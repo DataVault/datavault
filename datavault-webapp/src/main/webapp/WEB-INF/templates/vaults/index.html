@@ -45,7 +45,7 @@
                                     </th:block>
                                 </td>
                                 <td><th:block th:if="${vault.getOwnerId() != null}">[[${vault.getOwnerId()}]]</th:block></td>
-                                <td>[[${#dates.format(vault.getCreationTime(),'HH:mm:ss yyyy-MM-dd')}]]<!--/* datetime */--></td>
+                                <td>[[${#dates.format(vault.getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */--></td>
                                 <td class="text-muted">[[${vault.getReviewDateAsString()}]]</td>
                             </tr>
                         </tbody>
@@ -83,7 +83,7 @@
                                         </a>
                                     </td>
                                     <td><th:block th:if="${pendingVault.getOwnerId() != null}">[[${pendingVault.getOwnerId()}]]</th:block></td>
-                                    <td>[[${#dates.format(pendingVault.getCreationTime(),'HH:mm:ss yyyy-MM-dd')}]]<!--/* datetime */--></td>
+                                    <td>[[${#dates.format(pendingVault.getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */--></td>
                                 </tr>
                             </tbody>
                         </table>

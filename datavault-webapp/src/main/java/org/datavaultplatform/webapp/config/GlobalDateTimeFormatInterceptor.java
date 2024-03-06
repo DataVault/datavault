@@ -1,6 +1,7 @@
 package org.datavaultplatform.webapp.config;
 
 
+import org.springframework.ui.ModelMap;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -21,9 +22,14 @@ public class GlobalDateTimeFormatInterceptor implements HandlerInterceptor {
         if (modelAndView.getViewName().startsWith("forward:")) {
             return;
         }
-        modelAndView.getModelMap().put("globalDateFormat", "'['yyyy-MM-dd']'");
-        modelAndView.getModelMap().put("globalTimeFormat", "'['HH:mm:ss']'");
-        modelAndView.getModelMap().put("globalDateTimeFormat", "'['HH:mm:ss yyyy-MM-dd']'");
+        addGlobalDateTimeFormats(modelAndView.getModelMap());
+    }
+
+    public static void addGlobalDateTimeFormats(ModelMap modelMap){
+        modelMap.put("globalDateFormat", "'['yyyy-MM-dd']'");
+        modelMap.put("globalTimeFormat", "'['HH:mm:ss']'");
+        // From John Pinto : 17-Jan-2024 14:17:48
+        modelMap.put("globalDateTimeFormat", "dd-MMM-yyyy HH:mm:ss");
     }
 
 }

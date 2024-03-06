@@ -42,8 +42,8 @@
                             </td>
                             
                             <td>[[${vault.groupID}]]</td>
-                            <td>[[${#dates.format(vault.reviewDate,'dd/MM/yyyy')}]]<!--/* date */--></td>
-                            <td>[[${#dates.format(vault.getCreationTime(),'dd/MM/yyyy')}]]<!--/* date */--></td>
+                            <td>[[${#dates.format(vault.reviewDate,globalDateTimeFormat)}]]<!--/* datetime */--></td>
+                            <td>[[${#dates.format(vault.getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */--></td>
                             <td>
                                 <a th:href="@{|/admin/vaults/${vault.getID()}/reviews|}">Review</a>
                             </td>

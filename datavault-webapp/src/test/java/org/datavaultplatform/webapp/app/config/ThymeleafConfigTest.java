@@ -7,6 +7,7 @@ import org.datavaultplatform.common.request.CreateRetentionPolicy;
 import org.datavaultplatform.common.request.CreateVault;
 import org.datavaultplatform.common.response.*;
 import org.datavaultplatform.common.storage.impl.TivoliStorageManager;
+import org.datavaultplatform.webapp.config.GlobalDateTimeFormatInterceptor;
 import org.datavaultplatform.webapp.model.DepositReviewModel;
 import org.datavaultplatform.webapp.model.VaultReviewHistoryModel;
 import org.datavaultplatform.webapp.model.VaultReviewModel;
@@ -158,7 +159,7 @@ public class ThymeleafConfigTest {
     void test00TestHello() throws Exception {
         ClassPathResource helloResource = new ClassPathResource("WEB-INF/templates/test/hello.html");
         assertEquals(HELLO_FIRST_LINE, getFirstLine(helloResource));
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
         modelMap.put("name", "user101");
         String helloTemplateHtml = getHtml("test/hello.html", modelMap);
         assertEquals(HELLO_FIRST_LINE, getFirstLine(helloTemplateHtml));
@@ -171,7 +172,7 @@ public class ThymeleafConfigTest {
 
     @Test
     void test01AdminArchiveStoresIndex() throws Exception {
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
 
         ArchiveStore store1 = getArchiveStore("id-001");
         store1.setLabel("LABEL 1");
@@ -198,7 +199,7 @@ public class ThymeleafConfigTest {
     @Test
         //TODO this one is quite hard to setup - complex map structure
     void test02AdminAuditsDeposits() throws Exception {
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
         modelMap.put("deposits", Collections.emptyList());
         String html = getHtml("admin/audits/deposits.html", modelMap);
         Document doc = Jsoup.parse(html);
@@ -211,7 +212,7 @@ public class ThymeleafConfigTest {
 
     @Test
     void test03AdminAuditsIndex() throws Exception {
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
 
         AuditInfo audit1 = getAuditInfo("aud-001");
         audit1.setStatus(Audit.Status.IN_PROGRESS);
@@ -259,7 +260,7 @@ public class ThymeleafConfigTest {
 
     @Test
     void test04AdminBillingBillingDetails() throws Exception {
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
         BillingInformation info = getInfo(now);
 
         modelMap.put("billingDetails", info);
@@ -287,7 +288,7 @@ public class ThymeleafConfigTest {
     @Test
     void test05AdminBillingBillingDetailsBudget() throws Exception {
         
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
         BillingInformation info = getInfo(now);
 
         modelMap.put("billingDetails", info);
@@ -314,7 +315,7 @@ public class ThymeleafConfigTest {
     @Test
     void test06AdminBillingBillingDetailsBuyNewSlice() throws Exception {
         
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
         BillingInformation info = getInfo(now);
 
         modelMap.put("billingDetails", info);
@@ -340,7 +341,7 @@ public class ThymeleafConfigTest {
     @Test
     void test07AdminBillingBillingDetailsBuyFeeWaiver() throws Exception {
         
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
         BillingInformation info = getInfo(now);
 
         modelMap.put("billingDetails", info);
@@ -366,7 +367,7 @@ public class ThymeleafConfigTest {
     @Test
     void test08AdminBillingBillingDetailsFundingNoDoNotKnow() throws Exception {
         
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
         BillingInformation info = getInfo(now);
 
         modelMap.put("billingDetails", info);
@@ -393,7 +394,7 @@ public class ThymeleafConfigTest {
     @Test
     void test09AdminBillingBillingDetailsGrant() throws Exception {
         
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
         BillingInformation info = getInfo(now);
 
         modelMap.put("billingDetails", info);
@@ -420,7 +421,7 @@ public class ThymeleafConfigTest {
 
     @Test
     void test10AdminBillingBillingDetailsNA() throws Exception {
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
         
         BillingInformation info = getInfo(now);
 
@@ -446,7 +447,7 @@ public class ThymeleafConfigTest {
 
     @Test
     void test11AdminBillingDetailsSlice() throws Exception {
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
         
         BillingInformation info = getInfo(now);
 
@@ -463,7 +464,7 @@ public class ThymeleafConfigTest {
 
     @Test
     void test12AdminBillingBillingDetailsWillPay() throws Exception {
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
         
         BillingInformation info = getInfo(now);
 
@@ -489,7 +490,7 @@ public class ThymeleafConfigTest {
 
     @Test
     void test13BillingDetailsIndex() throws Exception {
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
 
         VaultInfo vault1 = getVaultInfo1();
         VaultInfo vault2 = getVaultInfo2();
@@ -516,7 +517,7 @@ public class ThymeleafConfigTest {
     void test14AdminDepositsIndex() throws Exception {
 
         
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
 
         Deposit deposit1 = getDeposit("dep-id-001");
 
@@ -614,7 +615,7 @@ public class ThymeleafConfigTest {
     @Test
     @WithMockUser(roles = "MANAGER")
     void test15AdminEventsIndex() throws Exception {
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
 
         EventInfo event1 = getEventInfo1();
 
@@ -635,7 +636,7 @@ public class ThymeleafConfigTest {
     @ParameterizedTest
     @EnumSource(value = ListState.class)
     void test16AdminPendingVaultsEditPendingVault(ListState listState) throws Exception {
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
 
         CreateVault vault = getCreateVault();
         RetentionPolicy policy1 = getRetentionPolicy1();
@@ -739,7 +740,7 @@ public class ThymeleafConfigTest {
     @Test
     @WithMockUser(roles = "MANAGER")
     void test17AdminPendingVaultsConfirmed() throws Exception {
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
 
         VaultInfo vault1 = getVaultInfo1();
         VaultInfo vault2 = getVaultInfo2();
@@ -766,7 +767,7 @@ public class ThymeleafConfigTest {
     @Test
     @WithMockUser(roles = "MANAGER")
     void test18AdminPendingVaultsIndex() throws Exception {
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
 
 
         modelMap.put("savedVaultsTotal", 123);
@@ -794,7 +795,7 @@ public class ThymeleafConfigTest {
     @Test
     @WithMockUser(roles = "MANAGER")
     void test19AdminPendingVaultsSaved() throws Exception {
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
 
         VaultInfo vault1 = getVaultInfo1();
 
@@ -822,7 +823,7 @@ public class ThymeleafConfigTest {
     @Test
     @WithMockUser(roles = "MANAGER")
     void test20AdminPendingVaultsSummary() throws Exception {
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
 
         VaultInfo vault1 = getVaultInfo1();
 
@@ -853,7 +854,7 @@ public class ThymeleafConfigTest {
     @Test
     @WithMockUser(roles = "USER")
     void test21AdminRetentionPoliciesAdd() throws Exception {
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
 
         RetentionPolicy policy1 = getRetentionPolicy1();
 
@@ -872,7 +873,7 @@ public class ThymeleafConfigTest {
     @Test
     @WithMockUser(roles = "USER")
     void test22AdminRetentionPoliciesEdit() throws Exception {
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
 
         RetentionPolicy policy1 = getRetentionPolicy1();
 
@@ -892,7 +893,7 @@ public class ThymeleafConfigTest {
     @Test
     @WithMockUser(roles = "USER")
     void test23AdminRetentionPoliciesIndex() throws Exception {
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
 
         RetentionPolicy policy1 = getRetentionPolicy1();
         RetentionPolicy policy2 = getRetentionPolicy2();
@@ -912,7 +913,7 @@ public class ThymeleafConfigTest {
     @Test
     @WithMockUser(roles = "USER")
     void test24AdminRetrievesIndex() throws Exception {
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
 
         Retrieve ret1 = getRetrieve("ret-id-1");
         ret1.setStatus(Retrieve.Status.IN_PROGRESS);
@@ -943,7 +944,7 @@ public class ThymeleafConfigTest {
     @Test
     @WithMockUser(roles = "USER")
     void test25AdminReviewsCreate() throws Exception {
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
 
         VaultReviewModel vrModel = new VaultReviewModel();
         vrModel.setVaultReviewId("vault-review-id-1");
@@ -956,12 +957,16 @@ public class ThymeleafConfigTest {
         drm1.setDepositReviewId("drm1-reviewId1");
         drm1.setName("drm1-name");
         drm1.setComment("drm1-comment");
+        drm1.setCreationTime(new Date());
+        drm1.setStatusName("NOT_STARTED");
 
         DepositReviewModel drm2 = new DepositReviewModel();
         drm2.setDepositId("drm2-depositId2");
         drm2.setDepositReviewId("drm2-reviewId2");
         drm2.setName("drm2-name");
         drm2.setComment("drm2-comment");
+        drm2.setCreationTime(new Date());
+        drm2.setStatusName("IN_PROGRESS");
 
         vrModel.setDepositReviewModels(Arrays.asList(drm1, drm2));
 
@@ -1013,7 +1018,7 @@ public class ThymeleafConfigTest {
     @Test
     @WithMockUser(roles = "USER")
     void test26AdminReviewsIndex() throws Exception {
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
 
         VaultInfo vault1 = getVaultInfo1();
         VaultInfo vault2 = getVaultInfo2();
@@ -1033,7 +1038,7 @@ public class ThymeleafConfigTest {
     @Test
     void test27AdminIRolesAdminIndex() throws Exception {
 
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
 
         String html = getHtml("admin/roles/isadmin/index.html", modelMap);
         Document doc = Jsoup.parse(html);
@@ -1048,7 +1053,7 @@ public class ThymeleafConfigTest {
     @Test
     @WithMockUser(roles = "USER")
     void test28AdminRolesIndex() throws Exception {
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
 
         String html = getHtml("admin/roles/index.html", modelMap);
         Document doc = Jsoup.parse(html);
@@ -1063,7 +1068,7 @@ public class ThymeleafConfigTest {
     @Test
     @WithMockUser(roles = "USER")
     void test29AdminSchoolsIndex() throws Exception {
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
 
         Group group1 = getGroup("school-id-1");
         group1.setName("school-name-1");
@@ -1087,7 +1092,7 @@ public class ThymeleafConfigTest {
     @Test
     @WithMockUser(roles = "USER")
     void test30AdminSchoolsRoles() throws Exception {
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
 
         Group group1 = getGroup("school-id-1");
         group1.setName("school-name-1");
@@ -1135,7 +1140,7 @@ public class ThymeleafConfigTest {
     @Test
     @WithMockUser(roles = "USER")
     void test31AdminUsersCreate() throws Exception {
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
         User user1 = getUser("user-id-1");
         user1.setFirstname("user1-first");
         user1.setLastname("user1-last");
@@ -1162,7 +1167,7 @@ public class ThymeleafConfigTest {
     @Test
     @WithMockUser(roles = "USER")
     void test32AdminUsersEdit() throws Exception {
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
         User user1 = getUser("user-id-1");
         user1.setFirstname("user1-first");
         user1.setLastname("user1-last");
@@ -1189,7 +1194,7 @@ public class ThymeleafConfigTest {
     @Test
     @WithMockUser(roles = "USER")
     void test33AdminUsersIndex() throws Exception {
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
         User user1 = getUser("user-id-1");
         user1.setFirstname("user1-first");
         user1.setLastname("user1-last");
@@ -1226,7 +1231,7 @@ public class ThymeleafConfigTest {
     @Test
     @WithMockUser(roles = "USER")
     void test34AdminVaultsIndex() throws Exception {
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
 
         VaultInfo vault1 = getVaultInfo1();
         VaultInfo vault2 = getVaultInfo2();
@@ -1259,7 +1264,7 @@ public class ThymeleafConfigTest {
     @Test
     @WithMockUser(roles = "USER")
     void test35AdminVaultsVault() throws Exception {
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
 
         VaultInfo vault1 = getVaultInfo1();
 
@@ -1358,7 +1363,7 @@ public class ThymeleafConfigTest {
     @Test
     @WithMockUser(roles = "USER")
     void test36adminIndex() throws Exception {
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
         modelMap.addAttribute("canViewVaultsSize", true);
         modelMap.addAttribute("vaultsize", 123_456_789);
         modelMap.addAttribute("canViewInProgress", true);
@@ -1401,7 +1406,7 @@ public class ThymeleafConfigTest {
 
     @Test
     void test37AuthConfirmation() throws Exception {
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
 
         String html = getHtml("auth/confirmation.html", modelMap);
         Document doc = Jsoup.parse(html);
@@ -1415,7 +1420,7 @@ public class ThymeleafConfigTest {
 
     @Test
     void test38AuthDenied() throws Exception {
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
 
         String html = getHtml("auth/denied.html", modelMap);
         Document doc = Jsoup.parse(html);
@@ -1429,7 +1434,7 @@ public class ThymeleafConfigTest {
 
     @Test
     void test39AuthLogin() throws Exception {
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
 
         modelMap.put("welcome", "Welcome Message");
         modelMap.put("success", "Success Message");
@@ -1446,7 +1451,7 @@ public class ThymeleafConfigTest {
 
     @Test
     void test40DepositsCreate() throws Exception {
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
 
 
         CreateDeposit deposit = new CreateDeposit();
@@ -1477,7 +1482,7 @@ public class ThymeleafConfigTest {
     @WithMockUser(roles = "IS_ADMIN")
     public void test41DepositsDeposit() throws Exception {
 
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
 
         User user1 = getUser("user-id-1");
 
@@ -1555,7 +1560,7 @@ public class ThymeleafConfigTest {
     @WithMockUser(roles = "IS_ADMIN")
     public void test42DepositsRetrieve() throws Exception {
 
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
 
         User user1 = getUser("user-id-1");
 
@@ -1621,7 +1626,7 @@ public class ThymeleafConfigTest {
         ClassPathResource errorResource = new ClassPathResource("WEB-INF/templates/error/error.html");
         assertEquals(ERROR_FIRST_LINE, getFirstLine(errorResource));
 
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
         modelMap.put("message", "This is a test error message");
         String errorTemplateHtml = getHtml("error/error.html", modelMap);
         //html is a mix of error 'page' and default template.
@@ -1669,7 +1674,7 @@ public class ThymeleafConfigTest {
 
     @Test
     void test44FeedbackIndex() throws Exception {
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
 
         String html = getHtml("feedback/index.html", modelMap);
         Document doc = Jsoup.parse(html);
@@ -1683,7 +1688,7 @@ public class ThymeleafConfigTest {
 
     @Test
     void test45FeedbackSent() throws Exception {
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
 
         String html = getHtml("feedback/sent.html", modelMap);
         Document doc = Jsoup.parse(html);
@@ -1697,7 +1702,7 @@ public class ThymeleafConfigTest {
 
     @Test
     void test46FilestoresIndex() throws Exception {
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
 
         User user = getUser("user-id-1");
         user.setFirstname("first");
@@ -1747,7 +1752,7 @@ public class ThymeleafConfigTest {
 
     @Test
     void test47GroupsIndex() throws Exception {
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
 
         Group group1 = getGroup("group-id-1");
         group1.setName("group-name-1");
@@ -1775,7 +1780,7 @@ public class ThymeleafConfigTest {
 
     @Test
     void test48HelpIndex() throws Exception {
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
 
         modelMap.put("system", "system-01");
         modelMap.put("link", "link-01");
@@ -1792,7 +1797,7 @@ public class ThymeleafConfigTest {
 
     @Test
     void test49VaultsConfirmed() throws Exception {
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
 
         String html = getHtml("vaults/confirmed.html", modelMap);
         Document doc = Jsoup.parse(html);
@@ -1806,7 +1811,7 @@ public class ThymeleafConfigTest {
 
     @Test
     void test50VaultsCreate() throws Exception {
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
 
         CreateVault vault = getCreateVault();
 
@@ -1836,7 +1841,7 @@ public class ThymeleafConfigTest {
     @Test
     @WithMockUser(roles = "IS_ADMIN")
     void test51VaultsIndex() throws Exception {
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
 
         VaultInfo vault1 = getVaultInfo1();
         VaultInfo vault2 = getVaultInfo2();
@@ -1887,7 +1892,7 @@ public class ThymeleafConfigTest {
     @ParameterizedTest
     @EnumSource(value = ListState.class)
     void test52VaultsNewCreatePrototype(ListState listState) throws Exception {
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
 
         Group group1 = getGroup("group-id-1");
         group1.setName("group-name-1");
@@ -1932,7 +1937,7 @@ public class ThymeleafConfigTest {
 
     @Test
     void test53VaultsUserVaults() throws Exception {
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
 
         VaultInfo vault1 = getVaultInfo1();
         VaultInfo vault2 = getVaultInfo2();
@@ -1952,7 +1957,7 @@ public class ThymeleafConfigTest {
     @WithMockUser(roles = "IS_ADMIN")
     void test54VaultsVault() throws Exception {
 
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
         RoleModel roleModel1 = new RoleModel();
         RoleModel roleModel2 = new RoleModel();
 
@@ -1968,16 +1973,19 @@ public class ThymeleafConfigTest {
         modelMap.addAttribute("group", group);
 
         DepositInfo deposit1 = getDepositInfo("deposit-id-1");
+        deposit1.setCreationTime(new Date());
 
         Retrieve deposit1Retrieve = getRetrieve("deposit1-ret-1");
         Retrieve deposit2Retrieve = getRetrieve("deposit1-ret-2");
 
         DepositInfo deposit2 = getDepositInfo("deposit-id-2");
+        deposit2.setCreationTime(new Date());
+
         modelMap.put("deposit", Arrays.asList(deposit1, deposit2));
 
         Map<String, Retrieve[]> depositNameToRetrievalsMap = new HashMap<>();
         depositNameToRetrievalsMap.put(deposit1.getName(), new Retrieve[]{deposit1Retrieve});
-        depositNameToRetrievalsMap.put(deposit1.getName(), new Retrieve[]{deposit2Retrieve});
+        depositNameToRetrievalsMap.put(deposit2.getName(), new Retrieve[]{deposit2Retrieve});
         modelMap.put("retrievals", depositNameToRetrievalsMap);
 
         User user1 = getUser1();
@@ -2027,6 +2035,7 @@ public class ThymeleafConfigTest {
         vrhm.setVaultReviewModels(Arrays.asList(vrm1, vrm2));
 
         modelMap.put("vrhm", vrhm);
+        modelMap.put("deposits", Arrays.asList(deposit1, deposit2));
 
         String html = getHtml("vaults/vault.html", modelMap);
         Document doc = Jsoup.parse(html);
@@ -2041,7 +2050,7 @@ public class ThymeleafConfigTest {
     @Test
     @WithMockUser(roles = "IS_ADMIN")
     void test55Index() throws Exception {
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
 
         String html = getHtml("index.html", modelMap);
         Document doc = Jsoup.parse(html);
@@ -2056,7 +2065,7 @@ public class ThymeleafConfigTest {
     @Test
     @WithMockUser()
     void test56Secure() throws Exception {
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
 
         String html = getHtml("secure.html", modelMap);
         Document doc = Jsoup.parse(html);
@@ -2070,7 +2079,7 @@ public class ThymeleafConfigTest {
 
     @Test
     void test57Welcome() throws Exception {
-        ModelMap modelMap = new ModelMap();
+        ModelMap modelMap = getModelMap();
         modelMap.put("filestoresExist",true);
         modelMap.put("datasetsExist",true);
         modelMap.put("link","link01");
@@ -2201,6 +2210,10 @@ public class ThymeleafConfigTest {
             public String getID() {
                 return id;
             }
+            @Override
+            public String getName(){
+                return "name-"+id;
+            }
         };
     }
 
@@ -2232,12 +2245,20 @@ public class ThymeleafConfigTest {
     }
 
     private Retrieve getRetrieve(String id) {
-        return new Retrieve() {
+        Retrieve result =  new Retrieve() {
             @Override
             public String getID() {
                 return id;
             }
         };
+        result.setHasExternalRecipients(true);
+        result.setUser(getUser("ret-user-"+id));
+        result.setNote("ret-note-"+id);
+        result.setRetrievePath("retrieve-path-"+id);
+        result.setTimestamp(new Date());
+        result.setStatus(Retrieve.Status.COMPLETE);
+        result.setDeposit(getDeposit("ret-"+id));
+        return result;
     }
 
     private User getUser(String id) {
@@ -2262,6 +2283,7 @@ public class ThymeleafConfigTest {
         VaultInfo vault1 = getVaultInfo("vault-info-1");
         vault1.setAffirmed(true);
         vault1.setAuthoriser("vault1-authoriser");
+        vault1.setAuthoriser("vault1-authoriser");
         vault1.setBillingType(PendingVault.Billing_Type.GRANT_FUNDING);
         vault1.setConfirmed(true);
         vault1.setContact("vault1-contact");
@@ -2277,6 +2299,9 @@ public class ThymeleafConfigTest {
         vault1.setUserID("vault1-user-id");
         vault1.setVaultCreatorId("vault1-creator-id");
         vault1.setUserName("vault-username-1");
+        vault1.setPolicyID("policy-id-1");
+        vault1.setPolicyExpiry(now);
+        vault1.setPolicyLastChecked(now);
         return vault1;
     }
 
@@ -2299,6 +2324,7 @@ public class ThymeleafConfigTest {
         vault2.setUserID("vault2-user-id");
         vault2.setVaultCreatorId("vault2-creator-id");
         vault2.setUserName("vault-username-2");
+        vault2.setPolicyID("policy-id-2");
         return vault2;
     }
 
@@ -2484,5 +2510,11 @@ public class ThymeleafConfigTest {
         if (output) {
             log.info(html);
         }
+    }
+
+    private ModelMap getModelMap() {
+        ModelMap result= new ModelMap();
+        GlobalDateTimeFormatInterceptor.addGlobalDateTimeFormats(result);
+        return  result;
     }
 }

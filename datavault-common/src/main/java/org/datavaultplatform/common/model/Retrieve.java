@@ -2,6 +2,7 @@ package org.datavaultplatform.common.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.GenericGenerator;
 
@@ -154,5 +155,11 @@ public class Retrieve {
     public int hashCode() {
         return getClass().hashCode();
     }
+
+    @Override
+    public String toString(){
+        return ToStringBuilder.reflectionToString(this);
+    }
+
 
 }

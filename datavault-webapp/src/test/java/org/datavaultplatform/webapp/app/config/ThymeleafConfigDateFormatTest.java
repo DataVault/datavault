@@ -74,7 +74,7 @@ public class ThymeleafConfigDateFormatTest {
 
         assertEquals("[2024-02-16]", globalDateFormat);
         assertEquals("[10:11:12]", globalTimeFormat);
-        assertEquals("[10:11:12 2024-02-16]", globalDateTimeFormat);
+        assertEquals("16-Feb-2024 10:11:12", globalDateTimeFormat);
     }
 
     private String lookupDivText(Document doc, String id) {

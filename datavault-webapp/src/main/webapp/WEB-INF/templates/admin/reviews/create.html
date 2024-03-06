@@ -138,13 +138,13 @@
                                         <th:block th:case="IN_PROGRESS">
                                             <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>&nbsp;In progress
                                         </th:block>
-                                        <:th:block th:case="*">
+                                        <th:block th:case="*">
                                             [[${drm.statusName}]]
-                                        </:th:block>
+                                        </th:block>
                                     </div>
                                 </td>
 
-                                <td>[[${#dates.format(drm.getCreationTime(),'HH:mm:ss yyyy-MM-dd')}]]<!--/* datetime */--></td>
+                                <td>[[${#dates.format(drm.getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */--></td>
 
                                 <td>
                                     <input type="radio" class="radio-inline" value="0"

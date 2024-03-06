@@ -132,7 +132,7 @@
                             
                             <td>[[${vault.groupID}]]</td>
                             <td>[[${#dates.format(vault.reviewDate,'dd/MM/yyyy')}]]<!--/* date */--></td>
-                            <td>[[${#dates.format(vault.getCreationTime(),'dd/MM/yyyy')}]]<!--/* date */--></td>
+                            <td>[[${#dates.format(vault.getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */--></td>
                             <td style="display:none">
                             <!-- TODO : Hiding the remove button unless the functionality is clear as to what it should do - Soft/Hard delete -->
                            

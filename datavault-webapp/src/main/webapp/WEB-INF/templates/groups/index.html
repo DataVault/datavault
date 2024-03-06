@@ -43,7 +43,7 @@
                                         <td>[[${vault.userID}]]</td>
                                         <td>[[${vault.getSizeStr()}]]</td>
                                         <td>[[${vault.policyID}]]</td>
-                                        <td>[[${#dates.format(vault.getCreationTime(),'HH:mm:ss yyyy-MM-dd')}]]<!--/* datetime */--></td>
+                                        <td>[[${#dates.format(vault.getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */--></td>
                                     </tr>
                             </tbody>
                         </table>

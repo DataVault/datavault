@@ -103,7 +103,7 @@
                                                 </span>
                                             </td>
                                             <td>
-                                                [[${#dates.format(vault.getCreationTime(),'HH:mm:ss yyyy-MM-dd')}]]<!--/* datetime */-->
+                                                [[${#dates.format(vault.getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */-->
                                             </td>
                                             <td>
                                                 <span th:if="${vault.reviewDate != null}">

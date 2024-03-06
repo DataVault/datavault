@@ -70,7 +70,7 @@
                     </h4>
                     </div>
                     <div class="col-md-3">
-                        [[${#dates.format(deposit['deposit'].getCreationTime(),'HH:mm:ss yyyy-MM-dd')}]]<!--/* datetime */-->
+                        [[${#dates.format(deposit['deposit'].getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */-->
                     </div>
                     <div class="col-md-3">
                         [[${deposit['deposit'].getStatus()}]]
@@ -105,12 +105,12 @@
                                             <th:block th:with="lastAuditChunk=${chunkInfo['last_audit_chunk']}">
                                             <td>
                                                 <th:block th:if="${lastAuditChunk.getCreationTime() != null}">
-                                                [[${#dates.format(lastAuditChunk.getCreationTime(),'HH:mm:ss yyyy-MM-dd')}]]<!--/* datetime */-->
+                                                [[${#dates.format(lastAuditChunk.getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */-->
                                                 </th:block>
                                             </td>
                                             <td>
                                                 <th:block th:if="${lastAuditChunk.getCompletedTime() != null}">
-                                                    [[${#dates.format(lastAuditChunk.getCompletedTime(),'HH:mm:ss yyyy-MM-dd')}]]<!--/* datetime */-->
+                                                    [[${#dates.format(lastAuditChunk.getCompletedTime(),globalDateTimeFormat)}]]<!--/* datetime */-->
                                                 </th:block>
                                             </td>
                                             <td>

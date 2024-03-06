@@ -43,7 +43,7 @@
                         </td>
                         <td>[[${event?.userID ?: ''}]]</td>
                         <td>[[${event?.eventClass ?: ''}]]</a></td>
-                        <td>[[${#dates.format(event?.timestamp,'HH:mm:ss yyyy-MM-dd')}]]<!--/* datetime */--></td>
+                        <td>[[${#dates.format(event?.timestamp,globalDateTimeFormat)}]]<!--/* datetime */--></td>
                         <td>[[${event?.vaultID ?: ''}]]</td>
                         <td>[[${event?.depositID ?: ''}]]</td>
                         <td>[[${event?.remoteAddress ?: ''}]]</td>
