@@ -359,7 +359,6 @@ public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
             channelSftp.cd(path);
 
             // Create timestamped folder to avoid overwriting files
-            //String timestampDirName = SftpUtils.getTimestampedDirectoryName(clock);
             path = path + PATH_SEPARATOR + timestampDirName;
 
             mkdir(channelSftp, timestampDirName);

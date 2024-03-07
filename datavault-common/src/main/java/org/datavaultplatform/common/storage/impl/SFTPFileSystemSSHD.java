@@ -181,7 +181,6 @@ public class SFTPFileSystemSSHD extends Device implements SFTPFileSystemDriver {
       final Path basePath = Paths.get(con.getFullPath(path));
 
       // Create timestamped folder to avoid overwriting files
-      //String timestampDirName = SftpUtils.getTimestampedDirectoryName(connectionInfo.getClock());
       Path tsDirPath = basePath.resolve(timestampDirName);
 
       UtilitySSHD.createDir(con.sftpClient, tsDirPath);

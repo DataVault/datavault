@@ -12,6 +12,7 @@ import org.datavaultplatform.common.event.retrieve.RetrieveStart;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.model.ArchiveStore;
 import org.datavaultplatform.common.storage.Device;
+import org.datavaultplatform.common.storage.SFTPFileSystemDriver;
 import org.datavaultplatform.common.storage.UserStore;
 import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.common.storage.impl.SftpUtils;
@@ -224,16 +225,10 @@ public class Retrieve extends Task {
         // Decompress to the temporary directory
         File bagDir = Tar.unTar(tarFile, context.getTempDir());
         long bagDirSize = FileUtils.sizeOfDirectory(bagDir);
-        
-        // Validate the bagit directory
-        //if (!Packager.validateBag(bagDir)) {
-        //    throw new Exception("Bag is invalid");
-        //}
+
 
         // Get the payload data directory
         File payloadDir = bagDir.toPath().resolve("data").toFile();
-        //File payloadDir = bagDir;
-        //long payloadSize = FileUtils.sizeOfDirectory(payloadDir);
 
         // Copy the extracted files to the target retrieve area
         logger.info("Copying to user directory ...");
@@ -250,7 +245,11 @@ public class Retrieve extends Task {
         try {
             ArrayList<File> contents = new ArrayList<>(Arrays.asList(payloadDir.listFiles()));
             for(File content: contents){
-                userFs.store(this.retrievePath, content, progress, timeStampDirName);
+                if (userFs instanceof SFTPFileSystemDriver) {
+                    ((SFTPFileSystemDriver) userFs).store(this.retrievePath, content, progress, timeStampDirName);
+                } else {
+                    userFs.store(this.retrievePath, content, progress);
+                }
             }
         } finally {
             // Stop the tracking thread
@@ -347,15 +346,27 @@ public class Retrieve extends Task {
                         .withUserId(this.userID));
             }
 
-            // copy .datavault file to test we can actually write
-            File hiddenDV = new File("src/main/resources/.datavault");
-
-            userFs.store(this.retrievePath, hiddenDV, new Progress(), timeStampDirName);
-
         } catch (Exception e) {
             logger.info("Unable to determine free space");
             eventSender.send(new RetrieveError(jobID, depositId, retrieveId, "Unable to determine free space")
                 .withUserId(this.userID));
+
+            throw new RuntimeException(e);
+        }
+
+        try {
+            // copy .datavault file to test we can actually write
+            File hiddenDV = new File("src/main/resources/.datavault");
+
+            if (userFs instanceof SFTPFileSystemDriver) {
+                ((SFTPFileSystemDriver) userFs).store(this.retrievePath, hiddenDV, new Progress(), timeStampDirName);
+            } else {
+                userFs.store(this.retrievePath, hiddenDV, new Progress());
+            }
+        } catch (Exception e) {
+            logger.info("Unable to write to user space");
+            eventSender.send(new RetrieveError(jobID, depositId, retrieveId, "Unable to write to user space")
+                    .withUserId(this.userID));
 
             throw new RuntimeException(e);
         }
