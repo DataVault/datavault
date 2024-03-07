@@ -182,11 +182,6 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 	}
 
 	@Override
-	public String store(String path, File working, Progress progress, String timeStampDirname) throws Exception {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
 	public void delete(String path, File working, Progress progress) {
 		/*try {
 			this.manager = FileTransferManager.getDefaultFileTransferManager(this.getTransferAuth());

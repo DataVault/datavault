@@ -333,9 +333,4 @@ public class DropboxFileSystem extends Device implements UserStore {
         return path;*/
         return "";
     }
-
-    @Override
-    public String store(String path, File working, Progress progress, String timeStampDirname) throws Exception {
-        throw new UnsupportedOperationException();
-    }
 }

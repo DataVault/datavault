@@ -170,11 +170,6 @@ public class SFTPFileSystemSSHD extends Device implements SFTPFileSystemDriver {
   }
 
   @Override
-  public String store(String path, File working, Progress progress) throws Exception {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
   public String store(String path, File localFileOrDirectory, Progress progress, String timestampDirName) throws Exception {
     try (SFTPConnection con = getConnection()) {
 

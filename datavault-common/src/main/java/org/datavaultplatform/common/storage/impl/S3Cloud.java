@@ -128,9 +128,4 @@ public class S3Cloud extends Device implements ArchiveStore {
 		return depositId;
 	}
 
-	@Override
-	public String store(String path, File working, Progress progress, String timeStampDirname) throws Exception {
-		throw new UnsupportedOperationException();
-	}
-
 }

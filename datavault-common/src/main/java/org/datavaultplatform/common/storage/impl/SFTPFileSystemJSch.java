@@ -345,11 +345,6 @@ public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
     }
 
     @Override
-    public String store(String path, File working, Progress progress) throws Exception {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public String store(String relativePath, File working, Progress progress, String timestampDirName) throws Exception {
 
         String path = getFullPath(relativePath);
