@@ -46,7 +46,7 @@
                                 </td>
                                 <td><th:block th:if="${vault.getOwnerId() != null}">[[${vault.getOwnerId()}]]</th:block></td>
                                 <td>[[${#dates.format(vault.getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */--></td>
-                                <td class="text-muted">[[${vault.getReviewDateAsString()}]]</td>
+                                <td class="text-muted">[[${#dates.format(vault.getReviewDate(),dateFormatISO)}]]<!--/* date */--></td>
                             </tr>
                         </tbody>
                     </table>

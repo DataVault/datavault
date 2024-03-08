@@ -148,7 +148,7 @@
                                 <input id="grantEndDate" name="grantEndDate" class="form-control date-picker" placeholder="yyyy-mm-dd"
                                     th:disabled="${#lists.isEmpty(datasets)}"
                                     th:field="*{grantEndDate}"
-                                />
+                                /><!--form-date-->
                             </div>
 
                             <div class="alert alert-info" role="alert">
@@ -199,7 +199,7 @@
                                 <input class="form-control" id="reviewDate" name="reviewDate" placeholder="yyyy-mm-dd"
                                     th:disabled="${#lists.isEmpty(datasets)}"
                                     th:field="*{reviewDate}"
-                                />
+                                /><!--form-date-->
                             </div>
 
                             <input type="hidden" id="submitAction" name="action" value="submit" />
@@ -223,7 +223,7 @@
     <script type="application/javascript">
         $(document).ready(function () {
             $.datepicker.setDefaults({
-                dateFormat: "yy-mm-dd",
+                dateFormat: "yy-mm-dd", /* yy-mm-dd for ISO DATE FORMAT 2024-01-31, see https://jqueryui.com/datepicker/#date-formats */
                 changeMonth: true,
                 changeYear: true,
                 showOtherMonths: true,
@@ -238,7 +238,6 @@
             $.validator.addMethod(
                 "date",
                 function(value, element) {
-                    // put your own logic here, this is just a (crappy) example
 
                     if (value){
                         return value.match(/^((1|2)\d\d\d)-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$/);
@@ -251,7 +250,6 @@
             $.validator.addMethod(
                 "reviewDate",
                 function(value, element) {
-                    // put your own logic here, this is just a (crappy) example
 
                     if (value){
                         var inAMonth = new Date();

@@ -65,7 +65,7 @@
                             </td>
                             <td>
                                <th:block th:if="${pendingVault.getCreationTime() != null}">
-                                    [[${#dates.format(pendingVault.getCreationTime(),'yyyy-MM-dd')}]]<!--/* date */-->
+                                    [[${#dates.format(pendingVault.getCreationTime(),dateFormatISO)}]]<!--/* date */-->
                                 </th:block>
                             </td>
                             <td>

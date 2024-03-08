@@ -40,7 +40,7 @@
                                 <td>&nbsp;</td>
                                 <td>[[${vault.getVaultSize()}]]</td>
                                 <td>[[${#dates.format(vault.getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */--></td>
-                                <td class="text-muted">[[${#dates.format(vault.getReviewDate(),'dd/MM/yyyy')}]]<!--/* date */--></td>
+                                <td class="text-muted">[[${#dates.format(vault.getReviewDate(),dateFormatddMMyyyy)}]]<!--/* date */--></td>
                             </tr>
                         </tbody>
                     </table>

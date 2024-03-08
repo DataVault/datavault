@@ -39,7 +39,7 @@
 
             <br/>
             <b>Dataset name:</b> <th:block th:if="${vault.datasetName != null}">[[${vault.datasetName}]]</th:block> <br/>
-            <b>Created:</b> [[${#dates.format(vault.creationTime,'yyyy-MM-dd')}]]<!--/* date */--><br/>
+            <b>Created:</b> [[${#dates.format(vault.creationTime,dateFormatISO)}]]<!--/* date */--><br/>
             <b>Group:</b> [[${group.name}]]<br/>
 
             <b>Retention Policy:</b> [[${createRetentionPolicy.name}]] :
@@ -51,7 +51,7 @@
             </th:block>
             <br/>
 
-            <b>Retention Policy expiry date:</b> [[${#dates.format(vault.policyExpiry,'yyyy-MM-dd')}]]<!--/* date */--><br/>
+            <b>Retention Policy expiry date:</b> [[${#dates.format(vault.policyExpiry,dateFormatISO)}]]<!--/* date */--><br/>
             (Date before which data should not be deleted, according to the funder retention policy, taking into account any extensions caused by retrievals for external users, if applicable. The expiry date is calculated by adding the minimum number of years to the grant end date. Data may be deleted sooner for overriding reason such as data protection, or if the funder counts the retention period as starting from the data creation date.)
             <br/>
 
@@ -67,7 +67,7 @@
             <b>Size:</b> [[${vault.getSizeStr()}]]<br/>
 
             <th:block th:if="${vault.grantEndDate != null}">
-                <b>Grant End Date:</b> [[${#dates.format(vault.grantEndDate,'yyyy-MM-dd')}]]<!--/* date */--><br/>
+                <b>Grant End Date:</b> [[${#dates.format(vault.grantEndDate,dateFormatISO)}]]<!--/* date */--><br/>
             </th:block>
             <th:block th:if="${vault.grantEndDate == null}">
                 <b>Grant End Date:</b> N/A<br/>
@@ -77,7 +77,7 @@
 
 
         <p>
-            <b>Current review date:</b> [[${#dates.format(vault.reviewDate,'yyyy-MM-dd')}]]<!--/* date */--><br/>
+            <b>Current review date:</b> [[${#dates.format(vault.reviewDate,dateFormatISO)}]]<!--/* date */--><br/>
         </p>
 
 
@@ -206,7 +206,7 @@
     $(document).ready(function () {
 
         $.datepicker.setDefaults({
-            dateFormat: "yy-mm-dd",
+            dateFormat: "yy-mm-dd", /* yy-mm-dd for ISO DATE FORMAT 2024-01-31, see https://jqueryui.com/datepicker/#date-formats */
             changeMonth: true,
             changeYear: true,
             showOtherMonths: true,
@@ -220,7 +220,6 @@
         $.validator.addMethod(
                 "date",
                 function(value, element) {
-                    // put your own logic here, this is just a (crappy) example
 
                     if (value){
                         return value.match(/^((1|2)\d\d\d)-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$/);
@@ -233,7 +232,6 @@
         $.validator.addMethod(
                 "newReviewDate",
                 function(value, element) {
-                    // put your own logic here, this is just a (crappy) example
 
                     if (value){
                         var inAMonth = new Date();

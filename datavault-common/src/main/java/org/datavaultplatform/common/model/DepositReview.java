@@ -2,6 +2,7 @@ package org.datavaultplatform.common.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.datavaultplatform.common.util.DateTimeUtils;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.GenericGenerator;
 import org.jsondoc.core.annotation.ApiObject;
@@ -47,7 +48,7 @@ public class DepositReview  {
     private String id;
 
     // Serialise date in ISO 8601 format
-    //@JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+    //@JsonFormat(shape=JsonFormat.Shape.STRING, pattern= DateTimeUtils.ISO_DATE_TIME_FORMAT)
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "creationTime", nullable = false)
     private Date creationTime;
@@ -68,7 +69,7 @@ public class DepositReview  {
 
     // The date this review was finally actioned.
     // Serialise date in ISO 8601 format
-    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss")
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern=DateTimeUtils.ISO_DATE_TIME_FORMAT)
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "actionedDate", nullable = true)
     private Date actionedDate;

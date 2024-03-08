@@ -19,6 +19,7 @@ import javax.persistence.TemporalType;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.datavaultplatform.common.util.DateTimeUtils;
 import org.hibernate.Hibernate;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -54,19 +55,19 @@ public class RetentionPolicy {
     private boolean extendUponRetrieval;
 
     // Date policy in effect
-    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd")
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern= DateTimeUtils.ISO_DATE_FORMAT)
     @Temporal(TemporalType.DATE)
     @Column(name = "inEffectDate", nullable = true)
     private Date inEffectDate;
 
     // Date policy in effect
-    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd")
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern=DateTimeUtils.ISO_DATE_FORMAT)
     @Temporal(TemporalType.DATE)
     @Column(name = "endDate", nullable = true)
     private Date endDate;
 
     // Date policy in effect
-    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd")
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern=DateTimeUtils.ISO_DATE_FORMAT)
     @Temporal(TemporalType.DATE)
     @Column(name = "dataGuidanceReviewed", nullable = true)
     private Date dataGuidanceReviewed;

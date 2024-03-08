@@ -8,6 +8,7 @@ import org.jsondoc.core.annotation.ApiObjectField;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -50,13 +51,13 @@ public class CreateVault {
     private String datasetID;
 
     @ApiObjectField(description = "Define the minimum of time the archive will be kept")
-    private String billingGrantEndDate;
+    private Date billingGrantEndDate;
 
     @ApiObjectField(description = "Define the minimum of time the archive will be kept")
-    private String grantEndDate;
+    private Date grantEndDate;
 
     @ApiObjectField(description = "The date by which the vault should be reviewed for decision as to whether it should be deleted or whether there are funds available to support continued storage")
-    private String reviewDate;
+    private Date reviewDate;
 
     @ApiObjectField(description = "Has the pending vault been confirmed")
     private Boolean confirmed = false;
@@ -223,27 +224,27 @@ public class CreateVault {
         this.datasetID = datasetID;
     }
 
-    public String getGrantEndDate() {
+    public Date getGrantEndDate() {
         return grantEndDate;
     }
 
-    public void setGrantEndDate(String grantEndDate) {
+    public void setGrantEndDate(Date grantEndDate) {
         this.grantEndDate = grantEndDate;
     }
 
-    public String getBillingGrantEndDate() {
+    public Date getBillingGrantEndDate() {
         return billingGrantEndDate ;
     }
 
-    public void setBillingGrantEndDate(String billingGrantEndDate) {
+    public void setBillingGrantEndDate(Date billingGrantEndDate) {
         this.billingGrantEndDate = billingGrantEndDate;
     }
 
-    public String getReviewDate() {
+    public Date getReviewDate() {
         return reviewDate;
     }
 
-    public void setReviewDate(String reviewDate) {
+    public void setReviewDate(Date reviewDate) {
         this.reviewDate = reviewDate;
     }
 
@@ -421,7 +422,7 @@ public class CreateVault {
             List<String> tmp = new ArrayList<>();
             for (String v : value) {
 
-                if (v != null && !v.equals("")) {
+                if (v != null && !v.isEmpty()) {
                     tmp.add(v);
                 }
             }

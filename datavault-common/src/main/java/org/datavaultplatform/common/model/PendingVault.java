@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 import org.datavaultplatform.common.response.VaultInfo;
+import org.datavaultplatform.common.util.DateTimeUtils;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.GenericGenerator;
 import org.jsondoc.core.annotation.ApiObject;
@@ -53,17 +54,17 @@ public class PendingVault {
         YES,
         NO_OR_DO_NOT_KNOW,
         BUY_NEW_SLICE
-    };
+    }
 
     public enum Funding_Query_Choice {
         YES,
         FUNDING_NO_OR_DO_NOT_KNOW
-    };
+    }
 
     public enum Feewaiver_Query_Choice {
         YES,
         NO_OR_DO_NOT_KNOW
-    };
+    }
 
     // Vault Identifier
     @Id
@@ -73,7 +74,7 @@ public class PendingVault {
     private String id;
 
     // Serialise date in ISO 8601 format
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateTimeUtils.ISO_DATE_TIME_FORMAT)
     @Temporal(TemporalType.TIMESTAMP)
     private Date creationTime;
 
@@ -99,13 +100,13 @@ public class PendingVault {
     // NOTE: This field is optional. Always remember to check for null when handling
     // it!
     // Serialise date in ISO 8601 format
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateTimeUtils.ISO_DATE_FORMAT)
     @Temporal(TemporalType.DATE)
     @Column(name = "grantEndDate", nullable = true)
     private Date grantEndDate;
 
     // Serialise date in ISO 8601 format
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateTimeUtils.ISO_DATE_FORMAT)
     @Temporal(TemporalType.DATE)
     @Column(name = "reviewDate", nullable = true)
     private Date reviewDate;

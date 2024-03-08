@@ -5,6 +5,8 @@ import lombok.Data;
 import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
 
+import java.util.Date;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiObject(name = "CreateRetentionPolicy")
 @Data
@@ -38,13 +40,13 @@ public class CreateRetentionPolicy {
     private String minDataRetentionPeriod;
 
     @ApiObjectField(description = "In Effect Date")
-    private String inEffectDate;
+    private Date inEffectDate;
 
     @ApiObjectField(description = "End Date")
-    private String endDate;
+    private Date endDate;
 
     @ApiObjectField(description = "Date Guidance Reviewed")
-    private String dateGuidanceReviewed;
+    private Date dateGuidanceReviewed;
 
 
 
@@ -122,27 +124,27 @@ public class CreateRetentionPolicy {
         this.minDataRetentionPeriod = minDataRetentionPeriod;
     }
 
-    public String getInEffectDate() {
+    public Date getInEffectDate() {
         return inEffectDate;
     }
 
-    public void setInEffectDate(String inEffectDate) {
+    public void setInEffectDate(Date inEffectDate) {
         this.inEffectDate = inEffectDate;
     }
 
-    public String getEndDate() {
+    public Date getEndDate() {
         return endDate;
     }
 
-    public void setEndDate(String endDate) {
+    public void setEndDate(Date endDate) {
         this.endDate = endDate;
     }
 
-    public String getDateGuidanceReviewed() {
+    public Date getDateGuidanceReviewed() {
         return dateGuidanceReviewed;
     }
 
-    public void setDateGuidanceReviewed(String dateGuidanceReviewed) {
+    public void setDateGuidanceReviewed(Date dateGuidanceReviewed) {
         this.dateGuidanceReviewed = dateGuidanceReviewed;
     }
 

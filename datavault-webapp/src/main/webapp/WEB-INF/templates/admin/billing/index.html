@@ -99,7 +99,7 @@
                                             </td>
                                             <td>
                                                 <span th:if="${vault.grantEndDate != null}">
-                                                    [[${#dates.format(vault.grantEndDate,'dd MMM yyyy')}]]<!--/* date */-->
+                                                    [[${#dates.format(vault.grantEndDate,dateFormatddMMMyyyy)}]]<!--/* date */-->
                                                 </span>
                                             </td>
                                             <td>
@@ -107,7 +107,7 @@
                                             </td>
                                             <td>
                                                 <span th:if="${vault.reviewDate != null}">
-                                                    [[${#dates.format(vault.reviewDate,'dd MMM yyyy')}]]<!--/* date */-->
+                                                    [[${#dates.format(vault.reviewDate,dateFormatddMMMyyyy)}]]<!--/* date */-->
                                                 </span>
                                             </td>
                                             <td>
