@@ -2,7 +2,6 @@ package org.datavaultplatform.common.storage.impl;
 
 import com.jcraft.jsch.*;
 import java.io.InputStream;
-import java.nio.file.Paths;
 import java.time.Clock;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +15,7 @@ import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.storage.SFTPFileSystemDriver;
 import org.datavaultplatform.common.storage.impl.ssh.UtilityJSch;
 import org.springframework.util.Assert;
+import org.slf4j.Logger;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -25,7 +25,8 @@ import java.util.Vector;
 
 /**
  * An implementation of SFTPFileSystemDriver to use JCraft's Jsch ssh/sftp library.
- */@Slf4j
+ */
+@Slf4j
 public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
 
 
@@ -404,4 +405,8 @@ public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
         return SftpUtils.getFullPath(rootPath, relativePath);
     }
 
+    @Override
+    public Logger getLogger() {
+        return log;
+    }
 }

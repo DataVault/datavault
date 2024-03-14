@@ -288,5 +288,8 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 			return false;
 		}
 	}
-
+	@Override
+	public Logger getLogger() {
+		return LOGGER;
+	}
 }

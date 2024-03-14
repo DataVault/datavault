@@ -3,10 +3,12 @@ package org.datavaultplatform.common.storage.impl;
 //import com.dropbox.core.*;
 //import org.apache.commons.io.IOUtils;
 //import org.datavaultplatform.common.io.FileCopy;
+import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.storage.UserStore;
+import org.slf4j.Logger;
 
 import java.io.*;
 //import java.nio.file.DirectoryStream;
@@ -22,6 +24,7 @@ import java.util.Map;
 // https://www.dropbox.com/developers-v1/core/docs
 // http://dropbox.github.io/dropbox-sdk-java/api-docs/v1.8.x/com/dropbox/core/DbxClient.html
 
+@Slf4j
 public class DropboxFileSystem extends Device implements UserStore {
 
     /*private final String dbxAppName = "DataVault/1.0";
@@ -332,5 +335,10 @@ public class DropboxFileSystem extends Device implements UserStore {
         
         return path;*/
         return "";
+    }
+
+    @Override
+    public Logger getLogger() {
+        return this.log;
     }
 }

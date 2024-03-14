@@ -149,13 +149,14 @@ public class Retrieve extends Task {
     private void recomposeSingle(String tarFileName, Context context, Device archiveFs, Progress progress, File tarFile) throws Exception {
         recompose(tarFileName, context, archiveFs, progress, tarFile, false, null);
     }
-    
-    private void recomposeMulti(String tarFileName, Context context, Device archiveFs, Progress progress, File tarFile, String location) throws Exception {
-        recompose(tarFileName, context, archiveFs, progress, tarFile, true, location);
+
+    private void recomposeMulti(String tarFileName, Context context, Device archiveFs, Progress progress, File tarFile, List<String> locations) throws Exception {
+        recompose(tarFileName, context, archiveFs, progress, tarFile, true, locations);
     }
-    
-    private void recompose(String tarFileName, Context context, Device archiveFs, Progress progress, 
-            File tarFile, boolean multiCopy, String location) throws Exception {
+
+
+    private void recompose(String tarFileName, Context context, Device archiveFs, Progress progress,
+                           File tarFile, boolean multiCopy, List<String> locations) throws Exception {
 
         File[] chunks = new File[this.numOfChunks];
         logger.info("Retrieving " + this.numOfChunks + " chunk(s)");
@@ -172,7 +173,7 @@ public class Retrieve extends Task {
             logger.debug("Creating chunk download task:" + chunkNum);
             ChunkRetrieveTracker crt = new ChunkRetrieveTracker(
                     this.archiveId, archiveFs,
-                    context, chunkNum, this.getChunksIVs(), location, multiCopy,
+                    context, chunkNum, this.getChunksIVs(), locations, multiCopy,
                     progress, this.chunksDigest, this.encChunksDigest, chunkFile
             );
             executor.add(crt);
@@ -383,50 +384,33 @@ public class Retrieve extends Task {
     
     protected void multipleCopies(Context context, String tarFileName, File tarFile, Device archiveFs, Device userFs,
                                 String timeStampDirName) throws Exception {
-    	logger.info("Device has multiple copies");
+        logger.info("Device has multiple copies");
         Progress progress = new Progress();
         ProgressTracker tracker = new ProgressTracker(progress, this.jobID, this.depositId, this.archiveSize, this.eventSender);
         Thread trackerThread = new Thread(tracker);
         trackerThread.start();
+        try {
+            List<String> locations = archiveFs.getLocations();
+            if (context.isChunkingEnabled()) {
+                recomposeMulti(tarFileName, context, archiveFs, progress, tarFile, locations);
+            } else {
+                // Ask the driver to copy files to the temp directory
+                archiveFs.retrieve(this.archiveId, tarFile, progress, locations);
 
-        List<String> locations = archiveFs.getLocations();
-        Iterator<String> locationsIt = locations.iterator();
-        LOCATION: 
-        while (locationsIt.hasNext()) {
-            String location = locationsIt.next();
-            logger.info("Current " + location);
-            try {
-                try {
-                    // NEED TO UPDATE THIS TO INCLUDE CHUNKING STUFF IS TURNED ON
-                    if (context.isChunkingEnabled()) {
-                        // TODO can bypass this if there is only one chunk.
-                        recomposeMulti(tarFileName, context, archiveFs, progress, tarFile, location);
-                    } else {
-                        // Ask the driver to copy files to the temp directory
-                        archiveFs.retrieve(this.archiveId, tarFile, progress, location);
-                    }
-                } finally {
-                    // Stop the tracking thread
-                    tracker.stop();
-                    trackerThread.join();
-                }
-
-                logger.info("Attempting retrieve on archive from " + location);
-                this.doRetrieve(context, userFs, tarFile, progress, timeStampDirName);
-                logger.info("Completed retrieve on archive from " + location);
-                break LOCATION;
-            } catch (Exception e) {
-                // if last location has an error throw the error else go
-                // round again
-                if (!locationsIt.hasNext()) {
-                    logger.error("All locations had problems throwing exception " + e.getMessage());
-                    throw e;
-                } else {
-                	logger.error("Current " + location + " has a problem trying next location");
-                    logger.error(e.getMessage());
-                	continue LOCATION;
+                if (this.getTarIV() != null) {
+                    // Decrypt tar file
+                    Utils.checkFileHash("ret-single-tar", tarFile, this.encTarDigest);
+                    Encryption.decryptFile(context, tarFile, this.getTarIV());
                 }
             }
+
+            logger.info("Attempting retrieve on archive from " + locations);
+            this.doRetrieve(context, userFs, tarFile, progress, timeStampDirName);
+            logger.info("Completed retrieve on archive from " + locations);
+        } finally {
+            // Stop the tracking thread
+            tracker.stop();
+            trackerThread.join();
         }
     }
     

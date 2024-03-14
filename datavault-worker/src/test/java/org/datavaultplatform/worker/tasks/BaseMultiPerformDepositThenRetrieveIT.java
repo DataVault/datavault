@@ -1,34 +1,7 @@
 package org.datavaultplatform.worker.tasks;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.Channel;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
-import javax.crypto.SecretKey;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
@@ -48,6 +21,7 @@ import org.datavaultplatform.worker.rabbit.BaseRabbitTCTest;
 import org.datavaultplatform.worker.utils.DepositEvents;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.springframework.amqp.core.AmqpAdmin;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
@@ -64,15 +38,32 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
+import javax.crypto.SecretKey;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.time.Duration;
+import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
+
 @Slf4j
-public abstract class BasePerformDepositThenRetrieveIT extends BaseRabbitTCTest {
+@Timeout(value = 60, unit = TimeUnit.SECONDS)
+public abstract class BaseMultiPerformDepositThenRetrieveIT extends BaseRabbitTCTest {
 
   static final String KEY_NAME_FOR_SSH = "key-name-for-ssh";
   static final String KEY_NAME_FOR_DATA = "key-name-for-data";
   static final String KEY_STORE_PASSWORD = "testPassword";
-  public static final String DATA_VAULT_HIDDEN_FILE = ".datavault";
 
-  final Resource depositMessage = new ClassPathResource("sampleMessages/sampleDepositMessage.json");
+  final Resource depositMessage = new ClassPathResource("sampleMessages/sampleMultiDepositMessage.json");
 
   final List<Event> events = new ArrayList<>();
   @Autowired
@@ -88,7 +79,8 @@ public abstract class BasePerformDepositThenRetrieveIT extends BaseRabbitTCTest 
   @Value("${metaDir}")
   String metaDir;
   File sourceDir;
-  File destDir;
+  File destDir1;
+  File destDir2;
   File retrieveBaseDir;
   File retrieveDir;
   @Autowired
@@ -161,8 +153,11 @@ public abstract class BasePerformDepositThenRetrieveIT extends BaseRabbitTCTest 
 
     sourceDir = baseTemp.resolve("source").toFile();
     assertTrue(sourceDir.mkdir());
-    destDir = baseTemp.resolve("dest").toFile();
-    assertTrue(destDir.mkdir());
+    destDir1 = baseTemp.resolve("dest/1").toFile();
+    assertTrue(destDir1.mkdirs());
+    destDir2 = baseTemp.resolve("dest/2").toFile();
+    assertTrue(destDir2.mkdirs());
+
     retrieveBaseDir = baseTemp.resolve("retrieve").toFile();
     assertTrue(retrieveBaseDir.mkdir());
     retrieveDir = retrieveBaseDir.toPath().resolve("ret-folder").toFile();
@@ -170,7 +165,7 @@ public abstract class BasePerformDepositThenRetrieveIT extends BaseRabbitTCTest 
     log.info("meta.dir   [{}]", metaDir);
     log.info("temp.dir   [{}]", tempDir);
     log.info("source dir [{}]", sourceDir);
-    log.info("dest   dir [{}]", destDir);
+    log.info("dest1   dir [{}]", destDir1);
     log.info("retrieve base dir [{}]", retrieveBaseDir);
     log.info("retrieve dir [{}]", retrieveDir);
 
@@ -222,8 +217,9 @@ public abstract class BasePerformDepositThenRetrieveIT extends BaseRabbitTCTest 
 
   @Test
   @SneakyThrows
-  void testDepositThenRetrieve() {
-    assertEquals(0, destDir.listFiles().length);
+  void testDepositThenRetrieveUsingSecondLocation() {
+    assertEquals(0, destDir1.listFiles().length);
+    assertEquals(0, destDir2.listFiles().length);
     String depositMessage = getSampleDepositMessage();
     Deposit deposit = new ObjectMapper().readValue(depositMessage, Deposit.class);
     log.info("depositMessage {}", depositMessage);
@@ -232,13 +228,15 @@ public abstract class BasePerformDepositThenRetrieveIT extends BaseRabbitTCTest 
 
     DepositEvents depositEvents = new DepositEvents(deposit, this.events);
 
-    checkDepositWorkedOkay(depositMessage, depositEvents);
+    checkDepositWorkedOkay(depositMessage, depositEvents, destDir1);
+    checkDepositWorkedOkay(depositMessage, depositEvents, destDir2);
 
-    File hiddenFile = new File(this.retrieveDir, DATA_VAULT_HIDDEN_FILE);
-    assertThat(hiddenFile).doesNotExist();
+    // delete files from the first location, the retrieve should work using the second location !
+    Arrays.stream(destDir1.listFiles()).forEach(File::delete);
+
     buildAndSendRetrieveMessage(depositEvents);
     checkRetrieve();
-    assertThat(hiddenFile).exists().isFile().isReadable();
+
   }
 
   void waitUntil(Callable<Boolean> test) {
@@ -273,19 +271,19 @@ public abstract class BasePerformDepositThenRetrieveIT extends BaseRabbitTCTest 
   abstract Optional<Integer> getExpectedNumberChunks();
 
   @SneakyThrows
-  private void checkDepositWorkedOkay(String depositMessage, DepositEvents depositEvents) {
+  private void checkDepositWorkedOkay(String depositMessage, DepositEvents depositEvents, File destinationDir) {
     Deposit deposit = mapper.readValue(depositMessage, Deposit.class);
     String bagId = deposit.getProperties().get("bagId");
 
     log.info("BROKER MSG COUNT {}", events.size());
-    File[] destFiles = destDir.listFiles();
+    File[] destFiles = destinationDir.listFiles();
 
     int expectedNumFiles = getExpectedNumberChunks().isPresent() ? getExpectedNumberChunks().get() : 1;
     assertEquals(expectedNumFiles, destFiles.length);
 
     Arrays.sort(destFiles, Comparator.comparing(File::getName));
 
-    final Map<Integer,File> chunkNumToEncChunk = new HashMap<>();
+    final Map<Integer, File> chunkNumToEncChunk = new HashMap<>();
 
     final ComputedEncryption computedEncryption = depositEvents.getComputedEncryption();
     AESMode aesMode = AESMode.valueOf(computedEncryption.getAesMode());
@@ -299,7 +297,7 @@ public abstract class BasePerformDepositThenRetrieveIT extends BaseRabbitTCTest 
       int expectedNumberChunks = getExpectedNumberChunks().get();
 
       for (int chunkNum = 1; chunkNum <= expectedNumberChunks; chunkNum++) {
-        File expectedEncChunk = destDir.toPath().resolve(bagId + ".tar." + chunkNum).toFile();
+        File expectedEncChunk = destinationDir.toPath().resolve(bagId + ".tar." + chunkNum).toFile();
         assertEquals(expectedEncChunk, destFiles[chunkNum - 1]);
         chunkNumToEncChunk.put(chunkNum, expectedEncChunk);
       }
@@ -332,7 +330,7 @@ public abstract class BasePerformDepositThenRetrieveIT extends BaseRabbitTCTest 
       }
 
     } else {
-      File expectedEncTar = destDir.toPath().resolve(bagId + ".tar").toFile();
+      File expectedEncTar = destinationDir.toPath().resolve(bagId + ".tar").toFile();
       assertEquals(expectedEncTar, destFiles[0]);
 
       String encTarHash = computedEncryption.getEncTarDigest();
@@ -346,23 +344,6 @@ public abstract class BasePerformDepositThenRetrieveIT extends BaseRabbitTCTest 
       assertTrue(decryptedTarFile.length() > 0);
       assertTrue(decryptedTarFile.length() != expectedEncTar.length());
     }
-
-    Set<Path> tarEntryPaths = getPathsWithinTarFile(decryptedTarFile);
-
-    Path base = Paths.get(bagId);
-    assertThat(tarEntryPaths).containsExactlyInAnyOrder(
-        base.resolve("bagit.txt"),
-        base.resolve("manifest-md5.txt"),
-        base.resolve("tagmanifest-md5.txt"),
-
-        base.resolve("data/src-path-1/src-file-1"),
-
-        base.resolve("metadata/filetype.json"),
-        base.resolve("metadata/vault.json"),
-        base.resolve("metadata/external.txt"),
-        base.resolve("metadata/deposit.json"));
-
-    assertEquals(computedDigest.getDigest(), getSha1Hash(decryptedTarFile));
   }
 
   @SneakyThrows
@@ -376,7 +357,9 @@ public abstract class BasePerformDepositThenRetrieveIT extends BaseRabbitTCTest 
     String temp1 = FileUtils.readFileToString(this.depositMessage.getFile(),
         StandardCharsets.UTF_8);
     String temp2 = temp1.replaceAll("/tmp/dv/src", sourceDir.getCanonicalPath());
-    return temp2.replaceAll("/tmp/dv/dest", destDir.getCanonicalPath());
+    String temp3 = temp2.replaceAll("/tmp/dv/dest/1", destDir1.getCanonicalPath());
+    String temp4 = temp3.replaceAll("/tmp/dv/dest/2", destDir2.getCanonicalPath());
+    return temp4;
   }
 
   @RabbitListener(queues = BaseQueueConfig.BROKER_QUEUE_NAME)
