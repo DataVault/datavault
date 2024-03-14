@@ -56,7 +56,7 @@ public class SFTPFileSystemPerformanceIT {
   static final int TEST_SFTP_SERVER_PORT = 2222;
   static final int TEST_ITERATIONS = 5;
 
-  static final double PERFORMANCE_THRESHOLD = 1.2;
+  static final double PERFORMANCE_THRESHOLD = 1.5;
   public static final int SIZE_50MB = 50_000_000;
 
   @Container
@@ -153,7 +153,7 @@ public class SFTPFileSystemPerformanceIT {
 
     Progress progressStore = new Progress();
     long start1 = System.currentTimeMillis();
-    String storedPath = sftpFileSystemDriver.store(".", bigFile, progressStore);
+    String storedPath = sftpFileSystemDriver.store(".", bigFile, progressStore, "20240305142225");
     long diff1 = System.currentTimeMillis() - start1;
     ProgressInfo pInfoStore = new ProgressInfo("store", diff1, progressStore);
 

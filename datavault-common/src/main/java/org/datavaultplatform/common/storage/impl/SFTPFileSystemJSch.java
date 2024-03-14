@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 import java.time.Clock;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.util.encoders.Base64;
 import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.crypto.Encryption;
@@ -14,6 +15,7 @@ import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.storage.SFTPFileSystemDriver;
 import org.datavaultplatform.common.storage.impl.ssh.UtilityJSch;
+import org.springframework.util.Assert;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -343,10 +345,10 @@ public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
             Disconnect();
         }
     }
-    
-    @Override
-    public String store(String relativePath, File working, Progress progress) throws Exception {
 
+    @Override
+    public String store(String relativePath, File working, Progress progress, String timestampDirName) throws Exception {
+        Assert.isTrue(StringUtils.isNotBlank(timestampDirName), "The timestampDirName cannot be blank");
         String path = getFullPath(relativePath);
         try {
             Connect();
@@ -354,7 +356,6 @@ public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
             channelSftp.cd(path);
 
             // Create timestamped folder to avoid overwriting files
-            String timestampDirName = SftpUtils.getTimestampedDirectoryName(clock);
             path = path + PATH_SEPARATOR + timestampDirName;
 
             mkdir(channelSftp, timestampDirName);
