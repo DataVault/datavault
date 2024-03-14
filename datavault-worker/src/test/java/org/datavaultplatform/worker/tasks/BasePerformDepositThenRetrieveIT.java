@@ -70,6 +70,7 @@ public abstract class BasePerformDepositThenRetrieveIT extends BaseRabbitTCTest 
   static final String KEY_NAME_FOR_SSH = "key-name-for-ssh";
   static final String KEY_NAME_FOR_DATA = "key-name-for-data";
   static final String KEY_STORE_PASSWORD = "testPassword";
+  public static final String DATA_VAULT_HIDDEN_FILE = ".datavault";
 
   final Resource depositMessage = new ClassPathResource("sampleMessages/sampleDepositMessage.json");
 
@@ -233,20 +234,21 @@ public abstract class BasePerformDepositThenRetrieveIT extends BaseRabbitTCTest 
 
     checkDepositWorkedOkay(depositMessage, depositEvents);
 
+    File hiddenFile = new File(this.retrieveDir, DATA_VAULT_HIDDEN_FILE);
+    assertThat(hiddenFile).doesNotExist();
     buildAndSendRetrieveMessage(depositEvents);
     checkRetrieve();
-
+    assertThat(hiddenFile).exists().isFile().isReadable();
   }
 
   void waitUntil(Callable<Boolean> test) {
-    Awaitility.await().atMost(15, TimeUnit.MINUTES)
+    Awaitility.await().atMost(5, TimeUnit.MINUTES)
         .pollInterval(Duration.ofSeconds(15))
         .until(test);
   }
 
   @SneakyThrows
   private void checkRetrieve() {
-    log.info("FIN {}", retrieveDir.getCanonicalPath());
     log.info("FIN {}", retrieveDir.getCanonicalPath());
     waitUntil(this::foundRetrieveComplete);
     log.info("FIN {}", retrieveDir.getCanonicalPath());

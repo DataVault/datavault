@@ -35,7 +35,7 @@ import java.util.*;
  * A class that extends Task which is used to handle Retrievals from the vault
  */
 public class Retrieve extends Task {
-    
+    public static final File DATA_VAULT_HIDDEN_FILE = new File("src/main/resources/.datavault");
     private static final Logger logger = LoggerFactory.getLogger(Retrieve.class);
     private String archiveId = null;
     private String archiveDigestAlgorithm = null;
@@ -85,13 +85,12 @@ public class Retrieve extends Task {
         this.encTarDigest = this.getEncTarDigest();
 
         if (this.isRedeliver()) {
-            eventSender.send(new RetrieveError(this.jobID, this.depositId, this.retrieveId,"Retrieve stopped: the message had been redelivered, please investigate")
-                .withUserId(this.userID));
+            sendError("Retrieve stopped: the message had been redelivered, please investigate");
             return;
         }
         
         this.initStates();
-        
+
         eventSender.send(new RetrieveStart(this.jobID, this.depositId, this.retrieveId)
             .withUserId(this.userID)
             .withNextState(0));
@@ -102,7 +101,7 @@ public class Retrieve extends Task {
         StorageClassNameResolver resolver = context.getStorageClassNameResolver();
         Device userFs = this.setupUserFileStores(resolver);
         Device archiveFs = this.setupArchiveFileStores(resolver);
-        String timestampDirName = SftpUtils.getTimestampedDirectoryName(Clock.systemDefaultZone());
+        String timestampDirName = SftpUtils.getTimestampedDirectoryName(getClock());
         
         try {
         	this.checkUserStoreFreeSpaceAndPermissions(userFs, timestampDirName);
@@ -127,11 +126,24 @@ public class Retrieve extends Task {
         } catch (Exception e) {
             String msg = "Data retrieve failed: " + e.getMessage();
             logger.error(msg, e);
-            eventSender.send(new RetrieveError(jobID, depositId, retrieveId, msg)
-                .withUserId(userID));
-
-            throw new RuntimeException(e);
+            sendError(msg);
+            throw getRuntimeException(e);
         }
+    }
+
+    private RuntimeException getRuntimeException(Exception ex) {
+        if (ex instanceof RuntimeException) {
+            return (RuntimeException) ex;
+        } else {
+            return new RuntimeException(ex);
+        }
+    }
+
+    /*
+        This method allows us to override the clock in tests.
+     */
+    protected Clock getClock() {
+        return Clock.systemDefaultZone();
     }
     
     private void recomposeSingle(String tarFileName, Context context, Device archiveFs, Progress progress, File tarFile) throws Exception {
@@ -284,7 +296,7 @@ public class Retrieve extends Task {
     
     private Device setupUserFileStores(StorageClassNameResolver resolver) {
         Device userFs = null;
-        
+
         for (String storageID : userFileStoreClasses.keySet()) {
             
             String storageClass = userFileStoreClasses.get(storageID);
@@ -298,9 +310,8 @@ public class Retrieve extends Task {
             } catch (Exception e) {
                 String msg = "Retrieve failed: could not access user filesystem";
                 logger.error(msg, e);
-                eventSender.send(new RetrieveError(this.jobID, this.depositId, this.retrieveId, msg)
-                    .withUserId(this.userID));
-                throw new RuntimeException(e);
+                sendError(msg);
+                throw getRuntimeException(e);
             }
         }
         
@@ -322,10 +333,8 @@ public class Retrieve extends Task {
         } catch (Exception e) {
             String msg = "Retrieve failed: could not access archive filesystem";
             logger.error(msg, e);
-            eventSender.send(new RetrieveError(this.jobID, this.depositId, this.retrieveId, msg)
-                .withUserId(userID));
-
-            throw new RuntimeException(e);
+            sendError(msg);
+            throw getRuntimeException(e);
         }
     }
     
@@ -333,46 +342,46 @@ public class Retrieve extends Task {
     	UserStore userStore = ((UserStore)userFs);
         if (!userStore.exists(retrievePath) || !userStore.isDirectory(retrievePath)) {
             // Target path must exist and be a directory
-            logger.info("Target directory not found or is not a directory ! [{}]", retrievePath);
+            String msg = String.format("Target directory not found or is not a directory ! [%s]", retrievePath);
+            logger.error(msg);
+            sendError(msg);
+            throw new RuntimeException(msg);
         }
         
         // Check that there's enough free space ...
+        final long freespace;
         try {
-            long freespace = userFs.getUsableSpace();
-            logger.info("Free space: " + freespace + " bytes (" +  FileUtils.byteCountToDisplaySize(freespace) + ")");
-            if (freespace < archiveSize) {
-                eventSender.send(new RetrieveError(this.jobID, this.depositId, this.retrieveId,
-                        "Not enough free space to retrieve data!")
-                        .withUserId(this.userID));
-            }
-
+            freespace = userFs.getUsableSpace();
         } catch (Exception e) {
-            logger.info("Unable to determine free space");
-            eventSender.send(new RetrieveError(jobID, depositId, retrieveId, "Unable to determine free space")
-                .withUserId(this.userID));
-
-            throw new RuntimeException(e);
+            String msg = "Unable to determine free space";
+            logger.error(msg, e);
+            sendError(msg);
+            throw e;
+        }
+        logger.info("Free space: " + freespace + " bytes (" +  FileUtils.byteCountToDisplaySize(freespace) + ")");
+        if (freespace < archiveSize) {
+            String msg = "Not enough free space to retrieve data!";
+            logger.error(msg);
+            sendError(msg);
+            throw new RuntimeException(msg);
         }
 
         try {
-            // copy .datavault file to test we can actually write
-            File hiddenDV = new File("src/main/resources/.datavault");
-
+            // copy ".datavault" file to test we can actually write
             if (userFs instanceof SFTPFileSystemDriver) {
-                ((SFTPFileSystemDriver) userFs).store(this.retrievePath, hiddenDV, new Progress(), timeStampDirName);
+                ((SFTPFileSystemDriver) userFs).store(this.retrievePath, DATA_VAULT_HIDDEN_FILE, new Progress(), timeStampDirName);
             } else {
-                userFs.store(this.retrievePath, hiddenDV, new Progress());
+                userFs.store(this.retrievePath, DATA_VAULT_HIDDEN_FILE, new Progress());
             }
         } catch (Exception e) {
-            logger.info("Unable to write to user space");
-            eventSender.send(new RetrieveError(jobID, depositId, retrieveId, "Unable to write to user space")
-                    .withUserId(this.userID));
-
-            throw new RuntimeException(e);
+            String msg = "Unable to perform test write of file[" + DATA_VAULT_HIDDEN_FILE.getName()  + "] to user space";
+            logger.error(msg, e);
+            sendError(msg);
+            throw e;
         }
     }
     
-    private void multipleCopies(Context context, String tarFileName, File tarFile, Device archiveFs, Device userFs,
+    protected void multipleCopies(Context context, String tarFileName, File tarFile, Device archiveFs, Device userFs,
                                 String timeStampDirName) throws Exception {
     	logger.info("Device has multiple copies");
         Progress progress = new Progress();
@@ -410,18 +419,18 @@ public class Retrieve extends Task {
                 // if last location has an error throw the error else go
                 // round again
                 if (!locationsIt.hasNext()) {
-                    logger.info("All locations had problems throwing exception " + e.getMessage());
+                    logger.error("All locations had problems throwing exception " + e.getMessage());
                     throw e;
                 } else {
-                	logger.info("Current " + location + " has a problem trying next location");
-                    logger.info(e.getMessage());
+                	logger.error("Current " + location + " has a problem trying next location");
+                    logger.error(e.getMessage());
                 	continue LOCATION;
                 }
             }
         }
     }
     
-    private void singleCopy(Context context, String tarFileName, File tarFile, Device archiveFs,
+    protected void singleCopy(Context context, String tarFileName, File tarFile, Device archiveFs,
                             Device userFs, String timeStampDirName) throws Exception {
     	logger.info("Single copy device");
         // Progress tracking (threaded)
@@ -472,5 +481,9 @@ public class Retrieve extends Task {
         );
         logger.error(msg);
         throw new Exception(msg);
+    }
+    private void sendError(String msg) {
+        eventSender.send(new RetrieveError(jobID, depositId, retrieveId, msg)
+                .withUserId(this.userID));
     }
 }
