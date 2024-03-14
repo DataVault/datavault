@@ -21,6 +21,7 @@ import org.datavaultplatform.common.task.Task;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.datavaultplatform.common.util.StorageClassUtils;
 import org.datavaultplatform.worker.operations.*;
+import org.datavaultplatform.worker.retry.TwoSpeedRetry;
 import org.datavaultplatform.worker.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,12 +31,20 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
+
+import org.springframework.retry.RetryCallback;
+import org.springframework.retry.RetryContext;
+import org.springframework.retry.support.RetryTemplate;
 
 /**
  * A class that extends Task which is used to handle Retrievals from the vault
  */
 public class Retrieve extends Task {
     public static final File DATA_VAULT_HIDDEN_FILE = new File("src/main/resources/.datavault");
+    private static final int DEFAULT_USERFS_RETRIEVE_ATTEMPTS = 10;
+    private static final int DEFAULT_USERFS_DELAY_SECS_1 = 60;
+    private static final int DEFAULT_USERFS_DELAY_SECS_2 = 60;
     private static final Logger logger = LoggerFactory.getLogger(Retrieve.class);
     private String archiveId = null;
     private String archiveDigestAlgorithm = null;
@@ -51,7 +60,9 @@ public class Retrieve extends Task {
     private String depositCreationDate = null;
     private long archiveSize = 0;
     private EventSender eventSender = null;
-    
+
+    private TwoSpeedRetry userFsTwoSpeedRetry;
+
     /* (non-Javadoc)
      * @see org.datavaultplatform.common.task.Task#performAction(org.datavaultplatform.common.task.Context)
      * 
@@ -83,6 +94,8 @@ public class Retrieve extends Task {
         this.chunksDigest = this.getChunkFilesDigest();
         this.encChunksDigest = this.getEncChunksDigest();
         this.encTarDigest = this.getEncTarDigest();
+
+        setupUserFsTwoSpeedRetry(properties);
 
         if (this.isRedeliver()) {
             sendError("Retrieve stopped: the message had been redelivered, please investigate");
@@ -226,7 +239,7 @@ public class Retrieve extends Task {
         }
     }
 
-    private void doRetrieve(Context context, Device userFs, File tarFile, Progress progress,
+    private void doRetrieveFromWorkerToUserFs(Context context, Device userFs, File tarFile, Progress progress,
                             String timeStampDirName) throws Exception{
         logger.info("Copied: " + progress.getDirCount() + " directories, " + progress.getFileCount() + " files, "
                 + progress.getByteCount() + " bytes");
@@ -239,7 +252,6 @@ public class Retrieve extends Task {
         File bagDir = Tar.unTar(tarFile, context.getTempDir());
         long bagDirSize = FileUtils.sizeOfDirectory(bagDir);
 
-
         // Get the payload data directory
         File payloadDir = bagDir.toPath().resolve("data").toFile();
 
@@ -249,27 +261,9 @@ public class Retrieve extends Task {
             .withUserId(this.userID)
             .withNextState(3));
         
-        // Progress tracking (threaded)
-        progress = new Progress();
-        ProgressTracker tracker = new ProgressTracker(progress, this.jobID, this.depositId, bagDirSize, this.eventSender);
-        Thread trackerThread = new Thread(tracker);
-        trackerThread.start();
+        // COPY FILES FROM WORKER BACK TO USER FS
+        copyFilesToUserFs(progress, payloadDir, userFs, bagDirSize, timeStampDirName);
 
-        try {
-            ArrayList<File> contents = new ArrayList<>(Arrays.asList(payloadDir.listFiles()));
-            for(File content: contents){
-                if (userFs instanceof SFTPFileSystemDriver) {
-                    ((SFTPFileSystemDriver) userFs).store(this.retrievePath, content, progress, timeStampDirName);
-                } else {
-                    userFs.store(this.retrievePath, content, progress);
-                }
-            }
-        } finally {
-            // Stop the tracking thread
-            tracker.stop();
-            trackerThread.join();
-        }
-        
         logger.info("Copied: " + progress.getDirCount() + " directories, " + progress.getFileCount() + " files, " + progress.getByteCount() + " bytes");
         
         // Cleanup
@@ -405,7 +399,7 @@ public class Retrieve extends Task {
             }
 
             logger.info("Attempting retrieve on archive from " + locations);
-            this.doRetrieve(context, userFs, tarFile, progress, timeStampDirName);
+            this.doRetrieveFromWorkerToUserFs(context, userFs, tarFile, progress, timeStampDirName);
             logger.info("Completed retrieve on archive from " + locations);
         } finally {
             // Stop the tracking thread
@@ -451,7 +445,7 @@ public class Retrieve extends Task {
             trackerThread.join();
         }
 
-        this.doRetrieve(context, userFs, tarFile, progress, timeStampDirName);
+        this.doRetrieveFromWorkerToUserFs(context, userFs, tarFile, progress, timeStampDirName);
     }
 
     protected static void throwChecksumError(
@@ -466,6 +460,55 @@ public class Retrieve extends Task {
         logger.error(msg);
         throw new Exception(msg);
     }
+    protected void setupUserFsTwoSpeedRetry(Map<String, String> properties) {
+        this.userFsTwoSpeedRetry = getUserFsTwoSpeedRetry(properties);
+    }
+
+    private TwoSpeedRetry getUserFsTwoSpeedRetry(Map<String, String> properties) {
+
+        int userFsRetrieveMaxAttempts = DEFAULT_USERFS_RETRIEVE_ATTEMPTS;
+        long userFsRetrieveDelayMs1 = TimeUnit.SECONDS.toMillis(DEFAULT_USERFS_DELAY_SECS_1);
+        long userFsRetrieveDelayMs2 = TimeUnit.SECONDS.toMillis(DEFAULT_USERFS_DELAY_SECS_2);
+
+        if (properties.containsKey(PropNames.USER_FS_RETRIEVE_MAX_ATTEMPTS)) {
+            userFsRetrieveMaxAttempts = Integer.parseInt(properties.get(PropNames.USER_FS_RETRIEVE_MAX_ATTEMPTS));
+        }
+        if (properties.containsKey(PropNames.USER_FS_RETRIEVE_DELAY_MS_1)) {
+            userFsRetrieveDelayMs1 = Long.parseLong(properties.get(PropNames.USER_FS_RETRIEVE_DELAY_MS_1));
+        }
+        if (properties.containsKey(PropNames.USER_FS_RETRIEVE_DELAY_MS_2)) {
+            userFsRetrieveDelayMs2 = Long.parseLong(properties.get(PropNames.USER_FS_RETRIEVE_DELAY_MS_2));
+        }
+
+        return new TwoSpeedRetry(userFsRetrieveMaxAttempts, userFsRetrieveDelayMs1, userFsRetrieveDelayMs2);
+    }
+    protected void copyFilesToUserFs(Progress progress, File payloadDir, Device userFs, long bagDirSize, String timeStampDirName) throws Exception {
+        ProgressTracker tracker = new ProgressTracker(progress, this.jobID, this.depositId, bagDirSize, this.eventSender);
+        Thread trackerThread = new Thread(tracker);
+        trackerThread.start();
+
+        try {
+            Path basePath = payloadDir.toPath();
+            File[] contents = payloadDir.listFiles();
+            Arrays.sort(contents);
+            for (File content : contents) {
+                String taskDesc = basePath.relativize(content.toPath()).toString();
+                RetryTemplate template = userFsTwoSpeedRetry.getRetryTemplate(String.format("toUserFs - %s", taskDesc));
+                template.execute((RetryCallback<Object, Exception>) retryContext -> {
+                    if (userFs instanceof SFTPFileSystemDriver) {
+                        return ((SFTPFileSystemDriver) userFs).store(retrievePath, content, progress, timeStampDirName);
+                    } else {
+                        return userFs.store(retrievePath, content, progress);
+                    }
+                });
+            }
+        } finally {
+            // Stop the tracking thread
+            tracker.stop();
+            trackerThread.join();
+        }
+    }
+
     private void sendError(String msg) {
         eventSender.send(new RetrieveError(jobID, depositId, retrieveId, msg)
                 .withUserId(this.userID));
