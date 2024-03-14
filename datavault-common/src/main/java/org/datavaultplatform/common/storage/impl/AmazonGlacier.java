@@ -176,7 +176,7 @@ public class AmazonGlacier extends Device implements ArchiveStore {
         // Glacier generates a new ID which is required retrieve data.
         return archiveId;
     }
-    
+
     @Override
     public Verify.Method getVerifyMethod() {
         return verificationMethod;

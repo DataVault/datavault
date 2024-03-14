@@ -216,7 +216,12 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
         }
         return depositId;
     }
-    
+
+	@Override
+	public String store(String path, File working, Progress progress, String timeStampDirname) throws Exception {
+		throw new UnsupportedOperationException();
+	}
+
 //    private String storeInTSMNode(File working, Progress progress, String optFilePath, String description) throws Exception {
 //
 //        // check we have enough space to store the data (is the file bagged and tarred atm or is the actual space going to be different?)

@@ -135,7 +135,7 @@ public class LocalFileSystem extends Device implements UserStore, ArchiveStore {
     public String store(String path, File working, Progress progress) throws Exception {
         return FileSystemUtils.store(path, working, progress, this.rootPath);
     }
-    
+
     @Override
     public Verify.Method getVerifyMethod() {
         // Return the default verification method (copy back and check)

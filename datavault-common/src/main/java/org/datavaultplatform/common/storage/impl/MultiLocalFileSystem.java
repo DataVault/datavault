@@ -78,7 +78,7 @@ public class MultiLocalFileSystem extends Device implements ArchiveStore {
 
         return working.getName();
     }
-    
+
     @Override
     public Verify.Method getVerifyMethod() {
         // Return the default verification method (copy back and check)
