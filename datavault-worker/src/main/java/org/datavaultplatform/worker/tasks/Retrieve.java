@@ -1,5 +1,6 @@
 package org.datavaultplatform.worker.tasks;
 
+import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.crypto.Encryption;
@@ -12,27 +13,43 @@ import org.datavaultplatform.common.event.retrieve.RetrieveStart;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.model.ArchiveStore;
 import org.datavaultplatform.common.storage.Device;
+import org.datavaultplatform.common.storage.SFTPFileSystemDriver;
 import org.datavaultplatform.common.storage.UserStore;
 import org.datavaultplatform.common.storage.Verify;
+import org.datavaultplatform.common.storage.impl.SftpUtils;
 import org.datavaultplatform.common.task.Context;
 import org.datavaultplatform.common.task.Task;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.datavaultplatform.common.util.StorageClassUtils;
 import org.datavaultplatform.worker.operations.*;
+import org.datavaultplatform.worker.retry.TwoSpeedRetry;
 import org.datavaultplatform.worker.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.Assert;
+
 import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
+
+import org.springframework.retry.RetryCallback;
+import org.springframework.retry.RetryContext;
+import org.springframework.retry.support.RetryTemplate;
 
 /**
  * A class that extends Task which is used to handle Retrievals from the vault
  */
 public class Retrieve extends Task {
-    
+    public static final String DATA_VAULT_HIDDEN_FILE_NAME = ".datavault";
+    private static final String DV_TEMP_DIR_PREFIX = "dvTempDir";
+    private static final int DEFAULT_USERFS_RETRIEVE_ATTEMPTS = 10;
+    private static final int DEFAULT_USERFS_DELAY_SECS_1 = 60;
+    private static final int DEFAULT_USERFS_DELAY_SECS_2 = 60;
     private static final Logger logger = LoggerFactory.getLogger(Retrieve.class);
     private String archiveId = null;
     private String archiveDigestAlgorithm = null;
@@ -48,7 +65,9 @@ public class Retrieve extends Task {
     private String depositCreationDate = null;
     private long archiveSize = 0;
     private EventSender eventSender = null;
-    
+
+    private TwoSpeedRetry userFsTwoSpeedRetry;
+
     /* (non-Javadoc)
      * @see org.datavaultplatform.common.task.Task#performAction(org.datavaultplatform.common.task.Context)
      * 
@@ -81,14 +100,15 @@ public class Retrieve extends Task {
         this.encChunksDigest = this.getEncChunksDigest();
         this.encTarDigest = this.getEncTarDigest();
 
+        setupUserFsTwoSpeedRetry(properties);
+
         if (this.isRedeliver()) {
-            eventSender.send(new RetrieveError(this.jobID, this.depositId, this.retrieveId,"Retrieve stopped: the message had been redelivered, please investigate")
-                .withUserId(this.userID));
+            sendError("Retrieve stopped: the message had been redelivered, please investigate");
             return;
         }
         
         this.initStates();
-        
+
         eventSender.send(new RetrieveStart(this.jobID, this.depositId, this.retrieveId)
             .withUserId(this.userID)
             .withNextState(0));
@@ -99,9 +119,10 @@ public class Retrieve extends Task {
         StorageClassNameResolver resolver = context.getStorageClassNameResolver();
         Device userFs = this.setupUserFileStores(resolver);
         Device archiveFs = this.setupArchiveFileStores(resolver);
+        String timestampDirName = SftpUtils.getTimestampedDirectoryName(getClock());
         
         try {
-        	this.checkUserStoreFreeSpace(userFs);
+        	this.checkUserStoreFreeSpaceAndPermissions(userFs, timestampDirName);
 
             // Retrieve the archived data
             String tarFileName = bagID + ".tar";
@@ -115,31 +136,45 @@ public class Retrieve extends Task {
                 .withNextState(1));
             
             if (archiveFs.hasMultipleCopies()) {
-            	this.multipleCopies(context, tarFileName, tarFile, archiveFs, userFs);
+            	this.multipleCopies(context, tarFileName, tarFile, archiveFs, userFs, timestampDirName);
             } else {
-            	this.singleCopy(context, tarFileName, tarFile, archiveFs, userFs);
+            	this.singleCopy(context, tarFileName, tarFile, archiveFs, userFs, timestampDirName);
             }
             
         } catch (Exception e) {
             String msg = "Data retrieve failed: " + e.getMessage();
             logger.error(msg, e);
-            eventSender.send(new RetrieveError(jobID, depositId, retrieveId, msg)
-                .withUserId(userID));
-
-            throw new RuntimeException(e);
+            sendError(msg);
+            throw getRuntimeException(e);
         }
+    }
+
+    private RuntimeException getRuntimeException(Exception ex) {
+        if (ex instanceof RuntimeException) {
+            return (RuntimeException) ex;
+        } else {
+            return new RuntimeException(ex);
+        }
+    }
+
+    /*
+        This method allows us to override the clock in tests.
+     */
+    protected Clock getClock() {
+        return Clock.systemDefaultZone();
     }
     
     private void recomposeSingle(String tarFileName, Context context, Device archiveFs, Progress progress, File tarFile) throws Exception {
         recompose(tarFileName, context, archiveFs, progress, tarFile, false, null);
     }
-    
-    private void recomposeMulti(String tarFileName, Context context, Device archiveFs, Progress progress, File tarFile, String location) throws Exception {
-        recompose(tarFileName, context, archiveFs, progress, tarFile, true, location);
+
+    private void recomposeMulti(String tarFileName, Context context, Device archiveFs, Progress progress, File tarFile, List<String> locations) throws Exception {
+        recompose(tarFileName, context, archiveFs, progress, tarFile, true, locations);
     }
-    
-    private void recompose(String tarFileName, Context context, Device archiveFs, Progress progress, 
-            File tarFile, boolean multiCopy, String location) throws Exception {
+
+
+    private void recompose(String tarFileName, Context context, Device archiveFs, Progress progress,
+                           File tarFile, boolean multiCopy, List<String> locations) throws Exception {
 
         File[] chunks = new File[this.numOfChunks];
         logger.info("Retrieving " + this.numOfChunks + " chunk(s)");
@@ -154,7 +189,7 @@ public class Retrieve extends Task {
             logger.debug("Creating chunk download task:" + chunkNum);
             ChunkRetrieveTracker crt = new ChunkRetrieveTracker(
                     this.archiveId, archiveFs,
-                    context, chunkNum, this.getChunksIVs(), location, multiCopy,
+                    context, chunkNum, this.getChunksIVs(), locations, multiCopy,
                     progress, this.chunksDigest, this.encChunksDigest, chunkFile
             );
             executor.add(crt);
@@ -207,8 +242,10 @@ public class Retrieve extends Task {
         }
     }
 
-    private void doRetrieve(Context context, Device userFs, File tarFile, Progress progress) throws Exception{
-        logger.info("Copied: " + progress.getDirCount() + " directories, " + progress.getFileCount() + " files, " + progress.getByteCount() + " bytes");
+    private void doRetrieveFromWorkerToUserFs(Context context, Device userFs, File tarFile, Progress progress,
+                            String timeStampDirName) throws Exception{
+        logger.info("Copied: " + progress.getDirCount() + " directories, " + progress.getFileCount() + " files, "
+                + progress.getByteCount() + " bytes");
         
         logger.info("Validating data ...");
         eventSender.send(new UpdateProgress(this.jobID, this.depositId).withNextState(2)
@@ -217,16 +254,9 @@ public class Retrieve extends Task {
         // Decompress to the temporary directory
         File bagDir = Tar.unTar(tarFile, context.getTempDir());
         long bagDirSize = FileUtils.sizeOfDirectory(bagDir);
-        
-        // Validate the bagit directory
-        //if (!Packager.validateBag(bagDir)) {
-        //    throw new Exception("Bag is invalid");
-        //}
 
         // Get the payload data directory
         File payloadDir = bagDir.toPath().resolve("data").toFile();
-        //File payloadDir = bagDir;
-        //long payloadSize = FileUtils.sizeOfDirectory(payloadDir);
 
         // Copy the extracted files to the target retrieve area
         logger.info("Copying to user directory ...");
@@ -234,23 +264,9 @@ public class Retrieve extends Task {
             .withUserId(this.userID)
             .withNextState(3));
         
-        // Progress tracking (threaded)
-        progress = new Progress();
-        ProgressTracker tracker = new ProgressTracker(progress, this.jobID, this.depositId, bagDirSize, this.eventSender);
-        Thread trackerThread = new Thread(tracker);
-        trackerThread.start();
+        // COPY FILES FROM WORKER BACK TO USER FS
+        copyFilesToUserFs(progress, payloadDir, userFs, bagDirSize, timeStampDirName);
 
-        try {
-            ArrayList<File> contents = new ArrayList<>(Arrays.asList(payloadDir.listFiles()));
-            for(File content: contents){
-                userFs.store(this.retrievePath, content, progress);
-            }
-        } finally {
-            // Stop the tracking thread
-            tracker.stop();
-            trackerThread.join();
-        }
-        
         logger.info("Copied: " + progress.getDirCount() + " directories, " + progress.getFileCount() + " files, " + progress.getByteCount() + " bytes");
         
         // Cleanup
@@ -278,7 +294,7 @@ public class Retrieve extends Task {
     
     private Device setupUserFileStores(StorageClassNameResolver resolver) {
         Device userFs = null;
-        
+
         for (String storageID : userFileStoreClasses.keySet()) {
             
             String storageClass = userFileStoreClasses.get(storageID);
@@ -292,9 +308,8 @@ public class Retrieve extends Task {
             } catch (Exception e) {
                 String msg = "Retrieve failed: could not access user filesystem";
                 logger.error(msg, e);
-                eventSender.send(new RetrieveError(this.jobID, this.depositId, this.retrieveId, msg)
-                    .withUserId(this.userID));
-                throw new RuntimeException(e);
+                sendError(msg);
+                throw getRuntimeException(e);
             }
         }
         
@@ -316,87 +331,101 @@ public class Retrieve extends Task {
         } catch (Exception e) {
             String msg = "Retrieve failed: could not access archive filesystem";
             logger.error(msg, e);
-            eventSender.send(new RetrieveError(this.jobID, this.depositId, this.retrieveId, msg)
-                .withUserId(userID));
-
-            throw new RuntimeException(e);
+            sendError(msg);
+            throw getRuntimeException(e);
         }
     }
     
-    private void checkUserStoreFreeSpace(Device userFs) throws Exception {
+    private void checkUserStoreFreeSpaceAndPermissions(Device userFs, String timeStampDirName) throws Exception {
     	UserStore userStore = ((UserStore)userFs);
         if (!userStore.exists(retrievePath) || !userStore.isDirectory(retrievePath)) {
             // Target path must exist and be a directory
-            logger.info("Target directory not found or is not a directory ! [{}]", retrievePath);
+            String msg = String.format("Target directory not found or is not a directory ! [%s]", retrievePath);
+            logger.error(msg);
+            sendError(msg);
+            throw new RuntimeException(msg);
         }
         
         // Check that there's enough free space ...
+        final long freespace;
         try {
-            long freespace = userFs.getUsableSpace();
-            logger.info("Free space: " + freespace + " bytes (" +  FileUtils.byteCountToDisplaySize(freespace) + ")");
-            if (freespace < archiveSize) {
-                eventSender.send(new RetrieveError(this.jobID, this.depositId, this.retrieveId,
-                        "Not enough free space to retrieve data!")
-                        .withUserId(this.userID));
+            freespace = userFs.getUsableSpace();
+        } catch (Exception e) {
+            String msg = "Unable to determine free space";
+            logger.error(msg, e);
+            sendError(msg);
+            throw e;
+        }
+        logger.info("Free space: " + freespace + " bytes (" +  FileUtils.byteCountToDisplaySize(freespace) + ")");
+        if (freespace < archiveSize) {
+            String msg = "Not enough free space to retrieve data!";
+            logger.error(msg);
+            sendError(msg);
+            throw new RuntimeException(msg);
+        }
+
+        try {
+            File createTempDataVaultHiddenFile = createTempDataVaultHiddenFile();
+            // copy ".datavault" file to test we can actually write
+            if (userFs instanceof SFTPFileSystemDriver) {
+                ((SFTPFileSystemDriver) userFs).store(this.retrievePath, createTempDataVaultHiddenFile, new Progress(), timeStampDirName);
+            } else {
+                userFs.store(this.retrievePath, createTempDataVaultHiddenFile, new Progress());
             }
         } catch (Exception e) {
-            logger.info("Unable to determine free space");
-            eventSender.send(new RetrieveError(jobID, depositId, retrieveId, "Unable to determine free space")
-                .withUserId(this.userID));
-
-            throw new RuntimeException(e);
+            String msg = "Unable to perform test write of file[" + DATA_VAULT_HIDDEN_FILE_NAME  + "] to user space";
+            logger.error(msg, e);
+            sendError(msg);
+            throw e;
         }
     }
     
-    private void multipleCopies(Context context, String tarFileName, File tarFile, Device archiveFs, Device userFs) throws Exception {
-    	logger.info("Device has multiple copies");
+    @SneakyThrows
+    public static File createTempDataVaultHiddenFile() {
+        File tempDir = Files.createTempDirectory(DV_TEMP_DIR_PREFIX).toFile();
+        File tempDataVaultHiddenFile = new File(tempDir, DATA_VAULT_HIDDEN_FILE_NAME);
+        tempDataVaultHiddenFile.createNewFile();
+        Assert.isTrue(tempDataVaultHiddenFile.exists());
+        Assert.isTrue(tempDataVaultHiddenFile.isFile());
+        Assert.isTrue(tempDataVaultHiddenFile.canRead());
+        Assert.isTrue(tempDataVaultHiddenFile.length() == 0);
+        return tempDataVaultHiddenFile;
+    }
+    
+    protected void multipleCopies(Context context, String tarFileName, File tarFile, Device archiveFs, Device userFs,
+                                String timeStampDirName) throws Exception {
+        logger.info("Device has multiple copies");
         Progress progress = new Progress();
         ProgressTracker tracker = new ProgressTracker(progress, this.jobID, this.depositId, this.archiveSize, this.eventSender);
         Thread trackerThread = new Thread(tracker);
         trackerThread.start();
+        try {
+            List<String> locations = archiveFs.getLocations();
+            if (context.isChunkingEnabled()) {
+                recomposeMulti(tarFileName, context, archiveFs, progress, tarFile, locations);
+            } else {
+                // Ask the driver to copy files to the temp directory
+                archiveFs.retrieve(this.archiveId, tarFile, progress, locations);
 
-        List<String> locations = archiveFs.getLocations();
-        Iterator<String> locationsIt = locations.iterator();
-        LOCATION: 
-        while (locationsIt.hasNext()) {
-            String location = locationsIt.next();
-            logger.info("Current " + location);
-            try {
-                try {
-                    // NEED TO UPDATE THIS TO INCLUDE CHUNKING STUFF IS TURNED ON
-                    if (context.isChunkingEnabled()) {
-                        // TODO can bypass this if there is only one chunk.
-                        recomposeMulti(tarFileName, context, archiveFs, progress, tarFile, location);
-                    } else {
-                        // Ask the driver to copy files to the temp directory
-                        archiveFs.retrieve(this.archiveId, tarFile, progress, location);
-                    }
-                } finally {
-                    // Stop the tracking thread
-                    tracker.stop();
-                    trackerThread.join();
-                }
-
-                logger.info("Attempting retrieve on archive from " + location);
-                this.doRetrieve(context, userFs, tarFile, progress);
-                logger.info("Completed retrieve on archive from " + location);
-                break LOCATION;
-            } catch (Exception e) {
-                // if last location has an error throw the error else go
-                // round again
-                if (!locationsIt.hasNext()) {
-                    logger.info("All locations had problems throwing exception " + e.getMessage());
-                    throw e;
-                } else {
-                	logger.info("Current " + location + " has a problem trying next location");
-                    logger.info(e.getMessage());
-                	continue LOCATION;
+                if (this.getTarIV() != null) {
+                    // Decrypt tar file
+                    Utils.checkFileHash("ret-single-tar", tarFile, this.encTarDigest);
+                    Encryption.decryptFile(context, tarFile, this.getTarIV());
                 }
             }
+
+            logger.info("Attempting retrieve on archive from " + locations);
+            this.doRetrieveFromWorkerToUserFs(context, userFs, tarFile, progress, timeStampDirName);
+            logger.info("Completed retrieve on archive from " + locations);
+        } finally {
+            // Stop the tracking thread
+            tracker.stop();
+            trackerThread.join();
         }
     }
     
-    private void singleCopy(Context context, String tarFileName, File tarFile, Device archiveFs, Device userFs) throws Exception {
+    protected void singleCopy(Context context, String tarFileName, File tarFile, Device archiveFs,
+                            Device userFs, String timeStampDirName) throws Exception {
     	logger.info("Single copy device");
         // Progress tracking (threaded)
         Progress progress = new Progress();
@@ -432,7 +461,7 @@ public class Retrieve extends Task {
             trackerThread.join();
         }
 
-        this.doRetrieve(context, userFs, tarFile, progress);
+        this.doRetrieveFromWorkerToUserFs(context, userFs, tarFile, progress, timeStampDirName);
     }
 
     protected static void throwChecksumError(
@@ -446,5 +475,58 @@ public class Retrieve extends Task {
         );
         logger.error(msg);
         throw new Exception(msg);
+    }
+    protected void setupUserFsTwoSpeedRetry(Map<String, String> properties) {
+        this.userFsTwoSpeedRetry = getUserFsTwoSpeedRetry(properties);
+    }
+
+    private TwoSpeedRetry getUserFsTwoSpeedRetry(Map<String, String> properties) {
+
+        int userFsRetrieveMaxAttempts = DEFAULT_USERFS_RETRIEVE_ATTEMPTS;
+        long userFsRetrieveDelayMs1 = TimeUnit.SECONDS.toMillis(DEFAULT_USERFS_DELAY_SECS_1);
+        long userFsRetrieveDelayMs2 = TimeUnit.SECONDS.toMillis(DEFAULT_USERFS_DELAY_SECS_2);
+
+        if (properties.containsKey(PropNames.USER_FS_RETRIEVE_MAX_ATTEMPTS)) {
+            userFsRetrieveMaxAttempts = Integer.parseInt(properties.get(PropNames.USER_FS_RETRIEVE_MAX_ATTEMPTS));
+        }
+        if (properties.containsKey(PropNames.USER_FS_RETRIEVE_DELAY_MS_1)) {
+            userFsRetrieveDelayMs1 = Long.parseLong(properties.get(PropNames.USER_FS_RETRIEVE_DELAY_MS_1));
+        }
+        if (properties.containsKey(PropNames.USER_FS_RETRIEVE_DELAY_MS_2)) {
+            userFsRetrieveDelayMs2 = Long.parseLong(properties.get(PropNames.USER_FS_RETRIEVE_DELAY_MS_2));
+        }
+
+        return new TwoSpeedRetry(userFsRetrieveMaxAttempts, userFsRetrieveDelayMs1, userFsRetrieveDelayMs2);
+    }
+    protected void copyFilesToUserFs(Progress progress, File payloadDir, Device userFs, long bagDirSize, String timeStampDirName) throws Exception {
+        ProgressTracker tracker = new ProgressTracker(progress, this.jobID, this.depositId, bagDirSize, this.eventSender);
+        Thread trackerThread = new Thread(tracker);
+        trackerThread.start();
+
+        try {
+            Path basePath = payloadDir.toPath();
+            File[] contents = payloadDir.listFiles();
+            Arrays.sort(contents);
+            for (File content : contents) {
+                String taskDesc = basePath.relativize(content.toPath()).toString();
+                RetryTemplate template = userFsTwoSpeedRetry.getRetryTemplate(String.format("toUserFs - %s", taskDesc));
+                template.execute((RetryCallback<Object, Exception>) retryContext -> {
+                    if (userFs instanceof SFTPFileSystemDriver) {
+                        return ((SFTPFileSystemDriver) userFs).store(retrievePath, content, progress, timeStampDirName);
+                    } else {
+                        return userFs.store(retrievePath, content, progress);
+                    }
+                });
+            }
+        } finally {
+            // Stop the tracking thread
+            tracker.stop();
+            trackerThread.join();
+        }
+    }
+
+    private void sendError(String msg) {
+        eventSender.send(new RetrieveError(jobID, depositId, retrieveId, msg)
+                .withUserId(this.userID));
     }
 }

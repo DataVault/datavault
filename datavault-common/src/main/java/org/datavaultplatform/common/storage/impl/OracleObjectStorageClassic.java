@@ -180,7 +180,7 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 		
 		return depositId;
 	}
-	
+
 	@Override
 	public void delete(String path, File working, Progress progress) {
 		/*try {
@@ -288,5 +288,8 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 			return false;
 		}
 	}
-
+	@Override
+	public Logger getLogger() {
+		return LOGGER;
+	}
 }

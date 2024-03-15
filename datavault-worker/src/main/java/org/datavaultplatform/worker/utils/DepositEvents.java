@@ -53,6 +53,9 @@ public class DepositEvents {
     topLevelProps.put(PropNames.ARCHIVE_DIGEST, info.archiveDigest);
     topLevelProps.put(PropNames.ARCHIVE_ID, info.archiveId);
     topLevelProps.put(PropNames.DEPOSIT_CREATION_DATE, "20240111");
+    topLevelProps.put(PropNames.USER_FS_RETRIEVE_MAX_ATTEMPTS, "10");
+    topLevelProps.put(PropNames.USER_FS_RETRIEVE_DELAY_MS_1, "60000");
+    topLevelProps.put(PropNames.USER_FS_RETRIEVE_DELAY_MS_2, "300000");
 
     retrieve.setProperties(topLevelProps);
     retrieve.setTarIV(info.tarIV);

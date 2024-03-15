@@ -14,6 +14,7 @@ import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.storage.ArchiveStore;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.storage.Verify;
+import org.slf4j.Logger;
 
 import java.io.File;
 import java.util.Map;
@@ -175,9 +176,14 @@ public class AmazonGlacier extends Device implements ArchiveStore {
         // Glacier generates a new ID which is required retrieve data.
         return archiveId;
     }
-    
+
     @Override
     public Verify.Method getVerifyMethod() {
         return verificationMethod;
+    }
+
+    @Override
+    public Logger getLogger() {
+        return log;
     }
 }

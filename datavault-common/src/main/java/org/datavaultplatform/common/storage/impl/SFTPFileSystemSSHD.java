@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sshd.sftp.client.SftpClient;
 import org.apache.sshd.sftp.client.SftpClient.Attributes;
 import org.apache.sshd.sftp.client.extensions.SpaceAvailableExtension;
@@ -25,6 +26,8 @@ import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.storage.SFTPFileSystemDriver;
 import org.datavaultplatform.common.storage.impl.ssh.UtilitySSHD;
 import org.datavaultplatform.common.storage.impl.ssh.UtilitySSHD.SFTPMonitorSSHD;
+import org.springframework.util.Assert;
+import org.slf4j.Logger;
 
 /**
  * An implementation of SFTPFileSystemDriver to use Apache sshd's sftp-client library.
@@ -170,13 +173,13 @@ public class SFTPFileSystemSSHD extends Device implements SFTPFileSystemDriver {
   }
 
   @Override
-  public String store(String path, File localFileOrDirectory, Progress progress) throws Exception {
+  public String store(String path, File localFileOrDirectory, Progress progress, String timestampDirName) throws Exception {
+    Assert.isTrue(StringUtils.isNotBlank(timestampDirName), "The timestampDirName cannot be blank");
     try (SFTPConnection con = getConnection()) {
 
       final Path basePath = Paths.get(con.getFullPath(path));
 
       // Create timestamped folder to avoid overwriting files
-      String timestampDirName = SftpUtils.getTimestampedDirectoryName(connectionInfo.getClock());
       Path tsDirPath = basePath.resolve(timestampDirName);
 
       UtilitySSHD.createDir(con.sftpClient, tsDirPath);
@@ -209,4 +212,8 @@ public class SFTPFileSystemSSHD extends Device implements SFTPFileSystemDriver {
   }
 
 
+  @Override
+  public Logger getLogger() {
+    return log;
+  }
 }

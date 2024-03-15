@@ -308,7 +308,7 @@ public class Deposit extends Task {
      * @param tarHash
      * @throws Exception
      */
-    private void verifyArchive(Context context, File[] chunkFiles, String[] chunksHash, File tarFile, String tarHash, 
+    private void verifyArchiveWithChunks(Context context, File[] chunkFiles, String[] chunksHash, File tarFile, String tarHash,
             Map<Integer, byte[]> ivs, String[] encChunksHash) throws Exception {
 
         for (String archiveStoreId : archiveStores.keySet() ) {
@@ -353,7 +353,7 @@ public class Deposit extends Task {
      * @param tarHash
      * @throws Exception
      */
-    private void verifyArchive(Context context, File tarFile, String tarHash, byte[] iv, String encTarHash) throws Exception {
+    private void verifyArchiveNoChunks(Context context, File tarFile, String tarHash, byte[] iv, String encTarHash) throws Exception {
 
         boolean alreadyVerified = false;
 
@@ -390,7 +390,7 @@ public class Deposit extends Task {
                         CopyBackFromArchive.copyBackFromArchive(archiveStore, archiveId, tarFile, loc);
 
                         // check encrypted tar
-                        verifyTarFile(context.getTempDir(), tarFile, encTarHash);
+                        Utils.checkFileHash("enc-tar", tarFile, encTarHash);
 
                         // Decryption
                         if(iv != null) {
@@ -840,9 +840,9 @@ public class Deposit extends Task {
 	
 	private void verifyArchive(Context context, File tarFile, String tarHash, byte[] iv, Map<Integer, byte[]> chunksIVs, String encTarHash) throws Exception {
 		if( context.isChunkingEnabled() ) {
-        verifyArchive(context, chunkFiles, chunksHash, tarFile, tarHash, chunksIVs, encChunksHash);
+        verifyArchiveWithChunks(context, chunkFiles, chunksHash, tarFile, tarHash, chunksIVs, encChunksHash);
     } else {
-        verifyArchive(context, tarFile, tarHash, iv, encTarHash);
+        verifyArchiveNoChunks(context, tarFile, tarHash, iv, encTarHash);
     }
     eventSender.send(new ValidationComplete(jobID, depositId).withUserId(userID));
 

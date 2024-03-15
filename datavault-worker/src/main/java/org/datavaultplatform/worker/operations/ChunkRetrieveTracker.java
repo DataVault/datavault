@@ -8,6 +8,7 @@ import org.datavaultplatform.common.task.Context;
 import org.datavaultplatform.worker.utils.Utils;
 
 import java.io.File;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
@@ -16,7 +17,7 @@ public class ChunkRetrieveTracker implements Callable<File> {
     private final Context context;
     private final String archiveId;
     private final boolean multipleCopies;
-    private final String location;
+    private final List<String> locations;
     private final Device archiveStore;
     private final int chunkNumber;
     private final Map<Integer, byte[]> ivs;
@@ -30,7 +31,7 @@ public class ChunkRetrieveTracker implements Callable<File> {
                                 Context context,
                                 int chunkNumber,
                                 Map<Integer, byte[]> ivs,
-                                String location, boolean multipleCopies,
+                                List<String> locations, boolean multipleCopies,
                                 Progress progress,
                                 Map<Integer, String> chunksDigest,
                                 Map<Integer, String> encChunksDigest,
@@ -38,7 +39,7 @@ public class ChunkRetrieveTracker implements Callable<File> {
         this.context = context;
         this.archiveId = archiveId;
         this.multipleCopies = multipleCopies;
-        this.location = location;
+        this.locations = locations;
         this.archiveStore = archiveStore;
         this.chunkNumber = chunkNumber;
         this.ivs = ivs;
@@ -53,7 +54,7 @@ public class ChunkRetrieveTracker implements Callable<File> {
         String chunkArchiveId = this.getArchiveId() + FileSplitter.CHUNK_SEPARATOR + this.getChunkNumber();
 
         if (this.getMultipleCopies()) {
-            this.getArchiveStore().retrieve(chunkArchiveId, this.getChunkFile(), this.getProgress(), this.getLocation());
+            this.getArchiveStore().retrieve(chunkArchiveId, this.getChunkFile(), this.getProgress(), locations);
         } else {
             this.getArchiveStore().retrieve(chunkArchiveId, this.getChunkFile(), this.getProgress());
         }
@@ -91,8 +92,8 @@ public class ChunkRetrieveTracker implements Callable<File> {
         return multipleCopies;
     }
 
-    public String getLocation() {
-        return location;
+    public List<String> getLocations() {
+        return locations;
     }
 
     public Device getArchiveStore() {
