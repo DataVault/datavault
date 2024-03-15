@@ -1,5 +1,6 @@
 package org.datavaultplatform.worker.tasks;
 
+import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.crypto.Encryption;
@@ -25,7 +26,10 @@ import org.datavaultplatform.worker.retry.TwoSpeedRetry;
 import org.datavaultplatform.worker.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.Assert;
+
 import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Clock;
 import java.time.LocalDate;
@@ -41,7 +45,8 @@ import org.springframework.retry.support.RetryTemplate;
  * A class that extends Task which is used to handle Retrievals from the vault
  */
 public class Retrieve extends Task {
-    public static final File DATA_VAULT_HIDDEN_FILE = new File("src/main/resources/.datavault");
+    public static final String DATA_VAULT_HIDDEN_FILE_NAME = ".datavault";
+    private static final String DV_TEMP_DIR_PREFIX = "dvTempDir";
     private static final int DEFAULT_USERFS_RETRIEVE_ATTEMPTS = 10;
     private static final int DEFAULT_USERFS_DELAY_SECS_1 = 60;
     private static final int DEFAULT_USERFS_DELAY_SECS_2 = 60;
@@ -362,18 +367,31 @@ public class Retrieve extends Task {
         }
 
         try {
+            File createTempDataVaultHiddenFile = createTempDataVaultHiddenFile();
             // copy ".datavault" file to test we can actually write
             if (userFs instanceof SFTPFileSystemDriver) {
-                ((SFTPFileSystemDriver) userFs).store(this.retrievePath, DATA_VAULT_HIDDEN_FILE, new Progress(), timeStampDirName);
+                ((SFTPFileSystemDriver) userFs).store(this.retrievePath, createTempDataVaultHiddenFile, new Progress(), timeStampDirName);
             } else {
-                userFs.store(this.retrievePath, DATA_VAULT_HIDDEN_FILE, new Progress());
+                userFs.store(this.retrievePath, createTempDataVaultHiddenFile, new Progress());
             }
         } catch (Exception e) {
-            String msg = "Unable to perform test write of file[" + DATA_VAULT_HIDDEN_FILE.getName()  + "] to user space";
+            String msg = "Unable to perform test write of file[" + DATA_VAULT_HIDDEN_FILE_NAME  + "] to user space";
             logger.error(msg, e);
             sendError(msg);
             throw e;
         }
+    }
+    
+    @SneakyThrows
+    public static File createTempDataVaultHiddenFile() {
+        File tempDir = Files.createTempDirectory(DV_TEMP_DIR_PREFIX).toFile();
+        File tempDataVaultHiddenFile = new File(tempDir, DATA_VAULT_HIDDEN_FILE_NAME);
+        tempDataVaultHiddenFile.createNewFile();
+        Assert.isTrue(tempDataVaultHiddenFile.exists());
+        Assert.isTrue(tempDataVaultHiddenFile.isFile());
+        Assert.isTrue(tempDataVaultHiddenFile.canRead());
+        Assert.isTrue(tempDataVaultHiddenFile.length() == 0);
+        return tempDataVaultHiddenFile;
     }
     
     protected void multipleCopies(Context context, String tarFileName, File tarFile, Device archiveFs, Device userFs,

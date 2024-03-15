@@ -90,6 +90,9 @@ public class RetrieveTest {
 
     @Captor
     ArgumentCaptor<Device> argUserStoreFs;
+    
+    @Captor
+    ArgumentCaptor<File> argDataVaultHiddenFile;
 
 
     @BeforeEach
@@ -282,9 +285,9 @@ public class RetrieveTest {
 
             if (useSftpUserStore) {
                 // Check that we always store the DataVault hidden file on the userstore regardless of singleCopy or multipleCopies
-                verify(mSftpUserStore).store(eq(TEST_RETRIEVE_PATH), eq(Retrieve.DATA_VAULT_HIDDEN_FILE), any(Progress.class), eq(TEST_TIMESTAMP_DIR_NAME));
+                verify(mSftpUserStore).store(eq(TEST_RETRIEVE_PATH), argDataVaultHiddenFile.capture(), any(Progress.class), eq(TEST_TIMESTAMP_DIR_NAME));
             } else {
-                verify(mNonSftpUserStore).store(eq(TEST_RETRIEVE_PATH), eq(Retrieve.DATA_VAULT_HIDDEN_FILE), any(Progress.class));
+                verify(mNonSftpUserStore).store(eq(TEST_RETRIEVE_PATH), argDataVaultHiddenFile.capture(), any(Progress.class));
             }
 
             if (upfrontUserStoreWriteSucceeds) {
@@ -311,6 +314,8 @@ public class RetrieveTest {
 
                     assertThat(actualTimestampDir1).isEqualTo(actualTimestampDir2);
                     assertThat(actualTimestampDir1).isEqualTo(TEST_TIMESTAMP_DIR_NAME);
+                    
+                    assertThat(argDataVaultHiddenFile.getValue().getName()).isEqualTo(Retrieve.DATA_VAULT_HIDDEN_FILE_NAME);
                 } else {
                     assertThat(actualUserStoreFs).isEqualTo(mNonSftpUserStore);
 
