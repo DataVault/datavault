@@ -406,7 +406,7 @@ public class VaultInfo {
         String retVal = "";
         if (this.getGrantEndDate() != null) {
             DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-            retVal = formatter.format(this.plusOneDay(this.getGrantEndDate()));
+            retVal = formatter.format(this.getGrantEndDate());
         }
         return retVal;
     }
