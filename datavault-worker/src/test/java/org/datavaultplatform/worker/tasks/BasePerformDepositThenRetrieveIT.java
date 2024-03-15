@@ -1,6 +1,7 @@
 package org.datavaultplatform.worker.tasks;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.datavaultplatform.worker.tasks.Retrieve.DATA_VAULT_HIDDEN_FILE_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -70,7 +71,6 @@ public abstract class BasePerformDepositThenRetrieveIT extends BaseRabbitTCTest 
   static final String KEY_NAME_FOR_SSH = "key-name-for-ssh";
   static final String KEY_NAME_FOR_DATA = "key-name-for-data";
   static final String KEY_STORE_PASSWORD = "testPassword";
-  public static final String DATA_VAULT_HIDDEN_FILE = ".datavault";
 
   final Resource depositMessage = new ClassPathResource("sampleMessages/sampleDepositMessage.json");
 
@@ -234,7 +234,7 @@ public abstract class BasePerformDepositThenRetrieveIT extends BaseRabbitTCTest 
 
     checkDepositWorkedOkay(depositMessage, depositEvents);
 
-    File hiddenFile = new File(this.retrieveDir, DATA_VAULT_HIDDEN_FILE);
+    File hiddenFile = new File(this.retrieveDir, DATA_VAULT_HIDDEN_FILE_NAME);
     assertThat(hiddenFile).doesNotExist();
     buildAndSendRetrieveMessage(depositEvents);
     checkRetrieve();
