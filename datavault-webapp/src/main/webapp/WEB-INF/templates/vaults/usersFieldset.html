@@ -40,9 +40,9 @@
             </label>
         </div>
 
-        <th:block th:if="${vault.nominatedDataManagers != null}">
-        <th:block th:each="ndm, ndmStatus: ${vault.nominatedDataManagers}">
-            <th:block th:with="ndmIndex=${ndmStatus.index}">
+        <th:block th:if="${!#lists.isEmpty(vault?.nominatedDataManagers)}">
+        <th:block th:each="ndm, ndmStatus: ${vault?.nominatedDataManagers}">
+        <th:block th:with="ndmIndex=${ndmStatus.index}">
             <div class="extra-ndm form-group col-sm-offset-4">
               <input class="autocomplete uun-required unique-uun-required" type="text"
                 th:field="*{nominatedDataManagers[__${ndmIndex}__]}"
@@ -55,10 +55,11 @@
             </div>
         </th:block>
         </th:block>
-        <th:block th:if="${vault.nominatedDataManagers == null}">
+        </th:block>
+        <th:block th:if="${#lists.isEmpty(vault?.nominatedDataManagers)}">
            <div class="extra-ndm form-group col-sm-offset-4">
               <input class="autocomplete uun-required unique-uun-required" type="text"
-                th:field="*{nominatedDataManagers[0]}"
+                name="nominatedDataManagers[0]"
               />
                <button type="button" id="add-ndm-btn" class="btn btn-default btn-sm">Add a NDM</button>
                <span class="uun-required-error-span"></span>
@@ -68,15 +69,21 @@
         <div id="extra-ndm-list"></div>
           
         <!-- START: NDMs hidden -->
-        <div id="hidden-empty-ndms" class="collapse col-sm-offset-4" th:with="existingNDM=${vault?.nominatedDataManagers == null ? 0 : #lists.size(vault.nominatedDataManagers)}">
-
-         <th:block th:each="ndmIndex: ${#numbers.sequence(existingNDM,existingNDM-1+15)}">
+        <div id="hidden-empty-ndms" class="collapse col-sm-offset-4" th:with="existing=${#lists.isEmpty(vault?.nominatedDataManagers) ? 0 : #lists.size(vault.nominatedDataManagers)}">
+            <th:block th:with="start=${existing == 0 ? 1      : existing}">
+            <th:block th:with="end  =${existing == 0 ? (15-1) : existing+(15-1)}">
+            <th:block th:each="loopIndex, loopStatus: ${#numbers.sequence(start, end)}">
             <div class="empty-ndm form-group col-sm-offset-4 my-1">
-               <input th:value="|nominatedDataManagers[${ndmIndex}]|" class="autocomplete uun-required unique-uun-required" type="text"  placeholder=""/>
+                <input class="autocomplete uun-required unique-uun-required"
+                    type="text" placeholder=""
+                    th:name="|nominatedDataManagers[${loopIndex}]|"
+                />
                <button type="button" class="remove-ndm-btn btn btn-danger btn-xs">Remove</button>
                <span class="uun-required-error-span"></span>
             </div>
-         </th:block>
+            </th:block>
+            </th:block>
+            </th:block>
         </div>
         <!-- END: NDMs hidden -->
        <!-- END: NDMs -->
@@ -91,8 +98,8 @@
           </label>
         </div>
 
-        <th:block th:if="${vault.depositors != null}">
-        <th:block th:each="depositor, depositorStatus: ${depositors}">
+        <th:block th:if="${! #lists.isEmpty(vault?.depositors)}">
+        <th:block th:each="depositor, depositorStatus: ${vault.depositors}">
         <th:block th:with="depositorIndex=${depositorStatus.index}">
            <div class="extra-depositor form-group col-sm-offset-4">
               <input th:field="*{depositors[__${depositorIndex}__]}" class="autocomplete uun-required unique-uun-required" type="text" />
@@ -106,9 +113,9 @@
         </th:block>
         </th:block>
         </th:block>
-        <th:block th:if="${vault.depositors == null}">
+        <th:block th:if="${#lists.isEmpty(vault?.depositors)}">
           <div class="extra-depositor form-group col-sm-offset-4">
-              <input th:field="*{depositors[0]}" class="autocomplete uun-required unique-uun-required" type="text" />
+              <input name="depositors[0]" class="autocomplete uun-required unique-uun-required" type="text" />
               <button type="button" id="add-depositor-btn" class="btn btn-default btn-sm">Add a depositor</button>
               <span class="uun-required-error-span"></span>
           </div>
@@ -117,13 +124,20 @@
         <div id="extra-depositor-list"></div>
           
         <!-- START: depositors hidden -->
-        <div id="hidden-empty-depositors" class="collapse col-sm-offset-4" th:with="existingDepositors=${vault?.depositors == null ? 0 : #lists.size(vault.depositors)}">
-            <th:block th:each="depositorIndex: ${#numbers.sequence(existingDepositors,existingDepositors-1+15)}">
+        <div id="hidden-empty-depositors" class="collapse col-sm-offset-4" th:with="existing=${#lists.isEmpty(vault?.depositors) ? 0 : #lists.size(vault.depositors)}">
+            <th:block th:with="start=${existing == 0 ? 1      : existing}">
+            <th:block th:with="end  =${existing == 0 ? (15-1) : existing+(15-1)}">
+            <th:block th:each="loopIndex, loopStatus: ${#numbers.sequence(start, end)}">
             <div class="empty-depositor form-group col-sm-offset-4 my-1">
-               <input th:value="|depositors[${depositorIndex}]|" class="autocomplete uun-required unique-uun-required" type="text"  placeholder=""/>
+                <input class="autocomplete uun-required unique-uun-required"
+                    type="text" placeholder=""
+                    th:name="|depositors[${loopIndex}]|"
+                />
                <button type="button" class="remove-depositor-btn btn btn-danger btn-xs">Remove</button>
                <span class="uun-required-error-span"></span>
             </div>
+            </th:block>
+            </th:block>
             </th:block>
         </div>
         <!-- END: Depositors hidden -->
@@ -145,8 +159,8 @@
           <label class="col-sm-4 control-label">Data Creators: </label>
         </div>
 
-        <th:block th:if="${vault.dataCreators != null}">
-        <th:block th:each="dataCreator,dataCreatorStatus: ${dataCreators}">
+        <th:block th:if="${! #lists.isEmpty(vault?.dataCreators)}">
+        <th:block th:each="dataCreator,dataCreatorStatus: ${vault.dataCreators}">
         <th:block th:with="dataCreatorIndex=${dataCreatorStatus.index}">
            <div class="extra-data-creator form-group col-sm-offset-4">
               <input th:field="*{dataCreators[__${dataCreatorIndex}__]}" class="autocomplete uun-required" type="text" />
@@ -159,9 +173,9 @@
         </th:block>
         </th:block>
 
-        <th:block th:if="${vault.dataCreators == null}">
+        <th:block th:if="${#lists.isEmpty(vault?.dataCreators)}">
           <div class="extra-data-creator form-group col-sm-offset-4">
-              <input th:field="*{dataCreators[0]}" class="autocomplete uun-required" type="text" />
+              <input name="dataCreators[0]" class="autocomplete uun-required" type="text" />
               <button type="button" id="add-data-creator-btn" class="btn btn-default btn-sm">Add a Data Creator</button>
               <span class="uun-required-error-span"></span>
           </div>
@@ -170,14 +184,19 @@
         <div id="extra-data-creator-list"></div>
           
         <!-- START: dataCreators hidden -->
-        <div id="hidden-empty-data-creators" class="collapse col-sm-offset-4" th:with="existingDataCreators=${vault?.dataCreators == null ? 0 : #lists.size(vault.dataCreators)}">
-            <th:block th:each="dataCreator,dataCreatorStatus: ${dataCreators}">
-            <th:block th:with="dataCreatorIndex=${dataCreatorStatus.index}">
+        <div id="hidden-empty-data-creators" class="collapse col-sm-offset-4" th:with="existing=${#lists.isEmpty(vault?.dataCreators) ? 0 : #lists.size(vault.dataCreators)}">
+            <th:block th:with="start=${existing == 0 ? 1      : existing}">
+            <th:block th:with="end  =${existing == 0 ? (15-1) : existing+(15-1)}">
+            <th:block th:each="loopIndex, loopStatus: ${#numbers.sequence(start, end)}">
             <div class="empty-data-creator form-group col-sm-offset-4 my-1">
-               <input th:field="*{dataCreators[__${dataCreatorIndex}__]}" class="autocomplete uun-required" type="text"  placeholder=""/>
+                <input class="autocomplete uun-required"
+                    type="text" placeholder=""
+                    th:name="|dataCreators[${loopIndex}]|"
+                />
                <button type="button" class="remove-data-creator-btn btn btn-danger btn-xs">Remove</button>
                <span class="uun-required-error-span"></span>
             </div>
+            </th:block>
             </th:block>
             </th:block>
         </div>

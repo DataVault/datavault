@@ -13,6 +13,7 @@ import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.common.response.EventInfo;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.task.Task;
+import org.datavaultplatform.common.util.DateTimeUtils;
 import org.jsondoc.core.annotation.Api;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -300,9 +301,7 @@ public class DepositsController {
         try {
             HashMap<String, String> retrieveProperties = new HashMap<>();
             retrieveProperties.put(PropNames.DEPOSIT_ID, deposit.getID());
-            Format formatter = new SimpleDateFormat("yyyyMMdd");
-            String creationDate = formatter.format(deposit.getCreationTime());
-            retrieveProperties.put(PropNames.DEPOSIT_CREATION_DATE, creationDate);
+            retrieveProperties.put(PropNames.DEPOSIT_CREATION_DATE, DateTimeUtils.formatDateBasicISO(deposit.getCreationTime()));
             retrieveProperties.put(PropNames.RETRIEVE_ID, retrieve.getID());
             retrieveProperties.put(PropNames.BAG_ID, deposit.getBagId());
             retrieveProperties.put(PropNames.RETRIEVE_PATH, retrievePath); // No longer the absolute path

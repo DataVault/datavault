@@ -40,7 +40,7 @@
                                     <div class="card px-0 pt-4 pb-0 mt-3 mb-3">
                                         <div class="row">
                                             <div class="col-md-12 mx-0">
-                                                <form id="vault-creation-form" th:object="${vault} "class="form" role="form" th:action="@{/stepCreate}" method="post" novalidate="novalidate" _lpchecked="1">
+                                                <form id="vault-creation-form" th:object="${vault}" class="form" role="form" th:action="@{/vaults/stepCreate}" method="post" novalidate="novalidate" _lpchecked="1">
                                                     <div th:replace="~{vaults/progressFieldset.html}" />
                                                     <!-- fieldsets -->
                                                     <div th:replace="~{vaults/affirmationFieldset.html}" />

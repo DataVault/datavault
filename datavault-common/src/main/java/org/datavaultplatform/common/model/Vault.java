@@ -23,6 +23,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.persistence.Version;
+import org.datavaultplatform.common.util.DateTimeUtils;
 import org.hibernate.Hibernate;
 import org.datavaultplatform.common.response.BillingInformation;
 import org.datavaultplatform.common.response.VaultInfo;
@@ -60,20 +61,20 @@ public class Vault {
     private long version;
 
     // Serialise date in ISO 8601 format
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateTimeUtils.ISO_DATE_TIME_FORMAT)
     @Temporal(TemporalType.TIMESTAMP)
     private Date creationTime;
 
     // NOTE: This field is optional. Always remember to check for null when handling
     // it!
     // Serialise date in ISO 8601 format
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateTimeUtils.ISO_DATE_FORMAT)
     @Temporal(TemporalType.DATE)
     @Column(name = "grantEndDate", nullable = true)
     private Date grantEndDate;
 
     // Serialise date in ISO 8601 format
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateTimeUtils.ISO_DATE_FORMAT)
     @Temporal(TemporalType.DATE)
     @Column(name = "reviewDate", nullable = false)
     private Date reviewDate;
@@ -118,12 +119,12 @@ public class Vault {
     private int retentionPolicyStatus;
 
     // Date retention policy will expire
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateTimeUtils.ISO_DATE_TIME_FORMAT)
     @Temporal(TemporalType.TIMESTAMP)
     private Date retentionPolicyExpiry;
 
     // Date retention policy was last checked
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateTimeUtils.ISO_DATE_TIME_FORMAT)
     @Temporal(TemporalType.TIMESTAMP)
     private Date retentionPolicyLastChecked;
 

@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.hibernate.annotations.UuidGenerator;
+import org.datavaultplatform.common.util.DateTimeUtils;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.response.EventInfo;
 
@@ -70,7 +71,7 @@ public class Event {
     public Integer nextState = null;
     
     // Serialise date in ISO 8601 format
-    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern= DateTimeUtils.ISO_DATE_TIME_FORMAT)
     @Temporal(TemporalType.TIMESTAMP)
     private Date timestamp;
     public int sequence;

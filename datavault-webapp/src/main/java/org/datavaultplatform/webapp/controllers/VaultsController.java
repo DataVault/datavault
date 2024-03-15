@@ -76,7 +76,7 @@ public class VaultsController {
 
     @PreAuthorize("hasPermission(#vaultId, 'VAULT', 'CAN_TRANSFER_VAULT_OWNERSHIP') or hasPermission(#vaultId, 'GROUP_VAULT', 'TRANSFER_SCHOOL_VAULT_OWNERSHIP')")
     @PostMapping(value = "/vaults/{vaultid}/data-owner/update")
-    public ResponseEntity<?> transferOwnership(
+    public ResponseEntity<Object> transferOwnership(
             @PathVariable("vaultid") String vaultId,
             @Valid VaultTransferRequest request) {
 
@@ -346,7 +346,7 @@ public class VaultsController {
         vault.setIsOwner(true);
         vault.setLoggedInAs(principal.getName());
         model.addAttribute("vault", vault);
-        String defaultReviewDate = validateService.getDefaultReviewDate();
+        Date defaultReviewDate = validateService.getDefaultReviewDate();
         vault.setReviewDate(defaultReviewDate);
 
         RetentionPolicy[] policies = restService.getRetentionPolicyListing();

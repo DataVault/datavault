@@ -16,6 +16,7 @@ import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.request.CreateVault;
 import org.datavaultplatform.common.request.TransferVault;
 import org.datavaultplatform.common.response.*;
+import org.datavaultplatform.common.util.DateTimeUtils;
 import org.datavaultplatform.common.util.RoleUtils;
 import org.jsondoc.core.annotation.*;
 import org.jsondoc.core.pojo.ApiVerb;
@@ -27,8 +28,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 
@@ -679,17 +678,16 @@ public class VaultsController {
         }
         vault.setUser(user);
 
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         try {
-            vault.setGrantEndDate(formatter.parse(createVault.getGrantEndDate()));
-        } catch (ParseException|NullPointerException ex) {
+            vault.setGrantEndDate(createVault.getGrantEndDate());
+        } catch (NullPointerException ex) {
             logger.error("Grant date is not in the right format: "+createVault.getGrantEndDate());
             vault.setGrantEndDate(null);
         }
 
         try {
-            vault.setReviewDate(formatter.parse(createVault.getReviewDate()));
-        } catch (ParseException|NullPointerException ex) {
+            vault.setReviewDate(createVault.getReviewDate());
+        } catch (NullPointerException ex) {
             logger.error("Review date is not in the right format: "+createVault.getReviewDate());
             vault.setReviewDate(null);
         }
@@ -917,8 +915,7 @@ public class VaultsController {
         User user = usersService.getUser(userID);
         Vault vault = vaultsService.getUserVault(user, vaultID);
 
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-        vault.setReviewDate(formatter.parse(reviewDate));
+        vault.setReviewDate(DateTimeUtils.parseDate(reviewDate));
 
         logger.info("Updating Review Date for Vault Id " + vaultID);
         vaultsService.updateVault(vault);

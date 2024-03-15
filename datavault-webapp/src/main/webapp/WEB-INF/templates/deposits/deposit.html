@@ -79,7 +79,7 @@
                     </tr>
                     <tr>
                         <th scope="col">Time and Date of Deposit</th>
-                        <td>[[${#dates.format(deposit.creationTime,'HH:mm:ss yyyy-MM-dd')}]]<!--/* datetime */--></td>
+                        <td>[[${#dates.format(deposit.creationTime,globalDateTimeFormat)}]]<!--/* datetime */--></td>
                     </tr>
                     <tr>
                     <th scope="col">Contains Personal Data</th>
@@ -146,7 +146,7 @@
                                         <td>[[${event.userID ?: ''}]]</td>
                                         <td>[[${#strings.replace(event.eventClass,'org.datavaultplatform.common.event.','')}]]</td>
                                         <td>[[${event.message}]]</td>
-                                        <td>[[${#dates.format(event.timestamp,'HH:mm:ss yyyy-MM-dd')}]]<!--/* datetime */--></td>
+                                        <td>[[${#dates.format(event.timestamp,globalDateTimeFormat)}]]<!--/* datetime */--></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -169,9 +169,9 @@
                                 <tbody>
                                     <!--RETRIEVES-->
                                     <tr th:each="retrieve: ${retrieves}" class="tr">
-                                        <td>[[${retrieve.user.getID()}]]}</td>
+                                        <td>[[${retrieve?.user?.getID()}]]</td>
                                         <td th:text="${retrieve.hasExternalRecipients} ? 'Yes' : 'No'">dummy</td>
-                                        <td>[[${#dates.format(retrieve.timestamp,'HH:mm:ss yyyy-MM-dd')}]]<!--/* datetime */--></td>
+                                        <td>[[${#dates.format(retrieve.timestamp,globalDateTimeFormat)}]]<!--/* datetime */--></td>
                                         <td>
                                             <div th:switch="${retrieve.status.name()}" class="job-status" >
                                                 <div th:case="COMPLETE" class="text-success">

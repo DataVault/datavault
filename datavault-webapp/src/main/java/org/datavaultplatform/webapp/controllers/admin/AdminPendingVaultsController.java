@@ -2,8 +2,6 @@ package org.datavaultplatform.webapp.controllers.admin;
 
 
 import java.security.Principal;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.text.ParseException;
 
@@ -12,6 +10,7 @@ import org.datavaultplatform.common.request.CreateVault;
 import org.datavaultplatform.common.request.CreateRetentionPolicy;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.response.VaultsData;
+import org.datavaultplatform.common.util.DateTimeUtils;
 import org.datavaultplatform.webapp.services.ForceLogoutService;
 import org.datavaultplatform.webapp.services.RestService;
 import org.datavaultplatform.webapp.services.UserLookupService;
@@ -52,7 +51,7 @@ public class AdminPendingVaultsController {
                                @RequestParam(value = "query", defaultValue = "") String query,
                                @RequestParam(value = "sort", defaultValue = "creationTime") String sort,
                                @RequestParam(value = "order", defaultValue = "desc") String order,
-                               @RequestParam(value = "pageId", defaultValue = "1") int pageId) throws Exception {
+                               @RequestParam(value = "pageId", defaultValue = "1") int pageId) {
 
         model.addAttribute("activePageId", pageId);
 
@@ -92,7 +91,7 @@ public class AdminPendingVaultsController {
                                       @RequestParam(value = "query", defaultValue = "") String query,
                                       @RequestParam(value = "sort", defaultValue = "creationTime") String sort,
                                       @RequestParam(value = "order", defaultValue = "desc") String order,
-                                      @RequestParam(value = "pageId", defaultValue = "1") int pageId) throws Exception {
+                                      @RequestParam(value = "pageId", defaultValue = "1") int pageId) {
 
         model.addAttribute("activePageId", pageId);
 
@@ -111,7 +110,7 @@ public class AdminPendingVaultsController {
                                       @RequestParam(value = "query", defaultValue = "") String query,
                                       @RequestParam(value = "sort", defaultValue = "creationTime") String sort,
                                       @RequestParam(value = "order", defaultValue = "desc") String order,
-                                      @RequestParam(value = "pageId", defaultValue = "1") int pageId) throws Exception {
+                                      @RequestParam(value = "pageId", defaultValue = "1") int pageId) {
 
         model.addAttribute("activePageId", pageId);
 
@@ -183,18 +182,14 @@ public class AdminPendingVaultsController {
         // and convert it to create vault object like in VaultController.getPendingVault
     	Date reviewDate = null;
 		try {
-			DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-			reviewDate = formatter.parse(reviewDateString);
-
+			reviewDate = DateTimeUtils.parseDate(reviewDateString);
 		} catch(ParseException pe ) {
 			logger.info("Parse error: " + pe);
 		}
 		VaultInfo pendingVault = restService.getPendingVault(pendingVaultID);
-		// We compare date strings as both will be in format yyyy-MM-dd, 
-		// as date comparision can be problematic
-		if(reviewDate != null && !pendingVault.getReviewDateAsString().equals(reviewDateString) ){
-			pendingVault.setReviewDate(reviewDate);
-		}
+        if(reviewDate != null && !DateTimeUtils.isSameDay(reviewDate, pendingVault.getReviewDate())) {
+            pendingVault.setReviewDate(reviewDate);
+        }
         CreateVault cv = pendingVault.convertToCreate();
         logger.info("Attempting to upgrade pending vault to full vault");
         VaultInfo newVault = restService.addVault(cv);
@@ -233,15 +228,15 @@ public class AdminPendingVaultsController {
 	}
 
     @RequestMapping(value = "/admin/pendingVaults/{pendingVaultID}", method = RequestMethod.GET)
-    public String deletePendingVault(ModelMap model, @PathVariable("pendingVaultID") String pendingVaultID) throws Exception {
+    public String deletePendingVault(ModelMap model, @PathVariable("pendingVaultID") String pendingVaultID) {
 
         restService.deletePendingVault(pendingVaultID);
         return "redirect:/admin/pendingVaults";
     }
 
-    private String constructTableRecordsInfo(int offset, int recordsTotal, int filteredRecords, int numberOfRecordsonPage, boolean isFiltered) {
+    private String constructTableRecordsInfo(int offset, int recordsTotal, int filteredRecords, int numberOfRecordsOnPage, boolean isFiltered) {
 		StringBuilder recordsInfo = new StringBuilder();
-		recordsInfo.append("Showing ").append(offset + 1).append(" - ").append(offset + numberOfRecordsonPage);
+		recordsInfo.append("Showing ").append(offset + 1).append(" - ").append(offset + numberOfRecordsOnPage);
 		if(isFiltered) {
 			recordsInfo.append(" pending vaults of ").append(filteredRecords)
                     .append(" (").append("filtered from ").append(recordsTotal).append(" total pending vaults)");

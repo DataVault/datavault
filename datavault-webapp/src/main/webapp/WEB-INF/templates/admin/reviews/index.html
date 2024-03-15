@@ -19,7 +19,7 @@
                     <tr class="tr">
                        <th>Vault Name</th>
                        <th>Deposits</th>
-                       <th>>Vault Size</th>
+                       <th>Vault Size</th>
                        <th>Owner(UUN)</th>
                        <th>School</th>
                        <th>Review Date</th>
@@ -42,8 +42,8 @@
                             </td>
                             
                             <td>[[${vault.groupID}]]</td>
-                            <td>[[${#dates.format(vault.reviewDate,'dd/MM/yyyy')}]]<!--/* date */--></td>
-                            <td>[[${#dates.format(vault.getCreationTime(),'dd/MM/yyyy')}]]<!--/* date */--></td>
+                            <td>[[${#dates.format(vault.reviewDate,dateFormatddMMyyyy)}]]<!--/* date */--></td>
+                            <td>[[${#dates.format(vault.getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */--></td>
                             <td>
                                 <a th:href="@{|/admin/vaults/${vault.getID()}/reviews|}">Review</a>
                             </td>

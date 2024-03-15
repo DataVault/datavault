@@ -82,7 +82,7 @@
                                 <tbody>
                                         <tr th:each="vault: ${vaults}" class="tr">
                                             <td>
-                                                <a href="@{|/vaults/${vault.getID()}|}">
+                                                <a th:href="@{|/vaults/${vault.getID()}|}">
                                                     [[${vault.name}]]
                                                 </a>
                                             </td>
@@ -99,15 +99,15 @@
                                             </td>
                                             <td>
                                                 <span th:if="${vault.grantEndDate != null}">
-                                                    [[${#dates.format(vault.grantEndDate,'dd MMM yyyy')}]]<!--/* date */-->
+                                                    [[${#dates.format(vault.grantEndDate,dateFormatddMMMyyyy)}]]<!--/* date */-->
                                                 </span>
                                             </td>
                                             <td>
-                                                [[${#dates.format(vault.getCreationTime(),'HH:mm:ss yyyy-MM-dd')}]]<!--/* datetime */-->
+                                                [[${#dates.format(vault.getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */-->
                                             </td>
                                             <td>
                                                 <span th:if="${vault.reviewDate != null}">
-                                                    [[${#dates.format(vault.reviewDate,'dd MMM yyyy')}]]<!--/* date */-->
+                                                    [[${#dates.format(vault.reviewDate,dateFormatddMMMyyyy)}]]<!--/* date */-->
                                                 </span>
                                             </td>
                                             <td>
@@ -126,7 +126,7 @@
                                                 </span>
                                             </td>
                                             <td>
-                                                <a href="@{|/admin/billing/${vault.getID()}|}">Billing Details</a>
+                                                <a th:href="@{|/admin/billing/${vault.getID()}|}">Billing Details</a>
                                             </td>
                                         </tr>
                                 </tbody>

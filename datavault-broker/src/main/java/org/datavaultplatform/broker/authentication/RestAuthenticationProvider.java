@@ -24,7 +24,7 @@ import java.util.Set;
 /**
  * In truth this class does not do any true authentication as it is assumed the user was authenticated by the client
  * application, it just has a look at the incoming user and client details and grants roles accordingly.
- *
+ * <p/>
  * User: Robin Taylor
  * Date: 13/11/2015
  * Time: 15:10
@@ -39,7 +39,7 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
     private RolesAndPermissionsService rolesAndPermissionsService;
     private AdminService adminService;
 
-    // This is a crappy means of allowing someone to turn off the client validation. Must be a better way of doing this.
+    // This is a not-perfect means of allowing someone to turn off the client validation. Must be a better way of doing this.
     private boolean validateClient;
 
     public void setUsersService(UsersService usersService) {

@@ -34,9 +34,9 @@
             <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
                   title="This information will assist the university in ensuring the archive is kept for at least the minimum amount of time required by the funder(s). This field should be left blank if there is no grant associated with the work.&nbsp;">
             </span>
-            <input id="grantEndDate" class="form-control date-picker" placeholder="yyyy-mm-dd"
+            <input type="text" id="grantEndDate" class="form-control date-picker" placeholder="yyyy-mm-dd"
                    th:field="*{grantEndDate}"
-                   />
+                   /><!--form-date-->
              <span id="invalid-grant-end-date-span" style="font-size: 1.2em; font: bold; color: #f00; display: inline;"></span>
         </div>
 
@@ -77,9 +77,9 @@
             <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
                   title="The date by which the vault should be reviewed for decision as to whether it should be deleted or whether there are funds available to support continued storage.&nbsp;If you wish to extend the review date further into the future, please contact the support team to discuss the funding of the storage for the vault.">
                                                                 </span>
-            <input class="form-control" id="reviewDate" placeholder="yyyy-mm-dd"
+            <input type="text" class="form-control" id="reviewDate" placeholder="yyyy-mm-dd"
                    th:field="*{reviewDate}"
-            />
+            /><!--form-date-->
                     <span id="updated-review-date-span" style="font-size: 1.2em; font: bold; color: #006400; display: inline;"></span>
                    <span id="invalid-review-date-span" style="font-size: 1.2em; font: bold; color: #f00; display: inline;"></span>
         </div>

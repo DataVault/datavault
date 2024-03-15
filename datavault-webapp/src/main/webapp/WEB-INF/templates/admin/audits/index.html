@@ -56,7 +56,7 @@
                                 </a>
                                 [[${audit.getId()}]]
                             </td>
-                            <td>[[${#dates.format(audit.getCreationTime(),'HH:mm:ss yyyy-MM-dd')}]]<!--/* datetime */--></td>
+                            <td>[[${#dates.format(audit.getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */--></td>
                             <td>[[${audit.getStatus()}]]</td>
                             <td th:if="${audit.auditChunks == null}">0</td>
                             <td th:if="${audit.auditChunks != null}">[[${#lists.size(audit.auditChunks)}]]</td>
@@ -85,10 +85,10 @@
                                             </td>
                                             <td>
                                                 <th:block th:if="${chunk?.creationTime != null}">
-                                                    [[${#dates.format(chunk.creationTime,'HH:mm:ss yyyy-MM-dd')}]]<!--/* datetime */-->
+                                                    [[${#dates.format(chunk.creationTime,globalDateTimeFormat)}]]<!--/* datetime */-->
                                                 </th:block>
                                                 <th:block th:if="${chunk?.completedTime != null}">
-                                                    <br/>[[${#dates.format(chunk.completedTime,'HH:mm:ss yyyy-MM-dd')}]]<!--/* datetime */-->
+                                                    <br/>[[${#dates.format(chunk.completedTime,globalDateTimeFormat)}]]<!--/* datetime */-->
                                                 </th:block>
                                             </td>
                                             <td>

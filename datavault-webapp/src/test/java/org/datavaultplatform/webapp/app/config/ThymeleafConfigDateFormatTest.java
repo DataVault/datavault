@@ -4,7 +4,6 @@ import org.datavaultplatform.webapp.config.GlobalDateTimeFormatInterceptor;
 import org.datavaultplatform.webapp.test.ProfileStandalone;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -31,7 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
  */
 @WebMvcTest
 @ProfileStandalone
-public class ThymeleafConfigDateFormatTest {
+public class ThymeleafConfigDateFormatTest extends BaseThymeleafTest{
 
     @Autowired
     MockMvc mvc;
@@ -54,7 +53,9 @@ public class ThymeleafConfigDateFormatTest {
         String customDateFormat = lookupDivText(doc, "custom-date-format");
         String customDateTimeFormat = lookupDivText(doc, "custom-datetime-format");
 
-        String globalDateFormat = lookupDivText(doc, "global-date-format");
+        String dateFormatISO = lookupDivText(doc, "date-format-iso");
+        String dateFormatMM = lookupDivText(doc, "date-format-mm");
+        String dateFormatMMM = lookupDivText(doc, "date-format-mmm");
         String globalTimeFormat = lookupDivText(doc, "global-time-format");
         String globalDateTimeFormat = lookupDivText(doc, "global-datetime-format");
 
@@ -63,7 +64,9 @@ public class ThymeleafConfigDateFormatTest {
         System.out.printf("customDateFormat[%s]%n", customDateFormat);
         System.out.printf("customDateTimeFormat[%s]%n", customDateTimeFormat);
 
-        System.out.printf("globalDateFormat[%s]%n", globalDateFormat);
+        System.out.printf("dateFormatISO[%s]%n", dateFormatISO);
+        System.out.printf("dateFormatMM[%s]%n", dateFormatMM);
+        System.out.printf("dateFormatMMM[%s]%n", dateFormatMMM);
         System.out.printf("globalTimeFormat[%s]%n", globalTimeFormat);
         System.out.printf("globalDateTimeFormat[%s]%n", globalDateTimeFormat);
 
@@ -72,19 +75,12 @@ public class ThymeleafConfigDateFormatTest {
         assertEquals("16/Feb/2024", customDateFormat);
         assertEquals("16/Feb/2024 10:11:12", customDateTimeFormat);
 
-        assertEquals("[2024-02-16]", globalDateFormat);
-        assertEquals("[10:11:12]", globalTimeFormat);
-        assertEquals("[10:11:12 2024-02-16]", globalDateTimeFormat);
+        assertEquals("2024-02-16", dateFormatISO);
+        assertEquals("16/02/2024", dateFormatMM);
+        assertEquals("16 Feb 2024", dateFormatMMM);
+        assertEquals("10:11:12", globalTimeFormat);
+        assertEquals("16-Feb-2024 10:11:12", globalDateTimeFormat);
     }
-
-    private String lookupDivText(Document doc, String id) {
-        return doc.selectXpath("//div[@id='" + id + "']")
-                .stream()
-                .map(Element::text)
-                .findFirst()
-                .orElseThrow(RuntimeException::new);
-    }
-
 
     @TestConfiguration
     static class TestConfig {

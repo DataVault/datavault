@@ -1,9 +1,7 @@
 package org.datavaultplatform.common.response;
 
 import java.math.BigDecimal;
-import java.text.DateFormat;
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -11,6 +9,7 @@ import java.util.List;
 import org.datavaultplatform.common.model.PendingVault;
 import org.datavaultplatform.common.request.CreateVault;
 import org.datavaultplatform.common.retentionpolicy.RetentionPolicyStatus;
+import org.datavaultplatform.common.util.DateTimeUtils;
 import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
 
@@ -24,15 +23,15 @@ public class VaultInfo {
     @ApiObjectField(description = "The unique identifier for this vault")
     private String id;
     
-    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern=DateTimeUtils.ISO_DATE_TIME_FORMAT)
     @ApiObjectField(description = "The date and time when this vault was created")
     private Date creationTime;
 
-    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern=DateTimeUtils.ISO_DATE_TIME_FORMAT)
     @ApiObjectField(description = "The date and time when the policy will expire")
     private Date policyExpiry;
 
-    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern=DateTimeUtils.ISO_DATE_TIME_FORMAT)
     @ApiObjectField(description = "The date and time when the policy check was last carried out")
     private Date policyLastChecked;
 
@@ -81,11 +80,11 @@ public class VaultInfo {
     @ApiObjectField(description = "The status of the vault policy")
     private int policyStatus;
 
-    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd")
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern= DateTimeUtils.ISO_DATE_FORMAT)
     @ApiObjectField(description = "Define the minimum of time the archive will be kept")
     private Date grantEndDate;
 
-    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd")
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern= DateTimeUtils.ISO_DATE_FORMAT)
     @ApiObjectField(description = "The date by which the vault should be reviewed for decision as to whether it should be deleted or whether there are funds available to support continued storage")
     private Date reviewDate;
     
@@ -401,30 +400,12 @@ public class VaultInfo {
         this.grantEndDate = grantEndDate;
     }
 
-    public String getGrantEndDateAsString() {
-        String retVal = "";
-        if (this.getGrantEndDate() != null) {
-            DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-            retVal = formatter.format(this.plusOneDay(this.getGrantEndDate()));
-        }
-        return retVal;
-    }
-
     public Date getReviewDate() {
         return reviewDate;
     }
 
     public void setReviewDate(Date reviewDate) {
         this.reviewDate = reviewDate;
-    }
-
-    public String getReviewDateAsString() {
-        String retVal = "";
-        if (this.getReviewDate() != null) {
-            DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-            retVal = formatter.format(this.getReviewDate());
-        }
-        return retVal;
     }
 
 	public long getNumberOfDeposits() {
@@ -655,8 +636,8 @@ public class VaultInfo {
                 cv.setProjectTitle(this.getProjectTitle());
 
                 if (this.getGrantEndDate() != null) {
-                    cv.setBillingGrantEndDate(this.getGrantEndDateAsString());
-                    cv.setGrantEndDate(this.getGrantEndDateAsString());
+                    cv.setBillingGrantEndDate(this.getGrantEndDate());
+                    cv.setGrantEndDate(this.getGrantEndDate());
                 }
             }
 
@@ -675,8 +656,8 @@ public class VaultInfo {
                 cv.setPaymentDetails(this.paymentDetails);
 
                 if (this.getGrantEndDate() != null) {
-                    cv.setBillingGrantEndDate(this.getGrantEndDateAsString());
-                    cv.setGrantEndDate(this.getGrantEndDateAsString());
+                    cv.setBillingGrantEndDate(this.getGrantEndDate());
+                    cv.setGrantEndDate(this.getGrantEndDate());
                 }
             }
 
@@ -698,11 +679,11 @@ public class VaultInfo {
         cv.setPolicyInfo(this.getPolicyID() + "-" + this.getPolicyLength());
 
         if (this.getGrantEndDate() != null) {
-            cv.setGrantEndDate(this.getGrantEndDateAsString());
+            cv.setGrantEndDate(this.getGrantEndDate());
         }
         cv.setGroupID(this.getGroupID());
         if (this.getReviewDate() != null) {
-            cv.setReviewDate(this.getReviewDateAsString());
+            cv.setReviewDate(this.getReviewDate());
         }
         if (this.getEstimate() != null) {
             cv.setEstimate(this.getEstimate().toString());

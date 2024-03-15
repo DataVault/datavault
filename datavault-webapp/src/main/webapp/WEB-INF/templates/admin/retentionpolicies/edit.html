@@ -53,20 +53,20 @@
                 <label  for="inEffectDate" class="control-label">In Effect Date</label>
                 <input id="inEffectDate" type="text" class="form-control date-picker" placeholder="yyyy-mm-dd"
                     th:field="*{inEffectDate}"
-                />
+                /><!--form-date-->
             </div>
 
             <div class="form-group">
                 <label  for="endDate" class="control-label">End Date</label>
                 <input id="endDate" type="text" class="form-control date-picker" placeholder="yyyy-mm-dd"
                     th:field="*{endDate}"
-                />
+                /><!--form-date-->
             </div>
 
             <div class="form-group">
-                <label  for="dateGuidanceReviewed" class="control-label">Date Guidance Review</label>
-                <input id="dateGuidanceReviewed" type="text" class="form-control date-picker" placeholder="yyyy-mm-dd"
-                       th:field="*{dataGuidanceReviewed}" />
+                <label  for="dataGuidanceReviewed" class="control-label">Date Guidance Review</label>
+                <input id="dataGuidanceReviewed" type="text" class="form-control date-picker" placeholder="yyyy-mm-dd"
+                       th:field="*{dataGuidanceReviewed}" /><!--form-date-->
             </div>
 
             <div class="form-group">
@@ -83,7 +83,7 @@
 <script type="application/javascript">
     $(document).ready(function () {
         $.datepicker.setDefaults({
-            dateFormat: "yy-mm-dd",
+            dateFormat: "yy-mm-dd", /* yy-mm-dd for ISO DATE FORMAT 2024-01-31, see https://jqueryui.com/datepicker/#date-formats */
             changeMonth: true,
             changeYear: true,
             showOtherMonths: true,

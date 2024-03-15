@@ -40,10 +40,10 @@
                     <tr class="tr">
                        <th><a th:href="|?sort=name&order=${ordername}&query=${queryPARAM}|">Vault Name
                             <th:block th:if="${sort == 'name'}">
-                                <th:block th:if="${$order == 'desc'}"}>
+                                <th:block th:if="${order == 'desc'}"}>
                                     <span class="dropup"><span class="caret"></span></span>
                                 </th:block>
-                                <th:block th:if="${$order != 'desc'}">
+                                <th:block th:if="${order != 'desc'}">
                                     <span class="caret"></span>
                                 </th:block>
                             </th:block>
@@ -52,10 +52,10 @@
                        <th>Project ID</th>
                         <th><a th:href="|?sort=crisID&order=${orderCrisId}&query=${queryPARAM}|">Cris ID
                             <th:block th:if="${sort == 'crisID'}">
-                                <th:block th:if="{$order == 'desc'"}>
+                                <th:block th:if="${order == 'desc'}"}>
                                     <span class="dropup"><span class="caret"></span></span>
                                 </th:block>
-                                <th:block th:if="{$order != 'desc'"}>
+                                <th:block th:if="${order != 'desc'}">
                                     <span class="caret"></span>
                                 </th:block>
                             </th:block>
@@ -63,50 +63,50 @@
                        <th>Project Size</th>
                        <th><a th:href="|?sort=vaultSize&order=${ordervaultsize}&query=${queryPARAM}|">Vault Size
                             <th:block th:if="${sort == 'vaultSize'}">
-                                <th:block th:if="{$order == 'desc'"}>
+                                <th:block th:if="${order == 'desc'}">
                                     <span class="dropup"><span class="caret"></span></span>
                                 </th:block>
-                                <th:block th:if="{$order != 'desc'"}>
+                                <th:block th:if="${order != 'desc'}">
                                     <span class="caret"></span>
                                 </th:block>
                             </th:block>
                         </a></th>
                        <th><a th:href="|?sort=user&order=${orderuser}&query=${queryPARAM}|">Owner(UUN)
                            <th:block th:if="${sort == 'user'}">
-                                <th:block th:if="{$order == 'desc'"}>
+                                <th:block th:if="${order == 'desc'}">
                                     <span class="dropup"><span class="caret"></span></span>
                                 </th:block>
-                                <th:block th:if="{$order != 'desc'"}>
+                                <th:block th:if="${order != 'desc'}">
                                     <span class="caret"></span>
                                 </th:block>
                             </th:block>
                        </a></th>
                        <th><a th:href="|?sort=groupID&order=${orderGroupId}&query=${queryPARAM}|">School
                            <th:block th:if="${sort == 'groupID'}">
-                               <th:block th:if="{$order == 'desc'"}>
+                               <th:block th:if="${order == 'desc'}">
                                    <span class="dropup"><span class="caret"></span></span>
                                </th:block>
-                               <th:block th:if="{$order != 'desc'"}>
+                               <th:block th:if="${order != 'desc'}">
                                    <span class="caret"></span>
                                </th:block>
                            </th:block>
                         </a></th>
                        <th><a th:href="|?sort=reviewDate&order=${orderreviewDate}&query=${queryPARAM}|">Review Date
                            <th:block th:if="${sort == 'reviewDate'}">
-                               <th:block th:if="{$order == 'desc'"}>
+                               <th:block th:if="${order == 'desc'}">
                                    <span class="dropup"><span class="caret"></span></span>
                                </th:block>
-                               <th:block th:if="{$order != 'desc'"}>
+                               <th:block th:if="${order != 'desc'}">
                                    <span class="caret"></span>
                                </th:block>
                            </th:block>
                         </a></th>
                         <th><a th:href="|?sort=creationTime&order=${ordercreationtime}&query=${queryPARAM}|">Date created
                             <th:block th:if="${sort == 'creationTime'}">
-                                <th:block th:if="{$order == 'desc'"}>
+                                <th:block th:if="${order == 'desc'}">
                                     <span class="dropup"><span class="caret"></span></span>
                                 </th:block>
-                                <th:block th:if="{$order != 'desc'"}>
+                                <th:block th:if="${order != 'desc'}">
                                     <span class="caret"></span>
                                 </th:block>
                             </th:block>
@@ -131,8 +131,8 @@
                             </td>
                             
                             <td>[[${vault.groupID}]]</td>
-                            <td>[[${#dates.format(vault.reviewDate,'dd/MM/yyyy')}]]<!--/* date */--></td>
-                            <td>[[${#dates.format(vault.getCreationTime(),'dd/MM/yyyy')}]]<!--/* date */--></td>
+                            <td>[[${#dates.format(vault.reviewDate,dateFormatddMMyyyy)}]]<!--/* date */--></td>
+                            <td>[[${#dates.format(vault.getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */--></td>
                             <td style="display:none">
                             <!-- TODO : Hiding the remove button unless the functionality is clear as to what it should do - Soft/Hard delete -->
                            

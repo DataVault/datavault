@@ -40,7 +40,7 @@ public class AdminReviewsController {
 
 
     @RequestMapping(value = "/admin/reviews", method = RequestMethod.GET)
-    public String getVaultsForReview(ModelMap model) throws Exception {
+    public String getVaultsForReview(ModelMap model) {
 
         VaultsData vaultsData = restService.getVaultsForReview();
         List<VaultInfo> vaultsInfo = vaultsData.getData();
@@ -52,7 +52,7 @@ public class AdminReviewsController {
 
     // Return a review page
     @RequestMapping(value = "/admin/vaults/{vaultid}/reviews", method = RequestMethod.GET)
-    public String showReview(ModelMap model, @PathVariable("vaultid") String vaultID, @RequestParam(value = "error", required = false) String error) throws Exception {
+    public String showReview(ModelMap model, @PathVariable("vaultid") String vaultID, @RequestParam(value = "error", required = false) String error) {
 
         if (error != null) {
             if (error.equals("reviewdate")) {
@@ -117,7 +117,7 @@ public class AdminReviewsController {
 
     // Process the completed review page
     @RequestMapping(value = "/admin/vaults/{vaultid}/reviews/{reviewid}", method = RequestMethod.POST)
-    public String processReview(@ModelAttribute VaultReviewModel vaultReviewModel, ModelMap model, RedirectAttributes redirectAttributes, @PathVariable("vaultid") String vaultID, @PathVariable("reviewid") String reviewID, @RequestParam String action) throws Exception {
+    public String processReview(@ModelAttribute VaultReviewModel vaultReviewModel, ModelMap model, RedirectAttributes redirectAttributes, @PathVariable("vaultid") String vaultID, @PathVariable("reviewid") String reviewID, @RequestParam String action) {
 
         // Note - The ModelAttributes made available here are not the same objects as those passed to the View,
         // they only contain the values entered on screen. With that in mind, fetch the original objects again and
@@ -129,7 +129,7 @@ public class AdminReviewsController {
 
         if ("Submit".equals(action)) {
             // Throw back an error if a new review date has not been entered but some deposits are being retained.
-            if (vaultReviewModel.getNewReviewDate().isEmpty()) {
+            if (vaultReviewModel.getNewReviewDate() != null) {
                 if (vaultReviewModel.getDepositReviewModels() != null) {
                     for (DepositReviewModel drm : vaultReviewModel.getDepositReviewModels()) {
                         if (drm.getDeleteStatus() == DepositReviewDeleteStatus.RETAIN) {
@@ -143,7 +143,7 @@ public class AdminReviewsController {
 
         // Get the old stuff and update it
         VaultReview originalReview = restService.getVaultReview(reviewID);
-        originalReview.setNewReviewDate(vaultReviewModel.StringToDate(vaultReviewModel.getNewReviewDate()));
+        originalReview.setNewReviewDate(vaultReviewModel.getNewReviewDate());
         originalReview.setComment(vaultReviewModel.getComment());
 
         if ("Submit".equals(action)) {
@@ -154,7 +154,7 @@ public class AdminReviewsController {
             originalReview.setOldReviewDate(vault.getReviewDate());
 
             // And update the review date in the Vault if a new one has been entered
-            if (!vaultReviewModel.getNewReviewDate().isEmpty()) {
+            if (vaultReviewModel.getNewReviewDate() != null) {
                 // Update the review date in the Vault object.
                 logger.info("Editing Review Date for Vault id " + vaultID + " with new Review Date " + vaultReviewModel.getNewReviewDate());
                 restService.updateVaultReviewDate(vaultID, vaultReviewModel.getNewReviewDate());

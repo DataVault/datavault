@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.hibernate.annotations.UuidGenerator;
+import org.datavaultplatform.common.util.DateTimeUtils;
 import org.jsondoc.core.annotation.ApiObject;
 
 import jakarta.persistence.*;
@@ -36,7 +37,7 @@ public class VaultReview {
     private String id;
 
     // Serialise date in ISO 8601 format
-    //@JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+    //@JsonFormat(shape=JsonFormat.Shape.STRING, pattern= DateTimeUtils.ISO_DATE_TIME_FORMAT)
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "creationTime", nullable = false)
     private Date creationTime;
@@ -51,20 +52,20 @@ public class VaultReview {
     private List<DepositReview> depositReviews;
 
     // Serialise date in ISO 8601 format
-    //@JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd")
+    //@JsonFormat(shape=JsonFormat.Shape.STRING, pattern=DateTimeUtils.ISO_DATE_FORMAT)
     @Temporal(TemporalType.DATE)
     @Column(name = "newReviewDate", nullable = true)
     private Date newReviewDate;
 
     // Serialise date in ISO 8601 format
-    //@JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd")
+    //@JsonFormat(shape=JsonFormat.Shape.STRING, pattern=DateTimeUtils.ISO_DATE_FORMAT)
     @Temporal(TemporalType.DATE)
     @Column(name = "oldReviewDate", nullable = true)
     private Date oldReviewDate;
 
     // The date this review was finally actioned.
     // Serialise date in ISO 8601 format
-    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss")
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern=DateTimeUtils.ISO_DATE_TIME_FORMAT)
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "actionedDate", nullable = true)
     private Date actionedDate;

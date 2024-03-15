@@ -29,9 +29,9 @@
             <b>Retention Policy:</b> [[${retentionPolicy.name}]]<br/>
             <b>Dataset name:</b> [[${vault.datasetName}]]<br/>
             <b>Group:</b> [[${group.name}]]<br/>
-            <b>Created:</b> [[${#dates.format(vault.creationTime,'HH:mm:ss yyyy-MM-dd')}]]<!--/* datetime */--><br/>
-            <b>Review date:</b> [[${#dates.format(vault.policyExpiry,'HH:mm:ss yyyy-MM-dd')}]]<!--/* datetime */--> (Status: [[${vault.policyStatusStr}]])<br/>
-            <b>Last checked:</b> [[${#dates.format(vault.policyLastChecked,'HH:mm:ss yyyy-MM-dd')}]]<!--/* datetime */--><button type="submit" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Update</button><br/>
+            <b>Created:</b> [[${#dates.format(vault.creationTime,globalDateTimeFormat)}]]<!--/* datetime */--><br/>
+            <b>Review date:</b> [[${#dates.format(vault.policyExpiry,globalDateTimeFormat)}]]<!--/* datetime */--> (Status: [[${vault.policyStatusStr}]])<br/>
+            <b>Last checked:</b> [[${#dates.format(vault.policyLastChecked,globalDateTimeFormat)}]]<!--/* datetime */--><button type="submit" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Update</button><br/>
             <b>Size:</b> [[${vault.getSizeStr()}]]
         </p>
 
@@ -79,7 +79,7 @@
                                     </div>
                                 </td>
                                 <td>[[${deposit.getSizeStr()}]]</td>
-                                <td>[[${#dates.format(deposit.getCreationTime(),'HH:mm:ss yyyy-MM-dd')}]]<!--/* datetime */--></td>
+                                <td>[[${#dates.format(deposit.getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */--></td>
                             </tr>
                     </tbody>
                 </table>
