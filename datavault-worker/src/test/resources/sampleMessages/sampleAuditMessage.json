@@ -1,0 +1,84 @@
+{
+  "taskClass": "org.datavaultplatform.worker.tasks.Audit",
+  "jobID": "test-job-id",
+  "properties": {
+    "auditId": "test-audit-id"
+  },
+  "archiveFileStores": [
+    {
+      "id": "ARCHIVE-STORE-DST-ID",
+      "storageClass": "org.datavaultplatform.common.storage.impl.LocalFileSystem",
+      "label": "ARCHIVE-STORE-DST-LABEL",
+      "retrieveEnabled": true,
+      "properties": {
+        "rootPath": "/private/var/folders/l6/_tg4808d31xcdk_pv81btkz40000gn/T/test8379811499084671993/temp/dest"
+      }
+    }
+  ],
+  "chunkFilesDigest": {
+    "0": "E08C787D30CF8D32E5C20A71D3079C3BE447A9B9",
+    "1": "A9C71EE106C392D1B20A00066912480993DB5457",
+    "2": "50DF26CB023B43A5BC2400B3B5B4CAD3FCBFA643",
+    "3": "F82357F62691B99CD7698C38949C0FB12E6DC661",
+    "4": "A9C71EE106C392D1B20A00066912480993DB5457",
+    "5": "6AFD5AB71D57E8365C41CE2BA31FF26C3F24AE59"
+  },
+  "chunksIVs": {
+    "0": "09eWG+sgiBF6yhYoo/YIj8BdAtBpnEaWVkFVlIl8zljvibBAlKokzJBGj4LfetzalKIJumy1ZW1htEsPKcvbU2c6x14ZYj91HOdJy32BzX4dPl2DQyYDSrbBWg2RDtyv",
+    "1": "wJe4VlKMESXIApMHUmr7mDYQecVojP/Q1zlT5XI605J9/U1u3aHVuh8i83eKQOVQFn1f8ovwDNYhLbc1GAYhXQygIO27IL0QxvSg3n941TexbzQLfukr5FZgSEn3qI1S",
+    "2": "tLSa1UBei+YInVJYwCqSGtMSA/sbTYUsSHPF1W6KuKSYONXNqUav1FbONoL+wi5jKp1OsAJp7lIPOIGgdQxA9lyhmfzpVp4XM0jT1mTngGBqYUenc0MCGbtYn3uYPQE4",
+    "3": "mC74cJgO0AU+e/VmdSg6Uk0LK02+2YTArrI7P6Nm4tg3l4B2mKlFRjS0nkGZ65mg9wXS7sn3L0epUz5GVb5L6HvMJYrgGJfGwjSGNnKtEwgxIp5I5cYLzR+w9xNsRF3f",
+    "4": "bCQtrjimU4929B4UdsdDORgQFJYIW7+mlLcjJxSIfP9qCV89MRhKUWMkSU0ilFlQ5YrT4z23NmbKQ/aa4Uy/fHrNGbMvofazm+6gujLIQK8j2Vm+vLBke86ssv/XdmqI",
+    "5": "n3ZiifPG/n5NX8pVDw+rdPM/E+Wh+bZ6YCs4B1bi910fRtQtz232dNyNFNRXMGDKSa7Yf90ZQv4rtJB5xWBhw9WmSCOXY9cMRSY8rxtYtOByZr6KNnEn8w7DFtOgRANp"
+  },
+  "encChunksDigest": {
+    "0": "C76179621E99A208DBFC5F2FF7A00DB18757DAD1",
+    "1": "1E6B1AEEAD619C53D4465D6D6AC061B35450F69E",
+    "2": "6995DDFD513BAC9B9BA4060F5BA3C6D1E9141659",
+    "3": "01A3E1845991DEE81A627928365B08114D1B2924",
+    "4": "CCA4AD436A0FD6013C0E82B2CA250E368F41C513",
+    "5": "82C1EE6567FD6C1AE6CC2534AACB59E880934782"
+  },
+  "chunksToAudit": [
+    {
+      "bagId": "d87ca007-9cee-4c49-8169-f74c2b90b773",
+      "chunkNum": "1",
+      "id": "db-id-for-bagid[d87ca007-9cee-4c49-8169-f74c2b90b773]chunkNum[1]"
+    },
+    {
+      "bagId": "d87ca007-9cee-4c49-8169-f74c2b90b773",
+      "chunkNum": "2",
+      "id": "db-id-for-bagid[d87ca007-9cee-4c49-8169-f74c2b90b773]chunkNum[2]"
+    },
+    {
+      "bagId": "d87ca007-9cee-4c49-8169-f74c2b90b773",
+      "chunkNum": "3",
+      "id": "db-id-for-bagid[d87ca007-9cee-4c49-8169-f74c2b90b773]chunkNum[3]"
+    },
+    {
+      "bagId": "bf73a7f5-42d1-4c3f-864a-a171af8373d4",
+      "chunkNum": "1",
+      "id": "db-id-for-bagid[bf73a7f5-42d1-4c3f-864a-a171af8373d4]chunkNum[1]"
+    },
+    {
+      "bagId": "bf73a7f5-42d1-4c3f-864a-a171af8373d4",
+      "chunkNum": "2",
+      "id": "db-id-for-bagid[bf73a7f5-42d1-4c3f-864a-a171af8373d4]chunkNum[2]"
+    },
+    {
+      "bagId": "bf73a7f5-42d1-4c3f-864a-a171af8373d4",
+      "chunkNum": "3",
+      "id": "db-id-for-bagid[bf73a7f5-42d1-4c3f-864a-a171af8373d4]chunkNum[3]"
+    }
+  ],
+  "archiveIds": [
+    "d87ca007-9cee-4c49-8169-f74c2b90b773.tar",
+    "d87ca007-9cee-4c49-8169-f74c2b90b773.tar",
+    "d87ca007-9cee-4c49-8169-f74c2b90b773.tar",
+    "bf73a7f5-42d1-4c3f-864a-a171af8373d4.tar",
+    "bf73a7f5-42d1-4c3f-864a-a171af8373d4.tar",
+    "bf73a7f5-42d1-4c3f-864a-a171af8373d4.tar"
+  ],
+  "restartArchiveIds": {},
+  "redeliver": false
+}

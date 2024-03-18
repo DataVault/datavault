@@ -4,11 +4,10 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.File;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
+import lombok.Builder;
+import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.event.Event;
@@ -20,8 +19,10 @@ import org.datavaultplatform.common.model.ArchiveStore;
 import org.datavaultplatform.common.storage.StorageConstants;
 import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.common.PropNames;
+import org.datavaultplatform.worker.tasks.Audit;
 import org.datavaultplatform.worker.tasks.Deposit;
 import org.datavaultplatform.worker.tasks.Retrieve;
+import org.springframework.util.Assert;
 
 @Slf4j
 public class DepositEvents {
@@ -32,13 +33,14 @@ public class DepositEvents {
 
   public DepositEvents(Deposit deposit, List<Event> events) {
     this.deposit = deposit;
-    this.events = events;
+    this.events = new ArrayList<>(events);
   }
 
+  @SuppressWarnings("UnnecessaryLocalVariable")
   @SneakyThrows
   public String generateRetrieveMessage(File retrieveBaseDir, String retrievePath) {
 
-    RetrieveInfo info = getRetrieveInfo(retrieveBaseDir, retrievePath);
+    TaskInfo info = getTaskInfo(retrieveBaseDir, retrievePath);
 
     Retrieve retrieve = new Retrieve();
     retrieve.setTaskClass("org.datavaultplatform.worker.tasks.Retrieve");
@@ -80,6 +82,79 @@ public class DepositEvents {
     return result;
   }
 
+  /**
+   * By using multiple DepositEvents - we can audit multiple deposits
+   * @param allDepositEvents - information about the deposits to audit
+   * @return the generated audit message.
+   */
+
+  @SneakyThrows
+  public static String generateAuditMessage(List<DepositEvents> allDepositEvents) {
+
+    Assert.isTrue(!allDepositEvents.isEmpty(), "must have at least 1 DepositEvents");
+
+    DepositEvents depositEvents1 = allDepositEvents.get(0);
+
+    Audit audit = new Audit();
+    audit.setJobID("test-job-id");
+    audit.setTaskClass("org.datavaultplatform.worker.tasks.Audit");
+
+    Map<String, String> topLevelProps = new HashMap<>();
+    topLevelProps.put(PropNames.AUDIT_ID, "test-audit-id");
+    audit.setProperties(topLevelProps);
+    audit.setArchiveFileStores(Collections.singletonList(depositEvents1.getArchiveStoreForRetrieve()));
+    audit.setIsRedeliver(false);
+
+    TaskInfo info = depositEvents1.getTaskInfo(null, null);
+    audit.setTarIV(info.tarIV);
+
+    List<ChunkInfo> allDepositChunkInfos = new ArrayList<>();
+    for(DepositEvents depositEvents : allDepositEvents){
+      TaskInfo taskInfo = depositEvents.getTaskInfo(null, null);
+      List<ChunkInfo> depositChunkInfos = taskInfo.getChunkInfo();
+      allDepositChunkInfos.addAll(depositChunkInfos);
+    }
+
+    int totalNumberOfChunks = allDepositChunkInfos.size();
+
+    List<HashMap<String, String>> chunksToAudit = new ArrayList<>();
+    String[] archiveIds = new String[totalNumberOfChunks];
+
+    //CHUNKS
+    Map<Integer, String> chunkDigests = new HashMap<>();
+    Map<Integer, String> chunkEncDigests = new HashMap<>();
+    Map<Integer, byte[]> chunkIVsAsBytes = new HashMap<>();
+
+    for (int chunkIdx = 0; chunkIdx < totalNumberOfChunks; chunkIdx++) {
+      ChunkInfo chunkInfo = allDepositChunkInfos.get(chunkIdx);
+      HashMap<String, String> chunkProps = new HashMap<>();
+      chunkProps.put(PropNames.CHUNK_NUM, String.valueOf(chunkInfo.chunkNum));
+      chunkProps.put(PropNames.BAG_ID, chunkInfo.bagitId);
+      chunkProps.put(PropNames.CHUNK_ID, String.format("db-id-for-bagid[%s]chunkNum[%s]",chunkInfo.bagitId,chunkInfo.chunkNum));
+      chunksToAudit.add(chunkProps);
+
+      chunkDigests.put(chunkIdx, chunkInfo.chunkDigest);
+      chunkEncDigests.put(chunkIdx, chunkInfo.chunkEncDigest);
+      chunkIVsAsBytes.put(chunkIdx, chunkInfo.chunkIVAsBytes);
+      archiveIds[chunkIdx] = chunkInfo.getArchiveId();
+    }
+    audit.setChunksToAudit(chunksToAudit);
+    audit.setArchiveIds(archiveIds);
+    audit.setChunkFilesDigest(chunkDigests);
+    audit.setEncChunksDigest(chunkEncDigests);
+    audit.setChunksIVs(chunkIVsAsBytes);
+
+    ObjectMapper mapper = new ObjectMapper();
+    mapper.setSerializationInclusion(Include.NON_NULL);
+    String result = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(audit);
+    System.out.println(result);
+
+
+    return result;
+  }
+
+
+  @SuppressWarnings("UnnecessaryLocalVariable")
   public ArchiveStore getArchiveStoreForRetrieve() {
     ArchiveStore result = deposit.getArchiveFileStores().stream()
         .filter(ArchiveStore::isRetrieveEnabled)
@@ -114,82 +189,147 @@ public class DepositEvents {
     return findEvent(ComputedDigest.class);
   }
 
+  @SuppressWarnings("UnnecessaryLocalVariable")
   @SneakyThrows
-  public RetrieveInfo getRetrieveInfo(File retrieveBaseDir, String retrievePath) {
-    RetrieveInfo info = new RetrieveInfo();
-    info.bagitId = deposit.getProperties().get(PropNames.BAG_ID);
+  public TaskInfo getTaskInfo(File retrieveBaseDir, String retrievePath) {
+
+    String bagitId = deposit.getProperties().get(PropNames.BAG_ID);
 
     ComputedEncryption computedEncryption = getComputedEncryption();
-    HashMap<Integer, byte[]> chunkIVs = computedEncryption.getChunkIVs();
-    info.numChunks = chunkIVs == null ? 0  : chunkIVs.size();
+    HashMap<Integer, byte[]> tempChunkIVS = computedEncryption.getChunkIVs();
+    int numChunks = tempChunkIVS == null ? 0  : tempChunkIVS.size();
 
-    //info.retrievePath = this.retrieveDir.getName();
-    info.retrievePath = retrievePath;
+    long archiveSize = getComplete().getArchiveSize();
 
-    info.archiveSize = getComplete().getArchiveSize();
+    String archiveDigest = getComputedDigest().getDigest();
 
-    info.archiveDigest = getComputedDigest().getDigest();
+    String archiveId = getUploadComplete().getArchiveIds().get(getArchiveStoreForRetrieve().getID());
 
-    info.archiveId = getUploadComplete().getArchiveIds().get(getArchiveStoreForRetrieve().getID());
+    Map<Integer,String> chunkIVs = new HashMap<>();
+    Map<Integer,byte[]> chunkIVsAsBytes = new HashMap<>();
+    Map<Integer,String> chunkDigests = new HashMap<>();
+    Map<Integer,String> chunkEncDigests = new HashMap<>();
 
-    info.chunkIVs = new HashMap<>();
-    info.chunkIVsAsBytes = new HashMap<>();
-    info.chunkDigests = new HashMap<>();
-    info.chunkEncDigests = new HashMap<>();
-
-    if (info.numChunks == 0) {
-      info.tarIV = computedEncryption.getTarIV();
-    }
-    for (int i = 0; i < info.numChunks; i++) {
+    byte[] tarIV = numChunks == 0 ? computedEncryption.getTarIV() : null;
+    for (int i = 0; i < numChunks; i++) {
       int chunkNumber = i + 1;
 
-      info.chunkIVs.put(chunkNumber,
+      chunkIVs.put(chunkNumber,
           base64Encode(computedEncryption.getChunkIVs().get(chunkNumber)));
 
-      info.chunkIVsAsBytes.put(chunkNumber,
+      chunkIVsAsBytes.put(chunkNumber,
           computedEncryption.getChunkIVs().get(chunkNumber));
 
-      info.chunkDigests.put(chunkNumber,
+      chunkDigests.put(chunkNumber,
           computedEncryption.getChunksDigest().get(chunkNumber));
 
-      info.chunkEncDigests.put(chunkNumber,
+      chunkEncDigests.put(chunkNumber,
           computedEncryption.getEncChunkDigests().get(chunkNumber));
     }
 
-    //info.rootPathArchiveStore = this.destDir.getCanonicalPath();
-    info.rootPathArchiveStore = getArchiveStoreForRetrieve().getProperties().get(PropNames.ROOT_PATH);
-    //info.rootPathRetrieve = this.retrieveBaseDir.getCanonicalPath();
-    info.rootPathRetrieve = retrieveBaseDir.getCanonicalPath();
-
+    String rootPathArchiveStore = getArchiveStoreForRetrieve().getProperties().get(PropNames.ROOT_PATH);
+    String rootPathRetrieve = null;
+    if (retrieveBaseDir != null) {
+      rootPathRetrieve = retrieveBaseDir.getCanonicalPath();
+    }
+    TaskInfo info = TaskInfo.builder()
+            .bagitId(bagitId)
+            .numChunks(numChunks)
+            .archiveSize(archiveSize)
+            .archiveId(archiveId)
+            .rootPathArchiveStore(rootPathArchiveStore)
+            .rootPathRetrieve(rootPathRetrieve)
+            .retrievePath(retrievePath)
+            .tarIV(tarIV)
+            .chunkDigests(chunkDigests)
+            .chunkEncDigests(chunkEncDigests)
+            .chunkIVs(chunkIVs)
+            .chunkIVsAsBytes(chunkIVsAsBytes)
+            .build();
     return info;
   }
 
 
-  public static class RetrieveInfo {
+  @Data
+  @Builder
+  public static class TaskInfo {
 
-    public String bagitId;
-    public int numChunks;
+    private final String bagitId;
+    private final int numChunks;
 
-    public long archiveSize;
-    public String archiveDigest;
-    public String archiveId;
+    private final long archiveSize;
+    private final String archiveDigest;
+    private final String archiveId;
 
-    public Map<Integer,String> chunkDigests;
+    private final Map<Integer,String> chunkDigests;
 
-    public Map<Integer,String> chunkEncDigests;
-    public Map<Integer,String> chunkIVs;
-    public Map<Integer,byte[]> chunkIVsAsBytes;
+    private final Map<Integer,String> chunkEncDigests;
+    private final Map<Integer,String> chunkIVs;
+    private final Map<Integer,byte[]> chunkIVsAsBytes;
 
-    public String rootPathArchiveStore;
-    public String rootPathRetrieve;
-    public String retrievePath;
+    private final String rootPathArchiveStore;
+    private final String rootPathRetrieve;
+    private final String retrievePath;
 
-    public byte[] tarIV;
+    private final byte[] tarIV;
+
+    public List<ChunkInfo> getChunkInfo() {
+      List<ChunkInfo> result = new ArrayList<>();
+      Set<Integer> keys = this.chunkDigests.keySet();
+      for(Integer key : keys){
+        String chunkDigest = this.chunkDigests.get(key);
+        String chunkEncDigest = this.chunkEncDigests.get(key);
+        String chunkIV = this.chunkIVs.get(key);
+        byte[] chunkIVBytes = this.chunkIVsAsBytes.get(key);
+
+        ChunkInfo chunkInfo = ChunkInfo
+                .builder()
+                .bagitId(bagitId)
+                .archiveId(archiveId)
+                .chunkNum(key)
+                .chunkDigest(chunkDigest)
+                .chunkEncDigest(chunkEncDigest)
+                .chunkIVAsString(chunkIV)
+                .chunkIVAsBytes(chunkIVBytes)
+                .build();
+        result.add(chunkInfo);
+      }
+      Collections.sort(result);
+      return result;
+    }
+
+    private <T> HashMap<Integer,T> zeroBased(Map<Integer,T> source){
+      HashMap<Integer,T> result = new HashMap<>();
+
+      source.entrySet().forEach(entry -> {
+        Integer key = entry.getKey();
+        T value = entry.getValue();
+        result.put(key - 1, value);
+      });
+
+      return result;
+    }
+
   }
 
   private static String base64Encode(byte[] data) {
     return Base64.getEncoder().encodeToString(data);
   }
 
+  @Data
+  @Builder
+  public static class ChunkInfo implements Comparable<ChunkInfo> {
+    private final int chunkNum;
+    private final String bagitId;
+    private final String archiveId;
+    private final String chunkDigest;
+    private final String chunkEncDigest;
+    private final String chunkIVAsString;
+    private final byte[] chunkIVAsBytes;
 
+    @Override
+    public int compareTo(DepositEvents.ChunkInfo chunkInfo) {
+      return Integer.compare(this.chunkNum, chunkInfo.chunkNum);
+    }
+  }
 }

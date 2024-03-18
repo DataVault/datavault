@@ -431,9 +431,6 @@ public class Deposit extends Task {
             String encTarHash, String[] encChunksHash, boolean doVerification) throws Exception {
 
         int noOfThreads = context.getNoChunkThreads();
-        if (noOfThreads < 0 ) {
-            noOfThreads = 25;
-        }
         logger.debug("Number of threads: " + noOfThreads);
         TaskExecutor<Object> executor = new TaskExecutor<>(noOfThreads, "Chunk download failed.");
         for (int i = 0; i < chunkFiles.length; i++) {
@@ -687,11 +684,8 @@ public class Deposit extends Task {
       HashMap<Integer, String> chunksDigest = new HashMap<>();
 
       int noOfThreads = context.getNoChunkThreads();
-        if (noOfThreads < 0 ) {
-            noOfThreads = 25;
-        }
+      logger.debug("Number of threads:" + noOfThreads);
 
-        logger.debug("Number of threads:" + noOfThreads);
         TaskExecutor<ChecksumHelper> executor = new TaskExecutor<>(noOfThreads,"Chunk encryption failed.");
         for (int i = 0; i < chunkFiles.length; i++){
             int chunkNumber = i + 1;
@@ -744,10 +738,6 @@ public class Deposit extends Task {
         encChunksHash = new String[chunkFiles.length];
 
         int noOfThreads = context.getNoChunkThreads();
-        if (noOfThreads < 0 ) {
-            noOfThreads = 25;
-        }
-
         logger.debug("Number of threads:" + noOfThreads);
 
         TaskExecutor<EncryptionChunkHelper> executor = new TaskExecutor<>(noOfThreads, "Chunk encryption failed.");
@@ -813,11 +803,10 @@ public class Deposit extends Task {
         logger.debug("Uploading to storage.");
 
 		if ( context.isChunkingEnabled() ) {
+
         int noOfThreads = context.getNoChunkThreads();
-        if (noOfThreads < 0 ) {
-            noOfThreads = 25;
-        }
         logger.debug("Number of threads:" + noOfThreads);
+
         TaskExecutor<HashMap<String, String>> executor = new TaskExecutor<>(noOfThreads, "Chunk upload failed.");
 
     		// kick of 10 (maybe more) tasks at a time?  each task would kick off 3 tasks of their own

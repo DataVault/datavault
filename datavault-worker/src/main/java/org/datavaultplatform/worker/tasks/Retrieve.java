@@ -180,10 +180,8 @@ public class Retrieve extends Task {
         logger.info("Retrieving " + this.numOfChunks + " chunk(s)");
 
         int noOfThreads = context.getNoChunkThreads();
-        if (noOfThreads < 0 ) {
-            noOfThreads = 25;
-        }
         logger.debug("Number of threads: " + noOfThreads);
+
         TaskExecutor<File> executor = new TaskExecutor<>(noOfThreads, "Chunk download failed.");
         for( int chunkNum = 1; chunkNum <= this.numOfChunks; chunkNum++) {
             Path chunkPath = context.getTempDir().resolve(tarFileName+FileSplitter.CHUNK_SEPARATOR+chunkNum);
