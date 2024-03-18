@@ -16,10 +16,7 @@ import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.datavaultplatform.common.util.StorageClassUtils;
 import org.datavaultplatform.worker.retry.TwoSpeedRetry;
 import org.datavaultplatform.worker.test.TestClockConfig;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -41,33 +38,30 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class RetrieveTest {
 
     public static final String TEST_RETRIEVE_PATH = "retrieve-path";
     public static final String TEST_TIMESTAMP_DIR_NAME = "dv_20220329141516";
     private static final String TEST_ARCHIVE_ID = "test-archive-id";
+
     @Mock
     EventSender mEventSender;
-
     @Mock
     Context mContext;
-
-    @Captor
-    ArgumentCaptor<Event> argEvent;
-
     @Mock
     StorageClassNameResolver mStorageClassResolver;
-
+    @Mock
+    LocalFileSystem mArchiveFS;
     @Mock
     SFTPFileSystemSSHD mSftpUserStore;
-
     @Mock
     LocalFileSystem mNonSftpUserStore;
 
-    @Mock
-    LocalFileSystem mArchiveFS;
-
     org.datavaultplatform.common.model.ArchiveStore storageModel;
+
+    @Captor
+    ArgumentCaptor<Event> argEvent;
 
     @Captor
     ArgumentCaptor<String> argTimestampDirName1;
@@ -97,12 +91,15 @@ public class RetrieveTest {
 
     @BeforeEach
     void setup() {
+        Mockito.reset(mArchiveFS, mContext, mStorageClassResolver, mEventSender, mNonSftpUserStore, mSftpUserStore);
+
         this.storageModel = new ArchiveStore();
         this.storageModel.setStorageClass("ARCHIVE_STORE_STORAGE_CLASS_NAME");
     }
 
     @Test
     @SneakyThrows
+    @Order(1)
     void testThrowCheckSumError() {
         File mFile = mock(File.class);
         when(mFile.getCanonicalPath()).thenReturn("/tmp/some/file.1.tar");
@@ -112,6 +109,8 @@ public class RetrieveTest {
     }
 
     @Nested
+    @Order(200)
+    @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
     class SftpUserStoreTests {
 
         @BeforeEach
@@ -120,21 +119,25 @@ public class RetrieveTest {
         }
 
         @Test
+        @Order(1)
         void testSingleCopyStoreWhenUpfrontUserStoreWriteSucceeds() {
             checkRetrieve(true, true, true);
         }
 
         @Test
+        @Order(2)
         void testMultipleCopiesWhenUpfrontUserStoreWriteSucceeds() {
             checkRetrieve(true, false, true);
         }
 
         @Test
+        @Order(3)
         void testSingleCopyStoreWhenUpfrontUserStoreWriteFails() {
             checkRetrieve(true, true, false);
         }
 
         @Test
+        @Order(4)
         void testMultipleCopiesWhenUpfrontUserStoreWriteFails() {
             checkRetrieve(true, false, false);
         }
@@ -142,6 +145,8 @@ public class RetrieveTest {
     }
 
     @Nested
+    @Order(300)
+    @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
     class NonSftpUserStoreTests {
 
         @BeforeEach
@@ -150,25 +155,28 @@ public class RetrieveTest {
         }
 
         @Test
+        @Order(1)
         void testSingleCopyStoreWhenUpfrontUserStoreWriteSucceeds() {
             checkRetrieve(false, true, true);
         }
 
         @Test
+        @Order(2)
         void testMultipleCopiesWhenUpfrontUserStoreWriteSucceeds() {
             checkRetrieve(false, false, true);
         }
 
         @Test
+        @Order(3)
         void testSingleCopyStoreWhenUpfrontUserStoreWriteFails() {
             checkRetrieve(false, true, false);
         }
 
         @Test
+        @Order(4)
         void testMultipleCopiesWhenUpfrontUserStoreWriteFails() {
             checkRetrieve(false, false, false);
         }
-
     }
 
     private Retrieve getRetrieveForTest(boolean singleCopy) {
@@ -213,23 +221,25 @@ public class RetrieveTest {
         Retrieve retrieve = getRetrieveForTest(singleCopy);
 
         // override the clock with a fixed clock for testing
-        lenient().when(retrieve.getClock()).thenReturn(TestClockConfig.TEST_CLOCK);
-        if (singleCopy) {
-            lenient().doNothing().when(retrieve).singleCopy(
-                    argContext.capture(),
-                    argTarFileName.capture(),
-                    argTarFile.capture(),
-                    argArchiveFs.capture(),
-                    argUserStoreFs.capture(),
-                    argTimestampDirName2.capture());
-        } else {
-            lenient().doNothing().when(retrieve).multipleCopies(
-                    argContext.capture(),
-                    argTarFileName.capture(),
-                    argTarFile.capture(),
-                    argArchiveFs.capture(),
-                    argUserStoreFs.capture(),
-                    argTimestampDirName2.capture());
+        when(retrieve.getClock()).thenReturn(TestClockConfig.TEST_CLOCK);
+        if (upfrontUserStoreWriteSucceeds) {
+            if (singleCopy) {
+                doNothing().when(retrieve).singleCopy(
+                        argContext.capture(),
+                        argTarFileName.capture(),
+                        argTarFile.capture(),
+                        argArchiveFs.capture(),
+                        argUserStoreFs.capture(),
+                        argTimestampDirName2.capture());
+            } else {
+                doNothing().when(retrieve).multipleCopies(
+                        argContext.capture(),
+                        argTarFileName.capture(),
+                        argTarFile.capture(),
+                        argArchiveFs.capture(),
+                        argUserStoreFs.capture(),
+                        argTimestampDirName2.capture());
+            }
         }
 
         try (MockedStatic<StorageClassUtils> storageClassUtilsStatic = Mockito.mockStatic(StorageClassUtils.class)) {
@@ -281,6 +291,7 @@ public class RetrieveTest {
                     assertThat(ex).hasMessage("UserStoreFS : store failed");
                 }
             }
+
 
 
             if (useSftpUserStore) {
@@ -342,6 +353,7 @@ public class RetrieveTest {
     }
 
     @Test
+    @Order(4)
     void testProblemWithUserStore() {
         Retrieve retrieve = getRetrieveForTest(true);
 
@@ -367,6 +379,7 @@ public class RetrieveTest {
     }
 
     @Test
+    @Order(5)
     void testProblemWithArchiveStore() {
         Retrieve retrieve = getRetrieveForTest(true);
 
@@ -395,6 +408,7 @@ public class RetrieveTest {
     }
 
     @Test
+    @Order(6)
     void testRedeliverTrue() {
         Retrieve retrieve = getRetrieveForTest(true);
         retrieve.setIsRedeliver(true);
@@ -403,6 +417,7 @@ public class RetrieveTest {
     }
 
     @Test
+    @Order(7)
     @SneakyThrows
     void testNotEnoughSpaceOnUserStore() {
         setupSftpUserStore();
@@ -433,9 +448,13 @@ public class RetrieveTest {
                     "Deposit retrieve started",
                     "Not enough free space to retrieve data!",
                     "Data retrieve failed: Not enough free space to retrieve data!");
+            verify(mSftpUserStore).exists(any());
+            verify(mSftpUserStore).isDirectory(any());
+            verify(mSftpUserStore).getUsableSpace();
         }
     }
     @Test
+    @Order(8)
     @SneakyThrows
     void testProblemWithUserStoreGetUsableSpace() {
 
@@ -467,6 +486,10 @@ public class RetrieveTest {
                     "Deposit retrieve started",
                     "Unable to determine free space",
                     "Data retrieve failed: problemGettingUsableSpace!");
+
+            verify(mSftpUserStore).exists(any());
+            verify(mSftpUserStore).isDirectory(any());
+            verify(mSftpUserStore).getUsableSpace();
         }
     }
 
@@ -477,17 +500,20 @@ public class RetrieveTest {
     }
 
     private void setupNonSftpUserStore() {
+        Mockito.reset(mNonSftpUserStore);
         lenient().when(mNonSftpUserStore.exists(TEST_RETRIEVE_PATH)).thenReturn(true);
         lenient().when(mNonSftpUserStore.isDirectory(TEST_RETRIEVE_PATH)).thenReturn(true);
     }
 
     @SneakyThrows
     private void setupSftpUserStore() {
+        Mockito.reset(mSftpUserStore);
         lenient().when(mSftpUserStore.exists(TEST_RETRIEVE_PATH)).thenReturn(true);
         lenient().when(mSftpUserStore.isDirectory(TEST_RETRIEVE_PATH)).thenReturn(true);
     }
 
     @Nested
+    @Order(9)
     class RetrieveTargetErrorTests{
 
         @Test
@@ -538,6 +564,7 @@ public class RetrieveTest {
     }
 
     @Nested
+    @Order(10)
     class UserFsRetrieveTests {
 
         private static final int MAX_ATTEMPTS = 4;
@@ -675,6 +702,11 @@ public class RetrieveTest {
             ret.copyFilesToUserFs(progress, payloadDir, mUserFs, 123_3456L, TEST_TIMESTAMP_DIR_NAME);
         }
     }
+    @AfterEach
+    void tearDown() {
+        Mockito.verifyNoMoreInteractions(mSftpUserStore, mSftpUserStore);
+    }
+
 }
 
 
