@@ -15,6 +15,7 @@ public class TestClockConfig {
 
   static {
     TEST_CLOCK =  Clock.fixed(
+            //because of daylight saving 13:15 UTC will be 14:15 BST
             Instant.parse("2022-03-29T13:15:16.101Z"),
             ZoneId.of("Europe/London"));
   }
