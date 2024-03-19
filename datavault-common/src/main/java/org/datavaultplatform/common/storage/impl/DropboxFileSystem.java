@@ -333,4 +333,14 @@ public class DropboxFileSystem extends Device implements UserStore {
         return path;*/
         return "";
     }
+
+    @Override
+    public boolean canRead(String path) throws Exception {
+        return false;
+    }
+
+    @Override
+    public boolean canWrite(String path) throws Exception {
+       return false;
+    }
 }

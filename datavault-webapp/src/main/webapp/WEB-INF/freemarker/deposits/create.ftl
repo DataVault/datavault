@@ -212,6 +212,7 @@
                         init: function(event, data) {
                             // Get root node
                             const rootNode = data.tree.rootNode;
+                            rootNode.checkbox = false;
                             // Order root child nodes
                             sortTreeNodesFn(rootNode);
                             // The GET request always returns the top level "SFTP filesystem" node if there's a filestore defined, even when it is bogus.

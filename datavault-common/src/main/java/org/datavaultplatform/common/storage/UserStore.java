@@ -31,6 +31,12 @@ public interface UserStore {
     // Check if the passed path is a directory/container
     boolean isDirectory(String path) throws Exception;
 
+    //  Check if the passed path is a readable file/directory
+    boolean canRead(String path) throws Exception;
+
+    // Check if the passed path is a writeable file/directory
+    boolean canWrite(String path) throws Exception;
+
     static UserStore fromFileStore(FileStore fileStore, StorageClassNameResolver resolver) {
         UserStore userStore = StorageClassUtils.createStorage(
             fileStore.getStorageClass(),
