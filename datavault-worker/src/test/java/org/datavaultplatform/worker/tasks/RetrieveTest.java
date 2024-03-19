@@ -1,9 +1,12 @@
 package org.datavaultplatform.worker.tasks;
 
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import lombok.SneakyThrows;
 import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.event.EventSender;
+import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.model.ArchiveStore;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.storage.impl.LocalFileSystem;
@@ -11,53 +14,67 @@ import org.datavaultplatform.common.storage.impl.SFTPFileSystemSSHD;
 import org.datavaultplatform.common.task.Context;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.datavaultplatform.common.util.StorageClassUtils;
+import org.datavaultplatform.worker.retry.TwoSpeedRetry;
 import org.datavaultplatform.worker.test.TestClockConfig;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@TestMethodOrder(MethodOrderer.Alphanumeric.class)
 public class RetrieveTest {
 
     public static final String TEST_RETRIEVE_PATH = "retrieve-path";
     public static final String TEST_TIMESTAMP_DIR_NAME = "dv_20220329141516";
     private static final String TEST_ARCHIVE_ID = "test-archive-id";
-
     @Mock
     EventSender mEventSender;
+
     @Mock
     Context mContext;
-    @Mock
-    StorageClassNameResolver mStorageClassResolver;
-    @Mock
-    LocalFileSystem mArchiveFS;
-    @Mock
-    SFTPFileSystemSSHD mSftpUserStore;
-    @Mock
-    LocalFileSystem mNonSftpUserStore;
-
-    org.datavaultplatform.common.model.ArchiveStore storageModel;
 
     @Captor
     ArgumentCaptor<Event> argEvent;
 
-    @Captor
-    ArgumentCaptor<String> argSftpUserStoreTimestampDirName;
+    @Mock
+    StorageClassNameResolver mStorageClassResolver;
+
+    @Mock
+    SFTPFileSystemSSHD mSftpUserStore;
+
+    @Mock
+    LocalFileSystem mNonSftpUserStore;
+
+    @Mock
+    LocalFileSystem mArchiveFS;
+
+    org.datavaultplatform.common.model.ArchiveStore storageModel;
 
     @Captor
-    ArgumentCaptor<String> argRetrieveTimestampDirName;
+    ArgumentCaptor<String> argTimestampDirName1;
+
+    @Captor
+    ArgumentCaptor<String> argTimestampDirName2;
+
 
     @Captor
     ArgumentCaptor<Context> argContext;
@@ -73,9 +90,10 @@ public class RetrieveTest {
 
     @Captor
     ArgumentCaptor<Device> argUserStoreFs;
-
+    
     @Captor
     ArgumentCaptor<File> argDataVaultHiddenFile;
+
 
     @BeforeEach
     void setup() {
@@ -93,53 +111,64 @@ public class RetrieveTest {
         assertEquals("Checksum failed:test:(actual)<actualCS> != (expected)<expectedCS>:/tmp/some/file.1.tar", ex.getMessage());
     }
 
+    @Nested
+    class SftpUserStoreTests {
 
-    @Test
-    void testSftpSingleCopyStoreWhenUpfrontUserStoreWriteSucceeds() {
-        setupSftpUserStore();
-        checkRetrieve(true, true, true);
+        @BeforeEach
+        void setup() {
+            setupSftpUserStore();
+        }
+
+        @Test
+        void testSingleCopyStoreWhenUpfrontUserStoreWriteSucceeds() {
+            checkRetrieve(true, true, true);
+        }
+
+        @Test
+        void testMultipleCopiesWhenUpfrontUserStoreWriteSucceeds() {
+            checkRetrieve(true, false, true);
+        }
+
+        @Test
+        void testSingleCopyStoreWhenUpfrontUserStoreWriteFails() {
+            checkRetrieve(true, true, false);
+        }
+
+        @Test
+        void testMultipleCopiesWhenUpfrontUserStoreWriteFails() {
+            checkRetrieve(true, false, false);
+        }
+
     }
 
-    @Test
-    void testSftpMultipleCopiesWhenUpfrontUserStoreWriteSucceeds() {
-        setupSftpUserStore();
-        checkRetrieve(true, false, true);
-    }
+    @Nested
+    class NonSftpUserStoreTests {
 
-    @Test
-    void testSftpSingleCopyStoreWhenUpfrontUserStoreWriteFails() {
-        setupSftpUserStore();
-        checkRetrieve(true, true, false);
-    }
+        @BeforeEach
+        void setup() {
+            setupNonSftpUserStore();
+        }
 
-    @Test
-    void testSftpMultipleCopiesWhenUpfrontUserStoreWriteFails() {
-        setupSftpUserStore();
-        checkRetrieve(true, false, false);
-    }
+        @Test
+        void testSingleCopyStoreWhenUpfrontUserStoreWriteSucceeds() {
+            checkRetrieve(false, true, true);
+        }
 
-    @Test
-    void testNonSftpSingleCopyStoreWhenUpfrontUserStoreWriteSucceeds() {
-        setupNonSftpUserStore();
-        checkRetrieve(false, true, true);
-    }
+        @Test
+        void testMultipleCopiesWhenUpfrontUserStoreWriteSucceeds() {
+            checkRetrieve(false, false, true);
+        }
 
-    @Test
-    void testNonSftpMultipleCopiesWhenUpfrontUserStoreWriteSucceeds() {
-        setupNonSftpUserStore();
-        checkRetrieve(false, false, true);
-    }
+        @Test
+        void testSingleCopyStoreWhenUpfrontUserStoreWriteFails() {
+            checkRetrieve(false, true, false);
+        }
 
-    @Test
-    void testNonSftpSingleCopyStoreWhenUpfrontUserStoreWriteFails() {
-        setupNonSftpUserStore();
-        checkRetrieve(false, true, false);
-    }
+        @Test
+        void testMultipleCopiesWhenUpfrontUserStoreWriteFails() {
+            checkRetrieve(false, false, false);
+        }
 
-    @Test
-    void testNonSftpMultipleCopiesWhenUpfrontUserStoreWriteFails() {
-        setupNonSftpUserStore();
-        checkRetrieve(false, false, false);
     }
 
     private Retrieve getRetrieveForTest(boolean singleCopy) {
@@ -184,25 +213,23 @@ public class RetrieveTest {
         Retrieve retrieve = getRetrieveForTest(singleCopy);
 
         // override the clock with a fixed clock for testing
-        when(retrieve.getClock()).thenReturn(TestClockConfig.TEST_CLOCK);
-        if (upfrontUserStoreWriteSucceeds) {
-            if (singleCopy) {
-                lenient().doNothing().when(retrieve).singleCopy(
-                        argContext.capture(),
-                        argTarFileName.capture(),
-                        argTarFile.capture(),
-                        argArchiveFs.capture(),
-                        argUserStoreFs.capture(),
-                        argRetrieveTimestampDirName.capture());
-            } else {
-                lenient().doNothing().when(retrieve).multipleCopies(
-                        argContext.capture(),
-                        argTarFileName.capture(),
-                        argTarFile.capture(),
-                        argArchiveFs.capture(),
-                        argUserStoreFs.capture(),
-                        argRetrieveTimestampDirName.capture());
-            }
+        lenient().when(retrieve.getClock()).thenReturn(TestClockConfig.TEST_CLOCK);
+        if (singleCopy) {
+            lenient().doNothing().when(retrieve).singleCopy(
+                    argContext.capture(),
+                    argTarFileName.capture(),
+                    argTarFile.capture(),
+                    argArchiveFs.capture(),
+                    argUserStoreFs.capture(),
+                    argTimestampDirName2.capture());
+        } else {
+            lenient().doNothing().when(retrieve).multipleCopies(
+                    argContext.capture(),
+                    argTarFileName.capture(),
+                    argTarFile.capture(),
+                    argArchiveFs.capture(),
+                    argUserStoreFs.capture(),
+                    argTimestampDirName2.capture());
         }
 
         try (MockedStatic<StorageClassUtils> storageClassUtilsStatic = Mockito.mockStatic(StorageClassUtils.class)) {
@@ -228,13 +255,14 @@ public class RetrieveTest {
                 when(mNonSftpUserStore.getUsableSpace()).thenReturn(10_000L);
                 when(mNonSftpUserStore.exists(any())).thenReturn(true);
                 when(mNonSftpUserStore.isDirectory(any())).thenReturn(true);
+
             }
 
             if (useSftpUserStore) {
                 if (upfrontUserStoreWriteSucceeds) {
-                    when(mSftpUserStore.store(any(), any(), any(), argSftpUserStoreTimestampDirName.capture())).thenReturn("STORED");
+                    when(mSftpUserStore.store(any(), any(), any(), argTimestampDirName1.capture())).thenReturn("STORED");
                 } else {
-                    when(mSftpUserStore.store(any(), any(), any(), argSftpUserStoreTimestampDirName.capture())).thenThrow(new RuntimeException("UserStoreFS : store failed"));
+                    when(mSftpUserStore.store(any(), any(), any(), argTimestampDirName1.capture())).thenThrow(new RuntimeException("UserStoreFS : store failed"));
                 }
             } else {
                 if (upfrontUserStoreWriteSucceeds) {
@@ -254,17 +282,12 @@ public class RetrieveTest {
                 }
             }
 
+
             if (useSftpUserStore) {
                 // Check that we always store the DataVault hidden file on the userstore regardless of singleCopy or multipleCopies
-                verify(mSftpUserStore).getUsableSpace();
-                verify(mSftpUserStore).exists(any());
-                verify(mSftpUserStore).isDirectory(any());
-                verify(mSftpUserStore).store(any(), argDataVaultHiddenFile.capture(), any(), any());
+                verify(mSftpUserStore).store(eq(TEST_RETRIEVE_PATH), argDataVaultHiddenFile.capture(), any(Progress.class), eq(TEST_TIMESTAMP_DIR_NAME));
             } else {
-                verify(mNonSftpUserStore).getUsableSpace();
-                verify(mNonSftpUserStore).exists(any());
-                verify(mNonSftpUserStore).isDirectory(any());
-                verify(mNonSftpUserStore).store(any(), argDataVaultHiddenFile.capture(), any());
+                verify(mNonSftpUserStore).store(eq(TEST_RETRIEVE_PATH), argDataVaultHiddenFile.capture(), any(Progress.class));
             }
 
             if (upfrontUserStoreWriteSucceeds) {
@@ -286,20 +309,22 @@ public class RetrieveTest {
                 if (useSftpUserStore) {
                     assertThat(actualUserStoreFs).isEqualTo(mSftpUserStore);
 
-                    String actualSftpUserStoreTimestampDirName = argSftpUserStoreTimestampDirName.getValue();
-                    assertThat(actualSftpUserStoreTimestampDirName).isEqualTo(TEST_TIMESTAMP_DIR_NAME);
+                    String actualTimestampDir1 = argTimestampDirName1.getValue();
+                    String actualTimestampDir2 = argTimestampDirName2.getValue();
 
+                    assertThat(actualTimestampDir1).isEqualTo(actualTimestampDir2);
+                    assertThat(actualTimestampDir1).isEqualTo(TEST_TIMESTAMP_DIR_NAME);
+                    
                     assertThat(argDataVaultHiddenFile.getValue().getName()).isEqualTo(Retrieve.DATA_VAULT_HIDDEN_FILE_NAME);
                 } else {
                     assertThat(actualUserStoreFs).isEqualTo(mNonSftpUserStore);
+
                 }
-                String actualRetrieveTimestampDir = argRetrieveTimestampDirName.getValue();
-                assertThat(actualRetrieveTimestampDir).isEqualTo(TEST_TIMESTAMP_DIR_NAME);
 
                 if (singleCopy) {
-                    verify(retrieve).singleCopy(any(), any(), any(), any(), any(), any());
+                    verify(retrieve).singleCopy(actualContext, actualTarFileName, actualTarFile, actualArchiveFs, actualUserStoreFs, TEST_TIMESTAMP_DIR_NAME);
                 } else {
-                    verify(retrieve).multipleCopies(any(), any(), any(), any(), any(), any());
+                    verify(retrieve).multipleCopies(actualContext, actualTarFileName, actualTarFile, actualArchiveFs, actualUserStoreFs, TEST_TIMESTAMP_DIR_NAME);
                 }
 
                 checkErrorMessages("Job states: 5", "Deposit retrieve started", "Job progress update");
@@ -408,12 +433,8 @@ public class RetrieveTest {
                     "Deposit retrieve started",
                     "Not enough free space to retrieve data!",
                     "Data retrieve failed: Not enough free space to retrieve data!");
-            verify(mSftpUserStore).exists(any());
-            verify(mSftpUserStore).isDirectory(any());
-            verify(mSftpUserStore).getUsableSpace();
         }
     }
-
     @Test
     @SneakyThrows
     void testProblemWithUserStoreGetUsableSpace() {
@@ -446,10 +467,6 @@ public class RetrieveTest {
                     "Deposit retrieve started",
                     "Unable to determine free space",
                     "Data retrieve failed: problemGettingUsableSpace!");
-
-            verify(mSftpUserStore).exists(any());
-            verify(mSftpUserStore).isDirectory(any());
-            verify(mSftpUserStore).getUsableSpace();
         }
     }
 
@@ -470,58 +487,194 @@ public class RetrieveTest {
         lenient().when(mSftpUserStore.isDirectory(TEST_RETRIEVE_PATH)).thenReturn(true);
     }
 
+    @Nested
+    class RetrieveTargetErrorTests{
 
-    @Test
-    @SneakyThrows
-    void testRetrieveTargetDoesNotExist() {
-        when(mSftpUserStore.exists(TEST_RETRIEVE_PATH)).thenReturn(false);
-        checkTargetDirectoryError();
-        verify(mSftpUserStore).exists(TEST_RETRIEVE_PATH);
-        verify(mSftpUserStore, never()).isDirectory(TEST_RETRIEVE_PATH);
-    }
+        @Test
+        @SneakyThrows
+        void testRetrieveTargetDoesNotExist() {
+            when(mSftpUserStore.exists(TEST_RETRIEVE_PATH)).thenReturn(false);
+            checkTargetDirectoryError();
+            verify(mSftpUserStore).exists(TEST_RETRIEVE_PATH);
+            verify(mSftpUserStore, never()).isDirectory(TEST_RETRIEVE_PATH);
+        }
 
-    @Test
-    @SneakyThrows
-    void testRetrieveTargetIsNotADirectory() {
-        when(mSftpUserStore.exists(TEST_RETRIEVE_PATH)).thenReturn(true);
-        when(mSftpUserStore.isDirectory(TEST_RETRIEVE_PATH)).thenReturn(false);
-        checkTargetDirectoryError();
-        verify(mSftpUserStore).exists(TEST_RETRIEVE_PATH);
-        verify(mSftpUserStore).isDirectory(TEST_RETRIEVE_PATH);
-    }
+        @Test
+        @SneakyThrows
+        void testRetrieveTargetIsNotADirectory() {
+            when(mSftpUserStore.exists(TEST_RETRIEVE_PATH)).thenReturn(true);
+            when(mSftpUserStore.isDirectory(TEST_RETRIEVE_PATH)).thenReturn(false);
+            checkTargetDirectoryError();
+            verify(mSftpUserStore).exists(TEST_RETRIEVE_PATH);
+            verify(mSftpUserStore).isDirectory(TEST_RETRIEVE_PATH);
+        }
 
-    void checkTargetDirectoryError() {
-        Retrieve retrieve = getRetrieveForTest(true);
-        try (MockedStatic<StorageClassUtils> storageClassUtilsStatic = Mockito.mockStatic(StorageClassUtils.class)) {
-            storageClassUtilsStatic.when(() -> StorageClassUtils.createStorage(any(), any(), any(), any())).thenAnswer(invocation -> {
-                String storageClassName = invocation.getArgument(0, String.class);
-                if (storageClassName.equals("USER_FILE_STORE_1_CLASS")) {
-                    return mSftpUserStore;
-                } else {
-                    return mArchiveFS;
+        void checkTargetDirectoryError() {
+            Retrieve retrieve = getRetrieveForTest(true);
+            try (MockedStatic<StorageClassUtils> storageClassUtilsStatic = Mockito.mockStatic(StorageClassUtils.class)) {
+                storageClassUtilsStatic.when(() -> StorageClassUtils.createStorage(any(), any(), any(), any())).thenAnswer(invocation -> {
+                    String storageClassName = invocation.getArgument(0, String.class);
+                    if (storageClassName.equals("USER_FILE_STORE_1_CLASS")) {
+                        return mSftpUserStore;
+                    } else {
+                        return mArchiveFS;
+                    }
+                });
+
+                try {
+                    retrieve.performAction(mContext);
+                    fail("exception expected!");
+                } catch (RuntimeException ex) {
+                    assertThat(ex).hasMessage("Target directory not found or is not a directory ! [retrieve-path]");
                 }
-            });
 
-            try {
-                retrieve.performAction(mContext);
-                fail("exception expected!");
-            } catch (RuntimeException ex) {
-                assertThat(ex).hasMessage("Target directory not found or is not a directory ! [retrieve-path]");
+                checkErrorMessages("Job states: 5",
+                        "Deposit retrieve started",
+                        "Target directory not found or is not a directory ! [retrieve-path]",
+                        "Data retrieve failed: Target directory not found or is not a directory ! [retrieve-path]"
+                );
             }
-
-            checkErrorMessages("Job states: 5",
-                    "Deposit retrieve started",
-                    "Target directory not found or is not a directory ! [retrieve-path]",
-                    "Data retrieve failed: Target directory not found or is not a directory ! [retrieve-path]"
-            );
         }
     }
 
-    @AfterEach
-    void tearDown() {
-        Mockito.verifyNoMoreInteractions(mSftpUserStore, mSftpUserStore);
-    }
+    @Nested
+    class UserFsRetrieveTests {
 
+        private static final int MAX_ATTEMPTS = 4;
+
+        @TempDir
+        private File payloadDir;
+
+
+        ch.qos.logback.classic.Logger getRetryLogger() {
+            @SuppressWarnings("UnnecessaryLocalVariable")
+            ch.qos.logback.classic.Logger result = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(TwoSpeedRetry.class);
+            return result;
+        }
+
+        final ListAppender<ILoggingEvent> logBackListAppender = new ListAppender<>();
+
+        @Mock
+        Device mUserFs;
+
+        @BeforeEach
+        void setup() throws Exception {
+
+            logBackListAppender.start();
+            getRetryLogger().addAppender(logBackListAppender);
+
+
+            assertThat(payloadDir).exists();
+
+            File file1 = new File(payloadDir, "file1.txt");
+            File file2 = new File(payloadDir, "file2.txt");
+            File file3 = new File(payloadDir, "file3.txt");
+
+            writeToFile(file1, "this is file 1");
+            writeToFile(file2, "this is file 2");
+            writeToFile(file3, "this is file 3");
+
+        }
+
+        @AfterEach
+        void tearDown() {
+            logBackListAppender.stop();
+            getRetryLogger().detachAppender(logBackListAppender);
+        }
+
+        private void writeToFile(File file, String contents) throws Exception {
+            try (FileWriter fw = new FileWriter(file)) {
+                fw.write(contents);
+            }
+            assertThat(file).exists();
+        }
+
+        @ParameterizedTest
+        @ValueSource(ints = {1, 2, 3, 4})
+        void testSucceedsIfNthAttemptWorks(int attemptThatCopyFilesWorks) throws Exception {
+            checkCopyFilesToUserFs(attemptThatCopyFilesWorks);
+
+            if (attemptThatCopyFilesWorks == MAX_ATTEMPTS) {
+                List<String> logMessages = this.logBackListAppender.list.stream()
+                        .map(ILoggingEvent::getFormattedMessage)
+                        .collect(Collectors.toList());
+
+                assertThat(logMessages).isEqualTo(Arrays.asList(
+                        "Task[toUserFs - file1.txt] Initial attempt",
+                        "Task[toUserFs - file1.txt] Backoff! attempts so far [1], retry in [010ms]",
+                        "Task[toUserFs - file1.txt] Sleeping for [010ms]",
+                        // CHANGE TO 2nd Backoff Delay of 20ms
+                        "Task[toUserFs - file1.txt] Backoff! attempts so far [2], retry in [020ms]",
+                        "Task[toUserFs - file1.txt] Sleeping for [020ms]",
+                        "Task[toUserFs - file1.txt] Backoff! attempts so far [3], retry in [020ms]",
+                        "Task[toUserFs - file1.txt] Sleeping for [020ms]",
+                        "Task[toUserFs - file1.txt] Succeeded after [4] attempts",
+
+                        "Task[toUserFs - file2.txt] Initial attempt",
+                        "Task[toUserFs - file2.txt] Backoff! attempts so far [1], retry in [010ms]",
+                        "Task[toUserFs - file2.txt] Sleeping for [010ms]",
+                        // CHANGE TO 2nd Backoff Delay of 20ms
+                        "Task[toUserFs - file2.txt] Backoff! attempts so far [2], retry in [020ms]",
+                        "Task[toUserFs - file2.txt] Sleeping for [020ms]",
+                        "Task[toUserFs - file2.txt] Backoff! attempts so far [3], retry in [020ms]",
+                        "Task[toUserFs - file2.txt] Sleeping for [020ms]",
+
+                        "Task[toUserFs - file2.txt] Succeeded after [4] attempts",
+                        "Task[toUserFs - file3.txt] Initial attempt",
+                        "Task[toUserFs - file3.txt] Backoff! attempts so far [1], retry in [010ms]",
+                        "Task[toUserFs - file3.txt] Sleeping for [010ms]",
+                        // CHANGE TO 2nd Backoff Delay of 20ms
+                        "Task[toUserFs - file3.txt] Backoff! attempts so far [2], retry in [020ms]",
+                        "Task[toUserFs - file3.txt] Sleeping for [020ms]",
+                        "Task[toUserFs - file3.txt] Backoff! attempts so far [3], retry in [020ms]",
+                        "Task[toUserFs - file3.txt] Sleeping for [020ms]",
+                        "Task[toUserFs - file3.txt] Succeeded after [4] attempts"
+                ));
+            }
+        }
+
+        @SuppressWarnings("CodeBlock2Expr")
+        @Test
+        void testFailsAfter4FailedAttempts() {
+            assertThatThrownBy(() -> {
+                checkCopyFilesToUserFs(5);
+            }).isInstanceOf(Exception.class).hasMessage("Failing on [file1.txt] attempt[4]");
+        }
+
+        void checkCopyFilesToUserFs(int attemptThatCopyWorksOn) throws Exception {
+            Progress progress = new Progress();
+            Map<String, String> properties = new HashMap<>();
+            properties.put(PropNames.USER_FS_RETRIEVE_MAX_ATTEMPTS, String.valueOf(MAX_ATTEMPTS));
+            properties.put(PropNames.USER_FS_RETRIEVE_DELAY_MS_1, "10");
+            properties.put(PropNames.USER_FS_RETRIEVE_DELAY_MS_2, "20");
+            Retrieve ret = new Retrieve();
+            ret.setupUserFsTwoSpeedRetry(properties);
+
+            Map<File, Integer> attemptCountsPerFile = new HashMap<>();
+            doAnswer(invocation -> {
+                assertThat(invocation.getArguments()).hasSize(3);
+                String path = invocation.getArgument(0, String.class);
+                File argFile = invocation.getArgument(1, File.class);
+                Progress argProgress = invocation.getArgument(2, Progress.class);
+
+                assertThat(argProgress).isSameAs(progress);
+
+                attemptCountsPerFile.merge(argFile, 1, Integer::sum);
+
+                int attempts = attemptCountsPerFile.get(argFile);
+
+                if (attempts == attemptThatCopyWorksOn) {
+                    argProgress.incFileCount(1);
+                    return path;
+                }
+                Path relativePath = payloadDir.toPath().relativize(argFile.toPath());
+                throw new Exception(String.format("Failing on [%s] attempt[%d]", relativePath, attempts));
+
+            }).when(mUserFs).store(any(), any(), any());
+
+            ret.copyFilesToUserFs(progress, payloadDir, mUserFs, 123_3456L, TEST_TIMESTAMP_DIR_NAME);
+        }
+    }
 }
 
 

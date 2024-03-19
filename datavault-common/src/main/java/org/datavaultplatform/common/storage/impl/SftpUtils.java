@@ -1,13 +1,10 @@
 package org.datavaultplatform.common.storage.impl;
 
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
 import java.time.Clock;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import lombok.SneakyThrows;
 import org.springframework.util.Assert;
