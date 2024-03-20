@@ -21,6 +21,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -834,6 +835,27 @@ public class RestService implements NotifyLogoutService, NotifyLoginService, Eva
         ResponseEntity<CreateRetentionPolicy> response = put(brokerURL + "/admin/retentionpolicies", CreateRetentionPolicy.class, createRetentionPolicy);
         return response.getBody();
     }
+
+    public String sizeOfSelectedFiles(String[] filePaths) {
+        StringBuilder parameters = new StringBuilder("?");
+
+        for (int i=0; i< filePaths.length; i++){
+            String filePath = filePaths[i];
+            if (!filePath.startsWith("/")) {
+                filePath = "/" + filePath;
+            }
+            parameters.append("filepath=").append(filePath).append("&");
+        }
+
+        logger.info("parameters: " + parameters);
+
+        ResponseEntity<String> response = get(brokerURL + "/sizeofselectedfiles" + parameters, String.class);
+
+        logger.info("return: " + response.getBody());
+
+        return response.getBody();
+    }
+
 
 
 }

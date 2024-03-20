@@ -209,6 +209,7 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 			LOGGER.error("Object does not exists in Oracle Cloud Storage " + e.getMessage());
 		}
 	}
+	
 
 	/*private String getContainerName() throws Exception {
 		Properties prop = this.getProperties();
