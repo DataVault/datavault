@@ -157,7 +157,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
 
         modelMap.put("archivestores", Arrays.asList(store1, store2));
         String html = getHtml("admin/archivestores/index.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         displayFormFields(doc,"add-archivestoreLocal-form");
         //check title
@@ -171,7 +171,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         ModelMap modelMap = getModelMap();
         modelMap.put("deposits", Collections.emptyList());
         String html = getHtml("admin/audits/deposits.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
         displayFormFields(doc, "");
 
         //check title
@@ -218,7 +218,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("audits", Arrays.asList(audit1, audit2));
 
         String html = getHtml("admin/audits/index.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         noFormFields(doc);
 
@@ -234,7 +234,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
 
         modelMap.put("billingDetails", info);
         String html = getHtml("admin/billing/billingDetails.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         displayFormFields(doc,"update-billingDetails-form");
 
@@ -262,7 +262,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
 
         modelMap.put("billingDetails", info);
         String html = getHtml("admin/billing/billingDetailsBudget.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         displayFormFields(doc,"update-billingDetails-form");
 
@@ -289,7 +289,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
 
         modelMap.put("billingDetails", info);
         String html = getHtml("admin/billing/billingDetailsBuyNewSlice.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         displayFormFields(doc,"update-billingDetails-form");
 
@@ -315,7 +315,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
 
         modelMap.put("billingDetails", info);
         String html = getHtml("admin/billing/billingDetailsFeeWaiver.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         displayFormFields(doc,"update-billingDetails-form");
 
@@ -341,7 +341,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
 
         modelMap.put("billingDetails", info);
         String html = getHtml("admin/billing/billingDetailsFundingNoDoNotKNow.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         displayFormFields(doc,"update-billingDetails-form");
 
@@ -368,7 +368,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
 
         modelMap.put("billingDetails", info);
         String html = getHtml("admin/billing/billingDetailsGrant.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         displayFormFields(doc,"update-billingDetails-form");
 
@@ -396,7 +396,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
 
         modelMap.put("billingDetails", info);
         String html = getHtml("admin/billing/billingDetailsNA.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         displayFormFields(doc, "update-billingDetails-form");
 
@@ -422,7 +422,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
 
         modelMap.put("billingDetails", info);
         String html = getHtml("admin/billing/billingDetailsSlice.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         displayFormFields(doc, "update-billingDetails-form");
 
@@ -439,7 +439,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
 
         modelMap.put("billingDetails", info);
         String html = getHtml("admin/billing/billingDetailsWilLPay.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         displayFormFields(doc, "update-billingDetails-form");
 
@@ -472,7 +472,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("numberOfPages",2);
 
         String html = getHtml("admin/billing/index.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         displayFormFields(doc, "search-vaults");
 
@@ -572,7 +572,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("orderVaultId", "orderVaultIdABC");
 
         String html = getHtml("admin/deposits/index.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         displayFormFields(doc, "search-vaults");
 
@@ -592,7 +592,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
 
         modelMap.put("events", Arrays.asList(event1, event2));
         String html = getHtml("admin/events/index.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         noFormFields(doc);
 
@@ -631,12 +631,13 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("policies", Arrays.asList(policy1, policy2));
 
         String html = getHtml("admin/pendingVaults/edit/editPendingVault.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         displayFormFields(doc, "pendingvault-edit-form");
 
         //check title
         checkTitle(doc, "Admin - Edit Pending Vault");
+        checkPolicyInfoOptions(doc);
         outputHtml(html);
 
     }
@@ -720,7 +721,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("pendingVaults", Arrays.asList(vault1, vault2));
 
         String html = getHtml("admin/pendingVaults/confirmed.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         displayFormFields(doc, "search-pendingvaults");
 
@@ -739,7 +740,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("confirmedVaultsTotal", 100);
 
         String html = getHtml("admin/pendingVaults/index.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         noFormFields(doc);
 
@@ -776,7 +777,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("pendingVaults", Arrays.asList(vault1, vault2));
 
         String html = getHtml("admin/pendingVaults/saved.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         displayFormFields(doc, "search-pendingvaults");
 
@@ -807,7 +808,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("group", group);
 
         String html = getHtml("admin/pendingVaults/summary.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         displayFormFields(doc, "create-vault");
 
@@ -826,7 +827,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("retentionPolicy", policy1);
 
         String html = getHtml("admin/retentionpolicies/add.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         displayFormFields(doc, "add-rentention-policy-form");
 
@@ -845,7 +846,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("retentionPolicy", policy1);
 
         String html = getHtml("admin/retentionpolicies/edit.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         displayFormFields(doc,"add-rentention-policy-form");
 
@@ -866,7 +867,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("policies", Arrays.asList(policy1, policy2));
 
         String html = getHtml("admin/retentionpolicies/index.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         noFormFields(doc);
 
@@ -897,7 +898,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("retrieves", Arrays.asList(ret1, ret2));
 
         String html = getHtml("admin/retrieves/index.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         noFormFields(doc);
 
@@ -971,7 +972,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("createRetentionPolicy", createRetentionPolicy);
 
         String html = getHtml("admin/reviews/create.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         displayFormFields(doc, "create-review");
 
@@ -991,7 +992,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("vaults", Arrays.asList(vault1, vault2));
 
         String html = getHtml("admin/reviews/index.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         noFormFields(doc);
 
@@ -1006,7 +1007,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         ModelMap modelMap = getModelMap();
 
         String html = getHtml("admin/roles/isadmin/index.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         displayFormFields(doc, "create-form");
 
@@ -1021,7 +1022,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         ModelMap modelMap = getModelMap();
 
         String html = getHtml("admin/roles/index.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         displayFormFields(doc, "create-role");
 
@@ -1045,7 +1046,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
 
         modelMap.put("schools", Arrays.asList(group1, group2));
         String html = getHtml("admin/schools/index.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         noFormFields(doc);
 
@@ -1093,7 +1094,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("canManageSchoolRoleAssignments", true);
 
         String html = getHtml("admin/schools/schoolRoles.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         displayFormFields(doc, "create-form");
 
@@ -1120,7 +1121,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("user", user1);
 
         String html = getHtml("admin/users/create.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         displayFormFields(doc, "create-user");
 
@@ -1147,7 +1148,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("user", user1);
 
         String html = getHtml("admin/users/edit.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         displayFormFields(doc,"edit-user");
 
@@ -1184,7 +1185,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("query", "admin users");
 
         String html = getHtml("admin/users/index.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         displayFormFields(doc, "search-users");
 
@@ -1217,7 +1218,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("vaults", Arrays.asList(vault1, vault2));
 
         String html = getHtml("admin/vaults/index.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         displayFormFields(doc, "search-vaults");
 
@@ -1316,7 +1317,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("group", group);
 
         String html = getHtml("admin/vaults/vault.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         displayFormFields(doc, "");
 
@@ -1360,7 +1361,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.addAttribute("archivestorescount", 114);
 
         String html = getHtml("admin/index.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         noFormFields(doc);
 
@@ -1374,7 +1375,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         ModelMap modelMap = getModelMap();
 
         String html = getHtml("auth/confirmation.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         noFormFields(doc);
 
@@ -1388,7 +1389,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         ModelMap modelMap = getModelMap();
 
         String html = getHtml("auth/denied.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         noFormFields(doc);
 
@@ -1405,7 +1406,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("success", "Success Message");
 
         String html = getHtml("auth/login.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         displayFormFields(doc, "");
 
@@ -1434,7 +1435,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("vault", vault1);
 
         String html = getHtml("deposits/create.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         displayFormFields(doc,"add-from-storage-form");
 
@@ -1512,7 +1513,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("retrieves", Arrays.asList(ret1, ret2));
 
         String html = getHtml("deposits/deposit.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         noFormFields(doc);
 
@@ -1576,7 +1577,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("retrieve", ret1);
 
         String html = getHtml("deposits/retrieve.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         displayFormFields(doc, "retrieve-deposit");
 
@@ -1642,7 +1643,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         ModelMap modelMap = getModelMap();
 
         String html = getHtml("feedback/index.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         displayFormFields(doc,"feedback");
 
@@ -1656,7 +1657,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         ModelMap modelMap = getModelMap();
 
         String html = getHtml("feedback/sent.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         noFormFields(doc);
 
@@ -1706,7 +1707,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("filestoresSFTP", Arrays.asList(fs1, fs2));
 
         String html = getHtml("filestores/index.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         displayFormFields(doc, "add-filestoreSFTP-form");
 
@@ -1734,7 +1735,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("groups", Arrays.asList(group1, group2));
 
         String html = getHtml("groups/index.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         noFormFields(doc);
 
@@ -1751,7 +1752,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("link", "link-01");
 
         String html = getHtml("help/index.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         noFormFields(doc);
 
@@ -1765,7 +1766,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         ModelMap modelMap = getModelMap();
 
         String html = getHtml("vaults/confirmed.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         noFormFields(doc);
 
@@ -1793,7 +1794,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
 
 
         String html = getHtml("vaults/create.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         displayFormFields(doc, "create-vault");
 
@@ -1844,7 +1845,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
 
 
         String html = getHtml("vaults/index.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         noFormFields(doc);
 
@@ -1881,6 +1882,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
                 break;
             default:
         }
+        modelMap.put("policies", Arrays.asList(getRetentionPolicy1(), getRetentionPolicy2()));
         modelMap.put("groups", Arrays.asList(group1, group2));
         modelMap.put("vault", vault);
         modelMap.put("errors", Arrays.asList("error1", "error2"));
@@ -1890,10 +1892,11 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("loggedInAs", "loggedInAs1");
 
         String html = getHtml("vaults/newCreatePrototype.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         displayFormFields(doc,"vault-creation-form");
-
+        checkPolicyInfoOptions(doc);
+        
         //check title
         checkTitle(doc, "Vaults - Create");
         outputHtml(html);
@@ -1909,7 +1912,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("vaults", Arrays.asList(vault1, vault2));
 
         String html = getHtml("vaults/userVaults.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         noFormFields(doc);
 
@@ -2003,7 +2006,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("deposits", Arrays.asList(deposit1, deposit2));
 
         String html = getHtml("vaults/vault.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         displayFormFields(doc,"add-data-manager-form");
 
@@ -2018,7 +2021,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         ModelMap modelMap = getModelMap();
 
         String html = getHtml("index.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         noFormFields(doc);
 
@@ -2033,7 +2036,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         ModelMap modelMap = getModelMap();
 
         String html = getHtml("secure.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         noFormFields(doc);
 
@@ -2051,7 +2054,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("system","system01");
 
         String html = getHtml("welcome.html", modelMap);
-        Document doc = Jsoup.parse(html);
+        Document doc = getDocument(html);
 
         noFormFields(doc);
 
@@ -2385,12 +2388,13 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         policy1.setInEffectDate(now);
         policy1.setEndDate(now);
         policy1.setDataGuidanceReviewed(now);
+        assertThat(policy1.getPolicyInfo()).isEqualTo("111-123");
         return policy1;
     }
 
     private RetentionPolicy getRetentionPolicy2() {
         RetentionPolicy policy2 = new RetentionPolicy();
-        policy2.setId(111);
+        policy2.setId(222);
         policy2.setName("policy-two");
         policy2.setDescription("policy2-description");
         policy2.setUrl("https://info.org/retention-policy-2");
@@ -2400,6 +2404,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         policy2.setInEffectDate(now);
         policy2.setEndDate(now);
         policy2.setDataGuidanceReviewed(now);
+        assertThat(policy2.getPolicyInfo()).isEqualTo("222-234");
         return policy2;
     }
 
@@ -2435,7 +2440,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
 
         vault.setPaymentDetails("project-details");
         vault.setPendingID("pending-id-123");
-        vault.setPolicyInfo("policy-info-1");
+        vault.setPolicyInfo("111-123");
         vault.setProjectTitle("project-title");
         vault.setPureLink(true);
         vault.setReviewDate(now);
@@ -2457,6 +2462,67 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
             model.mergeAttributes(tl);
             return path;
         }
+    }
+
+    private Document getDocument(String html) {
+        Document doc = Jsoup.parse(html);
+        checkCssLinks(doc);
+        checkScriptTags(doc);
+        return doc;
+    }
+    
+    void checkCssLinks(Document doc) {
+        Elements links = doc.selectXpath("//link");
+        for(Element link : links) {
+            String type = link.attr("type");
+            assertThat(type).containsAnyOf("text/css","image/ico");
+            if(type.equals("text/css")){
+                String href = link.attr("href");
+                assertThat(href).endsWith("css");
+                assertThat(link.hasAttr("src")).isFalse();
+            }
+        }
+    }
+    void checkScriptTags(Document doc) {
+        Elements scripts = doc.selectXpath("//script");
+        for(Element script : scripts) {
+
+            boolean hasType = script.hasAttr("type");
+            if (hasType) {
+                String type = script.attr("type");
+                assertThat(type).containsAnyOf("text/javascript","application/javascript");
+            }
+            boolean hasSource = script.hasAttr("src");
+            if (hasSource) {
+                String src = script.attr("src");
+                assertThat(src).endsWith(".js");
+            } else {
+                assertThat(hasType).isTrue();
+            }
+        }
+    }
+    
+    void checkPolicyInfoOptions(Document doc){
+        Elements policyInfoSelects = doc.selectXpath("//select[@id='policyInfo']");
+        assertThat(policyInfoSelects.size()).isOne();
+        Element policyInfoSelect = policyInfoSelects.first();
+        Elements options = policyInfoSelect.children();
+        for(int i=0;i<options.size();i++){
+            Element option = options.get(i);
+            if(i==1){
+                checkOption(option, "111-123",true);
+            }
+            else if(i==2){
+                checkOption(option, "222-234",false);
+            }
+        }
+        
+    }
+    void checkOption(Element option, String value, boolean selected){
+        assertThat(option.tag().getName().equals("option"));
+        assertThat(option.val().equals(value));
+        boolean isSelected = option.hasAttr("selected");
+        assertThat(isSelected).isEqualTo(selected);
     }
 
 }

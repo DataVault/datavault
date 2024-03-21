@@ -151,7 +151,7 @@
                     <p><label id="deposit-size" class="text-muted"></label></p>
                 </div>
                 
-                <script th:inline="javascript">
+                <script th:inline="javascript" type="text/javascript">
                     var filesizeSeq = 0;
                     var baseURL = /*[[@{/files}]]*/ 'replaced-by-tl';
                     
@@ -295,7 +295,7 @@
     </div>
 </div>
 
-<script th:inline="javascript">
+<script th:inline="javascript" type="text/javascript">
     $(function () {
 
         $('[data-toggle="popover"]').popover();

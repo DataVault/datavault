@@ -127,7 +127,7 @@
     <th:block th:if="${audits == null}">
         <div class="row">No Data Available</div>
     </th:block>
-    <script th:inline="javascript">
+    <script th:inline="javascript" type="text/javascript">
         $("button#audit").click(function(){
             var baseURL = /*[[@{/admin/deposits/audit}]]*/ 'replaced-by-tl';
             $.ajax({

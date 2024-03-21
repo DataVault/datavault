@@ -17,7 +17,7 @@
 
     <!-- jQuery UI js -->
     <script th:src="@{/resources/jquery-ui/jquery-ui.min.js}"></script>
-    <link th:src="@{/resources/jquery-ui/jquery-ui.min.css}" rel="stylesheet" type="text/css">
+    <link th:href="@{/resources/jquery-ui/jquery-ui.min.css}" rel="stylesheet" type="text/css">
 
     <!-- Bootstrap js -->
     <script th:src="@{/resources/bootstrap/js/bootstrap.min.js}"></script>
@@ -62,7 +62,7 @@
 
     <!-- Error Handler JS -->
     <script th:src="@{/resources/theme/js/ErrorHandler.js}"></script>
-    <script th:inline="javascript">
+    <script th:inline="javascript" type="text/javascript">
         var contextPath = /*[[@{/}]]*/ 'replaced-by-tl';
         ErrorHandler.initialiseSpringContextPath(contextPath);
     </script>

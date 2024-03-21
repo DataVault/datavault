@@ -20,10 +20,10 @@
             <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
                   title="Maximum 6,000 characters.">
                                                                 </span>
-            <textarea type="text" class="form-control"
-                    id="description"
-                    rows="4" cols="60"
-                    th:field="*{description}">
+            <textarea type="text" class="form-control" 
+                      id="description"
+                      rows="4" cols="60"
+                      th:field="*{description}">
             </textarea>
         </div>
 
@@ -35,8 +35,8 @@
                   title="This information will assist the university in ensuring the archive is kept for at least the minimum amount of time required by the funder(s). This field should be left blank if there is no grant associated with the work.&nbsp;">
             </span>
             <input type="text" id="grantEndDate" class="form-control date-picker" placeholder="yyyy-mm-dd"
-                   th:field="*{grantEndDate}"
-                   /><!--form-date-->
+                th:field="*{grantEndDate}"
+             /><!--form-date-->
              <span id="invalid-grant-end-date-span" style="font-size: 1.2em; font: bold; color: #f00; display: inline;"></span>
         </div>
 
@@ -60,11 +60,13 @@
                 <div class="col-md-12">
                     <select id="policyInfo" name="policyInfo" data-width="auto" class="form-control retentionPolicy-select selectpicker show-tick">
                         <option selected disabled data-hidden="true">Please choose a retention policy</option>
+                        <!--START-RP-->
                         <th:block th:each="retentionPolicy: ${policies}">
-                        <option th:value="|${retentionPolicy.getID()}-${retentionPolicy.minRetentionPeriod}|"
-                             th:selected="${vault?.policyInfo != null && vault?.policyInfo == retentionPolicy.getPolicyInfo()}"
-                        >[[${retentionPolicy.name}]] (Minimum period: [[${retentionPolicy.minRetentionPeriod}]])</option>
+                            <option th:value="${retentionPolicy.getPolicyInfo()}"
+                            th:selected="${vault?.policyInfo != null && vault?.policyInfo == retentionPolicy.getPolicyInfo()}"
+                            >[[${retentionPolicy.name}]] (Minimum period: [[${retentionPolicy.minRetentionPeriod}]])</option>
                         </th:block>
+                        <!--END-RP-->
                     </select>
                 </div>
             </div>
@@ -80,8 +82,8 @@
             <input type="text" class="form-control" id="reviewDate" placeholder="yyyy-mm-dd"
                    th:field="*{reviewDate}"
             /><!--form-date-->
-                    <span id="updated-review-date-span" style="font-size: 1.2em; font: bold; color: #006400; display: inline;"></span>
-                   <span id="invalid-review-date-span" style="font-size: 1.2em; font: bold; color: #f00; display: inline;"></span>
+                   <span id="updated-review-date-span" style="font-size: 1.2em; font: bold; color: #006400; display: inline;"></span>
+                   <span id="invalid-review-date-span" style="font-size: 1.2em; font: bold; color: #f00;    display: inline;"></span>
         </div>
 
         <div class="form-group required">
@@ -119,29 +121,29 @@
             <div class="radio">
                 <label>
                     <input type="radio" name="estimate" value="UNDER_100GB"
-                     th:checked="${vault?.estimate != null && vault?.estimate == 'UNDER_100GB'}"
-                > Under 100 GB
+                    th:checked="${vault?.estimate != null && vault?.estimate == 'UNDER_100GB'}"
+                    > Under 100 GB
                 </label>
             </div>
             <div class="radio">
                 <label>
                     <input type="radio" name="estimate" value="UNDER_10TB"
-                    th:checked="${vault?.estimate != null && vault?.estimate == 'UNDER_10TB'}"
-                > Between 100 GB and 10 TB
+                           th:checked="${vault?.estimate != null && vault?.estimate == 'UNDER_10TB'}"
+                    > Between 100 GB and 10 TB
                 </label>
             </div>
             <div class="radio">
                 <label>
                     <input type="radio" name="estimate" value="OVER_10TB"
-                    th:checked="${vault?.estimate != null && vault?.estimate == 'OVER_10TB'}"
-                > Over 10 TB
+                           th:checked="${vault?.estimate != null && vault?.estimate == 'OVER_10TB'}"
+                    > Over 10 TB
                 </label>
             </div>
             <div class="radio">
                 <label>
                     <input type="radio" name="estimate" value="UNKNOWN"
-                    th:checked="${vault?.estimate != null && vault?.estimate == 'UNKNOWN'}"
-                > Don’t know
+                           th:checked="${vault?.estimate != null && vault?.estimate == 'UNKNOWN'}"
+                    > Don’t know
                 </label>
             </div>
         </div>
@@ -158,15 +160,12 @@
             </textarea>
         </div>
     </div>
-    
+
     <button type="button" name="previous" class="previous action-button-previous btn btn-default" >&laquo; Previous</button>
     <a name="admin-pending-vault-summary" class="btn btn-primary" style="margin-bottom: 0;"
           th:href="@{|/admin/pendingVaults/summary/${vaultID}|}"><< Return Admin Pending Vault Summary</a>
     <button type="submit" name="save" value="Save" class="save action-button-previous btn btn-success" >
-       <span class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span> Save
+        <span class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span> Save
     </button>
-   
-
     <button type="button" name="next" class="next action-button btn btn-default">Next Step &raquo;</button>
-    
-    </fieldset>
+</fieldset>
