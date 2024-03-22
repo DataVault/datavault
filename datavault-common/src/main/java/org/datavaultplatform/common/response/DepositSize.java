@@ -11,6 +11,8 @@ public class DepositSize {
     private Long max;
     @ApiObjectField(description = "Whether the potential deposit is under the limit")
     private Boolean result;
+    @ApiObjectField(description = "The size of deposit as string with units.")
+    private String sizeWithUnits;
 
     public Long getMax() {
         return this.max;
@@ -27,4 +29,19 @@ public class DepositSize {
     public void setResult(Boolean result) {
         this.result = result;
     }
+
+    public String getSizeWithUnits() {
+        return sizeWithUnits;
+    }
+
+    public void setSizeWithUnits(String sizeWithUnits) {
+        this.sizeWithUnits = sizeWithUnits;
+    }
+
+    @Override
+    public String toString() {
+        return "DepositSize [max=" + max + ", result=" + result + ", sizeWithUnits=" + sizeWithUnits + "]";
+    }
+
+    
 }

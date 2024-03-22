@@ -16,9 +16,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.*;
 import org.datavaultplatform.common.util.DateTimeUtils;
 import org.hibernate.Hibernate;
 
@@ -102,12 +100,18 @@ public class RetentionPolicy {
         this.name = name;
     }
 
+    @JsonGetter
     public Integer getID() { return id; }
 
     public void setId(Integer id) {
         this.id = id;
     }
-
+    
+    @JsonSetter
+    public void setID(Integer id){
+        setId(id);
+    }
+    
     public void setName(String name) {
         this.name = name;
     }

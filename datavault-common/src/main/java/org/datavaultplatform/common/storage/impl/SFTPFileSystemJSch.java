@@ -199,11 +199,17 @@ public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
                 }
                 
                 String entryKey = path + PATH_SEPARATOR + entry.getFilename();
+                boolean canRead = canRead(entryKey);
+                boolean canWrite = canWrite(entryKey);
                 
                 FileInfo info = new FileInfo(entryKey,
                                              "", // Absolute path - unused?
                                              entry.getFilename(),
-                                             entry.getAttrs().isDir());
+                                             entry.getAttrs().isDir(),
+                                             canRead,
+                                             canWrite);
+
+                log.info(info.toString());
                 files.add(info);
                 
                 // Other useful properties:
@@ -402,4 +408,30 @@ public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
         return SftpUtils.getFullPath(rootPath, relativePath);
     }
 
+    @Override
+    public boolean canRead(String path) throws Exception {
+        return getPermissionsString(path).indexOf("r") > -1;
+    }
+
+    @Override
+	public boolean canWrite(String path) throws Exception {
+        return getPermissionsString(path).indexOf("w") > -1;
+    }
+
+    private String getPermissionsString(String path) throws Exception {
+        try {
+            Connect();
+            String fullPath = getFullPath(path);
+            final SftpATTRS attrs = channelSftp.stat(fullPath);
+            int unixPermissions = attrs.getPermissions();
+            String unixPermissionsString = attrs.getPermissionsString();
+            log.info("fullPath: " + fullPath + ", path: " + path + ", unixPermissions: " + unixPermissions + ", unixPermissionsString: " + unixPermissionsString);
+            return unixPermissionsString;
+        } catch (Exception e) {
+            log.error("unexpected exception", e);
+            throw e;
+        } finally {
+            Disconnect();
+        }
+    }
 }
