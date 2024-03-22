@@ -1,7 +1,7 @@
-# Created by David Hay 31Oct2022
+# Created by David Hay 31Oct2022 / Updated 20Mar2024
 # Used to create custom docker image for Jenkins docker builds
 #
-# used 'eclipse-temurin:8u345-b01-jdk' as base java8 image because it has addgroup/adduser/gpasswd
+# used 'eclipse-temurin:17.0.10_7-jdk' as base java17 image because it has addgroup/adduser/gpasswd
 #
 # added User[jenkins] and Groups[jenkins,docker]
 # added User[jenkins] to Group[docker]
@@ -10,9 +10,9 @@
 #
 # added tools jq, curl and ping to help with testing and diagnostics
 #
-# THIS SPECIFIC VERSION OF eclipse-temurin:8 works - dated 25Jan2023 (had problems with some other versions)
-#https://hub.docker.com/layers/library/eclipse-temurin/8-jdk/images/sha256-513e5bb69a4ab7c53d810340c5d247274aff7fed0021ca0ca8a46d881f5a16ee?context=explore
-FROM eclipse-temurin@sha256:513e5bb69a4ab7c53d810340c5d247274aff7fed0021ca0ca8a46d881f5a16ee
+# THIS SPECIFIC VERSION OF eclipse-temurin:17 works - dated 2024-01-16 (had problems with some other versions)
+#https://hub.docker.com/layers/library/eclipse-temurin/17.0.10_7-jdk/images/sha256-1ada72217fd0128dd372601d580f7968baea666fc0aa5de3d5a4ef472ceee50e?context=explore
+FROM eclipse-temurin@sha256:1ada72217fd0128dd372601d580f7968baea666fc0aa5de3d5a4ef472ceee50e
 ARG JENKINS_UID
 ARG JENKINS_GID
 ARG DOCKER_GID
