@@ -7,7 +7,6 @@ import org.datavaultplatform.common.request.CreateRetentionPolicy;
 import org.datavaultplatform.common.request.CreateVault;
 import org.datavaultplatform.common.response.*;
 import org.datavaultplatform.common.storage.impl.TivoliStorageManager;
-import org.datavaultplatform.webapp.config.GlobalDateTimeFormatInterceptor;
 import org.datavaultplatform.webapp.model.DepositReviewModel;
 import org.datavaultplatform.webapp.model.VaultReviewHistoryModel;
 import org.datavaultplatform.webapp.model.VaultReviewModel;
@@ -17,7 +16,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Comment;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.nodes.TextNode;
 import org.jsoup.select.Elements;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -40,11 +38,7 @@ import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ser.Serializers;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.LineNumberReader;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.*;
@@ -1111,7 +1105,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         user1.setFirstname("user1-first");
         user1.setLastname("user1-last");
         user1.setPassword("XXXX");
-        user1.setProperties(new HashMap<String, String>() {{
+        user1.setProperties(new HashMap<>() {{
             put("prop-1", "value-1");
             put("prop-2", "value-2");
         }});
@@ -1138,7 +1132,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         user1.setFirstname("user1-first");
         user1.setLastname("user1-last");
         user1.setPassword("XXXX");
-        user1.setProperties(new HashMap<String, String>() {{
+        user1.setProperties(new HashMap<>() {{
             put("prop-1", "value-1");
             put("prop-2", "value-2");
         }});
@@ -1166,7 +1160,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         user1.setLastname("user1-last");
         user1.setPassword("XXXX");
         user1.setEmail("user.one@example.com");
-        user1.setProperties(new HashMap<String, String>() {{
+        user1.setProperties(new HashMap<>() {{
             put("prop-A", "value-1");
             put("prop-B", "value-2");
         }});
@@ -1176,7 +1170,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         user2.setLastname("user2-last");
         user2.setPassword("XXXX");
         user2.setEmail("user.two@example.com");
-        user2.setProperties(new HashMap<String, String>() {{
+        user2.setProperties(new HashMap<>() {{
             put("prop-C", "value-3");
             put("prop-D", "value-4");
         }});
@@ -1682,7 +1676,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("sftpRootPath", "sftpRootPath4");
 
         FileStore fs1 = getFileStore("fs-id-1");
-        fs1.setProperties(new HashMap<String, String>() {{
+        fs1.setProperties(new HashMap<>() {{
             put("host", "host1");
             put("port", "port1");
             put("rootPath", "rootPath1");
@@ -1693,7 +1687,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         fs1.setUser(user);
 
         FileStore fs2 = getFileStore("fs-id-2");
-        fs2.setProperties(new HashMap<String, String>() {{
+        fs2.setProperties(new HashMap<>() {{
             put("host", "host2");
             put("port", "port2");
             put("rootPath", "rootPath2");
@@ -2321,7 +2315,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         user.setFirstname("user1-first");
         user.setLastname("user1-last");
         user.setPassword("XXXX");
-        user.setProperties(new HashMap<String, String>() {{
+        user.setProperties(new HashMap<>() {{
             put("prop-A", "value-1");
             put("prop-B", "value-2");
         }});
@@ -2334,7 +2328,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         user.setFirstname("user2-first");
         user.setLastname("user2-last");
         user.setPassword("XXXX");
-        user.setProperties(new HashMap<String, String>() {{
+        user.setProperties(new HashMap<>() {{
             put("prop-C", "value-3");
             put("prop-D", "value-4");
         }});

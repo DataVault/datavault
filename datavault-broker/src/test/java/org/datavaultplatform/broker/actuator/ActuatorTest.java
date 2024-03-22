@@ -9,7 +9,6 @@ import org.datavaultplatform.broker.services.FileStoreService;
 import org.datavaultplatform.broker.test.AddTestProperties;
 import org.datavaultplatform.broker.test.BaseDatabaseTest;
 import org.datavaultplatform.broker.test.TestClockConfig;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -113,11 +112,13 @@ public class ActuatorTest extends BaseDatabaseTest {
         .andReturn();
 
     String json = mvcResult.getResponse().getContentAsString();
-    Map<String,String> infoMap = mapper.createParser(json).readValueAs(Map.class);
+    try (var parser = mapper.createParser(json)) {
+      Map<String, String> infoMap = parser.readValueAs(Map.class);
 
-    assertTrue(infoMap.containsKey("current-time"));
-    String ct = infoMap.get("current-time");
-    assertEquals("Tue Mar 29 14:15:16 BST 2022",ct);
+      assertTrue(infoMap.containsKey("current-time"));
+      String ct = infoMap.get("current-time");
+      assertEquals("Tue Mar 29 14:15:16 BST 2022",ct);
+    }
   }
 
   @Test
@@ -129,16 +130,18 @@ public class ActuatorTest extends BaseDatabaseTest {
             .andReturn();
 
     String json = mvcResult.getResponse().getContentAsString();
-    Map<String,Object> infoMap = mapper.createParser(json).readValueAs(Map.class);
+    try (var parser = mapper.createParser(json)) {
+      Map<String,Object> infoMap = parser.readValueAs(Map.class);
 
-    String ct = (String)infoMap.get("timestamp");
-    assertEquals("2022-03-29T13:15:16.101Z",ct);
+      String ct = (String)infoMap.get("timestamp");
+      assertEquals("2022-03-29T13:15:16.101Z",ct);
 
-    assertTrue(infoMap.containsKey("memory"));
-    Map<String,Object> innerMap = (Map<String,Object>)infoMap.get("memory");
-    assertTrue(innerMap.containsKey("total"));
-    assertTrue(innerMap.containsKey("free"));
-    assertTrue(innerMap.containsKey("max"));
+      assertTrue(infoMap.containsKey("memory"));
+      Map<String,Object> innerMap = (Map<String,Object>)infoMap.get("memory");
+      assertTrue(innerMap.containsKey("total"));
+      assertTrue(innerMap.containsKey("free"));
+      assertTrue(innerMap.containsKey("max"));
 
+    }
   }
 }

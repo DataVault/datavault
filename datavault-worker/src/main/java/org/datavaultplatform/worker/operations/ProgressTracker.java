@@ -89,6 +89,7 @@ public class ProgressTracker implements Runnable {
     /* (non-Javadoc)
      * @see java.lang.Runnable#run()
      */
+    @SuppressWarnings("BusyWait")
     @Override
     public void run() {
         

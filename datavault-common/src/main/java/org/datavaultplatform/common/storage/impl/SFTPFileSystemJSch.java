@@ -410,12 +410,12 @@ public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
 
     @Override
     public boolean canRead(String path) throws Exception {
-        return getPermissionsString(path).indexOf("r") > -1;
+        return getPermissionsString(path).contains("r");
     }
 
     @Override
 	public boolean canWrite(String path) throws Exception {
-        return getPermissionsString(path).indexOf("w") > -1;
+        return getPermissionsString(path).contains("w");
     }
 
     private String getPermissionsString(String path) throws Exception {

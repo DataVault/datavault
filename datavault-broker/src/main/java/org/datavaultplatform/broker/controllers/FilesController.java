@@ -165,7 +165,7 @@ public class FilesController {
             // Start timing
             long start = System.nanoTime();
 
-            Set<String> storageIDSet = new HashSet<String>();
+            Set<String> storageIDSet = new HashSet<>();
             for (String filePath : filePaths) {
                 String fileStorageID = filePath.split("/")[1];
                 storageIDSet.add(fileStorageID);

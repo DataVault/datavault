@@ -16,14 +16,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * Used to test all is well when changing @Id generation annotations
  */
 public class UUIDUtils {
-    public static String PATTERN = "\\p{XDigit}{8}-\\p{XDigit}{4}-\\p{XDigit}{4}-\\p{XDigit}{4}-\\p{XDigit}{12}";
+    public static final String PATTERN = "\\p{XDigit}{8}-\\p{XDigit}{4}-\\p{XDigit}{4}-\\p{XDigit}{4}-\\p{XDigit}{12}";
 
     private static final String EXAMPLE_UUID = "f77b2f94-1426-4cfb-8601-256c962cf0b1";
 
     private static final String NIL_UUID  = "00000000-0000-0000-0000-000000000000";
     private static final String MAX_UUID  = "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF";
 
-    private static Predicate<String> UUID_TEST = Pattern.compile(PATTERN).asMatchPredicate();
+    private static final Predicate<String> UUID_TEST = Pattern.compile(PATTERN).asMatchPredicate();
 
     public static boolean isUUID(String value) {
         return usingUUID(value) && usingRegex(value);

@@ -97,17 +97,18 @@ public class ActuatorTest {
             .andReturn();
 
     String json = mvcResult.getResponse().getContentAsString();
-    Map<String,Object> infoMap = mapper.createParser(json).readValueAs(Map.class);
+    try (var parser = mapper.createParser(json)) {
+      Map<String,Object> infoMap = parser.readValueAs(Map.class);
 
-    String ct = (String)infoMap.get("timestamp");
-    Assertions.assertEquals("2022-03-29T13:15:16.101Z",ct);
+      String ct = (String)infoMap.get("timestamp");
+      Assertions.assertEquals("2022-03-29T13:15:16.101Z",ct);
 
-    assertTrue(infoMap.containsKey("memory"));
-    Map<String,Object> innerMap = (Map<String,Object>)infoMap.get("memory");
-    assertTrue(innerMap.containsKey("total"));
-    assertTrue(innerMap.containsKey("free"));
-    assertTrue(innerMap.containsKey("max"));
-
+      assertTrue(infoMap.containsKey("memory"));
+      Map<String,Object> innerMap = (Map<String,Object>)infoMap.get("memory");
+      assertTrue(innerMap.containsKey("total"));
+      assertTrue(innerMap.containsKey("free"));
+      assertTrue(innerMap.containsKey("max"));
+    }
   }
 
 }

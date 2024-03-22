@@ -14,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.services.UserKeyPairService.KeyPairInfo;
 import org.datavaultplatform.common.crypto.Encryption;
 import org.datavaultplatform.common.crypto.SshRsaKeyUtils;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
