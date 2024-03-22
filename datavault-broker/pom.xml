@@ -16,13 +16,11 @@
         <dependency>
             <groupId>datavault</groupId>
             <artifactId>datavault-common</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-hibernate5-jakarta</artifactId>
-            <version>${jackson.version}</version>
+            <artifactId>jackson-datatype-hibernate6</artifactId>
         </dependency>
 
         <dependency>
@@ -72,11 +70,9 @@
             <artifactId>super-csv</artifactId>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/org.mariadb.jdbc/mariadb-java-client -->
         <dependency>
             <groupId>org.mariadb.jdbc</groupId>
             <artifactId>mariadb-java-client</artifactId>
-            <version>3.1.4</version>
         </dependency>
 
         <dependency>
@@ -108,7 +104,6 @@
         <dependency>
             <groupId>it.burning</groupId>
             <artifactId>cron-expression-descriptor</artifactId>
-            <version>${cron.expr.desc.version}</version>
         </dependency>
 
         <!-- testing -->
@@ -141,7 +136,6 @@
         <dependency>
             <groupId>datavault</groupId>
             <artifactId>datavault-common</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
             <scope>test</scope>
             <classifier>tests</classifier>
         </dependency>
@@ -149,13 +143,11 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <version>${jackson.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
         </dependency>
 
     </dependencies>
@@ -166,11 +158,6 @@
             <resource>
                 <directory>${project.basedir}/src/main/resources</directory>
             </resource>
-            <!--
-            <resource>
-                <directory>${project.basedir}/src/main/webapp</directory>
-            </resource>
-            -->
         </resources>
         <plugins>
             <plugin>

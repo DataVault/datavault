@@ -16,16 +16,12 @@
         <dependency>
             <groupId>datavault</groupId>
             <artifactId>datavault-common</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents.client5/httpclient5 -->
         <dependency>
             <groupId>org.apache.httpcomponents.client5</groupId>
             <artifactId>httpclient5</artifactId>
-            <version>5.3.1</version>
         </dependency>
-
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -42,16 +38,13 @@
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/org.thymeleaf.extras/thymeleaf-extras-springsecurity6 -->
         <dependency>
             <groupId>org.thymeleaf.extras</groupId>
             <artifactId>thymeleaf-extras-springsecurity6</artifactId>
-            <version>3.1.2.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>nz.net.ultraq.thymeleaf</groupId>
             <artifactId>thymeleaf-layout-dialect</artifactId>
-            <version>3.3.0</version>
         </dependency>
 
         <dependency>
@@ -136,7 +129,6 @@
         <dependency>
             <groupId>datavault</groupId>
             <artifactId>datavault-common</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
             <scope>test</scope>
             <classifier>tests</classifier>
         </dependency>
@@ -144,13 +136,11 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <version>${jackson.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
         </dependency>
 
     </dependencies>

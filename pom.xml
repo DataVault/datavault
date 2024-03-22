@@ -35,35 +35,45 @@
 
     <!-- dependency versions -->
 
-    <!-- https://mvnrepository.com/artifact/pl.project13.maven/git-commit-id-plugin -->
-    <git.commit.id.maven.plugin.version>4.9.10</git.commit.id.maven.plugin.version>
-
     <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-bom -->
-    <aws.java.sdk.bom.version>1.12.662</aws.java.sdk.bom.version>
+    <aws.java.sdk.bom.version>1.12.684</aws.java.sdk.bom.version>
 
     <!-- https://mvnrepository.com/artifact/com.oracle.oci.sdk/oci-java-sdk-bom -->
-    <oci.java.sdk.bom.version>3.34.1</oci.java.sdk.bom.version>
+    <oci.java.sdk.bom.version>3.37.2</oci.java.sdk.bom.version>
 
     <!-- https://mvnrepository.com/artifact/org.testcontainers/testcontainers -->
-    <testcontainers.version>1.19.5</testcontainers.version>
+    <testcontainers.version>1.19.7</testcontainers.version>
+
+    <!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
+    <mockito.version>5.11.0</mockito.version>
+
+    <!-- https://mvnrepository.com/artifact/org.owasp/dependency-check-maven -->
+    <owasp.dependency.check.version>9.0.10</owasp.dependency.check.version>
+
+    <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
+    <commons.compress.version>1.26.1</commons.compress.version>
+    
+    <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
+    <guava.version>33.1.0-jre</guava.version>
+    
+    <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-exec -->
+    <commons.exec.version>1.4.0</commons.exec.version>
+
+    <!-- https://mvnrepository.com/artifact/org.thymeleaf.extras/thymeleaf-extras-springsecurity6 -->
+    <thymeleaf.extras.version>3.1.2.RELEASE</thymeleaf.extras.version>
+    
+    <!-- https://mvnrepository.com/artifact/nz.net.ultraq.thymeleaf/thymeleaf-layout-dialect -->
+    <thymeleaf.layout.version>3.3.0</thymeleaf.layout.version>
+    <!-- above here, updated 22Mar2024 -->
+
+    <!-- https://mvnrepository.com/artifact/io.github.git-commit-id/git-commit-id-maven-plugin -->
+    <git.commit.id.maven.plugin.version>8.0.2</git.commit.id.maven.plugin.version>
 
     <!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-contract-stub-runner -->
     <spring.cloud.version>4.1.1</spring.cloud.version>
 
-    <!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
-    <mockito.version>5.10.0</mockito.version>
-
-    <!-- https://mvnrepository.com/artifact/org.owasp/dependency-check-maven -->
-    <owasp.dependency.check.version>9.0.9</owasp.dependency.check.version>
-
-    <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
-    <commons.compress.version>1.26.0</commons.compress.version>
-
     <!-- https://mvnrepository.com/artifact/org.apache.sshd/sshd-sftp -->
     <sshd.sftp.version>2.12.1</sshd.sftp.version>
-
-    <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
-    <guava.version>33.0.0-jre</guava.version>
 
     <!-- https://mvnrepository.com/artifact/org.apache.directory.api/api-all -->
     <apache.directory.api.version>2.1.6</apache.directory.api.version>
@@ -90,7 +100,6 @@
     <hibernate.version>6.4.4.Final</hibernate.version>
 
     <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core -->
-    <!--<jackson.version>2.14.1</jackson.version>-->
     <jackson.version>2.16.1</jackson.version>
 
     <!-- https://mvnrepository.com/artifact/com.jayway.jsonpath/json-path -->
@@ -122,16 +131,26 @@
     <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-collections4 -->
     <commons.collections4.version>4.4</commons.collections4.version>
 
-    <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-exec -->
-    <commons.exec.version>1.3</commons.exec.version>
-
-
     <!-- https://mvnrepository.com/artifact/net.i2p.crypto/eddsa -->
     <eddsa.version>0.3.0</eddsa.version>
+
+    <!-- https://mvnrepository.com/artifact/org.apache.tika/tika-core -->
+    <tika.version>2.4.1</tika.version><!-- don't change -->
   </properties>
 
   <dependencyManagement>
     <dependencies>
+      <dependency>
+        <groupId>datavault</groupId>
+        <artifactId>datavault-common</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>datavault</groupId>
+        <artifactId>datavault-common</artifactId>
+        <version>${project.version}</version>
+        <classifier>tests</classifier>
+      </dependency>
       <dependency>
         <groupId>com.jayway.jsonpath</groupId>
         <artifactId>json-path</artifactId>
@@ -317,6 +336,41 @@
         <artifactId>eddsa</artifactId>
         <version>${eddsa.version}</version>
       </dependency>
+      <dependency>
+        <groupId>it.burning</groupId>
+        <artifactId>cron-expression-descriptor</artifactId>
+        <version>${cron.expr.desc.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-annotations</artifactId>
+        <version>${jackson.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>${jackson.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>jakarta.xml.bind</groupId>
+        <artifactId>jakarta.xml.bind-api</artifactId>
+        <version>${jakarta-xml-bind.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.tika</groupId>
+        <artifactId>tika-core</artifactId>
+        <version>${tika.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.thymeleaf.extras</groupId>
+        <artifactId>thymeleaf-extras-springsecurity6</artifactId>
+        <version>${thymeleaf.extras.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>nz.net.ultraq.thymeleaf</groupId>
+        <artifactId>thymeleaf-layout-dialect</artifactId>
+        <version>${thymeleaf.layout.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -393,8 +447,8 @@
           <version>3.12.1</version>
         </plugin>
         <plugin>
-          <groupId>pl.project13.maven</groupId>
-          <artifactId>git-commit-id-plugin</artifactId>
+          <groupId>io.github.git-commit-id</groupId>
+          <artifactId>git-commit-id-maven-plugin</artifactId>
           <version>${git.commit.id.maven.plugin.version}</version>
           <configuration>
             <offline>true</offline>
@@ -457,8 +511,8 @@
         <artifactId>maven-failsafe-plugin</artifactId>
       </plugin>
       <plugin>
-        <groupId>pl.project13.maven</groupId>
-        <artifactId>git-commit-id-plugin</artifactId>
+        <groupId>io.github.git-commit-id</groupId>
+        <artifactId>git-commit-id-maven-plugin</artifactId>
         <configuration>
           <skip>${skip.git.commit}</skip>
         </configuration>
