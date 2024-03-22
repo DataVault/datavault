@@ -74,18 +74,18 @@ public class SecurityConfig {
       .addFilterAt(restFilter(authenticationManager), AbstractPreAuthenticatedProcessingFilter.class)
       .sessionManagement(cust -> cust.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
       .exceptionHandling(ex -> ex.authenticationEntryPoint(http403EntryPoint()))
-      .authorizeRequests()
-            .requestMatchers("/admin/users/**").access("hasRole('ROLE_ADMIN')")
-            .requestMatchers("/admin/archivestores/**").access("hasRole('ROLE_ADMIN_ARCHIVESTORES')")
-            .requestMatchers("/admin/deposits/**").access("hasRole('ROLE_ADMIN_DEPOSITS')")
-            .requestMatchers("/admin/retrieves/**").access("hasRole('ROLE_ADMIN_RETRIEVES')")
-            .requestMatchers("/admin/vaults/**").access("hasRole('ROLE_ADMIN_VAULTS')")
-            .requestMatchers("/admin/pendingVaults/**").access("hasRole('ROLE_ADMIN_PENDING_VAULTS')")
-            .requestMatchers("/admin/events/**").access("hasRole('ROLE_ADMIN_EVENTS')")
-            .requestMatchers("/admin/billing/**").access("hasRole('ROLE_ADMIN_BILLING')")
+      .authorizeHttpRequests(authz -> authz
+            .requestMatchers("/admin/users/**").hasAuthority("ROLE_ADMIN")
+            .requestMatchers("/admin/archivestores/**").hasAuthority("ROLE_ADMIN_ARCHIVESTORES")
+            .requestMatchers("/admin/deposits/**").hasAuthority("ROLE_ADMIN_DEPOSITS")
+            .requestMatchers("/admin/retrieves/**").hasAuthority("ROLE_ADMIN_RETRIEVES")
+            .requestMatchers("/admin/vaults/**").hasAuthority("ROLE_ADMIN_VAULTS")
+            .requestMatchers("/admin/pendingVaults/**").hasAuthority("ROLE_ADMIN_PENDING_VAULTS")
+            .requestMatchers("/admin/events/**").hasAuthority("ROLE_ADMIN_EVENTS")
+            .requestMatchers("/admin/billing/**").hasAuthority("ROLE_ADMIN_BILLING")
             /* TODO : DavidHay : no controller mapped to /admin/reviews ! */
-            .requestMatchers("/admin/reviews/**").access("hasRole('ROLE_ADMIN_REVIEWS')")
-            .anyRequest().authenticated();
+            .requestMatchers("/admin/reviews/**").hasAuthority("ROLE_ADMIN_REVIEWS")
+            .anyRequest().authenticated());
 
     return http.build();
   }

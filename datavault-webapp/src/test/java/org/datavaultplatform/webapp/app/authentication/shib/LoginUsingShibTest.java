@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -31,6 +32,7 @@ import org.datavaultplatform.webapp.authentication.shib.ShibWebAuthenticationDet
 import org.datavaultplatform.webapp.services.RestService;
 import org.datavaultplatform.webapp.test.ProfileShib;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -83,6 +85,13 @@ public class LoginUsingShibTest {
 
     @Captor
     ArgumentCaptor<AuthenticationSuccessEvent> argAuthSuccessEvent;
+    
+    
+    @BeforeEach
+    void setup() {
+        lenient().when(mGA1.getAuthority()).thenReturn("");
+        lenient().when(mGA2.getAuthority()).thenReturn("");
+    }
 
     @Test
     void testNoUidHeader()  {

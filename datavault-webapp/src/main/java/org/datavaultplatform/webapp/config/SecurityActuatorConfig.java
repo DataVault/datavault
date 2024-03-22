@@ -54,7 +54,7 @@ public class SecurityActuatorConfig  {
         .csrf(AbstractHttpConfigurer::disable)
         .httpBasic(Customizer.withDefaults())
         .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .authorizeRequests().requestMatchers(
+        .authorizeHttpRequests(authz -> authz.requestMatchers(
             "/actuator",
             "/actuator/info",
             "/actuator/health",
@@ -63,7 +63,7 @@ public class SecurityActuatorConfig  {
             "/actuator/metrics",
             "/actuator/metrics/*",
             "/actuator/memoryinfo").permitAll()
-        .anyRequest().authenticated();
+        .anyRequest().authenticated());
 
     return http.build();
   }

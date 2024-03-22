@@ -13,33 +13,33 @@ public class HttpSecurityUtils {
 
     public static void authorizeRequests(
             HttpSecurity http, boolean includeStandaloneOnly) throws Exception {
-        http.authorizeRequests(requests -> {
+        http.authorizeHttpRequests(authz -> {
 
-            requests.requestMatchers("/favicon.ico").permitAll(); //OKAY
+            authz.requestMatchers("/favicon.ico").permitAll(); //OKAY
 
             if (includeStandaloneOnly) {
-                requests.requestMatchers("/test/**", "/index").permitAll();
+                authz.requestMatchers("/test/**", "/index").permitAll();
             }
 
-            requests.requestMatchers("/resources/**").permitAll(); //OKAY
-            requests.requestMatchers("/error").permitAll();      //OKAY
-            requests.requestMatchers("/auth/**").permitAll();      //OKAY
+            authz.requestMatchers("/resources/**").permitAll(); //OKAY
+            authz.requestMatchers("/error").permitAll();      //OKAY
+            authz.requestMatchers("/auth/**").permitAll();      //OKAY
 
-            requests.requestMatchers("/admin").hasRole("ADMIN");
-            requests.requestMatchers("/admin/").access("hasRole('ROLE_ADMIN')");
-            requests.requestMatchers("/admin/archivestores/**").access("hasRole('ROLE_ADMIN_ARCHIVESTORES')");
-            requests.requestMatchers("/admin/billing/**").access("hasRole('ROLE_ADMIN_BILLING')");
-            requests.requestMatchers("/admin/deposits/**").access("hasRole('ROLE_ADMIN_DEPOSITS')");
-            requests.requestMatchers("/admin/events/**").access("hasRole('ROLE_ADMIN_EVENTS')");
-            requests.requestMatchers("/admin/retentionpolicies/**").access("hasRole('ROLE_ADMIN_RETENTIONPOLICIES')");
-            requests.requestMatchers("/admin/retrieves/**").access("hasRole('ROLE_ADMIN_RETRIEVES')");
-            requests.requestMatchers("/admin/roles/**").access("hasRole('ROLE_ADMIN_ROLES')");
-            requests.requestMatchers("/admin/schools/**").access("hasRole('ROLE_ADMIN_SCHOOLS')");
-            requests.requestMatchers("/admin/vaults/**").access("hasRole('ROLE_ADMIN_VAULTS')");
-            requests.requestMatchers("/admin/reviews/**").access("hasRole('ROLE_ADMIN_REVIEWS')");
+            authz.requestMatchers("/admin").hasRole("ADMIN");
+            authz.requestMatchers("/admin/").hasAuthority("ROLE_ADMIN");
+            authz.requestMatchers("/admin/archivestores/**").hasAuthority("ROLE_ADMIN_ARCHIVESTORES");
+            authz.requestMatchers("/admin/billing/**").hasAuthority("ROLE_ADMIN_BILLING");
+            authz.requestMatchers("/admin/deposits/**").hasAuthority("ROLE_ADMIN_DEPOSITS");
+            authz.requestMatchers("/admin/events/**").hasAuthority("ROLE_ADMIN_EVENTS");
+            authz.requestMatchers("/admin/retentionpolicies/**").hasAuthority("ROLE_ADMIN_RETENTIONPOLICIES");
+            authz.requestMatchers("/admin/retrieves/**").hasAuthority("ROLE_ADMIN_RETRIEVES");
+            authz.requestMatchers("/admin/roles/**").hasAuthority("ROLE_ADMIN_ROLES");
+            authz.requestMatchers("/admin/schools/**").hasAuthority("ROLE_ADMIN_SCHOOLS");
+            authz.requestMatchers("/admin/vaults/**").hasAuthority("ROLE_ADMIN_VAULTS");
+            authz.requestMatchers("/admin/reviews/**").hasAuthority("ROLE_ADMIN_REVIEWS");
 
             // most general matcher - has to go last
-            requests.requestMatchers("/**").access("hasRole('ROLE_USER')"); //OKAY
+            authz.requestMatchers("/**").hasAuthority("ROLE_USER"); //OKAY
         });
     }
 
