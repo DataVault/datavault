@@ -1,22 +1,22 @@
 <!DOCTYPE html><!--layout/defaultLayout.html-->
-<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+<html lang="en" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5"
 >
 <head>
     <title>DEFAULT LAYOUT</title>
-    <div th:replace="~{layout/imports.html}"></div>
+    <th:block th:replace="~{layout/imports.html}"></th:block>
 </head>
 <body>
 <div id="datavault-container">
     <div id="datavault-header">
         <div th:replace="~{layout/header.html}"></div>
-    </div>
+    </div><!--layout-datavault-header-->
     <div id="datavault-body">
         <div layout:fragment="content">NESTED CONTENT GOES HERE</div>
-    </div>
+    </div><!--layout-datavault--body-->
     <div id="datavault-footer" style="z-index: -10">
         <div th:replace="~{layout/footer.html}"></div>
-    </div>
-</div>
+    </div><!--layout-datavault-footer-->
+</div><!--layout-datavault-container-->
 </body>
 </html>

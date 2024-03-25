@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/defaultlayout(nav='admin')}">
 <head><title>Admin - Roles</title></head>
-<div layout:fragment="content">
+<th:block layout:fragment="content">
     <style>
         #add-new {
             margin: 2em 0;
@@ -234,8 +234,8 @@
         $('#create-role').submit(function(event) {
             event.preventDefault();
             var formData = $(this).serialize();
-            var baseURL =   /*[[@{/admin/roles/save}]]*/ 'replaced-by-tl';
-            var windowURL = /*[[@{/admin/roles}]]*/ 'replaced-by-tl';
+            var baseURL =   /*[(|'@{/admin/roles/save}'|)]*/ 'replaced-by-tl';
+            var windowURL = /*[(|'@{/admin/roles}'|)]*/ 'replaced-by-tl';
             $.ajax({
                 method: 'POST',
                 url: baseURL,
@@ -255,8 +255,8 @@
         $('#delete-form').submit(function(event) {
             event.preventDefault();
             var formData = $(this).serialize();
-            var baseURL =   /*[[@{/admin/roles/delete}]]*/ 'replaced-by-tl';
-            var windowURL = /*[[@{/admin/roles}]]*/ 'replaced-by-tl';
+            var baseURL =   /*[(|'@{/admin/roles/delete}'|)]*/ 'replaced-by-tl';
+            var windowURL = /*[(|'@{/admin/roles}'|)]*/ 'replaced-by-tl';
             $.ajax({
                 method: 'POST',
                 url: baseURL,
@@ -274,8 +274,8 @@
         });
 
         function getPermissions() {
-            var baseURL1 = /*[[@{/admin/roles/getvaultpermissions}]]*/ 'replaced-by-tl';
-            var baseURL2 = /*[[@{/admin/roles/getschoolpermissions}]]*/ 'replaced-by-tl';
+            var baseURL1 = /*[(|'@{/admin/roles/getvaultpermissions}'|)]*/ 'replaced-by-tl';
+            var baseURL2 = /*[(|'@{/admin/roles/getschoolpermissions}'|)]*/ 'replaced-by-tl';
             $.ajax({
                 method: "GET",
                 url: baseURL1,
@@ -307,7 +307,7 @@
         function EditByRoleId(roleid) {
 
             getPermissions();
-            var baseURL = /*[[@{/admin/roles/}]]*/ 'replaced-by-tl';
+            var baseURL = /*[(|'@{/admin/roles/}'|)]*/ 'replaced-by-tl';
             $.ajax({
                 method: "GET",
                 url:  baseURL + roleid,
@@ -426,5 +426,5 @@
             });
         });
     </script>
-</div>
+</th:block>
 </html>

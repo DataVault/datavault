@@ -3,7 +3,7 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/defaultlayout(nav='admin')}" >
 <head><title>Admin - Vaults</title></head>
-<div layout:fragment="content" th:with="queryPARAM=${#uris.escapeQueryParam(query)}">
+<th:block layout:fragment="content" th:with="queryPARAM=${#uris.escapeQueryParam(query)}">
 
 <div class="container">
 
@@ -121,7 +121,7 @@
                                 <a th:href="@{|/vaults/${vault.getID()}/|}">[[${vault.name}]]</a>
                             </td>
                             <td>[[${vault.getNumberOfDeposits()}]]</td>
-                            <td>[[${vault.getProjectId() ?: ''}]]></td>
+                            <td>[[${vault.getProjectId() ?: ''}]]</td>
                             <td>[[${vault.getCrisID()    ?: ''}]]</td>
                             <td>[[${vault.getProjectSizeStr()}]]</td>
                             <td>[[${vault.getSizeStr()}]]</td>
@@ -162,5 +162,5 @@
 </div>
  
 
-</div>
+</th:block>
 </html>

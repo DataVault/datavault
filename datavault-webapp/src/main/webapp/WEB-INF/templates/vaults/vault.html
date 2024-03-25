@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/defaultlayout(nav='home')}">
 <head><title>Vaults - Vault</title></head>
-<div layout:fragment="content">
+<th:block layout:fragment="content">
 <div class="container">
 
     <div id="add-data-manager" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="addDataManger" aria-hidden="true">
@@ -204,7 +204,7 @@
                     </tr>
                 </tbody>
             </table>
-        </th:block><!-- deposits != null -->
+        </th:block>
         <th:block th:if="${deposits == null}">
             <th:block th:with="addDepositsSecurityExpression4=|hasPermission('${vault.ID}', 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES')|">
             <th:block th:if="${#authorization.expression(addDepositsSecurityExpression4)}">
@@ -216,7 +216,7 @@
                 </div>
             </div>
             </th:block></th:block><!-- addDepositsSecurityExpression4 -->
-        </th:block><!-- deposits == null -->
+        </th:block>
         </th:block></th:block><!-- viewDepositsSecurityExpression1 -->
 
             <div id="accordion">
@@ -469,7 +469,7 @@ $(document).ready(function(){
         minLength: 2,
         source: function( request, response ) {
             var term = request.term;
-            var baseURL = /*[[@{/vaults/autocompleteuun/}]]*/ 'replaced-by-tl';
+            var baseURL = /*[(|'@{/vaults/autocompleteuun/}'|)]*/ 'replaced-by-tl';
             $.ajax( {
                 url: baseURL + term,
                 type: 'GET',
@@ -489,5 +489,5 @@ $(document).ready(function(){
 });
 </script>
 
-</div>
+</th:block>
 </html>

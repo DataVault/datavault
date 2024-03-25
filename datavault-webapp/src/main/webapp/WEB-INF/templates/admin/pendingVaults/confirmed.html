@@ -3,7 +3,7 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/defaultlayout(nav='admin')}" >
 <head><title>Admin - Confirmed Pending Vaults</title></head>
-<div layout:fragment="content" th:with="queryPARAM=${#uris.escapeQueryParam(query)}">
+<th:block layout:fragment="content" th:with="queryPARAM=${#uris.escapeQueryParam(query)}">
 
     <div class="container" >
 
@@ -102,5 +102,5 @@
     </div>
 
 
-</div>
+</th:block>
 </html>

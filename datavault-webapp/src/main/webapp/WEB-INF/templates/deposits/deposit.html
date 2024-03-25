@@ -2,12 +2,12 @@
 <html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/defaultlayout(nav='home')}" >
 <head><title>Deposits - Deposit</title></head>
-<div layout:fragment="content">
-    <div class="container">
+<th:block layout:fragment="content">
+<div class="container">
 
     <ol class="breadcrumb">
         <li><a th:href="@{/}"><b>Home</b></a></li>
-        <li><a th:href="@{|/vaults/${vault.getID()}|}"><b>Vault:</b> [[${vault.name}]]</a></li>
+        <li><a th:href="@{|/vaults/${vault.getID()}/|}"><b>Vault:</b> [[${vault.name}]]</a></li>
         <li class="active"><b>Deposit:</b> [[${deposit.name}]]</li>
     </ol>
 
@@ -45,15 +45,15 @@
                 <button type="button" class="close" data-dismiss="alert">&times;</button>
                 <span id="job-info-msq"></span>
             </div>
-            <div th:with="canRetrieveDataExpression=|hasPermission('${vault.ID}', 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') or hasPermission('${vault.groupID}', 'GROUP', 'CAN_RETRIEVE_DATA')|">
-            <div th:if="${#authorization.expression(canRetrieveDataExpression)}">
+            <th:block th:with="canRetrieveDataExpression=|hasPermission('${vault.ID}', 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') or hasPermission('${vault.groupID}', 'GROUP', 'CAN_RETRIEVE_DATA')|">
+            <th:block th:if="${#authorization.expression(canRetrieveDataExpression)}">
                 <!-- CAN RETRIEVE DATA EXPRESSION -->
-            <div th:if="${deposit.status.name() == 'COMPLETE'}">
+            <th:block th:if="${deposit.status.name() == 'COMPLETE'}">
                 <a id="retrievebtn" class="btn btn-primary pull-right" th:href="@{|/vaults/${vault.getID()}/deposits/${deposit.getID()}/retrieve|}" disabled='disabled'>
                     <i class="fa fa-upload fa-rotate-180" aria-hidden="true"></i> Retrieve data
                 </a>
-            </div>
-            </div>
+            </th:block>
+            </th:block>
 
             <table class="table table-sm">
                 <tbody>
@@ -68,9 +68,9 @@
                     <tr>
                         <th scope="col">Deposit Size</th>
                         <td>
-                            <span th:if="${deposit.status.name() != 'NOT_STARTED'}">
+                            <th:block th:if="${deposit.status.name() != 'NOT_STARTED'}">
                             [[${deposit.getSizeStr()}]]
-                            </span>
+                            </th:block>
                         </td>
                     </tr>
                     <tr>
@@ -84,8 +84,8 @@
                     <tr>
                     <th scope="col">Contains Personal Data</th>
                         <td>
-                            <span th:if    ="${deposit.hasPersonalData}">Yes</span>
-                            <span th:unless="${deposit.hasPersonalData}">No</span>
+                            <th:block th:if    ="${deposit.hasPersonalData}">Yes</th:block>
+                            <th:block th:unless="${deposit.hasPersonalData}">No</th:block>
                         </td>
                     </tr>
                     <tr>
@@ -105,16 +105,16 @@
                                     <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
                                     Failed
                                 </div>
-                                <div th:case="NOT_STARTED">
+                                <th:block th:case="NOT_STARTED">
                                 Queued
-                                </div>
-                                <div th:case="IN_PROGRESS">
+                                </th:block>
+                                <th:block th:case="IN_PROGRESS">
                                 <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
                                 In progress
-                                </div>
-                                <dv: th:case="*">
+                                </th:block>
+                                <th:block th:case="*">
                                 ${deposit.status}
-                                </dv:>
+                                </th:block>
                               </th:block>
                             </div>
                         </td>
@@ -182,16 +182,16 @@
                                                     <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
                                                     Failed
                                                 </div>
-                                                <div th:case="NOT_STARTED">
+                                                <th:block th:case="NOT_STARTED">
                                                     Queued
-                                                </div>
-                                                <div th:case="IN_PROGRESS">
+                                                </th:block>
+                                                <th:block th:case="IN_PROGRESS">
                                                     <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
                                                     In progress
-                                                </div>
-                                                <div th:case="*">
+                                                </th:block>
+                                                <th:block th:case="*">
                                                     [[${retrieve.status}]]
-                                                </div>
+                                                </th:block>
                                             </div>
                                         </td>
                                     </tr>
@@ -201,7 +201,9 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </th:block>
+
+    </div>
 
     </div>
 
@@ -316,7 +318,7 @@
 
     function load() {
         setTimeout(function () {
-            var baseURL = /*[[@{|/vaults/${vault.getID()}/deposits/${deposit.getID()}/jobs|}]]*/ 'replaced-by-tl';
+            var baseURL = /*[(|'@{|/vaults/${vault.getID()}/deposits/${deposit.getID()}/jobs|}'|)]*/ 'replaced-by-tl';
             $.ajax({
                 url: baseURL,
                 type: "GET",
@@ -363,6 +365,6 @@
         to { transform: scale(1) rotate(360deg);}
     }
 </style>
-</div>
+</th:block>
 </html>
 

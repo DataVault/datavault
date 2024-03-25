@@ -2,8 +2,8 @@
 <html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/defaultlayout(nav='help')}">
 <head><title>Help</title></head>
-<div class="container" layout:fragment="content">
-
+<th:block layout:fragment="content">
+<div class="container" >
     <ol class="breadcrumb">
         <li><a th:href="@{/}"><b>Home</b></a></li>
         <li class="active"><b>Help</b></li>
@@ -172,4 +172,5 @@
     </div>
 
 </div>
+</th:block>
 </html>

@@ -2,7 +2,7 @@
 <html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/defaultlayout(nav='user')}" >
 <head><title>Filestores</title></head>
-<div layout:fragment="content">
+<th:block layout:fragment="content">
 
 <style>
 #copy-ssh-public-key .modal-body {
@@ -151,7 +151,7 @@
 
                 <div class="table-responsive storage-table" th:with="filestoresLocalNotEmpty=${!#lists.isEmpty(filestoresLocal)}">
 
-                    <table th:if="${filestoresLocalNotEmpty}" lass="table table-striped">
+                    <table th:if="${filestoresLocalNotEmpty}" class="table table-striped">
                         <!-- FILESTORES LOCAL -->
                         <thead>
                         <tr class="tr">
@@ -190,7 +190,7 @@
 
             <h3><strong>Locations of the folders/directories you want to deposit from or retrieve into</strong></h3>
 
-            <div th:with="filestoresSFTPnotEmpty=${!#lists.isEmpty(filestoresSFTP)}">
+            <th:block th:with="filestoresSFTPnotEmpty=${!#lists.isEmpty(filestoresSFTP)}">
                 <div th:if="${filestoresSFTPnotEmpty}" class="table-responsive storage-table">
                     <!-- FILESTORES SFTP -->
                     <p>After adding your DataStore location details (hostname and path) you will need to use the buttons below to copy the public SSH key over to DataStore (without this step, the DataVault will not be able to authenticate to the location).</p>
@@ -256,7 +256,7 @@
                 <p><b>It can take several minutes before the connection between Datavault and the location is set, so please reload the page and try again.</b></p>
             </div>
 
-            </div>
+            </th:block>
     </div>
 </div>
 
@@ -264,7 +264,7 @@
 
     var localFrm = $('#add-filestoreLocal-form');
     localFrm.submit(function (ev) {
-        var baseURL = /*[[@{/filestores/local}]]*/ 'replaced-by-tl';
+        var baseURL = /*[(|'@{/filestores/local}'|)]*/ 'replaced-by-tl';
         $.ajax({
             method: "POST",
             url: baseURL,
@@ -283,7 +283,7 @@
 
     var sftpFrm = $('#add-filestoreSFTP-form');
     sftpFrm.submit(function (ev) {
-        var baseURL = /*[[@{/filestores/sftp}]]*/ 'replaced-by-tl';
+        var baseURL = /*[(|'@{/filestores/sftp}'|)]*/ 'replaced-by-tl';
         $.ajax({
             method: "POST",
             url: baseURL,
@@ -311,7 +311,7 @@
 
     $("button#remove").click(function(){
         var filestoreId = $(this).data('filestoreId')
-        var baseURL = /*[[@{/filestores/}]]*/ 'replaced-by-tl';
+        var baseURL = /*[(|'@{/filestores/}'|)]*/ 'replaced-by-tl';
         $.ajax({
             method: "DELETE",
             url: baseURL + filestoreId,
@@ -347,5 +347,5 @@
 </script>
 
 </div>
-</div>
+</th:block>
 </html>
