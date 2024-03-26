@@ -6,16 +6,15 @@
 
 
 <div class="container">
-
     <ol class="breadcrumb">
         <li><a href="${springMacroRequestContext.getContextPath()}/admin/"><b>Administration</b></a></li>
         <li class="active"><b>Add Retention Policies</b></li>
     </ol>
 
-    <form id="add-rentention-policy-form" action="${springMacroRequestContext.getContextPath()}/admin/retentionpolicies/edit/${retentionPolicy.getId()}" method="post">
+    <form id="add-rentention-policy-form" action="${springMacroRequestContext.getContextPath()}/admin/retentionpolicies/edit/${retentionPolicy.getID()}" method="post">
         <div class="form-rentention-policy">
 
-            <input type="hidden" name="id" value="${retentionPolicy.getId()}">
+            <input type="hidden" name="id" value="${retentionPolicy.getID()}">
 
             <div class="form-group">
                 <label for="name">Name</label>
@@ -65,7 +64,7 @@
 
             <div class="form-group">
                 <label  for="dateGuidanceReviewed" class="control-label">Date Guidance Review</label>
-                <@spring.bind "retentionPolicy.dateGuidanceReviewed" />
+                <@spring.bind "retentionPolicy.dataGuidanceReviewed" />
                 <input type="text" class="form-control date-picker" placeholder="yyyy-mm-dd" name="${spring.status.expression}" value='${spring.status.value!""}'/>
             </div>
 

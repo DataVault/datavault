@@ -72,7 +72,7 @@
                     <label  for="dateGuidanceReviewed" class="control-label">
                         <strong>Date Guidance Review</strong>
                     </label>
-                            <@spring.bind "retentionPolicy.dateGuidanceReviewed" />
+                            <@spring.bind "retentionPolicy.dataGuidanceReviewed" />
                     <input id="dateGuidanceReviewed" name="dateGuidanceReviewed" class="form-control date-picker" placeholder="yyyy-mm-dd"/>
                 </div>
 

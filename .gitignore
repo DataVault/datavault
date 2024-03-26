@@ -40,4 +40,5 @@ docker/mysql-master-backup
 datavault-broker/pids
 datavault-worker/pids
 datavault-webapp/pids
+TEMPLATES/*
 
