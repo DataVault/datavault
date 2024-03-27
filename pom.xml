@@ -8,6 +8,7 @@
     <module>datavault-webapp</module>
     <module>datavault-broker</module>
     <module>datavault-worker</module>
+    <module>datavault-report</module>
   </modules>
   <parent>
     <groupId>org.springframework.boot</groupId>
@@ -32,7 +33,10 @@
     <skip.git.commit>false</skip.git.commit>
     <skip.unit.tests>false</skip.unit.tests>
     <skip.integration.tests>false</skip.integration.tests>
-
+    <surefire.plugin.version>3.2.5</surefire.plugin.version>
+    <failsafe.plugin.version>3.2.5</failsafe.plugin.version>
+    <jacoco.plugin.version>0.8.11</jacoco.plugin.version>
+    
     <!-- dependency versions -->
 
     <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-bom -->
@@ -480,6 +484,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-failsafe-plugin</artifactId>
+          <version>${failsafe.plugin.version}</version>
           <configuration>
             <skipITs>${skip.integration.tests}</skipITs>
           </configuration>
@@ -487,6 +492,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
+          <version>${surefire.plugin.version}</version>
           <configuration>
             <skipTests>${skip.unit.tests}</skipTests>
             <excludedGroups>slow,org.datavaultplatform.test.TSMTest</excludedGroups>
@@ -569,18 +575,12 @@
           <plugin>
             <groupId>org.jacoco</groupId>
             <artifactId>jacoco-maven-plugin</artifactId>
-            <version>0.8.11</version>
+            <version>${jacoco.plugin.version}</version>
             <executions>
               <execution>
+                <id>prepare-agent</id>
                 <goals>
                   <goal>prepare-agent</goal>
-                </goals>
-              </execution>
-              <execution>
-                <id>report</id>
-                <phase>prepare-package</phase>
-                <goals>
-                  <goal>report</goal>
                 </goals>
               </execution>
             </executions>
