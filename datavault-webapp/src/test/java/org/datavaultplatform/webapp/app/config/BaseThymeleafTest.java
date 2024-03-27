@@ -82,7 +82,7 @@ public class BaseThymeleafTest {
     @SneakyThrows
     private void outputTemplateHtmlToFile(String filename, String html) {
         // for local 'human' testing to compare old and new template output
-        String baseDirName = System.getenv(BASE_DIR_ENV_NAME);
+        String baseDirName = System.getProperty(BASE_DIR_ENV_NAME);
         if (StringUtils.isBlank(baseDirName)) {
             return;
         }

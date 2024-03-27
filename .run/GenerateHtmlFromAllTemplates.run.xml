@@ -16,10 +16,8 @@
     <option name="MAIN_CLASS_NAME" value="org.datavaultplatform.webapp.app.config.ThymeleafTemplateTest" />
     <option name="METHOD_NAME" value="" />
     <option name="TEST_OBJECT" value="class" />
-    <envs>
-      <!-- you can change this to point to another directory to compare html files generated using old and new template files -->
-      <env name="DV_LOCAL_TEST_TEMPLATE_OUTPUT_BASE_DIR" value="$PROJECT_DIR$/TEMPLATES" />
-    </envs>
+    <!-- you can change this to point to another directory to compare html files generated using old and new template files -->
+    <option name="VM_PARAMETERS" value="-ea -DDV_LOCAL_TEST_TEMPLATE_OUTPUT_BASE_DIR=$PROJECT_DIR$/TEMPLATES" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>
