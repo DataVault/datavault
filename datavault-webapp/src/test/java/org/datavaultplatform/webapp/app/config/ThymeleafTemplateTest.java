@@ -1666,7 +1666,8 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("message", "This is a test error message");
         String errorTemplateHtml = getHtml("error/error", modelMap);
         //html is a mix of error 'page' and default template.
-        assertThat(errorTemplateHtml).startsWith("<!--error.ftl-->\n" +
+        assertThat(errorTemplateHtml).startsWith("<!-- template[datavault-webapp/src/main/webapp/WEB-INF/freemarker/error/error.ftl] -->\n" +
+                "<!--error.ftl-->\n" +
                 "\n" +
                 "<!DOCTYPE html>");
 
