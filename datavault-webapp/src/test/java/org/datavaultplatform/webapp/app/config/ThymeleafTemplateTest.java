@@ -115,7 +115,15 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
-        return html;
+        StringBuilder sb = new StringBuilder();
+        sb.append("<!-- template[");
+        sb.append("datavault-webapp/src/main/webapp/WEB-INF/templates/");
+        sb.append(template);
+        sb.append(".html");
+        sb.append("] -->");
+        sb.append("\n");
+        sb.append(html);
+        return sb.toString();
     }
 
     @Test
@@ -125,7 +133,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         ModelMap modelMap = getModelMap();
         modelMap.put("name", "user101");
         String helloTemplateHtml = getHtml("test/hello", modelMap);
-        assertEquals(HELLO_FIRST_LINE, getFirstLine(helloTemplateHtml));
+        assertEquals("<!-- template[datavault-webapp/src/main/webapp/WEB-INF/templates/test/hello.html] -->", getFirstLine(helloTemplateHtml));
         Document doc = getDocument(helloTemplateHtml);
 
         noFormFields(doc);
@@ -1660,7 +1668,9 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("message", "This is a test error message");
         String errorTemplateHtml = getHtml("error/error", modelMap);
         //html is a mix of error 'page' and default template.
-        assertThat(errorTemplateHtml).startsWith("<!DOCTYPE html><!--error/error.html-->\n<!--layout/defaultLayout.html-->");
+        assertThat(errorTemplateHtml).startsWith("<!-- template[datavault-webapp/src/main/webapp/WEB-INF/templates/error/error.html] -->\n" +
+                "<!DOCTYPE html><!--error/error.html-->\n" +
+                "<!--layout/defaultLayout.html-->");
 
         Document doc = getDocument(errorTemplateHtml);
         

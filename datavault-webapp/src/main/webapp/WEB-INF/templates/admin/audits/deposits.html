@@ -38,7 +38,7 @@
             </div>
         </div>
 
-        <th:block th:if="${deposits != null}">
+        <th:block th:if="${!#lists.isEmpty(deposits)}">
 
         <form action="" method="get" class="form-inline">
             <div class="form-group">
@@ -137,10 +137,10 @@
             </div>
         </th:block><!-- for each deposit -->
         </div>
-        </th:block><!-- deposits != null -->
-        <th:block th:if="${deposits == null}">
+        </th:block><!-- end some deposits -->
+        <th:block th:if="${#lists.isEmpty(deposits)}">
             No Data Available
-        </th:block>
+        </th:block><!-- end no deposits-->
     </div>
     <script th:inline="javascript" type="text/javascript">
         $("button#audit").click(function(){
