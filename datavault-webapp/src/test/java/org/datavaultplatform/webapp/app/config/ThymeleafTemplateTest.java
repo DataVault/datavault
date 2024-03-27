@@ -114,7 +114,15 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
-        return html;
+        StringBuilder sb = new StringBuilder();
+        sb.append("<!-- template[");
+        sb.append("datavault-webapp/src/main/webapp/WEB-INF/freemarker/");
+        sb.append(template);
+        sb.append(".ftl");
+        sb.append("] -->");
+        sb.append("\n");
+        sb.append(html);
+        return sb.toString();
     }
 
     @Test
@@ -124,7 +132,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         ModelMap modelMap = getModelMap();
         modelMap.put("name", "user101");
         String helloTemplateHtml = getHtml("test/hello", modelMap);
-        assertEquals(HELLO_FIRST_LINE, getFirstLine(helloTemplateHtml));
+        assertEquals("<!-- template[datavault-webapp/src/main/webapp/WEB-INF/freemarker/test/hello.ftl] -->", getFirstLine(helloTemplateHtml));
         Document doc = getDocument(helloTemplateHtml);
 
         noFormFields(doc);
