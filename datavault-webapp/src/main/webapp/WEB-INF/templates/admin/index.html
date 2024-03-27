@@ -12,11 +12,11 @@
         width: 1em;
         height: 1em;
         display: inline-block;
-    }
-    @supports (-webkit-mask: url('/resources/theme/images/user-cog-solid.svg') no-repeat center) {
+    }<!--/* the text 'replaced-by-tl' is replaced by thymeleaf when it renders the HTML - see org.datavaultplatform.webapp.app.config.ThymeleafTemplateTest.test36adminIndex  */-->
+    @supports (-webkit-mask: /*[(|url('@{/resources/theme/images/user-cog-solid.svg}') no-repeat center) {|)]*/ replaced-by-tl
         .roles-icon {
-            -webkit-mask: /*[(|url('@{/resources/theme/images/user-cog-solid.svg}') no-repeat center|)]*/ black;
-            mask: /*[(|url('@{/resources/theme/images/user-cog-solid.svg}') no-repeat center|)]*/ black;
+            -webkit-mask: /*[(|url('@{/resources/theme/images/user-cog-solid.svg}') no-repeat center|)]*/ replaced-by-tl;
+            mask: /*[(|url('@{/resources/theme/images/user-cog-solid.svg}') no-repeat center|)]*/ replaced-by-tl;
             background: rgb(52, 109, 191);
         }
         .roles-link:hover .roles-icon {
