@@ -77,20 +77,25 @@ public class BaseThymeleafTest {
         outputTemplateHtmlToFile(filename,html);
     }
 
-    public static final String BASE_DIR_ENV_NAME = "DV_LOCAL_TEST_TEMPLATE_OUTPUT_BASE_DIR";
-    public static final String TEMPLATE_FILE_TYPE = "existing";
+    public static final String ENV_TEMPLATE_BASE_DIR = "DV_LOCAL_TEST_TEMPLATE_OUTPUT_BASE_DIR";
+    public static final String ENV_TEMPLATE_LABEL = "DV_LOCAL_TEST_TEMPLATE_OUTPUT_LABEL";
+
     @SneakyThrows
     private void outputTemplateHtmlToFile(String filename, String html) {
         // for local 'human' testing to compare old and new template output
-        String baseDirName = System.getProperty(BASE_DIR_ENV_NAME);
+        String baseDirName = System.getProperty(ENV_TEMPLATE_BASE_DIR);
         if (StringUtils.isBlank(baseDirName)) {
             return;
+        }
+        String label = System.getProperty(ENV_TEMPLATE_LABEL);
+        if (StringUtils.isBlank(label)) {
+            label = "new";
         }
         File baseDir = new File(baseDirName);
         Assert.isTrue(baseDir.exists(), String.format("The dv test template output base dir [%s] does not exist", baseDir));
         Assert.isTrue(baseDir.isDirectory(), String.format("The dv test template output base dir [%s] is not a directory", baseDir));
         Assert.isTrue(baseDir.canWrite(), String.format("The dv test template output base dir [%s] is not writable", baseDir));
-        File outputFile = new File(baseDir, filename + TEMPLATE_FILE_TYPE + ".html");
+        File outputFile = new File(baseDir, filename + label + ".html");
         try (FileWriter fw = new FileWriter(outputFile)) {
             fw.write(html);
             fw.write("\n");
