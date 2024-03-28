@@ -55,7 +55,7 @@ cd $BASE_DIR
 echo "Generated '${LABEL_THIS}' templates."
 #
 cd $TEMPLATES
-echo "'old' and 'new' generated HTML files"
+echo "'${LABEL_OTHER}' and '${LABEL_THIS}' generated HTML files"
 ls -1 *.html | xargs -n 2
 cd $BASE_DIR
 echo 'fin.'
