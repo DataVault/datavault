@@ -89,7 +89,7 @@ public class BaseThymeleafTest {
         }
         String label = System.getProperty(ENV_TEMPLATE_LABEL);
         if (StringUtils.isBlank(label)) {
-            label = "new";
+            label = "existing";
         }
         File baseDir = new File(baseDirName);
         Assert.isTrue(baseDir.exists(), String.format("The dv test template output base dir [%s] does not exist", baseDir));
