@@ -11,7 +11,6 @@
 # added tools jq, curl and ping to help with testing and diagnostics
 #
 # THIS SPECIFIC VERSION OF eclipse-temurin:22 works - dated 2024-03-19 (had problems with some other versions)
-#
 #https://hub.docker.com/layers/library/eclipse-temurin/22-jdk/images/sha256-9035430037330bf9a38d54d63e9fd0b412ed875dc6ba4853151bd8b6af09fb6a?context=explore
 FROM eclipse-temurin@sha256:9035430037330bf9a38d54d63e9fd0b412ed875dc6ba4853151bd8b6af09fb6a
 ARG JENKINS_UID
