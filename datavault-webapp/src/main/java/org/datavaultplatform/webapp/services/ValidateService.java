@@ -1,11 +1,9 @@
 package org.datavaultplatform.webapp.services;
 
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.request.CreateVault;
+import org.datavaultplatform.common.util.DateTimeUtils;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -140,8 +138,8 @@ public class ValidateService {
       retVal.add("Project Title missing");
     }
     // Grant end date
-    String grantEndDate = vault.getReviewDate();
-    if (grantEndDate == null || grantEndDate.isEmpty()) {
+    Date grantEndDate = vault.getReviewDate();
+    if (grantEndDate == null) {
       retVal.add("Review Date missing");
     }
     return retVal;
@@ -171,42 +169,18 @@ public class ValidateService {
       retVal.add("School missing");
     }
     // Review Date
-    String reviewDate = vault.getReviewDate();
-    if (reviewDate == null || reviewDate.isEmpty()) {
+    Date reviewDate = vault.getReviewDate();
+    if (reviewDate == null) {
       retVal.add("Review Date missing");
     } else {
       // if review date is less than 3 years from today
-      int length = 3;
-      if (
-        LocalDate
-          .parse(reviewDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-          .isBefore(
-            LocalDate.parse(
-              this.getDefaultReviewDate(length),
-              DateTimeFormatter.ofPattern("yyyy-MM-dd")
-            )
-          )
-      ) {
-        retVal.add(
-          "Review Date for selected policy is required to be at least " +
-          length +
-          " years"
-        );
+      int yearsToAdd = 3;
+      if (DateTimeUtils.isBefore(reviewDate,this.getDefaultReviewDate(yearsToAdd))) {
+        retVal.add("Review Date for selected policy is required to be at least " + yearsToAdd + " years");
       }
 
-      if (
-        LocalDate
-          .parse(reviewDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-          .isAfter(
-            LocalDate.parse(
-              this.getMaxReviewDate(),
-              DateTimeFormatter.ofPattern("yyyy-MM-dd")
-            )
-          )
-      ) {
-        retVal.add(
-          "Review Date for selected policy is required to be less than 30 years in the future"
-        );
+      if (DateTimeUtils.isBefore(reviewDate,this.getMaxReviewDate())) {
+        retVal.add("Review Date for selected policy is required to be less than 30 years in the future");
       }
     }
 
@@ -267,23 +241,19 @@ public class ValidateService {
     return retVal;
   }
 
-  public String getDefaultReviewDate(int length) {
-    String retVal;
+  public Date getDefaultReviewDate(int addedYears) {
     Calendar cal = Calendar.getInstance();
     cal.setTimeZone(TimeZone.getTimeZone("Europe/London"));
-    cal.add(Calendar.YEAR, length);
+    cal.add(Calendar.YEAR, addedYears);
     Date todayPlusXYears = cal.getTime();
-    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-    retVal = formatter.format(todayPlusXYears);
-
-    return retVal;
+    return todayPlusXYears;
   }
 
-  public String getDefaultReviewDate() {
+  public Date getDefaultReviewDate() {
     return this.getDefaultReviewDate(3);
   }
 
-  public String getMaxReviewDate() {
+  public Date getMaxReviewDate() {
     return this.getDefaultReviewDate(30);
   }
 }

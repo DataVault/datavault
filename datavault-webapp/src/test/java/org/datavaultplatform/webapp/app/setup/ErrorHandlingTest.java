@@ -43,7 +43,7 @@ public class ErrorHandlingTest {
     String body = respEntity.getBody();
     checkNoStackTrace(body);
 
-    Assertions.assertThat(body).contains("An error has occured!");
+    Assertions.assertThat(body).contains("An error has occurred!");
     Assertions.assertThat(body).contains("Error code null returned for Unknown with message:");
   }
 
@@ -57,7 +57,7 @@ public class ErrorHandlingTest {
     String body = respEntity.getBody();
     checkHasStackTrace(body);
 
-    Assertions.assertThat(respEntity.getBody()).contains("An error has occured!");
+    Assertions.assertThat(respEntity.getBody()).contains("An error has occurred!");
     Assertions.assertThat(respEntity.getBody()).contains("SimulatedError");
   }
 
@@ -89,7 +89,7 @@ public class ErrorHandlingTest {
 
     String body = respEntity.getBody();
     //response is from error/error template
-    Assertions.assertThat(body).contains("An error has occured!");
+    Assertions.assertThat(body).contains("An error has occurred!");
 
     //response text is generic 404 / NOT FOUND message
     Assertions.assertThat(body).contains(

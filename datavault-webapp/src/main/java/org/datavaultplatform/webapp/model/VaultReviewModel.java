@@ -1,8 +1,5 @@
 package org.datavaultplatform.webapp.model;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +11,7 @@ public class VaultReviewModel {
 
     private String vaultReviewId;
     private Date actionedDate;
-    private String newReviewDate;
+    private Date newReviewDate;
     private String comment;
 
     private List<DepositReviewModel> depositReviewModels;
@@ -25,7 +22,7 @@ public class VaultReviewModel {
     public VaultReviewModel(VaultReview vaultReview) {
         vaultReviewId = vaultReview.getId();
         actionedDate = vaultReview.getActionedDate();
-        newReviewDate = DateToString(vaultReview.getNewReviewDate());
+        newReviewDate = vaultReview.getNewReviewDate();
         comment = vaultReview.getComment();
     }
 
@@ -45,11 +42,11 @@ public class VaultReviewModel {
         this.actionedDate = actionedDate;
     }
 
-    public String getNewReviewDate() {
+    public Date getNewReviewDate() {
         return newReviewDate;
     }
 
-    public void setNewReviewDate(String newReviewDate) {
+    public void setNewReviewDate(Date newReviewDate) {
         this.newReviewDate = newReviewDate;
     }
 
@@ -67,28 +64,6 @@ public class VaultReviewModel {
 
     public void setDepositReviewModels(List<DepositReviewModel> depositReviewModels) {
         this.depositReviewModels = depositReviewModels;
-    }
-
-
-    private String DateToString(Date date) {
-        if (date != null) {
-            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            return dateFormat.format(date);
-        } else {
-            return "";
-        }
-
-    }
-
-    public Date StringToDate(String string) {
-        Date date = null;
-        try {
-            date = new SimpleDateFormat("yyyy-MM-dd").parse(string);
-        } catch (ParseException ex) {
-            log.error("problem parsing date from {}", string, ex);
-        }
-
-        return date;
     }
 }
 

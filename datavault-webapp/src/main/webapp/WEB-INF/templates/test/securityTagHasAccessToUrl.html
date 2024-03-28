@@ -1,0 +1,30 @@
+<!DOCTYPE html><!--test/securityTagHasAccessToUrl.html-->
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+  <meta charset="UTF-8">
+  <title>Test whether current user has access to url </title>
+</head>
+<body>
+<a th:href="@{/admin/events}">extra link</a>
+<div sec:authorize-url="/admin/events">
+  <div id="admin-events">
+    ACCESS TO /admin/events
+  </div>
+</div>
+<div sec:authorize-url="/admin/retentionpolicies">
+  <div id="admin-retention-policies">
+    ACCESS TO /admin/retentionpolicies
+  </div>
+</div>>
+<div id="user">
+    <div sec:authorize="isAuthenticated()">
+        <div th:with="principal=${#authentication.principal}">
+        AUTHENTICATED:[[${principal.username}]]
+        </div>
+    </div>
+    <div sec:authorize="! isAuthenticated()">
+        NOT AUTHENTICATED
+    </div>
+</div>
+</body>
+</html>

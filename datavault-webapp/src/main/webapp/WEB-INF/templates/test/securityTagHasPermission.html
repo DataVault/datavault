@@ -1,0 +1,17 @@
+<!DOCTYPE html><!--test/securityTagHasPermission.html-->
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+  <meta charset="UTF-8">
+  <title>Security hasPermission Test Page</title>
+</head>
+<body>
+<div id="targetId">&#91;[[${targetId}]]&#93;</div>
+<div th:with="secExpression=|hasPermission('${targetId}', 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES')|">
+<div th:if="${#authorization.expression(secExpression)}">
+  <div id="result">
+    DOES HAVE PERMISSION
+  </div>
+</div>
+</div>
+</body>
+</html>

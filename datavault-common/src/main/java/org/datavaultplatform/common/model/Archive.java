@@ -15,6 +15,8 @@ import javax.persistence.NamedSubgraph;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+
+import org.datavaultplatform.common.util.DateTimeUtils;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.GenericGenerator;
 
@@ -43,7 +45,7 @@ public class Archive {
     private String id;
 
     // Serialise date in ISO 8601 format
-    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern= DateTimeUtils.ISO_DATE_TIME_FORMAT)
     @Temporal(TemporalType.TIMESTAMP)
     private Date creationTime;
 

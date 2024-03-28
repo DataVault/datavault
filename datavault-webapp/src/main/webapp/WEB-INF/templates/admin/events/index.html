@@ -1,0 +1,60 @@
+<!DOCTYPE html><!--events/index.html-->
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/defaultlayout(nav='admin')}">
+<head><title>Admin - Events</title></head>
+<th:block layout:fragment="content">
+
+<div class="container">
+
+    <ol class="breadcrumb">
+        <li><a th:href="@{/admin/}"><b>Administration</b></a></li>
+        <li class="active"><b>Events</b></li>
+    </ol>
+    <th:block th:if="${events != null}">
+        <div class="table-responsive" style="overflow: scroll; font-family:monospace;">
+            <table class="table table-striped text-nowrap">
+                <thead>
+                    <tr class="tr">
+                        <th>Agent</th>
+                        <th>User</th>
+                        <th>Event</th>
+                        <th>Timestamp</a></th>
+                        <th>Vault</th>
+                        <th>Deposit</th>
+                        <th>Remote Address</th>
+                        <th>HTTP User Agent</th>
+                        <th>Event ID</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr th:each="event: ${events}" class="tr">
+                        <td th:switch="${event.agentType}">
+                            <th:block th:case="WORKER" >
+                                <span class="label label-Warning">[[${event.agentType}]]</span>&nbsp;[[${event.agent}]]
+                            </th:block>
+                            <th:block th:case="WEB" >
+                                <span class="label label-primary">[[${event.agentType}]]</span>&nbsp;[[${event.agent}]]
+                            </th:block>
+                            <th:block th:case="*">
+                                <span  class="label label-default">[[${event.agentType}]]</span>&nbsp;[[${event.agent}]]
+                            </th:block>
+                        </td>
+                        <td>[[${event?.userID ?: ''}]]</td>
+                        <td>[[${event?.eventClass ?: ''}]]</a></td>
+                        <td>[[${#dates.format(event?.timestamp,globalDateTimeFormat)}]]<!--/* datetime */--></td>
+                        <td>[[${event?.vaultID ?: ''}]]</td>
+                        <td>[[${event?.depositID ?: ''}]]</td>
+                        <td>[[${event?.remoteAddress ?: ''}]]</td>
+                        <td>[[${event?.userAgent ?: ''}]]</a></td>
+                        <td>[[${event?.id ?: ''}]]</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </th:block>
+
+</div>
+</th:block>
+</html>

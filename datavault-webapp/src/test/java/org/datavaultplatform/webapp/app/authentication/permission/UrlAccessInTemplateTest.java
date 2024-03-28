@@ -23,9 +23,9 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.bind.annotation.GetMapping;
 
 /**
- * Checks that the Spring Security authorize Jsp Tag in freemarker templates will evaluate the
+ * Checks that the SpringSecurity Tags are working as expected within Thymeleaf templates and will evaluate
  * whether the current user has access to a specified url.
- * For example '<@sec.authorize url="/admin/retentionpolicies/">'
+ * For example '<div sec:authorize-url="/admin/retentionpolicies">'
  */
 @SpringBootTest
 @AutoConfigureMockMvc

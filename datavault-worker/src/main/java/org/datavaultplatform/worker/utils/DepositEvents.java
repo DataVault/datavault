@@ -4,11 +4,11 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.File;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDate;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.util.*;
+
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.event.Event;
@@ -20,6 +20,7 @@ import org.datavaultplatform.common.model.ArchiveStore;
 import org.datavaultplatform.common.storage.StorageConstants;
 import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.common.PropNames;
+import org.datavaultplatform.common.util.DateTimeUtils;
 import org.datavaultplatform.worker.tasks.Deposit;
 import org.datavaultplatform.worker.tasks.Retrieve;
 
@@ -50,7 +51,11 @@ public class DepositEvents {
     topLevelProps.put(PropNames.ARCHIVE_SIZE, String.valueOf(info.archiveSize));
     topLevelProps.put(PropNames.ARCHIVE_DIGEST, info.archiveDigest);
     topLevelProps.put(PropNames.ARCHIVE_ID, info.archiveId);
-    topLevelProps.put(PropNames.DEPOSIT_CREATION_DATE, "20240111");
+    Instant testInstant = LocalDate.of(2024, 1, 11)
+            .atStartOfDay(ZoneOffset.UTC)
+            .toInstant();
+    Date testDate = Date.from(testInstant);
+    topLevelProps.put(PropNames.DEPOSIT_CREATION_DATE, DateTimeUtils.formatDateBasicISO(testDate));
 
     retrieve.setProperties(topLevelProps);
     retrieve.setTarIV(info.tarIV);

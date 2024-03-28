@@ -22,8 +22,11 @@ import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashSet;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 import java.util.List;
+import java.util.Set;
 
 /**
  * User: Robin Taylor
@@ -152,12 +155,80 @@ public class FilesController {
         }
     }
 
+    @GetMapping("/sizeofselectedfiles")
+    public String sizeOfSelectedFiles(@RequestHeader(HEADER_USER_ID) String userID,
+                                       HttpServletRequest request) throws Exception {
+        log.info("Start of sizeOfSelectedFiles");
+        String[] filePaths = request.getParameterValues("filepath");
+        // Get storage id from the file path of first
+        if (filePaths.length > 0) {
+            // Start timing
+            long start = System.nanoTime();
+
+            Set<String> storageIDSet = new HashSet<String>();
+            for (String filePath : filePaths) {
+                String fileStorageID = filePath.split("/")[1];
+                storageIDSet.add(fileStorageID);
+            }
+
+            Long size = 0L;
+            for (String storageID: storageIDSet) {
+                log.info("storageID: " + storageID);
+                User user = usersService.getUser(userID);
+                FileStore store = null;
+                List<FileStore> userStores = user.getFileStores();
+                
+                for (FileStore userStore : userStores) {
+                    if (userStore.getID().equals(storageID)) {
+                        store = userStore;
+                    }
+                }
+        
+                if (store == null) {
+                    // throw new Exception("Storage device '" + storageID + "' not found!");
+                    return "File information not available. Storage device '" + storageID + "' not found!.";
+                }
+            
+                for (String filePath : filePaths) {
+                    log.info("Loop filePaths: storageID: " + storageID);
+                    log.info("Loop filePaths: filePath: " + filePath);
+                    if (filePath.startsWith("/" + storageID)) {
+                        String modifiedFilepath = filePath.replace("/" + storageID, "");
+                        log.info("Loop filePaths: filePath: " + filePath);
+                        Long fSize = filesService.getFilesize(modifiedFilepath, store);
+                        log.info("Loop filePaths: fSize: " + fSize);
+                        if(fSize != null) {
+                           size += fSize;
+                        }
+                        log.info("Loop filePaths: size: " + size);
+                    }
+                }
+
+                long finish = System.nanoTime();
+                long timeElapsed = TimeUnit.SECONDS.convert(finish - start, TimeUnit.NANOSECONDS);
+                log.info("sizeOfSelectedFiles(): timeElapsed for calculating size: " + timeElapsed + " seconds");
+            }  
+            if (size == 0L) {
+                return "File information not available.";
+            } else {
+                return FileUtils.getGibibyteSizeStr(size);
+            }
+        } else {
+            return "File information not available.";
+        }
+
+        
+    }
+
     @GetMapping("/checkdepositsize")
     public DepositSize checkDepositSize(@RequestHeader(HEADER_USER_ID) String userID,
                               HttpServletRequest request) throws Exception {
 
         User user = usersService.getUser(userID);
         String[] filePaths = request.getParameterValues("filepath");
+
+        // Start timing
+        long start = System.nanoTime();
 
         Long size = 0L;
         for (String filePath : filePaths) {
@@ -192,9 +263,16 @@ public class FilesController {
         }
 
         log.info("Total size: " + size);
+        String sizeWithUnits = FileUtils.getGibibyteSizeStr(size);
+        log.info("checkDepositSize() - sizeWithUnits:" + sizeWithUnits);
+        long finish = System.nanoTime();
+        long timeElapsed = TimeUnit.SECONDS.convert(finish - start, TimeUnit.NANOSECONDS);
+        log.info("checkDepositSize(): timeElapsed for calculating size: " + timeElapsed + " seconds");
+
         Long max = (this.adminService.isAdminUser(user)) ? this.maxAdminDepositByteSize : this.maxDepositByteSize;
         DepositSize retVal = new DepositSize();
         retVal.setMax(max);
+        retVal.setSizeWithUnits(sizeWithUnits);
 
         log.info("Max (broker) is:" + max);
         if (size <= max) {
@@ -202,6 +280,7 @@ public class FilesController {
         } else {
             retVal.setResult(Boolean.FALSE);
         }
+        log.info("retVal: " + retVal);
         return retVal;
     }
     

@@ -24,7 +24,7 @@ import java.util.Set;
 /**
  * In truth this class does not do any true authentication as it is assumed the user was authenticated by the client
  * application, it just has a look at the incoming user and client details and grants roles accordingly.
- *
+ * <p/>
  * User: Robin Taylor
  * Date: 13/11/2015
  * Time: 15:10
@@ -39,7 +39,7 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
     private RolesAndPermissionsService rolesAndPermissionsService;
     private AdminService adminService;
 
-    // This is a crappy means of allowing someone to turn off the client validation. Must be a better way of doing this.
+    // This is a not-perfect means of allowing someone to turn off the client validation. Must be a better way of doing this.
     private boolean validateClient;
 
     public void setUsersService(UsersService usersService) {
@@ -71,7 +71,7 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
         logger.debug("preAuthenticatedPrincipal = " + name + ", trying to authenticate");
 
         // Note: name may be empty in some circumstances eg. a request to add a new user for a first time Shibboleth authenticated user.
-        if ((name != null) && (!name.equals(""))) {
+        if ((name != null) && (!name.isEmpty())) {
             User user = usersService.getUser(name);
             if (user == null) {
                 logger.debug("No matching User record found for Id " + name);

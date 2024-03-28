@@ -35,22 +35,22 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@Slf4j
-@ProfileStandalone
 /**
- * Checks that the SpringSecurity authorize Jsp Tag in freemarker templates
+ * Checks that the SpringSecurity Tags are working as expected within Thymeleaf templates
  * will delegate to the registered PermissionEvaluator bean when the authorize tag
  * uses hasPermission.
  * This test uses a mock PermissionEvaluator bean - we are not testing
  * the actual PermissionEvaluator - just that it gets called correctly.
  * For Example :
  * '
- *  <#assign secExpression = "hasPermission('${targetId}', 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES')">
- *  <@sec.authorize access=secExpression>
+ *  <div th:with="secExpression=|hasPermission('${targetId}', 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES')|">
+ *  <div th:if="${#authorization.expression(secExpression)}">
  * '
  */
+@SpringBootTest
+@AutoConfigureMockMvc
+@Slf4j
+@ProfileStandalone
 class PermissionEvaluatorTemplateTest {
 
   @Autowired

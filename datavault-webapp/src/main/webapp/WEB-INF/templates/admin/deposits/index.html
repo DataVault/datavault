@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/defaultlayout(nav='admin')}">
+<head><title>Admin - Deposits</title></head>
+<th:block layout:fragment="content" th:with="queryPARAM=${#uris.escapeQueryParam(query)}">
+    <div class="modal fade" id="confirm-removal" tabindex="-1" role="dialog" aria-labelledby="confirmRemovalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 class="modal-title" id="confirmRemovalLabel">Confirm removal of Deposit</h4>
+                </div>
+                <div class="modal-body">
+                    <p>You have selected to delete the files in this deposit.<br> Do you have the authorisation of the Owner / Data Manager and Head of School or College, as per the review process? (In the case of an ‘orphan’ vault, permission of the Head of School and College is necessary).</p>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger btn-ok" id="remove">Yes</button>
+                </div>
+            </div>
+        </div>
+    </div><!--modal-->
+
+    <div class="container">
+
+        <ol class="breadcrumb">
+            <li><a th:href="@{/admin/}"><b>Administration</b></a></li>
+            <li class="active"><b>Deposits</b></li>
+        </ol>
+
+        <form id="search-vaults" class="form" role="form" action="" method="get">
+            <div class="input-group">
+                <input type="text" class="form-control" name="query" th:value="${queryPARAM}" placeholder="Search for...">
+                <input type="hidden" class="form-control" name="sort" th:value="${sort}">
+                <input type="hidden" class="form-control" name="order" th:value="${order}">
+                <div class="input-group-btn">
+                    <button class="btn btn-primary" type="submit"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Search</button>
+                </div>
+            </div>
+        </form>
+
+        <div align="right">
+            <form id="search-vaults" class="form" role="form" th:action="@{/admin/deposits/csv}" method="get">
+                <div class="input-group" align="right">
+                    <input type="text" class="form-control hidden" th:value="${queryPARAM}" name="query" placeholder="Search for...">
+                    <input type="text" class="form-control hidden" th:value="${sort}" name="sort" placeholder="Search for...">
+                    <input type="text" class="form-control hidden" th:value="${order}" name="order" placeholder="Search for...">
+                    <button class="btn btn-primary" type="submit"><span class="glyphicon glyphicon-export" aria-hidden="true"></span> Download CSV File</button>
+                </div>
+            </form>
+        </div>
+
+        <th:block th:if="${deposits != null}">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr class="tr">
+                        <th><a th:href="|?sort=name&order=${orderName}&query=${queryPARAM}|">Deposit Name
+                            <th:block th:if="${sort == 'name'}">
+                                <span th:if="${order=='desc'}" class="dropup"><span class="caret"></span></span>
+                                <span th:if="${order!='desc'}" class="caret"></span>
+                            </th:block>
+                        </a></th>
+                        <th><a th:href="|?sort=depositSize&order=${orderDepositSize}&query=${queryPARAM}|">Size
+                            <th:block th:if="${sort == 'depositSize'}">
+                                <span th:if="${order=='desc'}" class="dropup"><span class="caret"></span></span>
+                                <span th:if="${order!='desc'}" class="caret"></span>
+                            </th:block>
+                        </a></th>
+                        <th><a th:href="|?sort=creationTime&order=${orderCreationTime}&query=${queryPARAM}|">Date deposited
+                            <th:block th:if="${sort == 'creationTime'}">
+                                <span th:if="${order=='desc'}" class="dropup"><span class="caret"></span></span>
+                                <span th:if="${order!='desc'}" class="caret"></span>
+                            </th:block>
+                        </a></th>
+                        <th><a th:href="|?sort=status&order=${orderStatus}&query=${queryPARAM}|">Status
+                            <th:block th:if="${sort == 'status'}">
+                                <span th:if="${order=='desc'}" class="dropup"><span class="caret"></span></span>
+                                <span th:if="${order!='desc'}" class="caret"></span>
+                            </th:block>
+                        </a></th>
+                        <th><a th:href="|?sort=user.id&order=${orderUserID}&query=${queryPARAM}|">Depositor
+                            <th:block th:if="${sort == 'status'}">
+                                <span th:if="${order=='desc'}" class="dropup"><span class="caret"></span></span>
+                                <span th:if="${order!='desc'}" class="caret"></span>
+                            </th:block>
+                        </a></th>
+                        <th>Vault Name</th>
+                        <th>Pure Record ID</th>
+                        <th>School</th>
+                        <th><a th:href="|?sort=id&order=${orderId}&query=${queryPARAM}|">Deposit ID
+                            <th:block th:if="${sort == 'id'}">
+                                <span th:if="${order=='desc'}" class="dropup"><span class="caret"></span></span>
+                                <span th:if="${order!='desc'}" class="caret"></span>
+                            </th:block>
+                        </a></th>
+                        <th><a th:href="|?sort=vault.id&order=${orderVaultId}&query=${queryPARAM}|">Vault ID
+                            <th:block th:if="${sort == 'vaultID'}">
+                                <span th:if="${order=='desc'}" class="dropup"><span class="caret"></span></span>
+                                <span th:if="${order!='desc'}" class="caret"></span>
+                            </th:block>
+                        </a></th>
+                        <th>Vault Owner</th>
+                        <th>Vault Review Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <th:block th:each="deposit: ${deposits}">
+                    <tr class="tr">
+                        <td>[[${deposit.name}]]</td>
+                        <td>[[${deposit.getSizeStr()}]]</td>
+                        <td>[[${#dates.format(deposit.getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */--></td>
+                        <td>[[${deposit.status}]]</td>
+                        <td><th:block th:if="${!#strings.isEmpty(deposit?.getUserName())}">[[${deposit.getUserName()}]]</th:block> ([[${deposit.userID}]])</td>
+                        <td><th:block th:if="${!#strings.isEmpty(deposit?.getVaultName())}">[[${deposit.getVaultName()}]]</th:block></td>
+                        <td><th:block th:if="${!#strings.isEmpty(deposit?.getCrisID())}">[[${deposit.getCrisID()}]]</th:block></td>
+                        <td>[[${deposit.groupName}]]</td>
+                        <td><a th:href="@{|/vaults/${deposit.vaultID}/deposits/${deposit.getID()}|}">[[${deposit.getID()}]]</a></td>
+                        <td><a th:href="@{|/vaults/${deposit.vaultID}|}">[[${deposit.vaultID}]]</a></td>
+                        <td><th:block th:if="${!#strings.isEmpty(deposit?.vaultOwnerID)}">[[${deposit.vaultOwnerName}]] ([[${deposit.vaultOwnerID}]])</th:block></td>
+                        <td>[[${deposit.vaultReviewDate}]]</td>
+                        <td th:with="removeDepositSecurityExpression=|hasPermission('${deposit.getGroupID()}', 'GROUP', 'DELETE_SCHOOL_VAULT_DEPOSITS')|">
+                            <th:block th:if="${#authorization.expression(removeDepositSecurityExpression)}">
+                            <th:block th:if="${deposit.status != 'DELETED'}">
+                                <a class="btn btn-xs btn-danger pull-left" href="#" th:data-vault="${deposit.getVaultID()}" th:data-deposit="${deposit.getID()}" data-toggle="modal" data-target="#confirm-removal">
+                                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Remove
+                                </a>
+                                <br>
+                            </th:block>
+                            </th:block>
+
+                            <th:block th:if="${deposit.status == 'FAILED'}">
+                                <a class="restart-deposit-btn btn btn-default btn-sm"
+                                   th:href="@{|/vaults/__${deposit.vaultID}__/deposits/__${deposit.getID()}__/restart|}">
+                                    Restart
+                                </a>
+                            </th:block>
+                        </td>
+
+
+                    </tr>
+                </th:block>
+                </tbody>
+            </table>
+        </div>
+
+        <div align="center">
+            <p class="text-info">Showing [[${offset}]] - <th:block th:text="${totalRecords < (offset + recordPerPage) ? totalRecords : (offset + recordPerPage)}" /> deposit of [[${totalRecords}]]</p>
+        </div>
+        <div align="center">
+        <nav aria-label="...">
+            <ul class="pagination pagination-lg" id="paginationButton">
+                <th:block th:each="path: ${#numbers.sequence(1,totalPages)}">
+                    <li th:id="${page}"
+                        th:class="${page == activePageId ? 'page-item active' : 'page-item'}"
+                    >
+                        <a class="page-link"
+                           th:href="@{|/admin/deposits?sort=${sort}&order=${order}&pageId=${page}&query=__${queryPARAM}__|}" tabindex="-1">[[${page}]]</a>
+                    </li>
+                </th:block>
+            </ul>
+        </nav>
+        </div><!--align-center-2-->
+        </th:block><!- if -->
+    <script th:inline="javascript" type="text/javascript">
+        //Bind properties to the user removal confirmation dialog
+        $('#confirm-removal').on('show.bs.modal', function(e) {
+            var data = $(e.relatedTarget).data();
+            $('#remove', this).data('depositId', data.deposit);
+            $('#remove', this).data('vaultId', data.vault);
+
+        });
+
+        $("button#remove").click(function(){
+            var depositId = $(this).data('depositId');
+            var vaultId = $(this).data('vaultId');
+            var baseURL =       /*[(|'@{/admin/deposits/}'|)]*/ 'replaced-by-tl';
+            var baseVaultsURL = /*[(|'@{/vaults/}'|)]*/ 'replaced-by-tl';
+            $.ajax({
+                url: baseURL + depositId+'?vaultId='+vaultId,
+                type: 'DELETE',
+                success: function (data) {
+                    console.log("----success---");
+                    window.location.href = baseVaultsURL+vaultId+'/deposits/'+depositId;
+
+                },
+                error: function(xhr, ajaxOptions, thrownError) {
+                    //alert('Error: unable to delete Deposit');
+                }
+            });
+        });
+
+        //Add Spring Security CSRF header to ajax requests
+        $(function () {
+            var token = $("meta[name='_csrf']").attr("content");
+            var header = $("meta[name='_csrf_header']").attr("content");
+            $(document).ajaxSend(function(e, xhr, options) {
+                xhr.setRequestHeader(header, token);
+            });
+        });
+				
+    </script>
+    </div><!--container-->
+</th:block>
+</html>

@@ -7,6 +7,7 @@ import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.request.*;
 import org.datavaultplatform.common.response.*;
 import org.datavaultplatform.common.util.Constants;
+import org.datavaultplatform.common.util.DateTimeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -712,8 +713,9 @@ public class RestService implements NotifyLogoutService, NotifyLoginService, Eva
         return response.getBody();
     }
 
-    public VaultInfo updateVaultReviewDate(String vaultId, String reviewDate) {
-        ResponseEntity<VaultInfo> response = post(brokerURL + "/vaults/" + vaultId + "/updatereviewdate", VaultInfo.class, reviewDate);
+    public VaultInfo updateVaultReviewDate(String vaultId, Date reviewDate) {
+        String reviewDateString = DateTimeUtils.formatDateBasicISO(reviewDate);
+        ResponseEntity<VaultInfo> response = post(brokerURL + "/vaults/" + vaultId + "/updatereviewdate", VaultInfo.class, reviewDateString);
         return response.getBody();
     }
 
@@ -834,6 +836,27 @@ public class RestService implements NotifyLogoutService, NotifyLoginService, Eva
         ResponseEntity<CreateRetentionPolicy> response = put(brokerURL + "/admin/retentionpolicies", CreateRetentionPolicy.class, createRetentionPolicy);
         return response.getBody();
     }
+
+    public String sizeOfSelectedFiles(String[] filePaths) {
+        StringBuilder parameters = new StringBuilder("?");
+
+        for (int i=0; i< filePaths.length; i++){
+            String filePath = filePaths[i];
+            if (!filePath.startsWith("/")) {
+                filePath = "/" + filePath;
+            }
+            parameters.append("filepath=").append(filePath).append("&");
+        }
+
+        logger.info("parameters: " + parameters);
+
+        ResponseEntity<String> response = get(brokerURL + "/sizeofselectedfiles" + parameters, String.class);
+
+        logger.info("return: " + response.getBody());
+
+        return response.getBody();
+    }
+
 
 
 }

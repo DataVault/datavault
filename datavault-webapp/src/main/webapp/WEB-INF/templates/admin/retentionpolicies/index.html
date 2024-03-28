@@ -1,0 +1,95 @@
+<!DOCTYPE html><!--admin/retentionpolicies/index.html-->
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/defaultlayout(nav='admin')}" >
+<head><title>Admin - Retention Policies</title></head>
+<th:block layout:fragment="content">
+<div class="container">
+
+    <ol class="breadcrumb">
+        <li><a th:href="@{/admin/}"><b>Administration</b></a></li>
+        <li class="active"><b>Retention Policies</b></li>
+    </ol>
+
+    <div class="row">
+        <div class="col-md-12">
+            <a class="btn btn-primary pull-right" th:href="@{/admin/retentionpolicies/add}">
+                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Retention Policy
+            </a>
+        </div>
+    </div>
+
+    <th:block th:if="${policies != null}">
+        <div class="table-responsive">
+            <table class="table table-striped">
+
+                <thead>
+                    <tr class="tr">
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <th:block th:each="policy: ${policies}">
+                        <tr th:id="|policy-row-${policy.getID()}|" class="tr">
+                            <td>
+                                [[${policy.name ?: ''}]]
+                            </td>
+                            <td>
+                                [[${policy.description ?: ''}]]
+                            </td>
+                            <td><a class="update-btn btn btn-default btn-sm" th:href="@{|/admin/retentionpolicies/edit/${policy.getID()}|}"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Edit Retention Policy </a></td>
+                            <td><button class="delete-btn btn btn-danger btn-sm" th:data-policyid="${policy.getID()}">Delete Policy</button></td>
+                        </tr>
+                    </th:block>
+                </tbody>
+            </table>
+        </div>
+    </th:block>
+
+</div>
+
+<script th:inline="javascript" type="text/javascript">
+$(document).ready(function () {
+    $.datepicker.setDefaults({
+        dateFormat: "yy-mm-dd", /* yy-mm-dd for ISO DATE FORMAT 2024-01-31, see https://jqueryui.com/datepicker/#date-formats */
+        changeMonth: true,
+        changeYear: true,
+        showOtherMonths: true,
+        selectOtherMonths: true
+    });
+    $( ".date-picker" ).datepicker();
+
+
+    // Add Spring Security CSRF header to ajax requests
+    $(function () {
+        var token = $("meta[name='_csrf']").attr("content");
+        var header = $("meta[name='_csrf_header']").attr("content");
+        $(document).ajaxSend(function (e, xhr, options) {
+            xhr.setRequestHeader(header, token);
+        });
+    });
+
+
+    // Handle delete button
+    $('.delete-btn').click(function () {
+        var policy_id = $(this).data('policyid');
+
+        var baseURL = /*[(|'@{/admin/retentionpolicies/delete/}'|)]*/ 'replaced-by-tl';
+        $.ajax({
+            url: baseURL + policy_id,
+            type: 'DELETE',
+            error: function (xhr, ajaxOptions, thrownError) {
+                alert('Error: unable to delete policy');
+            }
+        }).done(function() {
+            $("#policy-row-" + policy_id).remove();
+        });
+    });
+});
+</script>
+</th:block>
+</html>

@@ -11,6 +11,9 @@ public class FileInfo {
     private String absolutePath;
     private String name;
     private Boolean isDirectory;
+    private Boolean canRead;
+    private Boolean canWrite;
+
 
     public FileInfo() {}
     public FileInfo(String key, String absolutePath, String fileName, Boolean isDirectory) {
@@ -18,6 +21,15 @@ public class FileInfo {
         this.absolutePath = absolutePath;
         this.name = fileName;
         this.isDirectory = isDirectory;
+    }
+
+    public FileInfo(String key, String absolutePath, String fileName, Boolean isDirectory, Boolean canRead, Boolean canWrite) {
+        this.key = key;
+        this.absolutePath = absolutePath;
+        this.name = fileName;
+        this.isDirectory = isDirectory;
+        this.canRead = canRead;
+        this.canWrite = canWrite;
     }
 
     public String getKey() {
@@ -50,5 +62,25 @@ public class FileInfo {
 
     public void setIsDirectory(Boolean isDirectory) {
         this.isDirectory = isDirectory;
+    }
+
+    public Boolean getCanRead() {
+        return canRead;
+    }
+    public void setCanRead(Boolean canRead) {
+        this.canRead = canRead;
+    }
+  
+    public Boolean getCanWrite() {
+        return canWrite;
+    }
+    public void setCanWrite(Boolean canWrite) {
+        this.canWrite = canWrite;
+    }
+
+    @Override
+    public String toString() {
+        return "FileInfo [key=" + key + ", absolutePath=" + absolutePath + ", name=" + name + ", isDirectory="
+                + isDirectory + ", canRead=" + canRead + ", canWrite=" + canWrite + "]";
     }
 }

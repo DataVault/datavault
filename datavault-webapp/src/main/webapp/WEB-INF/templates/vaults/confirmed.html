@@ -1,0 +1,55 @@
+<!DOCTYPE html><!--vaults/confirmed.html-->
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/defaultlayout(nav='home')}">
+
+<head><title>Vaults - Confirmed</title></head>
+<th:block layout:fragment="content">
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-uoe-low">
+
+                <div class="associated-image">
+                    <figure class="uoe-panel-image uoe-panel-image"></figure>
+                </div>
+
+                <div class="panel-body">
+                    <h2>
+                        Your vault is now pending acceptance.
+                    </h2>
+
+                    <br/>
+
+                    <div class="container">
+                        <div class="form-card">
+                            <p>
+                                Thank you for submitting your request for a vault to be created. The Research Data Support team will check this request,
+                                and may contact you by email through Unidesk if we have questions about your vault. You will receive an email once we have
+                                approved your vault, which will then be ready for you to go ahead and deposit your data.
+                            </p>
+                            <p>
+                                You can view and edit your pending vault(s) at any time from the
+                                <a th:href="@{/vaults/}">
+                                    homepage.
+                                </a>
+                            </p>
+                            <p>
+                                If you wish to create another new vault, please click on the button below.
+                            </p>
+                            <div class="row">
+                                <a th:href="@{/vaults/buildsteps}" class="btn btn-lg btn-primary">
+                                    <span class="glyphicon glyphicon-folder-close"></span>
+                                    Create another vault
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</th:block>
+</html>
+

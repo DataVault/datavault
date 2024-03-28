@@ -1,0 +1,106 @@
+<!DOCTYPE html><!--admin/pendingVaults/confirmed.html-->
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/defaultlayout(nav='admin')}" >
+<head><title>Admin - Confirmed Pending Vaults</title></head>
+<th:block layout:fragment="content" th:with="queryPARAM=${#uris.escapeQueryParam(query)}">
+
+    <div class="container" >
+
+        <ol class="breadcrumb">
+            <li><a th:href="@{/admin/}"><b>Administration</b></a></li>
+            <li><a th:href="@{/admin/pendingVaults}"><b>Pending Vaults</b></a></li>
+            <li class="active"><b>Confirmed Pending Vaults</b></li>
+        </ol>
+
+        <h1>Confirmed Pending Vaults</h1>
+
+        <form id="search-pendingvaults" class="form" role="form" action="" method="get">
+            <div class="input-group">
+                <input type="text" class="form-control" th:value="${queryPARAM}" name="query" placeholder="Search for...">
+                <div class="input-group-btn">
+                    <button class="btn btn-primary" type="submit"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Search</button>
+                </div>
+            </div>
+        </form>
+
+        <th:block th:if="${pendingVaults != null}">
+
+            <div class="table-responsive" id="pendingVaultsTable">
+                <table class="table table-striped">
+                    <thead>
+                    <tr class="tr">
+                        <th><a th:href="|?sort=name&order=${ordername}&query=${queryPARAM}|">Vault Name
+                            <th:block th:if="${sort == 'name'}">
+                                <th:block th:if="${order == 'desc'}">
+                                    <span class="dropup"><span class="caret"></span></span>
+                                </th:block>
+                                <th:block th:if="${order != 'desc'}">
+                                    <span class="caret"></span>
+                                </th:block>
+                            </th:block>
+                        </a></th>
+
+                        <th>Owner</th>
+                        <th>Vault Creator</th>
+                        <th>Date Created</th>
+                        <th>View</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr th:each="pendingVault: ${pendingVaults}" class="tr">
+                            <td>
+                                [[${pendingVault.name}]]
+                            </td>
+                            <td>
+                                <th:block th:if="${pendingVault.ownerId != null}">
+                                    [[${pendingVault.ownerId}]]
+                                </th:block>
+                            </td>
+                            <td>
+                                <th:block th:if="${pendingVault.vaultCreatorId != null}">
+                                    [[${pendingVault.vaultCreatorId}]]
+                                </th:block>
+                            </td>
+                            <td>
+                               <th:block th:if="${pendingVault.getCreationTime() != null}">
+                                    [[${#dates.format(pendingVault.getCreationTime(),dateFormatISO)}]]<!--/* date */-->
+                                </th:block>
+                            </td>
+                            <td>
+                                <th:block th:if="${pendingVault.getUserID() != null}">
+                                    <a th:href="@{|/admin/pendingVaults/summary/${pendingVault.getID()}|}" class="btn btn-primary">
+                                        View
+                                    </a>
+                                </th:block>
+                            </td>
+
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div align="center">
+                <p class="text-info">[[${recordsInfo}]]</p>
+            </div>
+            <div align="center">
+                <nav aria-label="...">
+                    <ul class="pagination pagination-lg" id="paginationButton">
+                        <th:block th:each="page: ${#numbers.sequence(1,numberOfPages)}">
+                            <li th:class="${page == activePageId ? 'page-item active' : 'page-item'}" th:id="${page}">
+                                <a class="page-link" th:href="@{|/admin/pendingVaults/confirmed?sort=${sort}&order=${order}&pageId=${page}&query=${queryPARAM}|}" tabindex="-1">[[${page}]]</a>
+                            </li>
+                        </th:block>
+                    </ul>
+                </nav>
+            </div>
+
+
+        </th:block>
+
+    </div>
+
+
+</th:block>
+</html>

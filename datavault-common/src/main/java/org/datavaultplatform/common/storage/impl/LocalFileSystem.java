@@ -51,6 +51,21 @@ public class LocalFileSystem extends Device implements UserStore, ArchiveStore {
         
         Path basePath = Paths.get(rootPath);
         Path completePath = getAbsolutePath(path);
+        boolean canRead = false;
+        boolean canWrite = false;
+
+        // 
+        try {
+          canRead = canRead(path);
+        } catch(Exception e) {
+          // Do nothing
+        }
+
+        try {
+          canWrite = canWrite(path);
+        } catch(Exception e) {
+          // Do nothing
+        }
 
         if (completePath == null) {
             throw new IllegalArgumentException("Path invalid [" + path + "]");
@@ -71,7 +86,11 @@ public class LocalFileSystem extends Device implements UserStore, ArchiveStore {
                 FileInfo info = new FileInfo(entryKey,
                                              entryAbsolutePath,
                                              entryFileName,
-                                             Files.isDirectory(entry));
+                                             Files.isDirectory(entry),
+                                             canRead,
+                                             canWrite
+                );
+                log.info(info.toString());
                 files.add(info);
             }
 
@@ -214,5 +233,19 @@ public class LocalFileSystem extends Device implements UserStore, ArchiveStore {
     public void delete(String path, File working, Progress progress) throws Exception {
         Path absolutePath = getAbsolutePath(path);
         Files.deleteIfExists(absolutePath);
+    }
+
+    @Override
+    public boolean canRead(String path) throws Exception {
+      Path absolutePath = getAbsolutePath(path);
+      File file = absolutePath.toFile();
+      return file.canRead();
+    }
+
+    @Override
+    public boolean canWrite(String path) throws Exception {
+      Path absolutePath = getAbsolutePath(path);
+      File file = absolutePath.toFile();
+      return file.canWrite();
     }
 }

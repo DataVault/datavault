@@ -1,0 +1,203 @@
+<!DOCTYPE html><!--admin/billing/billingDetails.html-->
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/defaultlayout(nav='admin')}">
+<head><title>Admin - Billing Details</title></head>
+<th:block layout:fragment="content">
+            <div class="container">
+                <ol class="breadcrumb">
+                    <li><a
+                            th:href="@{/admin/}"><b>Administration</b></a></li>
+                    <li><a
+                            th:href="@{/admin/billing}"><b>Billing</b></a></li>
+                    <li class="active"><b>BillingDetails:</b>
+                        [[${billingDetails.vaultName}]]
+                    </li>
+                </ol>
+                <div class="panel panel-uoe-low">
+                    <div class="panel-body">
+                        <h2>Billing Details: <small>
+                                [[${billingDetails.vaultName}]]
+                            </small></h2>
+                        <br />
+                        <table class="table table-sm">
+                            <tbody>
+                                <tr>
+                                    <th scope="col">Authoriser</th>
+                                    <td>
+                                        <th:block th:if="${billingDetails.getContactName() != null}">
+                                            [[${billingDetails.contactName}]]
+                                        </th:block>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="col">School/Unit</th>
+                                    <td>
+                                        <th:block th:if="${billingDetails.getSchool() != null}">
+                                            [[${billingDetails.school}]]
+                                        </th:block>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="col">Subunit</th>
+                                    <td>
+                                        <th:block th:if="${billingDetails.getSubUnit() != null}">
+                                            [[${billingDetails.subUnit}]]
+                                        </th:block>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="col">Project Id</th>
+                                    <td>
+                                        <th:block th:if="${billingDetails.getProjectId() != null}">
+                                            [[${billingDetails.projectId}]]
+                                        </th:block>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="col">Grant End Date</th>
+                                    <td>
+                                        <th:block th:if="${billingDetails.getGrantEndDate() != null}">
+                                            [[${#dates.format(billingDetails.grantEndDate,dateFormatddMMMyyyy)}]]<!--/* date */-->
+                                        </th:block>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="col">Use Budget code</th>
+                                    <td>
+                                        <th:block th:if="${billingDetails.getBudgetCodeStr() != null}">
+                                            [[${billingDetails.getBudgetCodeStr()}]]
+                                        </th:block>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="col">Amount to be billed</th>
+                                    <td>
+                                        <th:block th:if="${billingDetails.getAmountToBeBilled() != null}">
+                                            [[${billingDetails.getAmountToBeBilled()}]]
+                                        </th:block>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="col">Amount billed</th>
+                                    <td>
+                                        <th:block th:if="${billingDetails.getAmountBilled() != null}">
+                                            [[${billingDetails.getAmountBilled()}]]
+                                        </th:block>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="col">Payment Details</th>
+                                    <td>
+                                        <th:block th:if="${billingDetails.getPaymentDetails() != null}">
+                                            [[${billingDetails.getPaymentDetails()}]]
+                                        </th:block>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="col">Special arrangement comments</th>
+                                    <td>
+                                        <th:block th:if="${billingDetails.getSpecialComments() != null}">
+                                            [[${billingDetails.getSpecialComments()}]]
+                                        </th:block>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="btn-toolbar pull-right">
+                            <button type="button" class="btn btn-default pull-right" data-toggle="modal" data-target="#update-billingDetails">
+                                Edit
+                            </button>
+                        </div>
+                        <div id="update-billingDetails" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="updateBillingDetails" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <form id="update-billingDetails-form" th:object="${billingDetails}" class="form" role="form" th:action="@{/admin/billing/updateBillingDetails}" method="post">
+                                        <div class="modal-header">
+                                            <h4 class="modal-title" id="addDataManger">Billing Details</h4>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="form-group">
+                                                <label class="control-label">Authoriser:</label>
+                                                <input type="text" class="form-control"
+                                                    id="contactName" maxlength="400"
+                                                    th:field="*{contactName}"
+                                                />
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label">School/Unit:</label>
+                                                <input type="text" class="form-control"
+                                                    id="school" maxlength="400"
+                                                    th:field="*{school}"
+                                                />
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label">Subunit:</label>
+                                                <input type="text" class="form-control"
+                                                    id="subunit" maxlength="400"
+                                                    th:field="*{subUnit}"
+                                                />
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label">ProjectId:</label>
+                                                <input type="text" class="form-control"
+                                                    id="projectId" maxlength="400"
+                                                    th:field="*{projectId}"
+                                                />
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label">Use BudgetCode:</label>
+                                                <input type="checkbox" id="budgetCode" th:field="*{budgetCode}" />
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label">Amount to be billed:(Please enter the amount in pounds (and pence if applicable) without any symbols, do not use commas)</label>
+                                                <input type="text" class="form-control" pattern="[0-9]+(\.[0-9][0-9]?)?"
+                                                    maxlength="400" id="amountToBeBilled"
+                                                    th:field="*{amountToBeBilled}"
+                                                />
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label">Amount billed:(Please enter the amount in pounds (and pence if applicable) without any symbols, do not use commas)</label>
+                                                <input type="text" class="form-control" pattern="[0-9]+(\.[0-9][0-9]?)?"
+                                                    maxlength="400" id="amountBilled"
+                                                    th:field="*{amountBilled}"
+                                                />
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label">Payment Details:</label>
+                                                <textarea type="text" class="form-control"
+                                                    id="paymentDetails" rows="4" cols="60" maxlength="400"
+                                                    th:field="*{paymentDetails}"
+                                                >
+                                                </textarea>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label">Special arrangements comments:</label>
+                                                <textarea type="text" class="form-control"
+                                                    id="comments" rows="4" cols="60" maxlength="400"
+                                                    th:field="*{specialComments}"
+                                                >
+                                                </textarea>
+                                            </div>
+                                        </div>
+                                        <input type="hidden" id="submitAction" name="action" value="submit" />
+                                        <input type="hidden" th:name="${_csrf?.parameterName ?: ''}" th:value="${_csrf?.token ?: ''}" />
+                                        <input type="hidden" name="vaultID" th:value="${billingDetails.getVaultID()}" />
+                                        <input type="hidden" name="vaultName" th:value="${billingDetails.getVaultName()}" />
+                                        <th:block th:if="${billingDetails.getBillingType() != null}">
+                                            <input type="hidden" name="billingType" th:value="${billingDetails.getBillingType()}" />
+                                        </th:block>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                                            <button type="submit" id="update-billingDetails-btn" class="btn btn-primary btn-ok">Save</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <input type="hidden" th:name="${_csrf?.parameterName ?: ''}" th:value="${_csrf?.token ?: ''}" />
+            </div>
+</th:block>
+</html>

@@ -1,0 +1,20 @@
+<!DOCTYPE html><!--admin/schools/index.html-->
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/defaultlayout(nav='admin')}">
+<head><title>Admin - Schools</title></head>
+<th:block layout:fragment="content">
+
+    <div class="container">
+
+        <ol class="breadcrumb">
+            <li><a th:href="@{/admin/}"><b>Administration</b></a></li>
+            <li class="active"><b>Schools</b></li>
+        </ol>
+
+        <div th:each="school: ${schools}">
+            <a th:href="@{|/admin/schools/${school.getID()}|}">[[${school.name}]]</a>
+        </div>
+
+    </div>
+</th:block>
+</html>
