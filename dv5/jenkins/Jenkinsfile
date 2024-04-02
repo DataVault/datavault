@@ -74,6 +74,7 @@ pipeline {
                     echo "Unit Tests Disabled";
                   }
                 }
+                junit '**/surefire-reports/*Test.xml'
             }
         }
         stage('Integration Tests') {
@@ -86,6 +87,7 @@ pipeline {
                     echo "Unit Tests Disabled";
                   }
                 }
+                junit '**/failsafe-reports/*IT.xml'
             }
         }
         stage('Install') {
