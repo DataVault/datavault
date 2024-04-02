@@ -68,26 +68,26 @@ pipeline {
             steps {
                 echo "Unit Tests.. [${env.ENABLE_UNIT_TESTS}"
                 script {
-                  if (env.ENABLE_UNIT_TESTS == 'true') {
-                    sh './mvnw test'
-                  } else {
+                  if (env.ENABLE_UNIT_TESTS != 'true') {
                     echo "Unit Tests Disabled";
+                    return;
                   }
+                  sh './mvnw test'
                 }
-                junit '**/surefire-reports/*Test.xml'
+                junit (allowEmptyResults: true, testResults: '**/surefire-reports/*Test.xml')
             }
         }
         stage('Integration Tests') {
             steps {
                 echo "Integration Tests.. [${env.ENABLE_INTEGRATION_TESTS}"
                 script {
-                  if (env.ENABLE_INTEGRATION_TESTS == 'true') {
-                    sh './mvnw integration-test -Dskip.unit.tests -Dmaven.main.skip'
-                  } else {
-                    echo "Unit Tests Disabled";
+                  if (env.ENABLE_INTEGRATION_TESTS != 'true') {
+                    echo "Integration Tests Disabled";
+                    return;
                   }
+                  sh './mvnw integration-test -Dskip.unit.tests -Dmaven.main.skip'
                 }
-                junit '**/failsafe-reports/*IT.xml'
+                junit (allowEmptyResults: true, testResults: '**/failsafe-reports/*IT.xml')
             }
         }
         stage('Install') {
