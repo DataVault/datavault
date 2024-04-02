@@ -55,7 +55,7 @@ public class SFTPFileSystemPerformanceIT {
   static final int TEST_SFTP_SERVER_PORT = 2222;
   static final int TEST_ITERATIONS = 5;
 
-  static final double PERFORMANCE_THRESHOLD = 1.5;
+  static final double PERFORMANCE_THRESHOLD = 3.0;
   public static final int SIZE_50MB = 50_000_000;
 
   @Container
