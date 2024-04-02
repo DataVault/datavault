@@ -70,6 +70,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
+import org.testcontainers.utility.MountableFile;
 
 @SpringBootTest(classes = DataVaultBrokerApp.class)
 @AddTestProperties
@@ -109,14 +110,17 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
   String passphrase;
   @MockBean
   Sender sender;
-  @TempDir
-  File tempFromSftp;
   @Autowired
   MockMvc mvc;
   @Autowired
   FileStoreDAO fileStoreDAO;
   String keyStorePath;
-  private Path tempSftpFolder;
+  private Path tempCopyToSftpFolder;
+  @TempDir
+  File tempRetrievedFromSftp;
+  @TempDir
+  File tempStoreToSftp;
+
   private GenericContainer<?> sftpServer;
 
   private final StorageClassNameResolver resolver = new StorageClassNameResolver(true);
@@ -133,7 +137,7 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
   @BeforeEach
   @SneakyThrows
   void setup() {
-    keyStorePath = tempFromSftp.toPath().resolve("test.ks").toString();
+    keyStorePath = tempRetrievedFromSftp.toPath().resolve("test.ks").toString();
     log.info("TEMP KEY IS AT [{}]", keyStorePath);
     Encryption enc = new Encryption();
     enc.setVaultEnable(false);
@@ -272,17 +276,22 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
   @SneakyThrows
   private GenericContainer<?> setupAndStartSFTP(String publicKey) {
 
-    this.tempSftpFolder = Files.createTempDirectory("SFTP_TEST");
-    copyToSFTPServer(tempSftpFolder.resolve(PATH_FILE_1), CONTENTS_FILE_1);
-    copyToSFTPServer(tempSftpFolder.resolve(PATH_FILE_2), CONTENTS_FILE_2);
-    copyToSFTPServer(tempSftpFolder.resolve(PATH_FILE_3), CONTENTS_FILE_3);
-    copyToSFTPServer(tempSftpFolder.resolve(PATH_FILE_4), CONTENTS_FILE_4);
+    this.tempCopyToSftpFolder = Files.createTempDirectory("SFTP_TEST");
+    copyToSFTPServer(tempCopyToSftpFolder.resolve(PATH_FILE_1), CONTENTS_FILE_1);
+    copyToSFTPServer(tempCopyToSftpFolder.resolve(PATH_FILE_2), CONTENTS_FILE_2);
+    copyToSFTPServer(tempCopyToSftpFolder.resolve(PATH_FILE_3), CONTENTS_FILE_3);
+    copyToSFTPServer(tempCopyToSftpFolder.resolve(PATH_FILE_4), CONTENTS_FILE_4);
+
+    var uid = String.valueOf(new com.sun.security.auth.module.UnixSystem().getUid());
+    var gid = String.valueOf(new com.sun.security.auth.module.UnixSystem().getGid());
 
     GenericContainer<?> sftpServer = new GenericContainer<>(DockerImageName.parse(DockerImage.OPEN_SSH_8pt6_IMAGE_NAME))
+        .withEnv("PUID", uid)
+        .withEnv("PGID", gid)
         .withEnv(ENV_USER_NAME, TEST_USER)
         .withEnv(ENV_PUBLIC_KEY, publicKey) //this causes the public key to be added to /config/.ssh/authorized_keys
         .withExposedPorts(SFTP_SERVER_PORT)
-        .withFileSystemBind(tempSftpFolder.toString(), BASE_SFTP_DIR)
+        .withCopyToContainer(MountableFile.forHostPath(tempCopyToSftpFolder), BASE_SFTP_DIR)
         .waitingFor(Wait.forListeningPort());
 
     sftpServer.start();
@@ -318,29 +327,31 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
     assertFalse(sftp.exists("FILES/AAA/file4.txt"));
 
     //TEST READING FILES FROM SFTP
-    sftp.retrieve("FILES/AAA/file1.txt", tempFromSftp, new Progress());
-    sftp.retrieve("FILES/AAA/file2.txt", tempFromSftp, new Progress());
-    sftp.retrieve("FILES/BBB/file3.txt", tempFromSftp, new Progress());
-    sftp.retrieve("FILES/BBB/file4.txt", tempFromSftp, new Progress());
+    sftp.retrieve("FILES/AAA/file1.txt", tempRetrievedFromSftp, new Progress());
+    sftp.retrieve("FILES/AAA/file2.txt", tempRetrievedFromSftp, new Progress());
+    sftp.retrieve("FILES/BBB/file3.txt", tempRetrievedFromSftp, new Progress());
+    sftp.retrieve("FILES/BBB/file4.txt", tempRetrievedFromSftp, new Progress());
 
-    checkFromSFTP(tempFromSftp, "file1.txt", CONTENTS_FILE_1);
-    checkFromSFTP(tempFromSftp, "file2.txt", CONTENTS_FILE_2);
-    checkFromSFTP(tempFromSftp, "file3.txt", CONTENTS_FILE_3);
-    checkFromSFTP(tempFromSftp, "file4.txt", CONTENTS_FILE_4);
+    checkFromSFTP(tempRetrievedFromSftp, "file1.txt", CONTENTS_FILE_1);
+    checkFromSFTP(tempRetrievedFromSftp, "file2.txt", CONTENTS_FILE_2);
+    checkFromSFTP(tempRetrievedFromSftp, "file3.txt", CONTENTS_FILE_3);
+    checkFromSFTP(tempRetrievedFromSftp, "file4.txt", CONTENTS_FILE_4);
 
     //TEST WRITING FILE TO SFTP
-    File tempFile = new File(this.tempFromSftp, "writeTest.txt");
+    File tempFile = new File(this.tempStoreToSftp, "writeTest.txt");
     String randomContents = UUID.randomUUID().toString();
     writeToFile(tempFile, randomContents);
     String storedPath = sftp.store("FILES/AAA", tempFile, new Progress());
     //this file should now be stored on sftp file system
 
-    Path relStoredPath = Paths.get(BASE_SFTP_DIR).relativize(Paths.get(storedPath));
-    File onSftp = this.tempSftpFolder.resolve(relStoredPath).resolve("writeTest.txt").toFile();
+    File retrievedFromSftp = new File(this.tempRetrievedFromSftp, "writeTest.txt");
+    String tsDirName = Paths.get(storedPath).getFileName().toString();
+    Path retrievePath = Path.of("FILES","AAA",tsDirName, "writeTest.txt");
+    sftp.retrieve(retrievePath.toString(), retrievedFromSftp, new Progress());
 
-    assertTrue(onSftp.exists());
-    assertTrue(onSftp.canRead());
-    assertEquals(randomContents, readFromFile(onSftp));
+    assertTrue(retrievedFromSftp.exists());
+    assertTrue(retrievedFromSftp.canRead());
+    assertEquals(randomContents, readFromFile(retrievedFromSftp));
   }
 
   @SneakyThrows
