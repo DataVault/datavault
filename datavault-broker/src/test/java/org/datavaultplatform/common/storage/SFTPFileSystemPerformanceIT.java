@@ -139,12 +139,12 @@ public class SFTPFileSystemPerformanceIT {
     log.info("Stats [{}] JSch    [{}]", label, summaryJSch);
     log.info("Stats [{}] SSHD    [{}]", label, summarySSHD);
     log.info("Stats [{}] SSHDMon [{}]", label, summarySSHDMonitor);
+    
+    double ratioSSDtoJSCH = summarySSHD.getAverage() / summaryJSch.getAverage();
+    
+    log.info("LABEL[{}] RATIO of SSD to JSCH is [{}]", label, ratioSSDtoJSCH);
 
-    double base = summaryJSch.getAverage();
-    double threshold = base * PERFORMANCE_THRESHOLD;
-
-    assertTrue(summarySSHD.getAverage() <= threshold, "for " + label + ", SFTP with SSHD without monitoring takes > " + PERFORMANCE_THRESHOLD + " longer than JSch");
-    assertTrue(summarySSHD.getAverage() <= threshold, "for " + label + ", SFTP with SSHD with monitoring takes > " + PERFORMANCE_THRESHOLD + " longer than JSch");
+    assertTrue(ratioSSDtoJSCH <= PERFORMANCE_THRESHOLD, "for " + label + ", SFTP with SSHD without monitoring takes > " + PERFORMANCE_THRESHOLD + " longer than JSch");
   }
 
   @SneakyThrows
