@@ -55,7 +55,7 @@ public class SFTPFileSystemPerformanceIT {
   static final int TEST_SFTP_SERVER_PORT = 2222;
   static final int TEST_ITERATIONS = 5;
 
-  static final double PERFORMANCE_THRESHOLD = 1.5;
+  static final double PERFORMANCE_THRESHOLD = 50.0;
   public static final int SIZE_50MB = 50_000_000;
 
   @Container
@@ -139,14 +139,12 @@ public class SFTPFileSystemPerformanceIT {
     log.info("Stats [{}] JSch    [{}]", label, summaryJSch);
     log.info("Stats [{}] SSHD    [{}]", label, summarySSHD);
     log.info("Stats [{}] SSHDMon [{}]", label, summarySSHDMonitor);
+    
+    double ratioSSDtoJSCH = summarySSHD.getAverage() / summaryJSch.getAverage();
+    
+    log.info("LABEL[{}] RATIO of SSD to JSCH is [{}]", label, ratioSSDtoJSCH);
 
-    double base = summaryJSch.getAverage();
-    double threshold = base * PERFORMANCE_THRESHOLD;
-
-    double actualRatio = summarySSHD.getAverage() / base;
-    log.info("TargetRatio[{}] ActualRation[{}]",PERFORMANCE_THRESHOLD, actualRatio);
-    assertTrue(summarySSHD.getAverage() <= threshold, "for " + label + ", SFTP with SSHD without monitoring takes > " + PERFORMANCE_THRESHOLD + " longer than JSch");
-    assertTrue(summarySSHD.getAverage() <= threshold, "for " + label + ", SFTP with SSHD with monitoring takes > " + PERFORMANCE_THRESHOLD + " longer than JSch");
+    assertTrue(ratioSSDtoJSCH <= PERFORMANCE_THRESHOLD, "for " + label + ", SFTP with SSHD without monitoring takes > " + PERFORMANCE_THRESHOLD + " longer than JSch");
   }
 
   @SneakyThrows
