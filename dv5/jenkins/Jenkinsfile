@@ -74,7 +74,11 @@ pipeline {
                   }
                   sh './mvnw test'
                 }
-                junit (allowEmptyResults: true, testResults: '**/surefire-reports/*Test.xml')
+                junit (
+                    allowEmptyResults: true,
+                    skipPublishingChecks: true,
+                    testResults: '**/surefire-reports/*Test.xml'
+                )
             }
         }
         stage('Integration Tests') {
@@ -87,7 +91,11 @@ pipeline {
                   }
                   sh './mvnw integration-test -Dskip.unit.tests -Dmaven.main.skip'
                 }
-                junit (allowEmptyResults: true, testResults: '**/failsafe-reports/*IT.xml')
+                junit (
+                    allowEmptyResults: true, 
+                    skipPublishingChecks: true,
+                    testResults: '**/failsafe-reports/*IT.xml'
+                )
             }
         }
         stage('Install') {
