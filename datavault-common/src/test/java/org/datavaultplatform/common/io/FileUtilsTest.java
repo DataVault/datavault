@@ -1,9 +1,15 @@
 package org.datavaultplatform.common.io;
 
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
+
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.attribute.PosixFilePermissions;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FileUtilsTest {
 
@@ -108,4 +114,14 @@ public class FileUtilsTest {
         assertEquals(expectedValue, valueReturn);
     }
 
+    @Test
+    @SneakyThrows
+    void testFilePermissions() {
+        File tempFile = Files.createTempFile("tmp", "txt").toFile();
+
+        Files.setPosixFilePermissions(tempFile.toPath(), PosixFilePermissions.fromString("rwxr-xr--"));
+
+        String result = FileUtils.getPermissions(tempFile);
+        assertThat(result).isEqualTo("rwxr-xr--");
+    }
 }
