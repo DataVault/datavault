@@ -1,34 +1,31 @@
 package org.datavaultplatform.broker.authentication;
 
 
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.FileWriter;
-import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Set;
 import java.util.Base64;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
-import java.util.function.Function;
 import javax.crypto.SecretKey;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -48,7 +45,6 @@ import org.datavaultplatform.common.model.dao.FileStoreDAO;
 import org.datavaultplatform.common.storage.SFTPFileSystemDriver;
 import org.datavaultplatform.common.storage.StorageConstants;
 import org.datavaultplatform.common.storage.UserStore;
-import org.datavaultplatform.common.storage.impl.SFTPConnectionInfo;
 import org.datavaultplatform.common.storage.impl.SFTPFileSystemSSHD;
 import org.datavaultplatform.common.util.Constants;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
@@ -56,7 +52,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -66,7 +61,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
@@ -125,8 +119,6 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
 
   private final StorageClassNameResolver resolver = new StorageClassNameResolver(true);
 
-  @MockBean
-  Function<String,String> mPortAdjuster;
 
   @Autowired
   SftpFileStoreEndpoint sftpFileStoreEndpoint;
@@ -222,30 +214,38 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
     assertTrue(isBase64(storedProps.get(PropNames.IV)));
     log.info("properties {}", storedProps);
 
+    String publicKey = fsFromDb.getProperties().get(PropNames.PUBLIC_KEY);
+    //by saving a new FileStore - we generate the private and public key - we can start sftp server
+    this.sftpServer = setupAndStartSFTP(publicKey);
+
+    // now we have running sftp server with correct authenticationsetup, we can update FileStore with host and port
+    int sftpServerPort = this.sftpServer.getMappedPort(SFTP_SERVER_PORT);
+    String sftpServerHost = this.sftpServer.getHost();
+
+    //now we have generated the public/private key
+    fsFromDb.getProperties().put(PropNames.PORT, String.valueOf(sftpServerPort));
+    fsFromDb.getProperties().put(PropNames.HOST, sftpServerHost);
+    this.fileStoreDAO.update(fsFromDb);
+
     UserStore us = UserStore.fromFileStore(fsFromDb, resolver);
     assertInstanceOf(SFTPFileSystemSSHD.class, us);
     SFTPFileSystemSSHD sftp = (SFTPFileSystemSSHD) us;
-    String publicKey = storedProps.get(PropNames.PUBLIC_KEY);
+
     log.info("public key [{}]", publicKey);
-
-    this.sftpServer = setupAndStartSFTP(publicKey);
-    int sftpServerPort = this.sftpServer.getMappedPort(SFTP_SERVER_PORT);
-
-    changeSFTPFileSystemPort(sftp, sftpServerPort);
 
     checkSFTP(sftp);
 
-    checkSftpFileStoreEndpoint(fileStoreId, sftpServerPort);
+    checkSftpFileStoreEndpoint(fileStoreId, sftpServerHost, sftpServerPort);
   }
 
   @SneakyThrows
-  private void checkSftpFileStoreEndpoint(String fileStoreId, int actualPort) {
-
-    Mockito.when(mPortAdjuster.apply(TEMP_SFTP_SERVER_PORT)).thenReturn(String.valueOf(actualPort));
+  private void checkSftpFileStoreEndpoint(String fileStoreId, String expectedHost, int expectedPort) {
 
     List<SftpFileStoreInfo> items = this.sftpFileStoreEndpoint.getSftpFileStoresInfo();
     SftpFileStoreInfo info = items.stream().filter(i -> i.getId().equals(fileStoreId)).findFirst()
         .get();
+    assertThat(info.getHost()).isEqualTo(expectedHost);
+    assertThat(info.getPort()).isEqualTo(String.valueOf(expectedPort));
     assertTrue(info.isCanConnect());
   }
 
@@ -259,18 +259,6 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
       assertEquals(resProps.get(prop), dbProps.get(prop));
     }
     assertEquals(fsResponse.getProperties().keySet(), Set.of(props));
-  }
-
-  @SneakyThrows
-  private void changeSFTPFileSystemPort(SFTPFileSystemSSHD sftp, int sftpServerPort) {
-    // Tweak the SFTPFileSystem to change the port to point to embedded sftp server
-    Field fInfo = sftp.getClass().getDeclaredField("connectionInfo");
-    fInfo.setAccessible(true);
-    SFTPConnectionInfo info = (SFTPConnectionInfo) fInfo.get(sftp);
-    Field fPort = info.getClass().getDeclaredField("port");
-    fPort.setAccessible(true);
-    fPort.set(info, sftpServerPort);
-    log.info("sftpServerPort {}", sftpServerPort);
   }
 
   @SneakyThrows
