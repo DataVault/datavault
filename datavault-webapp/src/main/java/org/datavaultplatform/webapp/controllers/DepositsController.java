@@ -50,7 +50,7 @@ public class DepositsController {
 
     // Process the completed 'create new deposit' page
     @RequestMapping(value = "/vaults/{vaultid}/deposits/create", method = RequestMethod.POST)
-    @PreAuthorize("hasPermission(#vaultID, 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') or hasPermission(#vaultID, 'GROUP_VAULT', 'MANAGE_SCHOOL_VAULT_DEPOSITS')")
+    @PreAuthorize("(hasPermission(#vaultID, 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') or hasPermission(#vaultID, 'GROUP_VAULT', 'MANAGE_SCHOOL_VAULT_DEPOSITS')) and (hasRole('IS_ADMIN') or (!@permissionsService.depositsPaused()))")
     public String addDeposit(@ModelAttribute CreateDeposit deposit, ModelMap model,
                              @PathVariable("vaultid") String vaultID, @RequestParam String action) throws Exception {
         // Was the cancel button pressed?
@@ -107,6 +107,7 @@ public class DepositsController {
     
     // Process the completed 'retrieve deposit' page
     @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}/retrieve", method = RequestMethod.POST)
+    @PreAuthorize("(hasPermission(#vaultID, 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') or hasPermission(#vaultID, 'GROUP_VAULT', 'CAN_RETRIEVE_DATA')) and (hasRole('IS_ADMIN') or (!@permissionsService.depositsPaused()))")
     public String processRetrieve(@ModelAttribute Retrieve retrieve, ModelMap model,
                                  @PathVariable("vaultid") String vaultID, @PathVariable("depositid") String depositID,
                                  @RequestParam String action) throws Exception {

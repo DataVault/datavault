@@ -856,6 +856,9 @@ public class RestService implements NotifyLogoutService, NotifyLoginService, Eva
         return response.getBody();
     }
 
+    public boolean areDepositsAndRetrievesPausedForNonIsAdmins() {
+        throw new UnsupportedOperationException();
+    }
 
 
 }
