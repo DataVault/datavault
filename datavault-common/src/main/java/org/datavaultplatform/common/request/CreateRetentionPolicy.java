@@ -1,6 +1,8 @@
 package org.datavaultplatform.common.request;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import lombok.Data;
 import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
@@ -52,6 +54,7 @@ public class CreateRetentionPolicy {
 
     public CreateRetentionPolicy() { }
 
+    @JsonGetter
     public int getId() {
         return id;
     }
@@ -59,6 +62,7 @@ public class CreateRetentionPolicy {
         return getId();
     }
 
+    @JsonSetter
     public void setId(int id) {
         this.id = id;
     }
