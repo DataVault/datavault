@@ -63,7 +63,8 @@
     <!-- Error Handler JS -->
     <script th:src="@{/resources/theme/js/ErrorHandler.js}"></script>
     <script th:inline="javascript" type="text/javascript">
-        var contextPath = /*[(|'@{/}'|)]*/ 'replaced-by-tl';
-        ErrorHandler.initialiseSpringContextPath(contextPath);
+        const contextPath = /*[(|'@{/}'|)]*/ 'replaced-by-tl';
+        const springContextPath = contextPath.replace(/\/+$/, ''); //remove trailing slash
+        ErrorHandler.initialiseSpringContextPath(springContextPath);
     </script>
 </th:block>
