@@ -75,7 +75,7 @@ public class RetentionPoliciesService {
 
         retentionPolicy.setEndDate(createRetentionPolicy.getEndDate());
 
-        retentionPolicy.setDataGuidanceReviewed(createRetentionPolicy.getDateGuidanceReviewed());
+        retentionPolicy.setDataGuidanceReviewed(createRetentionPolicy.getDataGuidanceReviewed());
 
         return retentionPolicy;
     }
@@ -95,7 +95,7 @@ public class RetentionPoliciesService {
 
         crp.setInEffectDate(rp.getInEffectDate());
         crp.setEndDate(rp.getEndDate());
-        crp.setDateGuidanceReviewed(rp.getDataGuidanceReviewed());
+        crp.setDataGuidanceReviewed(rp.getDataGuidanceReviewed());
 
         return crp;
 

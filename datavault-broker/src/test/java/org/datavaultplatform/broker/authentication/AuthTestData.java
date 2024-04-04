@@ -323,7 +323,7 @@ public class AuthTestData {
     CREATE_RETENTION_POLICY.setEngine("V8");
     CREATE_RETENTION_POLICY.setSort("bubble");
     CREATE_RETENTION_POLICY.setExtendUponRetrieval(true);
-    CREATE_RETENTION_POLICY.setDateGuidanceReviewed(new Date());
+    CREATE_RETENTION_POLICY.setDataGuidanceReviewed(new Date());
     CREATE_RETENTION_POLICY.setEndDate(new Date());
     CREATE_RETENTION_POLICY.setInEffectDate(new Date());
 

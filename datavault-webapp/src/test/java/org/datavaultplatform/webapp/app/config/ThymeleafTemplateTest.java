@@ -854,7 +854,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
     void test21AdminRetentionPoliciesAdd() throws Exception {
         ModelMap modelMap = getModelMap();
 
-        RetentionPolicy policy1 = getRetentionPolicy1();
+        CreateRetentionPolicy policy1 = getCreateRetentionPolicy1();
 
         modelMap.put("retentionPolicy", policy1);
 
@@ -873,7 +873,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
     void test22AdminRetentionPoliciesEdit() throws Exception {
         ModelMap modelMap = getModelMap();
 
-        RetentionPolicy policy1 = getRetentionPolicy1();
+        CreateRetentionPolicy policy1 = getCreateRetentionPolicy1();
 
         modelMap.put("retentionPolicy", policy1);
 
@@ -2502,9 +2502,40 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         assertThat(policy1.getPolicyInfo()).isEqualTo("111-123");
         return policy1;
     }
+    private CreateRetentionPolicy getCreateRetentionPolicy1() {
+        CreateRetentionPolicy policy1 = new CreateRetentionPolicy();
+        policy1.setId(111);
+        policy1.setName("policy-one");
+        policy1.setDescription("policy1-description");
+        policy1.setUrl("https://info.org/retention-policy-1");
+        policy1.setMinDataRetentionPeriod("123");
+        policy1.setMinRetentionPeriod(123);
+        policy1.setExtendUponRetrieval(true);
+        policy1.setInEffectDate(now);
+        policy1.setEndDate(now);
+        policy1.setDataGuidanceReviewed(now);
+        assertThat(policy1.getPolicyInfo()).isEqualTo("111-123");
+        return policy1;
+    }
 
     private RetentionPolicy getRetentionPolicy2() {
         RetentionPolicy policy2 = new RetentionPolicy();
+        policy2.setId(222);
+        policy2.setName("policy-two");
+        policy2.setDescription("policy2-description");
+        policy2.setUrl("https://info.org/retention-policy-2");
+        policy2.setMinDataRetentionPeriod("234");
+        policy2.setMinRetentionPeriod(234);
+        policy2.setExtendUponRetrieval(true);
+        policy2.setInEffectDate(now);
+        policy2.setEndDate(now);
+        policy2.setDataGuidanceReviewed(now);
+        assertThat(policy2.getPolicyInfo()).isEqualTo("222-234");
+        return policy2;
+    }
+
+    private CreateRetentionPolicy getCrateRetentionPolicy2() {
+        CreateRetentionPolicy policy2 = new CreateRetentionPolicy();
         policy2.setId(222);
         policy2.setName("policy-two");
         policy2.setDescription("policy2-description");

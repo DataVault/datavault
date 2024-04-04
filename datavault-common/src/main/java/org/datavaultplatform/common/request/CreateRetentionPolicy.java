@@ -46,7 +46,7 @@ public class CreateRetentionPolicy {
     private Date endDate;
 
     @ApiObjectField(description = "Date Guidance Reviewed")
-    private Date dateGuidanceReviewed;
+    private Date dataGuidanceReviewed;
 
 
 
@@ -54,6 +54,9 @@ public class CreateRetentionPolicy {
 
     public int getId() {
         return id;
+    }
+    public int getID() {
+        return getId();
     }
 
     public void setId(int id) {
@@ -140,12 +143,17 @@ public class CreateRetentionPolicy {
         this.endDate = endDate;
     }
 
-    public Date getDateGuidanceReviewed() {
-        return dateGuidanceReviewed;
+    public Date getDataGuidanceReviewed() {
+        return dataGuidanceReviewed;
     }
 
-    public void setDateGuidanceReviewed(Date dateGuidanceReviewed) {
-        this.dateGuidanceReviewed = dateGuidanceReviewed;
+    public void setDataGuidanceReviewed(Date dataGuidanceReviewed) {
+        this.dataGuidanceReviewed = dataGuidanceReviewed;
+    }
+
+    public String getPolicyInfo() {
+        String retVal = this.id + "-" + this.minRetentionPeriod;
+        return retVal;
     }
 
 }
