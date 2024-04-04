@@ -317,7 +317,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         BillingInformation info = getInfo(now);
 
         modelMap.put("billingDetails", info);
-        String html = getHtml("admin/billing/billingDetailsFeeWaiver", modelMap);
+        String html = getHtml("admin/billing/billingDetailsFeewaiver", modelMap);
         Document doc = getDocument(html);
 
         displayFormFields(doc,"update-billingDetails-form");
@@ -343,7 +343,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         BillingInformation info = getInfo(now);
 
         modelMap.put("billingDetails", info);
-        String html = getHtml("admin/billing/billingDetailsFundingNoDoNotKNow", modelMap);
+        String html = getHtml("admin/billing/billingDetailsFundingNoDoNotKnow", modelMap);
         Document doc = getDocument(html);
 
         displayFormFields(doc,"update-billingDetails-form");
@@ -441,7 +441,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         BillingInformation info = getInfo(now);
 
         modelMap.put("billingDetails", info);
-        String html = getHtml("admin/billing/billingDetailsWilLPay", modelMap);
+        String html = getHtml("admin/billing/billingDetailsWillPay", modelMap);
         Document doc = getDocument(html);
 
         displayFormFields(doc, "update-billingDetails-form");
