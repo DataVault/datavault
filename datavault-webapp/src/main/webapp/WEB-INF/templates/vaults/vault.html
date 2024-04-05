@@ -134,7 +134,7 @@
             <th:block th:if="${#authorization.expression(addDepositsSecurityExpression2)}">
             <div class="row">
                 <div class="col-md-12">
-                    <a class="btn btn-primary pull-right" th:ref="@{|/vaults/${vault.getID()}/deposits/create|}">
+                    <a class="btn btn-primary pull-right" th:href="@{|/vaults/${vault.getID()}/deposits/create|}">
                         <i class="fa fa-download fa-rotate-180" aria-hidden="true"></i> Deposit data
                     </a>
                 </div>
