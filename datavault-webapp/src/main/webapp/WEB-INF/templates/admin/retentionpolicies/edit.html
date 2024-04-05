@@ -14,7 +14,7 @@
     <form id="add-rentention-policy-form" th:object="${retentionPolicy}" th:action="@{|/admin/retentionpolicies/edit/${retentionPolicy.getID()}|}" method="post">
         <div class="form-rentention-policy">
 
-            <input type="hidden" name="id" th:field="*{ID}" />
+            <input type="hidden" name="id" th:field="*{id}" />
 
             <div class="form-group">
                 <label for="name">Name</label>
