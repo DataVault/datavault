@@ -179,7 +179,7 @@ public class ValidateService {
         retVal.add("Review Date for selected policy is required to be at least " + yearsToAdd + " years");
       }
 
-      if (DateTimeUtils.isBefore(reviewDate,this.getMaxReviewDate())) {
+      if (DateTimeUtils.isAfter(reviewDate,this.getMaxReviewDate())) {
         retVal.add("Review Date for selected policy is required to be less than 30 years in the future");
       }
     }
