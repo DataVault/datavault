@@ -633,6 +633,10 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         ModelMap modelMap = getModelMap();
 
         CreateVault vault = getCreateVault();
+        vault.setGrantSchoolOrUnit("group-id-1");
+        vault.setBudgetSchoolOrUnit("group-id-2");
+        vault.setGroupID("group-id-1");
+
         RetentionPolicy policy1 = getRetentionPolicy1();
         RetentionPolicy policy2 = getRetentionPolicy2();
 
@@ -654,7 +658,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("vault", vault);
         modelMap.put("vaultID", "vault-id-123");
         modelMap.put("policies", Arrays.asList(policy1, policy2));
-        modelMap.put("groups", Arrays.asList(getGroup("1"), getGroup("2")));
+        modelMap.put("groups", Arrays.asList(getGroup("group-id-1"), getGroup("group-id-2")));
 
         String html = getHtml("admin/pendingVaults/edit/editPendingVault", modelMap);
         Document doc = getDocument(html);
