@@ -171,7 +171,9 @@
                                         >
                                             <option selected disabled data-hidden="true">Please choose a School</option>
                                             <th:block th:each="group: ${groups}">
-                                                <option th:if="${group.enabled}" th:value="${group.getID()}">[[${group.name}]]</option>
+                                                <option th:if="${group.enabled}" 
+                                                        th:value="${group.getID()}"
+                                            >[[${group.name}]]</option>
                                             </th:block>
                                         </select>
                                     </div>

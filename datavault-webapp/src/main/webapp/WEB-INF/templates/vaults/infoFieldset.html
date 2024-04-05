@@ -96,8 +96,9 @@
                     <select id="groupID" name="groupID" data-width="auto" class="form-control group-select selectpicker show-tick">
                         <option selected disabled data-hidden="true">Please choose a School</option>
                         <th:block th:each="group: ${groups}">
-                            <option th:if="${group.enabled}"  th:value="${group.getID()}"
-                                    th:selected="${vaul?.groupID != null && vault?.groupID == group.getID()}"
+                            <option th:if="${group.enabled}"
+                                    th:value="${group.getID()}"
+                                    th:selected="${vault?.groupID != null && vault?.groupID == group.getID()}"
                             >[[${group.name}]]</option>
                         </th:block>
                     </select>

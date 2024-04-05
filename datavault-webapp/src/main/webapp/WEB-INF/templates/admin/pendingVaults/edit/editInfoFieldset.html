@@ -98,7 +98,7 @@
                         <th:block th:each="group: ${groups}">
                             <option th:if="${group.enabled}"
                                     th:value="${group.getID()}"
-                                    th:selected="${vault?.groupID != null && vault?.groupID == group.getID()}"
+                                    th:selected="${vault?.getGroupID() != null && vault?.getGroupID() == group.getID()}"
                             >[[${group.name}]]</option>
                         </th:block>
                     </select>
