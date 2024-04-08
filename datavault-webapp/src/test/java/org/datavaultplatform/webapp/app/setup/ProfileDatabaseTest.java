@@ -55,7 +55,7 @@ public class ProfileDatabaseTest {
     Set<String> names = Set.of(ctx.getBeanNamesForAnnotation(Controller.class));
     Set<String> restNames = Set.of(ctx.getBeanNamesForAnnotation(RestController.class));
     assertTrue(names.containsAll(restNames));
-    assertThat(names.size()).isEqualTo(25);
+    assertThat(names.size()).isEqualTo(26);
   }
 
   @TestConfiguration

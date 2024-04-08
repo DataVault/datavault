@@ -45,6 +45,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.filter.CommonsRequestLoggingFilter;
 import org.springframework.web.filter.GenericFilterBean;
 
+@SuppressWarnings("DefaultAnnotationParam")
 @ConditionalOnExpression("${broker.security.enabled:true}")
 @Configuration
 @EnableWebSecurity
@@ -85,6 +86,7 @@ public class SecurityConfig {
             .requestMatchers("/admin/billing/**").hasAuthority("ROLE_ADMIN_BILLING")
             /* TODO : DavidHay : no controller mapped to /admin/reviews ! */
             .requestMatchers("/admin/reviews/**").hasAuthority("ROLE_ADMIN_REVIEWS")
+            .requestMatchers("/admin/paused/toggle/**").hasAuthority("ROLE_ADMIN")
             .anyRequest().authenticated());
 
     return http.build();

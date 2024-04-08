@@ -3,6 +3,7 @@ package org.datavaultplatform.webapp.services;
 import static org.datavaultplatform.common.util.Constants.HEADER_CLIENT_KEY;
 
 import lombok.extern.slf4j.Slf4j;
+import org.datavaultplatform.common.dto.PausedStateDTO;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.request.*;
 import org.datavaultplatform.common.response.*;
@@ -13,15 +14,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -856,9 +855,29 @@ public class RestService implements NotifyLogoutService, NotifyLoginService, Eva
         return response.getBody();
     }
 
-    public boolean areDepositsAndRetrievesPausedForNonIsAdmins() {
-        throw new UnsupportedOperationException();
+    public PausedStateDTO getCurrentPauseState() {
+        ResponseEntity<PausedStateDTO> response = get(brokerURL + "/admin/paused/state", PausedStateDTO.class);
+        return response.getBody();
+    }
+    
+    public List<PausedStateDTO> getPauseStateHistory(Integer limit) {
+        String requestURL = brokerURL + "/admin/paused/history";
+        if (limit != null) {
+            requestURL += "/" + limit;
+        }
+        ResponseEntity<PausedStateDTO[]> response = get(requestURL, PausedStateDTO[].class);
+        PausedStateDTO[] data = response.getBody();
+        return Arrays.stream(data).toList();
     }
 
+    public void togglePauseState() {
+        ResponseEntity<?> response = post(brokerURL + "/admin/paused/toggle",Void.class,null);
+        HttpStatusCode code = response.getStatusCode();
+        if(!code.is2xxSuccessful()){
+            String msg = "Expected 200 status code, got [%s]".formatted(code.value());
+            logger.error(msg);
+            throw new RuntimeException(msg);
+        }
+    }
 
 }

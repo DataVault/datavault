@@ -6,7 +6,7 @@ insert ignore into Clients (id, name, apiKey, ipAddress) values ('datavault-weba
 insert ignore into Users (id, firstname, lastname, password, email) values ('admin1', 'admin user 1', 'Test', 'password1', 'admin@test.com');
 insert ignore into Users (id, firstname, lastname, password, email) values ('user1', 'user 1', 'Test', 'user1pass', 'user1@test.com');
 
-insert ignore into Groups (id, name, enabled) values ('grp-lfcs','LFCS','Y');
+insert ignore into `Groups` (id, name, enabled) values ('grp-lfcs','LFCS','Y');
 
 insert into GroupOwners (group_id, user_id)
 select 'grp-lfcs','admin1'
@@ -145,3 +145,8 @@ insert ignore into Role_assignments (id,user_id,school_id,role_id) select 2,'use
 
 -- this prevents means new Role Ids added by Java (uses hibernate_sequence) clashing with Role Ids added by this script
 update hibernate_sequence set next_val = 100 where next_val < 100;
+
+INSERT INTO paused_state  VALUES ('1', '2001-07-22 12:12:12.123456', true);
+INSERT INTO paused_state  VALUES ('2', '2002-07-22 12:12:12.123456', false);
+INSERT INTO paused_state  VALUES ('3', '2003-07-22 12:12:12.123456', true);
+INSERT INTO paused_state  VALUES ('4', '2004-07-22 12:12:12.123456', false);

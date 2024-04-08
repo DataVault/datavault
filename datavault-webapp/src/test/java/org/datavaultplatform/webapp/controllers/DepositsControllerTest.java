@@ -1,6 +1,7 @@
 package org.datavaultplatform.webapp.controllers;
 
 import lombok.SneakyThrows;
+import org.datavaultplatform.common.dto.PausedStateDTO;
 import org.datavaultplatform.common.model.Retrieve;
 import org.datavaultplatform.common.request.CreateDeposit;
 import org.datavaultplatform.webapp.app.DataVaultWebApp;
@@ -93,6 +94,7 @@ class DepositsControllerTest {
 
     @Nested
     class DeniedBecauseDepositsPausedAndNotISAdmin {
+        final PausedStateDTO PAUSED = new PausedStateDTO(true, null);
         @BeforeEach
         void setup() {
             Mockito.lenient().when(mEvaluator.hasPermission(
@@ -100,7 +102,7 @@ class DepositsControllerTest {
                     any(Serializable.class),
                     any(String.class),
                     any(Object.class))).thenReturn(false, true);
-            Mockito.lenient().when(mRestService.areDepositsAndRetrievesPausedForNonIsAdmins()).thenReturn(true);
+            Mockito.lenient().when(mRestService.getCurrentPauseState()).thenReturn(PAUSED);
         }
 
         @SneakyThrows
@@ -113,7 +115,7 @@ class DepositsControllerTest {
 
             checkPermissionsForDeposit("user11");
 
-            Mockito.verify(mRestService).areDepositsAndRetrievesPausedForNonIsAdmins();
+            Mockito.verify(mRestService).getCurrentPauseState();
             Mockito.verifyNoMoreInteractions(mEvaluator, mRestService);
         }
 
@@ -127,7 +129,7 @@ class DepositsControllerTest {
 
             checkPermissionsForRetrieve("user3");
 
-            Mockito.verify(mRestService).areDepositsAndRetrievesPausedForNonIsAdmins();
+            Mockito.verify(mRestService).getCurrentPauseState();
             Mockito.verifyNoMoreInteractions(mEvaluator, mRestService);
         }
     }
