@@ -1,16 +1,26 @@
 package org.datavaultplatform.webapp.services;
 
+import java.time.Clock;
 import java.util.*;
+
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.request.CreateVault;
 import org.datavaultplatform.common.util.DateTimeUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
 public class ValidateService {
+  
+  private final Clock clock;
+  
+    @Autowired
+    public ValidateService(Clock clock) {
+        this.clock = clock;
+    }
 
-  public List<String> validate(CreateVault vault, String userID) {
+    public List<String> validate(CreateVault vault, String userID) {
     List<String> retVal = new ArrayList<>();
     retVal.addAll(this.validateFieldset1(vault));
     retVal.addAll(this.validateFieldset2(vault));
@@ -20,7 +30,7 @@ public class ValidateService {
     return retVal;
   }
 
-  private List<String> validateFieldset1(CreateVault vault) {
+  protected List<String> validateFieldset1(CreateVault vault) {
     List<String> retVal = new ArrayList<>();
 
     // Field set 1 should have completed
@@ -33,7 +43,7 @@ public class ValidateService {
     return retVal;
   }
 
-  private List<String> validateFieldset2(CreateVault vault) {
+  protected List<String> validateFieldset2(CreateVault vault) {
     List<String> retVal = new ArrayList<>();
 
     // Field set 2 should have completed
@@ -43,7 +53,7 @@ public class ValidateService {
       retVal.add("BillingType missing");
       return retVal;
     }
-
+    
     if (
       !type.equals("NA") &&
       !type.equals("GRANT_FUNDING") &&
@@ -94,7 +104,7 @@ public class ValidateService {
     return retVal;
   }
 
-  private List<String> validateBudgetBillingType(CreateVault vault) {
+  protected List<String> validateBudgetBillingType(CreateVault vault) {
     List<String> retVal = new ArrayList<>();
 
     // Authoriser
@@ -115,7 +125,7 @@ public class ValidateService {
     return retVal;
   }
 
-  private List<String> validateGrantBillingType(CreateVault vault) {
+  protected List<String> validateGrantBillingType(CreateVault vault) {
     List<String> retVal = new ArrayList<>();
 
     String authoriser = vault.getGrantAuthoriser();
@@ -145,7 +155,7 @@ public class ValidateService {
     return retVal;
   }
 
-  private List<String> validateFieldset3(CreateVault vault) {
+  protected List<String> validateFieldset3(CreateVault vault) {
     List<String> retVal = new ArrayList<>();
     // Field set 3 should have completed
     // Name
@@ -187,7 +197,7 @@ public class ValidateService {
     return retVal;
   }
 
-  private List<String> validateFieldset4(CreateVault vault, String userID) {
+  protected List<String> validateFieldset4(CreateVault vault, String userID) {
     List<String> retVal = new ArrayList<>();
 
     // Field set 4 should have only one role per uuid
@@ -198,7 +208,13 @@ public class ValidateService {
     List<String> ownerList = new ArrayList<>();
     ownerList.add(owner);
     List<String> ndms = vault.getNominatedDataManagers();
+    if(ndms == null){
+      ndms = Collections.emptyList();
+    }
     List<String> deps = vault.getDepositors();
+    if(deps == null){
+      deps = Collections.emptyList();
+    }
     boolean match1 = ndms
       .stream()
       .filter(x -> !Objects.equals(x, ""))
@@ -229,7 +245,7 @@ public class ValidateService {
     return retVal;
   }
 
-  private List<String> validateFieldset5(CreateVault vault) {
+  protected List<String> validateFieldset5(CreateVault vault) {
     List<String> retVal = new ArrayList<>();
 
     // Field set 5 should have completed
@@ -243,6 +259,7 @@ public class ValidateService {
 
   public Date getDefaultReviewDate(int addedYears) {
     Calendar cal = Calendar.getInstance();
+    cal.setTimeInMillis(clock.millis());
     cal.setTimeZone(TimeZone.getTimeZone("Europe/London"));
     cal.add(Calendar.YEAR, addedYears);
     Date todayPlusXYears = cal.getTime();
