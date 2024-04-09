@@ -30,7 +30,7 @@
                     <div th:if="${deposit.hasPersonalData}" class="alert alert-info" role="alert"><strong>Contains personal data!</strong><br/>Statement: [[${deposit.getPersonalDataStatement()}]]</div>
 
 
-                    <form id="retrieve-deposit" class="form" role="form" action="" method="post" th:object="${retrieve}" >
+                    <form id="retrieve-deposit" class="form" role="form" th:action="@{|/vaults/${vault.getID()}/deposits/${deposit.getID()}/retrieve|}" method="post" th:object="${retrieve}" >
                         
                         <div class="form-group">
                             <label>Are any of the intended recipients external to the University of Edinburgh?</label>
@@ -137,8 +137,16 @@
                         <input type="hidden" th:name="${_csrf?.parameterName ?: ''}" th:value="${_csrf?.token ?: ''}" />
 
                         <div class="btn-toolbar">
-                            <button type="submit" value="submit" class="btn btn-primary"><i class="fa fa-upload fa-rotate-180" aria-hidden="true"></i> Retrieve data</button>
-                            <button type="submit" value="cancel" class="btn btn-danger cancel">Cancel</button>
+                            <!--/* UsesRetrievesPaused */-->
+                            <th:block th:with="notAffectedByRetrievesPaused=|hasRole('IS_ADMIN') or (!@permissionsService.retrievesPaused())|">
+                                <th:block th:if="${#authorization.expression(notAffectedByRetrievesPaused)}">
+                                    <button type="submit" value="submit" class="btn btn-primary"><i class="fa fa-upload fa-rotate-180" aria-hidden="true"></i> Retrieve data</button>
+                                </th:block>
+                                <th:block th:unless="${#authorization.expression(notAffectedByRetrievesPaused)}">
+                                    <button type="button" class="btn btn-primary" disabled><i class="fa fa-upload fa-rotate-180" aria-hidden="true"></i> Retrieve data : PAUSED</button>
+                                </th:block>
+                            </th:block>
+                            <button id="retrieve-cancel" type="submit" value="cancel" class="btn btn-danger cancel">Cancel</button>
                         </div>
                 
                     </form>
@@ -148,8 +156,15 @@
     </div>
 </div>
 
-<script type="application/javascript">
+<script th:inline="javascript" type="application/javascript">
     $(document).ready(function () {
+        
+        $('#retrieve-cancel').on("click", function (event) {
+            event.preventDefault();
+            var retrieveCancelURL = /*[(@{|'/vaults/${vault.getID()}/deposits/${deposit.getID()}/retrieve'|})]*/ 'replaced-by-tl';
+            window.location.href = retrieveCancelURL;
+            return false;
+        });
 
         $('button[type="submit"]').on("click", function() {
             $('#submitAction').val($(this).attr('value'));

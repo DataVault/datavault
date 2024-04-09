@@ -1,5 +1,6 @@
 package org.datavaultplatform.webapp.app.config;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.request.CreateDeposit;
@@ -10,6 +11,7 @@ import org.datavaultplatform.common.storage.impl.TivoliStorageManager;
 import org.datavaultplatform.webapp.model.DepositReviewModel;
 import org.datavaultplatform.webapp.model.VaultReviewHistoryModel;
 import org.datavaultplatform.webapp.model.VaultReviewModel;
+import org.datavaultplatform.webapp.services.PermissionsService;
 import org.datavaultplatform.webapp.test.ProfileStandalone;
 import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
@@ -20,19 +22,19 @@ import org.jsoup.select.Elements;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.stereotype.Controller;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
@@ -45,15 +47,16 @@ import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@Slf4j
 @SpringBootTest
 @ProfileStandalone
 @TestMethodOrder(MethodOrderer.MethodName.class)
 @AutoConfigureMockMvc
+@TestPropertySource(properties = "logging.level.org.thymeleaf.spring6.expression=TRACE")
 public class ThymeleafTemplateTest extends BaseThymeleafTest {
 
     private static final ThreadLocal<ModelMap> TL_MODEL_MAP = ThreadLocal.withInitial(ModelMap::new);
@@ -76,8 +79,6 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
     public static final  String ERROR_FIRST_LINE = "<!DOCTYPE html><!--error/error.html-->";
 
     private final Date now = new Date();
-
-    final Logger log = LoggerFactory.getLogger(getClass());
 
     enum ListState {
         NULL, EMPTY, NON_EMPTY
@@ -2513,10 +2514,21 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         
     }
     void checkOption(Element option, String value, boolean selected){
-        assertThat(option.tag().getName().equals("option"));
-        assertThat(option.val().equals(value));
+        assertThat(option.tag().getName()).isEqualTo("option");
+        assertThat(option.val()).isEqualTo(value);
         boolean isSelected = option.hasAttr("selected");
         assertThat(isSelected).isEqualTo(selected);
     }
 
+    @TestConfiguration
+    static class TestConfig {
+
+        @Bean
+        public PermissionsService permissionsService() {
+            PermissionsService mock = mock(PermissionsService.class);
+            when(mock.retrievesPaused()).thenReturn(false);
+            when(mock.depositsPaused()).thenReturn(false);
+            return mock;
+        }
+    }
 }

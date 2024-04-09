@@ -4,6 +4,7 @@ import lombok.SneakyThrows;
 import org.datavaultplatform.common.dto.PausedStateDTO;
 import org.datavaultplatform.common.model.Retrieve;
 import org.datavaultplatform.common.request.CreateDeposit;
+import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.webapp.app.DataVaultWebApp;
 import org.datavaultplatform.webapp.services.RestService;
 import org.datavaultplatform.webapp.test.AddTestProperties;
@@ -31,8 +32,9 @@ import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.Serializable;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -56,7 +58,7 @@ class DepositsControllerTest {
 
     @MockBean
     PermissionEvaluator mEvaluator;
-
+    
     @Nested
     class DeniedBecauseOfPermissions {
         @BeforeEach
@@ -93,7 +95,7 @@ class DepositsControllerTest {
     }
 
     @Nested
-    class DeniedBecauseDepositsPausedAndNotISAdmin {
+    class DeniedBecausePausedAndNotISAdmin {
         final PausedStateDTO PAUSED = new PausedStateDTO(true, null);
         @BeforeEach
         void setup() {
@@ -122,7 +124,7 @@ class DepositsControllerTest {
         @SneakyThrows
         @WithMockUser(username = "user3", roles = {"USER"})
         @Test
-        void testProcessRetrieveDeniedBecauseDepositsPaused() {
+        void testProcessRetrieveDeniedBecauseRetrievesPaused() {
             MvcResult result = performRetrieve();
 
             checkDenied(result);
@@ -135,7 +137,7 @@ class DepositsControllerTest {
     }
 
     @Nested
-    class IsAdminCanBypassPausedDeposits {
+    class IsAdminCanBypassPaused {
         @BeforeEach
         void setup() {
             Mockito.lenient().when(mEvaluator.hasPermission(
@@ -149,24 +151,33 @@ class DepositsControllerTest {
         @WithMockUser(username = "user12", roles = {"USER", "IS_ADMIN"})
         @Test
         void testAddDepositAllowedDespiteDepositsPaused() {
+
+            DepositInfo depositInfo = new DepositInfo();
+            depositInfo.setID("8888");
+            when(mRestService.addDeposit(any(CreateDeposit.class))).thenReturn(depositInfo);
             MvcResult result = performDeposit();
 
             assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.FOUND.value());
-            assertThat(result.getResponse().getRedirectedUrl()).isEqualTo("/vaults/2112");
+            assertThat(result.getResponse().getRedirectedUrl()).isEqualTo("/vaults/2112/deposits/8888/");
 
             checkPermissionsForDeposit("user12");
+            verify(mRestService).addDeposit(any(CreateDeposit.class));
             Mockito.verifyNoMoreInteractions(mEvaluator, mRestService);
         }
 
         @SneakyThrows
         @WithMockUser(username = "user31", roles = {"USER", "IS_ADMIN"})
         @Test
-        void testProcessRetrieveAllowedDespiteDepositsPaused() {
+        void testProcessRetrieveAllowedDespiteRetrievesPaused() {
             MvcResult result = performRetrieve();
 
+            when(mRestService.retrieveDeposit(eq("1234"), any(Retrieve.class))).thenReturn(Boolean.TRUE);
+            
             assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.FOUND.value());
             assertThat(result.getResponse().getRedirectedUrl()).isEqualTo("/vaults/2112/deposits/1234/");
 
+            Mockito.verify(mRestService).retrieveDeposit(eq("1234"),any(Retrieve.class));
+            
             checkPermissionsForRetrieve("user31");
             Mockito.verifyNoMoreInteractions(mEvaluator, mRestService);
         }
@@ -199,7 +210,6 @@ class DepositsControllerTest {
                         post("/vaults/2112/deposits/1234/retrieve")
                                 .content(mapper.writeValueAsString(retrieve))
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .queryParam("action", "cancel")
                                 .with(csrf())
                 )
                 .andDo(print()).andReturn();
@@ -215,7 +225,6 @@ class DepositsControllerTest {
                         post("/vaults/2112/deposits/create")
                                 .content(mapper.writeValueAsString(createDeposit))
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .queryParam("action", "cancel")
                                 .with(csrf())
                 )
                 .andDo(print())
