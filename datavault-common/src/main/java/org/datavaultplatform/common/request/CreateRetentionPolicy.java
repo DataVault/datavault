@@ -1,6 +1,8 @@
 package org.datavaultplatform.common.request;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import lombok.Data;
 import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
@@ -46,16 +48,21 @@ public class CreateRetentionPolicy {
     private Date endDate;
 
     @ApiObjectField(description = "Date Guidance Reviewed")
-    private Date dateGuidanceReviewed;
+    private Date dataGuidanceReviewed;
 
 
 
     public CreateRetentionPolicy() { }
 
+    @JsonGetter
     public int getId() {
         return id;
     }
+    public int getID() {
+        return getId();
+    }
 
+    @JsonSetter
     public void setId(int id) {
         this.id = id;
     }
@@ -140,12 +147,17 @@ public class CreateRetentionPolicy {
         this.endDate = endDate;
     }
 
-    public Date getDateGuidanceReviewed() {
-        return dateGuidanceReviewed;
+    public Date getDataGuidanceReviewed() {
+        return dataGuidanceReviewed;
     }
 
-    public void setDateGuidanceReviewed(Date dateGuidanceReviewed) {
-        this.dateGuidanceReviewed = dateGuidanceReviewed;
+    public void setDataGuidanceReviewed(Date dataGuidanceReviewed) {
+        this.dataGuidanceReviewed = dataGuidanceReviewed;
+    }
+
+    public String getPolicyInfo() {
+        String retVal = this.id + "-" + this.minRetentionPeriod;
+        return retVal;
     }
 
 }

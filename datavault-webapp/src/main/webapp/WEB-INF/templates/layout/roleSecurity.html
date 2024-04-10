@@ -223,8 +223,8 @@
         $('#create-form').submit(function (event) {
             event.preventDefault();
             var formData = $(this).serialize();
-            var baseURL =   /*[[@{|/admin/vaults/${vault.getID()}/user|}]]*/ 'replaced-by-tl';
-            var windowURL = /*[[@{|/admin/vaults/${vault.getID()}|}]]*/ 'replaced-by-tl';
+            var baseURL =   /*[(|'@{|/admin/vaults/${vault.getID()}/user|}'|)]*/ 'replaced-by-tl';
+            var windowURL = /*[(|'@{|/admin/vaults/${vault.getID()}|}'|)]*/ 'replaced-by-tl';
             $.ajax({
                 method: 'POST',
                 url: baseURL,
@@ -246,8 +246,8 @@
         $('#update-form').submit(function (event) {
             event.preventDefault();
             var formData = $(this).serialize();
-            var baseURL =   /*[[@{|/admin/vaults/${vault.getID()}/user/update|}]]*/ 'replaced-by-tl';
-            var windowURL = /*[[@{|/admin/vaults/${vault.getID()}|}]]*/ 'replaced-by-tl';
+            var baseURL =   /*[(|'@{|/admin/vaults/${vault.getID()}/user/update|}'|)]*/ 'replaced-by-tl';
+            var windowURL = /*[(|'@{|/admin/vaults/${vault.getID()}|}'|)]*/ 'replaced-by-tl';
             $.ajax({
                 method: 'POST',
                 url: baseURL,
@@ -269,8 +269,8 @@
         $('#delete-form').submit(function (event) {
             event.preventDefault();
             var formData = $(this).serialize();
-            var baseURL =   /*[[@{|/admin/vaults/${vault.getID()}/user/delete|}]]*/ 'replaced-by-tl'
-            var windowURL = /*[[@{|/admin/vaults/${vault.getID()}|}]]*/ 'replaced-by-tl'
+            var baseURL =   /*[(|'@{|/admin/vaults/${vault.getID()}/user/delete|}'|)]*/ 'replaced-by-tl'
+            var windowURL = /*[(|'@{|/admin/vaults/${vault.getID()}|}'|)]*/ 'replaced-by-tl'
             $.ajax({
                 method: 'POST',
                 url:  baseURL,
@@ -295,7 +295,7 @@
             minLength: 2,
             source: function (request, response) {
                 var term = request.term;
-                var baseURL = /*[[@{|/vaults/autocompleteuun/|}]]*/ 'replaced-by-tl'
+                var baseURL = /*[(|'@{|/vaults/autocompleteuun/|}'|)]*/ 'replaced-by-tl'
                 $.ajax({
                     url:  baseURL,
                     type: 'GET',

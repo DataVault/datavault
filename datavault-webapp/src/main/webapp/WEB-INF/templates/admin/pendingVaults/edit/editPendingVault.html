@@ -3,10 +3,11 @@
       xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
       >
 <head><title>Admin - Edit Pending Vault</title></head>
-<div layout:fragment="content">
+<body>
+<th:block layout:fragment="content">
 
 <!--/* ALLOW ONLY ADMIN ACCESS */-->
-<div sec:authorize="hasRole('ROLE_IS_ADMIN')">
+<th:block sec:authorize="hasRole('ROLE_IS_ADMIN')">
     <div class="container">
         <div class="row">
             <div class="col-md-12">
@@ -27,9 +28,9 @@
                         <div class="container">
                             <div th:if="${!#lists.isEmpty(errors)}" id="create-error" class="alert alert-danger" role="alert">
                                 Your request contains the following errors<br/>
-                                <span th:each="error: ${errors}" >
+                                <th:block th:each="error: ${errors}" >
                                     <th:block th:utext="${error}"/><br/>
-                                </span>
+                                </th:block>
                             </div>
                             <div class="row justify-content-center mt-0">
                                 <div class="col-10 text-center p-0 mt-3 mb-2">
@@ -67,10 +68,11 @@
    <script th:src="@{/resources/application/js/date-validation-utils.js}"></script>
    <script th:src="@{/resources/application/js/admin-pending-vault-edit.js}"></script>
 
-</div>
-</div>
+    </div>
+</th:block>
 <div sec:authorize="!hasRole('ROLE_IS_ADMIN')">
     <-- YOU DO NOT HAVE PERMISSION TO VIEW THIS PAGE -->
 </div>
-</div>
+</th:block>
+</body>
 </html>

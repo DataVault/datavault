@@ -2,7 +2,7 @@
 <html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/defaultlayout(nav='groups')}" >
 <head><title>Group Vaults</title></head>
-<div layout:fragment="content">
+<th:block layout:fragment="content">
 
 <div class="container">
 
@@ -10,7 +10,7 @@
         <li class="active"><b>Group Vaults</b></li>
     </ol>
 
-    <div th:if="${groups != null}">
+    <th:block th:if="${groups != null}">
             <div th:each="group,gStatus: ${groups}" class="panel panel-success">
                 <div class="panel-heading">
                     <h3 class="panel-title"><i class="fa fa-users" aria-hidden="true"></i> [[${group.name}]] ([[${group.getID()}]])</h3>
@@ -50,13 +50,13 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </th:block>
 
         <div th:if="${groups == null}">
             You are not an owner of any group!
         </div>
 
 </div>
-</div>
+</th:block>
 </html>
 

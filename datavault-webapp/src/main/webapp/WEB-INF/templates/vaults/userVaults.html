@@ -1,9 +1,9 @@
 <!DOCTYPE html><!--vaults/userVaults.html-->
 <html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/defaultlayout(nav='home')}">
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/welcomelayout(nav='home')}">
 <head><title>Vaults - User Vaults</title></head>
-<div layout:fragment="content">
-
+<body>
+<th:block layout:fragment="content">
     <div class="container">
 
         <th:block th:if="${vaults != null}">
@@ -37,7 +37,7 @@
                                     </a>
                                 </td>
                                 <td>[[${vault.getUserName()}]] ([[${vault.getUserID()}]])</td>
-                                <td>&nbsp;</td>
+                                <td></td>
                                 <td>[[${vault.getVaultSize()}]]</td>
                                 <td>[[${#dates.format(vault.getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */--></td>
                                 <td class="text-muted">[[${#dates.format(vault.getReviewDate(),dateFormatddMMyyyy)}]]<!--/* date */--></td>
@@ -51,6 +51,7 @@
         <br/>
         </th:block>
     </div>
-</div>
+</th:block>
+</body>
 </html>
 

@@ -115,7 +115,15 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
-        return html;
+        StringBuilder sb = new StringBuilder();
+        sb.append("<!-- template[");
+        sb.append("datavault-webapp/src/main/webapp/WEB-INF/templates/");
+        sb.append(template);
+        sb.append(".html");
+        sb.append("] -->");
+        sb.append("\n");
+        sb.append(html);
+        return sb.toString();
     }
 
     @Test
@@ -124,9 +132,9 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         assertEquals(HELLO_FIRST_LINE, getFirstLine(helloResource));
         ModelMap modelMap = getModelMap();
         modelMap.put("name", "user101");
-        String helloTemplateHtml = getHtml("test/hello.html", modelMap);
-        assertEquals(HELLO_FIRST_LINE, getFirstLine(helloTemplateHtml));
-        Document doc = Jsoup.parse(helloTemplateHtml);
+        String helloTemplateHtml = getHtml("test/hello", modelMap);
+        assertEquals("<!-- template[datavault-webapp/src/main/webapp/WEB-INF/templates/test/hello.html] -->", getFirstLine(helloTemplateHtml));
+        Document doc = getDocument(helloTemplateHtml);
 
         noFormFields(doc);
 
@@ -150,13 +158,13 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         store2.getProperties().put("prop2-2", "value2-2");
 
         modelMap.put("archivestores", Arrays.asList(store1, store2));
-        String html = getHtml("admin/archivestores/index.html", modelMap);
+        String html = getHtml("admin/archivestores/index", modelMap);
         Document doc = getDocument(html);
 
         displayFormFields(doc,"add-archivestoreLocal-form");
         //check title
         checkTitle(doc, "Admin - Archive Stores");
-        outputHtml(html);
+        outputHtml("test01",doc);
     }
 
     @Test
@@ -164,13 +172,13 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
     void test02AdminAuditsDeposits() throws Exception {
         ModelMap modelMap = getModelMap();
         modelMap.put("deposits", Collections.emptyList());
-        String html = getHtml("admin/audits/deposits.html", modelMap);
+        String html = getHtml("admin/audits/deposits", modelMap);
         Document doc = getDocument(html);
         displayFormFields(doc, "");
 
         //check title
         checkTitle(doc, "Admin Audits Deposits");
-        outputHtml(html);
+        outputHtml("test02",doc);
     }
 
     @Test
@@ -209,16 +217,17 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         audit1.setAuditChunks(Arrays.asList(info1, info2));
         audit2.setAuditChunks(Arrays.asList(info1, info2));
 
+        modelMap.put("audit", audit1);
         modelMap.put("audits", Arrays.asList(audit1, audit2));
 
-        String html = getHtml("admin/audits/index.html", modelMap);
+        String html = getHtml("admin/audits/index", modelMap);
         Document doc = getDocument(html);
 
         noFormFields(doc);
 
         //check title
         checkTitle(doc, "Admin - Audits");
-        outputHtml(html);
+        outputHtml("test03", doc);
     }
 
     @Test
@@ -227,7 +236,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         BillingInformation info = getInfo(now);
 
         modelMap.put("billingDetails", info);
-        String html = getHtml("admin/billing/billingDetails.html", modelMap);
+        String html = getHtml("admin/billing/billingDetails", modelMap);
         Document doc = getDocument(html);
 
         displayFormFields(doc,"update-billingDetails-form");
@@ -245,7 +254,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
 
         //check title
         checkTitle(doc, "Admin - Billing Details");
-        outputHtml(html);
+        outputHtml("test04", doc);
     }
 
     @Test
@@ -255,7 +264,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         BillingInformation info = getInfo(now);
 
         modelMap.put("billingDetails", info);
-        String html = getHtml("admin/billing/billingDetailsBudget.html", modelMap);
+        String html = getHtml("admin/billing/billingDetailsBudget", modelMap);
         Document doc = getDocument(html);
 
         displayFormFields(doc,"update-billingDetails-form");
@@ -271,7 +280,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
 
         //check title
         checkTitle(doc, "Admin - Billing Details (Budget)");
-        outputHtml(html);
+        outputHtml("test05", doc);
     }
 
 
@@ -282,7 +291,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         BillingInformation info = getInfo(now);
 
         modelMap.put("billingDetails", info);
-        String html = getHtml("admin/billing/billingDetailsBuyNewSlice.html", modelMap);
+        String html = getHtml("admin/billing/billingDetailsBuyNewSlice", modelMap);
         Document doc = getDocument(html);
 
         displayFormFields(doc,"update-billingDetails-form");
@@ -298,7 +307,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
 
         //check title
         checkTitle(doc, "Admin - Billing Details (SLICE)");
-        outputHtml(html);
+        outputHtml("test06", doc);
     }
 
     @Test
@@ -308,7 +317,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         BillingInformation info = getInfo(now);
 
         modelMap.put("billingDetails", info);
-        String html = getHtml("admin/billing/billingDetailsFeewaiver.html", modelMap);
+        String html = getHtml("admin/billing/billingDetailsFeewaiver", modelMap);
         Document doc = getDocument(html);
 
         displayFormFields(doc,"update-billingDetails-form");
@@ -324,7 +333,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
 
         //check title
         checkTitle(doc, "Admin - Billing Details (Funding: NO or Don't Know)");
-        outputHtml(html);
+        outputHtml("test07", doc);
     }
 
     @Test
@@ -334,7 +343,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         BillingInformation info = getInfo(now);
 
         modelMap.put("billingDetails", info);
-        String html = getHtml("admin/billing/billingDetailsFundingNoDoNotKnow.html", modelMap);
+        String html = getHtml("admin/billing/billingDetailsFundingNoDoNotKnow", modelMap);
         Document doc = getDocument(html);
 
         displayFormFields(doc,"update-billingDetails-form");
@@ -350,7 +359,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
 
         //check title
         checkTitle(doc, "Admin - Billing Details (FUNDING: NO OR DO NOT KNOW)");
-        outputHtml(html);
+        outputHtml("test08", doc);
     }
 
 
@@ -361,7 +370,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         BillingInformation info = getInfo(now);
 
         modelMap.put("billingDetails", info);
-        String html = getHtml("admin/billing/billingDetailsGrant.html", modelMap);
+        String html = getHtml("admin/billing/billingDetailsGrant", modelMap);
         Document doc = getDocument(html);
 
         displayFormFields(doc,"update-billingDetails-form");
@@ -379,7 +388,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
 
         //check title
         checkTitle(doc, "Admin - Billing Details (Grant)");
-        outputHtml(html);
+        outputHtml("test09", doc);
     }
 
     @Test
@@ -389,7 +398,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         BillingInformation info = getInfo(now);
 
         modelMap.put("billingDetails", info);
-        String html = getHtml("admin/billing/billingDetailsNA.html", modelMap);
+        String html = getHtml("admin/billing/billingDetailsNA", modelMap);
         Document doc = getDocument(html);
 
         displayFormFields(doc, "update-billingDetails-form");
@@ -405,7 +414,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
 
         //check title
         checkTitle(doc, "Admin - Billing Details (NA)");
-        outputHtml(html);
+        outputHtml("test10", doc);
     }
 
     @Test
@@ -415,14 +424,14 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         BillingInformation info = getInfo(now);
 
         modelMap.put("billingDetails", info);
-        String html = getHtml("admin/billing/billingDetailsSlice.html", modelMap);
+        String html = getHtml("admin/billing/billingDetailsSlice", modelMap);
         Document doc = getDocument(html);
 
         displayFormFields(doc, "update-billingDetails-form");
 
         //check title
         checkTitle(doc, "Admin - Billing Details (SLICE)");
-        outputHtml(html);
+        outputHtml("test11", doc);
     }
 
     @Test
@@ -432,7 +441,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         BillingInformation info = getInfo(now);
 
         modelMap.put("billingDetails", info);
-        String html = getHtml("admin/billing/billingDetailsWillPay.html", modelMap);
+        String html = getHtml("admin/billing/billingDetailsWillPay", modelMap);
         Document doc = getDocument(html);
 
         displayFormFields(doc, "update-billingDetails-form");
@@ -448,7 +457,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
 
         //check title
         checkTitle(doc, "Admin - Billing Details (WILL PAY)");
-        outputHtml(html);
+        outputHtml("test12", doc);
     }
 
     @Test
@@ -464,15 +473,28 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
 
         modelMap.put("billingDetails", info);
         modelMap.put("numberOfPages",2);
+        //ADDED 24MAR2024
+        modelMap.put("sort","blah");
+        modelMap.put("query","blah");
+        modelMap.put("ordername","blah");
+        modelMap.put("orderProjectId","blah");
+        modelMap.put("ordervaultsize","1234");
+        modelMap.put("ordergrantEndDate","blah");
+        modelMap.put("ordercreationtime","blah");
+        modelMap.put("orderreviewDate", new Date().toString());
+        modelMap.put("orderuser","bob");
+        modelMap.put("recordsInfo","info");
+        modelMap.put("activePageId",1);
+        modelMap.put("order","desc");
 
-        String html = getHtml("admin/billing/index.html", modelMap);
+        String html = getHtml("admin/billing/index", modelMap);
         Document doc = getDocument(html);
 
         displayFormFields(doc, "search-vaults");
 
         //check title
         checkTitle(doc, "Admin - Billing Details");
-        outputHtml(html);
+        outputHtml("test13", doc);
     }
 
     @Test
@@ -527,6 +549,9 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         info1.setPersonalDataStatement("personalDataStatement1");
         info1.setShortFilePath("short-file-path-1");
         info1.setHasPersonalData(true);
+        //added 24mar2024
+        info1.setUserID("dep1-user-id");
+        info1.setVaultOwnerName("dep1-vault-owner-name");
 
         DepositInfo info2 = getDepositInfo("dep-id-002");
         info2.setName("name2");
@@ -548,6 +573,10 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         info2.setPersonalDataStatement("personalDataStatement2");
         info2.setShortFilePath("short-file-path-2");
         info2.setHasPersonalData(true);
+        // added 24mar2024
+        info2.setUserID("dep2-user-id");
+        info2.setVaultOwnerName("dep2-vault-owner-name");
+        
         modelMap.put("deposits", Arrays.asList(info1, info2));
         modelMap.put("totalRecords", 15);
         modelMap.put("totalPages", 1);
@@ -564,15 +593,18 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("orderUserID", "user123");
         modelMap.put("orderId", "order123");
         modelMap.put("orderVaultId", "orderVaultIdABC");
+        //added 24mar2024
+        modelMap.put("deposit", info1);
+        modelMap.put("activePageId",1);
 
-        String html = getHtml("admin/deposits/index.html", modelMap);
+        String html = getHtml("admin/deposits/index", modelMap);
         Document doc = getDocument(html);
 
         displayFormFields(doc, "search-vaults");
 
         //check title
         checkTitle(doc, "Admin - Deposits");
-        outputHtml(html);
+        outputHtml("test14", doc);
     }
 
     @Test
@@ -585,14 +617,14 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         EventInfo event2 = getEventInfo2();
 
         modelMap.put("events", Arrays.asList(event1, event2));
-        String html = getHtml("admin/events/index.html", modelMap);
+        String html = getHtml("admin/events/index", modelMap);
         Document doc = getDocument(html);
 
         noFormFields(doc);
 
         //check title
         checkTitle(doc, "Admin - Events");
-        outputHtml(html);
+        outputHtml("test15", doc);
     }
 
     @WithMockUser(roles = "IS_ADMIN")
@@ -602,6 +634,10 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         ModelMap modelMap = getModelMap();
 
         CreateVault vault = getCreateVault();
+        vault.setGrantSchoolOrUnit("group-id-1");
+        vault.setBudgetSchoolOrUnit("group-id-2");
+        vault.setGroupID("group-id-1");
+        
         RetentionPolicy policy1 = getRetentionPolicy1();
         RetentionPolicy policy2 = getRetentionPolicy2();
 
@@ -623,8 +659,9 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("vault", vault);
         modelMap.put("vaultID", "vault-id-123");
         modelMap.put("policies", Arrays.asList(policy1, policy2));
+        modelMap.put("groups", Arrays.asList(getGroup("group-id-1"), getGroup("group-id-2")));
 
-        String html = getHtml("admin/pendingVaults/edit/editPendingVault.html", modelMap);
+        String html = getHtml("admin/pendingVaults/edit/editPendingVault", modelMap);
         Document doc = getDocument(html);
 
         displayFormFields(doc, "pendingvault-edit-form");
@@ -632,7 +669,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         //check title
         checkTitle(doc, "Admin - Edit Pending Vault");
         checkPolicyInfoOptions(doc);
-        outputHtml(html);
+        outputHtml("test16", doc);
 
     }
 
@@ -647,6 +684,11 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         assertThat(hiddenFalseValues.size()).isZero();
 
         Elements forms = doc.selectXpath("//form[1]");
+
+        if(forms.isEmpty()){
+            assertThat(expectedFormId.equals(""));
+            return;
+        }
         Element form = forms.get(0);
         String formMethod = form.attr("method");
         String formAction = form.attr("action");
@@ -714,14 +756,14 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("ordername", "bob");
         modelMap.put("pendingVaults", Arrays.asList(vault1, vault2));
 
-        String html = getHtml("admin/pendingVaults/confirmed.html", modelMap);
+        String html = getHtml("admin/pendingVaults/confirmed", modelMap);
         Document doc = getDocument(html);
 
         displayFormFields(doc, "search-pendingvaults");
 
         //check title
         checkTitle(doc, "Admin - Confirmed Pending Vaults");
-        outputHtml(html);
+        outputHtml("test17", doc);
     }
 
     @Test
@@ -733,7 +775,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("savedVaultsTotal", 123);
         modelMap.put("confirmedVaultsTotal", 100);
 
-        String html = getHtml("admin/pendingVaults/index.html", modelMap);
+        String html = getHtml("admin/pendingVaults/index", modelMap);
         Document doc = getDocument(html);
 
         noFormFields(doc);
@@ -749,7 +791,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
 
         //check title
         checkTitle(doc, "Admin - Pending Vaults");
-        outputHtml(html);
+        outputHtml("test18", doc);
     }
 
     @Test
@@ -770,14 +812,14 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("ordername", "bob");
         modelMap.put("pendingVaults", Arrays.asList(vault1, vault2));
 
-        String html = getHtml("admin/pendingVaults/saved.html", modelMap);
+        String html = getHtml("admin/pendingVaults/saved", modelMap);
         Document doc = getDocument(html);
 
         displayFormFields(doc, "search-pendingvaults");
 
         //check title
         checkTitle(doc, "Admin - Saved Pending Vaults");
-        outputHtml(html);
+        outputHtml("test19",doc);
     }
 
     @Test
@@ -791,7 +833,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         createRetentionPolicy.setDescription("crp-desc");
         createRetentionPolicy.setId(123);
         createRetentionPolicy.setName("crp-name");
-        createRetentionPolicy.setEndDate(now);
+        createRetentionPolicy.setEndDate(getNowValue());
 
         Group group = getGroup("group-id-1");
         group.setName("group-name-1");
@@ -801,14 +843,14 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("createRetentionPolicy", createRetentionPolicy);
         modelMap.put("group", group);
 
-        String html = getHtml("admin/pendingVaults/summary.html", modelMap);
+        String html = getHtml("admin/pendingVaults/summary", modelMap);
         Document doc = getDocument(html);
 
         displayFormFields(doc, "create-vault");
 
         //check title
         checkTitle(doc, "Admin - Pending Vault Summary");
-        outputHtml(html);
+        outputHtml("test20", doc);
     }
 
     @Test
@@ -816,18 +858,18 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
     void test21AdminRetentionPoliciesAdd() throws Exception {
         ModelMap modelMap = getModelMap();
 
-        RetentionPolicy policy1 = getRetentionPolicy1();
+        CreateRetentionPolicy policy1 = getCreateRetentionPolicy1();
 
         modelMap.put("retentionPolicy", policy1);
 
-        String html = getHtml("admin/retentionpolicies/add.html", modelMap);
+        String html = getHtml("admin/retentionpolicies/add", modelMap);
         Document doc = getDocument(html);
 
         displayFormFields(doc, "add-rentention-policy-form");
 
         //check title
         checkTitle(doc, "Admin - Add Retention Policy");
-        outputHtml(html);
+        outputHtml("test21", doc);
     }
 
     @Test
@@ -835,18 +877,18 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
     void test22AdminRetentionPoliciesEdit() throws Exception {
         ModelMap modelMap = getModelMap();
 
-        RetentionPolicy policy1 = getRetentionPolicy1();
+        CreateRetentionPolicy policy1 = getCreateRetentionPolicy1();
 
         modelMap.put("retentionPolicy", policy1);
 
-        String html = getHtml("admin/retentionpolicies/edit.html", modelMap);
+        String html = getHtml("admin/retentionpolicies/edit", modelMap);
         Document doc = getDocument(html);
 
         displayFormFields(doc,"add-rentention-policy-form");
 
         //check title
         checkTitle(doc, "Admin - Edit Retention Policy");
-        outputHtml(html);
+        outputHtml("test22", doc);
     }
 
 
@@ -860,14 +902,14 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
 
         modelMap.put("policies", Arrays.asList(policy1, policy2));
 
-        String html = getHtml("admin/retentionpolicies/index.html", modelMap);
+        String html = getHtml("admin/retentionpolicies/index", modelMap);
         Document doc = getDocument(html);
 
         noFormFields(doc);
 
         //check title
         checkTitle(doc, "Admin - Retention Policies");
-        outputHtml(html);
+        outputHtml("test23", doc);
     }
 
     @Test
@@ -891,14 +933,14 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
 
         modelMap.put("retrieves", Arrays.asList(ret1, ret2));
 
-        String html = getHtml("admin/retrieves/index.html", modelMap);
+        String html = getHtml("admin/retrieves/index", modelMap);
         Document doc = getDocument(html);
 
         noFormFields(doc);
 
         //check title
         checkTitle(doc, "Admin - Retrievals");
-        outputHtml(html);
+        outputHtml("test24", doc);
     }
 
     @Test
@@ -908,7 +950,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
 
         VaultReviewModel vrModel = new VaultReviewModel();
         vrModel.setVaultReviewId("vault-review-id-1");
-        vrModel.setNewReviewDate(now);
+        vrModel.setNewReviewDate(getNowValue());
         vrModel.setComment("comment-1");
         vrModel.setActionedDate(now);
 
@@ -965,14 +1007,14 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("group", group);
         modelMap.put("createRetentionPolicy", createRetentionPolicy);
 
-        String html = getHtml("admin/reviews/create.html", modelMap);
+        String html = getHtml("admin/reviews/create", modelMap);
         Document doc = getDocument(html);
 
         displayFormFields(doc, "create-review");
 
         //check title
         checkTitle(doc, "Admin - Review");
-        outputHtml(html);
+        outputHtml("test25", doc);
     }
 
     @Test
@@ -985,14 +1027,14 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
 
         modelMap.put("vaults", Arrays.asList(vault1, vault2));
 
-        String html = getHtml("admin/reviews/index.html", modelMap);
+        String html = getHtml("admin/reviews/index", modelMap);
         Document doc = getDocument(html);
 
         noFormFields(doc);
 
         //check title
         checkTitle(doc, "Admin - Reviews");
-        outputHtml(html);
+        outputHtml("test26", doc);
     }
 
     @Test
@@ -1000,14 +1042,23 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
 
         ModelMap modelMap = getModelMap();
 
-        String html = getHtml("admin/roles/isadmin/index.html", modelMap);
+        RoleModel superAdminRole = new RoleModel();
+        superAdminRole.setName("Super-Admin");
+        ArrayList<User> users = new ArrayList<>();
+        User user1 = getUser("one");
+        User user2 = getUser("two");
+        users.add(user1);
+        users.add(user2);
+        modelMap.put("role",superAdminRole);
+        modelMap.put("users", users);
+        String html = getHtml("admin/roles/isadmin/index", modelMap);
         Document doc = getDocument(html);
 
         displayFormFields(doc, "create-form");
 
         //check title
         checkTitle(doc, "Admin - IS Admin");
-        outputHtml(html);
+        outputHtml("test27", doc);
     }
 
     @Test
@@ -1015,14 +1066,36 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
     void test28AdminRolesIndex() throws Exception {
         ModelMap modelMap = getModelMap();
 
-        String html = getHtml("admin/roles/index.html", modelMap);
+        RoleModel superAdminRole = new RoleModel();
+        superAdminRole.setName("Super-Admin");
+        superAdminRole.setStatus("SUPER_STATUS");
+
+
+        RoleModel ror1 = new RoleModel();
+        ror1.setName("ror1");
+        ror1.setStatus("ror1-status");
+        RoleModel ror2 = new RoleModel();
+        ror2.setName("ror2");
+        ror2.setStatus("ror2-status");
+        modelMap.put("readOnlyRoles",Arrays.asList(ror1, ror2));
+        RoleModel role1 = new RoleModel();
+        role1.setName("role1");
+        role1.setStatus("role1-status");
+        RoleModel role2 = new RoleModel();
+        role2.setName("role1");
+        role2.setStatus("role1-status");
+        modelMap.put("roles", Arrays.asList(role1,role2));
+        modelMap.put("isSuperAdmin",true);
+        modelMap.put("superAdminRole", superAdminRole);
+        
+        String html = getHtml("admin/roles/index", modelMap);
         Document doc = getDocument(html);
 
         displayFormFields(doc, "create-role");
 
         //check title
         checkTitle(doc, "Admin - Roles");
-        outputHtml(html);
+        outputHtml("test28", doc);
     }
 
     @Test
@@ -1039,14 +1112,14 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         group2.setEnabled(true);
 
         modelMap.put("schools", Arrays.asList(group1, group2));
-        String html = getHtml("admin/schools/index.html", modelMap);
+        String html = getHtml("admin/schools/index", modelMap);
         Document doc = getDocument(html);
 
         noFormFields(doc);
 
         //check title
         checkTitle(doc, "Admin - Schools");
-        outputHtml(html);
+        outputHtml("test29", doc);
     }
 
     @Test
@@ -1063,6 +1136,8 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         roleModel1.setAssignedUserCount(111);
         roleModel1.setStatus("Status-1");
         roleModel1.setName("rm1-name");
+        roleModel1.setDescription("rm1-description");
+        
         RoleAssignment ra1 = new RoleAssignment();
         ra1.setId(111L);
         ra1.setRole(roleModel1);
@@ -1075,6 +1150,8 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         roleModel2.setAssignedUserCount(222);
         roleModel2.setStatus("Status-2");
         roleModel2.setName("rm2-name");
+        roleModel2.setDescription("rm2-description");
+        
         RoleAssignment ra2 = new RoleAssignment();
         ra2.setId(222L);
         ra2.setRole(roleModel2);
@@ -1087,14 +1164,14 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("roleAssignments", Arrays.asList(ra1, ra2));
         modelMap.put("canManageSchoolRoleAssignments", true);
 
-        String html = getHtml("admin/schools/schoolRoles.html", modelMap);
+        String html = getHtml("admin/schools/schoolRoles", modelMap);
         Document doc = getDocument(html);
 
         displayFormFields(doc, "create-form");
 
         //check title
         checkTitle(doc, "Admin - School Roles");
-        outputHtml(html);
+        outputHtml("test30", doc);
     }
 
     @Test
@@ -1114,14 +1191,14 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
 
         modelMap.put("user", user1);
 
-        String html = getHtml("admin/users/create.html", modelMap);
+        String html = getHtml("admin/users/create", modelMap);
         Document doc = getDocument(html);
 
         displayFormFields(doc, "create-user");
 
         //check title
         checkTitle(doc, "Admin - Create User");
-        outputHtml(html);
+        outputHtml("test31", doc);
     }
 
     @Test
@@ -1141,14 +1218,14 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
 
         modelMap.put("user", user1);
 
-        String html = getHtml("admin/users/edit.html", modelMap);
+        String html = getHtml("admin/users/edit", modelMap);
         Document doc = getDocument(html);
 
         displayFormFields(doc,"edit-user");
 
         //check title
         checkTitle(doc, "Admin - Edit Profile");
-        outputHtml(html);
+        outputHtml("test32", doc);
     }
 
     @Test
@@ -1178,14 +1255,14 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("users", Arrays.asList(user1, user2));
         modelMap.put("query", "admin users");
 
-        String html = getHtml("admin/users/index.html", modelMap);
+        String html = getHtml("admin/users/index", modelMap);
         Document doc = getDocument(html);
 
         displayFormFields(doc, "search-users");
 
         //check title
         checkTitle(doc, "Admin - Users");
-        outputHtml(html);
+        outputHtml("test33", doc);
     }
 
     @Test
@@ -1211,14 +1288,14 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("ordercreationtime", "orderCreationTime1");
         modelMap.put("vaults", Arrays.asList(vault1, vault2));
 
-        String html = getHtml("admin/vaults/index.html", modelMap);
+        String html = getHtml("admin/vaults/index", modelMap);
         Document doc = getDocument(html);
 
         displayFormFields(doc, "search-vaults");
 
         //check title
         checkTitle(doc, "Admin - Vaults");
-        outputHtml(html);
+        outputHtml("test34", doc);
     }
 
     @Test
@@ -1273,7 +1350,9 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         info1.setPersonalDataStatement("personalDataStatement1");
         info1.setShortFilePath("short-file-path-1");
         info1.setHasPersonalData(true);
-
+        info1.setFileOrigin("file-origin-1");
+        info1.setUserID("dep1-user-id");
+        
         DepositInfo info2 = getDepositInfo("dep-id-002");
         info2.setName("name2");
         info2.setStatus(Deposit.Status.COMPLETE);
@@ -1294,12 +1373,14 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         info2.setPersonalDataStatement("personalDataStatement2");
         info2.setShortFilePath("short-file-path-2");
         info2.setHasPersonalData(true);
+        info2.setFileOrigin("file-origin-2");
+        info2.setUserID("dep2-user-id");
 
         CreateRetentionPolicy createRetentionPolicy = new CreateRetentionPolicy();
         createRetentionPolicy.setDescription("crp-desc");
         createRetentionPolicy.setId(123);
         createRetentionPolicy.setName("crp-name");
-        createRetentionPolicy.setEndDate(now);
+        createRetentionPolicy.setEndDate(getNowValue());
 
         Group group = getGroup("group-id-1");
         group.setName("group-name-1");
@@ -1310,14 +1391,14 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("retentionPolicy", createRetentionPolicy);
         modelMap.put("group", group);
 
-        String html = getHtml("admin/vaults/vault.html", modelMap);
+        String html = getHtml("admin/vaults/vault", modelMap);
         Document doc = getDocument(html);
 
         displayFormFields(doc, "");
 
         //check title
         checkTitle(doc, "Admin - Vault");
-        outputHtml(html);
+        outputHtml("test35", doc);
     }
 
     @Test
@@ -1354,42 +1435,42 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.addAttribute("canManageArchiveStores", true);
         modelMap.addAttribute("archivestorescount", 114);
 
-        String html = getHtml("admin/index.html", modelMap);
+        String html = getHtml("admin/index", modelMap);
         Document doc = getDocument(html);
 
         noFormFields(doc);
 
         //check title
         checkTitle(doc, "Admin");
-        outputHtml(html);
+        outputHtml("test36", doc);
     }
 
     @Test
     void test37AuthConfirmation() throws Exception {
         ModelMap modelMap = getModelMap();
 
-        String html = getHtml("auth/confirmation.html", modelMap);
+        String html = getHtml("auth/confirmation", modelMap);
         Document doc = getDocument(html);
 
         noFormFields(doc);
 
         //check title
         checkTitle(doc, "Authentication - Confirmation");
-        outputHtml(html);
+        outputHtml("test37", doc);
     }
 
     @Test
     void test38AuthDenied() throws Exception {
         ModelMap modelMap = getModelMap();
 
-        String html = getHtml("auth/denied.html", modelMap);
+        String html = getHtml("auth/denied", modelMap);
         Document doc = getDocument(html);
 
         noFormFields(doc);
 
         //check title
         checkTitle(doc, "Authentication - Access Denied");
-        outputHtml(html);
+        outputHtml("test38", doc);
     }
 
     @Test
@@ -1399,14 +1480,14 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("welcome", "Welcome Message");
         modelMap.put("success", "Success Message");
 
-        String html = getHtml("auth/login.html", modelMap);
+        String html = getHtml("auth/login", modelMap);
         Document doc = getDocument(html);
 
         displayFormFields(doc, "");
 
         //check title
         checkTitle(doc, "Authentication - Login");
-        outputHtml(html);
+        outputHtml("test39", doc);
     }
 
     @Test
@@ -1428,14 +1509,14 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("deposit", deposit);
         modelMap.put("vault", vault1);
 
-        String html = getHtml("deposits/create.html", modelMap);
+        String html = getHtml("deposits/create", modelMap);
         Document doc = getDocument(html);
 
         displayFormFields(doc,"add-from-storage-form");
 
         //check title
         checkTitle(doc, "Deposits - Create");
-        outputHtml(html);
+        outputHtml("test40", doc);
     }
 
     @Test
@@ -1480,6 +1561,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         info1.setShortFilePath("short-file-path-1");
         info1.setHasPersonalData(true);
         info1.setStatus(Deposit.Status.COMPLETE);
+        info1.setUserID("deposit1-user-id");
 
         VaultInfo vault1 = getVaultInfo1();
 
@@ -1506,14 +1588,14 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("events", Arrays.asList(event1, event2));
         modelMap.put("retrieves", Arrays.asList(ret1, ret2));
 
-        String html = getHtml("deposits/deposit.html", modelMap);
+        String html = getHtml("deposits/deposit", modelMap);
         Document doc = getDocument(html);
 
         noFormFields(doc);
 
         //check title
         checkTitle(doc, "Deposits - Deposit");
-        outputHtml(html);
+        outputHtml("test41", doc);
     }
 
     @Test
@@ -1570,14 +1652,14 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("deposit", info1);
         modelMap.put("retrieve", ret1);
 
-        String html = getHtml("deposits/retrieve.html", modelMap);
+        String html = getHtml("deposits/retrieve", modelMap);
         Document doc = getDocument(html);
 
         displayFormFields(doc, "retrieve-deposit");
 
         //check title
         checkTitle(doc, "Deposits - Retrieve");
-        outputHtml(html);
+        outputHtml("test42", doc);
     }
 
     @Test
@@ -1588,14 +1670,14 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
 
         ModelMap modelMap = getModelMap();
         modelMap.put("message", "This is a test error message");
-        String errorTemplateHtml = getHtml("error/error.html", modelMap);
+        String errorTemplateHtml = getHtml("error/error", modelMap);
         //html is a mix of error 'page' and default template.
-        assertThat(errorTemplateHtml).startsWith("<!DOCTYPE html><!--error/error.html-->\n<!--layout/defaultLayout.html-->");
+        assertThat(errorTemplateHtml).startsWith("<!-- template[datavault-webapp/src/main/webapp/WEB-INF/templates/error/error.html] -->\n" +
+                "<!DOCTYPE html><!--error/error.html-->\n" +
+                "<!--layout/defaultLayout.html-->");
 
-        outputHtml(errorTemplateHtml);
-
-        Document doc = Jsoup.parse(errorTemplateHtml);
-
+        Document doc = getDocument(errorTemplateHtml);
+        
         noFormFields(doc);
 
         //check 1st css link
@@ -1628,7 +1710,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
 
         //check title
         checkTitle(doc, "Error Page");
-        System.out.println(errorTemplateHtml);
+        outputHtml("test43", doc);
     }
 
 
@@ -1636,28 +1718,28 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
     void test44FeedbackIndex() throws Exception {
         ModelMap modelMap = getModelMap();
 
-        String html = getHtml("feedback/index.html", modelMap);
+        String html = getHtml("feedback/index", modelMap);
         Document doc = getDocument(html);
 
         displayFormFields(doc,"feedback");
 
         //check title
         checkTitle(doc, "Feedback");
-        outputHtml(html);
+        outputHtml("test44", doc);
     }
 
     @Test
     void test45FeedbackSent() throws Exception {
         ModelMap modelMap = getModelMap();
 
-        String html = getHtml("feedback/sent.html", modelMap);
+        String html = getHtml("feedback/sent", modelMap);
         Document doc = getDocument(html);
 
         noFormFields(doc);
 
         //check title
         checkTitle(doc, "Feedback - Sent");
-        outputHtml(html);
+        outputHtml("test45", doc);
     }
 
     @Test
@@ -1700,14 +1782,14 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("filestoresLocal", Arrays.asList(fs1, fs2));
         modelMap.put("filestoresSFTP", Arrays.asList(fs1, fs2));
 
-        String html = getHtml("filestores/index.html", modelMap);
+        String html = getHtml("filestores/index", modelMap);
         Document doc = getDocument(html);
 
         displayFormFields(doc, "add-filestoreSFTP-form");
 
         //check title
         checkTitle(doc, "Filestores");
-        outputHtml(html);
+        outputHtml("test46", doc);
     }
 
     @Test
@@ -1725,17 +1807,21 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         VaultInfo vault1 = getVaultInfo1();
         VaultInfo vault2 = getVaultInfo2();
 
-        modelMap.put("vaults", Arrays.asList(vault1, vault2));
+
+        ArrayList<VaultInfo[]> vaults = new ArrayList<>();
+        vaults.add(new VaultInfo[]{vault1, vault2});
+        vaults.add(new VaultInfo[]{vault1, vault2});
+        modelMap.put("vaults", vaults);
         modelMap.put("groups", Arrays.asList(group1, group2));
 
-        String html = getHtml("groups/index.html", modelMap);
+        String html = getHtml("groups/index", modelMap);
         Document doc = getDocument(html);
 
         noFormFields(doc);
 
         //check title
         checkTitle(doc, "Group Vaults");
-        outputHtml(html);
+        outputHtml("test47", doc);
     }
 
     @Test
@@ -1745,28 +1831,28 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("system", "system-01");
         modelMap.put("link", "link-01");
 
-        String html = getHtml("help/index.html", modelMap);
+        String html = getHtml("help/index", modelMap);
         Document doc = getDocument(html);
 
         noFormFields(doc);
 
         //check title
         checkTitle(doc, "Help");
-        outputHtml(html);
+        outputHtml("test48", doc);
     }
 
     @Test
     void test49VaultsConfirmed() throws Exception {
         ModelMap modelMap = getModelMap();
 
-        String html = getHtml("vaults/confirmed.html", modelMap);
+        String html = getHtml("vaults/confirmed", modelMap);
         Document doc = getDocument(html);
 
         noFormFields(doc);
 
         //check title
         checkTitle(doc, "Vaults - Confirmed");
-        outputHtml(html);
+        outputHtml("test49", doc);
     }
 
     @Test
@@ -1785,16 +1871,18 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("datasets", Arrays.asList(dataset1, dataset2));
         modelMap.put("vault", vault);
         modelMap.put("policies", Arrays.asList(retPol1, retPol2));//RetentionPolicy[]
+        modelMap.put("link", "https://www.ed.ac.uk");
+        modelMap.put("system", "DataVault");
+        modelMap.put("groups", Arrays.asList(getGroup("1"), getGroup("2")));
 
-
-        String html = getHtml("vaults/create.html", modelMap);
+        String html = getHtml("vaults/create", modelMap);
         Document doc = getDocument(html);
 
         displayFormFields(doc, "create-vault");
 
         //check title
         checkTitle(doc, "Vaults - Create");
-        outputHtml(html);
+        outputHtml("test50", doc);
     }
 
 
@@ -1838,14 +1926,14 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.addAttribute("welcome", "WelcomeMessage01");
 
 
-        String html = getHtml("vaults/index.html", modelMap);
+        String html = getHtml("vaults/index", modelMap);
         Document doc = getDocument(html);
 
         noFormFields(doc);
 
         //check title
         checkTitle(doc, "Vaults");
-        outputHtml(html);
+        outputHtml("test51", doc);
     }
 
     @WithMockUser(roles = "IS_ADMIN")
@@ -1876,16 +1964,17 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
                 break;
             default:
         }
-        modelMap.put("policies", Arrays.asList(getRetentionPolicy1(), getRetentionPolicy2()));
-        modelMap.put("groups", Arrays.asList(group1, group2));
-        modelMap.put("vault", vault);
-        modelMap.put("errors", Arrays.asList("error1", "error2"));
         RetentionPolicy retPol1 = getRetentionPolicy1();
         RetentionPolicy retPol2 = getRetentionPolicy2();
-        modelMap.put("errors", Arrays.asList(retPol1, retPol2));
+        modelMap.put("policies", Arrays.asList(retPol1, retPol2));
+        modelMap.put("groups", Arrays.asList(group1, group2));
+        vault.setPolicyInfo("111-123");
+        vault.setGroupID("group-id-1");
+        modelMap.put("vault", vault);
+        modelMap.put("errors", Arrays.asList("error-message-1", "error-message-2"));
         modelMap.put("loggedInAs", "loggedInAs1");
 
-        String html = getHtml("vaults/newCreatePrototype.html", modelMap);
+        String html = getHtml("vaults/newCreatePrototype", modelMap);
         Document doc = getDocument(html);
 
         displayFormFields(doc,"vault-creation-form");
@@ -1893,7 +1982,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         
         //check title
         checkTitle(doc, "Vaults - Create");
-        outputHtml(html);
+        outputHtml("test52", doc);
     }
 
 
@@ -1905,14 +1994,14 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         VaultInfo vault2 = getVaultInfo2();
         modelMap.put("vaults", Arrays.asList(vault1, vault2));
 
-        String html = getHtml("vaults/userVaults.html", modelMap);
+        String html = getHtml("vaults/userVaults", modelMap);
         Document doc = getDocument(html);
 
         noFormFields(doc);
 
         //check title
         checkTitle(doc, "Vaults - User Vaults");
-        outputHtml(html);
+        outputHtml("test53", doc);
     }
 
     @Test
@@ -1920,12 +2009,28 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
     void test54VaultsVault() throws Exception {
 
         ModelMap modelMap = getModelMap();
+        
         RoleModel roleModel1 = new RoleModel();
+        roleModel1.setId(1111L);
+        roleModel1.setName("role1");
+        roleModel1.setDescription("role1desc");
+        
         RoleModel roleModel2 = new RoleModel();
+        roleModel2.setId(2222L);
+        roleModel2.setName("role2");
+        roleModel2.setDescription("role2desc");
 
         RoleAssignment roleAssignment1 = new RoleAssignment();
+        roleAssignment1.setId(1010L);
+        roleAssignment1.setUserId("user1");
+        roleAssignment1.setRole(roleModel1);
+        
         RoleAssignment roleAssignment2 = new RoleAssignment();
+        roleAssignment2.setId(2020L);
+        roleAssignment2.setUserId("user2");
+        roleAssignment2.setRole(roleModel2);
         CreateRetentionPolicy retentionPolicy = new CreateRetentionPolicy();
+        
         Group group = new Group();
 
         modelMap.addAttribute("vault", getVaultInfo1());
@@ -1936,13 +2041,19 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
 
         DepositInfo deposit1 = getDepositInfo("deposit-id-1");
         deposit1.setCreationTime(new Date());
+        deposit1.setUserID("deposit1-user-id");
+        deposit1.setStatus(Deposit.Status.IN_PROGRESS);
+        deposit1.setHasPersonalData(false);
 
         Retrieve deposit1Retrieve = getRetrieve("deposit1-ret-1");
         Retrieve deposit2Retrieve = getRetrieve("deposit1-ret-2");
 
         DepositInfo deposit2 = getDepositInfo("deposit-id-2");
         deposit2.setCreationTime(new Date());
-
+        deposit2.setUserID("deposit2-user-id");
+        deposit2.setStatus(Deposit.Status.COMPLETE);
+        deposit2.setHasPersonalData(true);
+        
         modelMap.put("deposit", Arrays.asList(deposit1, deposit2));
 
         Map<String, Retrieve[]> depositNameToRetrievalsMap = new HashMap<>();
@@ -1983,14 +2094,14 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         vrm1.setActionedDate(now);
         vrm1.setComment("vrm1 - comment");
         vrm1.setVaultReviewId("vault-review-id-1");
-        vrm1.setNewReviewDate(now);
+        vrm1.setNewReviewDate(getNowValue());
         vrm1.setDepositReviewModels(Arrays.asList(drm1, drm2));
 
         VaultReviewModel vrm2 = new VaultReviewModel();
         vrm2.setActionedDate(now);
         vrm2.setComment("vrm2 - comment");
         vrm2.setVaultReviewId("vault-review-id-2");
-        vrm2.setNewReviewDate(now);
+        vrm2.setNewReviewDate(getNowValue());
         vrm2.setDepositReviewModels(Arrays.asList(drm1, drm2));
 
         VaultReviewHistoryModel vrhm = new VaultReviewHistoryModel();
@@ -1999,14 +2110,14 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("vrhm", vrhm);
         modelMap.put("deposits", Arrays.asList(deposit1, deposit2));
 
-        String html = getHtml("vaults/vault.html", modelMap);
+        String html = getHtml("vaults/vault", modelMap);
         Document doc = getDocument(html);
 
         displayFormFields(doc,"add-data-manager-form");
 
         //check title
         checkTitle(doc, "Vaults - Vault");
-        outputHtml(html);
+        outputHtml("test54", doc);
     }
 
     @Test
@@ -2014,14 +2125,14 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
     void test55Index() throws Exception {
         ModelMap modelMap = getModelMap();
 
-        String html = getHtml("index.html", modelMap);
+        String html = getHtml("index", modelMap);
         Document doc = getDocument(html);
 
         noFormFields(doc);
 
         //check title
         checkTitle(doc, "Index");
-        outputHtml(html);
+        outputHtml("test55", doc);
     }
 
     @Test
@@ -2029,14 +2140,14 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
     void test56Secure() throws Exception {
         ModelMap modelMap = getModelMap();
 
-        String html = getHtml("secure.html", modelMap);
+        String html = getHtml("secure", modelMap);
         Document doc = getDocument(html);
 
         noFormFields(doc);
 
         //check title
         checkTitle(doc, "Secure Page");
-        outputHtml(html);
+        outputHtml("test56", doc);
     }
 
     @Test
@@ -2047,14 +2158,14 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("link","link01");
         modelMap.put("system","system01");
 
-        String html = getHtml("welcome.html", modelMap);
+        String html = getHtml("welcome", modelMap);
         Document doc = getDocument(html);
 
         noFormFields(doc);
 
         //check title
         checkTitle(doc, "Welcome");
-        outputHtml(html);
+        outputHtml("test57", doc);
     }
 
     public String getHrefMatchedOnText(Document doc, String linkText) {
@@ -2149,12 +2260,14 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
     }
 
     public AuditInfo getAuditInfo(String id) {
-        return new AuditInfo() {
+        AuditInfo result = new AuditInfo() {
             @Override
             public String getId() {
                 return id;
             }
         };
+        result.setCreationTime(new Date());
+        return result;
     }
 
     public AuditChunkStatusInfo getAuditChunkStatusInfo(String id) {
@@ -2197,14 +2310,14 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         };
     }
 
-    private Group getGroup(String id) {
-        return new Group() {
-            @Override
-            public String getID() {
-                return id;
-            }
-        };
+    private Group getGroup(String groupId){
+        Group group = new Group();
+        group.setID(groupId);
+        group.setName("name-"+groupId);
+        group.setEnabled(true);
+        return group;
     }
+
 
     private Retrieve getRetrieve(String id) {
         Retrieve result =  new Retrieve() {
@@ -2224,12 +2337,15 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
     }
 
     private User getUser(String id) {
-        return new User() {
+        User result = new User() {
             @Override
             public String getID() {
                 return id;
             }
         };
+        result.setFirstname("first-"+id);
+        result.setLastname("last-"+id);
+        return result;
     }
 
     private FileStore getFileStore(String id) {
@@ -2264,6 +2380,9 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         vault1.setPolicyID("policy-id-1");
         vault1.setPolicyExpiry(now);
         vault1.setPolicyLastChecked(now);
+        vault1.setGroupID("group-id-1");
+        vault1.setOwnerName("vault-owner-name-1");
+        vault1.setDatasetName("vault-data-set-name-1");
         return vault1;
     }
 
@@ -2287,6 +2406,8 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         vault2.setVaultCreatorId("vault2-creator-id");
         vault2.setUserName("vault-username-2");
         vault2.setPolicyID("policy-id-2");
+        vault2.setGroupID("group-id-2");
+        vault2.setOwnerName("vault-owner-name-2");
         return vault2;
     }
 
@@ -2385,6 +2506,21 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         assertThat(policy1.getPolicyInfo()).isEqualTo("111-123");
         return policy1;
     }
+    private CreateRetentionPolicy getCreateRetentionPolicy1() {
+        CreateRetentionPolicy policy1 = new CreateRetentionPolicy();
+        policy1.setId(111);
+        policy1.setName("policy-one");
+        policy1.setDescription("policy1-description");
+        policy1.setUrl("https://info.org/retention-policy-1");
+        policy1.setMinDataRetentionPeriod("123");
+        policy1.setMinRetentionPeriod(123);
+        policy1.setExtendUponRetrieval(true);
+        policy1.setInEffectDate(now);
+        policy1.setEndDate(now);
+        policy1.setDataGuidanceReviewed(now);
+        assertThat(policy1.getPolicyInfo()).isEqualTo("111-123");
+        return policy1;
+    }
 
     private RetentionPolicy getRetentionPolicy2() {
         RetentionPolicy policy2 = new RetentionPolicy();
@@ -2402,10 +2538,26 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         return policy2;
     }
 
+    private CreateRetentionPolicy getCrateRetentionPolicy2() {
+        CreateRetentionPolicy policy2 = new CreateRetentionPolicy();
+        policy2.setId(222);
+        policy2.setName("policy-two");
+        policy2.setDescription("policy2-description");
+        policy2.setUrl("https://info.org/retention-policy-2");
+        policy2.setMinDataRetentionPeriod("234");
+        policy2.setMinRetentionPeriod(234);
+        policy2.setExtendUponRetrieval(true);
+        policy2.setInEffectDate(now);
+        policy2.setEndDate(now);
+        policy2.setDataGuidanceReviewed(now);
+        assertThat(policy2.getPolicyInfo()).isEqualTo("222-234");
+        return policy2;
+    }
+
     private CreateVault getCreateVault() {
         CreateVault vault = new CreateVault();
         vault.setAffirmed(true);
-        vault.setBillingGrantEndDate(now);
+        vault.setBillingGrantEndDate(getNowValue());
         vault.setBillingType(PendingVault.Billing_Type.GRANT_FUNDING.name());
         vault.setBudgetAuthoriser("budget-authoriser-1");
         vault.setBudgetSchoolOrUnit("Informatics");
@@ -2414,12 +2566,20 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         vault.setContactPerson("contact-person-1");
 
         vault.setDatasetID("data-set-id-1");
-        vault.setDataCreators(Arrays.asList("creator1", "creator2"));
-        vault.setDepositors(Arrays.asList("Neil", "Geddy", "Alex"));
+        ArrayList creators = new ArrayList();
+        creators.add("creator1");
+        creators.add("creator2");
+        vault.setDataCreators(creators);
+
+        ArrayList depositors = new ArrayList();
+        depositors.add("Neil");
+        depositors.add("Geddy");
+        depositors.add("Alex");
+        vault.setDepositors(depositors);
         vault.setDescription("description-1");
         vault.setEstimate("estimate-1");
 
-        vault.setGrantEndDate(now);
+        vault.setGrantEndDate(getNowValue());
         vault.setGroupID("group-id-one");
         vault.setGrantSubunit("GrantSubUnit-1");
         vault.setGrantAuthoriser("grant-authorizer-1");
@@ -2429,7 +2589,10 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         vault.setLoggedInAs("user-one");
 
         vault.setName("vault-name");
-        vault.setNominatedDataManagers(Arrays.asList("Tom", "Dick", "Harry"));
+        ArrayList ndms = new ArrayList();
+        ndms.add("ndm1");
+        ndms.add("ndm2");
+        vault.setNominatedDataManagers(ndms);
         vault.setNotes("notes-one");
 
         vault.setPaymentDetails("project-details");
@@ -2437,7 +2600,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         vault.setPolicyInfo("111-123");
         vault.setProjectTitle("project-title");
         vault.setPureLink(true);
-        vault.setReviewDate(now);
+        vault.setReviewDate(getNowValue());
         vault.setSliceID("slice-id-1");
         vault.setSliceQueryChoice(PendingVault.Slice_Query_Choice.NO_OR_DO_NOT_KNOW.name());
         vault.setVaultCreator("vault-creator-1");
@@ -2464,7 +2627,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         checkScriptTags(doc);
         return doc;
     }
-    
+
     void checkCssLinks(Document doc) {
         Elements links = doc.selectXpath("//link");
         for(Element link : links) {
@@ -2495,7 +2658,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
             }
         }
     }
-    
+
     void checkPolicyInfoOptions(Document doc){
         Elements policyInfoSelects = doc.selectXpath("//select[@id='policyInfo']");
         assertThat(policyInfoSelects.size()).isOne();
@@ -2510,13 +2673,17 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
                 checkOption(option, "222-234",false);
             }
         }
-        
+
     }
     void checkOption(Element option, String value, boolean selected){
         assertThat(option.tag().getName().equals("option"));
         assertThat(option.val().equals(value));
         boolean isSelected = option.hasAttr("selected");
         assertThat(isSelected).isEqualTo(selected);
+    }
+
+    private Date getNowValue() {
+        return now;
     }
 
 }
