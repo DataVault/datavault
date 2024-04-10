@@ -64,6 +64,21 @@ public class DateTimeUtils {
         LocalDate ld2 = getLocalDate(date2);
         return ld1.isBefore(ld2);
     }
+    
+    public static boolean isAfter(Date date1, Date date2) {
+        if (date1 == null && date2 == null) {
+            return false;
+        }
+        if (date1 == null) {
+            return true;
+        }
+        if (date2 == null) {
+            return false;
+        }
+        LocalDate ld1 = getLocalDate(date1);
+        LocalDate ld2 = getLocalDate(date2);
+        return ld1.isAfter(ld2);
+    }
 
     private static LocalDate getLocalDate(Date date) {
         Calendar cal = Calendar.getInstance();

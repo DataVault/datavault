@@ -1,8 +1,8 @@
 <!DOCTYPE html><!--vaults/create.html-->
 <html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/defaultlayout(nav='home')}">
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/welcomelayout(nav='home')}">
 <head><title>Vaults - Create</title></head>
-<div layout:fragment="content">
+<th:block layout:fragment="content">
 
     <div class="container">
         <div class="row">
@@ -133,11 +133,11 @@
                                                             th:data-subtext="|( Minimum period: ${retentionPolicy.minRetentionPeriod} )|">[[${retentionPolicy.name}]]</option>
                                                 </th:block>
                                             </th:block>
-                                            </th:block>
                                         </select>
                                     </div>
                                 </div>
                             </div>
+
                             <div class="form-group">
                                 <label  for="grantEndDate" class="control-label">
                                     <strong>Grant End Date</strong>
@@ -171,7 +171,9 @@
                                         >
                                             <option selected disabled data-hidden="true">Please choose a School</option>
                                             <th:block th:each="group: ${groups}">
-                                                <option th:if="${group.enabled}" th:value="${group.getID()}">[[${group.name}]]</option>
+                                                <option th:if="${group.enabled}" 
+                                                        th:value="${group.getID()}"
+                                            >[[${group.name}]]</option>
                                             </th:block>
                                         </select>
                                     </div>
@@ -321,5 +323,5 @@
         }); $('[data-toggle="popover"]').popover();
     </script>
 
-</div>
+</th:block>
 </html>

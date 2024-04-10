@@ -3,8 +3,8 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/defaultlayout(nav='admin')}" >
 <head><title>Admin - Reviews</title></head>
-<div layout:fragment="content">
-    <div class="container">
+<th:block layout:fragment="content">
+<div class="container">
 
     <ol class="breadcrumb">
         <li><a th:href="@{/admin/}"><b>Administration</b></a></li>
@@ -55,6 +55,5 @@
     </th:block>
 
 </div>
-
-</div>
+</th:block>
 </html>

@@ -3,7 +3,7 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/defaultlayout(nav='admin')}">
 
 <head><title>Admin - Audits</title></head>
-<div layout:fragment="content">
+<th:block layout:fragment="content">
 
     <div class="modal fade" id="confirm-removal" tabindex="-1" role="dialog" aria-labelledby="confirmRemovalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -129,7 +129,7 @@
     </th:block>
     <script th:inline="javascript" type="text/javascript">
         $("button#audit").click(function(){
-            var baseURL = /*[[@{/admin/deposits/audit}]]*/ 'replaced-by-tl';
+            var baseURL = /*[(|'@{/admin/deposits/audit}'|)]*/ 'replaced-by-tl';
             $.ajax({
                 url: baseURL,
                 type: 'GET',
@@ -151,5 +151,5 @@
             });
         });
     </script>
-</div>
+</th:block>
 </html>

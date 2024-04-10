@@ -3,7 +3,7 @@
 	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	  layout:decorate="~{layout/defaultlayout(nav='admin')}" >
 <head><title>Admin - Pending Vault Summary</title></head>
-<div layout:fragment="content">
+<th:block layout:fragment="content">
 				<div class="container">
 					<ol class="breadcrumb">
 						<li><a th:href="@{/admin/}"><b>Administration</b></a></li>
@@ -99,7 +99,7 @@
 													<th:block th:if="${pendingVault.confirmed}">
 														<input class="form-control" id="reviewDate" placeholder="yyyy-mm-dd" name="reviewDate"
 															th:value="${pendingVault.getReviewDate()}" /><!--form-date-->
-														<span id="invalid-review-date-span" style="font-size: 1.2em; font: bold; color:  #AE0F0F; display: inline;"></span>
+														<span id="invalid-review-date-span" style="font-size: 1.2em; font-weight: bold; color:  #AE0F0F; display: inline;"></span>
 													</th:block>
 `													<th:block th:if="${pendingVault.reviewDate != null}">
 														[[${#dates.format(pendingVault.reviewDate,dateFormatISO)}]]<!--/* date */-->
@@ -299,4 +299,5 @@
 				<!-- import date-validation-utils.j first -->
 				<script th:src="@{/resources/application/js/date-validation-utils.js}"></script>
 				<script th:src="@{/resources/application/js/admin-pending-vault-summary.js}"></script>
-</div></html>
+</th:block>
+</html>

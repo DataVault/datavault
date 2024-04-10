@@ -2,7 +2,7 @@
 <html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/defaultlayout(nav='home')}" >
 <head><title>Deposits - Create</title></head>
-<div layout:fragment="content">
+<th:block layout:fragment="content">
 <style>
     /* Uploader: border */
     .flow-drop {padding:30px; font-size:13px; text-align:center; color:#666; font-weight:bold;background-color:#eee; border:2px dashed #aaa; border-radius:10px; z-index:9999;}
@@ -54,7 +54,7 @@
                         <label class="control-label">Select file or folder:</label>
                         <div id="tree-error" class="alert alert-danger" style="display:none"></div>
                         <div id="tree" class="fancytree tree-box" style="max-height:50vh; overflow-y:scroll;"></div>
-                        <#--  <label id="deposit-size" class="text-muted small">No files selected</label>  -->
+                        <!--/*   <label id="deposit-size" class="text-muted small">No files selected</label>  */-->
                     </div>
                 </form>
             </div>
@@ -153,7 +153,7 @@
                 
                 <script th:inline="javascript" type="text/javascript">
                     var filesizeSeq = 0;
-                    var baseURL = /*[[@{/files}]]*/ 'replaced-by-tl';
+                    var baseURL = /*[(|'@{/files}'|)]*/ 'replaced-by-tl';
                     
                     const sortTreeNodesFn = function (node) {
                         // Sort children alphabetically
@@ -327,7 +327,7 @@
         });
         
         $('#add-from-storage-btn').on("click", function() {
-            var checkDepositSizeURL = /*[[@{/checkdepositsize}]]*/ 'replaced-by-tl';
+            var checkDepositSizeURL = /*[(@{/checkdepositsize})]*/ 'replaced-by-tl';
 
             console.log("#add-from-storage-btn: CLICKED");
             const tree = $.ui.fancytree.getTree("#tree");
@@ -518,5 +518,5 @@
     }
 
 </script>
-</div>
+</th:block>
 </html>

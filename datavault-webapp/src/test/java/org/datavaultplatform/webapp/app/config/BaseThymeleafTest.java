@@ -1,6 +1,8 @@
 package org.datavaultplatform.webapp.app.config;
 
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.datavaultplatform.webapp.config.GlobalDateTimeFormatInterceptor;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -9,10 +11,9 @@ import org.jsoup.select.Elements;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.ui.ModelMap;
+import org.springframework.util.Assert;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.LineNumberReader;
+import java.io.*;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -67,16 +68,39 @@ public class BaseThymeleafTest {
             return Arrays.stream(fileContents.split("\n")).findFirst().orElse(null);
         }
     }
-
-    final void outputHtml(String html) {
-        outputHtml(html, true);
-    }
+    
 
     @SuppressWarnings("SameParameterValue")
-    final void outputHtml(String html, boolean output) {
-        if (output) {
-            log.info(html);
-        }
+    final void outputHtml(String filename, Document doc) {
+        String html = doc.html();
+        log.info(html);
+        
+        outputTemplateHtmlToFile(filename,html);
     }
 
+    public static final String ENV_TEMPLATE_BASE_DIR = "DV_LOCAL_TEST_TEMPLATE_OUTPUT_BASE_DIR";
+    public static final String ENV_TEMPLATE_LABEL = "DV_LOCAL_TEST_TEMPLATE_OUTPUT_LABEL";
+
+    @SneakyThrows
+    private void outputTemplateHtmlToFile(String filename, String html) {
+        // for local 'human' testing to compare old and new template output
+        String baseDirName = System.getProperty(ENV_TEMPLATE_BASE_DIR);
+        if (StringUtils.isBlank(baseDirName)) {
+            return;
+        }
+        String label = System.getProperty(ENV_TEMPLATE_LABEL);
+        if (StringUtils.isBlank(label)) {
+            label = "new";
+        }
+        File baseDir = new File(baseDirName);
+        Assert.isTrue(baseDir.exists(), String.format("The dv test template output base dir [%s] does not exist", baseDir));
+        Assert.isTrue(baseDir.isDirectory(), String.format("The dv test template output base dir [%s] is not a directory", baseDir));
+        Assert.isTrue(baseDir.canWrite(), String.format("The dv test template output base dir [%s] is not writable", baseDir));
+        File outputFile = new File(baseDir, filename + label + ".html");
+        try (FileWriter fw = new FileWriter(outputFile)) {
+            fw.write(html);
+            fw.write("\n");
+        }
+        log.info("Written template generated html to [{}]", outputFile.getCanonicalPath());
+    }
 }
