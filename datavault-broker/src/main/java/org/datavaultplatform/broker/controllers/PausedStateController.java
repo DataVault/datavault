@@ -17,11 +17,11 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/admin")
-public class PauseStateController {
+public class PausedStateController {
 
     private final PausedStateService service;
 
-    public PauseStateController(PausedStateService service) {
+    public PausedStateController(PausedStateService service) {
         this.service = service;
     }
 

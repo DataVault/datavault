@@ -9,8 +9,6 @@ import org.datavaultplatform.common.request.*;
 import org.datavaultplatform.common.response.*;
 import org.datavaultplatform.common.util.Constants;
 import org.datavaultplatform.common.util.DateTimeUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
@@ -34,8 +32,6 @@ import java.util.Optional;
 @Profile("!standalone")
 @Slf4j
 public class RestService implements NotifyLogoutService, NotifyLoginService, EvaluatorService {
-
-    private static final Logger logger = LoggerFactory.getLogger(RestService.class);
 
     private final String brokerURL;
     private final String brokerApiKey;
@@ -80,7 +76,7 @@ public class RestService implements NotifyLogoutService, NotifyLoginService, Eva
             throw new IllegalArgumentException("REST method not implemented!");
         }
 
-        logger.debug("Calling Broker with url:" + url + " Method:" + method);
+        log.debug("Calling Broker with url:" + url + " Method:" + method);
 
         // todo : check the http status code before returning?
 
@@ -171,11 +167,11 @@ public class RestService implements NotifyLogoutService, NotifyLoginService, Eva
             parameters.append("filepath=").append(filePath).append("&");
         }
 
-        logger.debug("parameters: " + parameters);
+        log.debug("parameters: " + parameters);
 
         ResponseEntity<DepositSize> response = get(brokerURL + "/checkdepositsize" + parameters, DepositSize.class);
 
-        logger.debug("return: " + response.getBody());
+        log.debug("return: " + response.getBody());
 
         return response.getBody();
     }
@@ -539,9 +535,9 @@ public class RestService implements NotifyLogoutService, NotifyLoginService, Eva
     }
 
     public ArchiveStore addArchiveStore(ArchiveStore archiveStore) {
-        logger.debug("Post request to broker");
+        log.debug("Post request to broker");
         ResponseEntity<ArchiveStore> response = post(brokerURL + "/admin/archivestores/", ArchiveStore.class, archiveStore);
-        logger.debug("Done");
+        log.debug("Done");
         return response.getBody();
     }
 
@@ -846,21 +842,21 @@ public class RestService implements NotifyLogoutService, NotifyLoginService, Eva
             parameters.append("filepath=").append(filePath).append("&");
         }
 
-        logger.info("parameters: " + parameters);
+        log.info("parameters: " + parameters);
 
         ResponseEntity<String> response = get(brokerURL + "/sizeofselectedfiles" + parameters, String.class);
 
-        logger.info("return: " + response.getBody());
+        log.info("return: " + response.getBody());
 
         return response.getBody();
     }
 
-    public PausedStateDTO getCurrentPauseState() {
+    public PausedStateDTO getCurrentPausedState() {
         ResponseEntity<PausedStateDTO> response = get(brokerURL + "/admin/paused/state", PausedStateDTO.class);
         return response.getBody();
     }
     
-    public List<PausedStateDTO> getPauseStateHistory(Integer limit) {
+    public List<PausedStateDTO> getPausedStateHistory(Integer limit) {
         String requestURL = brokerURL + "/admin/paused/history";
         if (limit != null) {
             requestURL += "/" + limit;
@@ -870,12 +866,12 @@ public class RestService implements NotifyLogoutService, NotifyLoginService, Eva
         return Arrays.stream(data).toList();
     }
 
-    public void togglePauseState() {
+    public void togglePausedState() {
         ResponseEntity<?> response = post(brokerURL + "/admin/paused/toggle",Void.class,null);
         HttpStatusCode code = response.getStatusCode();
         if(!code.is2xxSuccessful()){
             String msg = "Expected 200 status code, got [%s]".formatted(code.value());
-            logger.error(msg);
+            log.error(msg);
             throw new RuntimeException(msg);
         }
     }

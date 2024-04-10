@@ -19,11 +19,11 @@ import java.util.List;
 @Controller
 @ConditionalOnBean(RestService.class)
 @RequestMapping("/admin/paused")
-public class AdminPauseStateController {
+public class AdminPausedStateController {
 
     private final RestService service;
 
-    public AdminPauseStateController(RestService service) {
+    public AdminPausedStateController(RestService service) {
         this.service = service;
     }
 
@@ -34,7 +34,7 @@ public class AdminPauseStateController {
         Assert.isTrue(hasIsAdminRole, "USER DOES NOT HAVE 'USER' role");
         ModelAndView mav = new ModelAndView();
         mav.setViewName("admin/paused/history");
-        List<PausedStateDTO> pausedStates = service.getPauseStateHistory(10);
+        List<PausedStateDTO> pausedStates = service.getPausedStateHistory(10);
         mav.getModel().put("pausedStates", pausedStates);
         return mav;
     }
@@ -45,7 +45,7 @@ public class AdminPauseStateController {
     public String togglePause(Authentication auth) {
         boolean hasIsAdminRole = auth.getAuthorities().stream().map(GrantedAuthority::getAuthority).anyMatch(name -> name.equals(RoleName.ROLE_IS_ADMIN));
         Assert.isTrue(hasIsAdminRole, "USER DOES NOT HAVE 'IS_ADMIN' role");
-        service.togglePauseState();
+        service.togglePausedState();
         return "redirect:/admin/paused/history";
     }
 }

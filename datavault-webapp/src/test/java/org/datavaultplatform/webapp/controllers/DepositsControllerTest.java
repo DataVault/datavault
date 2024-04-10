@@ -104,7 +104,7 @@ class DepositsControllerTest {
                     any(Serializable.class),
                     any(String.class),
                     any(Object.class))).thenReturn(false, true);
-            Mockito.lenient().when(mRestService.getCurrentPauseState()).thenReturn(PAUSED);
+            Mockito.lenient().when(mRestService.getCurrentPausedState()).thenReturn(PAUSED);
         }
 
         @SneakyThrows
@@ -117,7 +117,7 @@ class DepositsControllerTest {
 
             checkPermissionsForDeposit("user11");
 
-            Mockito.verify(mRestService).getCurrentPauseState();
+            Mockito.verify(mRestService).getCurrentPausedState();
             Mockito.verifyNoMoreInteractions(mEvaluator, mRestService);
         }
 
@@ -131,7 +131,7 @@ class DepositsControllerTest {
 
             checkPermissionsForRetrieve("user3");
 
-            Mockito.verify(mRestService).getCurrentPauseState();
+            Mockito.verify(mRestService).getCurrentPausedState();
             Mockito.verifyNoMoreInteractions(mEvaluator, mRestService);
         }
     }

@@ -66,7 +66,7 @@ class PausedStateControllerTest {
         PausedStateDTO ps3 = new PausedStateDTO(false, LocalDateTime.now(CLOCK).minusDays(2));
         List<PausedStateDTO> list = Arrays.asList(ps3, ps2, ps1);
 
-        when(mService.getPauseStateHistory(10)).thenReturn(list);
+        when(mService.getPausedStateHistory(10)).thenReturn(list);
 
         MvcResult result = mvc.perform(get("/admin/paused/history"))
                 .andDo(print())
@@ -74,7 +74,7 @@ class PausedStateControllerTest {
         assertThat(result.getModelAndView().getViewName()).isEqualTo("admin/paused/history");
         assertThat(result.getModelAndView().getModel().get("pausedStates")).isEqualTo(list);
 
-        verify(mService).getPauseStateHistory(10);
+        verify(mService).getPausedStateHistory(10);
         verifyNoMoreInteractions(mService);
 
         String rawHtml = result.getResponse().getContentAsString();
@@ -99,7 +99,7 @@ class PausedStateControllerTest {
         MvcResult result = mvc.perform(post("/admin/paused/toggle").with(csrf())).andReturn();
         assertThat(result.getModelAndView().getViewName()).isEqualTo("redirect:/admin/paused/history");
 
-        verify(mService).togglePauseState();
+        verify(mService).togglePausedState();
         verifyNoMoreInteractions(mService);
     }
 }
