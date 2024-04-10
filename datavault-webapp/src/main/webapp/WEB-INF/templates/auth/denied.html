@@ -1,9 +1,9 @@
 <!DOCTYPE html><!--auth/denied.html-->
-<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:th="http://www.w3.org/1999/html"
       layout:decorate="~{layout/defaultlayout}">
 
 <head><title>Authentication - Access Denied</title></head>
-<div layout:fragment="content">
+<th:block layout:fragment="content">
     <div class="row">
         <div class="col-sm-3 col-sm-offset-5 col-md-3 col-md-offset-5">
 
@@ -15,5 +15,5 @@
 
         </div>
     </div>
-</div>
+</th:block>
 </html>

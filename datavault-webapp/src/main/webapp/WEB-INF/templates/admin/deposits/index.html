@@ -3,7 +3,7 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/defaultlayout(nav='admin')}">
 <head><title>Admin - Deposits</title></head>
-<div layout:fragment="content" th:with="queryPARAM=${#uris.escapeQueryParam(query)}">
+<th:block layout:fragment="content" th:with="queryPARAM=${#uris.escapeQueryParam(query)}">
     <div class="modal fade" id="confirm-removal" tabindex="-1" role="dialog" aria-labelledby="confirmRemovalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -21,7 +21,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div><!--modal-->
 
     <div class="container">
 
@@ -69,7 +69,7 @@
                                 <span th:if="${order!='desc'}" class="caret"></span>
                             </th:block>
                         </a></th>
-                        <th></th><a th:href="|?sort=creationTime&order=${orderCreationTime}&query=${queryPARAM}|">Date deposited
+                        <th><a th:href="|?sort=creationTime&order=${orderCreationTime}&query=${queryPARAM}|">Date deposited
                             <th:block th:if="${sort == 'creationTime'}">
                                 <span th:if="${order=='desc'}" class="dropup"><span class="caret"></span></span>
                                 <span th:if="${order!='desc'}" class="caret"></span>
@@ -114,23 +114,23 @@
                         <td>[[${deposit.getSizeStr()}]]</td>
                         <td>[[${#dates.format(deposit.getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */--></td>
                         <td>[[${deposit.status}]]</td>
-                        <td><span th:if="${!#strings.isEmpty(deposit?.getUserName())}">[[${deposit.getUserName()}]]</span> ([[${deposit.userID}]])</td>
-                        <td><span th:if="${!#strings.isEmpty(deposit?.getVaultName())}">[[${deposit.getVaultName()}]]</span></td>
-                        <td><span th:if="${!#strings.isEmpty(deposit?.getCrisID())}">[[${deposit.getCrisID()}]]</span></td>
+                        <td><th:block th:if="${!#strings.isEmpty(deposit?.getUserName())}">[[${deposit.getUserName()}]]</th:block> ([[${deposit.userID}]])</td>
+                        <td><th:block th:if="${!#strings.isEmpty(deposit?.getVaultName())}">[[${deposit.getVaultName()}]]</th:block></td>
+                        <td><th:block th:if="${!#strings.isEmpty(deposit?.getCrisID())}">[[${deposit.getCrisID()}]]</th:block></td>
                         <td>[[${deposit.groupName}]]</td>
                         <td><a th:href="@{|/vaults/${deposit.vaultID}/deposits/${deposit.getID()}|}">[[${deposit.getID()}]]</a></td>
                         <td><a th:href="@{|/vaults/${deposit.vaultID}|}">[[${deposit.vaultID}]]</a></td>
-                        <td><span th:if="${!#strings.isEmpty(deposit?.vaultOwnerID)}">[[${deposit.vaultOwnerName}]] ([[${deposit.vaultOwnerID}]])</span></td>
+                        <td><th:block th:if="${!#strings.isEmpty(deposit?.vaultOwnerID)}">[[${deposit.vaultOwnerName}]] ([[${deposit.vaultOwnerID}]])</th:block></td>
                         <td>[[${deposit.vaultReviewDate}]]</td>
                         <td th:with="removeDepositSecurityExpression=|hasPermission('${deposit.getGroupID()}', 'GROUP', 'DELETE_SCHOOL_VAULT_DEPOSITS')|">
-                            <div th:if="${#authorization.expression(removeDepositSecurityExpression)}">
+                            <th:block th:if="${#authorization.expression(removeDepositSecurityExpression)}">
                             <th:block th:if="${deposit.status != 'DELETED'}">
                                 <a class="btn btn-xs btn-danger pull-left" href="#" th:data-vault="${deposit.getVaultID()}" th:data-deposit="${deposit.getID()}" data-toggle="modal" data-target="#confirm-removal">
                                     <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Remove
                                 </a>
                                 <br>
                             </th:block>
-                            </div>
+                            </th:block>
 
                             <th:block th:if="${deposit.status == 'FAILED'}">
                                 <a class="restart-deposit-btn btn btn-default btn-sm"
@@ -148,9 +148,9 @@
         </div>
 
         <div align="center">
-            <p class="text-info">Showing [[${offset}]] - <span th:text="${totalRecords < (offset + recordPerPage) ? totalRecords : (offset + recordPerPage)}" /> deposit of [[${totalRecords}]]</p>
+            <p class="text-info">Showing [[${offset}]] - <th:block th:text="${totalRecords < (offset + recordPerPage) ? totalRecords : (offset + recordPerPage)}" /> deposit of [[${totalRecords}]]</p>
         </div>
-        <th:block align="center">
+        <div align="center">
         <nav aria-label="...">
             <ul class="pagination pagination-lg" id="paginationButton">
                 <th:block th:each="path: ${#numbers.sequence(1,totalPages)}">
@@ -163,9 +163,8 @@
                 </th:block>
             </ul>
         </nav>
+        </div><!--align-center-2-->
         </th:block><!- if -->
-
-    </div><!-- container -->
     <script th:inline="javascript" type="text/javascript">
         //Bind properties to the user removal confirmation dialog
         $('#confirm-removal').on('show.bs.modal', function(e) {
@@ -178,14 +177,14 @@
         $("button#remove").click(function(){
             var depositId = $(this).data('depositId');
             var vaultId = $(this).data('vaultId');
-            var baseURL =       /*[[@{/admin/deposits/}]]*/ 'replaced-by-tl';
-            var baseVaultsURL = /*[[@{/vaults/}]]*/ 'replaced-by-tl';
+            var baseURL =       /*[(|'@{/admin/deposits/}'|)]*/ 'replaced-by-tl';
+            var baseVaultsURL = /*[(|'@{/vaults/}'|)]*/ 'replaced-by-tl';
             $.ajax({
-                url: baseURL + depositId + '?vaultId=' + vaultId,
+                url: baseURL + depositId+'?vaultId='+vaultId,
                 type: 'DELETE',
                 success: function (data) {
                     console.log("----success---");
-                    window.location.href  = baseVaultsURL + vaultId + '/deposits/' + depositId;
+                    window.location.href = baseVaultsURL+vaultId+'/deposits/'+depositId;
 
                 },
                 error: function(xhr, ajaxOptions, thrownError) {
@@ -204,5 +203,6 @@
         });
 				
     </script>
-</div>
+    </div><!--container-->
+</th:block>
 </html>

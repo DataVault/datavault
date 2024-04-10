@@ -7,8 +7,6 @@
         >
         <div id="feewaiver-query-box" class="row collapse">
             <div class="col-md-8">
-                <!-- FOR TESTING: <p>DEBUG VAULT: [[${vault}]]
-                    </p> -->
                 <p>
                     Do you wish to use the fee waiver? That is, this vault and any others 
                     from the same project will have a total combined size of under 100GB.
@@ -172,7 +170,7 @@
                     <input type="text" id="billingGrantEndDate" class="date-picker col-sm-6" placeholder="yyyy-mm-dd"
                            th:field="*{billingGrantEndDate}"
                     /><!--form-date-->
-                    <span id="invalid-billing-grant-end-date-span" style="font-size: 1.2em; font: bold; color:  #AE0F0F; display: inline;"></span>
+                    <span id="invalid-billing-grant-end-date-span" style="font-size: 1.2em; font-weight: bold; color:  #AE0F0F; display: inline;"></span>
                 </div>
                 <div class="form-group" style="padding-bottom: 1.5rem;">
                     <label class="col-sm-4 control-label">

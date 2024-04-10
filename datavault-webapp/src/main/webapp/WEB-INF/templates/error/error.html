@@ -1,11 +1,12 @@
 <!DOCTYPE html><!--error/error.html-->
-<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:th="http://www.w3.org/1999/html"
       layout:decorate="~{layout/defaultlayout(nav='none')}"
 >
 <head>
     <title>Error Page</title>
 </head>
-<div id="error" class="container" layout:fragment="content">
+<th:block layout:fragment="content">
+<div id="error" class="container" >
 
     <div class="alert alert-danger" role="alert">
         <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
@@ -17,4 +18,5 @@
     </div>
 
 </div>
+</th:block>
 </html>

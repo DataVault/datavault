@@ -42,3 +42,4 @@ datavault-worker/pids
 datavault-webapp/pids
 # ignore intellij run files
 .run/
+TEMPLATES/*

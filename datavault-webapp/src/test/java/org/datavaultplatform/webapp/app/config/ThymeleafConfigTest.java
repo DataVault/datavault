@@ -139,7 +139,7 @@ public class ThymeleafConfigTest extends BaseThymeleafTest{
 
         checkTitle(doc, "Hello user101!");
 
-        outputHtml(helloTemplateHtml);
+        outputHtml("test00", doc);
     }
 
 
