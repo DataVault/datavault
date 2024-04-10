@@ -4,13 +4,13 @@
         <div id="autocomplete-error" class="alert alert-danger hidden error" role="alert"></div>
         <h4>Vault Access</h4>
 
-      
         <div class="form-group" required>
             <label class="col-sm-4 control-label">Owner UUN: </label>
             <input id="vaultOwner" type="text"
                    class="autocomplete uun-required unique-uun-required owner-uun-required" 
                    placeholder=""
-                   th:field="*{vaultOwner}" />
+                   th:field="*{vaultOwner}"
+            />
             <span class="uun-required-error-span owner-uun-required-error-span"></span>
         </div>
 
@@ -31,23 +31,27 @@
         <th:block th:each="ndm, ndmStatus: ${vault?.nominatedDataManagers}">
         <th:block th:with="ndmIndex=${ndmStatus.index}">
             <div class="extra-ndm form-group col-sm-offset-4">
-                <input class="autocomplete uun-required unique-uun-required"
-                    type="text"
-                    th:field="*{nominatedDataManagers[__${ndmIndex}__]}"
-                />
-                <!-- Add  remove button for inputs apart from first for which we add an add button. -->
-                <button th:if="${ndmIndex == 0}" type="button" id="add-ndm-btn" class="btn btn-default btn-sm">Add a NDM</button>
-                <button th:if="${ndmIndex != 0}" type="button" class="remove-ndm-btn btn btn-danger btn-xs">Remove</button>
-                <span class="uun-required-error-span"></span>
+              <input th:field="*{nominatedDataManagers[__${ndmIndex}__]}"
+                     class="autocomplete uun-required unique-uun-required"
+                     type="text"
+                     value=""
+              />
+              <!-- Add  remove button for inputs apart from first for which we add an add button. -->
+              <button th:if="${ndmIndex == 0}" type="button" id="add-ndm-btn" class="btn btn-default btn-sm">Add a NDM</button>
+              <button th:if="${ndmIndex != 0}" type="button" class="remove-ndm-btn btn btn-danger btn-xs">Remove</button>
+              <span class="uun-required-error-span"></span>
             </div>
         </th:block>
         </th:block>
         </th:block>
         <th:block th:if="${#lists.isEmpty(vault?.nominatedDataManagers)}">
            <div class="extra-ndm form-group col-sm-offset-4">
-                <input class="autocomplete uun-required unique-uun-required"
-                    type="text"
+                <input
                     name="nominatedDataManagers[0]"
+                    value=""
+                    class="autocomplete uun-required unique-uun-required"
+                    type="text"
+                    placeholder=""
                 />
                <button type="button" id="add-ndm-btn" class="btn btn-default btn-sm">Add a NDM</button>
                <span class="uun-required-error-span"></span>
@@ -56,15 +60,17 @@
            
         <div id="extra-ndm-list"></div>
           
-        <!-- START: NDMs hidden -->
+        <!-- START: NDMs hidden editUsersFieldSet.html -->
         <div id="hidden-empty-ndms" class="collapse col-sm-offset-4" th:with="existing=${#lists.isEmpty(vault?.nominatedDataManagers) ? 0 : #lists.size(vault.nominatedDataManagers)}">
             <th:block th:with="start=${existing == 0 ? 1      : existing}">
             <th:block th:with="end  =${existing == 0 ? (15-1) : existing+(15-1)}">
             <th:block th:each="loopIndex, loopStatus: ${#numbers.sequence(start, end)}">
             <div class="empty-ndm form-group col-sm-offset-4 my-1">
-                <input class="autocomplete uun-required unique-uun-required"
-                    type="text" placeholder=""
-                    th:name="|nominatedDataManagers[${loopIndex}]|"
+                <input th:name="|nominatedDataManagers[${loopIndex}]|"
+                       value=""
+                       class="autocomplete uun-required unique-uun-required"
+                       type="text"
+                       placeholder=""
                 />
                 <button type="button" class="remove-ndm-btn btn btn-danger btn-xs">Remove</button>
                 <span class="uun-required-error-span"></span>
@@ -98,7 +104,7 @@
               <button th:if="${depositorIndex == 0}" type="button" id="add-depositor-btn" class="btn btn-default btn-sm">Add a depositor</button>
               <button th:if="${depositorIndex != 0}" type="button" class="remove-depositor-btn btn btn-danger btn-xs">Remove</button>
               <span class="uun-required-error-span"></span>
-         </div>
+            </div>
         </th:block>
         </th:block>
         </th:block>
@@ -111,7 +117,7 @@
               <button type="button" id="add-depositor-btn" class="btn btn-default btn-sm">Add a depositor</button>
               <span class="uun-required-error-span"></span>
           </div>
-         </th:block>
+        </th:block>
            
         <div id="extra-depositor-list"></div>
           
@@ -121,9 +127,11 @@
             <th:block th:with="end  =${existing == 0 ? (15-1) : existing+(15-1)}">
             <th:block th:each="loopIndex, loopStatus: ${#numbers.sequence(start, end)}">
             <div class="empty-depositor form-group col-sm-offset-4 my-1">
-                <input class="autocomplete uun-required unique-uun-required"
-                    type="text" placeholder=""
-                    th:name="|depositors[${loopIndex}]|"
+                <input th:name="|depositors[${loopIndex}]|"
+                       value=""
+                       class="autocomplete uun-required unique-uun-required"
+                       type="text"
+                       placeholder=""
                 />
                <button type="button" class="remove-depositor-btn btn btn-danger btn-xs">Remove</button>
                <span class="uun-required-error-span"></span>
@@ -188,9 +196,11 @@
             <th:block th:with="end  =${existing == 0 ? (15-1) : existing+(15-1)}">
             <th:block th:each="loopIndex, loopStatus: ${#numbers.sequence(start, end)}">
             <div class="empty-data-creator form-group col-sm-offset-4 my-1">
-                <input class="autocomplete uun-required"
-                    type="text"  placeholder=""
-                    th:name="|dataCreators[${loopIndex}]|"
+                <input th:name="|dataCreators[${loopIndex}]|"
+                       value=""
+                       class="autocomplete uun-required"
+                       type="text"
+                       placeholder=""
                 />
                <button type="button" class="remove-data-creator-btn btn btn-danger btn-xs">Remove</button>
                <span class="uun-required-error-span"></span>
@@ -216,8 +226,6 @@
     <button type="submit" name="save" value="Save" class="save action-button-previous btn btn-success" >
        <span class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span> Save
     </button>
-   
-  
     <script type="application/javascript">
     $(document).ready(function(){
         $(".autocomplete").autocomplete({

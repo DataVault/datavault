@@ -37,7 +37,7 @@
             <input type="text" id="grantEndDate" class="form-control date-picker" placeholder="yyyy-mm-dd"
                 th:field="*{grantEndDate}"
              /><!--form-date-->
-             <span id="invalid-grant-end-date-span" style="font-size: 1.2em; font: bold; color: #f00; display: inline;"></span>
+             <span id="invalid-grant-end-date-span" style="font-size: 1.2em; font-weight: bold; color: #f00; display: inline;"></span>
         </div>
 
         <div class="alert alert-info" role="alert">
@@ -82,8 +82,8 @@
             <input type="text" class="form-control" id="reviewDate" placeholder="yyyy-mm-dd"
                    th:field="*{reviewDate}"
             /><!--form-date-->
-                   <span id="updated-review-date-span" style="font-size: 1.2em; font: bold; color: #006400; display: inline;"></span>
-                   <span id="invalid-review-date-span" style="font-size: 1.2em; font: bold; color: #f00;    display: inline;"></span>
+                   <span id="updated-review-date-span" style="font-size: 1.2em; font-weight: bold; color: #006400; display: inline;"></span>
+                   <span id="invalid-review-date-span" style="font-size: 1.2em; font-weight: bold; color: #f00; display: inline;"></span>
         </div>
 
         <div class="form-group required">
@@ -96,8 +96,9 @@
                     <select id="groupID" name="groupID" data-width="auto" class="form-control group-select selectpicker show-tick">
                         <option selected disabled data-hidden="true">Please choose a School</option>
                         <th:block th:each="group: ${groups}">
-                            <option th:if="${group.enabled}" th:value="${group.getID()}"
-                                    th:selected="${vault?.groupID != null && vault?.groupID == group.getID()}"
+                            <option th:if="${group.enabled}"
+                                    th:value="${group.getID()}"
+                                    th:selected="${vault?.getGroupID() != null && vault?.getGroupID() == group.getID()}"
                             >[[${group.name}]]</option>
                         </th:block>
                     </select>

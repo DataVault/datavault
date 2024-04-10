@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/defaultlayout(nav='home')}">
 <head><title>Vaults - Create</title></head>
-<html layout:fragment="content">
+<th:block layout:fragment="content">
    
     <div class="container">
         <div class="row">
@@ -71,4 +71,5 @@
    <script th:src="@{/resources/application/js/new-create-prototype.js}"></script>
 
 </div>
+</th:block>
 </html>

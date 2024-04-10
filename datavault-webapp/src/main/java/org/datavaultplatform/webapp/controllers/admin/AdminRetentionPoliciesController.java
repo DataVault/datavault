@@ -71,7 +71,7 @@ public class AdminRetentionPoliciesController {
     }
 
     // Return an 'edit retention policy' page
-    @RequestMapping(value = "/admin/retentionpolicies/edit/{retentionpolicyid}", method = RequestMethod.GET)
+    @GetMapping(value = "/admin/retentionpolicies/edit/{retentionpolicyid}")
     public String editRetentionPolicy(ModelMap model, @PathVariable("retentionpolicyid") String retentionPolicyId) throws Exception {
 
         logger.info("Getting RetentionPolicy with id = " +  retentionPolicyId);
@@ -83,11 +83,16 @@ public class AdminRetentionPoliciesController {
     }
 
     // Process the completed 'edit retention policy' page
-    @RequestMapping(value = "/admin/retentionpolicies/edit/{retentionpolicyid}", method = RequestMethod.POST)
+    @PostMapping(value = "/admin/retentionpolicies/edit/{retentionpolicyid}")
     public String editRetentionPolicy(@ModelAttribute CreateRetentionPolicy createRetentionPolicy, ModelMap model, @PathVariable("retentionpolicyid") String retentionPolicyId, @RequestParam String action) throws Exception {
         // Was the cancel button pressed?
         if ("cancel".equals(action)) {
             return "redirect:/";
+        }
+        String formId = String.valueOf(createRetentionPolicy.getId());
+        if (!formId.equals(retentionPolicyId)) {
+            String msg = String.format("retentionPolicyId mismatch URL[%s] form[%s]", retentionPolicyId, formId);
+            throw new IllegalArgumentException(msg);
         }
 
         logger.info("Editing RetentionPolicy with id and name = " + createRetentionPolicy.getId() + " " + createRetentionPolicy.getName());
