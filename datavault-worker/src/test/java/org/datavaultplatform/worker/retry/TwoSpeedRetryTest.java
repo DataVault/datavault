@@ -1,21 +1,21 @@
 package org.datavaultplatform.worker.retry;
 
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import org.datavaultplatform.worker.tasks.RetryTestUtils;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.retry.RetryCallback;
-import org.springframework.retry.support.RetryTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@Slf4j
 public class TwoSpeedRetryTest {
-
-    private final Logger log = LoggerFactory.getLogger(TwoSpeedRetry.class);
 
     private static final ThreadLocal<CountAttemptsBackoffContext> CTX = ThreadLocal.withInitial(CountAttemptsBackoffContext::new);
 
@@ -31,6 +31,16 @@ public class TwoSpeedRetryTest {
         log.info("Task[{}] Simulate Sleeping for [{}]", taskLabel, DurationHelper.formatHoursMinutesSeconds(delayMs));
     }
 
+    @BeforeAll
+    static void setupLogging() {
+        RetryTestUtils.setLoggingLevelTrace(log);
+    }
+
+    @AfterAll
+    static void tearDownLogging() {
+        RetryTestUtils.resetLoggingLevel(log);
+    }
+    
     @BeforeEach
     void setup() {
         CTX.remove();
@@ -40,7 +50,7 @@ public class TwoSpeedRetryTest {
     @ParameterizedTest
     @ValueSource(ints = {1, 2, 3, 4, 5, 6, 7, 8, 10})
     void testSucceedsWhenNthAttemptSucceeds(int attemptWillSucceed) throws Exception {
-        RetryTemplate template = templateHelper.getRetryTemplate("test-task-1",this::simulateSleep);
+        TwoSpeedRetry.DvRetryTemplate template = templateHelper.getRetryTemplate("test-task-1",this::simulateSleep);
         String value = template.execute(willSucceedOnNthAttempt(attemptWillSucceed));
         assertThat(value).isEqualTo("succeededOn" + attemptWillSucceed);
 
@@ -50,10 +60,13 @@ public class TwoSpeedRetryTest {
     @Test
     void testFailsWhen10thAttemptFails() {
         CTX.remove();
-        RetryTemplate template = templateHelper.getRetryTemplate("test-task-2",this::simulateSleep, CTX::get);
-        assertThatThrownBy(() -> {
+        TwoSpeedRetry.DvRetryTemplate template = templateHelper.getRetryTemplate("test-task-2", this::simulateSleep, CTX::get);
+        DvRetryException ex = assertThrows(DvRetryException.class, () -> {
             template.execute(willSucceedOnNthAttempt(11));
-        }).isInstanceOf(Exception.class).hasMessage("ATTEMPT [10] has failed");
+        });
+        assertThat(ex).hasMessage("task[test-task-2]failed after[10] attempts");
+        assertThat(ex).hasCauseInstanceOf(Exception.class);
+        assertThat((Exception) ex.getCause()).hasMessage("ATTEMPT [10] has failed");
         long expectedDelay = (4 * DELAY_MS_1) + (5 * DELAY_MS_2);
         assertThat(CTX.get().getTotalDelay()).isEqualTo(expectedDelay);
     }

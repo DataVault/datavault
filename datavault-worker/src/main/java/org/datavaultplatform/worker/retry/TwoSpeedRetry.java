@@ -24,8 +24,13 @@ public class TwoSpeedRetry {
         this.totalNumberOfAttempts = totalNumberOfAttempts;
         Assert.isTrue(totalNumberOfAttempts > 0, "The totalNumber of attempts must be greater than zero");
         Assert.isTrue(totalNumberOfAttempts % 2 == 0, "The totalNumber of attempts must be even");
+        Assert.isTrue(delay1 >= 0, "delay1 cannot be negative");
+        Assert.isTrue(delay2 >= 0, "delay2 cannot be negative");
         this.delay1 = delay1;
         this.delay2 = delay2;
+        log.info("delay1ms [{}]", delay1);
+        log.info("delay2ms [{}]", delay2);
+        log.info("totalNumberOfAttempts [{}]", totalNumberOfAttempts);
     }
 
     @SneakyThrows
@@ -34,31 +39,56 @@ public class TwoSpeedRetry {
         Thread.sleep(delayMs);
     }
 
-    public RetryTemplate getRetryTemplate(String taskLabel) {
+    public DvRetryTemplate getRetryTemplate(String taskLabel) {
         return getRetryTemplate(taskLabel, this::defaultSleep);
     }
 
-    public RetryTemplate getRetryTemplate(String taskLabel, BiConsumer<String,Long> sleeper) {
+    public DvRetryTemplate getRetryTemplate(String taskLabel, BiConsumer<String,Long> sleeper) {
         return getRetryTemplate( taskLabel, sleeper, CountAttemptsBackoffContext::new);
     }
 
-    public RetryTemplate getRetryTemplate(String taskLabel, BiConsumer<String,Long> sleeper, Supplier<CountAttemptsBackoffContext> ctxSupplier) {
+    public DvRetryTemplate getRetryTemplate(String taskLabel, BiConsumer<String,Long> sleeper, Supplier<CountAttemptsBackoffContext> ctxSupplier) {
         BackOffPolicy bop = new TwoSpeedBackoffPolicy(taskLabel, delay1, delay2, totalNumberOfAttempts / 2, sleeper, ctxSupplier);
         RetryTemplate template = new RetryTemplateBuilder()
                 .customBackoff(bop)
                 .maxAttempts(totalNumberOfAttempts)
-                .withListener(new CustomRetryListener(taskLabel))
+                .withListener(new CustomRetryListener(totalNumberOfAttempts, taskLabel))
                 .build();
         template.setThrowLastExceptionOnExhausted(true);
-        return template;
+        log.info("created RetryTemplate [{}]", taskLabel);
+        return new DvRetryTemplate(taskLabel, totalNumberOfAttempts, template);
+    }
+
+    public static class DvRetryTemplate {
+
+        private final String taskLabel;
+        private final int attempts;
+        private final RetryTemplate template;
+
+        public DvRetryTemplate(String taskLabel, int attempts, RetryTemplate retryTemplate) {
+            this.attempts = attempts;
+            this.taskLabel = taskLabel;
+            this.template = retryTemplate;
+        }
+
+        public final <T> T execute(RetryCallback<T, Exception> retryCallback) throws Exception {
+            try {
+                return template.execute(retryCallback);
+            } catch (Exception ex) {
+                String msg = String.format("task[%s]failed after[%s] attempts", taskLabel, attempts);
+                throw new DvRetryException(msg, ex);
+            }
+        }
     }
 
     private static class CustomRetryListener implements RetryListener {
 
         private final String taskLabel;
+        private final int maxAttempts;
 
-        public CustomRetryListener(String taskLabel) {
+        public CustomRetryListener(int maxAttempts, String taskLabel) {
             this.taskLabel = taskLabel;
+            this.maxAttempts = maxAttempts;
         }
 
         @Override
@@ -77,6 +107,12 @@ public class TwoSpeedRetry {
         }
 
         public <T, E extends Throwable> void onError(RetryContext retryContext, RetryCallback<T, E> retryCallback, Throwable throwable) {
+            Throwable th = retryContext.getLastThrowable();
+            if (log.isTraceEnabled()) {
+                log.trace("Task[{}] attempt[{}/{}] failed", taskLabel, retryContext.getRetryCount(), maxAttempts, th);
+            } else {
+                log.warn("Task[{}] attempt[{}/{}] failed : Throwable[{}]msg[{}]", taskLabel, retryContext.getRetryCount(), maxAttempts, th.getClass().getSimpleName(), th.toString());
+            }
         }
 
     }
