@@ -38,8 +38,6 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.retry.RetryCallback;
-import org.springframework.retry.RetryContext;
-import org.springframework.retry.support.RetryTemplate;
 
 /**
  * A class that extends Task which is used to handle Retrievals from the vault
@@ -480,7 +478,7 @@ public class Retrieve extends Task {
         this.userFsTwoSpeedRetry = getUserFsTwoSpeedRetry(properties);
     }
 
-    private TwoSpeedRetry getUserFsTwoSpeedRetry(Map<String, String> properties) {
+    protected static TwoSpeedRetry getUserFsTwoSpeedRetry(Map<String, String> properties) {
 
         int userFsRetrieveMaxAttempts = DEFAULT_USERFS_RETRIEVE_ATTEMPTS;
         long userFsRetrieveDelayMs1 = TimeUnit.SECONDS.toMillis(DEFAULT_USERFS_DELAY_SECS_1);
@@ -509,7 +507,7 @@ public class Retrieve extends Task {
             Arrays.sort(contents);
             for (File content : contents) {
                 String taskDesc = basePath.relativize(content.toPath()).toString();
-                RetryTemplate template = userFsTwoSpeedRetry.getRetryTemplate(String.format("toUserFs - %s", taskDesc));
+                TwoSpeedRetry.DvRetryTemplate template = userFsTwoSpeedRetry.getRetryTemplate(String.format("toUserFs - %s", taskDesc));
                 template.execute((RetryCallback<Object, Exception>) retryContext -> {
                     if (userFs instanceof SFTPFileSystemDriver) {
                         return ((SFTPFileSystemDriver) userFs).store(retrievePath, content, progress, timeStampDirName);

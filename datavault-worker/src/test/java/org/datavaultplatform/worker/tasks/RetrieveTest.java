@@ -3,6 +3,7 @@ package org.datavaultplatform.worker.tasks;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.event.EventSender;
@@ -14,6 +15,7 @@ import org.datavaultplatform.common.storage.impl.SFTPFileSystemSSHD;
 import org.datavaultplatform.common.task.Context;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.datavaultplatform.common.util.StorageClassUtils;
+import org.datavaultplatform.worker.retry.DvRetryException;
 import org.datavaultplatform.worker.retry.TwoSpeedRetry;
 import org.datavaultplatform.worker.test.TestClockConfig;
 import org.junit.jupiter.api.AfterEach;
@@ -36,10 +38,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-
+@Slf4j
 @ExtendWith(MockitoExtension.class)
 public class RetrieveTest {
 
@@ -97,6 +98,7 @@ public class RetrieveTest {
 
     @BeforeEach
     void setup() {
+        RetryTestUtils.setLoggingLevelInfo(log);
         this.storageModel = new ArchiveStore();
         this.storageModel.setStorageClass("ARCHIVE_STORE_STORAGE_CLASS_NAME");
     }
@@ -600,32 +602,48 @@ public class RetrieveTest {
                         .collect(Collectors.toList());
 
                 assertThat(logMessages).isEqualTo(Arrays.asList(
+                        "delay1ms [10]",
+                        "delay2ms [20]",
+                        "totalNumberOfAttempts [4]",
+                        
+                        "created RetryTemplate [toUserFs - file1.txt]",
                         "Task[toUserFs - file1.txt] Initial attempt",
+                        "Task[toUserFs - file1.txt] attempt[1/4] failed : Throwable[Exception]msg[java.lang.Exception: Failing on [file1.txt] attempt[1]]",
                         "Task[toUserFs - file1.txt] Backoff! attempts so far [1], retry in [010ms]",
                         "Task[toUserFs - file1.txt] Sleeping for [010ms]",
                         // CHANGE TO 2nd Backoff Delay of 20ms
+                        "Task[toUserFs - file1.txt] attempt[2/4] failed : Throwable[Exception]msg[java.lang.Exception: Failing on [file1.txt] attempt[2]]",
                         "Task[toUserFs - file1.txt] Backoff! attempts so far [2], retry in [020ms]",
                         "Task[toUserFs - file1.txt] Sleeping for [020ms]",
+                        "Task[toUserFs - file1.txt] attempt[3/4] failed : Throwable[Exception]msg[java.lang.Exception: Failing on [file1.txt] attempt[3]]",
                         "Task[toUserFs - file1.txt] Backoff! attempts so far [3], retry in [020ms]",
                         "Task[toUserFs - file1.txt] Sleeping for [020ms]",
                         "Task[toUserFs - file1.txt] Succeeded after [4] attempts",
 
+                        "created RetryTemplate [toUserFs - file2.txt]",
                         "Task[toUserFs - file2.txt] Initial attempt",
+                        "Task[toUserFs - file2.txt] attempt[1/4] failed : Throwable[Exception]msg[java.lang.Exception: Failing on [file2.txt] attempt[1]]",
                         "Task[toUserFs - file2.txt] Backoff! attempts so far [1], retry in [010ms]",
                         "Task[toUserFs - file2.txt] Sleeping for [010ms]",
                         // CHANGE TO 2nd Backoff Delay of 20ms
+                        "Task[toUserFs - file2.txt] attempt[2/4] failed : Throwable[Exception]msg[java.lang.Exception: Failing on [file2.txt] attempt[2]]",
                         "Task[toUserFs - file2.txt] Backoff! attempts so far [2], retry in [020ms]",
                         "Task[toUserFs - file2.txt] Sleeping for [020ms]",
+                        "Task[toUserFs - file2.txt] attempt[3/4] failed : Throwable[Exception]msg[java.lang.Exception: Failing on [file2.txt] attempt[3]]",
                         "Task[toUserFs - file2.txt] Backoff! attempts so far [3], retry in [020ms]",
                         "Task[toUserFs - file2.txt] Sleeping for [020ms]",
-
                         "Task[toUserFs - file2.txt] Succeeded after [4] attempts",
+
+                        "created RetryTemplate [toUserFs - file3.txt]",
                         "Task[toUserFs - file3.txt] Initial attempt",
+                        "Task[toUserFs - file3.txt] attempt[1/4] failed : Throwable[Exception]msg[java.lang.Exception: Failing on [file3.txt] attempt[1]]",
                         "Task[toUserFs - file3.txt] Backoff! attempts so far [1], retry in [010ms]",
                         "Task[toUserFs - file3.txt] Sleeping for [010ms]",
                         // CHANGE TO 2nd Backoff Delay of 20ms
+                        "Task[toUserFs - file3.txt] attempt[2/4] failed : Throwable[Exception]msg[java.lang.Exception: Failing on [file3.txt] attempt[2]]",
                         "Task[toUserFs - file3.txt] Backoff! attempts so far [2], retry in [020ms]",
                         "Task[toUserFs - file3.txt] Sleeping for [020ms]",
+                        "Task[toUserFs - file3.txt] attempt[3/4] failed : Throwable[Exception]msg[java.lang.Exception: Failing on [file3.txt] attempt[3]]",
                         "Task[toUserFs - file3.txt] Backoff! attempts so far [3], retry in [020ms]",
                         "Task[toUserFs - file3.txt] Sleeping for [020ms]",
                         "Task[toUserFs - file3.txt] Succeeded after [4] attempts"
@@ -636,9 +654,12 @@ public class RetrieveTest {
         @SuppressWarnings("CodeBlock2Expr")
         @Test
         void testFailsAfter4FailedAttempts() {
-            assertThatThrownBy(() -> {
+            DvRetryException ex = assertThrows(DvRetryException.class, () -> {
                 checkCopyFilesToUserFs(5);
-            }).isInstanceOf(Exception.class).hasMessage("Failing on [file1.txt] attempt[4]");
+            });
+            assertThat(ex).hasMessage("task[toUserFs - file1.txt]failed after[4] attempts");
+            assertThat(ex.getCause()).isInstanceOf(Exception.class);
+            assertThat(ex.getCause()).hasMessage("Failing on [file1.txt] attempt[4]");
         }
 
         void checkCopyFilesToUserFs(int attemptThatCopyWorksOn) throws Exception {
