@@ -1,12 +1,13 @@
 package org.datavaultplatform.common.storage.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
+import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.storage.ArchiveStore;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.storage.Verify;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.InputStream;
@@ -18,71 +19,61 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.*;
+import java.util.function.Function;
 
+@Slf4j
 public class TivoliStorageManager extends Device implements ArchiveStore {
 
-    private static final Logger logger = LoggerFactory.getLogger(TivoliStorageManager.class);
+	public static final String DEFAULT_TEMP_PATH_PREFIX = "/tmp/datavault/temp";
+	public static final int DEFAULT_RETRY_TIME = 30;
+	public static final int DEFAULT_MAX_RETRIES = 48; // 24 hours if retry time is 30 minutes
+	private static final Verify.Method verificationMethod = Verify.Method.COPY_BACK;
+	
     // default locations of TSM option files
-    public static String TSM_SERVER_NODE1_OPT = "/opt/tivoli/tsm/client/ba/bin/dsm1.opt";
-    public static String TSM_SERVER_NODE2_OPT = "/opt/tivoli/tsm/client/ba/bin/dsm2.opt";
-    public static String TEMP_PATH_PREFIX = "/tmp/datavault/temp/";
-
-	public static boolean REVERSE = false;
-
-    public final Verify.Method verificationMethod = Verify.Method.COPY_BACK;
-    private static final int defaultRetryTime = 30;
-		private static final int defaultMaxRetries = 48; // 24 hours if retry time is 30 minutes
-    private static int retryTime = TivoliStorageManager.defaultRetryTime;
-    private static int maxRetries = TivoliStorageManager.defaultMaxRetries;
+    public static String DEFAULT_TSM_SERVER_NODE1_OPT = "/opt/tivoli/tsm/client/ba/bin/dsm1.opt";
+    public static String DEFAULT_TSM_SERVER_NODE2_OPT = "/opt/tivoli/tsm/client/ba/bin/dsm2.opt";
+	
+    private final int retryTimeMins;
+    private final int maxRetries;
+	private final boolean reverse;
+	private final String tempPathPrefix;
+	private final String tsmServerNodeOpt1;
+	private final String tsmServerNodeOpt2;
 
     public TivoliStorageManager(String name, Map<String,String> config) {
-        super(name, config);
-        String optionsKey = "optionsDir";
-    	String tempKey = "tempDir";
-    	String retryKey = "tsmRetryTime";
-    	String maxKey = "tsmMaxRetries";
-		String reverseKey = "tsmReverse";
-
-        // if we have non default options in datavault.properties use them
-        if (config.containsKey(optionsKey)) {
-        	String optionsDir = config.get(optionsKey);
-        	TivoliStorageManager.TSM_SERVER_NODE1_OPT = optionsDir + "/dsm1.opt";
-        	TivoliStorageManager.TSM_SERVER_NODE2_OPT = optionsDir + "/dsm2.opt";
-        }
-        if (config.containsKey(tempKey)) {
-        	TivoliStorageManager.TEMP_PATH_PREFIX = config.get(tempKey);
-        }
-        if (config.containsKey(retryKey)){
-        	try {
-				TivoliStorageManager.retryTime = Integer.parseInt(config.get(retryKey));
-			} catch (NumberFormatException nfe) {
-				TivoliStorageManager.retryTime = TivoliStorageManager.defaultRetryTime;
-			}
-		}
-        if (config.containsKey(maxKey)) {
-			try {
-				TivoliStorageManager.maxRetries = Integer.parseInt(config.get(maxKey));
-			} catch (NumberFormatException nfe) {
-				TivoliStorageManager.maxRetries = TivoliStorageManager.defaultMaxRetries;
-			}
-		}
-		if (config.containsKey(reverseKey)){
-			TivoliStorageManager.REVERSE = Boolean.parseBoolean(config.get(reverseKey));
-		}
-        locations = new ArrayList<>();
-		if (! TivoliStorageManager.REVERSE) {
-			locations.add(TivoliStorageManager.TSM_SERVER_NODE1_OPT);
-			locations.add(TivoliStorageManager.TSM_SERVER_NODE2_OPT);
+		super(name, config);
+		this.retryTimeMins = lookup(PropNames.TSM_RETRY_TIME, Integer::parseInt, DEFAULT_RETRY_TIME);
+		this.maxRetries = lookup(PropNames.TSM_MAX_RETRIES, Integer::parseInt, DEFAULT_MAX_RETRIES);
+		this.reverse = lookup(PropNames.TSM_REVERSE, Boolean::parseBoolean, false);
+		this.tempPathPrefix = lookup(PropNames.TEMP_DIR, Function.identity(), DEFAULT_TEMP_PATH_PREFIX);
+		this.tsmServerNodeOpt1 = lookup(PropNames.OPTIONS_DIR, optionsDir -> optionsDir + "/dsm1.opt", DEFAULT_TSM_SERVER_NODE1_OPT);
+		this.tsmServerNodeOpt2 = lookup(PropNames.OPTIONS_DIR, optionsDir -> optionsDir + "/dsm2.opt", DEFAULT_TSM_SERVER_NODE2_OPT);
+		this.locations = new ArrayList<>();
+		if (reverse) {
+			locations.add(this.tsmServerNodeOpt2);
+			locations.add(this.tsmServerNodeOpt1);
 		} else {
-			locations.add(TivoliStorageManager.TSM_SERVER_NODE2_OPT);
-			locations.add(TivoliStorageManager.TSM_SERVER_NODE1_OPT);
+			locations.add(this.tsmServerNodeOpt1);
+			locations.add(this.tsmServerNodeOpt2);
 		}
-        super.multipleCopies = true;
-        super.depositIdStorageKey = true;
-        for (String key : config.keySet()) {
-        		logger.info("Config value for " + key + " is " + config.get(key));
-        }
+		super.multipleCopies = true;
+		super.depositIdStorageKey = true;
+		for (String key : config.keySet()) {
+			log.info("Config value for " + key + " is " + config.get(key));
+		}
     }
+
+	private <T> T lookup(String key, Function<String, T> parser, T defaultValue) {
+		T result = defaultValue;
+		if (config.containsKey(key)) {
+			try {
+				result = parser.apply(config.get(key));
+			} catch (RuntimeException ex) {
+				result = defaultValue;
+			}
+		}
+		return result;
+	}
     
     @Override
     public long getUsableSpace() throws Exception {
@@ -96,9 +87,9 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
         p.waitFor();
 
         if (p.exitValue() != 0) {
-            logger.info("Filespace output failed.");
-            logger.info(p.getErrorStream().toString());
-            logger.info(p.getOutputStream().toString());
+            log.info("Filespace output failed.");
+            log.info(p.getErrorStream().toString());
+            log.info(p.getOutputStream().toString());
             throw new Exception("Filespace output failed.");
         }
         
@@ -118,37 +109,38 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
     @Override
     public void retrieve(String depositId, File working, Progress progress, String optFilePath) throws Exception {
     	
-    	String fileDir = TivoliStorageManager.TEMP_PATH_PREFIX + "/" + depositId;
+    	String fileDir = tempPathPrefix + "/" + depositId;
     	String filePath = fileDir + "/" + working.getName();
     	if (! Files.exists(Paths.get(fileDir))) {
     		Files.createDirectory(Paths.get(fileDir));
     	}
-    	logger.info("Retrieve command is " + "dsmc " + " retrieve " + filePath + " -description=" + depositId + " -optfile=" + optFilePath + "-replace=true");
-    	for (int r = 0; r < TivoliStorageManager.maxRetries; r++) {
+    	log.info("Retrieve command is " + "dsmc " + " retrieve " + filePath + " -description=" + depositId + " -optfile=" + optFilePath + "-replace=true");
+		boolean retrieved = false;
+    	for (int r = 0; r < maxRetries && !retrieved; r++) {
 	        ProcessBuilder pb = new ProcessBuilder("dsmc", "retrieve", filePath, "-description=" + depositId, "-optfile=" + optFilePath, "-replace=true");
 	        Process p = pb.start();
 	        // This class is already running in its own thread so it can happily pause until finished.
 	        p.waitFor();
 	
 	        if (p.exitValue() != 0) {
-	            logger.info("Retrieval of " + working.getName() + " failed using " + optFilePath + ". ");
+	            log.info("Retrieval of " + working.getName() + " failed using " + optFilePath + ". ");
 	            InputStream error = p.getErrorStream();
 	            for (int i = 0; i < error.available(); i++) {
-	            		logger.info("" + error.read());
+	            		log.info("" + error.read());
 	            }
-	            if (r == (TivoliStorageManager.maxRetries - 1)) {
+	            if (r == (maxRetries - 1)) {
 					throw new Exception("Retrieval of " + working.getName() + " failed. ");
 				}
-	            logger.info("Retrieval of " + working.getName() + " failed. Retrying in " + TivoliStorageManager.retryTime + " mins");
-	            TimeUnit.MINUTES.sleep(TivoliStorageManager.retryTime);
+	            log.info("Retrieval of " + working.getName() + " failed. Retrying in " + retryTimeMins + " mins");
+	            TimeUnit.MINUTES.sleep(retryTimeMins);
 	            
 	        } else {
+				retrieved = true;
 		        // FILL IN THE REST OF PROGRESS x dirs, x files, x bytes etc.
 		        if (Files.exists(Paths.get(filePath))) {
 		        	Files.move(Paths.get(filePath), Paths.get(working.getAbsolutePath()), StandardCopyOption.REPLACE_EXISTING);
 		        }
 		        Files.delete(Paths.get(fileDir));
-		        break;
 	        }
     	}
     }
@@ -161,55 +153,41 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 
         // Note: generate a uuid to be passed as the description. We should probably use the deposit UUID instead (do we need a specialised archive method)?
         // Just a thought - Does the filename contain the deposit uuid? Could we use that as the description?
-        //String randomUUIDString = UUID.randomUUID().toString();
-    	String pathPrefix = TivoliStorageManager.TEMP_PATH_PREFIX;
+    	String pathPrefix = tempPathPrefix;
     	Path sourcePath = Paths.get(working.getAbsolutePath());
     	Path destinationDir = Paths.get(pathPrefix + "/" + depositId);
     	Path destinationFile = Paths.get(pathPrefix + "/" + depositId + "/" + working.getName());
     	if (Files.exists(sourcePath)) {
-    		logger.info("Moving from temp to deposit id");
+    		log.info("Moving from temp to deposit id");
     		if (! Files.exists(destinationDir)) {
 				Files.createDirectory(destinationDir);
 			}
-    		//Files.move(sourcePath, destinationFile, StandardCopyOption.REPLACE_EXISTING);
 			Files.copy(sourcePath, destinationFile, StandardCopyOption.REPLACE_EXISTING);
     	}
     	File tsmFile = new File(pathPrefix + "/" + depositId + "/" + working.getName());
     	// thread for each node
 		ExecutorService executor = Executors.newFixedThreadPool(2);
-		TivoliStorageManager.TSMTracker loc1 = new TivoliStorageManager.TSMTracker();
-		loc1.setLocation(TivoliStorageManager.TSM_SERVER_NODE1_OPT);
-		loc1.setWorking(tsmFile);
-		loc1.setProgress(progress);
-		loc1.setDescription(depositId);
-		TivoliStorageManager.TSMTracker loc2 = new TivoliStorageManager.TSMTracker();
-		loc2.setLocation(TivoliStorageManager.TSM_SERVER_NODE2_OPT);
-		loc2.setWorking(tsmFile);
-		loc2.setProgress(progress);
-		loc2.setDescription(depositId);
+		TSMTracker loc1 = new TSMTracker(tsmServerNodeOpt1, tsmFile, progress, depositId, maxRetries, retryTimeMins);
+		TSMTracker loc2 = new TSMTracker(tsmServerNodeOpt2, tsmFile, progress, depositId, maxRetries, retryTimeMins);
 
-		Future<Object> loc1Future = executor.submit(loc1);
-		Future<Object> loc2Future = executor.submit(loc2);
+		Future<String> loc1Future = executor.submit(loc1);
+		Future<String> loc2Future = executor.submit(loc2);
 		executor.shutdown();
 		try {
-			loc1Future.get();
-			loc2Future.get();
-			logger.info("loc1 result " + loc1.result);
-			logger.info("loc2 result " + loc2.result);
+			String result1 = loc1Future.get();
+			String result2 = loc2Future.get();
+			log.info("loc1 result " + result1);
+			log.info("loc2 result " + result2);
 		} catch (ExecutionException ee) {
 			Throwable cause = ee.getCause();
 			if (cause instanceof Exception) {
-				logger.info("TSM upload failed. " + cause.getMessage());
+				log.info("TSM upload failed. " + cause.getMessage());
 				throw (Exception) cause;
 			}
 		}
 
-
-        //this.storeInTSMNode(tsmFile, progress, TivoliStorageManager.TSM_SERVER_NODE1_OPT, depositId);
-        //this.storeInTSMNode(tsmFile, progress, TivoliStorageManager.TSM_SERVER_NODE2_OPT, depositId);
-        
         if (Files.exists(destinationFile)) {
-        	logger.info("Moving from deposit id to temp");
+        	log.info("Moving from deposit id to temp");
         	//Files.move(destinationFile, sourcePath, StandardCopyOption.REPLACE_EXISTING);
         	Files.delete(destinationFile);
         	Files.delete(destinationDir);
@@ -222,48 +200,6 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 		throw new UnsupportedOperationException();
 	}
 
-//    private String storeInTSMNode(File working, Progress progress, String optFilePath, String description) throws Exception {
-//
-//        // check we have enough space to store the data (is the file bagged and tarred atm or is the actual space going to be different?)
-//        // actually the Deposit  / Retreive worker classes check the free space it appears if we get here we don't need to check
-//
-//        // The working file appears to be bagged and tarred when we get here
-//		// in the local version of this class the FileCopy class adds info to the progress object
-//		// I don't think we need to use the patch at all in this version
-//    	//File path = working.getAbsoluteFile().getParentFile();
-//        logger.info("Store command is " + "dsmc" + " archive " + working.getAbsolutePath() +  " -description=" + description + " -optfile=" + optFilePath);
-//        ProcessBuilder pb = new ProcessBuilder("dsmc", "archive", working.getAbsolutePath(), "-description=" + description, "-optfile=" + optFilePath);
-//        //pb.directory(path);
-//		for (int r = 0; r < TivoliStorageManager.maxRetries; r++) {
-//	        Process p = pb.start();
-//
-//	        // This class is already running in its own thread so it can happily pause until finished.
-//	        p.waitFor();
-//
-//	        if (p.exitValue() != 0) {
-//	            logger.info("Deposit of " + working.getName() + " using " + optFilePath + " failed. ");
-//	            InputStream error = p.getErrorStream();
-//	            if (error != null) {
-//	            	logger.info(IOUtils.toString(error, StandardCharsets.UTF_8));
-//	            }
-//	            InputStream output = p.getInputStream();
-//	            if (output != null) {
-//	            	logger.info(IOUtils.toString(output, StandardCharsets.UTF_8));
-//	            }
-//	            if (r == (TivoliStorageManager.maxRetries -1)) {
-//					throw new Exception("Deposit of " + working.getName() + " using " + optFilePath + " failed. ");
-//				}
-//	            logger.info("Deposit of " + working.getName() + " using " + optFilePath + " failed.  Retrying in " + TivoliStorageManager.retryTime + " mins");
-//	            TimeUnit.MINUTES.sleep(TivoliStorageManager.retryTime);
-//	        } else {
-//	        	break;
-//	        }
-//        }
-//        return description;
-//    }
-    
-
-
     @Override
     public Verify.Method getVerifyMethod() {
         return verificationMethod;
@@ -271,156 +207,26 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
     
     @Override
     public void delete(String depositId, File working, Progress progress, String optFilePath) throws Exception {
-    	String fileDir = TivoliStorageManager.TEMP_PATH_PREFIX + "/" + depositId;
+    	String fileDir = tempPathPrefix + "/" + depositId;
     	String filePath = fileDir + "/" + working.getName();
 		//for (int r = 0; r < TivoliStorageManager.maxRetries; r++) {
-		logger.info("Delete command is " + "dsmc delete archive " + filePath +  " -noprompt -optfile=" + optFilePath);
+		log.info("Delete command is " + "dsmc delete archive " + filePath +  " -noprompt -optfile=" + optFilePath);
 		ProcessBuilder pb = new ProcessBuilder("dsmc", "delete", "archive", filePath, "-noprompt" , "-optfile=" + optFilePath);
 		Process p = pb.start();
 		p.waitFor();
 	
 		if (p.exitValue() != 0) {
-			logger.info("Delete of " + depositId + " failed.");
+			log.info("Delete of " + depositId + " failed.");
 			InputStream error = p.getErrorStream();
 			for (int i = 0; i < error.available(); i++) {
-				logger.info("" + error.read());
-			}
-			//if (r == (TivoliStorageManager.maxRetries -1)) {
-				//throw new Exception("Delete of " + depositId + " using " + optFilePath + " failed. ");
-				//	logger.info("Delete of " + depositId + " failed after max retries.  Attempt to remove manually");
-			//}
-			//logger.info("Delete of " + depositId + " failed. Retrying in " + TivoliStorageManager.retryTime + " mins");
-			//TimeUnit.MINUTES.sleep(TivoliStorageManager.retryTime);
-	            
+				log.info("" + error.read());
+			}				
 		} else {
-			logger.info("Delete of " + depositId + " is Successful.");
+			log.info("Delete of " + depositId + " is Successful.");
 			//break;
 		}
-    	//}
     }
-
-//	protected static class TSMTracker implements Runnable {
-//
-//		private String location;
-//
-//		@Override
-//		public void run() {
-//			// do stuff
-//			//String test = null;
-//			logger.debug("Starting: " + this.getLocation());
-//			//logger.debug("Force error: " + test.length());
-//			//throw new Exception("Bad TSM stuff");
-//		}
-//
-//
-//		public String getLocation() {
-//			return this.location;
-//		}
-//
-//		public void setLocation(String location) {
-//			this.location = location;
-//		}
-//	}
-
-	protected static class TSMTracker implements Callable<Object> {
-
-    	private String location;
-    	private File working;
-    	private Progress progress;
-    	private String description;
-    	public String result;
-
-
-		@Override
-		public Object call() throws Exception {
-			// do stuff
-			//String test = null;
-			//logger.debug("Starting: " + this.getLocation());
-			//logger.debug("Force error: " + test.length());
-			//logger.debug("About to throw Exception");
-			//throw new Exception("Bad TSM stuff");
-			//result = this.getLocation() + " completed";
-
-			// @TODO check params all set
-
-			this.storeInTSMNode(this.getWorking(), this.getProgress(), this.getLocation(), this.getDescription());
-			return result;
-		}
-
-		public String getLocation() {
-			return this.location;
-		}
-
-		public void setLocation(String location) {
-			this.location = location;
-		}
-
-		private String storeInTSMNode(File working, Progress progress, String location, String description) throws Exception {
-
-			// check we have enough space to store the data (is the file bagged and tarred atm or is the actual space going to be different?)
-			// actually the Deposit  / Retreive worker classes check the free space it appears if we get here we don't need to check
-
-			// The working file appears to be bagged and tarred when we get here
-			// in the local version of this class the FileCopy class adds info to the progress object
-			// I don't think we need to use the patch at all in this version
-			//File path = working.getAbsoluteFile().getParentFile();
-			logger.info("Store command is " + "dsmc" + " archive " + working.getAbsolutePath() +  " -description=" + description + " -optfile=" + location);
-			ProcessBuilder pb = new ProcessBuilder("dsmc", "archive", working.getAbsolutePath(), "-description=" + description, "-optfile=" + location);
-			//pb.directory(path);
-			for (int r = 0; r < TivoliStorageManager.maxRetries; r++) {
-				Process p = pb.start();
-
-				// This class is already running in its own thread so it can happily pause until finished.
-				p.waitFor();
-
-				if (p.exitValue() != 0) {
-					logger.info("Deposit of " + working.getName() + " using " + location + " failed. ");
-					InputStream error = p.getErrorStream();
-					if (error != null) {
-						logger.info(IOUtils.toString(error, StandardCharsets.UTF_8));
-					}
-					InputStream output = p.getInputStream();
-					if (output != null) {
-						logger.info(IOUtils.toString(output, StandardCharsets.UTF_8));
-					}
-					if (r == (TivoliStorageManager.maxRetries -1)) {
-						throw new Exception("Deposit of " + working.getName() + " using " + location + " failed. ");
-					}
-					logger.info("Deposit of " + working.getName() + " using " + location + " failed.  Retrying in " + TivoliStorageManager.retryTime + " mins");
-					TimeUnit.MINUTES.sleep(TivoliStorageManager.retryTime);
-				} else {
-					break;
-				}
-			}
-			result = description;
-			return this.result;
-		}
-
-		public File getWorking() {
-			return this.working;
-		}
-
-		public void setWorking(File working) {
-			this.working = working;
-		}
-
-		public Progress getProgress() {
-			return this.progress;
-		}
-
-		public void setProgress(Progress progress) {
-			this.progress = progress;
-		}
-
-		public String getDescription() {
-			return this.description;
-		}
-
-		public void setDescription(String description) {
-			this.description = description;
-		}
-	}
-
+	
 	/*
 	 * The TSM Tape Driver 'dsmc' executable should be on the Java PATH
 	 */
@@ -428,8 +234,8 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 		try {
 			ProcessBuilder pb = new ProcessBuilder("which", "dsmc");
 
-			logger.info("user.dir [{}]", System.getProperty("user.dir"));
-			logger.info("PB 'path' [{}]", pb.environment().get("PATH"));
+			log.info("user.dir [{}]", System.getProperty("user.dir"));
+			log.info("PB 'path' [{}]", pb.environment().get("PATH"));
 
 			Process process = pb.start();
 
@@ -439,21 +245,21 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 			if (status == 0) {
 				// canonicalPath resolves relative paths against user.dir and removes . and ..
 				Path canonicalPath = Paths.get(new File(pOutput).getCanonicalPath());
-				logger.info("'dsmc' - is found on PATH by 'which' at [{}]", canonicalPath);
+				log.info("'dsmc' - is found on PATH by 'which' at [{}]", canonicalPath);
 				return true;
 			} else {
-				logger.info("'dsmc' - is NOT found on PATH by 'which' {}", pError);
+				log.info("'dsmc' - is NOT found on PATH by 'which' {}", pError);
 				return false;
 			}
 		} catch (Exception ex) {
-			logger.error("problem trying to detect 'dsmc'", ex);
+			log.error("problem trying to detect 'dsmc'", ex);
 			return false;
 		}
 	}
 
 	@Override
 	public Logger getLogger() {
-		return logger;
+		return log;
 	}
 }
 
