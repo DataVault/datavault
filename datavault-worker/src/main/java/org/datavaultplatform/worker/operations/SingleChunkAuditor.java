@@ -74,7 +74,11 @@ public class SingleChunkAuditor implements Callable<Boolean> {
 
         this.totalNumberOfChunks = totalNumberOfChunks;
         this.chunkArchiveId = baseChunkArchiveId + FileSplitter.CHUNK_SEPARATOR + chunkNum;
-        this.chunkPath = context.getTempDir().resolve(chunkArchiveId);
+        if (singleCopy) {
+            this.chunkPath = context.getTempDir().resolve(chunkArchiveId);
+        } else {
+            this.chunkPath = context.getTempDir().resolve(location).resolve(chunkArchiveId);
+        }
     }
 
     @Override
@@ -86,10 +90,10 @@ public class SingleChunkAuditor implements Callable<Boolean> {
             File chunkFile = chunkPath.toFile();
 
             if (singleCopy) {
-                log.info("Retrieving singleCopy: " + chunkFile.getAbsolutePath());
+                log.info("Retrieving singleCopy: {}", chunkFile.getAbsolutePath());
                 archiveFS.retrieve(chunkArchiveId, chunkFile, null);
             } else {
-                log.info("Retrieving: " + chunkFile.getAbsolutePath());
+                log.info("Retrieving: {} from location[{}]", chunkFile.getAbsolutePath(), location);
                 archiveFS.retrieve(chunkArchiveId, chunkFile, null, location);
             }
 
@@ -100,7 +104,7 @@ public class SingleChunkAuditor implements Callable<Boolean> {
                 // Check encrypted file checksum
                 String encChunkFileHash = Verify.getDigest(chunkFile);
 
-                log.info("Encrypted Checksum: " + encChunkFileHash);
+                log.info("Encrypted Checksum: {}", encChunkFileHash);
 
                 if (!encChunkFileHash.equals(encryptedChunkDigest)) {
                     sendAuditError("Encrypted checksum failed: " + encChunkFileHash + " != " + encryptedChunkDigest);
@@ -114,7 +118,7 @@ public class SingleChunkAuditor implements Callable<Boolean> {
             // We might also want to move algorithm check before this loop
             String chunkFileHash = Verify.getDigest(chunkFile);
 
-            log.info("Checksum: " + chunkFileHash);
+            log.info("Checksum: {}", chunkFileHash);
 
             if (!chunkFileHash.equals(this.decryptedChunkDigest)) {
                 sendAuditError("Decrypted checksum failed: " + chunkFileHash + " != " + decryptedChunkDigest);

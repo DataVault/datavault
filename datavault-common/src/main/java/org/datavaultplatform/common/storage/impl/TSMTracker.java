@@ -1,17 +1,17 @@
 package org.datavaultplatform.common.storage.impl;
 
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
 import org.datavaultplatform.common.io.Progress;
+import org.datavaultplatform.common.util.ProcessHelper;
 
 import java.io.File;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
+@Getter
 public class TSMTracker implements Callable<String> {
 
     private final String location;
@@ -30,58 +30,35 @@ public class TSMTracker implements Callable<String> {
         this.retryTimeMins = retryTimeMins;
     }
 
-
     @Override
     public String call() throws Exception {
-        // @TODO check params all set
-
-        return this.storeInTSMNode(working, progress, location, description);
+        try {
+            return this.storeInTSMNode();
+        } catch (Exception ex) {
+            String msg = String.format("Storing [%s] in TSM location[%s] failed.", description, location);
+            throw new Exception(msg, ex);
+        }
     }
-
-
-    private String storeInTSMNode(File working, Progress progress, String location, String description) throws Exception {
-
-        log.info("Store command is " + "dsmc" + " archive " + working.getAbsolutePath() +  " -description=" + description + " -optfile=" + location);
-        ProcessBuilder pb = new ProcessBuilder("dsmc", "archive", working.getAbsolutePath(), "-description=" + description, "-optfile=" + location);
-        //pb.directory(path);
-        for (int r = 0; r < maxRetries; r++) {
-            Process p = pb.start();
-
-            // This class is already running in its own thread so it can happily pause until finished.
-            p.waitFor();
-
-            if (p.exitValue() != 0) {
-                log.info("Deposit of " + working.getName() + " using " + location + " failed. ");
-                InputStream error = p.getErrorStream();
-                if (error != null) {
-                    log.info(IOUtils.toString(error, StandardCharsets.UTF_8));
-                }
-                InputStream output = p.getInputStream();
-                if (output != null) {
-                    log.info(IOUtils.toString(output, StandardCharsets.UTF_8));
-                }
-                if (r == (maxRetries -1)) {
-                    throw new Exception("Deposit of " + working.getName() + " using " + location + " failed. ");
-                }
-                log.info("Deposit of " + working.getName() + " using " + location + " failed.  Retrying in " + retryTimeMins + " mins");
-                TimeUnit.MINUTES.sleep(retryTimeMins);
+    
+    private String storeInTSMNode() throws Exception {
+        ProcessHelper helper = new ProcessHelper("tsmStore",
+                "dsmc", "archive", working.getAbsolutePath(), "-description=" + description, "-optfile=" + location);
+        boolean stored = false;
+        for (int r = 0; r < maxRetries && !stored; r++) {
+            ProcessHelper.ProcessInfo info = helper.execute();
+            if (info.wasSuccess()) {
+                stored = true;
             } else {
-                break;
+                String errMsg = String.format("Deposit of [%s] failed using location[%s]", working.getName(), location);
+                TivoliStorageManager.logProcessOutput(info, errMsg);
+                boolean lastAttempt = r == (maxRetries - 1);
+                if (lastAttempt) {
+                    throw new Exception(errMsg);
+                }
+                log.info("{}  Retrying in [{}] mins", errMsg, retryTimeMins);
+                TimeUnit.MINUTES.sleep(retryTimeMins);
             }
         }
         return description;
     }
-
-    public File getWorking() {
-        return this.working;
-    }
-
-    public Progress getProgress() {
-        return this.progress;
-    }
-
-    public String getDescription() {
-        return this.description;
-    }
-
 }

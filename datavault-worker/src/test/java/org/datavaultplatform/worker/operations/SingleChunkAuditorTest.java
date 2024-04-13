@@ -80,7 +80,7 @@ class SingleChunkAuditorTest {
     ArgumentCaptor<Event> argEvent;
 
 
-    HashMap<String, String> properties = new HashMap() {{
+    final HashMap<String, String> properties = new HashMap<String, String>() {{
         this.put(SingleChunkAuditor.PROP_ID, TEST_CHUNK_ID);
         this.put(SingleChunkAuditor.PROP_CHUNK_NUM, "123");
     }};
@@ -167,7 +167,7 @@ class SingleChunkAuditorTest {
 
                 InOrder inOrderEventSender = Mockito.inOrder(mEventSender);
 
-                File expectedChunkFile = Paths.get("/tmp/dir/base-chunk-archive-id.123").toFile();
+                File expectedChunkFile = Paths.get("/tmp/dir/test-location/base-chunk-archive-id.123").toFile();
                 File actualChunkFile1 = argChunkFile.getAllValues().get(0);
                 File actualChunkFile2 = argChunkFile.getAllValues().get(1);
                 assertThat(actualChunkFile1).isEqualTo(expectedChunkFile);
@@ -206,7 +206,7 @@ class SingleChunkAuditorTest {
                 String actualLocation = argLocation.getValue();
 
                 assertThat(actualPath).isEqualTo(TEST_CHUNK_ARCHIVE_ID);
-                assertThat(actualWorking).isEqualTo(Paths.get("/tmp/dir/base-chunk-archive-id.123").toFile());
+                assertThat(actualWorking).isEqualTo(Paths.get("/tmp/dir/test-location/base-chunk-archive-id.123").toFile());
                 assertThat(actualProgress).isNull();
                 assertThat(actualLocation).isEqualTo(TEST_LOCATION);
 
@@ -227,7 +227,7 @@ class SingleChunkAuditorTest {
 
                 InOrder inOrderEventSender = Mockito.inOrder(mEventSender);
 
-                File expectedChunkFile = Paths.get("/tmp/dir/base-chunk-archive-id.123").toFile();
+                File expectedChunkFile = Paths.get("/tmp/dir/test-location/base-chunk-archive-id.123").toFile();
                 File actualChunkFile1 = argChunkFile.getAllValues().get(0);
                 assertThat(actualChunkFile1).isEqualTo(expectedChunkFile);
 
@@ -263,7 +263,7 @@ class SingleChunkAuditorTest {
                 String actualLocation = argLocation.getValue();
 
                 assertThat(actualPath).isEqualTo(TEST_CHUNK_ARCHIVE_ID);
-                assertThat(actualWorking).isEqualTo(Paths.get("/tmp/dir/base-chunk-archive-id.123").toFile());
+                assertThat(actualWorking).isEqualTo(Paths.get("/tmp/dir/test-location/base-chunk-archive-id.123").toFile());
                 assertThat(actualProgress).isNull();
                 assertThat(actualLocation).isEqualTo(TEST_LOCATION);
 
@@ -292,7 +292,7 @@ class SingleChunkAuditorTest {
 
                 InOrder inOrderEventSender = Mockito.inOrder(mEventSender);
 
-                File expectedChunkFile = Paths.get("/tmp/dir/base-chunk-archive-id.123").toFile();
+                File expectedChunkFile = Paths.get("/tmp/dir/test-location/base-chunk-archive-id.123").toFile();
                 File actualChunkFile1 = argChunkFile.getAllValues().get(0);
                 assertThat(actualChunkFile1).isEqualTo(expectedChunkFile);
 
@@ -329,7 +329,7 @@ class SingleChunkAuditorTest {
                 String actualLocation = argLocation.getValue();
 
                 assertThat(actualPath).isEqualTo(TEST_CHUNK_ARCHIVE_ID);
-                assertThat(actualWorking).isEqualTo(Paths.get("/tmp/dir/base-chunk-archive-id.123").toFile());
+                assertThat(actualWorking).isEqualTo(Paths.get("/tmp/dir/test-location/base-chunk-archive-id.123").toFile());
                 assertThat(actualProgress).isNull();
                 assertThat(actualLocation).isEqualTo(TEST_LOCATION);
 

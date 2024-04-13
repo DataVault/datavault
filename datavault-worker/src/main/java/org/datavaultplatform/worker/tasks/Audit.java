@@ -18,10 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -79,7 +76,7 @@ public class Audit extends Task {
 
         this.initStates();
 
-        logger.info("Audit id: " + this.auditId);
+        logger.info("Audit id: {}", this.auditId);
         eventSender.send(new AuditStart(this.jobID, this.auditId)
                 .withNextState(0));
 
@@ -104,8 +101,8 @@ public class Audit extends Task {
     /**
      * For every chunk that we are asked to Audit.
      * If the device supports multipleLocations, check that we can retrieve the chunk from each location
-     * @param context
-     * @param archiveFS
+     * @param context the context object
+     * @param archiveFS the archive storage
      */
     private void doAudit(Context context, Device archiveFS) {
         boolean singleCopy = !archiveFS.hasMultipleCopies();
@@ -114,18 +111,22 @@ public class Audit extends Task {
             Assert.isNull(locations, "The locations should be null if the audit is singleCopy");
         } else {
             Assert.notNull(locations, "The locations should NOT be null if the audit is not singleCopy");
+            boolean hasDuplicates = new HashSet<>(locations).size() < locations.size();
+            if (hasDuplicates) {
+                throw new IllegalArgumentException(String.format("The locations %s contains duplicates.",locations));
+            }
         }
         try {
 
             String auditFailedMessage = getAuditFailedMessage(singleCopy, locations);
 
             int noOfThreads = context.getNoChunkThreads();
-            logger.debug("Number of threads: " + noOfThreads);
+            logger.debug("Number of threads: {}", noOfThreads);
             TaskExecutor<Boolean> executor = createTaskExecutor(noOfThreads, auditFailedMessage);
 
             int totalNumberOfChunksPerLocation = this.depositChunksToAudit.size();
             int expectedNumberOfChunks = locations == null ? totalNumberOfChunksPerLocation : totalNumberOfChunksPerLocation * locations.size();
-            logger.info("Retrieving " + expectedNumberOfChunks + " chunk(s) for audit.");
+            logger.info("Retrieving {} chunk(s) for audit.", expectedNumberOfChunks);
 
             AtomicInteger auditedChunks = new AtomicInteger(0);
             List<String> auditLocations = getAuditLocations(locations);
