@@ -5,7 +5,7 @@ import org.datavaultplatform.common.crypto.Encryption;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.task.Context;
-import org.datavaultplatform.worker.utils.Utils;
+import org.datavaultplatform.common.util.Utils;
 
 import java.io.File;
 import java.util.List;

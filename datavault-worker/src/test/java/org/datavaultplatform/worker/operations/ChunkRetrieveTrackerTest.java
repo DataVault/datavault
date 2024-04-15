@@ -5,7 +5,7 @@ import org.datavaultplatform.common.crypto.Encryption;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.task.Context;
-import org.datavaultplatform.worker.utils.Utils;
+import org.datavaultplatform.common.util.Utils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

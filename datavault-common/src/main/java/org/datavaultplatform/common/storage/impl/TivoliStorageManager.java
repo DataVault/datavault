@@ -8,6 +8,7 @@ import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.storage.ArchiveStore;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.storage.Verify;
+import org.datavaultplatform.common.task.TaskExecutor;
 import org.datavaultplatform.common.util.ProcessHelper;
 import org.slf4j.Logger;
 import org.springframework.util.Assert;
@@ -173,35 +174,16 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 
 		log.info("Copying from sourcePath[{}] to tsmFilePath[{}]", sourcePath, tsmFilePath);
 		Files.copy(sourcePath, tsmFilePath, REPLACE_EXISTING);
+
+		TaskExecutor<String> executor = new TaskExecutor<>(2, "storeOnTSM");
 		
-		ExecutorService executor = Executors.newFixedThreadPool(2);
 		TSMTracker loc1 = getTSMTracker(tsmServerNodeOpt1, tsmFilePath.toFile(), progress, depositId, maxRetries, retryTimeMinutes);
 		TSMTracker loc2 = getTSMTracker(tsmServerNodeOpt2, tsmFilePath.toFile(), progress, depositId, maxRetries, retryTimeMinutes);
 
-		Future<String> loc1Future = executor.submit(loc1);
-		Future<String> loc2Future = executor.submit(loc2);
-		executor.shutdown(); // no more tasks will be submitted
-		try {
-			String result1 = loc1Future.get();
-			log.info("loc1 result [{}]", result1);
-			String result2 = loc2Future.get();
-			log.info("loc2 result [{}]", result2);
-		} catch (ExecutionException ee) {
-			Throwable cause = ee.getCause();
-			log.error("TSM upload failed.", cause);
-			if (cause instanceof Exception) {
-				throw (Exception) cause;
-			}
-			if (cause instanceof Error){
-				throw (Error) cause;
-			}
-		} finally {
-			// Actively try and kill any tasks which are still running
-			executor.shutdownNow();
-			//TODO : not sure about this - how long should we wait ?
-			boolean terminationTimeOut = !executor.awaitTermination(5, TimeUnit.MINUTES);
-			log.info("Executor termination timeout ? [{}]", terminationTimeOut);
-		}
+		executor.add(loc1);
+		executor.add(loc2);
+		
+		executor.execute(result -> log.info("storeOnTSM result [{}]", result));
 
         if (Files.exists(tsmFilePath)) {
         	Files.deleteIfExists(tsmFilePath);
