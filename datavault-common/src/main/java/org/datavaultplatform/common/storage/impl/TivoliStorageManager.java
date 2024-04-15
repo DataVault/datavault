@@ -131,8 +131,9 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 			log.info("retrieve [{}] attempt[{}/{}]", tsmFilePath, r+1, maxRetries);
 	        ProcessHelper.ProcessInfo info = getProcessInfo("tsmRetrieve" ,
 					"dsmc", "retrieve", tsmFilePath.toString(), retrieveToPath.toString(), "-description=" + depositId, "-optfile=" + optFilePath, "-replace=true");
+			String attemptCtx = String.format("attempt[%s/%s]", r+1, maxRetries);
 	        if (info.wasFailure()) {
-				String errMsg = String.format("Retrieval of [%s/%s] failed using location[%s]" , depositId, target.getName(), optFilePath);
+				String errMsg = String.format("Retrieval of [%s/%s] failed using location[%s]%s" , depositId, target.getName(), optFilePath, attemptCtx);
 				logProcessOutput(info, errMsg);
 				boolean lastAttempt = r == (maxRetries -1);
 	            if (lastAttempt) {
@@ -147,6 +148,9 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 					Files.move(retrieveToPath, targetPath, REPLACE_EXISTING, ATOMIC_MOVE);
 
 					retrieved = true;
+					String msg = String.format("Retrieval of [%s/%s] succeeded using location[%s]%s", depositId, target.getName(), optFilePath, attemptCtx);
+					log.info(msg);
+					
 					// TODO : retrieveToPath should not exist if we've just moved it ?
 					Files.deleteIfExists(retrieveToPath);
 		        } else {

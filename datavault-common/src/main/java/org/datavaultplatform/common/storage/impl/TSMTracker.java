@@ -41,15 +41,17 @@ public class TSMTracker implements Callable<String> {
     }
     
     private String storeInTSMNode() throws Exception {
-        ProcessHelper helper = new ProcessHelper("tsmStore",
-                "dsmc", "archive", working.getAbsolutePath(), "-description=" + description, "-optfile=" + location);
         boolean stored = false;
         for (int r = 0; r < maxRetries && !stored; r++) {
-            ProcessHelper.ProcessInfo info = helper.execute();
+            String attemptCtx = String.format("attempt[%s/%s]", r+1, maxRetries);
+            ProcessHelper.ProcessInfo info = getProcessInfo("tsmStore",
+                    "dsmc", "archive", working.getAbsolutePath(), "-description=" + description, "-optfile=" + location);
             if (info.wasSuccess()) {
                 stored = true;
+                String msg = String.format("Deposit of [%s] succeeded using location[%s]%s", working.getAbsolutePath(), location, attemptCtx);
+                log.info(msg);
             } else {
-                String errMsg = String.format("Deposit of [%s] failed using location[%s]", working.getName(), location);
+                String errMsg = String.format("Deposit of [%s] failed using location[%s]%s", working.getAbsolutePath(), location, attemptCtx);
                 TivoliStorageManager.logProcessOutput(info, errMsg);
                 boolean lastAttempt = r == (maxRetries - 1);
                 if (lastAttempt) {
@@ -60,5 +62,15 @@ public class TSMTracker implements Callable<String> {
             }
         }
         return description;
+    }
+
+    /*
+     * This allows creation of ProcessInfo to be faked during unit tests.
+     */
+    @SuppressWarnings("UnnecessaryLocalVariable")
+    protected ProcessHelper.ProcessInfo getProcessInfo(String desc, String... commands) throws Exception {
+        ProcessHelper helper = new ProcessHelper(desc, commands);
+        ProcessHelper.ProcessInfo info = helper.execute();
+        return info;
     }
 }

@@ -491,7 +491,7 @@ class TivoliStorageManagerTest {
             Exception ex = assertThrows(Exception.class, () -> {
                 tsm.retrieve("testDepositId", targetFile, progress, "testLocation");
             });
-            assertThat(ex).hasMessage("Retrieval of [testDepositId/target.txt] failed using location[testLocation]");
+            assertThat(ex).hasMessage("Retrieval of [testDepositId/target.txt] failed using location[testLocation]attempt[5/5]");
             assertThat(counter.get()).isEqualTo(5);
             assertThat(Files.exists(targetFilePath)).isFalse();
         }
