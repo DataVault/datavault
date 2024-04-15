@@ -1,0 +1,22 @@
+<!DOCTYPE html><!--test/securityTagBasic.html-->
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+  <meta charset="UTF-8">
+  <title>Security Tag Test Page</title>
+</head>
+<body>
+
+<div sec:authorize="hasRole('USER')">
+  <div id="users">DIV FOR USERS</div>
+</div>
+
+<div sec:authorize="hasRole('ADMIN')">
+  <div id="admins">DIV FOR ADMINS</div>
+</div>
+
+<div id="for_all">
+  DIV FOR ALL
+</div>
+
+</body>
+</html>

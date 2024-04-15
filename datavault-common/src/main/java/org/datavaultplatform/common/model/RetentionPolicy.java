@@ -16,9 +16,8 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.*;
+import org.datavaultplatform.common.util.DateTimeUtils;
 import org.hibernate.Hibernate;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -54,19 +53,19 @@ public class RetentionPolicy {
     private boolean extendUponRetrieval;
 
     // Date policy in effect
-    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd")
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern= DateTimeUtils.ISO_DATE_FORMAT)
     @Temporal(TemporalType.DATE)
     @Column(name = "inEffectDate", nullable = true)
     private Date inEffectDate;
 
     // Date policy in effect
-    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd")
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern=DateTimeUtils.ISO_DATE_FORMAT)
     @Temporal(TemporalType.DATE)
     @Column(name = "endDate", nullable = true)
     private Date endDate;
 
     // Date policy in effect
-    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd")
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern=DateTimeUtils.ISO_DATE_FORMAT)
     @Temporal(TemporalType.DATE)
     @Column(name = "dataGuidanceReviewed", nullable = true)
     private Date dataGuidanceReviewed;
@@ -101,10 +100,16 @@ public class RetentionPolicy {
         this.name = name;
     }
 
+    @JsonGetter
     public Integer getID() { return id; }
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    @JsonSetter
+    public void setID(Integer id){
+        setId(id);
     }
 
     public void setName(String name) {

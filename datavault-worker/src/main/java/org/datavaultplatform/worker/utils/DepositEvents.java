@@ -8,6 +8,10 @@ import java.util.*;
 
 import lombok.Builder;
 import lombok.Data;
+import java.time.LocalDate;
+import java.time.Instant;
+import java.time.ZoneOffset;
+
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.event.Event;
@@ -20,6 +24,7 @@ import org.datavaultplatform.common.storage.StorageConstants;
 import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.worker.tasks.Audit;
+import org.datavaultplatform.common.util.DateTimeUtils;
 import org.datavaultplatform.worker.tasks.Deposit;
 import org.datavaultplatform.worker.tasks.Retrieve;
 import org.springframework.util.Assert;
@@ -56,6 +61,11 @@ public class DepositEvents {
     topLevelProps.put(PropNames.USER_FS_RETRIEVE_MAX_ATTEMPTS, "10");
     topLevelProps.put(PropNames.USER_FS_RETRIEVE_DELAY_MS_1, "60000");
     topLevelProps.put(PropNames.USER_FS_RETRIEVE_DELAY_MS_2, "300000");
+    Instant testInstant = LocalDate.of(2024, 1, 11)
+            .atStartOfDay(ZoneOffset.UTC)
+            .toInstant();
+    Date testDate = Date.from(testInstant);
+    topLevelProps.put(PropNames.DEPOSIT_CREATION_DATE, DateTimeUtils.formatDateBasicISO(testDate));
 
     retrieve.setProperties(topLevelProps);
     retrieve.setTarIV(info.tarIV);

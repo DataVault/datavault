@@ -1,7 +1,5 @@
 package org.datavaultplatform.broker.services;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
@@ -422,37 +420,25 @@ public class PendingVaultsService {
       throw new Exception("User '" + userID + "' does not exist");
     }
     vault.setUser(user);
-    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 
-    String grantEndDate = (
-        createVault.getBillingGrantEndDate() != null &&
-        !createVault.getBillingGrantEndDate().isEmpty()
-      )
-      ? createVault.getBillingGrantEndDate()
-      : null;
+    Date grantEndDate = createVault.getBillingGrantEndDate();
 
     if (grantEndDate == null) {
-      grantEndDate =
-        (
-            createVault.getGrantEndDate() != null &&
-            !createVault.getGrantEndDate().isEmpty()
-          )
-          ? createVault.getGrantEndDate()
-          : null;
+      grantEndDate = createVault.getGrantEndDate();
     }
 
     try {
-      vault.setGrantEndDate(formatter.parse(grantEndDate));
-    } catch (ParseException | NullPointerException ex) {
+      vault.setGrantEndDate(grantEndDate);
+    } catch (NullPointerException ex) {
       logger.error("Grant date is not in the right format: " + grantEndDate);
       vault.setGrantEndDate(null);
     }
 
-    String reviewDate = createVault.getReviewDate();
+    Date reviewDate = createVault.getReviewDate();
     if (reviewDate != null) {
       try {
-        vault.setReviewDate(formatter.parse(reviewDate));
-      } catch (ParseException | NullPointerException ex) {
+        vault.setReviewDate(reviewDate);
+      } catch (NullPointerException ex) {
         logger.error("Review date is not in the right format: " + reviewDate);
         vault.setReviewDate(null);
       }

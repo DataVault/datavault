@@ -207,6 +207,16 @@ public class SFTPFileSystemSSHD extends Device implements SFTPFileSystemDriver {
     return this.monitoring;
   }
 
+  @Override
+  public boolean canRead(String path) throws Exception {
+      return false;
+  }
+
+  @Override
+  public boolean canWrite(String path) throws Exception {
+    return false;
+  }
+
   public void setMonitoring(boolean value) {
     this.monitoring = value;
   }

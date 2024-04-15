@@ -3,13 +3,12 @@ package org.datavaultplatform.broker.scheduled;
 import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.services.LDAPService;
+import org.datavaultplatform.common.util.DateTimeUtils;
 import org.datavaultplatform.common.util.RoleUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import org.datavaultplatform.common.email.EmailTemplate;
@@ -94,8 +93,8 @@ public class CheckForReview implements ScheduledTask {
                 HashMap<String, Object> model = new HashMap<>();
                 model.put(EMAIL_VAULT_NAME, vault.getName());
                 model.put(EMAIL_VAULT_ID, vault.getID());
-                model.put(EMAIL_VAULT_REVIEW_DATE, dateToString(vault.getReviewDate()));
-                model.put(EMAIL_RETENTION_POLICY_EXPIRY_DATE, dateToString(vault.getRetentionPolicyExpiry()));
+                model.put(EMAIL_VAULT_REVIEW_DATE, DateTimeUtils.formatDate(vault.getReviewDate()));
+                model.put(EMAIL_RETENTION_POLICY_EXPIRY_DATE, DateTimeUtils.formatDate(vault.getRetentionPolicyExpiry()));
                 model.put(EMAIL_GROUP_NAME, vault.getGroup().getName());
                 model.put(EMAIL_HOME_PAGE, homeUrl);
                 model.put(EMAIL_HELP_PAGE, helpUrl);
@@ -146,15 +145,4 @@ public class CheckForReview implements ScheduledTask {
         log.info("Finished check of Vaults for review at " + start);
         log.info("Check took " + TimeUnit.MILLISECONDS.toSeconds(end.getTime() - start.getTime()) + " seconds");
     }
-
-
-    private String dateToString(Date date) {
-        if (date != null) {
-            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            return dateFormat.format(date);
-        } else {
-            return "";
-        }
-    }
-
 }

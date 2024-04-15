@@ -437,6 +437,10 @@
           <configuration>
             <skipTests>${skip.unit.tests}</skipTests>
             <excludedGroups>slow,org.datavaultplatform.test.TSMTest</excludedGroups>
+              <systemPropertyVariables>
+                <user.language>en</user.language>
+                <user.region>GB</user.region>
+              </systemPropertyVariables>
           </configuration>
         </plugin>
         <plugin>

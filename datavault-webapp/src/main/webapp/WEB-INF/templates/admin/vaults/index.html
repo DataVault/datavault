@@ -1,0 +1,166 @@
+<!DOCTYPE html><!DOCTYPE html><!--admin/vaults/index.html-->
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/defaultlayout(nav='admin')}" >
+<head><title>Admin - Vaults</title></head>
+<th:block layout:fragment="content" th:with="queryPARAM=${#uris.escapeQueryParam(query)}">
+
+<div class="container">
+
+    <ol class="breadcrumb">
+        <li><a th:href="@{/admin/}"><b>Administration</b></a></li>
+        <li class="active"><b>Vaults</b></li>
+    </ol>
+    
+    <a th:href="@{/vaults}">+Add New Vault</a>
+    
+
+    <form id="search-vaults" class="form" role="form" action="" method="get">
+        <div class="input-group">
+            <input type="text" class="form-control" th:value="${queryPARAM}" name="query" placeholder="Search for...">
+            <div class="input-group-btn">
+                <button class="btn btn-primary" type="submit"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Search</button>
+            </div>
+        </div>
+    </form>
+    
+    <div align="right">
+        <form id="search-vaults" class="form" role="form" th:action="@{/admin/vaults/csv}" method="get">
+            <div class="input-group" align="right">
+                <input type="text" class="form-control hidden" th:value="${queryPARAM}" name="query" placeholder="Search for...">
+                <button class="btn btn-primary" type="submit"><span class="glyphicon glyphicon-export" aria-hidden="true"></span> Download CSV File</button>
+            </div>
+        </form>
+</div>
+    <th:block th:if="${vaults != null}">
+
+        <div class="table-responsive" id="vaultsTable">
+            <table class="table table-striped">
+                <thead>
+                    <tr class="tr">
+                       <th><a th:href="|?sort=name&order=${ordername}&query=${queryPARAM}|">Vault Name
+                            <th:block th:if="${sort == 'name'}">
+                                <th:block th:if="${order == 'desc'}"}>
+                                    <span class="dropup"><span class="caret"></span></span>
+                                </th:block>
+                                <th:block th:if="${order != 'desc'}">
+                                    <span class="caret"></span>
+                                </th:block>
+                            </th:block>
+                        </a></th>
+                       <th>Deposits</th>
+                       <th>Project ID</th>
+                        <th><a th:href="|?sort=crisID&order=${orderCrisId}&query=${queryPARAM}|">Cris ID
+                            <th:block th:if="${sort == 'crisID'}">
+                                <th:block th:if="${order == 'desc'}"}>
+                                    <span class="dropup"><span class="caret"></span></span>
+                                </th:block>
+                                <th:block th:if="${order != 'desc'}">
+                                    <span class="caret"></span>
+                                </th:block>
+                            </th:block>
+                        </a></th>
+                       <th>Project Size</th>
+                       <th><a th:href="|?sort=vaultSize&order=${ordervaultsize}&query=${queryPARAM}|">Vault Size
+                            <th:block th:if="${sort == 'vaultSize'}">
+                                <th:block th:if="${order == 'desc'}">
+                                    <span class="dropup"><span class="caret"></span></span>
+                                </th:block>
+                                <th:block th:if="${order != 'desc'}">
+                                    <span class="caret"></span>
+                                </th:block>
+                            </th:block>
+                        </a></th>
+                       <th><a th:href="|?sort=user&order=${orderuser}&query=${queryPARAM}|">Owner(UUN)
+                           <th:block th:if="${sort == 'user'}">
+                                <th:block th:if="${order == 'desc'}">
+                                    <span class="dropup"><span class="caret"></span></span>
+                                </th:block>
+                                <th:block th:if="${order != 'desc'}">
+                                    <span class="caret"></span>
+                                </th:block>
+                            </th:block>
+                       </a></th>
+                       <th><a th:href="|?sort=groupID&order=${orderGroupId}&query=${queryPARAM}|">School
+                           <th:block th:if="${sort == 'groupID'}">
+                               <th:block th:if="${order == 'desc'}">
+                                   <span class="dropup"><span class="caret"></span></span>
+                               </th:block>
+                               <th:block th:if="${order != 'desc'}">
+                                   <span class="caret"></span>
+                               </th:block>
+                           </th:block>
+                        </a></th>
+                       <th><a th:href="|?sort=reviewDate&order=${orderreviewDate}&query=${queryPARAM}|">Review Date
+                           <th:block th:if="${sort == 'reviewDate'}">
+                               <th:block th:if="${order == 'desc'}">
+                                   <span class="dropup"><span class="caret"></span></span>
+                               </th:block>
+                               <th:block th:if="${order != 'desc'}">
+                                   <span class="caret"></span>
+                               </th:block>
+                           </th:block>
+                        </a></th>
+                        <th><a th:href="|?sort=creationTime&order=${ordercreationtime}&query=${queryPARAM}|">Date created
+                            <th:block th:if="${sort == 'creationTime'}">
+                                <th:block th:if="${order == 'desc'}">
+                                    <span class="dropup"><span class="caret"></span></span>
+                                </th:block>
+                                <th:block th:if="${order != 'desc'}">
+                                    <span class="caret"></span>
+                                </th:block>
+                            </th:block>
+                        </a></th>
+                        <th style="display:none">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                        <tr th:each="vault: ${vaults}" class="tr">
+                            <td>
+                                <a th:href="@{|/vaults/${vault.getID()}/|}">[[${vault.name}]]</a>
+                            </td>
+                            <td>[[${vault.getNumberOfDeposits()}]]</td>
+                            <td>[[${vault.getProjectId() ?: ''}]]</td>
+                            <td>[[${vault.getCrisID()    ?: ''}]]</td>
+                            <td>[[${vault.getProjectSizeStr()}]]</td>
+                            <td>[[${vault.getSizeStr()}]]</td>
+                            <td>
+                                <a    th:if="${vault.getOwnerId() != null}" th:href="@{|/vaults/${vault.getID()}/${vault.getOwnerId()}|}">[[${vault.getOwnerName()}]] ([[${vault.getOwnerId()}]])</a>
+                                <span th:if="${vault.getOwnerId() == null}">User missing</span>
+                            </td>
+                            
+                            <td>[[${vault.groupID}]]</td>
+                            <td>[[${#dates.format(vault.reviewDate,dateFormatddMMyyyy)}]]<!--/* date */--></td>
+                            <td>[[${#dates.format(vault.getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */--></td>
+                            <td style="display:none">
+                            <!-- TODO : Hiding the remove button unless the functionality is clear as to what it should do - Soft/Hard delete -->
+                           
+                            </td>
+                        </tr>
+                </tbody>
+            </table>
+        </div>
+            
+        <div align="center">
+            <p class="text-info">[[${recordsInfo}]]</p>
+        </div>
+        <div align="center">
+            <nav aria-label="...">
+			    <ul class="pagination pagination-lg" id="paginationButton">
+                    <th:block th:each="page: ${#numbers.sequence(1,numberOfPages)}">
+				    	<li th:id="${page}" th:class="${page == activePageId ? 'page-item active' : 'page_item'}" >
+				     	 <a class="page-link" th:href="@{|/admin/vaults?sort=${sort}&order=${order}&pageId=${page}&query=${query}|}" tabindex="-1">[[${page}]]</a>
+				    	</li>
+                    </th:block>
+				 </ul>
+			</nav>
+        </div>
+
+    </th:block>
+
+</div>
+ 
+
+</th:block>
+</html>

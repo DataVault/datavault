@@ -1,8 +1,5 @@
 package org.datavaultplatform.common.storage.impl;
 
-//import com.dropbox.core.*;
-//import org.apache.commons.io.IOUtils;
-//import org.datavaultplatform.common.io.FileCopy;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.model.FileInfo;
@@ -11,12 +8,9 @@ import org.datavaultplatform.common.storage.UserStore;
 import org.slf4j.Logger;
 
 import java.io.*;
-//import java.nio.file.DirectoryStream;
-//import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-//import java.util.Locale;
 import java.util.Map;
 
 // Documentation:
@@ -340,5 +334,14 @@ public class DropboxFileSystem extends Device implements UserStore {
     @Override
     public Logger getLogger() {
         return this.log;
+    }
+    
+    public boolean canRead(String path) throws Exception {
+        return false;
+    }
+
+    @Override
+    public boolean canWrite(String path) throws Exception {
+       return false;
     }
 }

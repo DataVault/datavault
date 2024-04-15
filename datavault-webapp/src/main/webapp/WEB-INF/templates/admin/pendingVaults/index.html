@@ -1,0 +1,30 @@
+<!DOCTYPE html><!--admin/pendingVaults/index.html-->
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/defaultlayout(nav='admin')}" >
+<head><title>Admin - Pending Vaults</title></head>
+<th:block layout:fragment="content">
+<div class="container">
+
+    <ol class="breadcrumb">
+        <li><a th:href="@{/admin/}"><b>Administration</b></a></li>
+        <li class="active"><b>Pending Vaults</b></li>
+    </ol>
+    
+    <h1>Pending Vaults</h1>
+
+    <h3><a th:href="@{/admin/pendingVaults/confirmed/}">
+            Confirmed ([[${confirmedVaultsTotal}]])
+        </a>
+    </h3>
+    <h3><a th:href="@{/admin/pendingVaults/saved/}">
+             Saved ([[${savedVaultsTotal}]])
+         </a>
+    </h3>
+   
+   
+</div>
+ 
+
+</th:block>
+</html>
