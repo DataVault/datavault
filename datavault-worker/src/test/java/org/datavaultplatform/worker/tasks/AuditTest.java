@@ -196,7 +196,7 @@ class AuditTest {
     void checkAudit(final int numberOfChunks, final int numberOfSuccessfulChunks, final boolean multipleCopies, final List<String> locations) throws Exception {
         boolean expectedSuccess = numberOfChunks == numberOfSuccessfulChunks;
         try (MockedStatic<StorageClassUtils> staticStorageClassUtils = Mockito.mockStatic(StorageClassUtils.class)) {
-            staticStorageClassUtils.when(() -> StorageClassUtils.createStorage(any(), any(), any(), any()))
+            staticStorageClassUtils.when(() -> StorageClassUtils.createStorage(any(String.class), any(Map.class), any(Class.class), any(StorageClassNameResolver.class)))
                     .thenReturn(mDevice);
 
             Mockito.lenient().when(mDevice.hasMultipleCopies()).thenReturn(multipleCopies);
@@ -218,7 +218,7 @@ class AuditTest {
 
             argExecutorCallable.getAllValues().forEach(callable -> {
                 SingleChunkAuditor aud = (SingleChunkAuditor) callable;
-                System.out.printf("location" + aud.getLocation());
+                System.out.printf("location[%s]%n", aud.getLocation());
             });
 
             int numberOfLocations = locations == null ? 1 : locations.size();

@@ -18,12 +18,13 @@
       <artifactId>spring-retry</artifactId>
     </dependency>
 
+    <!--
     <dependency>
-      <!-- allows mocking of static methods -->
       <groupId>org.mockito</groupId>
       <artifactId>mockito-inline</artifactId>
       <scope>test</scope>
     </dependency>
+    -->
 
     <dependency>
       <groupId>datavault</groupId>

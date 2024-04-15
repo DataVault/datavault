@@ -48,7 +48,7 @@
     <spring.cloud.version>3.1.5</spring.cloud.version>
 
     <!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
-    <mockito.version>4.9.0</mockito.version>
+    <mockito.version>4.11.0</mockito.version>
 
     <!-- https://mvnrepository.com/artifact/org.owasp/dependency-check-maven -->
     <owasp.dependency.check.version>7.3.1</owasp.dependency.check.version>
@@ -346,6 +346,11 @@
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-inline</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>

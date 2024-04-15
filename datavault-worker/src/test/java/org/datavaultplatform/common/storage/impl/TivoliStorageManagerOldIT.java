@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Disabled
-public class TivoliStorageManagerTest {
+public class TivoliStorageManagerOldIT {
 	
 	private TivoliStorageManager tsm = null;
 	private static String tsmResources;
@@ -77,20 +77,20 @@ public class TivoliStorageManagerTest {
 			retVal = tsm.store(path, working, progress);
 			assertNotNull(retVal, "RetVal should not be null");
     			// check it is now in TSM node 1
-			BufferedReader reader = this.queryArchive(working, retVal, TivoliStorageManager.TSM_SERVER_NODE1_OPT);
+			BufferedReader reader = this.queryArchive(working, retVal, TivoliStorageManager.DEFAULT_TSM_SERVER_NODE1_OPT );
     			String line;
     			while ( (line = reader.readLine()) != null) {
     				assertFalse(line.contains("No files matching search criteria were found"), "Node1 attempt to store failed");
     			}
 
-    			reader = this.queryArchive(working, retVal, TivoliStorageManager.TSM_SERVER_NODE2_OPT);
+    			reader = this.queryArchive(working, retVal, TivoliStorageManager.DEFAULT_TSM_SERVER_NODE2_OPT);
 					while ( (line = reader.readLine()) != null) {
     				assertFalse(line.contains("No files matching search criteria were found"), "Node2 attempt to store failed");
     			}
 
     			// delete from TSM node 1
-    			deleteArchive(retVal, TivoliStorageManager.TSM_SERVER_NODE1_OPT);
-    			deleteArchive(retVal, TivoliStorageManager.TSM_SERVER_NODE2_OPT);
+    			deleteArchive(retVal, TivoliStorageManager.DEFAULT_TSM_SERVER_NODE1_OPT);
+    			deleteArchive(retVal, TivoliStorageManager.DEFAULT_TSM_SERVER_NODE2_OPT);
 		} catch (Exception e) {
 			fail("Unexpected exception " + e.getMessage());
 		}
@@ -129,13 +129,13 @@ public class TivoliStorageManagerTest {
 			assertNotNull(retVal, "RetVal should not be null");
 			// check it is now in TSM node 1
 			System.out.println("check it has been archived");
-			BufferedReader reader = this.queryArchive(working, retVal, TivoliStorageManager.TSM_SERVER_NODE1_OPT);
+			BufferedReader reader = this.queryArchive(working, retVal, TivoliStorageManager.DEFAULT_TSM_SERVER_NODE1_OPT);
 			String line;
 			while ( (line = reader.readLine()) != null) {
 				assertFalse(line.contains("No files matching search criteria were found"), "Node 1 attempt to store failed");
 			}
 			
-			reader = this.queryArchive(working, retVal, TivoliStorageManager.TSM_SERVER_NODE2_OPT);
+			reader = this.queryArchive(working, retVal, TivoliStorageManager.DEFAULT_TSM_SERVER_NODE2_OPT);
 			while ( (line = reader.readLine()) != null) {
 				assertFalse(line.contains("No files matching search criteria were found"), "Node 2 attempt to store failed");
 			}
@@ -147,7 +147,7 @@ public class TivoliStorageManagerTest {
 			// retrieve from TSM node 1
 			System.out.println("Retrieve the tar");
 			//dsmc  retrieve /tmp/datavault/temp/2848@ubuntu-xenial/513c2b11-30df-4947-846b-a64309c61eb8.tar
-			tsm.retrieve(path, working, progress, TivoliStorageManager.TSM_SERVER_NODE1_OPT);
+			tsm.retrieve(path, working, progress, TivoliStorageManager.DEFAULT_TSM_SERVER_NODE1_OPT);
 			
 			// check that the /tmp/"retval" dir now exists
 			System.out.println("Check the retrieve archive exits");
@@ -155,10 +155,10 @@ public class TivoliStorageManagerTest {
 			
 			// delete from TSM node 1
 			System.out.println("Delete from TSM");
-			deleteArchive(retVal, TivoliStorageManager.TSM_SERVER_NODE1_OPT);
+			deleteArchive(retVal, TivoliStorageManager.DEFAULT_TSM_SERVER_NODE1_OPT);
 			
 			// delete from TSM node2
-			deleteArchive(retVal, TivoliStorageManager.TSM_SERVER_NODE2_OPT);
+			deleteArchive(retVal, TivoliStorageManager.DEFAULT_TSM_SERVER_NODE2_OPT);
 			
 			// delete the retrieved tar
 			System.out.println("Delete the retrieved archive");
@@ -184,7 +184,7 @@ public class TivoliStorageManagerTest {
     		try {
 	    		System.out.println("Retrieve the tar");
 	    		//dsmc  retrieve /tmp/datavault/temp/2848@ubuntu-xenial/513c2b11-30df-4947-846b-a64309c61eb8.tar
-	    		tsm.retrieve(path, working, progress, TivoliStorageManager.TSM_SERVER_NODE1_OPT);
+	    		tsm.retrieve(path, working, progress, TivoliStorageManager.DEFAULT_TSM_SERVER_NODE1_OPT);
 	    		fail("Exception should have been thrown");
     		} catch (Exception e) {
     			assertNotNull(e, "Exception should not be null");
@@ -203,7 +203,7 @@ public class TivoliStorageManagerTest {
     		try {
 	    		System.out.println("Retrieve the tar");
 	    		//dsmc  retrieve /tmp/datavault/temp/2848@ubuntu-xenial/513c2b11-30df-4947-846b-a64309c61eb8.tar
-	    		tsm.retrieve(path, working, progress, TivoliStorageManager.TSM_SERVER_NODE2_OPT);
+	    		tsm.retrieve(path, working, progress, TivoliStorageManager.DEFAULT_TSM_SERVER_NODE2_OPT);
 	    		fail("Exception should have been thrown");
     		} catch (Exception e) {
     			assertNotNull(e, "Exception should not be null");
