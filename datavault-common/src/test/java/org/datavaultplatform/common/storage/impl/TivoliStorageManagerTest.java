@@ -220,7 +220,7 @@ class TivoliStorageManagerTest {
             TSMTracker mTSMTracker1 = Mockito.mock(TSMTracker.class);
             TSMTracker mTSMTracker2 = Mockito.mock(TSMTracker.class);
 
-            Mockito.doReturn(mTSMTracker1, mTSMTracker2).when(tsm).getTSMTracker(
+            Mockito.lenient().doReturn(mTSMTracker1, mTSMTracker2).when(tsm).getTSMTracker(
                     argLocation.capture(),
                     argTsmFile.capture(),
                     argProgress.capture(),
@@ -255,7 +255,7 @@ class TivoliStorageManagerTest {
             TSMTracker mTSMTracker1 = Mockito.mock(TSMTracker.class);
             TSMTracker mTSMTracker2 = Mockito.mock(TSMTracker.class);
 
-            Mockito.doReturn(mTSMTracker1, mTSMTracker2).when(tsm).getTSMTracker(
+            lenient().doReturn(mTSMTracker1, mTSMTracker2).when(tsm).getTSMTracker(
                     argLocation.capture(),
                     argTsmFile.capture(),
                     argProgress.capture(),
