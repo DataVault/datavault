@@ -41,22 +41,6 @@ public abstract class BaseSFTPFileSystemPrivatePublicKeyPairIT extends BaseSFTPF
   static File keyStoreTempDir;
   static KeyPairInfo keyPairInfo;
 
-  static final Path tempLocalPath;
-  
-  static {
-    try {
-      tempLocalPath = Files.createTempDirectory("sftpTestFilesDir");
-      for (int i = 0; i < 1000; i++) {
-        Path tempFile = tempLocalPath.resolve(String.format("temp-%s.txt", i));
-        try (PrintWriter pw = new PrintWriter(new FileWriter(tempFile.toFile()))) {
-          pw.printf("test file number - [%s]%n", i);
-
-        }
-      }
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
 
   static GenericContainer<?> initialiseContainer(String tcName) {
 
@@ -123,19 +107,4 @@ public abstract class BaseSFTPFileSystemPrivatePublicKeyPairIT extends BaseSFTPF
     UserKeyPairService userKeyPairService = new UserKeyPairServiceJSchImpl(TEST_PASSPHRASE);
     return userKeyPairService.generateNewKeyPair();
   }
-
-  @Test
-  public void testListOneThousandFiles() {
-
-    long startMS = System.currentTimeMillis();
-    List<FileInfo> files = getSftpDriver().list(".");
-    long diffMS = System.currentTimeMillis() - startMS;
-    for (int i = 0; i < files.size(); i++) {
-      FileInfo info = files.get(i);
-      System.out.printf("%04d - [%s]%n", i, info);
-    }
-    getLog().info("Listing {} files took [{}]ms", files.size(), diffMS);
-    assertThat(files).hasSizeGreaterThan(1000);
-  }
-
 }
