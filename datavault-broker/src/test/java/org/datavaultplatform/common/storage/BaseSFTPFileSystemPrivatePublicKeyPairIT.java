@@ -1,12 +1,17 @@
 package org.datavaultplatform.common.storage;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.interfaces.RSAPublicKey;
+import java.util.List;
 import java.util.Map;
 import javax.crypto.SecretKey;
 import lombok.SneakyThrows;
@@ -19,8 +24,11 @@ import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.crypto.Encryption;
 import org.datavaultplatform.common.crypto.SshRsaKeyUtils;
 import org.datavaultplatform.common.docker.DockerImage;
+import org.datavaultplatform.common.model.FileInfo;
+import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.utility.MountableFile;
 
 @Slf4j
 public abstract class BaseSFTPFileSystemPrivatePublicKeyPairIT extends BaseSFTPFileSystemIT {
@@ -33,7 +41,22 @@ public abstract class BaseSFTPFileSystemPrivatePublicKeyPairIT extends BaseSFTPF
   static File keyStoreTempDir;
   static KeyPairInfo keyPairInfo;
 
+  static final Path tempLocalPath;
+  
+  static {
+    try {
+      tempLocalPath = Files.createTempDirectory("sftpTestFilesDir");
+      for (int i = 0; i < 1000; i++) {
+        Path tempFile = tempLocalPath.resolve(String.format("temp-%s.txt", i));
+        try (PrintWriter pw = new PrintWriter(new FileWriter(tempFile.toFile()))) {
+          pw.printf("test file number - [%s]%n", i);
 
+        }
+      }
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
 
   static GenericContainer<?> initialiseContainer(String tcName) {
 
@@ -51,6 +74,7 @@ public abstract class BaseSFTPFileSystemPrivatePublicKeyPairIT extends BaseSFTPF
         .withEnv(ENV_PUBLIC_KEY,
             keyPairInfo.getPublicKey()) //this causes the public key to be added to /config/.ssh/authorized_keys
         .withExposedPorts(SFTP_SERVER_PORT)
+        .withCopyFileToContainer(MountableFile.forHostPath(tempLocalPath),"/config")
         .waitingFor(Wait.forListeningPort());
   }
 
@@ -99,4 +123,19 @@ public abstract class BaseSFTPFileSystemPrivatePublicKeyPairIT extends BaseSFTPF
     UserKeyPairService userKeyPairService = new UserKeyPairServiceJSchImpl(TEST_PASSPHRASE);
     return userKeyPairService.generateNewKeyPair();
   }
+
+  @Test
+  public void testListOneThousandFiles() {
+
+    long startMS = System.currentTimeMillis();
+    List<FileInfo> files = getSftpDriver().list(".");
+    long diffMS = System.currentTimeMillis() - startMS;
+    for (int i = 0; i < files.size(); i++) {
+      FileInfo info = files.get(i);
+      System.out.printf("%04d - [%s]%n", i, info);
+    }
+    getLog().info("Listing {} files took [{}]ms", files.size(), diffMS);
+    assertThat(files).hasSizeGreaterThan(1000);
+  }
+
 }
