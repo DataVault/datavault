@@ -107,10 +107,9 @@
                                     }, 3000);
                                 },
                                 selectMode: 1,
-                                checkbox: "radio",
                                 activate: function(event, data) {
-                                    var node = data.tree.getSelectedNode();
-                
+                                    var node = data.tree.getActiveNode();
+                                    
                                     if (node) {
                                         $(".file-path").val(node.key);
                                     } else {
