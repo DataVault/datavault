@@ -1,0 +1,103 @@
+<!DOCTYPE html><!--vaults/index.html-->
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/welcomelayout(nav='home')}">
+<head><title>Vaults</title></head>
+<th:block layout:fragment="content">
+
+    <div class="container">
+
+        <th:block th:if="${vaults != null}">
+        <h3>
+            Current Vaults
+            <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
+                title="Vaults of which you are either the Owner or the Nominated Data Manager. If you think a vault is missing from this list, please contact the Research Data Service">
+            </span>
+        </h3>
+        
+        <div class="row">
+            <div class="col-md-12">
+                <div class="scrollable">
+                    <table class="table table-bordered whitebackground">
+                        <thead>
+                            <tr>
+                                <th>Vault Name</th>
+                                <th>Deposit</th>
+                                <th>Owner Name</th>
+                                <th>Date Created</th>
+                                <th class="text-muted">Review Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="vault: ${vaults}">
+                                <td>
+                                    <a th:href="@{|/vaults/${vault.getID()}/|}">
+                                        [[${vault.name}]]
+                                    </a>
+                                </td>
+                                <td>
+                                    <th:block th:with="viewDepositsSecurityExpression=|hasPermission('${vault.ID}', 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') or hasPermission('${vault.groupID}', 'GROUP', 'MANAGE_SCHOOL_VAULT_DEPOSITS')|">
+                                    <th:block th:if="${#authorization.expression(viewDepositsSecurityExpression)}">
+                                    <a th:href="@{|/vaults/${vault.getID()}/deposits/create|}" class="btn btn-primary">
+                                       <i class="fa fa-download fa-rotate-180" aria-hidden="true"></i> Deposit
+                                    </a>
+                                    </th:block>
+                                    </th:block>
+                                </td>
+                                <td><th:block th:if="${vault.getOwnerId() != null}">[[${vault.getOwnerId()}]]</th:block></td>
+                                <td>[[${#dates.format(vault.getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */--></td>
+                                <td class="text-muted">[[${#dates.format(vault.getReviewDate(),dateFormatISO)}]]<!--/* date */--></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <br/>
+        <br/>
+        </th:block>
+        <th:block th:if="${pendingVaults != null}">
+            <h3>
+                Pending Vaults
+                <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
+                      title="Vaults of which are pending. If you think a vault is missing from this list, please contact the Research Data Service">
+                </span>
+            </h3>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="scrollable">
+                        <table class="table table-bordered whitebackground">
+                            <thead>
+                            <tr>
+                                <th>Vault Name</th>
+                                <th>Owner Name</th>
+                                <th>Date Created</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="pendingVault: ${pendingVaults}">
+                                    <td>
+                                        <a th:href="@{|/pendingVaults/${pendingVault.getID()}/|}">
+                                            [[${pendingVault.name}]]
+                                        </a>
+                                    </td>
+                                    <td><th:block th:if="${pendingVault.getOwnerId() != null}">[[${pendingVault.getOwnerId()}]]</th:block></td>
+                                    <td>[[${#dates.format(pendingVault.getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */--></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <br/>
+            <br/>
+        </th:block>
+        <div class="row">
+            <a th:href="@{/vaults/buildsteps}" class="btn btn-lg btn-primary">
+                <span class="glyphicon glyphicon-folder-close"></span>
+                Create vault
+            </a>
+        </div>
+</div>
+</th:block>
+</html>

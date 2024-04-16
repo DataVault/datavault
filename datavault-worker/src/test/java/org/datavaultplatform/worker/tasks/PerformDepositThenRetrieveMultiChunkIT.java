@@ -26,7 +26,7 @@ public class PerformDepositThenRetrieveMultiChunkIT extends BasePerformDepositTh
 
 
   @Override
-  Optional<Integer> getExpectedNumberChunks() {
+  Optional<Integer> getExpectedNumberChunksPerDeposit() {
     return Optional.of(3);
   }
 }

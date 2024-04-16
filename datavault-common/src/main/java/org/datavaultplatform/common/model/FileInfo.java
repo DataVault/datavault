@@ -16,7 +16,6 @@ public class FileInfo {
 
 
     public FileInfo() {}
-
     public FileInfo(String key, String absolutePath, String fileName, Boolean isDirectory) {
         this.key = key;
         this.absolutePath = absolutePath;

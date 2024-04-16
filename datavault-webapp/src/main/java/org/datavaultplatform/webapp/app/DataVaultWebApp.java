@@ -18,6 +18,7 @@ import org.datavaultplatform.webapp.config.SecurityActuatorConfig;
 import org.datavaultplatform.webapp.config.SecurityConfig;
 import org.datavaultplatform.webapp.config.TomcatAjpConfig;
 import org.datavaultplatform.webapp.config.WebConfig;
+import org.datavaultplatform.webapp.config.ThymeleafConfig;
 import org.datavaultplatform.webapp.config.database.DatabaseProfileConfig;
 import org.datavaultplatform.webapp.config.shib.ShibProfileConfig;
 import org.datavaultplatform.webapp.config.standalone.StandaloneProfileConfig;
@@ -34,7 +35,6 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.env.Environment;
-import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
 @SpringBootApplication
 @ComponentScan({
@@ -43,7 +43,7 @@ import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 @Import({PropertiesConfig.class, WebConfig.class, MvcConfig.class, ActutatorConfig.class,
     SecurityActuatorConfig.class, SecurityConfig.class, MailConfig.class, LdapConfig.class,
         StandaloneProfileConfig.class, DatabaseProfileConfig.class,
-    ShibProfileConfig.class, RestTemplateConfig.class, TomcatAjpConfig.class})
+    ShibProfileConfig.class, RestTemplateConfig.class, TomcatAjpConfig.class, ThymeleafConfig.class})
 @Slf4j
 public class DataVaultWebApp implements CommandLineRunner {
 
@@ -52,11 +52,6 @@ public class DataVaultWebApp implements CommandLineRunner {
 
   @Autowired
   Environment env;
-
-  public DataVaultWebApp(FreeMarkerConfigurer freeMarkerConfigurer) {
-    freeMarkerConfigurer.getTaglibFactory()
-        .setClasspathTlds(singletonList("/META-INF/security.tld"));
-  }
 
   @SneakyThrows
   public static void main(String[] args) {

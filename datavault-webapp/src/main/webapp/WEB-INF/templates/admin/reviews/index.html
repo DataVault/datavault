@@ -1,0 +1,59 @@
+<!DOCTYPE html><!--admin/reviews/index.html-->
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/defaultlayout(nav='admin')}" >
+<head><title>Admin - Reviews</title></head>
+<th:block layout:fragment="content">
+<div class="container">
+
+    <ol class="breadcrumb">
+        <li><a th:href="@{/admin/}"><b>Administration</b></a></li>
+        <li class="active"><b>Reviews</b></li>
+    </ol>
+
+    <th:block th:if="${vaults != null}">
+
+        <div class="table-responsive" id="vaultsTable">
+            <table class="table table-striped">
+                <thead>
+                    <tr class="tr">
+                       <th>Vault Name</th>
+                       <th>Deposits</th>
+                       <th>Vault Size</th>
+                       <th>Owner(UUN)</th>
+                       <th>School</th>
+                       <th>Review Date</th>
+                        <th>Date created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                        <tr th:each="vault: ${vaults}" class="tr">
+                            <td>
+                                <a th:href="@{|/vaults/${vault.getID()}/|}">[[${vault.name}]]</a>
+                            </td>
+                            <td>[[${vault.getNumberOfDeposits()}]]</td>
+                            <td>[[${vault.getSizeStr()}]]</td>
+                            <td>
+                                <th:block th:if="${vault.getUserID() != null}">
+                                <a th:href="@{|/vaults/${vault.getID()}/${vault.getUserID()}|}">[[${vault.getUserName()}]] ([[${vault.getUserID()}]])</a>
+                                </th:block>
+                            </td>
+                            
+                            <td>[[${vault.groupID}]]</td>
+                            <td>[[${#dates.format(vault.reviewDate,dateFormatddMMyyyy)}]]<!--/* date */--></td>
+                            <td>[[${#dates.format(vault.getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */--></td>
+                            <td>
+                                <a th:href="@{|/admin/vaults/${vault.getID()}/reviews|}">Review</a>
+                            </td>
+                        </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </th:block>
+
+</div>
+</th:block>
+</html>

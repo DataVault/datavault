@@ -1,0 +1,22 @@
+<!DOCTYPE html><!--error/error.html-->
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:th="http://www.w3.org/1999/html"
+      layout:decorate="~{layout/defaultlayout(nav='none')}"
+>
+<head>
+    <title>Error Page</title>
+</head>
+<th:block layout:fragment="content">
+<div id="error" class="container" >
+
+    <div class="alert alert-danger" role="alert">
+        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+        <span id="error-heading" class="sr-only">Error:</span>
+        An error has occurred!<br/><br/>
+
+        <span th:if="${!#strings.isEmpty(message)}" id="error-message"><th:block th:utext="${message}"/></span>
+
+    </div>
+
+</div>
+</th:block>
+</html>

@@ -1,0 +1,21 @@
+<!DOCTYPE html><!--layout/welcomelayout.html-->
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" th:with="principal=${#authentication.principal}">
+<head>
+    <title>LOGIN LAYOUT</title>
+    <div th:replace="~{layout/imports.html}"></div>
+</head>
+<body>
+<div id="datavault-container">
+    <div id="datavault-header">
+        <div th:replace="~{layout/header.html}"></div>
+        <div th:replace="~{layout/headerextra.html}"></div>
+    </div>
+    <div id="datavault-body">
+        <div layout:fragment="content">NESTED CONTENT GOES HERE</div>
+    </div>
+    <div id="datavault-footer">
+        <div th:replace="~{layout/footer.html}"></div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,493 @@
+<!DOCTYPE html><!--vaults/vault.html-->
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/defaultlayout(nav='home')}">
+<head><title>Vaults - Vault</title></head>
+<th:block layout:fragment="content">
+<div class="container">
+
+    <div id="add-data-manager" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="addDataManger" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <form id="add-data-manager-form" class="form" role="form" th:action="@{|/vaults/${vault.getID()}/addDataManager|}" method="post">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i></button>
+                        <h4 class="modal-title" id="addDataManger">Add Data Manager</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <div class="ui-widget">
+                                <label class="control-label">UUN or Name:</label>
+                                <input id="data-manager-uun" type="text" class="form-control" name="uun" value=""/>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <input type="hidden" id="submitAction" name="action" value="submit"/>
+                    <input type="hidden" th:name="${_csrf?.parameterName ?: ''}" th:value="${_csrf?.token ?: ''}" />
+                    
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button type="submit" id="add-data-manager-btn" class="btn btn-primary btn-ok">Add</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div id="update-vault-description" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="updateVaultDescription" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <form id="update-vault-description-form" th:object="${vault}" class="form" role="form" action="updateVaultDescription" method="post">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i></button>
+                        <h4 class="modal-title" id="editDescription">Edit Description</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label class="control-label">Vault description:</label>
+                            <textarea type="text" class="form-control"
+                                      id="description" rows="4" cols="60"
+                                      th:field="*{description}"
+                            >
+                            </textarea>
+                        </div>
+                    </div>
+
+                    <input type="hidden" id="submitAction" name="action" value="submit"/>
+                    <input type="hidden" th:name="${_csrf?.parameterName ?: ''}" th:value="${_csrf?.token ?: ''}" />
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default btn-cancel" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> Cancel</button>
+                        <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="update-vault-name" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="updateVaultName" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <form id="update-vault-name-form" th:object="${vault}" class="form" role="form" action="updateVaultName" method="post">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i></button>
+                        <h4 class="modal-title" id="editName">Edit Name</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label class="control-label">Vault name:</label>
+                            <input type="text"
+                                class="form-control"
+                                id="vaultName"
+                                placeholder="Enter a descriptive name for the Vault e.g. the project or experiment."
+                                th:field="*{name}"
+                            />
+                        </div>
+                    </div>
+
+                    <input type="hidden" id="submitAction" name="action" value="submit"/>
+                    <input type="hidden" th:name="${_csrf?.parameterName ?: ''}" th:value="${_csrf?.token ?: ''}" />
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default btn-cancel" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> Cancel</button>
+                        <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <ol class="breadcrumb">
+        <li><a th:href="@{/}"><b>Home</b></a></li>
+        <li class="active"><b>Vault:</b> [[${vault.name}]]</li>
+    </ol>
+
+    <div class="panel panel-uoe-low">
+        <div class="associated-image">
+            <figure class="uoe-panel-image uoe-panel-image"></figure>
+        </div>
+
+        <div class="panel-body">
+            <h2>Summary of Vault Metadata</h2>
+            <br/>
+
+            <th:block th:if="${error != null}">
+                <div class="alert alert-danger">
+                    <strong>Error!</strong> [[${error}]]
+                </div>
+            </th:block>
+            <th:block th:if="${warning != null}">
+                <div class="alert alert-warning">
+                    <strong>Warning!</strong> [[${warning}]]
+                </div>
+            </th:block>
+            <th:block th:if="${success != null}">
+                <div class="alert alert-success">
+                    [[${success}]]
+                </div>
+            </th:block>
+
+        <th:block th:with="viewDepositsSecurityExpression1=|hasPermission('${vault.ID}', 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') or hasPermission('${vault.groupID}', 'GROUP', 'MANAGE_SCHOOL_VAULT_DEPOSITS') or hasPermission('${vault.groupID}', 'GROUP', 'MANAGE_SCHOOL_VAULT_DEPOSITS')|">
+        <th:block th:if="${#authorization.expression(viewDepositsSecurityExpression1)}">
+            <th:block th:if="${deposits != null}">
+            <h4><strong>Deposit and Retrieve</strong></h4>
+             <th:block th:with="addDepositsSecurityExpression2=|hasPermission('${vault.ID}', 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') |">
+            <th:block th:if="${#authorization.expression(addDepositsSecurityExpression2)}">
+            <div class="row">
+                <div class="col-md-12">
+                    <a class="btn btn-primary pull-right" th:href="@{|/vaults/${vault.getID()}/deposits/create|}">
+                        <i class="fa fa-download fa-rotate-180" aria-hidden="true"></i> Deposit data
+                    </a>
+                </div>
+            </div>
+            </th:block></th:block><!-- addDepositsSecurityExpression2 -->
+            <table class="table table-bordered">
+                <thead>
+                    <tr class="tr">
+                        <th>Deposit Name</th>
+                        <th>Deposited By</th>
+                        <th>Date and Time</th>
+                        <th>Total Size of Selected Deposits</th>
+                        <th>Select Deposit(s) to be Retrieved
+                            <span class="glyphicon glyphicon-info-sign text-muted" aria-hidden="true" data-toggle="tooltip" 
+                                title="Please make sure you have enough space for the full contents of the vault to be copied to the location you will specify (see 'Size', below).">
+                            </span>
+                        </th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    <tr th:each="deposit: ${deposits}" class="tr">
+                        <td>
+                            <a th:href="@{|/vaults/${vault.getID()}/deposits/${deposit.getID()}|}">
+                                [[${deposit.name}]]
+                            </a>
+                        </td>
+                        <td>[[${deposit.getUserID()}]]</td>
+                        <td>[[${#dates.format(deposit.getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */--></td>
+                        <td>
+                            <th:block th:if="${deposit?.status?.name() != 'NOT_STARTED'}">
+                            [[${deposit.getSizeStr()}]]
+                            </th:block>
+                        </td>
+                        <td th:switch="${deposit?.status?.name()}">
+                            <th:block th:case="COMPLETE">
+                                <div class="pull-right">
+                                    <th:block th:if="${deposit.hasPersonalData}">
+                                        <span class="label label-info" style="margin-right: 10px">Personal data</span>
+                                    </th:block>
+                                    <th:block th:with="canRetrieveDataExpression3=|hasPermission('${vault.ID}', 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') or hasPermission('${vault.groupID}', 'GROUP', 'CAN_RETRIEVE_DATA')|">
+
+                                    <th:block th:if="${#authorization.expression(canRetrieveDataExpression3)}">
+                                        <th:block th:if="${deposit?.status?.name() == 'COMPLETE'}">
+                                        <a id="retrievebtn" class="btn btn-default"
+                                           th:href="@{|/vaults/${vault.getID()}/deposits/${deposit.getID()}/retrieve|}">
+                                            <span class="fa fa-upload fa-rotate-180" aria-hidden="true"></span> Retrieve
+                                        </a>
+                                        </th:block>
+                                    </th:block></th:block><!-- canRetrieveDataExpression3 -->
+                                </div>
+                            </th:block>
+                            <th:block th:case="FAILED">
+                                <span class="label label-danger pull-right">Failed</span>
+                            </th:block>
+                            <th:block th:case="NOT_STARTED">
+                                <span class="label label-info pull-right">Queued</span>
+                            </th:block>
+                            <th:block th:case="IN_PROGRESS">
+                                <span class="label label-info pull-right">In progress</span>
+                            </th:block>
+                            <th:block th:case="*">
+                                <span class="label label-info pull-right">[[${deposit.status}]]</span>
+                            </th:block>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </th:block>
+        <th:block th:if="${deposits == null}">
+            <th:block th:with="addDepositsSecurityExpression4=|hasPermission('${vault.ID}', 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES')|">
+            <th:block th:if="${#authorization.expression(addDepositsSecurityExpression4)}">
+            <div class="row">
+                <div class="col-md-12">
+                    <a class="btn btn-primary" th:href="@{|/vaults/${vault.getID()}/deposits/create|}">
+                        <i class="fa fa-download fa-rotate-180" aria-hidden="true"></i> Deposit data
+                    </a>
+                </div>
+            </div>
+            </th:block></th:block><!-- addDepositsSecurityExpression4 -->
+        </th:block>
+        </th:block></th:block><!-- viewDepositsSecurityExpression1 -->
+
+            <div id="accordion">
+                <th:block th:with="viewMetadataSecurityExpression5=|hasPermission('${vault.ID}', 'vault', 'VIEW_VAULT_METADATA') or hasPermission('${vault.groupID}', 'GROUP', 'VIEW_SCHOOL_VAULT_METADATA')|">
+                <th:block th:if="${#authorization.expression(viewMetadataSecurityExpression5)}">
+                <h4 class="accordion-toggle">
+                    ‹› &nbsp;Summary of Full Vault Metadata
+                </h4>
+                <div class="accordion-content">
+                    <table class="table table-sm">
+
+                        <tbody>
+                            <tr>
+                                <th scope="col">Vault Name</th>
+                                <td>[[${vault.name}]]</td>
+                                <td>
+                                    <th:block th:with="editVaultNameSecurityExpression6=|hasRole('ROLE_ADMIN')|">
+                                    <th:block th:if="${#authorization.expression(editVaultNameSecurityExpression6)}">
+                                        <button type="button" class="btn btn-default pull-right" data-toggle="modal" data-target="#update-vault-name">
+                                            Edit
+                                        </button>
+                                    </th:block></th:block><!-- editVaultNameSecurityExpression6 -->
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="col">Description</th>
+                                <td>[[${vault.description}]]</td>
+                                <td>
+                                    <th:block th:with="editVaultSecurityExpression7=|hasPermission('${vault.ID}', 'vault', 'VIEW_VAULT_METADATA') or hasPermission('${vault.getGroupID()}', 'GROUP', 'EDIT_SCHOOL_VAULT_METADATA')|">
+                                    <th:block th:if="${#authorization.expression(editVaultSecurityExpression7)}">
+                                    <button type="button" class="btn btn-default pull-right" data-toggle="modal" data-target="#update-vault-description">
+                                        Edit
+                                    </button>
+                                    </th:block></th:block><!-- editVaultSecurityExpression7 -->
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="col">Size</th>
+                                <td>
+                                    [[${vault.getSizeStr()}]]
+                                </td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <th scope="col">Grant End Date</th>
+                                <td>
+                                    <th:block th:if="${vault.grantEndDate != null}">
+                                        [[${#dates.format(vault.getGrantEndDate(),dateFormatISO)}]]<!--/* date */-->
+                                    </th:block>
+                                    <th:block th:if="${vault.grantEndDate == null}">
+                                        No end date
+                                    </th:block>
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-default pull-right" disabled>
+                                        Edit review date
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="col">Review Date</th>
+                                <td>[[${#dates.format(vault.getReviewDate(),dateFormatISO)}]]<!--/* date */--></td>
+                                <td>
+                                    <button type="button" class="btn btn-default pull-right" disabled>
+                                        Edit review date
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="alert alert-info" role="alert">
+                        <p>
+                            You will not be able to add new deposits to this Vault once it is closed.
+                            The Vault will be closed ONE calendar year after the first deposit.
+                            Or, if you specify a Grant End Date,
+                            ONE calendar year after the Grant End Date IF that falls later than one year after the first deposit.
+                        </p>
+                    </div>
+                </div>
+                </th:block></th:block><!-- viewMetadataSecurityExpression5 -->
+
+                <th:block th:with="viewVaultRolesSecurityExpression8=|hasPermission('${vault.ID}', 'vault', 'VIEW_VAULT_ROLES') or hasPermission('${vault.groupID}', 'GROUP', 'VIEW_SCHOOL_VAULT_ROLES')|">
+                <th:block th:if="${#authorization.expression(viewVaultRolesSecurityExpression8)}">
+                <h4 class="accordion-toggle">
+                    ‹› &nbsp;Vault Roles
+                </h4>
+
+                <div class="accordion-content">
+                    <div th:replace="~{vaults/security.html}"></div>
+                </div>
+                </th:block></th:block><!-- viewVaultRolesSecurityExpression8 -->
+
+
+                <th:block th:with="viewHistorySecurityExpression9=|hasPermission('${vault.ID}', 'vault', 'VIEW_VAULT_HISTORY') or hasPermission('${vault.groupID}', 'GROUP', 'VIEW_SCHOOL_VAULT_HISTORY')|">
+                <th:block th:if="${#authorization.expression(viewHistorySecurityExpression9)}">
+                <h4 class="accordion-toggle">
+                    ‹› &nbsp;Vault History
+                </h4>
+                <div class="accordion-content">
+                    <h4><strong>Retrievals</strong></h4>
+                    <div class="scrollable">
+                        <table class="table table-bordered ">
+                            <thead>
+                            <tr>
+                                <th>Deposit Name</th>
+                                <th>Retrieved By</th>
+                                <th>For an external user</th>
+                                <th>Date and Time</th>
+                                <th>Status</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <th:block th:each="depositName: ${retrievals.keySet()}">
+                                <tr th:each="retrieve: ${retrievals.get(depositName)}">
+                                    <td>[[${depositName}]]</td>
+                                    <td>[[${retrieve?.user?.getID()}]]</td>
+                                    <td>[[${#bools.isTrue(retrieve?.hasExternalRecipients) ? 'Yes' : 'No'}]]</td>
+                                    <td>[[${#dates.format(retrieve.timestamp,globalDateTimeFormat)}]]<!--/* datetime */--></td>
+                                    <td>
+                                        <div th:switch="${retrieve?.status?.name()}" class="job-status">
+                                        <th:block th:case="COMPLETE">
+                                            <div class="text-success">
+                                                <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                                                Complete
+                                            </div>
+                                        </th:block>
+                                        <th:block th:case="FAILED">
+                                            <div class="text-danger">
+                                                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                                                Failed
+                                            </div>
+                                        </th:block>
+                                        <th:block th:case="NOT_STARTED">
+                                            Queued
+                                        </th:block>
+                                        <th:block th:case="IN_PROGRESS">
+                                            <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
+                                            In progress
+                                        </th:block>
+                                        <th:block th:case="*">
+                                            [[${retrieve.status}]]
+                                        </th:block>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </th:block>
+                            </tbody>
+                        </table>
+                    </div>
+                    <h4><strong>Events</strong></h4>
+                    <div class="scrollable">
+                        <table class="table table-bordered ">
+                            <thead>
+                            <tr>
+                                <th>User</th>
+
+                                <th>Message</th>
+                                <th>Timestamp</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+
+                                <tr th:each="event: ${roleEvents}">
+                                    <td>[[${event.userID ?: ''}]]</td>
+                                    <td>[[${event.message}]]</td>
+                                    <td>[[${#dates.format(event.timestamp,globalDateTimeFormat)}]]<!--/* datetime */--></td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h4><strong>Reviews</strong></h4>
+                    <div class="scrollable">
+                        <table class="table table-bordered ">
+                             <th:block th:each="vrm: ${vrhm.vaultReviewModels}">
+
+                                 <thead>
+                                 <tr>
+                                     <th>Date Reviewed</th>
+                                     <th>New Review Date</th>
+                                     <th>Comment</th>
+                                 </tr>
+                                 </thead>
+
+                                 <tbody>
+                                 <tr>
+                                     <th:block th:if="${vrm.actionedDate != null}">
+                                        <td>[[${#dates.format(vrm.actionedDate,dateFormatISO)}]]<!--/* date */--></td>
+                                     </th:block>
+                                     <th:block th:if="${vrm.actionedDate == null}">
+                                        <td>Review still in progress</td>
+                                     </th:block>
+                                     <td>[[${vrm.newReviewDate}]]</td>
+                                     <td>[[${vrm.comment ?: ''}]]</td>
+                                 </tr>
+                                 </tbody>
+
+                                 <thead>
+                                 <tr>
+                                     <th>Deposit</th>
+                                     <th>Marked for deletion</th>
+                                     <th>Comment</th>
+                                 </tr>
+                                 </thead>
+
+                                 <tbody>
+
+                                    <tr th:each="drm: ${vrm.depositReviewModels}">
+                                        <td>[[${drm.name}]]</td>
+                                        <td>[[${drm.deleteStatus == 0 ? 'No' : 'Yes'}]]</td>
+                                        <td>[[${drm.comment ?: ""}]]</td>
+                                    </tr>
+
+                                 </tbody>
+
+                                 <br/>
+                             </th:block>
+
+                        </table>
+                    </div>
+                </div>
+                </th:block></th:block><!-- viewHistorySecurityExpression9 -->
+            </div>
+    </div>
+</div>
+
+</div>
+<script th:inline="javascript" type="text/javascript">
+$(document).ready(function(){
+    $('[data-toggle="popover"]').popover();
+
+    $('#accordion').find('.accordion-toggle').click(function(){
+
+      //Expand or collapse this panel
+      $(this).next().slideToggle('fast');
+
+      //Hide the other panels
+      $(".accordion-content").not($(this).next()).slideUp('fast');
+
+    });
+    
+    $('[data-toggle="tooltip"]').tooltip({
+        'placement': 'right'
+    });
+
+    $( "#data-manager-uun" ).autocomplete({
+        autoFocus: true,
+        appendTo: "#add-data-manager",
+        minLength: 2,
+        source: function( request, response ) {
+            var term = request.term;
+            var baseURL = /*[(|'@{/vaults/autocompleteuun/}'|)]*/ 'replaced-by-tl';
+            $.ajax( {
+                url: baseURL + term,
+                type: 'GET',
+                dataType: "json",
+                success: function( data ) {
+                    response( data );
+                }
+            } );
+        },
+        select: function( event, ui ) {
+            var attributes = ui.item.value.split( " - " );
+            this.value = attributes[0];
+            return false;
+        }
+    });
+
+});
+</script>
+
+</th:block>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html><!DOCTYPE html><!--admin/vaults/vault.html-->
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/defaultlayout(nav='admin')}" >
+<head><title>Admin - Vault</title></head>
+<th:block layout:fragment="content">
+<div class="container">
+
+    <ol class="breadcrumb">
+        <li><a th:href="@{/admin/}"><b>Administration</b></a></li>
+        <li><a th:href="@{/admin/vaults}"><b>Vaults</b></a></li>
+        <li class="active"><b>Vault:</b> [[${vault.name}]]</li>
+    </ol>
+
+    <form th:action="@{|/admin/vaults/${vault.getID()}/checkretentionpolicy|}" method="post">
+
+    <div class="bs-callout">
+        <h2>
+            <span class="glyphicon glyphicon-folder-close"></span> [[${vault.name}]]
+        </h2>
+        <h2>
+            <small>
+                [[${vault.description}]]
+            </small>
+        </h2>
+        <hr>
+        <p>
+            <b>Owner:</b> [[${vault.userID}]]<br/>
+            <b>Retention Policy:</b> [[${retentionPolicy.name}]]<br/>
+            <b>Dataset name:</b> [[${vault.datasetName}]]<br/>
+            <b>Group:</b> [[${group.name}]]<br/>
+            <b>Created:</b> [[${#dates.format(vault.creationTime,globalDateTimeFormat)}]]<!--/* datetime */--><br/>
+            <b>Review date:</b> [[${#dates.format(vault.policyExpiry,globalDateTimeFormat)}]]<!--/* datetime */--> (Status: [[${vault.policyStatusStr}]])<br/>
+            <b>Last checked:</b> [[${#dates.format(vault.policyLastChecked,globalDateTimeFormat)}]]<!--/* datetime */--><button type="submit" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Update</button><br/>
+            <b>Size:</b> [[${vault.getSizeStr()}]]
+        </p>
+
+        <th:block th:if="${deposits != null}">
+
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr class="tr">
+                            <th>Deposit</th>
+                            <th>Origin</th>
+                            <th>File Path</th>
+                            <th>Status</th>
+                            <th>Size</th>
+                            <th>Timestamp</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                            <tr th:each="deposit: ${deposits}" class="tr">
+                                <td>
+                                    <a th:href="@{|/vaults/${vault.getID()}/deposits/${deposit.getID()}|}">[[${deposit.name}]]</a>
+                                </td>
+                                <td>[[${deposit.fileOrigin}]]</td>
+                                <td>[[${deposit.shortFilePath}]]</td>
+                                <td>
+                                    <div id="deposit-status" class="job-status">
+                                        <th:block th:switch="${deposit.status.name()}">
+                                            <div th:case="COMPLETE" class="text-success">
+                                                <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>&nbsp;Complete
+                                            </div>
+                                            <div th:case="FAILED" class="text-danger">
+                                                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>&nbsp;Failed
+                                            </div>
+                                            <div th:case="NOT_STARTED">
+                                                &nbsp;Queued
+                                            </div>
+                                            <div th:case="IN_PROGRESS">
+                                                <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>&nbsp;In progress
+                                            </div>
+                                            <div th:case="*">
+                                               [[${deposit.status}]]
+                                            </div>
+                                        </th:block>
+                                    </div>
+                                </td>
+                                <td>[[${deposit.getSizeStr()}]]</td>
+                                <td>[[${#dates.format(deposit.getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */--></td>
+                            </tr>
+                    </tbody>
+                </table>
+            </div>
+        </th:block>
+    </div>
+
+        <input type="hidden" th:name="${_csrf?.parameterName ?: ''}" th:value="${_csrf?.token ?: ''}" />
+    </form>
+
+</div>
+</th:block>
+</html>

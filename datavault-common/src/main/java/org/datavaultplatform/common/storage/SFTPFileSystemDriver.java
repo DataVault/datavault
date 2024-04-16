@@ -37,6 +37,8 @@ public interface SFTPFileSystemDriver extends UserStore {
 
   String store(String path, File working, Progress progress) throws Exception;
 
+  String store(String path, File working, Progress progress, String timeStampDirName) throws Exception;
+
   boolean isMonitoring();
 
 }

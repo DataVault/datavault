@@ -25,7 +25,7 @@ public class PerformDepositThenRetrieveNoChunksIT extends BasePerformDepositThen
   }
 
   @Override
-  Optional<Integer> getExpectedNumberChunks() {
+  Optional<Integer> getExpectedNumberChunksPerDeposit() {
     return Optional.empty();
   }
 }

@@ -1,0 +1,78 @@
+<!DOCTYPE html><!--admin/pendingVaults/edit/editPendingVault.html-->
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/defaultlayout(nav='home')}"
+      xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
+      >
+<head><title>Admin - Edit Pending Vault</title></head>
+<body>
+<th:block layout:fragment="content">
+
+<!--/* ALLOW ONLY ADMIN ACCESS */-->
+<th:block sec:authorize="hasRole('ROLE_IS_ADMIN')">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-uoe-low">
+
+                    <div class="associated-image">
+                        <figure class="uoe-panel-image uoe-panel-image"></figure>
+                    </div>
+
+                    <div class="panel-body">
+                        <h2>
+                            Edit Pending Vault
+                        </h2>
+
+                        <br/>
+
+                        <!-- MultiStep Form -->
+                        <div class="container">
+                            <div th:if="${!#lists.isEmpty(errors)}" id="create-error" class="alert alert-danger" role="alert">
+                                Your request contains the following errors<br/>
+                                <th:block th:each="error: ${errors}" >
+                                    <th:block th:utext="${error}"/><br/>
+                                </th:block>
+                            </div>
+                            <div class="row justify-content-center mt-0">
+                                <div class="col-10 text-center p-0 mt-3 mb-2">
+                                    <div class="card px-0 pt-4 pb-0 mt-3 mb-3">
+                                        <div class="row">
+                                            <div class="col-md-12 mx-0">
+                                                <form id="pendingvault-edit-form" class="form" role="form" th:object="${vault}"
+                                                      th:action="@{/admin/pendingVaults/edit}" method="post" novalidate="novalidate" _lpchecked="1">
+                                                    <!-- fieldsets -->
+                                                    <div th:replace="~{admin/pendingVaults/edit/editProgressFieldset.html}"></div>
+                                                    <div th:replace="~{admin/pendingVaults/edit/editSummaryFieldset.html}"></div>
+                                                    <div th:replace="~{admin/pendingVaults/edit/editBillingFieldset.html}"></div>
+                                                    <div th:replace="~{admin/pendingVaults/edit/editInfoFieldset.html}"></div>
+                                                    <div th:replace="~{admin/pendingVaults/edit/editUsersFieldset.html}"></div>
+
+                                                    <input type="hidden" id="submitAction" name="action" value="submit" />
+                                                    <input type="hidden" id="pendingID" th:field="*{pendingID}" />
+                                                    <input type="hidden" id="loggedInAs" th:field="*{loggedInAs}" />
+                                                    <input type="hidden" id="confirmed" th:field="*{confirmed}"/>
+                                                    <input type="hidden" th:name="${_csrf?.parameterName ?: ''}" th:value="${_csrf?.token ?: ''}" />
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                 </div>
+               </div>
+            </div>
+    
+   <!-- Custom javascript -->
+   <!-- import date-validation-utils.js first -->
+   <script th:src="@{/resources/application/js/date-validation-utils.js}"></script>
+   <script th:src="@{/resources/application/js/admin-pending-vault-edit.js}"></script>
+
+    </div>
+</th:block>
+<div sec:authorize="!hasRole('ROLE_IS_ADMIN')">
+    <-- YOU DO NOT HAVE PERMISSION TO VIEW THIS PAGE -->
+</div>
+</th:block>
+</body>
+</html>

@@ -1,0 +1,171 @@
+<!DOCTYPE html><!--admin/audit/deposits.html-->
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/defaultlayout(nav='admin')}">
+
+<head><title>Admin Audits Deposits</title></head>
+<th:block layout:fragment="content">
+
+<div class="modal fade" id="confirm-removal" tabindex="-1" role="dialog" aria-labelledby="confirmRemovalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 class="modal-title" id="confirmRemovalLabel">Confirm removal of Deposit</h4>
+                </div>
+                <div class="modal-body">
+                    <p>You have selected to delete the files in this deposit.<br> Do you have the authorisation of the Owner / Data Manager and Head of School or College, as per the review process? (In the case of an ‘orphan’ vault, permission of the Head of School and College is necessary).</p>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger btn-ok" id="remove">Yes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+
+        <ol class="breadcrumb">
+            <li><a th:href="@{/admin/}"><b>Administration</b></a></li>
+            <li class="active"><b>Audits</b></li>
+        </ol>
+        <div class="row">
+            <div class="cold-md-12">
+                <button id="audit" class="btn btn-primary pull-right">
+                    <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span> Run Audit
+                </button>
+            </div>
+        </div>
+
+        <th:block th:if="${!#lists.isEmpty(deposits)}">
+
+        <form action="" method="get" class="form-inline">
+            <div class="form-group">
+                Sort by:
+                <label class="checkbox-inline">
+                    <input class="form-check-input" type="radio" name="sort" id="date" value="date" th:checked="${sort == 'date'}" > Date
+                </label>
+                <label class="checkbox-inline">
+                    <input class="form-check-input" type="radio" name="sort" id="chunkStatus" value="chunkStatus" th:checked="${sort == 'chunkStatus'}" > Chunk Status
+                </label>
+                <label class="checkbox-inline">
+                    <input class="form-check-input" type="radio" name="sort" id="chunkNum" value="chunkNum" th:checked="${sort == 'chunkNum'}" > Chunk Number
+                </label>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+
+        <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+            <th:block th:each="deposit: ${deposits}">
+            <div class="panel panel-default">
+                <div class="panel-heading row" role="tab" th:id="|heading-${deposit['deposit'].getID()}|">
+                    <div class="col-md-6">
+                    <h4 class="panel-title">
+                        <a role="button" data-toggle="collapse" data-parent="#accordion"
+                           th:href="|#collapse-${deposit['deposit'].getID()}|"
+                           aria-expanded="true" th:aria-controls="|collapse${deposit['deposit'].getID()}|">
+                            [[${deposit['deposit'].getName()}]] &#91;[[${deposit['deposit'].getID()}]]&#93;
+                        </a>
+                    </h4>
+                    </div>
+                    <div class="col-md-3">
+                        [[${#dates.format(deposit['deposit'].getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */-->
+                    </div>
+                    <div class="col-md-3">
+                        [[${deposit['deposit'].getStatus()}]]
+                    </div>
+                </div>
+                <div th:id="|collapse-${deposit['deposit'].getID()}|" class="panel-collapse collapse" role="tabpanel"
+                     th:aria-labelledby="|heading-${deposit['deposit'].getID()}|">
+                    <div class="panel-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                <tr class="tr">
+                                    <th>Status</th>
+                                    <th>Chunk</th>
+                                    <th>Last Audit Start</th>
+                                    <th>Last Audit End</th>
+                                    <th>Last Audit Status</th>
+                                    <th>Last Audit Message</th>
+                                </tr>
+                                </thead>
+
+                                <tbody>
+                                    <tr th:each="chunkInfo: ${deposit['chunks_info']}" class="tr">
+                                        <td th:with="hasLastAuditChunk=${chunkInfo['last_audit_chunk'] != null}">
+                                            <span th:if="${hasLastAuditChunk}"  class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                                            <span th:if="${!hasLastAuditChunk}" class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                                        </td>
+                                        <td>
+                                            [[${chunkInfo['deposit_chunk'].getChunkNum()}]]
+                                        </td>
+                                        <th:block th:if="${hasLastAuditChunk}">
+                                            <th:block th:with="lastAuditChunk=${chunkInfo['last_audit_chunk']}">
+                                            <td>
+                                                <th:block th:if="${lastAuditChunk.getCreationTime() != null}">
+                                                [[${#dates.format(lastAuditChunk.getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */-->
+                                                </th:block>
+                                            </td>
+                                            <td>
+                                                <th:block th:if="${lastAuditChunk.getCompletedTime() != null}">
+                                                    [[${#dates.format(lastAuditChunk.getCompletedTime(),globalDateTimeFormat)}]]<!--/* datetime */-->
+                                                </th:block>
+                                            </td>
+                                            <td>
+                                                <th:block th:if="${lastAuditChunk.getStatus() != null}">
+                                                    [[${lastAuditChunk.getStatus()}]]
+                                                </th:block>
+                                            </td>
+                                            <td>
+                                                <th:block th:if="${lastAuditChunk.getNote() != null}">
+                                                    [[${lastAuditChunk.getNote()}]]
+                                                </th:block>
+                                            </td>
+                                        </th:block>
+                                        </th:block>
+                                        <th:block th:if="${!hasLastAuditChunk}">
+                                        <td>-</td><td>-</td><td>-</td><td>-</td>
+                                        </th:block>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </th:block><!-- for each deposit -->
+        </div>
+        </th:block><!-- end some deposits -->
+        <th:block th:if="${#lists.isEmpty(deposits)}">
+            No Data Available
+        </th:block><!-- end no deposits-->
+    </div>
+    <script th:inline="javascript" type="text/javascript">
+        $("button#audit").click(function(){
+            var baseURL = /*[(|'@{/admin/deposits/audit}'|)]*/ 'replaced-by-tl';
+            $.ajax({
+                url: baseURL,
+                type: 'GET',
+                success: function (data) {
+                    console.log("----success---");
+                },
+                error: function(xhr, ajaxOptions, thrownError) {
+                    alert('Error: unable to delete Deposit');
+                }
+            });
+        });
+
+        //Add Spring Security CSRF header to ajax requests
+        $(function () {
+            var token = $("meta[name='_csrf']").attr("content");
+            var header = $("meta[name='_csrf_header']").attr("content");
+            $(document).ajaxSend(function(e, xhr, options) {
+                xhr.setRequestHeader(header, token);
+            });
+        });
+    </script>
+</th:block>
+</html>
+

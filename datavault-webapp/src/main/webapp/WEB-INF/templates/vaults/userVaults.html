@@ -1,0 +1,57 @@
+<!DOCTYPE html><!--vaults/userVaults.html-->
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/welcomelayout(nav='home')}">
+<head><title>Vaults - User Vaults</title></head>
+<body>
+<th:block layout:fragment="content">
+    <div class="container">
+
+        <th:block th:if="${vaults != null}">
+        <h3>
+            Current Vaults
+            <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
+                title="Vaults of which you are either the Owner or the Nominated Data Manager. If you think a vault is missing from this list, please contact the Research Data Service"
+            />
+        </h3>
+        
+        <div class="row">
+            <div class="col-md-12">
+                <div class="scrollable">
+                    <table class="table table-bordered whitebackground">
+                        <thead>
+                            <tr>
+                                <th>Vault Name</th>                                
+                                <th>Owner Name</th>
+                                <th>Role</th>
+                                <th>Vault Size</th>
+                                <th>Date Created</th>
+                                <th class="text-muted">Review Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            <tr th:each="vault: ${vaults}">
+                                <td>
+                                    <a th:href="@{|/vaults/${vault.getID()}/|}">
+                                        [[${vault.name}]]
+                                    </a>
+                                </td>
+                                <td>[[${vault.getUserName()}]] ([[${vault.getUserID()}]])</td>
+                                <td></td>
+                                <td>[[${vault.getVaultSize()}]]</td>
+                                <td>[[${#dates.format(vault.getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */--></td>
+                                <td class="text-muted">[[${#dates.format(vault.getReviewDate(),dateFormatddMMyyyy)}]]<!--/* date */--></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <br/>
+        <br/>
+        </th:block>
+    </div>
+</th:block>
+</body>
+</html>
+

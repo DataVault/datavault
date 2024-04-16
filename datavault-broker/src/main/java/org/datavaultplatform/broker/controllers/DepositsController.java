@@ -12,9 +12,8 @@ import org.datavaultplatform.common.request.CreateDeposit;
 import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.common.response.EventInfo;
 import org.datavaultplatform.common.response.VaultInfo;
-import org.datavaultplatform.common.storage.StorageConstants;
-import org.datavaultplatform.common.storage.impl.TivoliStorageManager;
 import org.datavaultplatform.common.task.Task;
+import org.datavaultplatform.common.util.DateTimeUtils;
 import org.jsondoc.core.annotation.Api;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,8 +47,8 @@ public class DepositsController {
     private final JobsService jobsService;
     private final AdminService adminService;
     private final Sender sender;
-    private String optionsDir;
-	  private final String tempDir;
+    private final String optionsDir;
+    private final String tempDir;
     private final String bucketName;
     private final String region;
     private final String awsAccessKey;
@@ -62,6 +61,10 @@ public class DepositsController {
     private final String ociBucketName;
 
     private final String tsmReverse;
+    private final int userFsRetrieveMaxAttempts;
+    private final long userFsRetrieveDelaySeconds1;
+    private final long userFsRetrieveDelaySeconds2;
+
     private final ObjectMapper mapper;
 
     private static final Logger logger = LoggerFactory.getLogger(DepositsController.class);
@@ -85,6 +88,9 @@ public class DepositsController {
         @Value("${ociNameSpace:#{null}}") String ociNameSpace,
         @Value("${tsmReverse:#{false}}") String tsmReverse,
         @Value("${ociBucketName:#{null}}") String ociBucketName,
+        @Value("${userFsRetrieveMaxAttempts:10}") int userFsRetrieveMaxAttempts,
+        @Value("${userFsRetrieveDelaySeconds1:60}") long userFsRetrieveDelaySeconds1,
+        @Value("${userFsRetrieveDelaySeconds2:60}") long userFsRetrieveDelaySeconds2,
         ObjectMapper mapper) {
         this.vaultsService = vaultsService;
         this.depositsService = depositsService;
@@ -110,6 +116,9 @@ public class DepositsController {
         this.ociNameSpace = ociNameSpace;
         this.ociBucketName = ociBucketName;
         this.tsmReverse = tsmReverse;
+        this.userFsRetrieveMaxAttempts = userFsRetrieveMaxAttempts;
+        this.userFsRetrieveDelaySeconds1 = userFsRetrieveDelaySeconds1;
+        this.userFsRetrieveDelaySeconds2 = userFsRetrieveDelaySeconds2;
         this.mapper = mapper;
     }
 
@@ -149,7 +158,7 @@ public class DepositsController {
         deposit.getDepositPaths().add(fileUploadPath);
 
         List<ArchiveStore> archiveStores = archiveStoreService.getArchiveStores();
-        if (archiveStores.size() == 0) {
+        if (archiveStores.isEmpty()) {
             throw new Exception("No configured archive storage");
         }
 
@@ -302,9 +311,7 @@ public class DepositsController {
         try {
             HashMap<String, String> retrieveProperties = new HashMap<>();
             retrieveProperties.put(PropNames.DEPOSIT_ID, deposit.getID());
-            Format formatter = new SimpleDateFormat("yyyyMMdd");
-            String creationDate = formatter.format(deposit.getCreationTime());
-            retrieveProperties.put(PropNames.DEPOSIT_CREATION_DATE, creationDate);
+            retrieveProperties.put(PropNames.DEPOSIT_CREATION_DATE, DateTimeUtils.formatDateBasicISO(deposit.getCreationTime()));
             retrieveProperties.put(PropNames.RETRIEVE_ID, retrieve.getID());
             retrieveProperties.put(PropNames.BAG_ID, deposit.getBagId());
             retrieveProperties.put(PropNames.RETRIEVE_PATH, retrievePath); // No longer the absolute path
@@ -314,7 +321,10 @@ public class DepositsController {
             retrieveProperties.put(PropNames.ARCHIVE_DIGEST, deposit.getArchiveDigest());
             retrieveProperties.put(PropNames.ARCHIVE_DIGEST_ALGORITHM, deposit.getArchiveDigestAlgorithm());
             retrieveProperties.put(PropNames.NUM_OF_CHUNKS, Integer.toString(deposit.getNumOfChunks()));
-            
+            retrieveProperties.put(PropNames.USER_FS_RETRIEVE_MAX_ATTEMPTS, String.valueOf(this.userFsRetrieveMaxAttempts));
+            retrieveProperties.put(PropNames.USER_FS_RETRIEVE_DELAY_MS_1, String.valueOf(this.userFsRetrieveDelaySeconds1));
+            retrieveProperties.put(PropNames.USER_FS_RETRIEVE_DELAY_MS_2, String.valueOf(this.userFsRetrieveDelaySeconds2));
+
             // Add a single entry for the user file storage
             Map<String, String> userFileStoreClasses = new HashMap<>();
             Map<String, Map<String, String>> userFileStoreProperties = new HashMap<>();
@@ -366,19 +376,19 @@ public class DepositsController {
 	    	for (ArchiveStore archiveStore : archiveStores) {
 		        if (archiveStore.isTivoliStorageManager()) {
 		        	HashMap<String, String> asProps = archiveStore.getProperties();
-		        	if (this.optionsDir != null && ! this.optionsDir.equals("")) {
+		        	if (this.optionsDir != null && !this.optionsDir.isEmpty()) {
 		        		asProps.put(PropNames.OPTIONS_DIR, this.optionsDir);
 		        	}
-		        	if (this.tempDir != null && ! this.tempDir.equals("")) {
+		        	if (this.tempDir != null && !this.tempDir.isEmpty()) {
 		        		asProps.put(PropNames.TEMP_DIR, this.tempDir);
 		        	}
-		        	if (this.tsmRetryTime != null && ! this.tsmRetryTime.equals("")) {
+		        	if (this.tsmRetryTime != null && !this.tsmRetryTime.isEmpty()) {
 		        	    asProps.put(PropNames.TSM_RETRY_TIME, this.tsmRetryTime);
                     }
-                    if (this.tsmMaxRetries != null && ! this.tsmMaxRetries.equals("")) {
+                    if (this.tsmMaxRetries != null && !this.tsmMaxRetries.isEmpty()) {
                         asProps.put(PropNames.TSM_MAX_RETRIES, this.tsmMaxRetries);
                     }
-                    if (this.tsmReverse != null && ! this.tsmReverse.equals("")) {
+                    if (this.tsmReverse != null && !this.tsmReverse.isEmpty()) {
                         asProps.put(PropNames.TSM_REVERSE, this.tsmReverse);
                     }
 
@@ -387,16 +397,16 @@ public class DepositsController {
 
 		        if (archiveStore.isOracle()) {
                     HashMap<String, String> asProps = archiveStore.getProperties();
-                    if (this.occRetryTime != null && ! this.occRetryTime.equals("")) {
+                    if (this.occRetryTime != null && !this.occRetryTime.isEmpty()) {
                         asProps.put(PropNames.OCC_RETRY_TIME, this.occRetryTime);
                     }
-                    if (this.occMaxRetries != null && ! this.occMaxRetries.equals("")) {
+                    if (this.occMaxRetries != null && !this.occMaxRetries.isEmpty()) {
                         asProps.put(PropNames.OCC_MAX_RETRIES, this.occMaxRetries);
                     }
-                    if (this.ociBucketName != null && ! this.ociBucketName.equals("")) {
+                    if (this.ociBucketName != null && !this.ociBucketName.isEmpty()) {
                         asProps.put(PropNames.OCI_BUCKET_NAME, this.ociBucketName);
                     }
-                    if (this.ociNameSpace != null && ! this.ociNameSpace.equals("")) {
+                    if (this.ociNameSpace != null && !this.ociNameSpace.isEmpty()) {
                         asProps.put(PropNames.OCI_NAME_SPACE, this.ociNameSpace);
                     }
                     archiveStore.setProperties(asProps);
@@ -404,16 +414,16 @@ public class DepositsController {
 
 		        if (archiveStore.isAmazonS3()) {
 		        	HashMap<String, String> asProps = archiveStore.getProperties();
-		        	if (this.bucketName != null && ! this.bucketName.equals("")) {
+		        	if (this.bucketName != null && !this.bucketName.isEmpty()) {
 		        		asProps.put(PropNames.AWS_S3_BUCKET_NAME, this.bucketName);
 		        	}
-		        	if (this.region != null && ! this.region.equals("")) {
+		        	if (this.region != null && !this.region.isEmpty()) {
 		        		asProps.put(PropNames.AWS_S3_REGION, this.region);
 		        	}
-		        	if (this.awsAccessKey != null && ! this.awsAccessKey.equals("")) {
+		        	if (this.awsAccessKey != null && !this.awsAccessKey.isEmpty()) {
 		        		asProps.put(PropNames.AWS_ACCESS_KEY, this.awsAccessKey);
 		        	}
-		        	if (this.awsSecretKey != null && ! this.awsSecretKey.equals("")) {
+		        	if (this.awsSecretKey != null && !this.awsSecretKey.isEmpty()) {
 		        		asProps.put(PropNames.AWS_SECRET_KEY, this.awsSecretKey);
 		        	}
 

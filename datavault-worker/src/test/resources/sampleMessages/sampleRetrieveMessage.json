@@ -7,7 +7,10 @@
     "retrievePath" : "retDir",
     "archiveSize" : "50010112",
     "archiveDigest" : "B32854FA767B73A0F5C78664780080BA56E7B234",
-    "archiveId" : "27092022-175853.tar"
+    "archiveId" : "27092022-175853.tar",
+    "userFsRetrieveMaxAttempts" : "10",
+    "userFsRetrieveDelaySeconds1" : "60",
+    "userFsRetrieveDelaySeconds2" : "60"
   },
   "archiveFileStores" : [ {
     "id" : "ARCHIVE-STORE-DST-ID",

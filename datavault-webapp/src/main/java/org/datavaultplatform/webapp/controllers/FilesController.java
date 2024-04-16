@@ -34,11 +34,10 @@ public class FilesController {
         this.restService = restService;
     }
 
-    public ArrayList<FancytreeNode> getNodes(String parent, Boolean directoryOnly, DISPLAY_VISIBILITY visibility)
-            throws Exception {
+    public ArrayList<FancytreeNode> getNodes(String parent, Boolean directoryOnly, DISPLAY_VISIBILITY visibility) throws Exception{
 
         String filePath = "";
-
+        
         if (parent != null) {
             // This is a request for a sub-path
             filePath = parent;
@@ -46,17 +45,17 @@ public class FilesController {
 
         FileInfo[] files = restService.getFilesListing(filePath);
         ArrayList<FancytreeNode> nodes = new ArrayList<>();
-
+        
         for (FileInfo info : files) {
-
+            
             if (directoryOnly && !info.getIsDirectory()) {
                 continue;
             }
-
+            
             FancytreeNode node = new FancytreeNode();
             node.setKey(info.getKey());
-            String nodeTitle = info.getName();
             node.setTitle(info.getName());
+            
             if (info.getIsDirectory()) {
                 switch (visibility) {
                     case READ:
@@ -105,44 +104,44 @@ public class FilesController {
 
             nodes.add(node);
         }
-
+        
         return nodes;
     }
-
+    
     @RequestMapping("/files")
-    public @ResponseBody ArrayList<FancytreeNode> getFilesListing(HttpServletRequest request) throws Exception {
+    public @ResponseBody ArrayList<FancytreeNode> getFilesListing(HttpServletRequest request) throws Exception{
 
         // Fancytree parameters
         String mode = request.getParameter("mode");
         String parent = request.getParameter("parent");
-
+        
         return getNodes(parent, false, DISPLAY_VISIBILITY.READ);
     }
-
+    
     @RequestMapping("/dir")
-    public @ResponseBody ArrayList<FancytreeNode> getDirListing(HttpServletRequest request) throws Exception {
+    public @ResponseBody ArrayList<FancytreeNode> getDirListing(HttpServletRequest request) throws Exception{
 
         // Fancytree parameters
         String mode = request.getParameter("mode");
         String parent = request.getParameter("parent");
-
+        
         return getNodes(parent, true, DISPLAY_VISIBILITY.WRITE);
     }
-
+    
     @RequestMapping("/filesize")
-    public @ResponseBody String getFilesize(HttpServletRequest request) throws Exception {
+    public @ResponseBody String getFilesize(HttpServletRequest request) throws Exception{
 
         String filepath = request.getParameter("filepath");
-
+        
         return restService.getFilesize(filepath);
     }
 
     @RequestMapping("/checkdepositsize")
-    public @ResponseBody String checkDepositSize(HttpServletRequest request) throws Exception {
+    public @ResponseBody String checkDepositSize(HttpServletRequest request) throws Exception{
 
         String[] filePaths = request.getParameterValues("filepath[]");
 
-        for (String filePath : filePaths) {
+        for(String filePath : filePaths){
             log.info("filePaths: " + filePath);
         }
 
@@ -154,10 +153,10 @@ public class FilesController {
         return "{ \"success\":\"" + success + "\", \"max\":\"" + max + "\", \"sizeWithUnits\":\"" + sizeWithUnits
                 + "\"}";
     }
-
+    
     @RequestMapping(value = "/fileupload", method = RequestMethod.POST)
     public void fileUpload(MultipartHttpServletRequest request, HttpServletResponse response) throws Exception {
-
+        
         String flowChunkNumber = request.getParameter("flowChunkNumber");
         String flowTotalChunks = request.getParameter("flowTotalChunks");
         String flowChunkSize = request.getParameter("flowChunkSize");
@@ -166,26 +165,25 @@ public class FilesController {
         String flowFilename = request.getParameter("flowFilename");
         String flowRelativePath = request.getParameter("flowRelativePath");
         String fileUploadHandle = request.getParameter("fileUploadHandle");
-
+        
         /*
-         * logger.info("webapp fileupload:" +
-         * " flowChunkNumber=" + flowChunkNumber +
-         * " flowTotalChunks=" + flowTotalChunks +
-         * " flowChunkSize=" + flowChunkSize +
-         * " flowTotalSize=" + flowTotalSize +
-         * " flowIdentifier=" + flowIdentifier +
-         * " flowFilename=" + flowFilename +
-         * " flowRelativePath=" + flowRelativePath +
-         * " fileUploadHandle=" + fileUploadHandle);
-         */
-
+        logger.info("webapp fileupload:" +
+                " flowChunkNumber=" + flowChunkNumber +
+                " flowTotalChunks=" + flowTotalChunks +
+                " flowChunkSize=" + flowChunkSize +
+                " flowTotalSize=" + flowTotalSize +
+                " flowIdentifier=" + flowIdentifier +
+                " flowFilename=" + flowFilename +
+                " flowRelativePath=" + flowRelativePath +
+                " fileUploadHandle=" + fileUploadHandle);
+        */
+        
         MultipartFile file = request.getFile("file");
-
+        
         // Send this chunk to the broker
         String encodedRelativePath = new String(Base64.encodeBase64(flowRelativePath.getBytes()));
-        restService.addFileChunk(fileUploadHandle, flowFilename, encodedRelativePath, flowChunkNumber, flowTotalChunks,
-                flowChunkSize, flowTotalSize, file.getBytes());
-
+        restService.addFileChunk(fileUploadHandle, flowFilename, encodedRelativePath, flowChunkNumber, flowTotalChunks, flowChunkSize, flowTotalSize, file.getBytes());
+        
         // Send a response to the client
         java.io.PrintWriter wr = response.getWriter();
         response.setStatus(HttpServletResponse.SC_OK);

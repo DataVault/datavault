@@ -1,9 +1,10 @@
 package org.datavaultplatform.common.storage.impl;
 
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
 import java.time.Clock;
-import java.util.Date;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.concurrent.TimeUnit;
 import lombok.SneakyThrows;
 import org.springframework.util.Assert;
@@ -21,7 +22,8 @@ public class SftpUtils {
       // We are sleeping to ensure we don't get duplicate timestamp folders - assumes single thread - TODO ensure this
       TimeUnit.SECONDS.sleep(2);
       // Create timestamped folder to avoid overwriting files
-      String timeStamp = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date(clock.millis()));
+      DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss").withZone(ZoneId.of("Europe/London"));
+      String timeStamp = ZonedDateTime.now(clock).format(formatter);
       String timestampDirName = "dv_" + timeStamp;
       return timestampDirName;
     }

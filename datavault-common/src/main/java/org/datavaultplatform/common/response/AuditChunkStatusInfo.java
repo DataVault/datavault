@@ -3,6 +3,7 @@ package org.datavaultplatform.common.response;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.datavaultplatform.common.model.*;
+import org.datavaultplatform.common.util.DateTimeUtils;
 import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
 
@@ -16,11 +17,11 @@ public class AuditChunkStatusInfo {
     private String id;
 
     @ApiObjectField(description = "Date that the audit started")
-    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern=DateTimeUtils.ISO_DATE_TIME_FORMAT)
     private Date creationTime;
 
     @ApiObjectField(description = "Date that the audit finished")
-    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern=DateTimeUtils.ISO_DATE_TIME_FORMAT)
     private Date completedTime;
 
     @ApiObjectField(description = "Status of the Audit", allowedvalues={"FAILED", "IN_PROGRESS", "COMPLETE"})

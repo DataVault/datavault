@@ -180,7 +180,7 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 		
 		return depositId;
 	}
-	
+
 	@Override
 	public void delete(String path, File working, Progress progress) {
 		/*try {
@@ -209,7 +209,6 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 			LOGGER.error("Object does not exists in Oracle Cloud Storage " + e.getMessage());
 		}
 	}
-	
 
 	/*private String getContainerName() throws Exception {
 		Properties prop = this.getProperties();
@@ -289,5 +288,8 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 			return false;
 		}
 	}
-
+	@Override
+	public Logger getLogger() {
+		return LOGGER;
+	}
 }

@@ -17,7 +17,10 @@ public interface PropNames {
   String CHUNK_NUM = "chunkNum";
   String DEPOSIT_CHUNK = "depositChunk";
   String DEPOSIT_ID = "depositId";
-
+  /**
+   * DepositCreationDate: Date Value in Basic ISO Format e.g. '20240131'
+   * <p/>TODO - change to '2024-01-31'
+   */
   String DEPOSIT_CREATION_DATE = "depositCreationDate";
   String DEPOSIT_METADATA = "depositMetadata";
   String EXTERNAL_METADATA = "externalMetadata";
@@ -48,4 +51,7 @@ public interface PropNames {
   String MONITOR_SFTP = "monitorSftp";
 
   String TSM_REVERSE = "tsmReverse";
+  String USER_FS_RETRIEVE_MAX_ATTEMPTS = "userFsRetrieveMaxAttempts";
+  String USER_FS_RETRIEVE_DELAY_MS_1 = "userFsRetrieveDelayMs1";
+  String USER_FS_RETRIEVE_DELAY_MS_2 = "userFsRetrieveDelayMs2";
 }
