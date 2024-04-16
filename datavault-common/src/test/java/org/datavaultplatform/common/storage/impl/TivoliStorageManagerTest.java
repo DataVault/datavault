@@ -228,8 +228,8 @@ class TivoliStorageManagerTest {
                     argMaxRetries.capture(),
                     argRetryTimeMins.capture());
 
-            Mockito.when(mTSMTracker1.call()).thenThrow(new IOException("oops1"));
-            Mockito.when(mTSMTracker2.call()).thenReturn("two");
+            lenient().when(mTSMTracker1.call()).thenThrow(new IOException("oops1"));
+            lenient().when(mTSMTracker2.call()).thenReturn("two");
 
             Progress progress = new Progress();
             
@@ -263,8 +263,8 @@ class TivoliStorageManagerTest {
                     argMaxRetries.capture(),
                     argRetryTimeMins.capture());
 
-            Mockito.when(mTSMTracker1.call()).thenReturn("one");
-            Mockito.when(mTSMTracker2.call()).thenThrow(new IOException("oops2"));
+            lenient().when(mTSMTracker1.call()).thenReturn("one");
+            lenient().when(mTSMTracker2.call()).thenThrow(new IOException("oops2"));
 
             Progress progress = new Progress();
 
