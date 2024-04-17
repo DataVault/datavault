@@ -628,7 +628,7 @@ public abstract class BaseSFTPFileSystemIT {
   @SneakyThrows
   void cleanup() {
     executeCommand("pwd");
-    executeCommand("ls -l /config");
+    executeCommand("ls -ld /config/dv_");
     executeCommand("/bin/bash","-c","if [ -d config/dv_20220326094433 ]; then rm -rf config/dv_20220326094433; fi");
   }
 
@@ -665,5 +665,23 @@ public abstract class BaseSFTPFileSystemIT {
     getLog().info("Listing {} files took [{}]ms", files.size(), diffMS);
     assertThat(files).hasSizeGreaterThan(1_000);
     assertThat(Duration.ofMillis(diffMS)).isLessThan(Duration.ofSeconds(5));
+  }
+
+  
+  protected static void setupFilesWithinContainer(GenericContainer<?> container) throws Exception {
+    System.out.println("INIT CONTAINER START");
+    org.testcontainers.containers.Container.ExecResult result1 = container.execInContainer("mkdir","/config/rootDir");
+    System.out.println(result1);
+    org.testcontainers.containers.Container.ExecResult result2 = container.execInContainer("sh","-c","echo 'one' > /config/rootFile.txt");
+    System.out.println(result2);
+    org.testcontainers.containers.Container.ExecResult result3 = container.execInContainer("sh","-c","echo 'two' > /config/rootDir/rootFile.txt");
+    System.out.println(result3);
+    org.testcontainers.containers.Container.ExecResult result4 = container.execInContainer("sh","-c","echo 'three' > /config/onlyRootCanRead.txt");
+    System.out.println(result4);
+    org.testcontainers.containers.Container.ExecResult result5 = container.execInContainer("sh","-c","chmod 700 /config/onlyRootCanRead.txt");
+    System.out.println(result5);
+    org.testcontainers.containers.Container.ExecResult result6 = container.execInContainer("sh","-c","find /config -name root\"*\" -exec ls -ld {} \\;");
+    System.out.println(result6);
+    System.out.println("INIT CONTAINER END");
   }
 }

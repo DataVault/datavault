@@ -2,10 +2,13 @@ package org.datavaultplatform.common.storage.impl;
 
 import com.jcraft.jsch.*;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.time.Clock;
+import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.io.IOUtils;
 import org.bouncycastle.util.encoders.Base64;
 import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.crypto.Encryption;
@@ -56,16 +59,16 @@ public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
         JSch.setLogger(JSchLogger.getInstance());
     }
 
-    public SFTPFileSystemJSch(String name, Map<String,String> config) {
+    public SFTPFileSystemJSch(String name, Map<String, String> config) {
         this(name, config, Clock.systemDefaultZone());
     }
 
-    public SFTPFileSystemJSch(String name, Map<String,String> config, Clock clock) {
+    public SFTPFileSystemJSch(String name, Map<String, String> config, Clock clock) {
         super(name, config);
         this.clock = clock;
 
         log.info("Construct SFTPFileSystemJSch...");
-        
+
         // Unpack the config parameters (in an implementation-specific way)
         host = config.get(PropNames.HOST);
         port = Integer.parseInt(config.get(PropNames.PORT));
@@ -89,7 +92,7 @@ public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
         } else {
             byte[] privateKey = Encryption.decryptSecret(encPrivateKey, encIV);
 
-            log.debug("Private Key: {}"+new String(privateKey));
+            log.debug("Private Key: {}", new String(privateKey));
             jsch.addIdentity(username, privateKey, null, passphrase.getBytes());
         }
 
@@ -100,78 +103,78 @@ public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
         properties.put(STRICT_HOST_KEY_CHECKING, NO);
         session.setConfig(properties);
         for (int i = 0; i < RETRIES; i++) {
-            int attempt = i+1;
+            int attempt = i + 1;
             try {
-               log.info("Sftp connection attempt[{}/{}]", attempt, RETRIES);
-               session.connect();
-               break;
-            } catch(JSchException ex) {
-               if (i == RETRIES - 1) {
-                   log.error("problem with Jsch attempt[{}/{}]", attempt, RETRIES, ex);
-                   throw ex;
-               } else {
-                   log.warn("problem with Jsch attempt[{}/{}]", attempt, RETRIES, ex);
-               }
+                log.info("Sftp connection attempt[{}/{}]", attempt, RETRIES);
+                session.connect();
+                break;
+            } catch (JSchException ex) {
+                if (i == RETRIES - 1) {
+                    log.error("problem with Jsch attempt[{}/{}]", attempt, RETRIES, ex);
+                    throw ex;
+                } else {
+                    log.warn("problem with Jsch attempt[{}/{}]", attempt, RETRIES, ex);
+                }
             }
         }
-        
+
         // Start a channel for SFTP
         Channel channel = session.openChannel("sftp");
         channel.connect();
-        channelSftp = (ChannelSftp)channel;
+        channelSftp = (ChannelSftp) channel;
         channelSftp.cd(rootPath);
     }
-    
+
     private void Disconnect() {
         if (channelSftp != null) {
             channelSftp.exit();
         }
-        
+
         if (session != null) {
             session.disconnect();
         }
     }
 
-    private String runCommand(String command) throws Exception {
+    public CommandResult runCommand(String command) throws Exception {
+        try{
+            Connect();
+            return runCommandInternal(command);
+        }finally {
+            Disconnect();
+        }
+    }
+    
+    private CommandResult runCommandInternal(String command) throws Exception {
         
         ChannelExec channelExec = null;
         
         try {
-            Connect();
-            
             // Start a channel for commands
             channelExec = (ChannelExec)(session.openChannel("exec"));
             
             channelExec.setCommand(command);
             channelExec.setInputStream(null);
-            channelExec.setErrStream(System.err);
-            InputStream in = channelExec.getInputStream();
             
             channelExec.connect();
+
+            InputStream err = channelExec.getExtInputStream();
+            InputStream in = channelExec.getInputStream();
+
+            String stdOut = IOUtils.toString(in, StandardCharsets.UTF_8);
+            String stdErr = IOUtils.toString(err, StandardCharsets.UTF_8);
             
-            byte[] tmp = new byte[1024];
-            StringBuilder response = new StringBuilder();
-
-            while(true) {
-                while (in.available() > 0) {
-                    int i = in.read(tmp, 0, 1024);
-                    if (i < 0) {
-                        break;
-                    }
-                    response.append(new String(tmp, 0, i));
-                }
-
-                if (channelExec.isClosed()) {
-                    if (in.available() > 0) {
-                        continue;
-                    }
-                    log.info("exit-status: " + channelExec.getExitStatus());
-                    break;
-                }
+            int exitStatus = -1;
+            if(channelExec.isClosed()) {
+                exitStatus = channelExec.getExitStatus();
             }
+            log.info("exit-status: {}", exitStatus);
             
-            log.info("response: " + response);
-            return response.toString();
+            CommandResult result = new CommandResult();
+            result.setExitStatus(exitStatus);
+            result.setStdOut(stdOut);
+            result.setStdError(stdErr);
+            
+            return result;
             
         } catch (Exception e) {
             log.error("unexpected exception", e);
@@ -180,7 +183,6 @@ public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
             if (channelExec != null) {
                 channelExec.disconnect();
             }
-            Disconnect();
         }
     }
     
@@ -414,8 +416,9 @@ public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
     @Override
     public Logger getLogger() {
         return log;
-    } 
-    
+    }
+
+    @Override
     public boolean canRead(String path) throws Exception {
         try {
             Connect();
@@ -429,7 +432,7 @@ public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
     }
 
     @Override
-	public boolean canWrite(String path) throws Exception {
+    public boolean canWrite(String path) throws Exception {
         try {
             Connect();
             return canWriteInternal(path);
@@ -440,13 +443,57 @@ public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
             Disconnect();
         }
     }
-    
-    public boolean canWriteInternal(String path) throws  Exception {
-        return getPermissionsString(path).contains("w");
+
+    private boolean canReadInternal(String path) throws Exception {
+        CommandResult result = runCommandInternal(String.format("[ -r %s ]", path));
+        return result.getExitStatus() == 0;
+    }
+
+    private boolean canWriteInternal(String path) throws Exception {
+        CommandResult result = runCommandInternal(String.format("[ -w %s ]", path));
+        return result.getExitStatus() == 0;
+    }
+
+    public boolean canReadOLD(String path) throws Exception {
+        try {
+            Connect();
+            return canReadInternalOLD(path);
+        } catch (Exception ex) {
+            log.error("unexpected exception", ex);
+            throw ex;
+        } finally {
+            Disconnect();
+        }
+    }
+
+    public boolean canWriteOLD(String path) throws Exception {
+        try {
+            Connect();
+            return canWriteInternalOLD(path);
+        } catch (Exception ex) {
+            log.error("unexpected exception", ex);
+            throw ex;
+        } finally {
+            Disconnect();
+        }
     }
     
-    public boolean canReadInternal(String path) throws  Exception {
-        return getPermissionsString(path).contains("r");
+    private boolean canWriteInternalOLD(String path) {
+        try {
+            return getPermissionsString(path).contains("w");
+        } catch (Exception ex) {
+            log.warn("problem getting permission string for [{}]", path, ex);
+            return false;
+        }
+    }
+    
+    private boolean canReadInternalOLD(String path) {
+        try {
+            return getPermissionsString(path).contains("r");
+        } catch (Exception ex) {
+            log.warn("problem getting permissions string for [{}]", path, ex);
+            return false;
+        }
     }
 
     private String getPermissionsString(String path) throws Exception {
@@ -456,5 +503,12 @@ public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
         String unixPermissionsString = attrs.getPermissionsString();
         log.info("fullPath: " + fullPath + ", path: " + path + ", unixPermissions: " + unixPermissions + ", unixPermissionsString: " + unixPermissionsString);
         return unixPermissionsString;
+    }
+    
+    @Data
+    public static class CommandResult {
+        private int exitStatus;
+        private String stdOut;
+        private String stdError;
     }
 }

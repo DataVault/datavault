@@ -3,6 +3,7 @@ package org.datavaultplatform.common.storage;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.storage.impl.SFTPFileSystemJSch;
+import org.junit.jupiter.api.BeforeAll;
 import org.slf4j.Logger;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -17,10 +18,15 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  */
 @Testcontainers(disabledWithoutDocker = true)
 @Slf4j
-public class SFTPFileSystemUsernamePasswordJSchIT extends BaseSFTPFileSystemUsernamePasswordIT {
+public class SFTPFileSystemUsernamePasswordJSchIT extends BaseSFTPFileSystemUsernamePasswordIT implements SFTPFileSystemJSchIT {
 
   @Container
   static final GenericContainer<?> container= initialiseContainer("SftpUsernamePasswordJSchDIT");
+
+  @BeforeAll
+  static void setupContainer() throws Exception {
+    setupFilesWithinContainer(container);
+  }
 
   @Override
   public SFTPFileSystemDriver getSftpDriver() {
