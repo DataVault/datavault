@@ -415,6 +415,7 @@ public abstract class BaseSFTPFileSystemIT {
     return result;
   }
 
+  @SuppressWarnings("CodeBlock2Expr")
   @Test
   @SneakyThrows
   public void testSftpDriverSingleDirectoryStoreAndRetrieve() {
@@ -652,8 +653,9 @@ public abstract class BaseSFTPFileSystemIT {
 
   abstract Logger getLog();
 
+  @SuppressWarnings("CommentedOutCode")
   @Test
-  public void testListOneThousandFiles() {
+  public void testList1000Files() throws Exception {
 
     long startMS = System.currentTimeMillis();
     List<FileInfo> files = getSftpDriver().list(".");
@@ -663,8 +665,10 @@ public abstract class BaseSFTPFileSystemIT {
       System.out.printf("%04d - [%s]%n", i, info);
     }
     getLog().info("Listing {} files took [{}]ms", files.size(), diffMS);
-    assertThat(files).hasSizeGreaterThan(1_000);
+    assertThat(files).hasSizeGreaterThan(1000);
     assertThat(Duration.ofMillis(diffMS)).isLessThan(Duration.ofSeconds(5));
+    
+    assertThat(getSftpDriver().isDirectory(".")).isTrue();
   }
 
   

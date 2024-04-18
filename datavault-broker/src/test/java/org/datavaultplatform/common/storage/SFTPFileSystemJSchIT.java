@@ -1,9 +1,15 @@
 package org.datavaultplatform.common.storage;
 
 import org.datavaultplatform.common.storage.impl.SFTPFileSystemJSch;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -14,6 +20,7 @@ public interface SFTPFileSystemJSchIT {
     String ROOT_FILE = "rootFile.txt";
     String ONLY_ROOT_CAN_READ_FILE = "onlyRootCanReadFile.txt";
     String ROOT_FILE_WITHIN_ROOT_DIR = "rootDir/rootFile.txt";
+    String EXPECTED_SSH_VERSION = "OpenSSH_9.6p1, OpenSSL 3.1.4 24 Oct 2023";
     
     SFTPFileSystemDriver getSftpDriver();
     
@@ -21,6 +28,7 @@ public interface SFTPFileSystemJSchIT {
         return (SFTPFileSystemJSch) getSftpDriver();
     }
     
+    @SuppressWarnings("CommentedOutCode")
     default void checkCanRead(String path, boolean expected) throws Exception {
         SFTPFileSystemJSch jSch = getJSchSftpDriver();
         boolean canReadNEW = jSch.canRead(path);
@@ -34,6 +42,8 @@ public interface SFTPFileSystemJSchIT {
          */
     }
     
+    
+    @SuppressWarnings("CommentedOutCode")
     default void checkCanWrite(String path, boolean expected) throws Exception {
         SFTPFileSystemJSch jSch = getJSchSftpDriver();
         boolean canWriteNEW = jSch.canWrite(path);
@@ -70,7 +80,34 @@ public interface SFTPFileSystemJSchIT {
     default void testCanWrite(String path) throws Exception {
         checkCanWrite(path, true);
     }
+    
+    @ParameterizedTest
+    @CsvSource({
+        "'ls -r -c1 root*.txt', 'rootFile.txt'",
+        "pwd, /config",
+        "'echo $SHELL', /bin/bash"
+    })
+    default void checkRunCommandStdOut(String command, String stdOut) throws Exception {
+        SFTPFileSystemJSch.CommandResult result = getJSchSftpDriver().runCommand(command);
+        assertThat(result.getExitStatus()).isZero();
+        assertThat(result.getStdOut()).isEqualTo(stdOut);
+    }
+    
+    @Test
+    default void checkRunCommandStdErr() throws Exception {
+        SFTPFileSystemJSch.CommandResult result = getJSchSftpDriver().runCommand("ssh -V");
+        assertThat(result.getExitStatus()).isEqualTo(0);
+        assertThat(result.getStdError()).isEqualTo(EXPECTED_SSH_VERSION);
+    }
 
+    @Test
+    default void checkRunCommandThatFails() throws Exception {
+        SFTPFileSystemJSch.CommandResult result = getJSchSftpDriver().runCommand("blah");
+        assertThat(result.getExitStatus()).isNotZero();
+        assertThat(result.getStdOut()).isBlank();
+        assertThat(result.getStdError()).isEqualTo("bash: line 1: blah: command not found");
+    }
+    
     /*
      * The user who sftp's into the sftp server is 'testuser' who is NOT the root user.
      */
@@ -82,5 +119,20 @@ public interface SFTPFileSystemJSchIT {
         assertThat(result.getExitStatus()).isZero();
         assertThat(result.getStdOut()).contains("testuser");
     }
+    
+    @Nested
+    class InputStreamTests {
+        
+        @Test
+        void testNullStream() {
+            assertThat(SFTPFileSystemJSch.readFromStream(null)).isEqualTo("");
+        }
 
+        @Test
+        void testNonNullStream() {
+            byte[] bytes = "BLAH-BLAH".getBytes(StandardCharsets.UTF_8);
+            InputStream is = new ByteArrayInputStream(bytes);
+            assertThat(SFTPFileSystemJSch.readFromStream(is)).isEqualTo("BLAH-BLAH");
+        }
+    }
 }

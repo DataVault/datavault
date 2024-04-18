@@ -17,7 +17,7 @@ public abstract class BaseSFTPFileSystemUsernamePasswordIT extends BaseSFTPFileS
 
   static GenericContainer<?> initialiseContainer(String tcName) {
 
-    return new GenericContainer<>(DockerImage.OPEN_SSH_9pt0_IMAGE_NAME)
+    return new GenericContainer<>(DockerImage.OPEN_SSH_9pt6_IMAGE_NAME)
         .withEnv("TC_NAME", tcName)
         .withEnv(ENV_USER_NAME, TEST_USER)
         .withEnv(ENV_PASSWORD, TEST_PASSWORD)

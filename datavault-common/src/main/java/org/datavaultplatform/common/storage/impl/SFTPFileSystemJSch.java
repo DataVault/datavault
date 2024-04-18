@@ -1,6 +1,8 @@
 package org.datavaultplatform.common.storage.impl;
 
 import com.jcraft.jsch.*;
+
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
@@ -83,7 +85,11 @@ public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
         log.info("SFTPFileSystemJSch created...");
     }
 
-    private void Connect() throws Exception {
+    private synchronized void Connect() throws Exception {
+        Assert.isTrue(session == null, "The session should be null before Connecting");
+        Assert.isTrue(channelSftp == null, "The channelSftp should be null before Connecting");
+        try {
+
         JSch jsch = new JSch();
         session = jsch.getSession(username, host, port);
 
@@ -105,83 +111,116 @@ public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
         for (int i = 0; i < RETRIES; i++) {
             int attempt = i + 1;
             try {
-                log.info("Sftp connection attempt[{}/{}]", attempt, RETRIES);
-                session.connect();
-                break;
-            } catch (JSchException ex) {
-                if (i == RETRIES - 1) {
-                    log.error("problem with Jsch attempt[{}/{}]", attempt, RETRIES, ex);
-                    throw ex;
-                } else {
-                    log.warn("problem with Jsch attempt[{}/{}]", attempt, RETRIES, ex);
-                }
+               log.info("Sftp connection attempt[{}/{}]", attempt, RETRIES);
+               session.connect();
+               break;
+            } catch(JSchException ex) {
+               if (i == RETRIES - 1) {
+                   log.error("problem with Jsch attempt[{}/{}]", attempt, RETRIES, ex);
+                   throw ex;
+               } else {
+                   log.warn("problem with Jsch attempt[{}/{}]", attempt, RETRIES, ex);
+               }
             }
         }
+
+        log.info("ssh-version-client [{}]", session.getClientVersion());
+        log.info("ssh-version-server [{}]", session.getServerVersion());
 
         // Start a channel for SFTP
         Channel channel = session.openChannel("sftp");
         channel.connect();
         channelSftp = (ChannelSftp) channel;
         channelSftp.cd(rootPath);
+        } catch (Exception ex) {
+            log.error("Problem Connecting", ex);
+            Disconnect();
+            throw ex;
+        } 
     }
 
-    private void Disconnect() {
+    @SuppressWarnings("ConstantValue")
+    private synchronized void Disconnect() {
         if (channelSftp != null) {
-            channelSftp.exit();
+            try {
+                channelSftp.exit();
+            } catch (RuntimeException ex) {
+                log.warn("problem Exiting channelSftp ", ex);
+            } finally {
+                channelSftp = null;
+            }
         }
 
         if (session != null) {
-            session.disconnect();
+            try {
+                session.disconnect();
+            } catch (RuntimeException ex) {
+                log.warn("problem Disconnecting session", ex);
+            } finally {
+                session = null;
+            }
         }
+        Assert.isTrue(this.session == null, "session should be null after Disconnecting");
+        Assert.isTrue(this.channelSftp == null, "channelSftp should be null after Disconnecting");
     }
 
     public CommandResult runCommand(String command) throws Exception {
-        try{
+        try {
             Connect();
             return runCommandInternal(command);
-        }finally {
+        } finally {
             Disconnect();
         }
     }
     
     private CommandResult runCommandInternal(String command) throws Exception {
         
+        Assert.isTrue(StringUtils.isNotBlank(command), "The command cannot be blank");
+        Assert.isTrue(session != null, String.format("The session should not be null when running command[%s]", command));
+        
         ChannelExec channelExec = null;
         
         try {
             // Start a channel for commands
-            channelExec = (ChannelExec)(session.openChannel("exec"));
+            channelExec = (ChannelExec)session.openChannel("exec");
             
             channelExec.setCommand(command);
             channelExec.setInputStream(null);
             
-            channelExec.connect();
-
-            InputStream err = channelExec.getExtInputStream();
+            InputStream err = channelExec.getErrStream();
             InputStream in = channelExec.getInputStream();
 
-            String stdOut = IOUtils.toString(in, StandardCharsets.UTF_8);
-            String stdErr = IOUtils.toString(err, StandardCharsets.UTF_8);
+            channelExec.connect();
+
+            String stdErr = readFromStream(err);
+            String stdOut = readFromStream(in);
             
             int exitStatus = -1;
             if(channelExec.isClosed()) {
                 exitStatus = channelExec.getExitStatus();
+            } else { 
+                log.warn("command[{}] sftp-exec stream is not closed", command);
             }
-            log.info("exit-status: {}", exitStatus);
+            log.info("command[{}] exit-status: [{}]", command, exitStatus);
             
             CommandResult result = new CommandResult();
+            result.setCommmand(command);
             result.setExitStatus(exitStatus);
             result.setStdOut(stdOut);
             result.setStdError(stdErr);
-            
+            log.info("command[{}] result[{}]", command, result);
             return result;
             
         } catch (Exception e) {
-            log.error("unexpected exception", e);
+            log.error("command[{}] unexpected exception running sftp-exec", command, e);
             throw e;
         } finally {
             if (channelExec != null) {
-                channelExec.disconnect();
+                try {
+                    channelExec.disconnect();
+                } catch (RuntimeException ex) {
+                    log.warn("command[{}] problem disconnecting channelExec", command, ex);
+                }
             }
         }
     }
@@ -194,7 +233,16 @@ public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
         try {
             Connect();
             
-            @SuppressWarnings("unchecked") Vector<ChannelSftp.LsEntry> filelist = channelSftp.ls(rootPath + PATH_SEPARATOR + path);
+            CommandResult pwdResult = runCommandInternal("pwd");
+            log.info("result_pwd {}", pwdResult);
+
+            CommandResult whoamiResult = runCommandInternal("whoami");
+            log.info("result_whoami {}", whoamiResult);
+
+            CommandResult badCommandResult = runCommandInternal("badCommand");
+            log.info("result_badCommand {}", badCommandResult);
+
+            Vector<ChannelSftp.LsEntry> filelist = channelSftp.ls(rootPath + PATH_SEPARATOR + path);
 
             for (int i = 0; i < filelist.size(); i++) {
                 ChannelSftp.LsEntry entry = filelist.get(i);
@@ -501,12 +549,29 @@ public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
         final SftpATTRS attrs = channelSftp.stat(fullPath);
         int unixPermissions = attrs.getPermissions();
         String unixPermissionsString = attrs.getPermissionsString();
-        log.info("fullPath: " + fullPath + ", path: " + path + ", unixPermissions: " + unixPermissions + ", unixPermissionsString: " + unixPermissionsString);
+        log.info("fullPath[{}], path[{}], unixPermissions[{}], unixPermissionsString[{}]", fullPath, path, unixPermissions, unixPermissionsString);
         return unixPermissionsString;
+    }
+    
+    public static String readFromStream(InputStream is ) {
+        if (is == null) {
+            return "";
+        }
+        try {
+            String result = IOUtils.toString(is, StandardCharsets.UTF_8);
+            if(result != null){
+                result = result.trim();
+            }
+            return result;
+        } catch (RuntimeException | IOException ex) {
+            log.warn("problem reading input stream", ex);
+            return "";
+        }
     }
     
     @Data
     public static class CommandResult {
+        private String commmand;
         private int exitStatus;
         private String stdOut;
         private String stdError;

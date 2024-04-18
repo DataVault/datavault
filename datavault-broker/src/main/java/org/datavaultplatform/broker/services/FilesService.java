@@ -1,14 +1,16 @@
 package org.datavaultplatform.broker.services;
 
 
+import java.time.Duration;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.*;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.common.model.FileStore;
 import org.datavaultplatform.common.storage.UserStore;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,61 +26,24 @@ public class FilesService {
 
     private final StorageClassNameResolver resolver;
 
+    private Duration timeout;
+
     public FilesService(StorageClassNameResolver resolver) {
         this.resolver = resolver;
+        this.timeout = Duration.ofSeconds(300);
     }
 
-    //TODO - DHAY this does not seem thread safe
-    private UserStore userStore;
-    private final long TIMEOUT_SECONDS = 300;
-    
-    private boolean connect(FileStore fileStore) {
-        try {
-            userStore = UserStore.fromFileStore(fileStore, resolver);
-            return true;
-        } catch (Exception e) {
-            log.error("unexpected exception",e);
-            return false;
-        }
-    }
-    
     public List<FileInfo> getFilesListing(String filePath, FileStore fileStore) {
-        if (connect(fileStore)) {
-            return userStore.list(filePath);
-        } else {
-            return null;
-        }
+        return connect(fileStore)
+                .map(userStore -> userStore.list(filePath))
+                .orElse(Collections.emptyList());
     }
-    
-    private class FileSizeTask implements Runnable {
 
-        public Long result = null;
-        private final String filePath;
-        
-        public FileSizeTask(String filePath) {
-            this.filePath = filePath;
-        }
-
-        @Override
-        public void run() {
-            try {
-                result = userStore.getSize(filePath);
-            } catch (Exception e) {
-                log.warn("problem getting file size", e);
-                result = null;
-            }
-        }
-    }
-    
     public Long getFilesize(String filePath, FileStore fileStore) {
-        
         try {
-            if (connect(fileStore)) {
-                ExecutorService executor = Executors.newSingleThreadExecutor();
-                FileSizeTask task = new FileSizeTask(filePath);
-                executor.submit(task).get(TIMEOUT_SECONDS, TimeUnit.SECONDS);
-                executor.shutdown();
-                return task.result;
+            Optional<UserStore> optUserStore = connect(fileStore);
+            if (optUserStore.isPresent()) {
+                return executeWithTimeout(new FileSizeTask(optUserStore.get(), filePath), timeout);
             } else {
                 return null;
             }
@@ -87,10 +52,77 @@ public class FilesService {
             return null;
         }
     }
-    
+
     public boolean validPath(String filePath, FileStore fileStore) {
-        connect(fileStore);
-        return userStore.valid(filePath);
+        return connect(fileStore)
+                .map(userStore -> userStore.valid(filePath))
+                .orElse(false);
+    }
+
+
+    protected void setTimeout(Duration timeout) {
+        this.timeout = timeout;
+    }
+
+    @SuppressWarnings("OptionalOfNullableMisuse")
+    private Optional<UserStore> connect(FileStore fileStore) {
+        try {
+            UserStore userStore = UserStore.fromFileStore(fileStore, resolver);
+            return Optional.ofNullable(userStore);
+        } catch (Exception e) {
+            log.error("unexpected exception", e);
+            return Optional.empty();
+        }
+    }
+
+    private static class FileSizeTask implements Callable<Long> {
+
+        private final String filePath;
+        private final UserStore userStore;
+
+        public FileSizeTask(UserStore userStore, String filePath) {
+            this.filePath = filePath;
+            this.userStore = userStore;
+        }
+
+        @Override
+        public Long call() throws Exception {
+            return userStore.getSize(filePath);
+        }
+
+        @Override
+        public String toString() {
+            return String.format("FileSizeTask(filePath[%s]userStore[%s])", filePath, userStore);
+        }
+    }
+    
+    protected static <T> T executeWithTimeout(Callable<T> callable, Duration timeout) throws Exception {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        try {
+            Future<T> future = executor.submit(callable);
+            executor.shutdown(); //no more  tasks to be submitted
+            long start = System.currentTimeMillis();
+            T result = future.get(timeout.toMillis(), TimeUnit.MILLISECONDS);
+            long diff = System.currentTimeMillis() - start;
+            log.info("time for {} is [{}]ms", callable, diff);
+            return result;
+        } catch (TimeoutException ex) {
+            log.warn("timed out {}", callable);
+            return null;
+        } catch (InterruptedException ex) {
+            return null;
+        } catch (ExecutionException ee) {
+            Throwable th = ee.getCause();
+            if (th instanceof Exception) {
+                throw (Exception) th;
+            } else if (th instanceof Error) {
+                throw (Error) th;
+            } else {
+                throw new Exception(th);
+            }
+        } finally {
+            executor.shutdownNow();
+        }
     }
 }
 

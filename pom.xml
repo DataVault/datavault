@@ -34,6 +34,10 @@
     <skip.unit.tests>false</skip.unit.tests>
     <skip.integration.tests>false</skip.integration.tests>
 
+    <!-- https://mvnrepository.com/artifact/com.github.mwiede/jsch -->
+    <sftp.jsch.version>0.2.17</sftp.jsch.version>
+
+    <!-- above here updated 17 Apr 2024 -->
     <!-- dependency versions -->
     <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-bom -->
     <aws.java.sdk.bom.version>1.12.334</aws.java.sdk.bom.version>
@@ -90,10 +94,7 @@
 
     <!-- https://mvnrepository.com/artifact/net.sf.supercsv/super-csv -->
     <super.csv.version>2.4.0</super.csv.version>
-
-    <!-- https://mvnrepository.com/artifact/com.jcraft/jsch -->
-    <jcraft.jsch.version>0.1.55</jcraft.jsch.version>
-
+    
     <!-- https://mvnrepository.com/artifact/gov.loc/bagit -->
     <bagit.version>5.2.0</bagit.version>
 
@@ -232,9 +233,9 @@
         <version>${apache.directory.api.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.jcraft</groupId>
+        <groupId>com.github.mwiede</groupId>
         <artifactId>jsch</artifactId>
-        <version>${jcraft.jsch.version}</version>
+        <version>${sftp.jsch.version}</version>
       </dependency>
       <dependency>
         <groupId>net.sf.supercsv</groupId>
