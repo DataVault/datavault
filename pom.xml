@@ -13,7 +13,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.2.4</version>
+    <version>3.2.5</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
 
@@ -40,19 +40,45 @@
     <!-- dependency versions -->
 
     <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-bom -->
-    <aws.java.sdk.bom.version>1.12.684</aws.java.sdk.bom.version>
+    <aws.java.sdk.bom.version>1.12.701</aws.java.sdk.bom.version>
 
     <!-- https://mvnrepository.com/artifact/com.oracle.oci.sdk/oci-java-sdk-bom -->
-    <oci.java.sdk.bom.version>3.37.2</oci.java.sdk.bom.version>
+    <oci.java.sdk.bom.version>3.39.1</oci.java.sdk.bom.version>
 
+    <!-- https://mvnrepository.com/artifact/org.owasp/dependency-check-maven -->
+    <owasp.dependency.check.version>9.1.0</owasp.dependency.check.version>
+
+    <!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-contract-stub-runner -->
+    <spring.cloud.version>4.1.2</spring.cloud.version>
+
+    <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on -->
+    <bouncy.castle.version>1.78</bouncy.castle.version>
+
+    <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-text -->
+    <commons.text.version>1.12.0</commons.text.version>
+    
+    <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
+    <commons.io.version>2.16.1</commons.io.version>
+
+    <!-- https://mvnrepository.com/artifact/org.testng/testng -->
+    <testng.version>7.10.1</testng.version>
+
+    <!-- https://mvnrepository.com/artifact/it.burning/cron-expression-descriptor -->
+    <cron.expr.desc.version>1.2.10</cron.expr.desc.version>
+
+    <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core -->
+    <jackson.version>2.17.0</jackson.version>
+
+    <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-collections4 -->
+    <commons.collections4.version>4.5.0-M1</commons.collections4.version>
+
+    <!-- above here, updated 19Apr2024 -->
+ 
     <!-- https://mvnrepository.com/artifact/org.testcontainers/testcontainers -->
     <testcontainers.version>1.19.7</testcontainers.version>
 
     <!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
     <mockito.version>5.11.0</mockito.version>
-
-    <!-- https://mvnrepository.com/artifact/org.owasp/dependency-check-maven -->
-    <owasp.dependency.check.version>9.0.10</owasp.dependency.check.version>
 
     <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
     <commons.compress.version>1.26.1</commons.compress.version>
@@ -73,38 +99,17 @@
     <!-- https://mvnrepository.com/artifact/io.github.git-commit-id/git-commit-id-maven-plugin -->
     <git.commit.id.maven.plugin.version>8.0.2</git.commit.id.maven.plugin.version>
 
-    <!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-contract-stub-runner -->
-    <spring.cloud.version>4.1.1</spring.cloud.version>
-
     <!-- https://mvnrepository.com/artifact/org.apache.sshd/sshd-sftp -->
     <sshd.sftp.version>2.12.1</sshd.sftp.version>
 
     <!-- https://mvnrepository.com/artifact/org.apache.directory.api/api-all -->
     <apache.directory.api.version>2.1.6</apache.directory.api.version>
 
-    <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on -->
-    <bouncy.castle.version>1.77</bouncy.castle.version>
-
-    <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-text -->
-    <commons.text.version>1.11.0</commons.text.version>
-
     <!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
     <jsoup.version>1.17.2</jsoup.version>
 
-    <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
-    <commons.io.version>2.15.1</commons.io.version>
-
-    <!-- https://mvnrepository.com/artifact/org.testng/testng -->
-    <testng.version>7.9.0</testng.version>
-
-    <!-- https://mvnrepository.com/artifact/it.burning/cron-expression-descriptor -->
-    <cron.expr.desc.version>1.2.8</cron.expr.desc.version>
-
     <!-- https://mvnrepository.com/artifact/org.hibernate.orm/hibernate-core -->
     <hibernate.version>6.4.4.Final</hibernate.version>
-
-    <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core -->
-    <jackson.version>2.16.1</jackson.version>
 
     <!-- https://mvnrepository.com/artifact/com.jayway.jsonpath/json-path -->
     <json-path.version>2.9.0</json-path.version>
@@ -131,9 +136,6 @@
 
     <!-- https://mvnrepository.com/artifact/oro/oro -->
     <oro.version>2.0.8</oro.version>
-
-    <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-collections4 -->
-    <commons.collections4.version>4.4</commons.collections4.version>
 
     <!-- https://mvnrepository.com/artifact/net.i2p.crypto/eddsa -->
     <eddsa.version>0.3.0</eddsa.version>
@@ -353,6 +355,17 @@
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-databind</artifactId>
+        <version>${jackson.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-core</artifactId>
         <version>${jackson.version}</version>
       </dependency>
       <dependency>
