@@ -673,7 +673,7 @@ public class Encryption {
             KeyStoreInfo keyStoreInfo = extractKeyStoreInfo(keyStoreFileName);
             generateSecretKeyAndAddToJCEKS(keyStoreInfo);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("unexpected exception", e);
             System.exit(1);
         }
     }
