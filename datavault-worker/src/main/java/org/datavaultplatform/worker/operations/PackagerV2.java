@@ -1,7 +1,7 @@
 package org.datavaultplatform.worker.operations;
 
 
-import org.datavaultplatform.common.io.FileUtils;
+import org.datavaultplatform.common.io.DataVaultFileUtils;
 import org.datavaultplatform.common.bagish.Checksummer;
 import org.datavaultplatform.common.bagish.ManifestWriter;
 import org.datavaultplatform.common.bagish.SupportedAlgorithm;
@@ -44,7 +44,7 @@ public class PackagerV2 {
      * @throws Exception if anything unexpected happens
      */
     public void createBag(File bagDir) throws Exception {
-        FileUtils.checkDirectoryExists(bagDir);
+        DataVaultFileUtils.checkDirectoryExists(bagDir);
 
         File manifest = createManifest(bagDir);
 
@@ -72,7 +72,7 @@ public class PackagerV2 {
     private File createManifest(File bagDir) throws IOException {
         // Pass the bagDir to the ManifestWriter
         File dataDir = new File(bagDir, DATA_DIR_NAME);
-        FileUtils.checkDirectoryExists(dataDir);
+        DataVaultFileUtils.checkDirectoryExists(dataDir);
 
         try(ManifestWriter mf = new ManifestWriter(bagDir, checkSummer)) {
           // Start walking at the subdirectory <bagDir>/data
@@ -96,17 +96,17 @@ public class PackagerV2 {
                                       String externalMetadata) throws Exception {
 
 
-      FileUtils.checkDirectoryExists(bagDir);
+      DataVaultFileUtils.checkDirectoryExists(bagDir);
 
       Path bagPath = bagDir.toPath();
 
       // Create an empty "metadata" directory
       Path metadataDirPath = bagPath.resolve(metadataDirName);
       File metadataDir = metadataDirPath.toFile();
-      FileUtils.checkDirectoryExists(metadataDir, true);
+      DataVaultFileUtils.checkDirectoryExists(metadataDir, true);
 
       File tagManifest = bagPath.resolve(TAG_MANIFEST_FILENAME).toFile();
-      FileUtils.checkFileExists(tagManifest, true);
+      DataVaultFileUtils.checkFileExists(tagManifest, true);
 
       SupportedAlgorithm alg = SupportedAlgorithm.MD5;
 
