@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class HashMapConverterTest {
 
-  final HashMapConverter<String,String> converter = new HashMapConverter<>();
+  final HashMapConverter converter = new HashMapConverter();
 
 
   private String random() {
