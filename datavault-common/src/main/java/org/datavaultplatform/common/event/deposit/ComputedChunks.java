@@ -13,7 +13,7 @@ import org.datavaultplatform.common.model.custom.HashMapConverter;
 public class ComputedChunks extends Event implements ChunksDigestEvent {
 
     @Lob
-    @Convert(converter = HashMapConverter.class)
+    @Convert(converter = HashMapConverter.IntegerString.class)
     @Column(name="chunksDigest", columnDefinition="LONGBLOB")
     public HashMap<Integer, String> chunksDigest = new HashMap<>();
 

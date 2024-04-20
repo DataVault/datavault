@@ -1,18 +1,21 @@
 package org.datavaultplatform.common.model.custom;
 
 import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Converter;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.HashMap;
-import jakarta.persistence.Converter;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
-
+import static org.datavaultplatform.common.model.custom.HashMapConverter.*;
 @Slf4j
 @Converter
-public class HashMapConverter<K,V> implements AttributeConverter<HashMap<K,V>,byte[]> {
+public sealed abstract class HashMapConverter<K, V>
+        implements AttributeConverter<HashMap<K, V>, byte[]>
+        permits IntegerByteArray, IntegerString, StringString {
 
   @Override
   public byte[] convertToDatabaseColumn(HashMap<K, V> customProperties) {
@@ -32,7 +35,7 @@ public class HashMapConverter<K,V> implements AttributeConverter<HashMap<K,V>,by
         encoded = new byte[0];
       } else {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ObjectOutputStream oos = new ObjectOutputStream(baos)) {
+             ObjectOutputStream oos = new ObjectOutputStream(baos)) {
           oos.writeObject(props);
           encoded = baos.toByteArray();
         }
@@ -54,8 +57,11 @@ public class HashMapConverter<K,V> implements AttributeConverter<HashMap<K,V>,by
         log.info("decoded [{}]bytes to [{}]", 0, properties);
       } else {
         try (ObjectInputStream ois = new ObjectInputStream(
-            new ByteArrayInputStream(encoded))) {
+                new ByteArrayInputStream(encoded))) {
           Object obj = ois.readObject();
+          if (!(obj instanceof HashMap)) {
+            throw new RuntimeException("expected HashMap got %s".formatted(obj.getClass().getName()));
+          }
           properties = (HashMap<K, V>) obj;
         }
         log.info("decoded [{}]bytes to [{}]", encoded.length, properties);
@@ -67,4 +73,12 @@ public class HashMapConverter<K,V> implements AttributeConverter<HashMap<K,V>,by
     }
   }
 
+  public static final class StringString extends HashMapConverter<String, String> {
+  }
+
+  public static final class IntegerString extends HashMapConverter<Integer, String> {
+  }
+
+  public static final class IntegerByteArray extends HashMapConverter<Integer, byte[]> {
+  }
 }

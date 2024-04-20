@@ -26,6 +26,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.apache.commons.lang3.StringUtils;
+import org.datavaultplatform.common.io.DataVaultFileUtils;
 import org.datavaultplatform.common.task.Context;
 import org.datavaultplatform.common.task.Context.AESMode;
 import org.slf4j.Logger;
@@ -515,7 +516,7 @@ public class Encryption {
     public static int getEncBufferSize() { return encBufferSize; }
 
     public void setEncBufferSize(String encBufferSize) {
-        int bytes = Math.toIntExact(org.datavaultplatform.common.io.FileUtils.parseFormattedSizeToBytes(encBufferSize));
+        int bytes = Math.toIntExact(DataVaultFileUtils.parseFormattedSizeToBytes(encBufferSize));
         Encryption.encBufferSize = bytes;
     }
 
@@ -672,7 +673,7 @@ public class Encryption {
             KeyStoreInfo keyStoreInfo = extractKeyStoreInfo(keyStoreFileName);
             generateSecretKeyAndAddToJCEKS(keyStoreInfo);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("unexpected exception", e);
             System.exit(1);
         }
     }

@@ -6,9 +6,9 @@ import java.util.HashMap;
 import java.util.Objects;
 
 import jakarta.persistence.*;
+import org.datavaultplatform.common.model.custom.HashMapConverter;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.UuidGenerator;
-import org.datavaultplatform.common.model.custom.HashMapConverter;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
@@ -43,7 +43,7 @@ public class FileStore implements DataStore {
     // Properties to use for this storage system
     // NOTE: this is not a secure mechanism for storing credentials!
     @Lob
-    @Convert(converter = HashMapConverter.class)
+    @Convert(converter = HashMapConverter.StringString.class)
     @Column(name="properties", columnDefinition="LONGBLOB")
     private HashMap<String,String> properties = new HashMap<>();
     
