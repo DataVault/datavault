@@ -8,8 +8,8 @@ import jakarta.persistence.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
-import org.hibernate.Hibernate;
 import org.datavaultplatform.common.model.custom.HashMapConverter;
+import org.hibernate.Hibernate;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
@@ -42,7 +42,7 @@ public class User {
     private String email;
 
     // Additional properties associated with the user
-    @Convert(converter = HashMapConverter.class)
+    @Convert(converter = HashMapConverter.StringString.class)
     @Column(name="properties", columnDefinition="LONGBLOB")
     private HashMap<String,String> properties = new HashMap<>();
 

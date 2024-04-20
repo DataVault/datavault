@@ -65,6 +65,9 @@ public class InputStreamAdapter extends InputStream {
   @SuppressWarnings("com.haulmont.jpb.EqualsDoesntCheckParameterClass")
   @Override
   public boolean equals(Object value) {
+    if (!(value instanceof InputStream)) {
+      return false;
+    }
     return this.is.equals(value);
   }
 

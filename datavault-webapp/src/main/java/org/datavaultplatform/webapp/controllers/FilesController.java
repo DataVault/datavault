@@ -27,7 +27,7 @@ public class FilesController {
         WRITE,
         READ_AND_WRITE,
         OTHER
-    };
+    }
 
     @Autowired
     public FilesController(RestService restService) {
