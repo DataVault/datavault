@@ -7,7 +7,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.datavaultplatform.broker.services.AdminService;
 import org.datavaultplatform.broker.services.FilesService;
 import org.datavaultplatform.broker.services.UsersService;
-import org.datavaultplatform.common.io.FileUtils;
+import org.datavaultplatform.common.io.DataVaultFileUtils;
 import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.common.model.FileStore;
 import org.datavaultplatform.common.model.User;
@@ -56,8 +56,8 @@ public class FilesController {
         this.usersService = usersService;
         this.adminService = adminService;
         this.tempDir = tempDir;
-        this.maxDepositByteSize = FileUtils.parseFormattedSizeToBytes(maxDepositByteSize);
-        this.maxAdminDepositByteSize = FileUtils.parseFormattedSizeToBytes(maxAdminDepositByteSize);
+        this.maxDepositByteSize = DataVaultFileUtils.parseFormattedSizeToBytes(maxDepositByteSize);
+        this.maxAdminDepositByteSize = DataVaultFileUtils.parseFormattedSizeToBytes(maxAdminDepositByteSize);
     }
 
     @GetMapping("/files")
@@ -151,7 +151,7 @@ public class FilesController {
         if (size == null) {
             return "File information not available";
         } else {
-            return FileUtils.getGibibyteSizeStr(size);
+            return DataVaultFileUtils.getGibibyteSizeStr(size);
         }
     }
 
@@ -211,7 +211,7 @@ public class FilesController {
             if (size == 0L) {
                 return "File information not available.";
             } else {
-                return FileUtils.getGibibyteSizeStr(size);
+                return DataVaultFileUtils.getGibibyteSizeStr(size);
             }
         } else {
             return "File information not available.";
@@ -263,7 +263,7 @@ public class FilesController {
         }
 
         log.info("Total size: " + size);
-        String sizeWithUnits = FileUtils.getGibibyteSizeStr(size);
+        String sizeWithUnits = DataVaultFileUtils.getGibibyteSizeStr(size);
         log.info("checkDepositSize() - sizeWithUnits:" + sizeWithUnits);
         long finish = System.nanoTime();
         long timeElapsed = TimeUnit.SECONDS.convert(finish - start, TimeUnit.NANOSECONDS);
