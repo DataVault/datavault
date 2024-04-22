@@ -66,14 +66,17 @@ public class PermissionsService {
     }
 
     public boolean depositsPaused() {
-        return areDepositsAndRetrievesPaused();
+        return areDepositsPaused();
     }
 
     public boolean retrievesPaused() {
-        return areDepositsAndRetrievesPaused();
+        return areRetrievesPaused();
     }
 
-    private boolean areDepositsAndRetrievesPaused() {
-        return restService.getCurrentPausedState().isPaused();
+    private boolean areDepositsPaused() {
+        return restService.getCurrentDepositPausedState().isPaused();
+    }
+    private boolean areRetrievesPaused() {
+        return restService.getCurrentRetrievePausedState().isPaused();
     }
 }

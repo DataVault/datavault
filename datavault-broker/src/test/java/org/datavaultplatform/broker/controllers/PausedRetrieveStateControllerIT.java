@@ -7,7 +7,7 @@ import org.datavaultplatform.broker.config.MockServicesConfig;
 import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.broker.test.AddTestProperties;
 import org.datavaultplatform.common.model.Client;
-import org.datavaultplatform.common.model.PausedState;
+import org.datavaultplatform.common.model.PausedRetrieveState;
 import org.datavaultplatform.common.model.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,17 +34,15 @@ import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.datavaultplatform.common.util.Constants.HEADER_CLIENT_KEY;
 import static org.datavaultplatform.common.util.Constants.HEADER_USER_ID;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-
-
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
 
 @SpringBootTest(classes = DataVaultBrokerApp.class)
@@ -65,9 +63,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
         "broker.initialise.enabled=false",
         "broker.email.enabled=false",
         "broker.database.enabled=false"})
-@Import({MockServicesConfig.class, MockRabbitConfig.class}) //cos spring security requires some services so we have to mock them
+@Import({MockServicesConfig.class, MockRabbitConfig.class}) //because spring security requires some services, so we have to mock them
 @AutoConfigureMockMvc
-class PausedStateControllerIT {
+class PausedRetrieveStateControllerIT {
 
     private static final Clock CLOCK = Clock.fixed(Instant.parse("2007-12-03T10:15:30.00Z"), ZoneOffset.UTC);
 
@@ -84,7 +82,7 @@ class PausedStateControllerIT {
     MockMvc mvc;
 
     @Autowired
-    PausedStateService mPausedStateService;
+    PausedRetrieveStateService mPausedRetrieveStateService;
 
     @Autowired
     ClientsService mClientsService;
@@ -93,20 +91,20 @@ class PausedStateControllerIT {
     void setup() {
         assertThat(mockingDetails(mUsersService).isMock()).isTrue();
         assertThat(mockingDetails(mAdminService).isMock()).isTrue();
-        assertThat(mockingDetails(mPausedStateService).isMock()).isTrue();
+        assertThat(mockingDetails(mPausedRetrieveStateService).isMock()).isTrue();
         assertThat(mockingDetails(mRolesAndPermissionService).isMock()).isTrue();
         assertThat(mockingDetails(mClientsService).isMock()).isTrue();
     }
 
     @Test
     public void testGetState() throws Exception {
-        PausedState pausedState = new PausedState();
-        pausedState.setPaused(false);
-        pausedState.setCreated(LocalDateTime.now(CLOCK));
-        when(mPausedStateService.getCurrentState()).thenReturn(pausedState);
+        PausedRetrieveState PausedRetrieveState = new PausedRetrieveState();
+        PausedRetrieveState.setPaused(false);
+        PausedRetrieveState.setCreated(LocalDateTime.now(CLOCK));
+        when(mPausedRetrieveStateService.getCurrentState()).thenReturn(PausedRetrieveState);
 
         setupUser("bob",false);
-        mvc.perform(get("/admin/paused/state")
+        mvc.perform(get("/admin/paused/retrieve/state")
                         .header(HEADER_CLIENT_KEY,"clientKey123")
                         .header(HEADER_USER_ID, "bob")
                 ).
@@ -117,30 +115,30 @@ class PausedStateControllerIT {
     "created" : "2007-12-03T10:15:30"
   }
 """));
-        verify(mPausedStateService).getCurrentState();
-        verifyNoMoreInteractions(mPausedStateService);
+        verify(mPausedRetrieveStateService).getCurrentState();
+        verifyNoMoreInteractions(mPausedRetrieveStateService);
     }
 
     @ParameterizedTest
     @ValueSource(ints = {0,1,10,12})
     @NullSource
     public void testPausedHistory(final Integer limit) throws Exception {
-        PausedState ps1 = new PausedState();
+        PausedRetrieveState ps1 = new PausedRetrieveState();
         ps1.setPaused(false);
         ps1.setCreated(LocalDateTime.now(CLOCK));
-        PausedState ps2 = new PausedState();
+        PausedRetrieveState ps2 = new PausedRetrieveState();
         ps2.setPaused(true);
         ps2.setCreated(LocalDateTime.now(CLOCK).minusDays(1));
-        PausedState ps3 = new PausedState();
+        PausedRetrieveState ps3 = new PausedRetrieveState();
         ps3.setPaused(false);
         ps3.setCreated(LocalDateTime.now(CLOCK).minusDays(2));
         
         int expectedLimit = limit == null ? 10 : limit;
-        when(mPausedStateService.getRecentEntries(expectedLimit)).thenReturn(List.of(ps1,ps2,ps3));
+        when(mPausedRetrieveStateService.getRecentEntries(expectedLimit)).thenReturn(List.of(ps1,ps2,ps3));
 
         setupUser("bob",false);
 
-        String requestURL = "/admin/paused/history";
+        String requestURL = "/admin/paused/retrieve/history";
         if(limit != null){
             requestURL += "/" + limit;
         }
@@ -157,8 +155,8 @@ class PausedStateControllerIT {
   { "isPaused":false, "created":"2007-12-01T10:15:30"}
 ]
 """));
-        verify(mPausedStateService).getRecentEntries(expectedLimit);
-        verifyNoMoreInteractions(mPausedStateService);
+        verify(mPausedRetrieveStateService).getRecentEntries(expectedLimit);
+        verifyNoMoreInteractions(mPausedRetrieveStateService);
     }
 
     @SuppressWarnings({"unchecked", "SameParameterValue"})
@@ -178,34 +176,34 @@ class PausedStateControllerIT {
     
     @Test
     public void testToggleStateAsAdminUser() throws Exception {
-        PausedState pausedState = new PausedState();
-        when(mPausedStateService.toggleState()).thenReturn(pausedState);
+        PausedRetrieveState PausedRetrieveState = new PausedRetrieveState();
+        when(mPausedRetrieveStateService.toggleState()).thenReturn(PausedRetrieveState);
         
         setupUser("bob", true);
 
-        MvcResult result = mvc.perform(post("/admin/paused/toggle")
+        MvcResult result = mvc.perform(post("/admin/paused/retrieve/toggle")
                 .header(HEADER_CLIENT_KEY,"clientKey123")
                 .header(HEADER_USER_ID, "bob")
                 .with(csrf())).andReturn();
         assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.OK.value());
 
-        verify(mPausedStateService).toggleState();
-        verifyNoMoreInteractions(mPausedStateService);
+        verify(mPausedRetrieveStateService).toggleState();
+        verifyNoMoreInteractions(mPausedRetrieveStateService);
     }
     @Test
     public void testToggleStateAsNonAdminUser() throws Exception {
-        PausedState pausedState = new PausedState();
-        when(mPausedStateService.toggleState()).thenReturn(pausedState);
+        PausedRetrieveState PausedRetrieveState = new PausedRetrieveState();
+        when(mPausedRetrieveStateService.toggleState()).thenReturn(PausedRetrieveState);
 
         setupUser("bob", false);
 
-        MvcResult result = mvc.perform(post("/admin/paused/toggle")
+        MvcResult result = mvc.perform(post("/admin/paused/retrieve/toggle")
                 .header(HEADER_CLIENT_KEY,"clientKey123")
                 .header(HEADER_USER_ID, "bob")
                 .with(csrf())).andReturn();
         assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.FORBIDDEN.value());
 
-        verify(mPausedStateService, never()).toggleState();
-        verifyNoMoreInteractions(mPausedStateService);
+        verify(mPausedRetrieveStateService, never()).toggleState();
+        verifyNoMoreInteractions(mPausedRetrieveStateService);
     }
 }

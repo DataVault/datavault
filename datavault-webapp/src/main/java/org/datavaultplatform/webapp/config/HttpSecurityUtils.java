@@ -28,9 +28,12 @@ public class HttpSecurityUtils {
             authz.requestMatchers("/admin").hasRole("ADMIN");
             authz.requestMatchers("/admin/").hasAuthority("ROLE_ADMIN");
             
-            authz.requestMatchers("/admin/paused/history").hasRole("USER");
-            authz.requestMatchers("/admin/paused/toggle").hasRole("IS_ADMIN");
-            
+            authz.requestMatchers("/admin/paused/deposit/history").hasRole("USER");
+            authz.requestMatchers("/admin/paused/deposit/toggle").hasRole("IS_ADMIN");
+
+            authz.requestMatchers("/admin/paused/retrieve/history").hasRole("USER");
+            authz.requestMatchers("/admin/paused/retrieve/toggle").hasRole("IS_ADMIN");
+
             authz.requestMatchers("/admin/archivestores/**").hasAuthority("ROLE_ADMIN_ARCHIVESTORES");
             authz.requestMatchers("/admin/billing/**").hasAuthority("ROLE_ADMIN_BILLING");
             authz.requestMatchers("/admin/deposits/**").hasAuthority("ROLE_ADMIN_DEPOSITS");

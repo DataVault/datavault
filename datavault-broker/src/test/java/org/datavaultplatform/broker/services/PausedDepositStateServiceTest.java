@@ -1,8 +1,8 @@
 package org.datavaultplatform.broker.services;
 
 
-import org.datavaultplatform.common.model.PausedState;
-import org.datavaultplatform.common.model.dao.PausedStateRepository;
+import org.datavaultplatform.common.model.PausedDepositState;
+import org.datavaultplatform.common.model.dao.PausedDepositStateRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -23,27 +23,27 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class PausedStateServiceTest {
+class PausedDepositStateServiceTest {
 
     @Captor
     ArgumentCaptor<Integer> argLimit;
 
     @Captor
-    ArgumentCaptor<PausedState> argState;
+    ArgumentCaptor<PausedDepositState> argState;
 
     @Mock
-    PausedStateRepository mRepo;
+    PausedDepositStateRepository mRepo;
 
     @InjectMocks
-    PausedStateService service;
+    PausedDepositStateService service;
     
     @Test
     void testCurrentStateExists() {
 
-        PausedState state = new PausedState();
+        PausedDepositState state = new PausedDepositState();
         when(mRepo.getCurrentState()).thenReturn(Optional.of(state));
 
-        PausedState initial = service.getCurrentState();
+        PausedDepositState initial = service.getCurrentState();
 
         assertThat(initial).isSameAs(state);
 
@@ -56,7 +56,7 @@ class PausedStateServiceTest {
 
         when(mRepo.getCurrentState()).thenReturn(Optional.empty());
 
-        PausedState initial = service.getCurrentState();
+        PausedDepositState initial = service.getCurrentState();
         assertThat(initial).isNotNull();
         assertThat(initial.isPaused()).isFalse();
         assertThat(initial.getCreated().toLocalDate()).isEqualTo(LocalDate.of(1970, 1, 1));
@@ -69,7 +69,7 @@ class PausedStateServiceTest {
     @ValueSource(booleans = {true, false})
     void toggleState(boolean currentlyIsPaused) {
 
-        PausedState state = new PausedState();
+        PausedDepositState state = new PausedDepositState();
         state.setPaused(currentlyIsPaused);
         when(mRepo.getCurrentState()).thenReturn(Optional.of(state));
 
@@ -79,7 +79,7 @@ class PausedStateServiceTest {
 
         verify(mRepo).getCurrentState();
 
-        PausedState actualPausedState = argState.getValue();
+        PausedDepositState actualPausedState = argState.getValue();
         assertThat(actualPausedState.isPaused()).isNotEqualTo(currentlyIsPaused);
 
         verify(mRepo).save(actualPausedState);
@@ -89,7 +89,7 @@ class PausedStateServiceTest {
     @ParameterizedTest
     @ValueSource(ints = {0, 1, 2, 3, 4})
     void testGetRecentEntries(int limit) {
-        List<PausedState> entries = new ArrayList<>();
+        List<PausedDepositState> entries = new ArrayList<>();
         when(mRepo.getRecentEntries(argLimit.capture())).thenReturn(entries);
 
         service.getRecentEntries(limit);

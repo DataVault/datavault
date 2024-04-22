@@ -12,7 +12,10 @@ This class creates mock services beans which are placed into the spring context.
 public class MockServicesConfig {
 
   @MockBean
-  PausedStateService mPausedStateService;
+  PausedDepositStateService mPausedDepositStateService;
+
+  @MockBean
+  PausedRetrieveStateService mPausedRetrieveStateService;
 
   @MockBean
   AdminService mAdminService;

@@ -86,7 +86,8 @@ public class SecurityConfig {
             .requestMatchers("/admin/billing/**").hasAuthority("ROLE_ADMIN_BILLING")
             /* TODO : DavidHay : no controller mapped to /admin/reviews ! */
             .requestMatchers("/admin/reviews/**").hasAuthority("ROLE_ADMIN_REVIEWS")
-            .requestMatchers("/admin/paused/toggle/**").hasAuthority("ROLE_ADMIN")
+            .requestMatchers("/admin/paused/deposit/toggle/**").hasAuthority("ROLE_ADMIN")
+            .requestMatchers("/admin/paused/retrieve/toggle/**").hasAuthority("ROLE_ADMIN")
             .anyRequest().authenticated());
 
     return http.build();

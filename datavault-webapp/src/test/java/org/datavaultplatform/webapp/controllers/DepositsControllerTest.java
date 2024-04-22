@@ -1,7 +1,8 @@
 package org.datavaultplatform.webapp.controllers;
 
 import lombok.SneakyThrows;
-import org.datavaultplatform.common.dto.PausedStateDTO;
+import org.datavaultplatform.common.dto.PausedDepositStateDTO;
+import org.datavaultplatform.common.dto.PausedRetrieveStateDTO;
 import org.datavaultplatform.common.model.Retrieve;
 import org.datavaultplatform.common.request.CreateDeposit;
 import org.datavaultplatform.common.response.DepositInfo;
@@ -96,7 +97,8 @@ class DepositsControllerTest {
 
     @Nested
     class DeniedBecausePausedAndNotISAdmin {
-        final PausedStateDTO PAUSED = new PausedStateDTO(true, null);
+        final PausedRetrieveStateDTO PAUSED_RETRIEVE = new PausedRetrieveStateDTO(true, null);
+        final PausedDepositStateDTO PAUSED_DEPOSIT = new PausedDepositStateDTO(true, null);
         @BeforeEach
         void setup() {
             Mockito.lenient().when(mEvaluator.hasPermission(
@@ -104,7 +106,8 @@ class DepositsControllerTest {
                     any(Serializable.class),
                     any(String.class),
                     any(Object.class))).thenReturn(false, true);
-            Mockito.lenient().when(mRestService.getCurrentPausedState()).thenReturn(PAUSED);
+            Mockito.lenient().when(mRestService.getCurrentRetrievePausedState()).thenReturn(PAUSED_RETRIEVE);
+            Mockito.lenient().when(mRestService.getCurrentDepositPausedState()).thenReturn(PAUSED_DEPOSIT);
         }
 
         @SneakyThrows
@@ -117,7 +120,7 @@ class DepositsControllerTest {
 
             checkPermissionsForDeposit("user11");
 
-            Mockito.verify(mRestService).getCurrentPausedState();
+            Mockito.verify(mRestService).getCurrentDepositPausedState();
             Mockito.verifyNoMoreInteractions(mEvaluator, mRestService);
         }
 
@@ -131,7 +134,7 @@ class DepositsControllerTest {
 
             checkPermissionsForRetrieve("user3");
 
-            Mockito.verify(mRestService).getCurrentPausedState();
+            Mockito.verify(mRestService).getCurrentRetrievePausedState();
             Mockito.verifyNoMoreInteractions(mEvaluator, mRestService);
         }
     }

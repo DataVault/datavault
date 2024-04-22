@@ -3,7 +3,8 @@ package org.datavaultplatform.webapp.services;
 import static org.datavaultplatform.common.util.Constants.HEADER_CLIENT_KEY;
 
 import lombok.extern.slf4j.Slf4j;
-import org.datavaultplatform.common.dto.PausedStateDTO;
+import org.datavaultplatform.common.dto.PausedDepositStateDTO;
+import org.datavaultplatform.common.dto.PausedRetrieveStateDTO;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.request.*;
 import org.datavaultplatform.common.response.*;
@@ -76,7 +77,7 @@ public class RestService implements NotifyLogoutService, NotifyLoginService, Eva
             throw new IllegalArgumentException("REST method not implemented!");
         }
 
-        log.debug("Calling Broker with url:" + url + " Method:" + method);
+        log.debug("Calling Broker with url:{} Method:{}", url, method);
 
         // todo : check the http status code before returning?
 
@@ -167,11 +168,11 @@ public class RestService implements NotifyLogoutService, NotifyLoginService, Eva
             parameters.append("filepath=").append(filePath).append("&");
         }
 
-        log.debug("parameters: " + parameters);
+        log.debug("parameters: {}", parameters);
 
         ResponseEntity<DepositSize> response = get(brokerURL + "/checkdepositsize" + parameters, DepositSize.class);
 
-        log.debug("return: " + response.getBody());
+        log.debug("return: {}", response.getBody());
 
         return response.getBody();
     }
@@ -842,32 +843,57 @@ public class RestService implements NotifyLogoutService, NotifyLoginService, Eva
             parameters.append("filepath=").append(filePath).append("&");
         }
 
-        log.info("parameters: " + parameters);
+        log.info("parameters: {}", parameters);
 
         ResponseEntity<String> response = get(brokerURL + "/sizeofselectedfiles" + parameters, String.class);
 
-        log.info("return: " + response.getBody());
+        log.info("return: {}", response.getBody());
 
         return response.getBody();
     }
 
-    public PausedStateDTO getCurrentPausedState() {
-        ResponseEntity<PausedStateDTO> response = get(brokerURL + "/admin/paused/state", PausedStateDTO.class);
+    public PausedRetrieveStateDTO getCurrentRetrievePausedState() {
+        ResponseEntity<PausedRetrieveStateDTO> response = get(brokerURL + "/admin/paused/retrieve/state", PausedRetrieveStateDTO.class);
         return response.getBody();
     }
     
-    public List<PausedStateDTO> getPausedStateHistory(Integer limit) {
-        String requestURL = brokerURL + "/admin/paused/history";
+    public PausedDepositStateDTO getCurrentDepositPausedState() {
+        ResponseEntity<PausedDepositStateDTO> response = get(brokerURL + "/admin/paused/deposit/state", PausedDepositStateDTO.class);
+        return response.getBody();
+    }
+    
+    public List<PausedRetrieveStateDTO> getPausedRetrieveStateHistory(Integer limit) {
+        String requestURL = brokerURL + "/admin/paused/retrieve/history";
         if (limit != null) {
             requestURL += "/" + limit;
         }
-        ResponseEntity<PausedStateDTO[]> response = get(requestURL, PausedStateDTO[].class);
-        PausedStateDTO[] data = response.getBody();
+        ResponseEntity<PausedRetrieveStateDTO[]> response = get(requestURL, PausedRetrieveStateDTO[].class);
+        PausedRetrieveStateDTO[] data = response.getBody();
+        return Arrays.stream(data).toList();
+    }
+    
+    public List<PausedDepositStateDTO> getPausedDepositStateHistory(Integer limit) {
+        String requestURL = brokerURL + "/admin/paused/deposit/history";
+        if (limit != null) {
+            requestURL += "/" + limit;
+        }
+        ResponseEntity<PausedDepositStateDTO[]> response = get(requestURL, PausedDepositStateDTO[].class);
+        PausedDepositStateDTO[] data = response.getBody();
         return Arrays.stream(data).toList();
     }
 
-    public void togglePausedState() {
-        ResponseEntity<?> response = post(brokerURL + "/admin/paused/toggle",Void.class,null);
+    public void toggleDepositPausedState() {
+        ResponseEntity<?> response = post(brokerURL + "/admin/paused/deposit/toggle",Void.class,null);
+        HttpStatusCode code = response.getStatusCode();
+        if(!code.is2xxSuccessful()){
+            String msg = "Expected 200 status code, got [%s]".formatted(code.value());
+            log.error(msg);
+            throw new RuntimeException(msg);
+        }
+    }
+    
+    public void toggleRetrievePausedState() {
+        ResponseEntity<?> response = post(brokerURL + "/admin/paused/retrieve/toggle",Void.class,null);
         HttpStatusCode code = response.getStatusCode();
         if(!code.is2xxSuccessful()){
             String msg = "Expected 200 status code, got [%s]".formatted(code.value());

@@ -1,7 +1,7 @@
 {
   "priority": 1,
   "request": {
-    "urlPath": "/admin/paused/toggle",
+    "urlPath": "/admin/paused/deposit/toggle",
     "method": "POST"
   },
   "response": {

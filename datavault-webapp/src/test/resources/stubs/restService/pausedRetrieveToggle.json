@@ -1,0 +1,10 @@
+{
+  "priority": 1,
+  "request": {
+    "urlPath": "/admin/paused/retrieve/toggle",
+    "method": "POST"
+  },
+  "response": {
+    "status": 200
+  }
+}

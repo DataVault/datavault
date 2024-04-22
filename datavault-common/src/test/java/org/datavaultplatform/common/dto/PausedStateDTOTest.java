@@ -26,14 +26,14 @@ class PausedStateDTOTest {
     
     @Test
     void testSerialization() throws Exception {
-        PausedStateDTO dto = new PausedStateDTO(true, LocalDateTime.now(FIXED));
+        PausedRetrieveStateDTO dto = new PausedRetrieveStateDTO(true, LocalDateTime.now(FIXED));
         String json = toJson(dto);
         JSONAssert.assertEquals(PAUSED_STATE_JSON, json, false);
     }
 
     @Test
     void testDeSerialization() throws Exception {
-        PausedStateDTO dto = MAPPER.readValue(PAUSED_STATE_JSON, PausedStateDTO.class);
+        PausedRetrieveStateDTO dto = MAPPER.readValue(PAUSED_STATE_JSON, PausedRetrieveStateDTO.class);
         assertThat(dto.isPaused()).isTrue();
         assertThat(dto.created()).isEqualTo(LocalDateTime.now(FIXED));
     }

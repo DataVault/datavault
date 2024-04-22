@@ -56,7 +56,12 @@ insert into GroupOwners (group_id, user_id) values ('CMVM', 'user4');
 
 insert into Clients (id, name, apiKey, ipAddress) values ('datavault-webapp', 'Datavault Webapp', 'datavault-webapp', '127.0.0.1');
 
-INSERT INTO paused_state  VALUES ('1', '2001-07-22 12:12:12.123456', true);
-INSERT INTO paused_state  VALUES ('2', '2002-07-22 12:12:12.123456', false);
-INSERT INTO paused_state  VALUES ('3', '2003-07-22 12:12:12.123456', true);
-INSERT INTO paused_state  VALUES ('4', '2004-07-22 12:12:12.123456', false);
+INSERT INTO paused_deposit_state  VALUES ('1', '2001-07-22 12:12:12.123456', true);
+INSERT INTO paused_deposit_state  VALUES ('2', '2002-07-22 12:12:12.123456', false);
+INSERT INTO paused_deposit_state  VALUES ('3', '2003-07-22 12:12:12.123456', true);
+INSERT INTO paused_deposit_state  VALUES ('4', '2004-07-22 12:12:12.123456', false);
+
+INSERT INTO paused_retrieve_state  VALUES ('1', '2001-07-22 12:12:12.123456', true);
+INSERT INTO paused_retrieve_state  VALUES ('2', '2002-07-22 12:12:12.123456', false);
+INSERT INTO paused_retrieve_state  VALUES ('3', '2003-07-22 12:12:12.123456', true);
+INSERT INTO paused_retrieve_state  VALUES ('4', '2004-07-22 12:12:12.123456', false);

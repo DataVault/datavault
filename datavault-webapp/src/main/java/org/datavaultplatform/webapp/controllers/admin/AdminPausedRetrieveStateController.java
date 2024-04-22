@@ -1,6 +1,6 @@
 package org.datavaultplatform.webapp.controllers.admin;
 
-import org.datavaultplatform.common.dto.PausedStateDTO;
+import org.datavaultplatform.common.dto.PausedRetrieveStateDTO;
 import org.datavaultplatform.common.model.RoleName;
 import org.datavaultplatform.webapp.services.RestService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -18,12 +18,12 @@ import java.util.List;
 
 @Controller
 @ConditionalOnBean(RestService.class)
-@RequestMapping("/admin/paused")
-public class AdminPausedStateController {
+@RequestMapping("/admin/paused/retrieve")
+public class AdminPausedRetrieveStateController {
 
     private final RestService service;
 
-    public AdminPausedStateController(RestService service) {
+    public AdminPausedRetrieveStateController(RestService service) {
         this.service = service;
     }
 
@@ -33,8 +33,8 @@ public class AdminPausedStateController {
         boolean hasIsAdminRole = auth.getAuthorities().stream().map(GrantedAuthority::getAuthority).anyMatch(name -> name.equals(RoleName.ROLE_USER));
         Assert.isTrue(hasIsAdminRole, "USER DOES NOT HAVE 'USER' role");
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("admin/paused/history");
-        List<PausedStateDTO> pausedStates = service.getPausedStateHistory(10);
+        mav.setViewName("admin/paused/retrieve/history");
+        List<PausedRetrieveStateDTO> pausedStates = service.getPausedRetrieveStateHistory(10);
         mav.getModel().put("pausedStates", pausedStates);
         return mav;
     }
@@ -45,7 +45,7 @@ public class AdminPausedStateController {
     public String togglePause(Authentication auth) {
         boolean hasIsAdminRole = auth.getAuthorities().stream().map(GrantedAuthority::getAuthority).anyMatch(name -> name.equals(RoleName.ROLE_IS_ADMIN));
         Assert.isTrue(hasIsAdminRole, "USER DOES NOT HAVE 'IS_ADMIN' role");
-        service.togglePausedState();
-        return "redirect:/admin/paused/history";
+        service.toggleRetrievePausedState();
+        return "redirect:/admin/paused/retrieve/history";
     }
 }

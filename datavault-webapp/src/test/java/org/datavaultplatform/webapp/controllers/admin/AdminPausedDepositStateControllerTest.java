@@ -1,7 +1,7 @@
 package org.datavaultplatform.webapp.controllers.admin;
 
 
-import org.datavaultplatform.common.dto.PausedStateDTO;
+import org.datavaultplatform.common.dto.PausedDepositStateDTO;
 import org.datavaultplatform.webapp.app.DataVaultWebApp;
 import org.datavaultplatform.webapp.services.RestService;
 import org.datavaultplatform.webapp.test.AddTestProperties;
@@ -38,7 +38,7 @@ import java.util.List;
 @ProfileDatabase
 @TestPropertySource(properties = "logging.level.org.springframework.security=DEBUG")
 @AddTestProperties
-class PausedStateControllerTest {
+class AdminPausedDepositStateControllerTest {
 
     private static final Clock CLOCK = Clock.fixed(Instant.parse("2007-12-03T10:15:30.00Z"), ZoneOffset.UTC);
 
@@ -61,20 +61,20 @@ class PausedStateControllerTest {
     }
 
     private void checkShowRecent(boolean hasIsAdminRole) throws Exception {
-        PausedStateDTO ps1 = new PausedStateDTO(false, LocalDateTime.now(CLOCK));
-        PausedStateDTO ps2 = new PausedStateDTO(true, LocalDateTime.now(CLOCK).minusDays(1));
-        PausedStateDTO ps3 = new PausedStateDTO(false, LocalDateTime.now(CLOCK).minusDays(2));
-        List<PausedStateDTO> list = Arrays.asList(ps3, ps2, ps1);
+        PausedDepositStateDTO ps1 = new PausedDepositStateDTO(false, LocalDateTime.now(CLOCK));
+        PausedDepositStateDTO ps2 = new PausedDepositStateDTO(true, LocalDateTime.now(CLOCK).minusDays(1));
+        PausedDepositStateDTO ps3 = new PausedDepositStateDTO(false, LocalDateTime.now(CLOCK).minusDays(2));
+        List<PausedDepositStateDTO> list = Arrays.asList(ps3, ps2, ps1);
 
-        when(mService.getPausedStateHistory(10)).thenReturn(list);
+        when(mService.getPausedDepositStateHistory(10)).thenReturn(list);
 
-        MvcResult result = mvc.perform(get("/admin/paused/history"))
+        MvcResult result = mvc.perform(get("/admin/paused/deposit/history"))
                 .andDo(print())
                 .andReturn();
-        assertThat(result.getModelAndView().getViewName()).isEqualTo("admin/paused/history");
+        assertThat(result.getModelAndView().getViewName()).isEqualTo("admin/paused/deposit/history");
         assertThat(result.getModelAndView().getModel().get("pausedStates")).isEqualTo(list);
 
-        verify(mService).getPausedStateHistory(10);
+        verify(mService).getPausedDepositStateHistory(10);
         verifyNoMoreInteractions(mService);
 
         String rawHtml = result.getResponse().getContentAsString();
@@ -94,12 +94,11 @@ class PausedStateControllerTest {
     @Test
     @WithMockUser(roles = {"IS_ADMIN"})
     public void testToggleState() throws Exception {
-        PausedStateDTO pausedState = new PausedStateDTO(true, LocalDateTime.now(CLOCK));
 
-        MvcResult result = mvc.perform(post("/admin/paused/toggle").with(csrf())).andReturn();
-        assertThat(result.getModelAndView().getViewName()).isEqualTo("redirect:/admin/paused/history");
+        MvcResult result = mvc.perform(post("/admin/paused/deposit/toggle").with(csrf())).andDo(print()).andReturn();
+        assertThat(result.getModelAndView().getViewName()).isEqualTo("redirect:/admin/paused/deposit/history");
 
-        verify(mService).togglePausedState();
+        verify(mService).toggleDepositPausedState();
         verifyNoMoreInteractions(mService);
     }
 }

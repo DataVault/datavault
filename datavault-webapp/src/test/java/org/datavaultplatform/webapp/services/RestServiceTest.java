@@ -2,7 +2,8 @@ package org.datavaultplatform.webapp.services;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.datavaultplatform.common.dto.PausedStateDTO;
+import org.datavaultplatform.common.dto.PausedDepositStateDTO;
+import org.datavaultplatform.common.dto.PausedRetrieveStateDTO;
 import org.datavaultplatform.webapp.app.DataVaultWebApp;
 import org.datavaultplatform.webapp.app.services.BaseRestTemplateWithLoggingTest;
 import org.datavaultplatform.webapp.test.ProfileDatabase;
@@ -35,18 +36,18 @@ class RestServiceTest extends BaseRestTemplateWithLoggingTest {
     }
 
     @Nested
-    class PausedStateTests {
+    class PausedDepositStateTests {
 
         @Test
         @WithMockUser(username = "user1")
         void testTogglePausedState() {
-            restService.togglePausedState();
+            restService.toggleDepositPausedState();
         }
 
         @Test
         @WithMockUser(username = "user2")
         void testGetCurrentPausedState() {
-            PausedStateDTO result = restService.getCurrentPausedState();
+            PausedDepositStateDTO result = restService.getCurrentDepositPausedState();
             assertThat(result.isPaused()).isTrue();
             assertThat(result.created()).isEqualTo(LocalDateTime.of(2007, 12, 3, 10, 15, 30));
         }
@@ -54,12 +55,49 @@ class RestServiceTest extends BaseRestTemplateWithLoggingTest {
         @Test
         @WithMockUser(username = "user3")
         void testGetPausedStateHistory() {
-            List<PausedStateDTO> result = restService.getPausedStateHistory(null);
+            List<PausedDepositStateDTO> result = restService.getPausedDepositStateHistory(null);
             assertThat(result.size()).isEqualTo(3);
 
-            PausedStateDTO dto0 = result.get(0);
-            PausedStateDTO dto1 = result.get(1);
-            PausedStateDTO dto2 = result.get(2);
+            PausedDepositStateDTO dto0 = result.get(0);
+            PausedDepositStateDTO dto1 = result.get(1);
+            PausedDepositStateDTO dto2 = result.get(2);
+
+            assertThat(dto0.isPaused()).isTrue();
+            assertThat(dto1.isPaused()).isFalse();
+            assertThat(dto2.isPaused()).isTrue();
+
+            assertThat(dto0.created()).isEqualTo(LocalDateTime.of(2012, 12, 12, 12, 12, 12));
+            assertThat(dto1.created()).isEqualTo(LocalDateTime.of(2011, 11, 11, 11, 11, 11));
+            assertThat(dto2.created()).isEqualTo(LocalDateTime.of(2010, 10, 10, 10, 10, 10));
+        }
+    }
+
+    @Nested
+    class PausedRetrieveStateTests {
+
+        @Test
+        @WithMockUser(username = "user1")
+        void testTogglePausedState() {
+            restService.toggleRetrievePausedState();
+        }
+
+        @Test
+        @WithMockUser(username = "user2")
+        void testGetCurrentPausedState() {
+            PausedRetrieveStateDTO result = restService.getCurrentRetrievePausedState();
+            assertThat(result.isPaused()).isTrue();
+            assertThat(result.created()).isEqualTo(LocalDateTime.of(2007, 12, 3, 10, 15, 30));
+        }
+
+        @Test
+        @WithMockUser(username = "user3")
+        void testGetPausedStateHistory() {
+            List<PausedRetrieveStateDTO> result = restService.getPausedRetrieveStateHistory(null);
+            assertThat(result.size()).isEqualTo(3);
+
+            PausedRetrieveStateDTO dto0 = result.get(0);
+            PausedRetrieveStateDTO dto1 = result.get(1);
+            PausedRetrieveStateDTO dto2 = result.get(2);
 
             assertThat(dto0.isPaused()).isTrue();
             assertThat(dto1.isPaused()).isFalse();

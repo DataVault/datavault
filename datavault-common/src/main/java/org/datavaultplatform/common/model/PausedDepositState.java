@@ -9,10 +9,10 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "paused_state")
+@Table(name = "paused_deposit_state")
 @EntityListeners(AuditingEntityListener.class)
 @Getter
-public class PausedState {
+public class PausedDepositState {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -25,6 +25,5 @@ public class PausedState {
     @CreatedDate
     @Setter
     private LocalDateTime created;
-
 }
 

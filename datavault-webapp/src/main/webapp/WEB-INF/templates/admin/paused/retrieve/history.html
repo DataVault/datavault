@@ -1,0 +1,57 @@
+<!DOCTYPE html><!--admin/paused/history.html-->
+<html th:lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout/defaultlayout(nav='admin')}">
+<head>
+    <title>Admin - RETRIEVE Paused - History</title>
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+    </style>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <div class="container">
+        <table>
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>Is Retrieve Paused?</th>
+                <th>Timestamp</th>
+                <th>&nbsp;</th>
+            </tr>
+            </thead>
+            <th:block th:each="pausedState,status: ${pausedStates}">
+                <tr>
+                    <td th:if="${status.first}">
+                        CURRENT STATE
+                    </td>
+                    <td th:unless="${status.first}">&nbsp;</td>
+
+                    <td>[[${pausedState.isPaused}]]</td>
+                    <td>[[${#temporals.format(pausedState.created,'yyyy-MMM-dd HH:mm:ss')}]]</td>
+
+                    <td th:if="${status.first}">
+                        <form method="post" th:action="@{/web/paused/deposit/toggle}">
+                            <th:block sec:authorize="hasRole('IS_ADMIN')">
+                                <input id="tglPsBtn" type="submit" value="toggle">
+                            </th:block>
+                            <th:block sec:authorize="!hasRole('IS_ADMIN')">
+                                <span id="tglPsSpan">You need IS_ADMIN role to toggle 'paused retrieve state' </span>
+                            </th:block>
+                        </form>
+                    </td>
+                    <td th:unless="${status.first}">&nbsp/td>
+                </tr>
+            </th:block>
+        </table>
+    </div>
+
+
+</div>
+</body>
+</html>
