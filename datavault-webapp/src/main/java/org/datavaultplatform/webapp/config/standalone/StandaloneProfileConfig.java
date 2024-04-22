@@ -13,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class StandaloneProfileConfig {
 
   @Bean
+  @SuppressWarnings("deprecation")
   public PasswordEncoder passwordEncoder() {
     return NoOpPasswordEncoder.getInstance();
   }

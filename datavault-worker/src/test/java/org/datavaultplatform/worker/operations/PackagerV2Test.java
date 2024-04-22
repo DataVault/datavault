@@ -15,12 +15,13 @@ import java.util.List;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.datavaultplatform.common.bagish.Checksummer;
 import org.datavaultplatform.common.bagish.ManifestWriter;
 import org.datavaultplatform.common.bagish.SupportedAlgorithm;
-import org.datavaultplatform.common.io.FileUtils;
+import org.datavaultplatform.common.io.DataVaultFileUtils;
 import org.datavaultplatform.common.process.ProcessUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;

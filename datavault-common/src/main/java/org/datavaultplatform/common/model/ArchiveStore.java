@@ -50,7 +50,7 @@ public class ArchiveStore implements DataStore {
     // Properties to use for this storage system
     // NOTE: this is not a secure mechanism for storing credentials!
     @Lob
-    @Convert(converter = HashMapConverter.class)
+    @Convert(converter = HashMapConverter.StringString.class)
     @Column(name="properties", columnDefinition="LONGBLOB")
     private HashMap<String,String> properties = new HashMap<>();
 

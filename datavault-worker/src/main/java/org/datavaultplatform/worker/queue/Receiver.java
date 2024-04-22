@@ -6,10 +6,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import org.apache.commons.io.FileUtils;
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.event.EventSender;
 import org.datavaultplatform.common.event.RecordingEventSender;
-import org.datavaultplatform.common.io.FileUtils;
+import org.datavaultplatform.common.io.DataVaultFileUtils;
 import org.datavaultplatform.common.task.Context;
 import org.datavaultplatform.common.task.Context.AESMode;
 import org.datavaultplatform.common.task.Task;
@@ -65,7 +67,7 @@ public class Receiver implements MessageProcessor {
         this.tempDir = tempDir;
         this.metaDir = metaDir;
         this.chunkingEnabled = chunkingEnabled;
-        this.chunkingByteSize = FileUtils.parseFormattedSizeToBytes(chunkingByteSize);
+        this.chunkingByteSize = DataVaultFileUtils.parseFormattedSizeToBytes(chunkingByteSize);
 
         this.encryptionEnabled = encryptionEnabled;
         this.encryptionMode = AESMode.valueOf(encryptionMode);

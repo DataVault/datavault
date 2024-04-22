@@ -10,7 +10,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
-import org.datavaultplatform.common.io.FileUtils;
+import org.datavaultplatform.common.io.DataVaultFileUtils;
 
 import static java.nio.file.FileVisitResult.CONTINUE;
 
@@ -27,13 +27,13 @@ public class ManifestWriter extends SimpleFileVisitor<Path> implements AutoClose
     private final File manifest;
 
     public ManifestWriter(File bagDir, Checksummer checkSummer) throws IOException {
-        FileUtils.checkDirectoryExists(bagDir);
+        DataVaultFileUtils.checkDirectoryExists(bagDir);
 
         bagPathLength = bagDir.toPath().toString().length();
 
         // todo: change so that 'md5' is a variable representing the checksum type.
         manifest = new File(bagDir, MANIFEST_FILE_NAME);
-        FileUtils.checkFileExists(manifest, true);
+        DataVaultFileUtils.checkFileExists(manifest, true);
         this.manifestFilePath = manifest.toPath();
         this.manifestParentPath = manifestFilePath.getParent();
 

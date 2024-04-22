@@ -119,7 +119,7 @@ public abstract class Tar {
             new BufferedInputStream(new FileInputStream(input)))) {
 
             TarArchiveEntry entry;
-            while ((entry = tar.getNextTarEntry()) != null) {
+            while ((entry = tar.getNextEntry()) != null) {
 
                 Path path = outputDir.resolve(entry.getName());
                 File entryFile = path.toFile();

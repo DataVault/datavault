@@ -14,7 +14,7 @@ public class UploadComplete extends Event {
 
     // Maps the model ArchiveStore Id to the generated Archive Id
     @Lob
-    @Convert(converter = HashMapConverter.class)
+    @Convert(converter = HashMapConverter.StringString.class)
     @Column(name="archiveIds", columnDefinition="TINYBLOB")
     HashMap<String, String> archiveIds = new HashMap<>();
 
