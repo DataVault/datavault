@@ -2,7 +2,8 @@ version: "3.7"
 services:
   localdb:
     container_name: dv-local-mariadb
-    image: mariadb:10.9.4
+    image: mariadb:5.5.64
+    platform: linux/x86_64
     restart: always
     environment:
       MARIADB_DATABASE: "local"
