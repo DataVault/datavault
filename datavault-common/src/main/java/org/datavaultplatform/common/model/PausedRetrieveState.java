@@ -18,11 +18,12 @@ public class PausedRetrieveState {
     private String id;
 
     @Setter
-    @Column(columnDefinition = "BOOLEAN NOT NULL")
+    @Column(name="is_paused", columnDefinition = "TINYINT(1) NOT NULL")
     private boolean isPaused;
 
     @CreatedDate
     @Setter
+    @Column(columnDefinition = "TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime created;
 }
 
