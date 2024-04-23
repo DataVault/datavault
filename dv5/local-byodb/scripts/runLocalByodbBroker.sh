@@ -17,7 +17,7 @@ cd $PROJECT_ROOT
  SPRING_SQL_INIT_MODE=never \
  SPRING_DATASOURCE_USERNAME=user \
  SPRING_DATASOURCE_PASSWORD=userpass \
- SPRING_DATASOURCE_URL='jdbc:mysql://localhost:3306/test?useSSL=false&serverTimezone=UTC' \
+ SPRING_DATASOURCE_URL='jdbc:mariadb://localhost:3306/test?useSSL=false&serverTimezone=UTC' \
 #KEYSTORE_ENABLE=true \
 #KEYSTORE_PATH=XXX/PATH/TO/KEYSTORE.ks \
 #KEYSTORE_SHA1=4499a0663669cc06e7099632ba360c15a404943c \

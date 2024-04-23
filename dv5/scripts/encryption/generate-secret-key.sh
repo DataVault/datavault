@@ -9,7 +9,7 @@ cd ${DATAVAULT_HOME}
 # the broker jar has all the classes we need but we want a different 'main class' - org.datavaultplatform.common.crypto.Encryption
 OUTPUT=$(java -cp datavault-broker/target/datavault-broker.jar \
  -Dloader.main=org.datavaultplatform.common.crypto.Encryption \
- org.springframework.boot.loader.PropertiesLauncher generateSecretKey)
+ org.springframework.boot.loader.launch.PropertiesLauncher generateSecretKey)
 STATUS=$?
 if [ $STATUS -ne 0 ]; then
   echo "ERROR : "

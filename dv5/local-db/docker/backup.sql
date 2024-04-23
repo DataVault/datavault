@@ -992,11 +992,13 @@ CREATE TABLE `paused_retrieve_state`
     PRIMARY KEY (id)
 ) ENGINE = InnoDB;
 
+delete from `paused_deposit_state`;
 INSERT INTO `paused_deposit_state`  VALUES ('101', '2001-07-22 12:12:12.123456', true);
 INSERT INTO `paused_deposit_state`  VALUES ('102', '2002-07-22 12:12:12.123456', false);
 INSERT INTO `paused_deposit_state`  VALUES ('103', '2003-07-22 12:12:12.123456', true);
 INSERT INTO `paused_deposit_state`  VALUES ('104', '2004-07-22 12:12:12.123456', false);
 
+delete from `paused_retrieve_state`;
 INSERT INTO `paused_retrieve_state`  VALUES ('201', '2001-07-22 12:12:12.123456', true);
 INSERT INTO `paused_retrieve_state`  VALUES ('202', '2002-07-22 12:12:12.123456', false);
 INSERT INTO `paused_retrieve_state`  VALUES ('203', '2003-07-22 12:12:12.123456', true);
