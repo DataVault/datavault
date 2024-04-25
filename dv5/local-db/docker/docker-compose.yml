@@ -6,13 +6,13 @@ services:
     platform: linux/x86_64
     restart: always
     environment:
-      MYSQL_DATABASE: "test" #same name of db in 'backup.sql'
+      MYSQL_DATABASE: "local"
       # So you don't have to use root, but you can if you like
       MYSQL_USER: "user"
       # You can use whatever password you like
-      MYSQL_PASSWORD: "userpass"
+      MYSQL_PASSWORD: "passXXXX"
       # Password for root access
-      MYSQL_ROOT_PASSWORD: "rootpass"
+      MYSQL_ROOT_PASSWORD: "passYYYY"
     ports:
       # <Port exposed> : < MariaDB Port running inside container>
       - "3306:3306"
