@@ -39,7 +39,7 @@ class PausedRetrieveStateRepositoryIT extends BaseDatabaseTest {
     void testDbInitialization() {
         assertThat(repo.count()).isEqualTo(4);
         PausedRetrieveState ps = repo.getCurrentState().get();
-        assertThat(ps.getId()).isEqualTo("204");
+        assertThat(ps.getId()).isEqualTo("404");
         assertThat(ps.isPaused()).isFalse();
         assertThat(ps.getCreated()).isEqualTo(LocalDateTime.of(2004,7,22,12,12,12, 123456000));
     }
@@ -55,7 +55,7 @@ class PausedRetrieveStateRepositoryIT extends BaseDatabaseTest {
         List<PausedRetrieveState> recent3 = repo.getRecentEntries(3);
         assertThat(recent3).hasSize(3);
         List<String> recent4 = repo.getRecentEntries(4).stream().map(PausedRetrieveState::getId).toList();
-        assertThat(recent4).isEqualTo(List.of("204","203","202","201"));
+        assertThat(recent4).isEqualTo(List.of("404","403","402","401"));
         List<PausedRetrieveState> recent5 = repo.getRecentEntries(5);
         assertThat(recent5).hasSize(4);
     }

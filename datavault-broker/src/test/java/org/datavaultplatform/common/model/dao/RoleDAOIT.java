@@ -1,5 +1,6 @@
 package org.datavaultplatform.common.model.dao;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -87,6 +88,8 @@ public class RoleDAOIT extends BaseDatabaseTest {
 
     RoleModel foundById2 = dao.findById(RoleModel2.getId()).get();
     assertEquals(RoleModel2.getName(), foundById2.getName());
+
+    assertThat(foundById2.getId()).isEqualTo(foundById1.getId() + 1);
   }
 
   @Test

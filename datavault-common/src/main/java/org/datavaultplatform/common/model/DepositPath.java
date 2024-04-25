@@ -50,6 +50,7 @@ public class DepositPath {
     private String filePath;
     
     // Record the type of this path (e.g. is it a user upload or on a server filestore).
+    @Column(columnDefinition = "INT(11)")
     private Path.PathType pathType;
     
     public DepositPath() {}

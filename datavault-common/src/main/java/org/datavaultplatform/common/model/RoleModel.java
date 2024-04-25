@@ -12,6 +12,8 @@ import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Objects;
 import org.hibernate.Hibernate;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.id.enhanced.SequenceStyleGenerator;
 
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -25,8 +27,14 @@ public class RoleModel {
     public static final String EG_ROLE_MODEL = "eg.RoleModel.1";
 
     @Id
-    @SequenceGenerator(name = "hibSEQ", sequenceName = "hibernate_sequence")
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "hibSEQ")
+    @GenericGenerator(
+            name = "hibSEQ",
+            type = org.hibernate.id.enhanced.SequenceStyleGenerator.class,
+            parameters = {
+                    @org.hibernate.annotations.Parameter(name = SequenceStyleGenerator.SEQUENCE_PARAM, value = "hibernate_sequence"),
+                    @org.hibernate.annotations.Parameter(name = SequenceStyleGenerator.FORCE_TBL_PARAM, value = "true")
+            })
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "hibSEQ")
     private Long id;
 
     @Column(name = "name", nullable = false, columnDefinition = "TEXT")

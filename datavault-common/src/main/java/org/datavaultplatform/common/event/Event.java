@@ -15,7 +15,7 @@ import org.datavaultplatform.common.response.EventInfo;
 @Entity
 @Table(name="Events")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name="eventType", discriminatorType = DiscriminatorType.STRING)
+@DiscriminatorColumn(name="eventType", discriminatorType = DiscriminatorType.STRING, columnDefinition = "VARCHAR(31)")
 @NamedEntityGraph(name = Event.EG_EVENT, attributeNodes = {
     @NamedAttributeNode(value = Event_.ARCHIVE, subgraph = "subArchive"),
     @NamedAttributeNode(value = Event_.DEPOSIT, subgraph = "subDeposit"),
@@ -116,6 +116,7 @@ public class Event {
     public String userAgent;
     
     @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "VARCHAR(255)")
     private Agent.AgentType agentType;
 
     // For Audit

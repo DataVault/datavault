@@ -1,11 +1,5 @@
 package org.datavaultplatform.common.model.dao;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -27,6 +21,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
+
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = DataVaultBrokerApp.class)
 @AddTestProperties
@@ -75,6 +72,8 @@ public class RoleAssignmentDAOIT extends BaseReuseDatabaseTest {
 
     RoleAssignment foundById2 = dao.findById(roleAssignment2.getId()).get();
     assertEquals(roleAssignment2.getId(), foundById2.getId());
+
+    assertThat(foundById2.getId()).isEqualTo(foundById1.getId() + 1);
   }
 
   @Test

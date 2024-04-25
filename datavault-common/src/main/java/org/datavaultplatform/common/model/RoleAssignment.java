@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.id.enhanced.SequenceStyleGenerator;
+
 import java.util.Objects;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -23,8 +26,14 @@ import java.util.Objects;
 public class RoleAssignment {
     public static final String EG_ROLE_ASSIGNMENT = "eg.RoleAssignment.1";
     @Id
-    @SequenceGenerator(name = "hibSEQ", sequenceName = "hibernate_sequence")
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "hibSEQ")
+    @GenericGenerator(
+            name = "hibSEQ",
+            type = org.hibernate.id.enhanced.SequenceStyleGenerator.class,
+            parameters = {
+                    @org.hibernate.annotations.Parameter(name = SequenceStyleGenerator.SEQUENCE_PARAM, value = "hibernate_sequence"),
+                    @org.hibernate.annotations.Parameter(name = SequenceStyleGenerator.FORCE_TBL_PARAM, value = "true")
+            })
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "hibSEQ")
     private Long id;
 
     @ManyToOne(optional = false)

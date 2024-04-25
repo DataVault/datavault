@@ -39,7 +39,7 @@ class PausedDepositStateRepositoryIT extends BaseDatabaseTest {
     void testDbInitialization() {
         assertThat(repo.count()).isEqualTo(4);
         PausedDepositState ps = repo.getCurrentState().get();
-        assertThat(ps.getId()).isEqualTo("104");
+        assertThat(ps.getId()).isEqualTo("304");
         assertThat(ps.isPaused()).isFalse();
         assertThat(ps.getCreated()).isEqualTo(LocalDateTime.of(2004,7,22,12,12,12, 123456000));
     }
@@ -55,7 +55,7 @@ class PausedDepositStateRepositoryIT extends BaseDatabaseTest {
         List<PausedDepositState> recent3 = repo.getRecentEntries(3);
         assertThat(recent3).hasSize(3);
         List<String> recent4 = repo.getRecentEntries(4).stream().map(PausedDepositState::getId).toList();
-        assertThat(recent4).isEqualTo(List.of("104","103","102","101"));
+        assertThat(recent4).isEqualTo(List.of("304","303","302","301"));
         List<PausedDepositState> recent5 = repo.getRecentEntries(5);
         assertThat(recent5).hasSize(4);
     }
