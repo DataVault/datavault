@@ -2,16 +2,17 @@ version: "3.7"
 services:
   localdb:
     container_name: dv-local-mariadb
-    image: mariadb:10.9.4
+    image: mariadb:5.5.64
+    platform: linux/x86_64
     restart: always
     environment:
-      MARIADB_DATABASE: "local"
+      MYSQL_DATABASE: "local"
       # So you don't have to use root, but you can if you like
-      MARIADB_USER: "user"
+      MYSQL_USER: "user"
       # You can use whatever password you like
-      MARIADB_PASSWORD: "passXXXX"
+      MYSQL_PASSWORD: "passXXXX"
       # Password for root access
-      MARIADB_ROOT_PASSWORD: "passYYYY"
+      MYSQL_ROOT_PASSWORD: "passYYYY"
     ports:
       # <Port exposed> : < MariaDB Port running inside container>
       - "3306:3306"
