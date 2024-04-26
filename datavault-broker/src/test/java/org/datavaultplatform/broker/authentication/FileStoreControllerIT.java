@@ -329,7 +329,7 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
     File tempFile = new File(this.tempStoreToSftp, "writeTest.txt");
     String randomContents = UUID.randomUUID().toString();
     writeToFile(tempFile, randomContents);
-    String storedPath = sftp.store("FILES/AAA", tempFile, new Progress());
+    String storedPath = sftp.store("FILES/AAA", tempFile, new Progress(), "dv_111111");
     //this file should now be stored on sftp file system
 
     File retrievedFromSftp = new File(this.tempRetrievedFromSftp, "writeTest.txt");

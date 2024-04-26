@@ -8,7 +8,7 @@ import jakarta.persistence.Transient;
 public class InitStates extends Event {
 
     @Transient
-    public ArrayList<String> states;
+    private ArrayList<String> states;
     
     public InitStates() {
     }

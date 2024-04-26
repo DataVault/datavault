@@ -1,10 +1,11 @@
-package org.datavaultplatform.worker.utils;
+package org.datavaultplatform.common.util;
 
-import java.io.File;
-import java.util.concurrent.ExecutionException;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.storage.Verify;
 import org.springframework.util.Assert;
+
+import java.io.File;
+import java.util.concurrent.ExecutionException;
 
 @Slf4j
 public class Utils {

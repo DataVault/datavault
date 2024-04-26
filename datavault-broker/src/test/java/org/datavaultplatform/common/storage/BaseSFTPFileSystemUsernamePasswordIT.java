@@ -6,6 +6,7 @@ import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.docker.DockerImage;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.utility.MountableFile;
 
 public abstract class BaseSFTPFileSystemUsernamePasswordIT extends BaseSFTPFileSystemIT {
 
@@ -22,6 +23,7 @@ public abstract class BaseSFTPFileSystemUsernamePasswordIT extends BaseSFTPFileS
         .withEnv(ENV_PASSWORD, TEST_PASSWORD)
         .withEnv(ENV_PASSWORD_ACCESS, "true")
         .withExposedPorts(SFTP_SERVER_PORT)
+        .withCopyFileToContainer(MountableFile.forHostPath(tempLocalPath),"/config")
         .waitingFor(Wait.forListeningPort());
   }
 

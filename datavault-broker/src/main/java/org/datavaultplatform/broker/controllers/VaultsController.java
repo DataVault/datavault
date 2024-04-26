@@ -523,6 +523,14 @@ public class VaultsController {
         //    e.printStackTrace();
         //    throw e;
         //}
+        logger.info("createVault.getConfirmed(): " + createVault.getConfirmed());
+        // Send email if createVault confirmed
+        if (createVault.getConfirmed()) {
+            logger.info("Calling sendNewPendingVaultEmail().");
+            pendingVaultsService.sendNewPendingVaultEmail(vault);
+            logger.info("Called sendNewPendingVaultEmail().");
+        }
+
         return vault.convertToResponse();
     }
 
@@ -633,8 +641,12 @@ public class VaultsController {
 
         pendingVaultsService.addCreator(createVault, userID, vault.getId());
 
+        logger.info("createVault.getConfirmed(): " + createVault.getConfirmed());
+        // Send email if createVault confirmed
         if (createVault.getConfirmed()) {
+            logger.info("Calling sendNewPendingVaultEmail().");
             pendingVaultsService.sendNewPendingVaultEmail(vault);
+            logger.info("Called sendNewPendingVaultEmail().");
         }
 
         return vault.convertToResponse();

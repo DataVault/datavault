@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.time.Clock;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.util.encoders.Base64;
 import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.crypto.Encryption;
@@ -13,6 +14,8 @@ import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.storage.SFTPFileSystemDriver;
 import org.datavaultplatform.common.storage.impl.ssh.UtilityJSch;
+import org.springframework.util.Assert;
+import org.slf4j.Logger;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -22,7 +25,8 @@ import java.util.Vector;
 
 /**
  * An implementation of SFTPFileSystemDriver to use JCraft's Jsch ssh/sftp library.
- */@Slf4j
+ */
+@Slf4j
 public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
 
 
@@ -85,7 +89,7 @@ public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
         } else {
             byte[] privateKey = Encryption.decryptSecret(encPrivateKey, encIV);
 
-            log.debug("Private Key: "+new String(privateKey));
+            log.debug("Private Key: {}"+new String(privateKey));
             jsch.addIdentity(username, privateKey, null, passphrase.getBytes());
         }
 
@@ -199,8 +203,8 @@ public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
                 }
                 
                 String entryKey = path + PATH_SEPARATOR + entry.getFilename();
-                boolean canRead = canRead(entryKey);
-                boolean canWrite = canWrite(entryKey);
+                boolean canRead = canReadInternal(entryKey);
+                boolean canWrite = canWriteInternal(entryKey);
                 
                 FileInfo info = new FileInfo(entryKey,
                                              "", // Absolute path - unused?
@@ -348,10 +352,10 @@ public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
             Disconnect();
         }
     }
-    
-    @Override
-    public String store(String relativePath, File working, Progress progress) throws Exception {
 
+    @Override
+    public String store(String relativePath, File working, Progress progress, String timestampDirName) throws Exception {
+        Assert.isTrue(StringUtils.isNotBlank(timestampDirName), "The timestampDirName cannot be blank");
         String path = getFullPath(relativePath);
         try {
             Connect();
@@ -359,7 +363,6 @@ public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
             channelSftp.cd(path);
 
             // Create timestamped folder to avoid overwriting files
-            String timestampDirName = SftpUtils.getTimestampedDirectoryName(clock);
             path = path + PATH_SEPARATOR + timestampDirName;
 
             mkdir(channelSftp, timestampDirName);
@@ -409,29 +412,49 @@ public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
     }
 
     @Override
+    public Logger getLogger() {
+        return log;
+    } 
+    
     public boolean canRead(String path) throws Exception {
-        return getPermissionsString(path).contains("r");
+        try {
+            Connect();
+            return canReadInternal(path);
+        } catch (Exception ex) {
+            log.error("unexpected exception", ex);
+            throw ex;
+        } finally {
+            Disconnect();
+    }
     }
 
     @Override
 	public boolean canWrite(String path) throws Exception {
-        return getPermissionsString(path).contains("w");
-    }
-
-    private String getPermissionsString(String path) throws Exception {
         try {
             Connect();
-            String fullPath = getFullPath(path);
-            final SftpATTRS attrs = channelSftp.stat(fullPath);
-            int unixPermissions = attrs.getPermissions();
-            String unixPermissionsString = attrs.getPermissionsString();
-            log.info("fullPath: " + fullPath + ", path: " + path + ", unixPermissions: " + unixPermissions + ", unixPermissionsString: " + unixPermissionsString);
-            return unixPermissionsString;
-        } catch (Exception e) {
-            log.error("unexpected exception", e);
-            throw e;
+            return canWriteInternal(path);
+        } catch (Exception ex) {
+            log.error("unexpected exception", ex);
+            throw ex;
         } finally {
             Disconnect();
         }
+    }
+    
+    public boolean canWriteInternal(String path) throws  Exception {
+        return getPermissionsString(path).contains("w");
+    }
+    
+    public boolean canReadInternal(String path) throws  Exception {
+        return getPermissionsString(path).contains("r");
+    }
+
+    private String getPermissionsString(String path) throws Exception {
+        String fullPath = getFullPath(path);
+        final SftpATTRS attrs = channelSftp.stat(fullPath);
+        int unixPermissions = attrs.getPermissions();
+        String unixPermissionsString = attrs.getPermissionsString();
+        log.info("fullPath: " + fullPath + ", path: " + path + ", unixPermissions: " + unixPermissions + ", unixPermissionsString: " + unixPermissionsString);
+        return unixPermissionsString;
     }
 }

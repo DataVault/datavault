@@ -39,21 +39,29 @@
     
     <!-- dependency versions -->
 
-    <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-bom -->
-    <aws.java.sdk.bom.version>1.12.701</aws.java.sdk.bom.version>
+    <!-- https://mvnrepository.com/artifact/org.springframework.retry/spring-retry -->
+    <spring.retry.version>2.0.5</spring.retry.version>
 
     <!-- https://mvnrepository.com/artifact/com.oracle.oci.sdk/oci-java-sdk-bom -->
-    <oci.java.sdk.bom.version>3.39.1</oci.java.sdk.bom.version>
+    <oci.java.sdk.bom.version>3.40.0</oci.java.sdk.bom.version>
+    
+    <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-bom -->
+    <aws.java.sdk.bom.version>1.12.708</aws.java.sdk.bom.version>
+
+    <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on -->
+    <bouncy.castle.version>1.78.1</bouncy.castle.version>
+
+    <!-- https://mvnrepository.com/artifact/org.hibernate.orm/hibernate-core -->
+    <hibernate.version>6.4.7.Final</hibernate.version>
+
+    <!-- above here, updated 26apr2024 -->
 
     <!-- https://mvnrepository.com/artifact/org.owasp/dependency-check-maven -->
     <owasp.dependency.check.version>9.1.0</owasp.dependency.check.version>
 
     <!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-contract-stub-runner -->
     <spring.cloud.version>4.1.2</spring.cloud.version>
-
-    <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on -->
-    <bouncy.castle.version>1.78</bouncy.castle.version>
-
+    
     <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-text -->
     <commons.text.version>1.12.0</commons.text.version>
     
@@ -107,10 +115,7 @@
 
     <!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
     <jsoup.version>1.17.2</jsoup.version>
-
-    <!-- https://mvnrepository.com/artifact/org.hibernate.orm/hibernate-core -->
-    <hibernate.version>6.4.4.Final</hibernate.version>
-
+    
     <!-- https://mvnrepository.com/artifact/com.jayway.jsonpath/json-path -->
     <json-path.version>2.9.0</json-path.version>
 
@@ -162,6 +167,11 @@
         <artifactId>json-path</artifactId>
         <version>${json-path.version}</version>
         <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.retry</groupId>
+        <artifactId>spring-retry</artifactId>
+        <version>${spring.retry.version}</version>
       </dependency>
       <dependency>
         <groupId>com.google.guava</groupId>

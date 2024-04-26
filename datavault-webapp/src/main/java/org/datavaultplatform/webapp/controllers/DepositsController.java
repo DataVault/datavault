@@ -51,7 +51,7 @@ public class DepositsController {
         
         model.addAttribute("deposit", deposit);
         model.addAttribute("vault", restService.getVault(vaultID));
-        return "/deposits/create";
+        return "deposits/create";
     }
 
     // Process the completed 'create new deposit' page

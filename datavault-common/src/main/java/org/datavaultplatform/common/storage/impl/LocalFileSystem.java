@@ -2,13 +2,13 @@ package org.datavaultplatform.common.storage.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
-import org.datavaultplatform.common.io.FileCopy;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.common.storage.ArchiveStore;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.storage.UserStore;
 import org.datavaultplatform.common.storage.Verify;
+import org.slf4j.Logger;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -142,36 +142,19 @@ public class LocalFileSystem extends Device implements UserStore, ArchiveStore {
     
     @Override
     public long getUsableSpace() {
-        File file = new File(rootPath);
-        return file.getUsableSpace();
+        return FileSystemUtils.getUsableSpace(new File(rootPath));
     }
 
     @Override
     public void retrieve(String path, File working, Progress progress) throws Exception {
-        Path absolutePath = getAbsolutePath(path);
-        File file = new File(absolutePath.toUri());
-
-        if (file.isFile()) {
-            FileCopy.copyFile(progress, file, working);
-        } else if (file.isDirectory()) {
-            FileCopy.copyDirectory(progress, file, working);
-        }
+        FileSystemUtils.retrieve(path, working, progress, this.rootPath);
     }
 
     @Override
     public String store(String path, File working, Progress progress) throws Exception {
-        Path absolutePath = getAbsolutePath(path);    
-        File retrieveFile = new File(absolutePath.resolve(working.getName()).toUri());
-
-        if (working.isFile()) {
-            FileCopy.copyFile(progress, working, retrieveFile);
-        } else if (working.isDirectory()) {
-            FileCopy.copyDirectory(progress, working, retrieveFile);
-        }
-
-        return working.getName();
+        return FileSystemUtils.store(path, working, progress, this.rootPath);
     }
-    
+
     @Override
     public Verify.Method getVerifyMethod() {
         // Return the default verification method (copy back and check)
@@ -179,60 +162,18 @@ public class LocalFileSystem extends Device implements UserStore, ArchiveStore {
     }
     
     private Path getAbsolutePath(String filePath) {
-        
-        // Join the requested path to the root of the filesystem.
-        // In future this path handling should be part of a filesystem-specific driver.
-        Path base = Paths.get(rootPath);
-        Path absolute;
-        
-        try {
-            if (filePath.isEmpty()) {
-                absolute = base;
-            } else {
-                // A leading '/' would cause the path to be treated as absolute
-                while (filePath.startsWith("/")) {
-                    filePath = filePath.replaceFirst("/", "");
-                    
-                }
-                
-                absolute = base.resolve(filePath);
-                absolute = Paths.get(absolute.toFile().getCanonicalPath());
-            }
-
-            if (isValidSubPath(absolute)) {
-                return absolute;
-            } else {
-                // Path is invalid (doesn't exist in base)!
-                return null;
-            }
-        } catch (Exception e) {
-            log.error("unexpected exception",e);
-            return null;
-        }
+        return FileSystemUtils.getAbsolutePath(filePath, this.rootPath);
     }
-    
-    private boolean isValidSubPath(Path path) {
-        
-        // Check if the path is valid with respect to the base path.
-        // For example, we don't want to allow path traversal ("../../abc").
-        
-        try {
-            Path base = Paths.get(rootPath);
-            Path canonicalBase = Paths.get(base.toFile().getCanonicalPath());
-            Path canonicalPath = Paths.get(path.toFile().getCanonicalPath());
 
-            return canonicalPath.startsWith(canonicalBase);
-        }
-        catch (Exception e) {
-            log.error("unexpected exception",e);
-            return false;
-        }
-    }
     
     @Override
     public void delete(String path, File working, Progress progress) throws Exception {
-        Path absolutePath = getAbsolutePath(path);
-        Files.deleteIfExists(absolutePath);
+        FileSystemUtils.delete(path, this.rootPath);
+    }
+
+    @Override
+    public Logger getLogger() {
+        return this.log;
     }
 
     @Override

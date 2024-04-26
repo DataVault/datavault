@@ -95,7 +95,7 @@ public class LocalFileSystemTest {
     @Test
     void testRootPathIsNull() {
       IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-          () -> new LocalFileSystem(null, new HashMap<>()));
+          () -> new LocalFileSystem("test-lfs", new HashMap<>()));
       assertEquals("rootPath cannot be null", ex.getMessage());
     }
 
@@ -104,7 +104,7 @@ public class LocalFileSystemTest {
       HashMap<String, String> map = new HashMap<>();
       map.put(LocalFileSystem.ROOT_PATH, "/doesNotExist");
       FileNotFoundException ex = assertThrows(FileNotFoundException.class,
-          () -> new LocalFileSystem(null, map));
+          () -> new LocalFileSystem("test-lfs", map));
       assertEquals("/doesNotExist", ex.getMessage());
     }
 
@@ -119,7 +119,7 @@ public class LocalFileSystemTest {
       HashMap<String, String> map = new HashMap<>();
       map.put(LocalFileSystem.ROOT_PATH, newFile.getAbsolutePath());
       IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-          () -> new LocalFileSystem(null, map));
+          () -> new LocalFileSystem("test-lfs", map));
       assertEquals(String.format("rootPath is not a directory[%s]",newFile), ex.getMessage());
     }
 
@@ -133,7 +133,7 @@ public class LocalFileSystemTest {
       HashMap<String, String> map = new HashMap<>();
       map.put(LocalFileSystem.ROOT_PATH, newDir.getAbsolutePath());
       IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-          () -> new LocalFileSystem(null, map));
+          () -> new LocalFileSystem("test-lfs", map));
       assertEquals(String.format("rootPath is not readable[%s]", newDir), ex.getMessage());
     }
 
@@ -147,7 +147,7 @@ public class LocalFileSystemTest {
       HashMap<String, String> map = new HashMap<>();
       map.put(LocalFileSystem.ROOT_PATH, newDir.getAbsolutePath());
       IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-          () -> new LocalFileSystem(null, map));
+          () -> new LocalFileSystem("test-lfs", map));
       assertEquals(String.format("rootPath is not writable[%s]", newDir), ex.getMessage());
     }
   }

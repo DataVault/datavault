@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
+
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.queue.Sender;
@@ -88,6 +90,10 @@ public abstract class BaseGenerateMessageTest {
 
   final File optionsDir = new File(baseDir, "options");
 
+  final int userFsRetrieveMaxAttempts = 10;
+  final long userFsRetrieveDelaySeconds1 = TimeUnit.MINUTES.toSeconds(1);
+  final long userFsRetrieveDelaySeconds2 = TimeUnit.MINUTES.toSeconds(5);
+
   @Spy
   final ObjectMapper mapper = new ObjectMapper();
 
@@ -125,6 +131,9 @@ public abstract class BaseGenerateMessageTest {
         ociNameSpace,
         ociBucketName,
         tsmReverse,
+        userFsRetrieveMaxAttempts,
+        userFsRetrieveDelaySeconds1,
+        userFsRetrieveDelaySeconds2,
         mapper
     );
     return dc;

@@ -128,4 +128,8 @@ public class S3Cloud extends Device implements ArchiveStore {
 		return depositId;
 	}
 
+	@Override
+	public Logger getLogger() {
+		return logger;
+	}
 }

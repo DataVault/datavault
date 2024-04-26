@@ -14,6 +14,11 @@
 
   <dependencies>
     <dependency>
+      <groupId>org.springframework.retry</groupId>
+      <artifactId>spring-retry</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>datavault</groupId>
       <artifactId>datavault-common</artifactId>
     </dependency>

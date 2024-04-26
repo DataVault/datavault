@@ -327,7 +327,7 @@
         });
         
         $('#add-from-storage-btn').on("click", function() {
-            var checkDepositSizeURL = /*[(@{/checkdepositsize})]*/ 'replaced-by-tl';
+            var checkDepositSizeURL = /*[(|'@{/checkdepositsize/}'|)]*/ 'replaced-by-tl';
 
             console.log("#add-from-storage-btn: CLICKED");
             const tree = $.ui.fancytree.getTree("#tree");

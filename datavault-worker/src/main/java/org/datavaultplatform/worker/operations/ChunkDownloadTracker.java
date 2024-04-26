@@ -4,12 +4,12 @@ import org.datavaultplatform.common.crypto.Encryption;
 import org.datavaultplatform.common.storage.ArchiveStore;
 import org.datavaultplatform.common.task.Context;
 import lombok.extern.slf4j.Slf4j;
+import org.datavaultplatform.common.util.Utils;
 
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import org.datavaultplatform.worker.utils.Utils;
 
 @Slf4j
 public record ChunkDownloadTracker(String archiveId, ArchiveStore archiveStore, File chunkFile, Context context,

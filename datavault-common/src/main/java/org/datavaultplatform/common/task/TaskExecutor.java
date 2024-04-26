@@ -1,17 +1,13 @@
-package org.datavaultplatform.worker.tasks;
+package org.datavaultplatform.common.task;
+
+import org.datavaultplatform.common.util.Utils;
+import org.springframework.util.Assert;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
-
-import org.datavaultplatform.worker.utils.Utils;
-import org.springframework.util.Assert;
 
 public class TaskExecutor<T> {
 
