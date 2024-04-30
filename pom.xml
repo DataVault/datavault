@@ -35,24 +35,29 @@
     <skip.integration.tests>false</skip.integration.tests>
     <surefire.plugin.version>3.2.5</surefire.plugin.version>
     <failsafe.plugin.version>3.2.5</failsafe.plugin.version>
-    <jacoco.plugin.version>0.8.11</jacoco.plugin.version>
+    <jacoco.plugin.version>0.8.12</jacoco.plugin.version>
     
     <!-- dependency versions -->
 
+    <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-bom -->
+    <aws.java.sdk.bom.version>1.12.710</aws.java.sdk.bom.version>
+
+    <!-- https://mvnrepository.com/artifact/org.hibernate.orm/hibernate-core -->
+    <hibernate.version>6.4.8.Final</hibernate.version>
+
+    <!-- https://mvnrepository.com/artifact/org.testng/testng -->
+    <testng.version>7.10.2</testng.version>
+    
+    <!-- above here, updated 30apr2024 -->
+    
     <!-- https://mvnrepository.com/artifact/org.springframework.retry/spring-retry -->
     <spring.retry.version>2.0.5</spring.retry.version>
 
     <!-- https://mvnrepository.com/artifact/com.oracle.oci.sdk/oci-java-sdk-bom -->
     <oci.java.sdk.bom.version>3.40.0</oci.java.sdk.bom.version>
     
-    <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-bom -->
-    <aws.java.sdk.bom.version>1.12.708</aws.java.sdk.bom.version>
-
     <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on -->
     <bouncy.castle.version>1.78.1</bouncy.castle.version>
-
-    <!-- https://mvnrepository.com/artifact/org.hibernate.orm/hibernate-core -->
-    <hibernate.version>6.4.7.Final</hibernate.version>
 
     <!-- above here, updated 26apr2024 -->
 
@@ -67,9 +72,6 @@
     
     <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
     <commons.io.version>2.16.1</commons.io.version>
-
-    <!-- https://mvnrepository.com/artifact/org.testng/testng -->
-    <testng.version>7.10.1</testng.version>
 
     <!-- https://mvnrepository.com/artifact/it.burning/cron-expression-descriptor -->
     <cron.expr.desc.version>1.2.10</cron.expr.desc.version>
@@ -489,6 +491,27 @@
               <excludeProperty>git.remote.origin.url*</excludeProperty>
             </excludeProperties>
           </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-maven-plugin</artifactId>
+          <executions>
+            <execution>
+              <goals>
+                <goal>build-info</goal>
+              </goals>
+              <configuration>
+                <additionalProperties>
+                  <encoding.source>UTF-8</encoding.source>
+                  <encoding.reporting>UTF-8</encoding.reporting>
+                  <java.source>17</java.source>
+                  <java.target>17</java.target>
+                  <!--suppress UnresolvedMavenProperty -->
+                  <git.commit.id>${git.commit.id}</git.commit.id>
+                </additionalProperties>
+              </configuration>
+            </execution>
+          </executions>
         </plugin>
         <plugin>
           <groupId>org.springframework.boot</groupId>

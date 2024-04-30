@@ -1,17 +1,12 @@
 package org.datavaultplatform.common.storage;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.security.interfaces.RSAPublicKey;
-import java.util.List;
 import java.util.Map;
 import javax.crypto.SecretKey;
 import lombok.SneakyThrows;
@@ -24,8 +19,6 @@ import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.crypto.Encryption;
 import org.datavaultplatform.common.crypto.SshRsaKeyUtils;
 import org.datavaultplatform.common.docker.DockerImage;
-import org.datavaultplatform.common.model.FileInfo;
-import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.MountableFile;
