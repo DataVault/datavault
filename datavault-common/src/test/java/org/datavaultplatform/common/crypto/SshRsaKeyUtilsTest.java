@@ -1,7 +1,5 @@
 package org.datavaultplatform.common.crypto;
 
-import static org.junit.Assert.assertEquals;
-
 import java.io.File;
 import java.math.BigInteger;
 import java.net.URLDecoder;
@@ -19,6 +17,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Takes example, Base64 encoded, RSA public/private key pair - formatted (for ssh/sftp)

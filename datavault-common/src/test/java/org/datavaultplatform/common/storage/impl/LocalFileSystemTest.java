@@ -20,7 +20,6 @@ import java.util.Map;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
-import org.datavaultplatform.common.io.DataVaultFileUtils;
 import org.datavaultplatform.common.io.Progress;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;

@@ -2567,12 +2567,12 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         vault.setContactPerson("contact-person-1");
 
         vault.setDatasetID("data-set-id-1");
-        ArrayList creators = new ArrayList();
+        ArrayList<String> creators = new ArrayList<>();
         creators.add("creator1");
         creators.add("creator2");
         vault.setDataCreators(creators);
 
-        ArrayList depositors = new ArrayList();
+        ArrayList<String> depositors = new ArrayList<>();
         depositors.add("Neil");
         depositors.add("Geddy");
         depositors.add("Alex");
@@ -2590,7 +2590,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         vault.setLoggedInAs("user-one");
 
         vault.setName("vault-name");
-        ArrayList ndms = new ArrayList();
+        ArrayList<String> ndms = new ArrayList<>();
         ndms.add("ndm1");
         ndms.add("ndm2");
         vault.setNominatedDataManagers(ndms);
