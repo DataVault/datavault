@@ -1,6 +1,5 @@
 package org.datavaultplatform.webapp.controllers.admin;
 
-import io.vavr.collection.List;
 import org.datavaultplatform.common.model.Group;
 import org.datavaultplatform.common.model.RoleModel;
 import org.datavaultplatform.webapp.services.ForceLogoutService;
@@ -8,13 +7,11 @@ import org.datavaultplatform.webapp.services.RestService;
 import org.datavaultplatform.webapp.services.UserLookupService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.security.Principal;
 import java.util.Arrays;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
