@@ -617,9 +617,9 @@
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-compiler-plugin</artifactId>
             <configuration>
-              <source>17</source>
-              <target>17</target>
-              <release>17</release>
+              <source>22</source>
+              <target>22</target>
+              <release>22</release>
               <testExcludes>
                 <testExclude>**/*FT.java</testExclude>
               </testExcludes>

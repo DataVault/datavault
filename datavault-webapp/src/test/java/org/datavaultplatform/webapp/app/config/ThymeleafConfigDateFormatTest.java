@@ -71,7 +71,7 @@ public class ThymeleafConfigDateFormatTest extends BaseThymeleafTest{
         System.out.printf("globalDateTimeFormat[%s]%n", globalDateTimeFormat);
 
         assertEquals("Fri Feb 16 10:11:12 GMT 2024", noFormat);
-        assertEquals("16 February 2024 at 10:11:12 GMT", builtInDateTimeFormat);
+        assertEquals("16 February 2024, 10:11:12 GMT", builtInDateTimeFormat);
         assertEquals("16/Feb/2024", customDateFormat);
         assertEquals("16/Feb/2024 10:11:12", customDateTimeFormat);
 
