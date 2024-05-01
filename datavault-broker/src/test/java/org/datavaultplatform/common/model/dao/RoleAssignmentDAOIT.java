@@ -278,7 +278,7 @@ public class RoleAssignmentDAOIT extends BaseReuseDatabaseTest {
 
     assertEquals(
         List.of(ra4.getId(), ra5.getId()),
-        dao.findByVaultId("vault-id-four").stream().map(RoleAssignment::getId).toList());
+        dao.findByVaultId("vault-id-four").stream().map(RoleAssignment::getId).sorted().toList());
   }
 
   @Test

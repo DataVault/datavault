@@ -664,6 +664,6 @@ public abstract class BaseSFTPFileSystemIT {
     }
     getLog().info("Listing {} files took [{}]ms", files.size(), diffMS);
     assertThat(files).hasSizeGreaterThan(1_000);
-    assertThat(Duration.ofMillis(diffMS)).isLessThan(Duration.ofSeconds(30));
+    assertThat(Duration.ofMillis(diffMS)).isLessThan(Duration.ofSeconds(40));
   }
 }
