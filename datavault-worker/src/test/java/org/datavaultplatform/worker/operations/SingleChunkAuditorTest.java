@@ -13,6 +13,7 @@ import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.common.task.Context;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
@@ -27,6 +28,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -58,7 +60,8 @@ class SingleChunkAuditorTest {
 
     static final String TEST_CHUNK_ARCHIVE_ID = "base-chunk-archive-id.123";
 
-    static final String TEST_LOCATION = "test-location";
+    static final String TEST_LOCATION = "/a/b/c/test-location";
+    
     @Captor
     ArgumentCaptor<String> argChunkArchiveId;
 
@@ -348,5 +351,46 @@ class SingleChunkAuditorTest {
                 singleCopy, location,
                 TOTAL_NUMBER_CHUNKS);
         return auditor;
+    }
+    
+    @Nested
+    class GetLocationValueTests {
+        
+        @Test
+        void testLocationIsPath() {
+            checkGetLocationValue("/home/lacdv/.TSM/opt/audit/dsm1.opt","dsm1_opt");
+        }
+        @Test
+        void testLocationIsNonPath() {
+            checkGetLocationValue("dsm1.opt","dsm1_opt");
+        }
+        
+        @Test
+        void testLocationIsRoot() {
+            checkGetLocationValueThrowsException("/", IllegalArgumentException.class, "The location cannot be /");
+        }
+        @Test
+        void testLocationIsNull() {
+            checkGetLocationValueThrowsException(null, IllegalArgumentException.class, "The location [null] cannot be blank");
+        }
+        @Test
+        void testLocationIsEmpty() {
+            checkGetLocationValueThrowsException("", IllegalArgumentException.class, "The location [] cannot be blank");
+        }
+        @Test
+        void testLocationIsBlankSpace() {
+            checkGetLocationValueThrowsException(" ", IllegalArgumentException.class, "The location [ ] cannot be blank");
+        }
+
+        void checkGetLocationValueThrowsException(String location, Class<? extends Exception> clazz, String message){
+            Exception ex = assertThrows(clazz, () -> {
+                SingleChunkAuditor.getLocationValue(location);
+            });
+            assertThat(ex).hasMessage(message);
+        }
+
+        void checkGetLocationValue(String location, String locationValue){
+            assertThat(SingleChunkAuditor.getLocationValue(location)).isEqualTo(locationValue);
+        }
     }
 }

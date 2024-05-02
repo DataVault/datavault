@@ -2,6 +2,7 @@ package org.datavaultplatform.worker.operations;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.datavaultplatform.common.crypto.Encryption;
 import org.datavaultplatform.common.event.EventSender;
 import org.datavaultplatform.common.event.UpdateProgress;
@@ -11,11 +12,13 @@ import org.datavaultplatform.common.event.audit.ChunkAuditStarted;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.common.task.Context;
+import org.springframework.util.Assert;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
@@ -77,8 +80,20 @@ public class SingleChunkAuditor implements Callable<Boolean> {
         if (singleCopy) {
             this.chunkPath = context.getTempDir().resolve(chunkArchiveId);
         } else {
-            this.chunkPath = context.getTempDir().resolve(location).resolve(chunkArchiveId);
+            String locationValue = getLocationValue(location);
+            this.chunkPath = context.getTempDir().resolve(locationValue).resolve(chunkArchiveId);
         }
+    }
+    
+    public static String getLocationValue(String location) {
+        Assert.isTrue(StringUtils.isNotBlank(location), String.format("The location [%s] cannot be blank", location));
+        Path locationPath = Paths.get(location);
+        if (locationPath.isAbsolute() && locationPath.getParent() == null) {
+            throw new IllegalArgumentException("The location cannot be /");
+        }
+        String locationValue = locationPath.getFileName().toString().replace(".","_");
+        log.info("location[{}] => locationValue[{}]", location, locationValue);
+        return locationValue;
     }
 
     @Override
