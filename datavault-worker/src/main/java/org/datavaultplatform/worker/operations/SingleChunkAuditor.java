@@ -3,6 +3,7 @@ package org.datavaultplatform.worker.operations;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.crypto.Encryption;
 import org.datavaultplatform.common.event.EventSender;
 import org.datavaultplatform.common.event.UpdateProgress;
@@ -25,8 +26,9 @@ import java.util.concurrent.Callable;
 @Slf4j
 @Data
 public class SingleChunkAuditor implements Callable<Boolean> {
-    static final String PROP_ID = "id";
-    static final String PROP_CHUNK_NUM = "chunkNum";
+    static final String PROP_CHUNK_ID = PropNames.CHUNK_ID;
+    static final String PROP_CHUNK_NUM = PropNames.CHUNK_NUM;
+    static final String PROP_BAG_ID = PropNames.BAG_ID;
     private final String encryptedChunkDigest;
     private final String decryptedChunkDigest;
     private final byte[] chunkIV;
@@ -72,16 +74,20 @@ public class SingleChunkAuditor implements Callable<Boolean> {
         this.singleCopy = singleCopy;
         this.location = location;
 
-        this.chunkId = depositChunkProperties.get(PROP_ID);
+        this.chunkId = depositChunkProperties.get(PROP_CHUNK_ID);
         this.chunkNum = Integer.parseInt(depositChunkProperties.get(PROP_CHUNK_NUM));
 
         this.totalNumberOfChunks = totalNumberOfChunks;
         this.chunkArchiveId = baseChunkArchiveId + FileSplitter.CHUNK_SEPARATOR + chunkNum;
+        
+        String tarFileName = depositChunkProperties.get(PROP_BAG_ID) + ".tar";
+        String tsmFileName = tarFileName + FileSplitter.CHUNK_SEPARATOR + chunkNum;
+
         if (singleCopy) {
-            this.chunkPath = context.getTempDir().resolve(chunkArchiveId);
+            this.chunkPath = context.getTempDir().resolve(tsmFileName);
         } else {
             String locationValue = getLocationValue(location);
-            this.chunkPath = context.getTempDir().resolve(locationValue).resolve(chunkArchiveId);
+            this.chunkPath = context.getTempDir().resolve(locationValue).resolve(tsmFileName);
         }
     }
     
