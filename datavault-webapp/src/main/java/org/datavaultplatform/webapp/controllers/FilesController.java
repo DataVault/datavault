@@ -22,19 +22,12 @@ public class FilesController {
 
     private final RestService restService;
 
-    private enum DISPLAY_VISIBILITY {
-        READ,
-        WRITE,
-        READ_AND_WRITE,
-        OTHER
-    };
-
     @Autowired
     public FilesController(RestService restService) {
         this.restService = restService;
     }
 
-    public ArrayList<FancytreeNode> getNodes(String parent, Boolean directoryOnly, DISPLAY_VISIBILITY visibility) throws Exception{
+    public ArrayList<FancytreeNode> getNodes(String parent, boolean directoryOnly) throws Exception{
 
         String filePath = "";
         
@@ -57,49 +50,8 @@ public class FilesController {
             node.setTitle(info.getName());
             
             if (info.getIsDirectory()) {
-                switch (visibility) {
-                    case READ:
-                        if (info.getCanRead() != null) {
-                            node.setTitle(info.getName() + " (read: " + info.getCanRead() + ")");
-                        } else {
-                            node.setUnselectable(true);
-                            node.setCheckbox(false);
-                        }
-                        break;
-                    case WRITE:
-                        if (info.getCanWrite() != null) {
-                            node.setTitle(info.getName() + " (write: " + info.getCanWrite() + ")");
-                        } 
-                        break;
-                    default:
-                        node.setTitle(
-                                info.getName() + " (read: " + info.getCanRead() + "write: " + info.getCanWrite() + ")");
-                }
-                // node.setCheckbox(false);
                 node.setFolder(true);
                 node.setLazy(true);
-            }
-
-            // Only display nodes that satisfy DISPLAY_VISIBILITY condition.
-            switch (visibility) {
-                case READ:
-                    if (info.getCanRead() != null && !info.getCanRead()) {
-                        continue;
-                    }
-                    break;
-                case WRITE:
-                    if (info.getCanWrite() != null && !info.getCanWrite()) {
-                        continue;
-                    }
-                    break;
-                case READ_AND_WRITE:
-                    if ((info.getCanRead() != null && !info.getCanRead())
-                            || (info.getCanRead() != null && !info.getCanWrite())) {
-                        continue;
-                    }
-                    break;
-                default:
-                    // Do nothing
             }
 
             nodes.add(node);
@@ -115,7 +67,7 @@ public class FilesController {
         String mode = request.getParameter("mode");
         String parent = request.getParameter("parent");
         
-        return getNodes(parent, false, DISPLAY_VISIBILITY.READ);
+        return getNodes(parent, false);
     }
     
     @RequestMapping("/dir")
@@ -125,7 +77,7 @@ public class FilesController {
         String mode = request.getParameter("mode");
         String parent = request.getParameter("parent");
         
-        return getNodes(parent, true, DISPLAY_VISIBILITY.WRITE);
+        return getNodes(parent, true);
     }
     
     @RequestMapping("/filesize")
@@ -148,10 +100,8 @@ public class FilesController {
         DepositSize result = restService.checkDepositSize(filePaths);
         Boolean success = result.getResult();
         String max = FileUtils.getGibibyteSizeStr(result.getMax());
-        String sizeWithUnits = result.getSizeWithUnits();
         log.info("Max deposit (web): " + max);
-        return "{ \"success\":\"" + success + "\", \"max\":\"" + max + "\", \"sizeWithUnits\":\"" + sizeWithUnits
-                + "\"}";
+        return "{ \"success\":\"" + success + "\", \"max\":\"" + max + "\"}";
     }
     
     @RequestMapping(value = "/fileupload", method = RequestMethod.POST)
@@ -189,18 +139,5 @@ public class FilesController {
         response.setStatus(HttpServletResponse.SC_OK);
         wr.flush();
         wr.close();
-    }
-
-    @RequestMapping(value = "/sizeofselectedfiles")
-    public @ResponseBody String sizeOfSelectedFiles(HttpServletRequest request) throws Exception {
-        log.info("WEBAPP: Called sizeOfSelectedFiles");
-
-        String[] filePaths = request.getParameterValues("filepath[]");
-
-        for (String filePath : filePaths) {
-            log.info("filePaths: " + filePath);
-        }
-
-        return restService.sizeOfSelectedFiles(filePaths);
     }
 }
