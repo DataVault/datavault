@@ -25,12 +25,6 @@ public interface SFTPFileSystemDriver extends UserStore {
   @Override
   String getName(String path);
 
-  @Override
-  boolean canRead(String path) throws Exception;
-  
-  @Override
-  boolean canWrite(String path) throws Exception;
-
   long getUsableSpace() throws Exception;
 
   void retrieve(String path, File working, Progress progress) throws Exception;
