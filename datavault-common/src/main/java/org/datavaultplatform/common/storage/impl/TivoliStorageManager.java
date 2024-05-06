@@ -146,6 +146,12 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 		        if (Files.exists(retrieveToPath)) {
 					
 					log.info("Moving from retrieveTargetPath[{}] to targetPath[{}]", tsmFilePath, targetPath);
+
+					Path targetPathDir = targetPath.getParent();
+					if (targetPathDir != null) {
+						Files.createDirectories(targetPathDir);
+					}
+					
 					Files.move(retrieveToPath, targetPath, REPLACE_EXISTING, ATOMIC_MOVE);
 
 					retrieved = true;
