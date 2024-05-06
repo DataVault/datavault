@@ -442,6 +442,41 @@ class TivoliStorageManagerTest {
             assertThat(Files.lines(targetFilePath)).containsExactly("line1","line2");
         }
 
+        @Test
+        void testTargetDirIsCreated() throws Exception {
+
+            targetFile = tempPath.resolve("createMe").resolve("target.txt").toFile();
+            
+            Path targetFilePath = targetFile.toPath();
+            assertThat(Files.exists(targetFilePath)).isFalse();
+
+            AtomicInteger attempts = new AtomicInteger(0);
+
+            Mockito.doAnswer(invocation -> {
+
+                checkGetProcessInfo(invocation);
+
+                ProcessHelper.ProcessInfo mProcessInfo = Mockito.mock(ProcessHelper.ProcessInfo.class);
+                lenient().when(mProcessInfo.wasFailure()).thenReturn(false);
+                lenient().when(mProcessInfo.wasSuccess()).thenReturn(true);
+                    Path retrieveToParentPath = tsmTemp.resolve(timestampedDir);
+                    Files.createDirectories(retrieveToParentPath);
+                    File retrieveTo = retrieveToParentPath.resolve(targetFile.getName()).toFile();
+                    try (PrintWriter writer = new PrintWriter(new FileWriter(retrieveTo))) {
+                        writer.println("line1");
+                        writer.println("line2");
+                    }
+                return mProcessInfo;
+            }).when(tsm).getProcessInfo(argDesc.capture(), argCommands.capture());
+
+            Progress progress = new Progress();
+            tsm.retrieve("testDepositId", targetFile, progress, "testLocation");
+
+            assertThat(Files.exists(targetFilePath)).isTrue();
+            assertThat(Files.lines(targetFilePath)).containsExactly("line1","line2");
+        }
+
+
         @ParameterizedTest
         @ValueSource(ints = {1,2,3,4,5})
         void testRetrieveFailsBecauseOfTSMFailure(int attemptWhichProcessSucceeds) throws Exception {
