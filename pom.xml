@@ -40,21 +40,29 @@
     <!-- dependency versions -->
 
     <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-bom -->
-    <aws.java.sdk.bom.version>1.12.710</aws.java.sdk.bom.version>
+    <aws.java.sdk.bom.version>1.12.715</aws.java.sdk.bom.version>
+
+    <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core -->
+    <jackson.version>2.17.1</jackson.version>
+
+    <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
+    <guava.version>33.2.0-jre</guava.version>
+
+    <!-- above here, updated 06may2024 -->
 
     <!-- https://mvnrepository.com/artifact/org.hibernate.orm/hibernate-core -->
     <hibernate.version>6.4.8.Final</hibernate.version>
 
     <!-- https://mvnrepository.com/artifact/org.testng/testng -->
     <testng.version>7.10.2</testng.version>
-    
+
+    <!-- https://mvnrepository.com/artifact/com.oracle.oci.sdk/oci-java-sdk-bom -->
+    <oci.java.sdk.bom.version>3.41.0</oci.java.sdk.bom.version>
+
     <!-- above here, updated 30apr2024 -->
     
     <!-- https://mvnrepository.com/artifact/org.springframework.retry/spring-retry -->
     <spring.retry.version>2.0.5</spring.retry.version>
-
-    <!-- https://mvnrepository.com/artifact/com.oracle.oci.sdk/oci-java-sdk-bom -->
-    <oci.java.sdk.bom.version>3.40.0</oci.java.sdk.bom.version>
     
     <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on -->
     <bouncy.castle.version>1.78.1</bouncy.castle.version>
@@ -76,14 +84,11 @@
     <!-- https://mvnrepository.com/artifact/it.burning/cron-expression-descriptor -->
     <cron.expr.desc.version>1.2.10</cron.expr.desc.version>
 
-    <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core -->
-    <jackson.version>2.17.0</jackson.version>
-
     <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-collections4 -->
     <commons.collections4.version>4.5.0-M1</commons.collections4.version>
 
     <!-- above here, updated 19Apr2024 -->
- 
+
     <!-- https://mvnrepository.com/artifact/org.testcontainers/testcontainers -->
     <testcontainers.version>1.19.7</testcontainers.version>
 
@@ -92,16 +97,13 @@
 
     <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
     <commons.compress.version>1.26.1</commons.compress.version>
-    
-    <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
-    <guava.version>33.1.0-jre</guava.version>
-    
+
     <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-exec -->
     <commons.exec.version>1.4.0</commons.exec.version>
 
     <!-- https://mvnrepository.com/artifact/org.thymeleaf.extras/thymeleaf-extras-springsecurity6 -->
     <thymeleaf.extras.version>3.1.2.RELEASE</thymeleaf.extras.version>
-    
+
     <!-- https://mvnrepository.com/artifact/nz.net.ultraq.thymeleaf/thymeleaf-layout-dialect -->
     <thymeleaf.layout.version>3.3.0</thymeleaf.layout.version>
     <!-- above here, updated 22Mar2024 -->
@@ -117,7 +119,7 @@
 
     <!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
     <jsoup.version>1.17.2</jsoup.version>
-    
+
     <!-- https://mvnrepository.com/artifact/com.jayway.jsonpath/json-path -->
     <json-path.version>2.9.0</json-path.version>
 
