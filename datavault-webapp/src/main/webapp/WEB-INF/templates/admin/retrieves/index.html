@@ -1,0 +1,40 @@
+<!DOCTYPE html><!--admin/retrieves/index.html-->
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/defaultlayout(nav='admin')}">
+<head><title>Admin - Retrievals</title></head>
+<th:block layout:fragment="content">
+    <div class="container">
+
+    <ol class="breadcrumb">
+        <li><a th:href="@{/admin/}"><b>Administration</b></a></li>
+        <li class="active"><b>Retrievals</b></li>
+    </ol>
+    <th:block th:if="${retrieves != null && !#lists.isEmpty(retrieves)}">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                <tr class="tr">
+                    <th>Retrieval</th>
+                    <th>Status</th>
+                    <th>Timestamp</th>
+                    <th>Retrieve path</th>
+                    <th>Retrieve note</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                    <tr th:each="retrieve: ${retrieves}" class="tr">
+                        <td>[[${retrieve.getDeposit().getID()}]]</td>
+                        <td>[[${retrieve.status}]]</td>
+                        <td>[[${#dates.format(retrieve.timestamp,globalDateTimeFormat)}]]<!--/* datetime */--></td>
+                        <td>[[${retrieve.retrievePath}]]</td>
+                        <td>[[${retrieve.note}]]</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </th:block>
+
+</div>
+</th:block>
+</html>

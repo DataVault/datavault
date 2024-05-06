@@ -53,7 +53,7 @@ public class FilesController {
                 node.setFolder(true);
                 node.setLazy(true);
             }
-            
+
             nodes.add(node);
         }
         

@@ -1,0 +1,12 @@
+<!DOCTYPE html><!--test/hello.html-->
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Hello [[${name}]]!</title>
+  <link th:href="@{/resources/test/css/hello.css}" rel="stylesheet" type="text/css">
+</head>
+<body>
+<h2 class="hello-title">Hello [[${name}]]!</h2>
+<script th:src="@{/resources/test/js/hello.js}"></script>
+</body>
+</html>

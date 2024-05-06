@@ -82,6 +82,19 @@ public class AdminSchoolsController {
         mav.addObject("roles", getRoles());
         mav.addObject("roleAssignments", getRoleAssignments(school.get()));
         mav.addObject("canManageSchoolRoleAssignments", canManageSchoolRoleAssignments);
+
+        try {
+            List<RoleModel> mavRoles = (List<RoleModel>) mav.getModelMap().get("roles");
+
+            logger.info("XXXX-START");
+            logger.info("XXXX-SIZE[{}]", mavRoles.size());
+            mavRoles.forEach(role -> {
+                logger.info("XXXX-ROLE-ID[{}] ROLE-NAME[{}]", role.getId(), role.getName());
+            });
+            logger.info("XXXX-END");
+        }catch (RuntimeException ex) {
+            logger.info("XXXX-ERROR",ex);
+        }
         return mav;
     }
 

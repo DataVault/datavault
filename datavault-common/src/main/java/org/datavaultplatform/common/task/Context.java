@@ -7,6 +7,9 @@ import org.datavaultplatform.common.util.StorageClassNameResolver;
 // Some common properties needed for all jobs
 
 public class Context {
+
+    public static final int DEFAULT_NUMBER_OF_THREADS = 25;
+
     public enum AESMode {GCM, CBC}
 
     private final Path tempDir;
@@ -106,7 +109,11 @@ public class Context {
     }
 
     public int getNoChunkThreads() {
-        return noChunkThreads;
+        if (noChunkThreads < 1) {
+            return DEFAULT_NUMBER_OF_THREADS;
+        } else {
+            return noChunkThreads;
+        }
     }
 
     public StorageClassNameResolver getStorageClassNameResolver(){ return this.classNameResolver; }

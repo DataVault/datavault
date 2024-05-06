@@ -1,9 +1,13 @@
 package org.datavaultplatform.common.request;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import lombok.Data;
 import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
+
+import java.util.Date;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiObject(name = "CreateRetentionPolicy")
@@ -38,22 +42,27 @@ public class CreateRetentionPolicy {
     private String minDataRetentionPeriod;
 
     @ApiObjectField(description = "In Effect Date")
-    private String inEffectDate;
+    private Date inEffectDate;
 
     @ApiObjectField(description = "End Date")
-    private String endDate;
+    private Date endDate;
 
     @ApiObjectField(description = "Date Guidance Reviewed")
-    private String dateGuidanceReviewed;
+    private Date dataGuidanceReviewed;
 
 
 
     public CreateRetentionPolicy() { }
 
+    @JsonGetter
     public int getId() {
         return id;
     }
+    public int getID() {
+        return getId();
+    }
 
+    @JsonSetter
     public void setId(int id) {
         this.id = id;
     }
@@ -122,28 +131,33 @@ public class CreateRetentionPolicy {
         this.minDataRetentionPeriod = minDataRetentionPeriod;
     }
 
-    public String getInEffectDate() {
+    public Date getInEffectDate() {
         return inEffectDate;
     }
 
-    public void setInEffectDate(String inEffectDate) {
+    public void setInEffectDate(Date inEffectDate) {
         this.inEffectDate = inEffectDate;
     }
 
-    public String getEndDate() {
+    public Date getEndDate() {
         return endDate;
     }
 
-    public void setEndDate(String endDate) {
+    public void setEndDate(Date endDate) {
         this.endDate = endDate;
     }
 
-    public String getDateGuidanceReviewed() {
-        return dateGuidanceReviewed;
+    public Date getDataGuidanceReviewed() {
+        return dataGuidanceReviewed;
     }
 
-    public void setDateGuidanceReviewed(String dateGuidanceReviewed) {
-        this.dateGuidanceReviewed = dateGuidanceReviewed;
+    public void setDataGuidanceReviewed(Date dataGuidanceReviewed) {
+        this.dataGuidanceReviewed = dataGuidanceReviewed;
+    }
+
+    public String getPolicyInfo() {
+        String retVal = this.id + "-" + this.minRetentionPeriod;
+        return retVal;
     }
 
 }

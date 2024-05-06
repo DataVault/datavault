@@ -15,10 +15,11 @@ import org.datavaultplatform.common.storage.UserStore;
 import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.common.task.Context;
 import org.datavaultplatform.common.task.Task;
+import org.datavaultplatform.common.task.TaskExecutor;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.datavaultplatform.common.util.StorageClassUtils;
+import org.datavaultplatform.common.util.Utils;
 import org.datavaultplatform.worker.operations.*;
-import org.datavaultplatform.worker.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -308,7 +309,7 @@ public class Deposit extends Task {
      * @param tarHash
      * @throws Exception
      */
-    private void verifyArchive(Context context, File[] chunkFiles, String[] chunksHash, File tarFile, String tarHash, 
+    private void verifyArchiveWithChunks(Context context, File[] chunkFiles, String[] chunksHash, File tarFile, String tarHash,
             Map<Integer, byte[]> ivs, String[] encChunksHash) throws Exception {
 
         for (String archiveStoreId : archiveStores.keySet() ) {
@@ -353,7 +354,7 @@ public class Deposit extends Task {
      * @param tarHash
      * @throws Exception
      */
-    private void verifyArchive(Context context, File tarFile, String tarHash, byte[] iv, String encTarHash) throws Exception {
+    private void verifyArchiveNoChunks(Context context, File tarFile, String tarHash, byte[] iv, String encTarHash) throws Exception {
 
         boolean alreadyVerified = false;
 
@@ -390,7 +391,7 @@ public class Deposit extends Task {
                         CopyBackFromArchive.copyBackFromArchive(archiveStore, archiveId, tarFile, loc);
 
                         // check encrypted tar
-                        verifyTarFile(context.getTempDir(), tarFile, encTarHash);
+                        Utils.checkFileHash("enc-tar", tarFile, encTarHash);
 
                         // Decryption
                         if(iv != null) {
@@ -431,9 +432,6 @@ public class Deposit extends Task {
             String encTarHash, String[] encChunksHash, boolean doVerification) throws Exception {
 
         int noOfThreads = context.getNoChunkThreads();
-        if (noOfThreads < 0 ) {
-            noOfThreads = 25;
-        }
         logger.debug("Number of threads: " + noOfThreads);
         TaskExecutor<Object> executor = new TaskExecutor<>(noOfThreads, "Chunk download failed.");
         for (int i = 0; i < chunkFiles.length; i++) {
@@ -687,11 +685,8 @@ public class Deposit extends Task {
       HashMap<Integer, String> chunksDigest = new HashMap<>();
 
       int noOfThreads = context.getNoChunkThreads();
-        if (noOfThreads < 0 ) {
-            noOfThreads = 25;
-        }
+      logger.debug("Number of threads:" + noOfThreads);
 
-        logger.debug("Number of threads:" + noOfThreads);
         TaskExecutor<ChecksumHelper> executor = new TaskExecutor<>(noOfThreads,"Chunk encryption failed.");
         for (int i = 0; i < chunkFiles.length; i++){
             int chunkNumber = i + 1;
@@ -744,10 +739,6 @@ public class Deposit extends Task {
         encChunksHash = new String[chunkFiles.length];
 
         int noOfThreads = context.getNoChunkThreads();
-        if (noOfThreads < 0 ) {
-            noOfThreads = 25;
-        }
-
         logger.debug("Number of threads:" + noOfThreads);
 
         TaskExecutor<EncryptionChunkHelper> executor = new TaskExecutor<>(noOfThreads, "Chunk encryption failed.");
@@ -813,11 +804,10 @@ public class Deposit extends Task {
         logger.debug("Uploading to storage.");
 
 		if ( context.isChunkingEnabled() ) {
+
         int noOfThreads = context.getNoChunkThreads();
-        if (noOfThreads < 0 ) {
-            noOfThreads = 25;
-        }
         logger.debug("Number of threads:" + noOfThreads);
+
         TaskExecutor<HashMap<String, String>> executor = new TaskExecutor<>(noOfThreads, "Chunk upload failed.");
 
     		// kick of 10 (maybe more) tasks at a time?  each task would kick off 3 tasks of their own
@@ -851,9 +841,9 @@ public class Deposit extends Task {
 	
 	private void verifyArchive(Context context, File tarFile, String tarHash, byte[] iv, Map<Integer, byte[]> chunksIVs, String encTarHash) throws Exception {
 		if( context.isChunkingEnabled() ) {
-        verifyArchive(context, chunkFiles, chunksHash, tarFile, tarHash, chunksIVs, encChunksHash);
+        verifyArchiveWithChunks(context, chunkFiles, chunksHash, tarFile, tarHash, chunksIVs, encChunksHash);
     } else {
-        verifyArchive(context, tarFile, tarHash, iv, encTarHash);
+        verifyArchiveNoChunks(context, tarFile, tarHash, iv, encTarHash);
     }
     eventSender.send(new ValidationComplete(jobID, depositId).withUserId(userID));
 

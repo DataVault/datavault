@@ -7,7 +7,8 @@ import java.util.concurrent.Callable;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.event.EventSender;
 import org.datavaultplatform.common.storage.ArchiveStore;
-import org.datavaultplatform.worker.tasks.TaskExecutor;
+import org.datavaultplatform.common.task.TaskExecutor;
+
 
 @Slf4j
 public class ChunkUploadTracker implements Callable<HashMap<String, String>> {

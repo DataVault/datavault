@@ -1,0 +1,201 @@
+<fieldset id="billing-fieldset" xmlns:th="http://www.thymeleaf.org">
+    <div id="billing-section" class="form-card">
+        <h2 class="fs-title">Billing</h2>
+        <input id="billingType"
+            type="hidden"
+            th:field="*{billingType}"
+        >
+        <div id="feewaiver-query-box" class="row collapse">
+            <div class="col-md-8">
+                <p>
+                    Do you wish to use the fee waiver? That is, this vault and any others 
+                    from the same project will have a total combined size of under 100GB.
+                </p>
+            </div>
+            <div class="col-md-4 well">
+                <div class="radio">
+                    <label>
+                        <input type="radio"
+                            id="feewaiver-query-yes"
+                            value="YES"
+                            th:field="*{feewaiverQueryChoice}"
+                        />
+                        Yes
+                    </label>
+                </div>
+                <div class="radio">
+                    <label>
+                        <input type="radio"
+                            id="feewaiver-query-no-or-do-not-know"
+                            value="NO_OR_DO_NOT_KNOW"
+                            th:field="*{feewaiverQueryChoice}"
+                        />
+                        No/Don't know
+                    </label>
+                </div>
+                <button type="button"
+                    class="btn btn-danger my-1 query-choice-clear"
+                    id="feewaiver-query-choice-clear">Clear selections and return to top</button>
+            </div>
+        </div>
+        <div id="slice-query-box" class="row collapse">
+            <div class="col-md-8">
+                <p>
+                    Will funding be from prepaid reserved DataVault storage (a slice).
+                </p>
+            </div>
+            <div class="col-md-4 well">
+                <div class="radio">
+                    <label>
+                        <input type="radio"
+                            id="slice-query-yes"
+                            value="YES"
+                            th:field="*{sliceQueryChoice}"
+                        >
+                        Yes
+                    </label>
+                </div>
+                <div class="radio">
+                    <label>
+                        <input type="radio"
+                            id="slice-query-no-or-do-not-know"
+                            value="NO_OR_DO_NOT_KNOW"
+                            th:field="*{sliceQueryChoice}"
+                        >
+                        No/Don't know
+                    </label>
+                </div>
+                <div class="radio">
+                    <label>
+                        <input type="radio"
+                            id="slice-query-buy"
+                            value="BUY_NEW_SLICE"
+                            th:field="*{sliceQueryChoice}"
+                        >
+                        I wish to buy reserved DataVault storage
+                    </label>
+                </div>
+                <button type="button"
+                    class="btn btn-danger query-choice-clear"
+                    id="slice-query-choice-clear">Clear selection</button>
+            </div>
+        </div>
+        <div id="funding-query-box" class="row collapse">
+            <div class="col-md-8">
+                <p>
+                    Do you have a research grant or budget code to pay for this Vault?
+                </p>
+            </div>
+            <div class="col-md-4 well">
+                <div class="radio">
+                    <label>
+                        <input type="radio"
+                            id="funding-query-yes"
+                            value="YES"
+                            th:field="*{fundingQueryChoice}"
+                        >
+                        Yes
+                    </label>
+                </div>
+                <div class="radio">
+                    <label>
+                        <input type="radio"
+                            id="funding-query-no-or-do-not-know"
+                            value="FUNDING_NO_OR_DO_NOT_KNOW"
+                            th:field="*{fundingQueryChoice}"
+                        >
+                        No/Don't know
+                    </label>
+                </div>
+                <button type="button"
+                        class="btn btn-danger my-1 query-choice-clear"
+                        id="funding-query-choice-clear">Clear selections and return to the top</button>
+            </div>
+        </div>
+        
+        <div id="slice-form" class="row collapse">
+            <div class="well">
+                <p>
+                    A slice is reserved DataVault storage. If you know the name of your slice, 
+                    please enter it here (eg Slice001). 
+                </p>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">Slice: </label>
+                    <input type="text" id="sliceID"
+                           th:field="*{sliceID}"
+                    />
+                </div>
+                </label>
+            </div>
+        </div>
+        <div id="payment-details-form" class="row collapse">
+            <h4 class="fs-title">Billing Details</h4>
+            <p>Please provide the details we should use to send your bill to the correct finance team.</p>
+            <div class="well">
+                <div class="form-group required" style="padding-bottom: 1.5rem;">
+                    <label class="col-sm-4 control-label">Authoriser:
+                        <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
+                            title="The name of someone in your School/Unit or Sub-Unit who can authorise the payment."></span>
+                    </label>
+                    <input type="text" class="col-sm-6" id="budget-authoriser"
+                           th:field="*{budgetAuthoriser}"
+                    />
+                </div>
+                <div class="form-group required" style="padding-bottom: 1.5rem;">
+                    <label class="col-sm-4 control-label">School/Unit:</label>
+                    <input type="text" class="col-sm-6" id="schoolOrUnit"
+                           th:field="*{budgetSchoolOrUnit}"
+                    />
+                </div>
+                <div class="form-group" style="padding-bottom: 1.5rem;">
+                    <label class="col-sm-4 control-label">Subunit:</label>
+                    <input type="text" class="col-sm-6" id="subunit"
+                           th:field="*{budgetSubunit}"
+                    />
+                </div>
+                <div class="form-group required" style="padding-bottom: 1.5rem;">
+                    <label class="col-sm-4 control-label">Project Title:
+                        <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
+                            title="If you are planning to pay the bill from a grant, please enter the Project Title."></span>
+                    </label>
+                    <input type="text" class="col-sm-6" id="projectTitle"
+                           th:field="*{projectTitle}"
+                    />
+                </div>
+                <div class="form-group" style="padding-bottom: 1.5rem;">
+                    <label for="billingGrantEndDate" class="col-sm-4 control-label">
+                        Grant End Date:<span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
+                            title="This information will assist the university in ensuring the archive is kept for at least the minimum amount of time required by the funder(s). This field should be left blank if there is no grant associated with the work.&nbsp;"></span>
+                    </label>
+                    <input type="text" id="billingGrantEndDate" class="date-picker col-sm-6" placeholder="yyyy-mm-dd"
+                           th:field="*{billingGrantEndDate}"
+                    /><!--form-date-->
+                    <span id="invalid-billing-grant-end-date-span" style="font-size: 1.2em; font-weight: bold; color:  #AE0F0F; display: inline;"></span>
+                </div>
+                <div class="form-group" style="padding-bottom: 1.5rem;">
+                    <label class="col-sm-4 control-label">
+                       Payment details (if known), <br>for example, Project Number or Accounting String
+                    </label>
+                    <textarea id="budget-payment-details" type="text" class="col-sm-6"
+                        rows="4"
+                        th:field="*{paymentDetails}"
+                    >
+                    </textarea>
+                </div>
+                <div class="form-group" style="padding-top: 1.5rem;">
+                    <button type="button"
+                        class="btn btn-danger query-choice-clear"
+                        id="payment-details-form-clear">Clear selection and return to the top</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <button type="button" name="previous" class="previous action-button-previous btn btn-default">&laquo; Previous</button>
+    <a name="admin-pending-vault-summary" class="btn btn-primary" style="margin-bottom: 0;"
+        th:href="@{|/admin/pendingVaults/summary/${vaultID}|}">
+        << Return Admin Pending Vault Summary</a>
+            <button type="submit" name="save" value="Save" class="save action-button-previous btn btn-success">
+                <span class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span> Save
+            </button>
+            <button type="button" name="next" class="next action-button btn btn-default">Next Step &raquo;</button>
+</fieldset>

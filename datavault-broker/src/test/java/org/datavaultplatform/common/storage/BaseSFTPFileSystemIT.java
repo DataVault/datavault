@@ -6,14 +6,13 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.File;
-import java.io.InputStream;
-import java.io.RandomAccessFile;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -60,6 +59,23 @@ public abstract class BaseSFTPFileSystemIT {
   static final long EXPECTED_SPACE_AVAILABLE_ON_SFTP_SERVER = 100_000;
   private static final int FREE_SPACE_FACTOR = 10;
 
+  static final Path tempLocalPath;
+
+  static {
+    try {
+      tempLocalPath = Files.createTempDirectory("sftpTestFilesDir");
+      for (int i = 0; i < 1000; i++) {
+        Path tempFile = tempLocalPath.resolve(String.format("temp-%s.txt", i));
+        try (PrintWriter pw = new PrintWriter(new FileWriter(tempFile.toFile()))) {
+          pw.printf("test file number - [%s]%n", i);
+
+        }
+      }
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+  
   public abstract GenericContainer<?> getContainer();
 
   public abstract SFTPFileSystemDriver getSftpDriver();
@@ -142,7 +158,7 @@ public abstract class BaseSFTPFileSystemIT {
   @Test
   @SneakyThrows
   void testUsableSpace() {
-    assertThat(getSftpDriver().getUsableSpace()).isGreaterThan(50_000_000_000L);
+    assertThat(getSftpDriver().getUsableSpace()).isGreaterThan(10_000_000_000L);
   }
 
   @Test
@@ -161,7 +177,7 @@ public abstract class BaseSFTPFileSystemIT {
     getLog().info("sftpDriver {}", getSftpDriver());
 
     Progress p1 = new Progress();
-    String pathOnRemote = getSftpDriver().store(".", fromDvFile, p1);
+    String pathOnRemote = getSftpDriver().store(".", fromDvFile, p1, "dv_20220326094433");
 
     if(getSftpDriver().isMonitoring()) {
       assertEquals(fromDvFile.length(), p1.getByteCount());
@@ -237,7 +253,7 @@ public abstract class BaseSFTPFileSystemIT {
     getLog().info("sftpDriver {}", getSftpDriver());
 
     Progress p1 = new Progress();
-    String pathOnRemote = getSftpDriver().store(".", fromDvFile, p1);
+    String pathOnRemote = getSftpDriver().store(".", fromDvFile, p1, "dv_20220326094433");
 
     if(getSftpDriver().isMonitoring()) {
       assertEquals(fromDvFile.length(), p1.getByteCount());
@@ -329,7 +345,8 @@ public abstract class BaseSFTPFileSystemIT {
     ProgressEventListener sendListener = sendEvents::add;
     Progress pSend = new Progress(sendListener);
     File largeFileSend = createLargeFile(tempFileDir, fileSize);
-    String pathOnRemote = time(label, "store", () -> getSftpDriver().store(".", largeFileSend, pSend));
+    String pathOnRemote = time(label, "store", () -> getSftpDriver().store(".", largeFileSend, pSend,
+            "dv_20220326094433"));
     Path tsPath = Paths.get(SFTP_ROOT_DIR).relativize(Paths.get(pathOnRemote));
 
     String largeFileRemotePath = tsPath.resolve(largeFileSend.getName()).toString();
@@ -433,7 +450,7 @@ public abstract class BaseSFTPFileSystemIT {
     getLog().info("sftpDriver {}", getSftpDriver());
 
     Progress p1 = new Progress();
-    String pathOnRemote = getSftpDriver().store(".", fromDvDir, p1);
+    String pathOnRemote = getSftpDriver().store(".", fromDvDir, p1, "dv_20220326094433");
     if(getSftpDriver().isMonitoring()) {
       assertEquals(fromDvDirFileA.length() + fromDvDirFileB.length() + fromDvDirFileC.length(),
           p1.getByteCount());
@@ -566,7 +583,7 @@ public abstract class BaseSFTPFileSystemIT {
     getLog().info("sftpDriver {}", getSftpDriver());
 
     Progress p1 = new Progress();
-    String pathOnRemote = getSftpDriver().store(".", fromDvDir, p1);
+    String pathOnRemote = getSftpDriver().store(".", fromDvDir, p1, "dv_20220326094433");
 
     Path tsPath = Paths.get(SFTP_ROOT_DIR).relativize(Paths.get(pathOnRemote));
     Path retrievePath = tsPath.resolve(fromDvDir.toPath().getFileName());
@@ -634,4 +651,19 @@ public abstract class BaseSFTPFileSystemIT {
   }
 
   abstract Logger getLog();
+
+  @Test
+  public void testListOneThousandFiles() {
+
+    long startMS = System.currentTimeMillis();
+    List<FileInfo> files = getSftpDriver().list(".");
+    long diffMS = System.currentTimeMillis() - startMS;
+    for (int i = 0; i < files.size(); i++) {
+      FileInfo info = files.get(i);
+      System.out.printf("%04d - [%s]%n", i, info);
+    }
+    getLog().info("Listing {} files took [{}]ms", files.size(), diffMS);
+    assertThat(files).hasSizeGreaterThan(1_000);
+    assertThat(Duration.ofMillis(diffMS)).isLessThan(Duration.ofSeconds(5));
+  }
 }

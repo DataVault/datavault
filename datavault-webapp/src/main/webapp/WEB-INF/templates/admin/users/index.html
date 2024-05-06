@@ -1,0 +1,46 @@
+<!DOCTYPE html><!--admin/users/index.html-->
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/defaultlayout(nav='admin')}">
+<head><title>Admin - Users</title></head>
+<th:block layout:fragment="content" th:with="queryPARAM=${#uris.escapeQueryParam(query)}">
+<div class="container">
+
+    <ol class="breadcrumb">
+        <li><a th:href="@{/admin/}"><b>Administration</b></a></li>
+        <li class="active"><b>Users</b></li>
+    </ol>
+
+    <form id="search-users" class="form" role="form" action="" method="get">
+        <div class="input-group">
+            <input type="text" class="form-control" th:value="${queryPARAM}" name="query" placeholder="Search for...">
+            <div class="input-group-btn">
+                <button class="btn btn-primary" type="submit"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Search</button>
+            </div>
+        </div>
+    </form>
+
+    <th:block th:if="${users != null}">
+        <div class="table-responsive">
+            <table class="table table-striped">
+
+                <thead>
+                    <tr class="tr">
+                        <th>ID</th>
+                        <th>Name</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                        <tr th:each="user: ${users}" class="tr">
+                            <td>[[${user.getID()}]]</td>
+                            <td>[[${user.lastname}]], [[${user.firstname}]]</td>
+                        </tr>
+                </tbody>
+            </table>
+        </div>
+    </th:block>
+
+</div>
+</th:block>
+</html>
+

@@ -11,9 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -73,23 +71,11 @@ public class RetentionPoliciesService {
         // MinDataRetentionPeriod is deprecated so et it to blank until we remove it from the database
         retentionPolicy.setMinDataRetentionPeriod("");
 
-        if (createRetentionPolicy.getInEffectDate().isEmpty()) {
-            retentionPolicy.setInEffectDate(null);
-        } else {
-            retentionPolicy.setInEffectDate(stringToDate(createRetentionPolicy.getInEffectDate()));
-        }
+        retentionPolicy.setInEffectDate(createRetentionPolicy.getInEffectDate());
 
-        if (createRetentionPolicy.getEndDate().isEmpty()) {
-            retentionPolicy.setEndDate(null);
-        } else {
-            retentionPolicy.setEndDate(stringToDate(createRetentionPolicy.getEndDate()));
-        }
+        retentionPolicy.setEndDate(createRetentionPolicy.getEndDate());
 
-        if (createRetentionPolicy.getDateGuidanceReviewed().isEmpty()) {
-            retentionPolicy.setDataGuidanceReviewed(null);
-        } else {
-            retentionPolicy.setDataGuidanceReviewed(stringToDate(createRetentionPolicy.getDateGuidanceReviewed()));
-        }
+        retentionPolicy.setDataGuidanceReviewed(createRetentionPolicy.getDataGuidanceReviewed());
 
         return retentionPolicy;
     }
@@ -107,32 +93,12 @@ public class RetentionPoliciesService {
         crp.setMinRetentionPeriod(rp.getMinRetentionPeriod());
         crp.setExtendUponRetrieval(rp.isExtendUponRetrieval());
 
-        crp.setInEffectDate(dateToString(rp.getInEffectDate()));
-        crp.setEndDate(dateToString(rp.getEndDate()));
-        crp.setDateGuidanceReviewed(dateToString(rp.getDataGuidanceReviewed()));
+        crp.setInEffectDate(rp.getInEffectDate());
+        crp.setEndDate(rp.getEndDate());
+        crp.setDataGuidanceReviewed(rp.getDataGuidanceReviewed());
 
         return crp;
 
-    }
-
-    private String dateToString(Date date) {
-        if (date != null) {
-            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            return dateFormat.format(date);
-        } else {
-            return "";
-        }
-    }
-
-    private Date stringToDate(String value) {
-        Date date = null;
-        try {
-            date = new SimpleDateFormat("yyyy-MM-dd").parse(value);
-        } catch (ParseException e) {
-            logger.error("unexpected exception",e);
-        }
-
-        return date;
     }
 
     /**

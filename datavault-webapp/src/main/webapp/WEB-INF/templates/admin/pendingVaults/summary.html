@@ -1,0 +1,303 @@
+<!DOCTYPE html><!--admin/pendingVaults/summary.html-->
+<html xmlns:th="http://www.thymeleaf.org"
+	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	  layout:decorate="~{layout/defaultlayout(nav='admin')}" >
+<head><title>Admin - Pending Vault Summary</title></head>
+<th:block layout:fragment="content">
+				<div class="container">
+					<ol class="breadcrumb">
+						<li><a th:href="@{/admin/}"><b>Administration</b></a></li>
+						<li><a th:href="@{/admin/pendingVaults}"><b>Pending Vaults</b></a></li>
+						<li class="active"><b>Pending Vault Summary</b></li>
+					</ol>
+					<div class="container whitebackground">
+						<h1>Pending Vault Summary</h1>
+						<div class="row">
+							<div class="col-md-12">
+								<a name="previous" class="btn btn-primary"
+									th:href="@{/admin/pendingVaults}">&laquo; Return</a>
+							</div>
+						</div>
+						<form id="create-vault" class="form" role="form" th:action="@{|/admin/pendingVaults/upgrade/${pendingVault.ID}|}" method="get" novalidate="novalidate" _lpchecked="1">
+							<div class="row">
+								<div class="col-md-12">
+									<table class="table table-sm">
+										<tbody>
+											<tr>
+												<th scope="col">
+													<h3 class="fs-title">Vault Information</h3>
+												</th>
+												<td></td>
+											</tr>
+											<tr>
+												<th scope="col">Affirmation</th>
+												<td>
+													<th:block th:if="${pendingVault.affirmed != null}">
+														[[${pendingVault.affirmed}]]
+													</th:block>
+												</td>
+											</tr>
+											<tr>
+												<th scope="col">Vault Name</th>
+												<td>
+													[[${pendingVault.name}]]
+												</td>
+											</tr>
+											<tr>
+												<th scope="col">Description</th>
+												<td>
+													<th:block th:if="${pendingVault.description != null}">
+														[[${pendingVault.description}]]
+													</th:block>
+												</td>
+											</tr>
+											<tr>
+												<th scope="col">Creation Date</th>
+												<td>
+													<th:block th:if="${pendingVault.creationTime != null}">
+														[[${#dates.format(pendingVault.creationTime,dateFormatISO)}]]<!--/* date */-->
+													</th:block>
+												</td>
+											</tr>
+											<tr>
+												<th scope="col">Retention Policy</th>
+												<td>
+													<!-- Model attribute createRetentionPolicy is used here. -->
+													<span>
+														<th:block th:if="${createRetentionPolicy}">
+															[[${createRetentionPolicy.name}]] (Minimum period:
+															<th:block th:if="${createRetentionPolicy.minRetentionPeriod != null}">
+																[[${createRetentionPolicy.minRetentionPeriod}]]
+															</th:block>
+															<th:block th:if="${createRetentionPolicy.minRetentionPeriod == null}">
+																not stated
+															</th:block>
+														</th:block>
+													</span>
+												</td>
+											</tr>
+											<tr>
+												<th scope="col">Grant End Date</th>
+												<td>
+													<th:block th:if="${pendingVault.grantEndDate != null}">
+														[[${#dates.format(pendingVault.grantEndDate,dateFormatISO)}]]<!--/* date */-->
+													</th:block>
+												</td>
+											</tr>
+											<tr>
+												<th scope="col">School</th>
+												<td>
+													<!-- Model attribute group used here.-->
+													<th:block th:if="${group?.name != null}">
+														[[${group.name}]]
+													</th:block>
+												</td>
+											</tr>
+											<tr>
+												<th scope="col">Review Date</th>
+												<td>
+													<th:block th:if="${pendingVault.confirmed}">
+														<input class="form-control" id="reviewDate" placeholder="yyyy-mm-dd" name="reviewDate"
+															th:value="${pendingVault.getReviewDate()}" /><!--form-date-->
+														<span id="invalid-review-date-span" style="font-size: 1.2em; font-weight: bold; color:  #AE0F0F; display: inline;"></span>
+													</th:block>
+`													<th:block th:if="${pendingVault.reviewDate != null}">
+														[[${#dates.format(pendingVault.reviewDate,dateFormatISO)}]]<!--/* date */-->
+													</th:block>
+												</td>
+											</tr>
+											<tr>
+												<th scope="col">Estimate of the amount of data</th>
+												<td>
+													<th:block th:if="${pendingVault.estimate != null}">
+														[[${pendingVault.estimate}]]
+													</th:block>
+												</td>
+											</tr>
+											<tr>
+												<th scope="col">Notes regarding data retention</th>
+												<td>
+													<th:block th:if="${pendingVault.notes != null}">
+														[[${pendingVault.notes}]]
+													</th:block>
+												</td>
+											</tr>
+											<!-- START OF BILLING SECTION -->
+											<tr>
+												<th scope="col">
+													<h3 class="fs-title">Billing</h3>
+												</th>
+												<td></td>
+											</tr>
+											<tr>
+												<th scope="col">Billing Type</th>
+												<td>
+													<th:block th:if="${pendingVault.billingType != null}">
+														[[${pendingVault.billingType}]]
+													</th:block>
+												</td>
+											</tr>
+
+											<th:block th:if="${pendingVault.billingType != null}">
+											<th:block th:switch="${pendingVault.billingType}">
+												<!-- BILLING_TYPE SLICE -->
+												<th:block th:case="SLICE">
+													<tr>
+														<th scope="col">Slice</th>
+														<td>
+															<th:block th:if="${pendingVault.sliceID != null}">
+																[[${pendingVault.billingType}]]
+															</th:block>
+														</td>
+													</tr>
+												</th:block>
+												<!-- BILLING_TYPE WILL_PAY -->
+												<th:block th:case="WILL_PAY">
+													<tr>
+														<th scope="col">Authoriser</th>
+														<td>
+															<th:block th:if="${pendingVault.authoriser != null}">
+																[[${pendingVault.authoriser}]]
+															</th:block>
+														</td>
+													</tr>
+													<tr>
+														<th scope="col">School/Unit</th>
+														<td>
+															<th:block th:if="${pendingVault.schoolOrUnit != null}">
+																[[${pendingVault.schoolOrUnit}]]
+															</th:block>
+														</td>
+													</tr>
+													<tr>
+														<th scope="col">Subunit</th>
+														<td>
+															<th:block th:if="${pendingVault.subunit != null}">
+																[[${pendingVault.subunit}]]
+															</th:block>
+														</td>
+													</tr>
+													<tr>
+														<th scope="col">Project Title</th>
+														<td>
+															<th:block th:if="${pendingVault.projectTitle != null}">
+																[[${pendingVault.projectTitle}]]
+															</th:block>
+														</td>
+													</tr>
+													<tr>
+														<th scope="col">Grant End Date</th>
+														<td>
+															<th:block th:if="${pendingVault.grantEndDate != null}">
+																[[${#dates.format(pendingVault.grantEndDate,dateFormatISO)}]]<!--/* date */-->
+															</th:block>
+														</td>
+													</tr>
+													<tr>
+														<th scope="col">Payment Details</th>
+														<td>
+															<textarea id="summary-payment-details" type="text"
+																readonly
+																rows="4" cols="60"
+																th:text="${pendingVault.paymentDetails}"
+															>
+															</textarea>
+														</td>
+													</tr>
+											</th:block>
+											</th:block>
+											</th:block>
+											<!-- END OF BILLING SECTION -->
+											<tr>
+												<th scope="col">
+													<h3 class="fs-title">Vault Access</h3>
+												</th>
+												<td></td>
+											</tr>
+											<tr>
+												<th scope="col">Owner</th>
+												<td>
+													<th:block th:if="${pendingVault.ownerId != null}">
+														[[${pendingVault.ownerId}]]
+													</th:block>
+												</td>
+											</tr>
+											<tr>
+												<th scope="col">NDMs</th>
+												<td>
+													<th:block th:if="${pendingVault.nominatedDataManagerIds != null}">
+														<th:block th:each="ndm: ${pendingVault.nominatedDataManagerIds}">
+															[[${ndm}]]
+															<br>
+														</th:block>
+													</th:block>
+												</td>
+											</tr>
+											<tr>
+												<th scope="col">Depositors</th>
+												<td>
+													<th:block th:if="${pendingVault.depositorIds != null}">
+														<th:block th:each="dep: ${pendingVault.depositorIds}">
+															[[${dep}]]
+															<br>
+														</th:block>
+													</th:block>
+												</td>
+											</tr>
+											<tr>
+												<th scope="col">
+													<h3 class="fs-title">Pure Information</h3>
+												</th>
+												<td></td>
+											</tr>
+											<tr>
+												<th scope="col">Contact Person</th>
+												<td>
+													<th:block th:if="${pendingVault.contact != null}">
+														[[${pendingVault.contact}]]
+													</th:block>
+												</td>
+											</tr>
+											<tr>
+												<th scope="col">Data Creators</th>
+												<td>
+													<th:block th:if="${pendingVault.dataCreators != null}">
+														<th:block th:each="dc: ${pendingVault.dataCreators}">
+															[[${dc}]]
+															<br>
+														</th:block>
+													</th:block>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-md-12 text-center">
+									<th:block th:if="${pendingVault.ID}">
+										<a name="return-confirmed-pending-vaults" class="btn btn-default"
+											th:href="@{/admin/pendingVaults/confirmed}">Cancel</a>
+										<a name="delete-pending-vault" class="btn btn-danger"
+											th:href="@{|/admin/pendingVaults/${pendingVault.getID()}|}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Delete Pending Vault</a>
+										<!-- Note: start=2 added to ensure we go the Billing page of Edit Pending Vault -->
+										<a name="edit-pending-vault" class="btn btn-primary" style="margin-bottom: 0;"
+											th:href="@{|/admin/pendingVaults/edit/${pendingVault.getID()}?start=2|}">Edit Pending Vault Metadata</a>
+										<th:block th:if="${pendingVault.confirmed}">
+											<button id="create-vault-btn" type="submit" value="submit" class="btn btn-success">
+												<span class="glyphicon glyphicon-folder-close"></span>
+												Create Vault
+											</button>
+										</th:block>
+									</th:block>
+								</div>
+							</div>
+						</form>
+					</div>
+				</div>
+				<!-- Custom javascript -->
+				<!-- import date-validation-utils.j first -->
+				<script th:src="@{/resources/application/js/date-validation-utils.js}"></script>
+				<script th:src="@{/resources/application/js/admin-pending-vault-summary.js}"></script>
+</th:block>
+</html>

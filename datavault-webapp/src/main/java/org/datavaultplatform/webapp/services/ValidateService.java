@@ -1,18 +1,26 @@
 package org.datavaultplatform.webapp.services;
 
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+import java.time.Clock;
 import java.util.*;
+
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.request.CreateVault;
+import org.datavaultplatform.common.util.DateTimeUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
 public class ValidateService {
+  
+  private final Clock clock;
+  
+    @Autowired
+    public ValidateService(Clock clock) {
+        this.clock = clock;
+    }
 
-  public List<String> validate(CreateVault vault, String userID) {
+    public List<String> validate(CreateVault vault, String userID) {
     List<String> retVal = new ArrayList<>();
     retVal.addAll(this.validateFieldset1(vault));
     retVal.addAll(this.validateFieldset2(vault));
@@ -22,7 +30,7 @@ public class ValidateService {
     return retVal;
   }
 
-  private List<String> validateFieldset1(CreateVault vault) {
+  protected List<String> validateFieldset1(CreateVault vault) {
     List<String> retVal = new ArrayList<>();
 
     // Field set 1 should have completed
@@ -35,7 +43,7 @@ public class ValidateService {
     return retVal;
   }
 
-  private List<String> validateFieldset2(CreateVault vault) {
+  protected List<String> validateFieldset2(CreateVault vault) {
     List<String> retVal = new ArrayList<>();
 
     // Field set 2 should have completed
@@ -45,7 +53,7 @@ public class ValidateService {
       retVal.add("BillingType missing");
       return retVal;
     }
-
+    
     if (
       !type.equals("NA") &&
       !type.equals("GRANT_FUNDING") &&
@@ -96,7 +104,7 @@ public class ValidateService {
     return retVal;
   }
 
-  private List<String> validateBudgetBillingType(CreateVault vault) {
+  protected List<String> validateBudgetBillingType(CreateVault vault) {
     List<String> retVal = new ArrayList<>();
 
     // Authoriser
@@ -117,7 +125,7 @@ public class ValidateService {
     return retVal;
   }
 
-  private List<String> validateGrantBillingType(CreateVault vault) {
+  protected List<String> validateGrantBillingType(CreateVault vault) {
     List<String> retVal = new ArrayList<>();
 
     String authoriser = vault.getGrantAuthoriser();
@@ -140,14 +148,14 @@ public class ValidateService {
       retVal.add("Project Title missing");
     }
     // Grant end date
-    String grantEndDate = vault.getReviewDate();
-    if (grantEndDate == null || grantEndDate.isEmpty()) {
+    Date grantEndDate = vault.getReviewDate();
+    if (grantEndDate == null) {
       retVal.add("Review Date missing");
     }
     return retVal;
   }
 
-  private List<String> validateFieldset3(CreateVault vault) {
+  protected List<String> validateFieldset3(CreateVault vault) {
     List<String> retVal = new ArrayList<>();
     // Field set 3 should have completed
     // Name
@@ -171,49 +179,25 @@ public class ValidateService {
       retVal.add("School missing");
     }
     // Review Date
-    String reviewDate = vault.getReviewDate();
-    if (reviewDate == null || reviewDate.isEmpty()) {
+    Date reviewDate = vault.getReviewDate();
+    if (reviewDate == null) {
       retVal.add("Review Date missing");
     } else {
       // if review date is less than 3 years from today
-      int length = 3;
-      if (
-        LocalDate
-          .parse(reviewDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-          .isBefore(
-            LocalDate.parse(
-              this.getDefaultReviewDate(length),
-              DateTimeFormatter.ofPattern("yyyy-MM-dd")
-            )
-          )
-      ) {
-        retVal.add(
-          "Review Date for selected policy is required to be at least " +
-          length +
-          " years"
-        );
+      int yearsToAdd = 3;
+      if (DateTimeUtils.isBefore(reviewDate,this.getDefaultReviewDate(yearsToAdd))) {
+        retVal.add("Review Date for selected policy is required to be at least " + yearsToAdd + " years");
       }
 
-      if (
-        LocalDate
-          .parse(reviewDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-          .isAfter(
-            LocalDate.parse(
-              this.getMaxReviewDate(),
-              DateTimeFormatter.ofPattern("yyyy-MM-dd")
-            )
-          )
-      ) {
-        retVal.add(
-          "Review Date for selected policy is required to be less than 30 years in the future"
-        );
+      if (DateTimeUtils.isAfter(reviewDate,this.getMaxReviewDate())) {
+        retVal.add("Review Date for selected policy is required to be less than 30 years in the future");
       }
     }
 
     return retVal;
   }
 
-  private List<String> validateFieldset4(CreateVault vault, String userID) {
+  protected List<String> validateFieldset4(CreateVault vault, String userID) {
     List<String> retVal = new ArrayList<>();
 
     // Field set 4 should have only one role per uuid
@@ -224,7 +208,13 @@ public class ValidateService {
     List<String> ownerList = new ArrayList<>();
     ownerList.add(owner);
     List<String> ndms = vault.getNominatedDataManagers();
+    if(ndms == null){
+      ndms = Collections.emptyList();
+    }
     List<String> deps = vault.getDepositors();
+    if(deps == null){
+      deps = Collections.emptyList();
+    }
     boolean match1 = ndms
       .stream()
       .filter(x -> !Objects.equals(x, ""))
@@ -255,7 +245,7 @@ public class ValidateService {
     return retVal;
   }
 
-  private List<String> validateFieldset5(CreateVault vault) {
+  protected List<String> validateFieldset5(CreateVault vault) {
     List<String> retVal = new ArrayList<>();
 
     // Field set 5 should have completed
@@ -267,23 +257,20 @@ public class ValidateService {
     return retVal;
   }
 
-  public String getDefaultReviewDate(int length) {
-    String retVal;
+  public Date getDefaultReviewDate(int addedYears) {
     Calendar cal = Calendar.getInstance();
+    cal.setTimeInMillis(clock.millis());
     cal.setTimeZone(TimeZone.getTimeZone("Europe/London"));
-    cal.add(Calendar.YEAR, length);
+    cal.add(Calendar.YEAR, addedYears);
     Date todayPlusXYears = cal.getTime();
-    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-    retVal = formatter.format(todayPlusXYears);
-
-    return retVal;
+    return todayPlusXYears;
   }
 
-  public String getDefaultReviewDate() {
+  public Date getDefaultReviewDate() {
     return this.getDefaultReviewDate(3);
   }
 
-  public String getMaxReviewDate() {
+  public Date getMaxReviewDate() {
     return this.getDefaultReviewDate(30);
   }
 }
