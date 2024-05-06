@@ -7,13 +7,10 @@ import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.storage.UserStore;
 import org.slf4j.Logger;
 
-import java.io.*;
-
-
+import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-
 import java.util.Map;
 
 // Documentation:
@@ -337,14 +334,5 @@ public class DropboxFileSystem extends Device implements UserStore {
     @Override
     public Logger getLogger() {
         return this.log;
-    }
-    
-    public boolean canRead(String path) throws Exception {
-        return false;
-    }
-
-    @Override
-    public boolean canWrite(String path) throws Exception {
-       return false;
     }
 }
