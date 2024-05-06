@@ -14,8 +14,8 @@ import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.storage.SFTPFileSystemDriver;
 import org.datavaultplatform.common.storage.impl.ssh.UtilityJSch;
-import org.springframework.util.Assert;
 import org.slf4j.Logger;
+import org.springframework.util.Assert;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -25,8 +25,7 @@ import java.util.Vector;
 
 /**
  * An implementation of SFTPFileSystemDriver to use JCraft's Jsch ssh/sftp library.
- */
-@Slf4j
+ */@Slf4j
 public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
 
 
@@ -89,7 +88,7 @@ public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
         } else {
             byte[] privateKey = Encryption.decryptSecret(encPrivateKey, encIV);
 
-            log.debug("Private Key: {}"+new String(privateKey));
+            log.debug("Private Key: "+new String(privateKey));
             jsch.addIdentity(username, privateKey, null, passphrase.getBytes());
         }
 
@@ -203,17 +202,11 @@ public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
                 }
                 
                 String entryKey = path + PATH_SEPARATOR + entry.getFilename();
-                boolean canRead = canReadInternal(entryKey);
-                boolean canWrite = canWriteInternal(entryKey);
                 
                 FileInfo info = new FileInfo(entryKey,
                                              "", // Absolute path - unused?
                                              entry.getFilename(),
-                                             entry.getAttrs().isDir(),
-                                             canRead,
-                                             canWrite);
-
-                log.info(info.toString());
+                                             entry.getAttrs().isDir());
                 files.add(info);
                 
                 // Other useful properties:
@@ -414,47 +407,6 @@ public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
     @Override
     public Logger getLogger() {
         return log;
-    } 
-    
-    public boolean canRead(String path) throws Exception {
-        try {
-            Connect();
-            return canReadInternal(path);
-        } catch (Exception ex) {
-            log.error("unexpected exception", ex);
-            throw ex;
-        } finally {
-            Disconnect();
-        }
     }
 
-    @Override
-	public boolean canWrite(String path) throws Exception {
-        try {
-            Connect();
-            return canWriteInternal(path);
-        } catch (Exception ex) {
-            log.error("unexpected exception", ex);
-            throw ex;
-        } finally {
-            Disconnect();
-        }
-    }
-    
-    public boolean canWriteInternal(String path) throws  Exception {
-        return getPermissionsString(path).contains("w");
-    }
-    
-    public boolean canReadInternal(String path) throws  Exception {
-        return getPermissionsString(path).contains("r");
-    }
-
-    private String getPermissionsString(String path) throws Exception {
-        String fullPath = getFullPath(path);
-        final SftpATTRS attrs = channelSftp.stat(fullPath);
-        int unixPermissions = attrs.getPermissions();
-        String unixPermissionsString = attrs.getPermissionsString();
-        log.info("fullPath: " + fullPath + ", path: " + path + ", unixPermissions: " + unixPermissions + ", unixPermissionsString: " + unixPermissionsString);
-        return unixPermissionsString;
-    }
 }
