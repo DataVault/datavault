@@ -3,7 +3,8 @@ package org.datavaultplatform.common.config;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.*;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -30,5 +31,48 @@ public abstract class BaseQueueConfig {
   @ConditionalOnProperty(value="rabbitmq.define.queue.broker", havingValue = "true",  matchIfMissing = false)
   public Queue brokerQueue(@Value(BROKER_QUEUE_NAME) String brokerQueueName) {
     return new Queue(brokerQueueName, true, false, false);
+  }
+
+  //will create Q if it does not exist
+  @Bean
+  @ConditionalOnProperty(value="rabbitmq.define.queue.broker", havingValue = "true",  matchIfMissing = false)
+  public Queue restartWorker1Queue() {
+    return new Queue("restart-worker-1", true, false, false);
+  }
+  //will create Q if it does not exist
+  @Bean
+  @ConditionalOnProperty(value="rabbitmq.define.queue.broker", havingValue = "true",  matchIfMissing = false)
+  public Queue restartWorker2Queue() {
+    return new Queue("restart-worker-2", true, false, false);
+  }
+  //will create Q if it does not exist
+  @Bean
+  @ConditionalOnProperty(value="rabbitmq.define.queue.broker", havingValue = "true",  matchIfMissing = false)
+  public Queue restartWorker3Queue() {
+    return new Queue("restart-worker-3", true, false, false);
+  }
+  
+  @Bean
+  @ConditionalOnProperty(value="rabbitmq.define.queue.broker", havingValue = "true",  matchIfMissing = false)
+  public FanoutExchange restartWorkerExchange() {
+    return new FanoutExchange("restart-worker", true, false);
+  }
+  
+  @Bean
+  @ConditionalOnProperty(value="rabbitmq.define.queue.broker", havingValue = "true",  matchIfMissing = false)
+  public Binding bindRestartWorkerExchangeToRestartWorkerQueue1(FanoutExchange fanoutExchange, @Qualifier("restartWorker1Queue") Queue restartWorkerQueue1) {
+    return BindingBuilder.bind(restartWorkerQueue1).to(fanoutExchange);
+  }
+  
+  @Bean
+  @ConditionalOnProperty(value="rabbitmq.define.queue.broker", havingValue = "true",  matchIfMissing = false)
+  public Binding bindRestartWorkerExchangeToRestartWorkerQueue2(FanoutExchange fanoutExchange, @Qualifier("restartWorker2Queue") Queue restartWorkerQueue2) {
+    return BindingBuilder.bind(restartWorkerQueue2).to(fanoutExchange);
+  }
+  
+  @Bean
+  @ConditionalOnProperty(value="rabbitmq.define.queue.broker", havingValue = "true",  matchIfMissing = false)
+  public Binding bindRestartWorkerExchangeToRestartWorkerQueue3(FanoutExchange fanoutExchange, @Qualifier("restartWorker3Queue") Queue restartWorkerQueue3) {
+    return BindingBuilder.bind(restartWorkerQueue3).to(fanoutExchange);
   }
 }
