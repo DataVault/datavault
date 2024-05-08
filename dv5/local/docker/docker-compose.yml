@@ -25,15 +25,14 @@ services:
       - v-local-mariadb:/var/lib/mysql
   localrabbit:
     container_name: dv-local-rabbit
-    image: rabbitmq:3.11.3-management-alpine
+    image: rabbitmq:3.13.2-management-alpine
     restart: always
-    environment:
-      - RABBITMQ_DEFAULT_USER=rabbit
-      - RABBITMQ_DEFAULT_PASS=twin2port
     ports:
       - "15672:15672"
       - "5672:5672"
     volumes:
+      - "./rabbitmq.config:/etc/rabbitmq/rabbitmq.config:ro"
+      - "./rabbitmq-definitions.json:/etc/rabbitmq/definitions.json:ro"
       - v-local-rabbit:/var/lib/rabbitmq
   localemail:
     container_name: dv-local-email

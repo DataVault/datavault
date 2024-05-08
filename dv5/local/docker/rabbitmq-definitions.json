@@ -1,0 +1,140 @@
+{
+    "rabbit_version": "3.13.0",
+    "rabbitmq_version": "3.13.0",
+    "product_name": "RabbitMQ",
+    "product_version": "3.13.0",
+    "users": [
+        {
+            "name": "datavault",
+            "password_hash": "7by810DExunJOGorbkhAwz0AYqygraw4Mp+3iIg5QkXPPBUL",
+            "hashing_algorithm": "rabbit_password_hashing_sha256",
+            "tags": [
+                "monitoring"
+            ],
+            "limits": {}
+        },
+        {
+            "name": "rabbit",
+            "password_hash": "A4+VSzkcCpmVD4eK4pHvBu+4N996PHpp6SnVE1BktH8m6VUI",
+            "hashing_algorithm": "rabbit_password_hashing_sha256",
+            "tags": [
+                "administrator"
+            ],
+            "limits": {}
+        }
+    ],
+    "vhosts": [
+        {
+            "name": "/"
+        }
+    ],
+    "permissions": [
+        {
+            "user": "rabbit",
+            "vhost": "/",
+            "configure": ".*",
+            "write": ".*",
+            "read": ".*"
+        },
+        {
+            "user": "datavault",
+            "vhost": "/",
+            "configure": "",
+            "write": ".*",
+            "read": ".*"
+        }
+    ],
+    "topic_permissions": [],
+    "parameters": [],
+    "global_parameters": [
+        {
+            "name": "internal_cluster_id",
+            "value": "rabbitmq-cluster-id-OGkTlzfBho-bhBZas36YUQ"
+        }
+    ],
+    "policies": [],
+    "queues": [
+        {
+            "name": "restart-worker-2",
+            "vhost": "/",
+            "durable": true,
+            "auto_delete": false,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "restart-worker-1",
+            "vhost": "/",
+            "durable": true,
+            "auto_delete": false,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "datavault",
+            "vhost": "/",
+            "durable": true,
+            "auto_delete": false,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "datavault-event",
+            "vhost": "/",
+            "durable": true,
+            "auto_delete": false,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "restart-worker-3",
+            "vhost": "/",
+            "durable": true,
+            "auto_delete": false,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        }
+    ],
+    "exchanges": [
+        {
+            "name": "restart-worker",
+            "vhost": "/",
+            "type": "fanout",
+            "durable": true,
+            "auto_delete": false,
+            "internal": false,
+            "arguments": {}
+        }
+    ],
+    "bindings": [
+        {
+            "source": "restart-worker",
+            "vhost": "/",
+            "destination": "restart-worker-1",
+            "destination_type": "queue",
+            "routing_key": "",
+            "arguments": {}
+        },
+        {
+            "source": "restart-worker",
+            "vhost": "/",
+            "destination": "restart-worker-2",
+            "destination_type": "queue",
+            "routing_key": "",
+            "arguments": {}
+        },
+        {
+            "source": "restart-worker",
+            "vhost": "/",
+            "destination": "restart-worker-3",
+            "destination_type": "queue",
+            "routing_key": "",
+            "arguments": {}
+        }
+    ]
+}
