@@ -81,7 +81,7 @@
                                 <span th:if="${order!='desc'}" class="caret"></span>
                             </th:block>
                         </a></th>
-                        <th><a th:href="|?sort=user.id&order=${orderUserID}&query=${queryPARAM}|">Depositor
+                        <th><a th:href="|?sort=userID&order=${orderUserID}&query=${queryPARAM}|">Depositor
                             <th:block th:if="${sort == 'status'}">
                                 <span th:if="${order=='desc'}" class="dropup"><span class="caret"></span></span>
                                 <span th:if="${order!='desc'}" class="caret"></span>
@@ -96,7 +96,7 @@
                                 <span th:if="${order!='desc'}" class="caret"></span>
                             </th:block>
                         </a></th>
-                        <th><a th:href="|?sort=vault.id&order=${orderVaultId}&query=${queryPARAM}|">Vault ID
+                        <th><a th:href="|?sort=vaultID&order=${orderVaultId}&query=${queryPARAM}|">Vault ID
                             <th:block th:if="${sort == 'vaultID'}">
                                 <span th:if="${order=='desc'}" class="dropup"><span class="caret"></span></span>
                                 <span th:if="${order!='desc'}" class="caret"></span>
