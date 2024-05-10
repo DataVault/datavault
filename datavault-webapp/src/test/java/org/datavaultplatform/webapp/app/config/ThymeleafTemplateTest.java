@@ -580,7 +580,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         
         modelMap.put("deposits", Arrays.asList(info1, info2));
         modelMap.put("totalRecords", 15);
-        modelMap.put("totalPages", 1);
+        modelMap.put("totalPages", 3);
         modelMap.put("recordPerPage", 20);
         modelMap.put("offset", 0);
         modelMap.put("sort", "name");
