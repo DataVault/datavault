@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -49,7 +50,7 @@ public class UserLookupService {
                         user.getFirstname().replace(" - ", " – "),
                         user.getLastname().replace(" - ", " – ")
                     )
-            ).toList();
+            ).collect(Collectors.toList());
         }
         return result;
     }

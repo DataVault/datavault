@@ -29,6 +29,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -121,7 +122,7 @@ public class VaultsController {
                         RoleUtils.isDataOwner(roleAssignment))  && (roleAssignment.getVaultId() != null))
                 .map(roleAssignment -> vaultsService.getVault(roleAssignment.getVaultId()).convertToResponse())
                 .sorted(Comparator.comparing(VaultInfo::getCreationTime))
-                .toList();
+                .collect(Collectors.toList());
         Collections.reverse(vaultResponses);
         if(CollectionUtils.isNotEmpty(vaultResponses)) {
             for (VaultInfo vault : vaultResponses) {
@@ -151,7 +152,7 @@ public class VaultsController {
                 .filter(roleAssignment -> (RoleUtils.isVaultCreator(roleAssignment)) && (roleAssignment.getPendingVaultId() != null))
                 .map(roleAssignment -> pendingVaultsService.getPendingVault(roleAssignment.getPendingVaultId()).convertToResponse())
                 .sorted(Comparator.comparing(VaultInfo::getCreationTime))
-                .toList();
+                .collect(Collectors.toList());
         Collections.reverse(vaultResponses);
         if(CollectionUtils.isNotEmpty(vaultResponses)) {
             for (VaultInfo vault : vaultResponses) {

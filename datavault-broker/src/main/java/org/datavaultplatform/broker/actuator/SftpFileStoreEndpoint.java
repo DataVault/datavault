@@ -7,6 +7,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -56,7 +57,7 @@ public class SftpFileStoreEndpoint {
         .filter(FileStore::isSFTPFileSystem)
         .map(this::getFileStoreInfo)
         .sorted(Comparator.comparing(SftpFileStoreInfo::isIgnored)) //ignored first
-        .toList();
+        .collect(Collectors.toList());
   }
 
   private SftpFileStoreInfo getFileStoreInfo(FileStore fileStore) {

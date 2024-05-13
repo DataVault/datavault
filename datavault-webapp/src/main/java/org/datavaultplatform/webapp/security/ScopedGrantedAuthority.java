@@ -1,5 +1,6 @@
 package org.datavaultplatform.webapp.security;
 
+import lombok.ToString;
 import org.datavaultplatform.common.model.Group;
 import org.datavaultplatform.common.model.Permission;
 import org.datavaultplatform.common.model.PermissionModel;
@@ -11,7 +12,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
+@ToString
 public class ScopedGrantedAuthority implements GrantedAuthority {
 
     private final Class<?> type;
@@ -51,7 +54,7 @@ public class ScopedGrantedAuthority implements GrantedAuthority {
             Collection<Permission> permissions = assignment.getRole().getPermissions()
                     .stream()
                     .map(PermissionModel::getPermission)
-                    .toList();
+                    .collect(Collectors.toList());
 
             if (vaultId != null) {
                 authorities.add(new ScopedGrantedAuthority(Vault.class, vaultId, permissions));

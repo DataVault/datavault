@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
@@ -80,7 +81,7 @@ public class SchoolPermissionQueryHelper<T> {
     }
     if (this.predicateHelper != null) {
       List<Predicate> additional = this.predicateHelper.getPredicates(this.cb, root);
-      result.addAll(additional.stream().filter(Objects::nonNull).toList());
+      result.addAll(additional.stream().filter(Objects::nonNull).collect(Collectors.toList()));
     }
     if (this.singlePredicateHelper != null) {
       Predicate single = this.singlePredicateHelper.getPredicate(this.cb, root);

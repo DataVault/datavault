@@ -32,6 +32,6 @@ cd $PROJECT_ROOT
  -Dspring-boot.run.jvmArguments="-Xdebug \
  -Xms1024M -Xmx2024M \
  -Duser.language=en -Duser.country=GB -Duser.timezone=Europe/London -Djava.net.preferIPv4Stack=true \
- -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005" \
+ -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005" \
  --projects datavault-broker
 

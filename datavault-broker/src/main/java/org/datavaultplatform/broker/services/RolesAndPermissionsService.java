@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.transaction.annotation.Transactional;
 
@@ -199,7 +200,7 @@ public class RolesAndPermissionsService {
         List<RoleAssignment> assignments = roleAssignmentDao.findByPendingVaultId(pendingVaultId);
         List<RoleAssignment> ndmAssignments = assignments.stream()
                 .filter(RoleUtils::isNominatedDataManager)
-                .toList();
+                .collect(Collectors.toList());
         List<User> retVal = new ArrayList<>();
         if(ndmAssignments == null){
             return null;
@@ -220,7 +221,7 @@ public class RolesAndPermissionsService {
         List<RoleAssignment> assignments = roleAssignmentDao.findByPendingVaultId(pendingVaultId);
         List<RoleAssignment> ndmAssignments = assignments.stream()
                 .filter(RoleUtils::isDepositor)
-                .toList();
+                .collect(Collectors.toList());
         List<User> retVal = new ArrayList<>();
         if(ndmAssignments == null){
             return null;

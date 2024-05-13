@@ -4,6 +4,7 @@ import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.request.ValidateUser;
 import org.datavaultplatform.common.services.LDAPService;
 import org.datavaultplatform.webapp.authentication.AuthenticationSuccess;
+import org.datavaultplatform.webapp.authentication.AuthenticationUtils;
 import org.datavaultplatform.webapp.services.RestService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
+import org.springframework.util.Assert;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -89,6 +91,7 @@ public class ShibAuthenticationProvider implements AuthenticationProvider {
         }
 
         grantedAuths.add(ShibUtils.ROLE_USER);
+        AuthenticationUtils.validateGrantedAuthorities(grantedAuths);
         return new PreAuthenticatedAuthenticationToken(name, password, grantedAuths);
 
     }

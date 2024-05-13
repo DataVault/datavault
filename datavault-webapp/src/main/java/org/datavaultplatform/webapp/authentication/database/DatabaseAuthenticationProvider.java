@@ -3,6 +3,7 @@ package org.datavaultplatform.webapp.authentication.database;
 import org.datavaultplatform.common.model.RoleAssignment;
 import org.datavaultplatform.common.model.RoleName;
 import org.datavaultplatform.common.request.ValidateUser;
+import org.datavaultplatform.webapp.authentication.AuthenticationUtils;
 import org.datavaultplatform.webapp.security.ScopedGrantedAuthority;
 import org.datavaultplatform.webapp.model.AdminDashboardPermissionsModel;
 import org.datavaultplatform.webapp.services.PermissionsService;
@@ -86,6 +87,7 @@ public class DatabaseAuthenticationProvider implements AuthenticationProvider {
 
         logger.info("Granting user " + name + " " + RoleName.ROLE_USER);
         grantedAuths.add(new SimpleGrantedAuthority(RoleName.ROLE_USER));
+        AuthenticationUtils.validateGrantedAuthorities(grantedAuths);
         return new UsernamePasswordAuthenticationToken(name, password, grantedAuths);
 
     }
