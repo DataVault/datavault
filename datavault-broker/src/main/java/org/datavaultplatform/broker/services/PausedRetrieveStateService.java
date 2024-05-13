@@ -15,7 +15,13 @@ public class PausedRetrieveStateService {
     private static final PausedRetrieveState NOT_PAUSED;
     
     static {
-        NOT_PAUSED = new PausedRetrieveState();
+        NOT_PAUSED = new PausedRetrieveState(){
+            @Override
+            public String getId() {
+                return "-1";
+            }
+        };
+
         NOT_PAUSED.setPaused(false);
         NOT_PAUSED.setCreated(LocalDateTime.of(1970,1,1,12,0,0));
     }

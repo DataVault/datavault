@@ -26,7 +26,7 @@ public class ScopedGrantedAuthority implements GrantedAuthority {
 
     @Override
     public String getAuthority() {
-        return null;
+        return "n/a";
     }
 
     public Serializable getId() {

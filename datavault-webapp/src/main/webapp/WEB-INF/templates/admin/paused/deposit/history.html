@@ -1,4 +1,4 @@
-<!DOCTYPE html><!--admin/paused/history.html-->
+<!DOCTYPE html><!--admin/paused/deposit/history.html-->
 <html th:lang="en" xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
@@ -22,7 +22,16 @@
                 <th>#</th>
                 <th>Is Deposit Paused?</th>
                 <th>Timestamp</th>
-                <th>&nbsp;</th>
+                <th>
+                    <form method="post" th:action="@{/admin/paused/deposit/toggle}">
+                        <th:block sec:authorize="hasRole('IS_ADMIN')">
+                            <input id="tglPsBtn" type="submit" value="toggle">
+                        </th:block>
+                        <th:block sec:authorize="!hasRole('IS_ADMIN')">
+                            <span id="tglPsSpan">You need IS_ADMIN role to toggle 'paused retrieve state' </span>
+                        </th:block>
+                    </form>
+                </th>
             </tr>
             </thead>
             <th:block th:each="pausedState,status: ${pausedStates}">
@@ -35,23 +44,35 @@
                     <td>[[${pausedState.isPaused}]]</td>
                     <td>[[${#temporals.format(pausedState.created,'yyyy-MMM-dd HH:mm:ss')}]]</td>
 
-                    <td th:if="${status.first}">
-                        <form method="post" th:action="@{/web/paused/deposit/toggle}">
-                            <th:block sec:authorize="hasRole('IS_ADMIN')">
-                                <input id="tglPsBtn" type="submit" value="toggle">
-                            </th:block>
-                            <th:block sec:authorize="!hasRole('IS_ADMIN')">
-                                <span id="tglPsSpan">You need IS_ADMIN role to toggle 'paused deposit state' </span>
-                            </th:block>
-                        </form>
-                    </td>
-                    <td th:unless="${status.first}">&nbsp/td>
+                    <td>&nbsp;</td>
                 </tr>
             </th:block>
         </table>
     </div>
 
+    <hr/>
+    <th:block th:with="isAdmin=|hasRole('IS_ADMIN')|">
+        <th:block th:if="${#authorization.expression(isAdmin)}">
+            SPRING SEC : IS ADMIN
+        </th:block>
+        <th:block th:unless="${#authorization.expression(isAdmin)}">
+            SPRING SEC : NOT ADMIN
+        </th:block>
+    </th:block>
 
+    <hr/>
+    <th:block th:with="areDepositsNotPaused=|(!@permissionsService.depositsPaused())|">
+        <th:block th:if="${#authorization.expression(areDepositsNotPaused)}">
+            SPRING SEC : DEPOSITS ARE NOT PAUSED
+        </th:block>
+        <th:block th:unless="${#authorization.expression(areDepositsNotPaused)}">
+            SPRING SEC : DEPOSITS ARE PAUSED
+        </th:block>
+    </th:block>
+
+    <hr/>
+    <p>Logged user: <span sec:authentication="name">USER</span>
+    <p>Roles: <span sec:authentication="authorities">[ROLE_USER, ROLE_ADMIN]</span>
 </div>
 </body>
 </html>

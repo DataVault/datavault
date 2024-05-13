@@ -67,6 +67,7 @@ class AdminPausedDepositStateControllerTest {
         List<PausedDepositStateDTO> list = Arrays.asList(ps3, ps2, ps1);
 
         when(mService.getPausedDepositStateHistory(10)).thenReturn(list);
+        when(mService.getCurrentDepositPausedState()).thenReturn(ps1);
 
         MvcResult result = mvc.perform(get("/admin/paused/deposit/history"))
                 .andDo(print())
@@ -74,7 +75,8 @@ class AdminPausedDepositStateControllerTest {
         assertThat(result.getModelAndView().getViewName()).isEqualTo("admin/paused/deposit/history");
         assertThat(result.getModelAndView().getModel().get("pausedStates")).isEqualTo(list);
 
-        verify(mService).getPausedDepositStateHistory(10);
+        verify(mService, atLeastOnce()).getPausedDepositStateHistory(10);
+        verify(mService, atLeastOnce()).getCurrentDepositPausedState();
         verifyNoMoreInteractions(mService);
 
         String rawHtml = result.getResponse().getContentAsString();

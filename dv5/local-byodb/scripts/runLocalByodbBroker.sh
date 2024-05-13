@@ -13,7 +13,7 @@ cd $PROJECT_ROOT
  SPRING_PROFILES_ACTIVE=local \
  SPRING_SECURITY_DEBUG=true \
  DATAVAULT_HOME="$PROJECT_ROOT/dv5/local-byodb/props/broker" \
- SPRING_JPA_HIBERNATE_DDL_AUTO=update \
+ SPRING_JPA_HIBERNATE_DDL_AUTO=validate \
  SPRING_SQL_INIT_MODE=never \
  SPRING_DATASOURCE_USERNAME=root \
  SPRING_DATASOURCE_PASSWORD=rootpass \
@@ -31,7 +31,7 @@ cd $PROJECT_ROOT
  ./mvnw spring-boot:run  \
  -Dspring-boot.run.jvmArguments="-Xdebug \
  -Xms1024M -Xmx2024M \
- -Duser.language=en -Duser.country=GB -Duser.timezone=Europe/London \
+ -Duser.language=en -Duser.country=GB -Duser.timezone=Europe/London -Djava.net.preferIPv4Stack=true \
  -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005" \
  --projects datavault-broker
 
