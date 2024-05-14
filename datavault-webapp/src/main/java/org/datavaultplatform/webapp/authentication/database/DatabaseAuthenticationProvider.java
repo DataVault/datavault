@@ -47,7 +47,8 @@ public class DatabaseAuthenticationProvider implements AuthenticationProvider {
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         // Note: - name here is equivalent to our User.id
         String name = authentication.getName();
-        String password = authentication.getCredentials().toString();
+        Object credentials = authentication.getCredentials();
+        String password = credentials == null ? null : credentials.toString();
 
         boolean isUserValid = false;
         try {
@@ -67,7 +68,9 @@ public class DatabaseAuthenticationProvider implements AuthenticationProvider {
         List<RoleAssignment> roles = restService.getRoleAssignmentsForUser(name);
         List<ScopedGrantedAuthority> scopedAuthorities = ScopedGrantedAuthority.fromRoleAssignments(roles);
 
-        grantedAuths.addAll(scopedAuthorities);
+        if(scopedAuthorities != null) {
+            grantedAuths.addAll(scopedAuthorities);
+        }
 
         try{
             boolean isAdmin = restService.isAdmin(new ValidateUser(name, null));
@@ -79,7 +82,7 @@ public class DatabaseAuthenticationProvider implements AuthenticationProvider {
         }
 
         Collection<GrantedAuthority> adminAuthorities = getAdminAuthorities(authentication);
-        if (!adminAuthorities.isEmpty()) {
+        if (adminAuthorities != null && !adminAuthorities.isEmpty()) {
             logger.info("Granting user " + name + " " + RoleName.ROLE_ADMIN);
             grantedAuths.add(new SimpleGrantedAuthority(RoleName.ROLE_ADMIN));
             grantedAuths.addAll(adminAuthorities);
@@ -102,6 +105,6 @@ public class DatabaseAuthenticationProvider implements AuthenticationProvider {
 
     @Override
     public boolean supports(Class<?> authentication) {
-        return authentication.equals(UsernamePasswordAuthenticationToken.class);
+        return UsernamePasswordAuthenticationToken.class.equals(authentication);
     }
 }

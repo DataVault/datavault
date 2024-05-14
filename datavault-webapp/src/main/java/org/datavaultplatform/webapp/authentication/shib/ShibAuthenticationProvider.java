@@ -15,7 +15,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
-import org.springframework.util.Assert;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -87,7 +86,9 @@ public class ShibAuthenticationProvider implements AuthenticationProvider {
             }
         } else {
             List<GrantedAuthority> grantedAuthsForUser = this.shibGrantedAuthorityService.getGrantedAuthoritiesForUser(name, authentication);
-            grantedAuths.addAll(grantedAuthsForUser);
+            if(grantedAuthsForUser != null) {
+                grantedAuths.addAll(grantedAuthsForUser);
+            }
         }
 
         grantedAuths.add(ShibUtils.ROLE_USER);
@@ -99,7 +100,7 @@ public class ShibAuthenticationProvider implements AuthenticationProvider {
 
     @Override
     public boolean supports(Class<?> authentication) {
-        return authentication.equals(PreAuthenticatedAuthenticationToken.class);
+        return PreAuthenticatedAuthenticationToken.class.equals(authentication);
     }
 
     private HashMap<String, String> getLDAPAttributes(String name) {
