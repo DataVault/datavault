@@ -37,9 +37,17 @@
                                 <td>
                                     <th:block th:with="viewDepositsSecurityExpression=|hasPermission('${vault.ID}', 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') or hasPermission('${vault.groupID}', 'GROUP', 'MANAGE_SCHOOL_VAULT_DEPOSITS')|">
                                     <th:block th:if="${#authorization.expression(viewDepositsSecurityExpression)}">
-                                    <a th:href="@{|/vaults/${vault.getID()}/deposits/create|}" class="btn btn-primary">
-                                       <i class="fa fa-download fa-rotate-180" aria-hidden="true"></i> Deposit
-                                    </a>
+                                        <!--/* UsesDepositsPaused */-->            
+                                        <th:block th:with="notAffectedByDepositsPaused=|hasRole('IS_ADMIN') or (!@permissionsService.depositsPaused())|">
+                                        <th:block th:if="${#authorization.expression(notAffectedByDepositsPaused)}">
+                                            <a th:href="@{|/vaults/${vault.getID()}/deposits/create|}" class="btn btn-primary">
+                                                <i class="fa fa-download fa-rotate-180" aria-hidden="true"></i> Deposit
+                                            </a>
+                                        </th:block>
+                                        <th:block th:unless="${#authorization.expression(notAffectedByDepositsPaused)}">
+                                            <span>Deposits : PAUSED</span>   
+                                        </th:block>
+                                        </th:block>
                                     </th:block>
                                     </th:block>
                                 </td>

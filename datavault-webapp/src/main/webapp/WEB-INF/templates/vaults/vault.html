@@ -134,9 +134,17 @@
             <th:block th:if="${#authorization.expression(addDepositsSecurityExpression2)}">
             <div class="row">
                 <div class="col-md-12">
-                    <a class="btn btn-primary pull-right" th:href="@{|/vaults/${vault.getID()}/deposits/create|}">
-                        <i class="fa fa-download fa-rotate-180" aria-hidden="true"></i> Deposit data
-                    </a>
+                    <!--/* UsesDepositsPaused */-->
+                    <th:block th:with="notAffectedByDepositsPaused=|hasRole('IS_ADMIN') or (!@permissionsService.depositsPaused())|">
+                    <th:block th:if="${#authorization.expression(notAffectedByDepositsPaused)}">
+                        <a class="btn btn-primary pull-right" th:href="@{|/vaults/${vault.getID()}/deposits/create|}">
+                            <i class="fa fa-download fa-rotate-180" aria-hidden="true"></i> Deposit data
+                        </a>
+                    </th:block>
+                    <th:block th:unless="${#authorization.expression(notAffectedByDepositsPaused)}">
+                        <span>Deposits Paused</span>
+                    </th:block>
+                    </th:block>
                 </div>
             </div>
             </th:block></th:block><!-- addDepositsSecurityExpression2 -->
@@ -180,11 +188,19 @@
 
                                     <th:block th:if="${#authorization.expression(canRetrieveDataExpression3)}">
                                         <th:block th:if="${deposit?.status?.name() == 'COMPLETE'}">
-                                        <a id="retrievebtn" class="btn btn-default"
-                                           th:href="@{|/vaults/${vault.getID()}/deposits/${deposit.getID()}/retrieve|}">
-                                            <span class="fa fa-upload fa-rotate-180" aria-hidden="true"></span> Retrieve
-                                        </a>
-                                        </th:block>
+                                            <!--/* UsesRetrievesPaused */-->
+                                            <th:block th:with="notAffectedByRetrievesPaused=|hasRole('IS_ADMIN') or (!@permissionsService.retrievesPaused())|">
+                                            <th:block th:if="${#authorization.expression(notAffectedByRetrievesPaused)}">
+                                                <a id="retrievebtn" class="btn btn-default"
+                                                    th:href="@{|/vaults/${vault.getID()}/deposits/${deposit.getID()}/retrieve|}">
+                                                    <span class="fa fa-upload fa-rotate-180" aria-hidden="true"></span> Retrieve
+                                                </a>
+                                             </th:block>
+                                             <th:block th:unless="${#authorization.expression(notAffectedByRetrievesPaused)}">
+                                                <span>Retrieves Paused</span>
+                                             </th:block>
+                                            </th:block>
+                                       </th:block>
                                     </th:block></th:block><!-- canRetrieveDataExpression3 -->
                                 </div>
                             </th:block>
