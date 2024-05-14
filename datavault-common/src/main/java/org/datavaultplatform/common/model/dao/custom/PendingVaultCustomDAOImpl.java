@@ -116,7 +116,7 @@ public class PendingVaultCustomDAOImpl extends BaseCustomDAOImpl implements
       if ("user".equals(sort)) {
         sortPath = rt.get(PendingVault_.user).get(User_.id);
       } else {
-        sortPath = rt.get(sort);
+        sortPath = getPathFromNestedProperties(rt, sort);
       }
       return getSingletonOrderList(cb, asc, sortPath);
     });

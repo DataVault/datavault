@@ -1,5 +1,6 @@
 package org.datavaultplatform.common.model.dao;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.datavaultplatform.broker.test.TestUtils.NOW;
 import static org.datavaultplatform.broker.test.TestUtils.ONE_WEEK_AGO;
 import static org.datavaultplatform.broker.test.TestUtils.TWO_WEEKS_AGO;
@@ -20,6 +21,7 @@ import org.datavaultplatform.common.model.Dataset;
 import org.datavaultplatform.common.model.Group;
 import org.datavaultplatform.common.model.Permission;
 import org.datavaultplatform.common.model.Vault;
+import org.datavaultplatform.common.model.User;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -510,6 +512,97 @@ public class VaultDAOIT extends BaseReuseDatabaseTest {
     assertEquals(3, dao.search("allowed", null, "groupID", "desc", null, null).size());
     assertEquals(3, dao.search("allowed", null, "crisID", "asc", null, null).size());
     assertEquals(3, dao.search("allowed", null, "crisID", "desc", null, null).size());
+  }
+  
+  @Test
+  void testVaultsSortedByUserIdUsingNestedPropertyPath() {
+
+    Dataset ds1 = new Dataset();
+    ds1.setID("dataset-1");
+    ds1.setName("dataset-1");
+    ds1.setCrisId("crisId1");
+    ds1.setVisible(true);
+
+    Dataset ds2 = new Dataset();
+    ds2.setID("dataset-2");
+    ds2.setName("dataset-2");
+    ds2.setCrisId("crisId2");
+    ds2.setVisible(true);
+
+    datasetDAO.save(ds1);
+    datasetDAO.save(ds2);
+
+    String schoolId = "lfcs-id";
+    User user1 = createTestUser("user-id-1", schoolId);
+    User user2 = createTestUser("user-id-2", schoolId);
+
+    assertThat(user1.getID()).isEqualTo("user-id-1");
+    assertThat(user2.getID()).isEqualTo("user-id-2");
+    
+    Vault v1 = getVault1();
+    v1.setUser(user1);
+    v1.setDataset(ds1);
+    
+    Vault v2 = getVault2();
+    v2.setUser(user2);
+    v2.setDataset(ds2);
+    
+    Vault v3 = getVault3();
+    v3.setUser(user1);
+    v3.setDataset(ds1);
+    
+
+
+    Group group = new Group();
+    group.setID(schoolId);
+    group.setName("LFCS");
+    group.setEnabled(true);
+    groupDAO.save(group);
+
+    v1.setGroup(group);
+    v2.setGroup(group);
+    v3.setGroup(group);
+
+    v1.setDescription("desc-for-1");
+    v2.setDescription("desc-for-12");
+    v3.setDescription("desc-for-123");
+
+    v1.setName("name-Z");
+    v2.setName("name-Y");
+    v3.setName("name-X");
+
+    dao.save(v1);
+    dao.save(v2);
+    dao.save(v3);
+
+    createTestUser("allowed", schoolId, Permission.CAN_MANAGE_VAULTS);
+    List<Vault> vaultsByNameAsc = dao.search("allowed", null, "name", "asc", null,null);
+    assertEquals(3, vaultsByNameAsc.size());
+
+    {
+      List<Vault> sortByVaultUserIdDesc = dao.search("allowed", "name-", "user.id", "desc", "0", "3");
+      assertEquals(3, sortByVaultUserIdDesc.size());
+      Vault vault1 = sortByVaultUserIdDesc.get(0);
+      Vault vault2 = sortByVaultUserIdDesc.get(1);
+      Vault vault3 = sortByVaultUserIdDesc.get(2);
+
+      assertThat(vault1.getUser().getID()).isEqualTo(user2.getID());
+      assertThat(vault2.getUser().getID()).isEqualTo(user1.getID());
+      assertThat(vault3.getUser().getID()).isEqualTo(user1.getID());
+    }
+    
+    {
+      List<Vault> sortByVaultUserIdAsc = dao.search("allowed", "name-", "user.id", "asc", "0", "3");
+      assertEquals(3, sortByVaultUserIdAsc.size());
+
+      Vault vault1 = sortByVaultUserIdAsc.get(0);
+      Vault vault2 = sortByVaultUserIdAsc.get(1);
+      Vault vault3 = sortByVaultUserIdAsc.get(2);
+
+      assertThat(vault1.getUser().getID()).isEqualTo(user1.getID());
+      assertThat(vault2.getUser().getID()).isEqualTo(user1.getID());
+      assertThat(vault3.getUser().getID()).isEqualTo(user2.getID());
+    }
   }
 
   @Test
