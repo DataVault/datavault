@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * User: Robin Taylor
@@ -869,7 +870,7 @@ public class RestService implements NotifyLogoutService, NotifyLoginService, Eva
         }
         ResponseEntity<PausedRetrieveStateDTO[]> response = get(requestURL, PausedRetrieveStateDTO[].class);
         PausedRetrieveStateDTO[] data = response.getBody();
-        return Arrays.stream(data).toList();
+        return Arrays.stream(data).collect(Collectors.toList());
     }
     
     public List<PausedDepositStateDTO> getPausedDepositStateHistory(Integer limit) {
@@ -879,7 +880,7 @@ public class RestService implements NotifyLogoutService, NotifyLoginService, Eva
         }
         ResponseEntity<PausedDepositStateDTO[]> response = get(requestURL, PausedDepositStateDTO[].class);
         PausedDepositStateDTO[] data = response.getBody();
-        return Arrays.stream(data).toList();
+        return Arrays.stream(data).collect(Collectors.toList());
     }
 
     public void toggleDepositPausedState() {

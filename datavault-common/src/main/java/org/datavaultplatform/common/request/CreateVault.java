@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiObject(name = "CreateVault")
@@ -385,7 +386,7 @@ public class CreateVault {
                 .stream()
                 .filter(Objects::nonNull)
                 .filter(Predicate.not(String::isEmpty))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     public String getContactPerson() {

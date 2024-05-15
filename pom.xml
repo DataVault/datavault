@@ -57,7 +57,7 @@
     <testng.version>7.10.2</testng.version>
 
     <!-- https://mvnrepository.com/artifact/com.oracle.oci.sdk/oci-java-sdk-bom -->
-    <oci.java.sdk.bom.version>3.41.0</oci.java.sdk.bom.version>
+    <oci.java.sdk.bom.version>3.31.1</oci.java.sdk.bom.version>
 
     <!-- above here, updated 30apr2024 -->
     

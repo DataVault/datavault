@@ -67,6 +67,7 @@ class AdminPausedRetrieveStateControllerTest {
         List<PausedRetrieveStateDTO> list = Arrays.asList(ps3, ps2, ps1);
 
         when(mService.getPausedRetrieveStateHistory(10)).thenReturn(list);
+        when(mService.getCurrentRetrievePausedState()).thenReturn(ps1);
 
         MvcResult result = mvc.perform(get("/admin/paused/retrieve/history"))
                 .andDo(print())
@@ -74,7 +75,8 @@ class AdminPausedRetrieveStateControllerTest {
         assertThat(result.getModelAndView().getViewName()).isEqualTo("admin/paused/retrieve/history");
         assertThat(result.getModelAndView().getModel().get("pausedStates")).isEqualTo(list);
 
-        verify(mService).getPausedRetrieveStateHistory(10);
+        verify(mService, atLeastOnce()).getPausedRetrieveStateHistory(10);
+        verify(mService, atLeastOnce()).getCurrentRetrievePausedState();
         verifyNoMoreInteractions(mService);
 
         String rawHtml = result.getResponse().getContentAsString();

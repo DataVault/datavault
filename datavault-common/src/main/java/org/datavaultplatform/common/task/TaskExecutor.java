@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class TaskExecutor<T> {
 
@@ -43,7 +44,7 @@ public class TaskExecutor<T> {
 
     List<Future<T>> futures = tasks.stream()
         .map(service::submit)
-        .toList();
+        .collect(Collectors.toList());
 
     service.shutdown();
 

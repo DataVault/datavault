@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/admin/paused/retrieve")
@@ -33,7 +34,7 @@ public class PausedRetrieveStateController {
     @GetMapping(value = {"/history", "/history/{limit}"})
     public List<PausedRetrieveStateDTO> showPauseHistory(HttpServletRequest request, @PathVariable Optional<Integer> limit) {
         int actualLimit = limit.orElse(10);
-        return service.getRecentEntries(actualLimit).stream().map(PausedRetrieveStateDTO::create).toList();
+        return service.getRecentEntries(actualLimit).stream().map(PausedRetrieveStateDTO::create).collect(Collectors.toList());
     }
 
     @PostMapping("/toggle")

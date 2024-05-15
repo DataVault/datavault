@@ -5,6 +5,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Root;
 import org.datavaultplatform.common.model.BillingInfo;
 import org.datavaultplatform.common.model.BillingInfo_;
@@ -21,10 +22,11 @@ public class BillingCustomDAOImpl extends BaseCustomDAOImpl implements BillingCu
         CriteriaQuery<BillingInfo> cr = cb.createQuery(BillingInfo.class).distinct(true);
         Root<BillingInfo> rt = cr.from(BillingInfo.class);
 
+        Path<?> sortPath = getPathFromNestedProperties(rt, sort);
         if ("asc".equals(order)) {
-            cr.orderBy(cb.asc(rt.get(sort)));
+            cr.orderBy(cb.asc(sortPath));
         } else {
-            cr.orderBy(cb.desc(rt.get(sort)));
+            cr.orderBy(cb.desc(sortPath));
         }
 
         TypedQuery<BillingInfo> typedQuery = restrict(cr, offset, maxResult);
@@ -46,11 +48,11 @@ public class BillingCustomDAOImpl extends BaseCustomDAOImpl implements BillingCu
               cb.like(cb.lower(rt.get(BillingInfo_.contactName)), queryLower)
           ));
         }
-
+        Path<?> sortPath = getPathFromNestedProperties(rt, sort);
         if ("desc".equals(order)) {
-            cr.orderBy(cb.desc(rt.get(sort)));
+            cr.orderBy(cb.desc(sortPath));
         } else {
-            cr.orderBy(cb.asc(rt.get(sort)));
+            cr.orderBy(cb.asc(sortPath));
         }
 
         TypedQuery<BillingInfo> typedQuery = restrict(cr, offset, maxResult);
