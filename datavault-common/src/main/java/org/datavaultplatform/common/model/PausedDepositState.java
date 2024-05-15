@@ -16,6 +16,7 @@ public class PausedDepositState {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(columnDefinition = "VARCHAR(36)")
     private String id;
 
     @Setter
