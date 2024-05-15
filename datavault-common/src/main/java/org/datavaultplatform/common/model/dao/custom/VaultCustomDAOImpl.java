@@ -128,7 +128,7 @@ public class VaultCustomDAOImpl extends BaseCustomDAOImpl implements VaultCustom
             } else if ("crisID".equals(sort)) {
                 sortExpr = rt.join(Vault_.dataset).get(Dataset_.crisId);
             } else {
-                sortExpr = rt.get(sort);
+                sortExpr = getPathFromNestedProperties(rt, sort);
             }
             jakarta.persistence.criteria.Order orderBy;
             if (asc) {
