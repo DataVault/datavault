@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 public class PausedRetrieveState {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(columnDefinition = "VARCHAR(36)")
     private String id;
 
     @Setter
