@@ -25,6 +25,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.security.Principal;
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Controller
 @ConditionalOnBean(RestService.class)
@@ -62,7 +63,7 @@ public class AdminRolesController {
         List<User> superAdminUsers = restService.getRoleAssignmentsForRole(superAdminRole.getId())
                 .stream()
                 .map(roleAssignment -> restService.getUser(roleAssignment.getUserId()))
-                .toList();
+                .collect(Collectors.toList());
 
         ModelAndView mav = new ModelAndView();
         mav.setViewName("admin/roles/isadmin/index");
@@ -155,7 +156,7 @@ public class AdminRolesController {
         Set<String> permissionIds = Set.of(permIds);
         return getPermissionsByType(type).stream()
                 .filter(permission -> permissionIds.contains(permission.getId()))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     private List<PermissionModel> getPermissionsByType(String type) {
@@ -344,7 +345,7 @@ public class AdminRolesController {
         List<PermissionModel> allPermissions = getPermissionsByType(role.get().getType().name());
         List<PermissionModel> unsetPermissions = allPermissions.stream()
                 .filter(p -> !role.get().hasPermission(p.getPermission()))
-                .toList();
+                .collect(Collectors.toList());
 
         return ResponseEntity.ok(new RoleViewModel(role.get(), unsetPermissions));
     }

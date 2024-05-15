@@ -43,10 +43,10 @@ JAVA_TOOL_OPTS=\
  -Duser.country=GB \
  -Duser.home=$PROJECT_ROOT/dv5/user/home \
  -Duser.dir=$PROJECT_ROOT/dv5/user/dir \
- -Duser.timezone=Europe/London \
+ -Duser.timezone=Europe/London -Djava.net.preferIPv4Stack=true \
  -Xdebug \
  -Xms1024M -Xmx2024M \
- -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005"
+ -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
 
  eval $SETUP_ENV \
  java $JAVA_TOOL_OPTS -jar $PROJECT_ROOT/datavault-broker/target/datavault-broker.jar

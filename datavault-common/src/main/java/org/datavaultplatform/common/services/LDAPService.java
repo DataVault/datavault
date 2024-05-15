@@ -244,7 +244,7 @@ public class LDAPService {
             }
             logger.info("LDAP found [{}] results.", entries.size());
             //sort by alphabetical order - more consistent for testing
-            return entries.stream().sorted(Comparator.naturalOrder()).toList();
+            return entries.stream().sorted(Comparator.naturalOrder()).collect(Collectors.toList());
         } finally {
             IOUtils.closeQuietly(cursor);
             closeConnection(connection);

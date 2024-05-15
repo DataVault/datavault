@@ -5,8 +5,12 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Root;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.datavaultplatform.common.util.DaoUtils;
+import org.springframework.util.Assert;
 
 @Slf4j
 public abstract class BaseCustomDAOImpl implements BaseCustomDAO {
@@ -55,4 +59,17 @@ public abstract class BaseCustomDAOImpl implements BaseCustomDAO {
     return "%" + query.toLowerCase() + "%";
   }
 
+  public static Path<?> getPathFromNestedProperties(Root<?> rt, String sort) {
+    Assert.isTrue(rt != null, "The rt parameter cannot be null");
+    Assert.isTrue(StringUtils.isNotBlank(sort), "The sort parameter cannot be blank");
+    String[] segments = sort.split("\\."); // split using '.' delimiter
+    Assert.isTrue(segments != null, "The segments array is null");
+    Assert.isTrue(segments.length != 0, "The segments array is empty");
+    Path<?> sortPath = rt.get(segments[0]);
+    for (int i = 1; i < segments.length; i++) {
+      String segment = segments[i];
+      sortPath = sortPath.get(segment);
+    }
+    return sortPath;
+  }
 }

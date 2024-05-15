@@ -15,7 +15,12 @@ public class PausedDepositStateService {
     private static final PausedDepositState NOT_PAUSED;
     
     static {
-        NOT_PAUSED = new PausedDepositState();
+        NOT_PAUSED = new PausedDepositState(){
+            @Override
+            public String getId() {
+                return "-1";
+            }  
+        };
         NOT_PAUSED.setPaused(false);
         NOT_PAUSED.setCreated(LocalDateTime.of(1970,1,1,12,0,0));
     }

@@ -63,7 +63,7 @@ public class DepositCustomDAOImpl extends BaseCustomDAOImpl implements DepositCu
       } else if ("vaultID".equals(sort)) {
         sortPath = rt.get(Deposit_.vault).get(Vault_.id);
       } else {
-        sortPath = rt.get(sort);
+        sortPath = getPathFromNestedProperties(rt, sort);
       }
 
       Order order;
@@ -161,7 +161,7 @@ public class DepositCustomDAOImpl extends BaseCustomDAOImpl implements DepositCu
     );
 
     helper.setOrderByHelper((cb, rt) -> {
-      Path<?> sortPath = rt.get(sort);
+      Path<?> sortPath = getPathFromNestedProperties(rt, sort);
       final Order order;
       if("asc".equals(sortDirection)) {
         order = cb.asc(sortPath);

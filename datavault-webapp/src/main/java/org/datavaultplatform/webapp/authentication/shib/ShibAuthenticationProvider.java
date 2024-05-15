@@ -4,6 +4,7 @@ import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.request.ValidateUser;
 import org.datavaultplatform.common.services.LDAPService;
 import org.datavaultplatform.webapp.authentication.AuthenticationSuccess;
+import org.datavaultplatform.webapp.authentication.AuthenticationUtils;
 import org.datavaultplatform.webapp.services.RestService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,10 +86,13 @@ public class ShibAuthenticationProvider implements AuthenticationProvider {
             }
         } else {
             List<GrantedAuthority> grantedAuthsForUser = this.shibGrantedAuthorityService.getGrantedAuthoritiesForUser(name, authentication);
-            grantedAuths.addAll(grantedAuthsForUser);
+            if(grantedAuthsForUser != null) {
+                grantedAuths.addAll(grantedAuthsForUser);
+            }
         }
 
         grantedAuths.add(ShibUtils.ROLE_USER);
+        AuthenticationUtils.validateGrantedAuthorities(grantedAuths);
         return new PreAuthenticatedAuthenticationToken(name, password, grantedAuths);
 
     }
@@ -96,7 +100,7 @@ public class ShibAuthenticationProvider implements AuthenticationProvider {
 
     @Override
     public boolean supports(Class<?> authentication) {
-        return authentication.equals(PreAuthenticatedAuthenticationToken.class);
+        return PreAuthenticatedAuthenticationToken.class.equals(authentication);
     }
 
     private HashMap<String, String> getLDAPAttributes(String name) {

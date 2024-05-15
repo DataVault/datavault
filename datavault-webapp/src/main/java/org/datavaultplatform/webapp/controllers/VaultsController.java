@@ -39,6 +39,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.AssertTrue;
 import java.security.Principal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 @ConditionalOnBean(RestService.class)
@@ -195,7 +196,7 @@ public class VaultsController {
         List<RoleAssignment> roleAssignmentsForVault = restService.getRoleAssignmentsForVault(vaultID);
         List<RoleAssignment> vaultUsers = roleAssignmentsForVault.stream()
                 .filter(roleAssignment -> !RoleUtils.isDataOwner(roleAssignment))
-                .toList();
+                .collect(Collectors.toList());
         roleAssignmentsForVault.stream()
                 .filter(RoleUtils::isDataOwner)
                 .findFirst()

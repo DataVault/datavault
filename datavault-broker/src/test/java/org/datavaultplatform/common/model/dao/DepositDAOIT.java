@@ -1,5 +1,6 @@
 package org.datavaultplatform.common.model.dao;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.datavaultplatform.broker.test.TestUtils.NOW;
 import static org.datavaultplatform.broker.test.TestUtils.ONE_YEAR_AGO;
 import static org.datavaultplatform.broker.test.TestUtils.THREE_YEARS_AGO;
@@ -314,6 +315,125 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
     List<Deposit> items8 = dao.list("name1","allowed1","name","desc",1,1);
     assertEquals(1, items8.size());
     assertEquals("name1", items8.get(0).getName());
+
+    {
+      // sorting by vault id is not great as the vault ids are UUIDs which are not generated in an alphanumeric order
+      List<Deposit> items9 = dao.list("name1", "allowed1", "vaultID", "desc", 1, 1);
+      assertEquals(1, items9.size());
+    }
+
+    {
+      // sorting by vault id is not great as the vault ids are UUIDs which are not generated in an alphanumeric order
+      List<Deposit> items10 = dao.list("name1", "allowed1", "vault.id", "desc", 0, 2);
+      assertEquals(2, items10.size());
+    }
+
+    {
+      // sorting by vault id is not great as the vault ids are UUIDs which are not generated in an alphanumeric order
+      List<Deposit> items11 = dao.list("name1", "allowed1", "vault.id", "asc", 0, 2);
+      assertEquals(2, items11.size());
+    }
+  }
+  
+  
+  @Test
+  void testSortByNestedProperty() {
+
+    String schoolId1 = "lfcs-id-1";
+    String schoolId2 = "lfcs-id-2";
+
+    Group group1 = new Group();
+    group1.setID(schoolId1);
+    group1.setName("LFCS-ONE");
+    group1.setEnabled(true);
+    groupDAO.save(group1);
+
+    Group group2 = new Group();
+    group2.setID(schoolId2);
+    group2.setName("LFCS-TWO");
+    group2.setEnabled(true);
+    groupDAO.save(group2);
+
+    Vault vault1 = new Vault();
+    vault1.setContact("James Bond1");
+    vault1.setGroup(group1);
+    vault1.setName("vault-1");
+    vault1.setReviewDate(NOW);
+    vaultDAO.save(vault1);
+
+    Vault vault2 = new Vault();
+    vault2.setContact("Brooke Bond");
+    vault2.setGroup(group1);
+    vault2.setName("vault-2");
+    vault2.setReviewDate(NOW);
+    vaultDAO.save(vault2);
+    
+    Vault vault3 = new Vault();
+    vault3.setContact("Jane Bond");
+    vault3.setGroup(group1);
+    vault3.setName("vault-3");
+    vault3.setReviewDate(NOW);
+    vaultDAO.save(vault3);
+
+    Vault vault4 = new Vault();
+    vault4.setContact("Chemical Bond");
+    vault4.setGroup(group1);
+    vault4.setName("vault-4");
+    vault4.setReviewDate(NOW);
+    vaultDAO.save(vault4);
+
+    Vault vault5 = new Vault();
+    vault5.setContact("Premium Bond");
+    vault5.setGroup(group1);
+    vault5.setName("vault-5");
+    vault5.setReviewDate(NOW);
+    vaultDAO.save(vault5);
+
+    Deposit depositReview1 = getDeposit1();
+    depositReview1.setVault(vault1);
+    depositReview1.setName("name11");
+
+    Deposit depositReview2 = getDeposit2();
+    depositReview2.setVault(vault2);
+    depositReview2.setName("name12");
+
+    Deposit depositReview3 = getDeposit3();
+    depositReview3.setVault(vault3);
+    depositReview3.setName("name13");
+
+    Deposit depositReview4 = getDeposit4();
+    depositReview4.setVault(vault4);
+    depositReview4.setName("name14");
+
+    Deposit depositReview5 = getDeposit5();
+    depositReview5.setVault(vault5);
+    depositReview5.setName("name15");
+
+    dao.save(depositReview1);
+    dao.save(depositReview2);
+    dao.save(depositReview3);
+    dao.save(depositReview4);
+    dao.save(depositReview5);
+
+    assertEquals(5, dao.count());
+
+    createTestUser("denied1", schoolId1);
+    createTestUser("denied2", schoolId2);
+    createTestUser("allowed1", schoolId1, Permission.CAN_MANAGE_DEPOSITS);
+    createTestUser("allowed2", schoolId2, Permission.CAN_MANAGE_DEPOSITS);
+
+    {
+      List<Deposit> items = dao.list("name1", "allowed1", "vault.name", "desc", 0, 5);
+      assertEquals(5, items.size());
+      List<String> actualDescVaultNames = items.stream().map(d ->d.getVault().getName()).collect(Collectors.toList());
+      assertThat(actualDescVaultNames).isEqualTo(Arrays.asList("vault-5","vault-4","vault-3","vault-2","vault-1"));
+    }
+    {
+      List<Deposit> items = dao.list("name1", "allowed1", "vault.name", "asc", 0, 5);
+      assertEquals(5, items.size());
+      List<String> actualDescVaultNames = items.stream().map(d ->d.getVault().getName()).collect(Collectors.toList());
+      assertThat(actualDescVaultNames).isEqualTo(Arrays.asList("vault-1","vault-2","vault-3","vault-4","vault-5"));
+    }
   }
 
   @Test
