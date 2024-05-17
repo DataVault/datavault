@@ -196,6 +196,9 @@ public class RetrieveTest {
         properties.put(PropNames.ARCHIVE_DIGEST_ALGORITHM, "archive-digest-algorithm");
         properties.put(PropNames.NUM_OF_CHUNKS, "1");
         properties.put(PropNames.ARCHIVE_SIZE, "2112");
+        properties.put(PropNames.USER_FS_RETRY_MAX_ATTEMPTS, "10");
+        properties.put(PropNames.USER_FS_RETRY_DELAY_MS_1, "50");
+        properties.put(PropNames.USER_FS_RETRY_DELAY_MS_2, "50");
         retrieve.setProperties(properties);
 
         Map<String, String> userFileStoreClasses = new HashMap<>();
@@ -665,9 +668,9 @@ public class RetrieveTest {
         void checkCopyFilesToUserFs(int attemptThatCopyWorksOn) throws Exception {
             Progress progress = new Progress();
             Map<String, String> properties = new HashMap<>();
-            properties.put(PropNames.USER_FS_RETRIEVE_MAX_ATTEMPTS, String.valueOf(MAX_ATTEMPTS));
-            properties.put(PropNames.USER_FS_RETRIEVE_DELAY_MS_1, "10");
-            properties.put(PropNames.USER_FS_RETRIEVE_DELAY_MS_2, "20");
+            properties.put(PropNames.USER_FS_RETRY_MAX_ATTEMPTS, String.valueOf(MAX_ATTEMPTS));
+            properties.put(PropNames.USER_FS_RETRY_DELAY_MS_1, "10");
+            properties.put(PropNames.USER_FS_RETRY_DELAY_MS_2, "20");
             Retrieve ret = new Retrieve();
             ret.setupUserFsTwoSpeedRetry(properties);
 
