@@ -462,13 +462,13 @@ public class RetrieveTest {
                 retrieve.performAction(mContext);
                 fail("exception expected!");
             } catch (RuntimeException ex) {
-                assertThat(ex).hasMessage("java.lang.Exception: problemGettingUsableSpace!");
+                assertThat(ex).hasMessage("org.datavaultplatform.worker.retry.DvRetryException: task[calcSizeToFS - retrieve-path]failed after[10] attempts");
             }
 
             checkErrorMessages("Job states: 5",
                     "Deposit retrieve started",
                     "Unable to determine free space",
-                    "Data retrieve failed: problemGettingUsableSpace!");
+                    "Data retrieve failed: task[calcSizeToFS - retrieve-path]failed after[10] attempts");
         }
     }
 
