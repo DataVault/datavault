@@ -342,9 +342,7 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
         final long freespace;
         try {
             TwoSpeedRetry.DvRetryTemplate template = userFsTwoSpeedRetry.getRetryTemplate(String.format("calcSizeToFS - %s", retrievePath));
-            freespace = (long)template.execute((RetryCallback<Object, Exception>) retryContext -> {
-                return userFs.getUsableSpace();
-            });
+            freespace = template.execute(retryContext -> userFs.getUsableSpace());
 
         } catch (Exception e) {
             String msg = "Unable to determine free space";

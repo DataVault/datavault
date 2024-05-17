@@ -19,7 +19,6 @@ import org.datavaultplatform.worker.operations.*;
 import org.datavaultplatform.worker.retry.TwoSpeedRetry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.retry.RetryCallback;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -224,7 +223,7 @@ public class Deposit extends BaseTwoSpeedRetryTask {
             logger.debug("CopyFromUserStorage filePath:" + filePath);
             logger.debug("CopyFromUserStorage outputFile:" + outputFile.getAbsolutePath());
             TwoSpeedRetry.DvRetryTemplate template = userFsTwoSpeedRetry.getRetryTemplate(String.format("fromUserFs - %s", filePath));
-            template.execute((RetryCallback<Object, Exception>) retryContext -> {
+            template.execute(retryContext -> {
                 ((Device)userStore).retrieve(filePath, outputFile, progress);
                 return null;
             });
@@ -515,9 +514,7 @@ public class Deposit extends BaseTwoSpeedRetryTask {
                 try {
                     UserStore userStore = userStores.get(storageID);
                     TwoSpeedRetry.DvRetryTemplate template = userFsTwoSpeedRetry.getRetryTemplate(String.format("calcSizeFromFS - %s", filePath));
-                    long fileSize = (long)template.execute((RetryCallback<Object, Exception>) retryContext -> {
-                        return userStore.getSize(storagePath);
-                    });
+                    long fileSize = template.execute( retryContext -> userStore.getSize(storagePath));
                     depositTotalSize += fileSize;
 
                 } catch (Exception e) {
