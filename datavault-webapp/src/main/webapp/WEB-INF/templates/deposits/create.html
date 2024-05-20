@@ -54,7 +54,7 @@
                         <label class="control-label">Select file or folder:</label>
                         <div id="tree-error" class="alert alert-danger" style="display:none"></div>
                         <div id="tree" class="fancytree tree-box" style="max-height:50vh; overflow-y:scroll;"></div>
-                        <label id="deposit-size" class="text-muted small">No files selected</label>
+                        <!--/*   <label id="deposit-size" class="text-muted small">No files selected</label>  */-->
                     </div>
                 </form>
             </div>
@@ -148,11 +148,20 @@
                     </div>
     
                     <div id="upload-tree" class="fancytree tree-box text-left" style="display:none; margin-top:15px; max-height:25vh; overflow-y:scroll;"></div>
+                    <p><label id="deposit-size" class="text-muted"></label></p>
                 </div>
                 
                 <script th:inline="javascript" type="text/javascript">
                     var filesizeSeq = 0;
                     var baseURL = /*[(|'@{/files}'|)]*/ 'replaced-by-tl';
+                    
+                    const sortTreeNodesFn = function (node) {
+                        // Sort children alphabetically
+                        node.sortChildren(function(a, b) {
+                            return a.title.localeCompare(b.title);
+                        });
+                    };
+
                     // Create the tree inside the "tree" element.
                     $("#tree").fancytree({
                         source: {
@@ -160,7 +169,7 @@
                             cache: false
                         },
                         lazyLoad: function(event, data){
-                            var node = data.node;
+                            const node = data.node;
                             // Load child nodes via ajax GET /files?mode=children&parent=1234
                             data.result = {
                                 url: baseURL,
@@ -172,7 +181,10 @@
                             };
                         },
                         loadChildren: function(event, data) {
-                            var node = data.node;
+                            const  node = data.node;
+                            // Order child nodes
+                            sortTreeNodesFn(node);
+
                             if(node != null && !node.key.includes('/') && node.children.length == 0) {
                                 $("#tree-error").html("DataVault could not access the location you specified. Please check that you have provided the correct hostname, port number and have copied the authentication key to the location. It can take several minutes before the connection between Datavault and the location is set, so please reload the page and try again. If the problem persists and you need assistance please contact the DataVault support team.");
                                 $("#tree-error").show();
@@ -180,32 +192,25 @@
                                 $("#tree-error").hide();
                             }
                         },
-                        selectMode: 1,
-                        activate: function(event, data) {
-                            var node = data.tree.getActiveNode();
-                            
-                            filesizeSeq = filesizeSeq + 1;
-                            var currentSeq = filesizeSeq;
-                            
-                            if (node) {
-                                $("#deposit-size").text("Deposit size: calculating ...");
-                                var fileSizeURL = /*[[@{/filesize}]]*/ 'replaced-by-tl';
-                                $.ajax({
-                                    url: fileSizeURL,
-                                    type: "GET",
-                                    data: {filepath: node.key},
-                                    dataType: 'text',
-                                    success: function (result) {
-                                        if (currentSeq == filesizeSeq) {
-                                            $("#deposit-size").text("Deposit size: " + result);
-                            }
-                                    }
-                                });
-                            } else {
-                                $("#deposit-size").text("No files selected");
+                        checkbox: true,
+                        selectMode: 3,
+                        clickFolderMode: 3,
+                        click: function(event, data){
+                            // Enables clicking on titles, not just checkbox
+                            if (data.targetType === 'title') {
+                                data.node.toggleSelected();
                             }
                         },
+                        select: function(event, data) {
+                            // Do nothing
+                        },
+
                         init: function(event, data) {
+                            // Get root node
+                            const rootNode = data.tree.rootNode;
+                            rootNode.checkbox = false;
+                            // Order root child nodes
+                            sortTreeNodesFn(rootNode);
                             // The GET request always returns the top level "SFTP filesystem" node if there's a filestore defined, even when it is bogus.
                             // If there's no filestore defined, it returns an empty result. Therefore, if there's 1 or fewer items in the tree, we know
                             // that there's likely some problem with the filestore.
@@ -306,7 +311,7 @@
 
         $('[data-toggle="popover"]').popover();
         
-        var updateProgress = function(percentComplete) {
+        const updateProgress = function(percentComplete) {
           $('#upload-progress').css('width', percentComplete + '%').attr('aria-valuenow', percentComplete);
           $('#progress-label').text(percentComplete + '% Complete');
         }
@@ -322,48 +327,67 @@
         });
         
         $('#add-from-storage-btn').on("click", function() {
-            var node = $("#tree").fancytree("getActiveNode");
+            var checkDepositSizeURL = /*[(|'@{/checkdepositsize/}'|)]*/ 'replaced-by-tl';
 
-            var storageNode = $("#upload-tree").fancytree("getNodeByKey", "storage");
+            console.log("#add-from-storage-btn: CLICKED");
+            const tree = $.ui.fancytree.getTree("#tree");
+            console.log("#tree: ", tree);
+            const selectedNodes = Array.from(new Set(tree.getSelectedNodes()));
+            console.log("selectedNodes: ", selectedNodes);
 
+            const uploadTree = $.ui.fancytree.getTree("#upload-tree");
+            console.log("#upload-tree: ", uploadTree);
+            var storageNode = uploadTree.getNodeByKey("storage", uploadTree.rootNode)
+            console.log("storageNode: ", storageNode);
             var paths = [];
+            const pathsSet = new Set();
             if (storageNode) {
-                var pathNodes = storageNode.getChildren();
-
+                const pathNodes = storageNode.getChildren();
                 var isFull = false;
-
                 if (pathNodes != null) {
                     for (var i = 0; i < pathNodes.length; i++) {
-                        var checkedNode = pathNodes[i];
-                        paths.push(checkedNode.getKeyPath().replace("/storage/", "/"));
+                        const checkedNode = pathNodes[i];
+                        pathsSet.add(checkedNode.getKeyPath().replace("/storage/", "/"));
                     }
                 }
             }
+            // Get a list of all selected nodes, and convert to a key array:
+            $.map(selectedNodes, function(node) {
+                console.log("node.key: ", node.key);
+                pathsSet.add(node.key);
+            });
+            console.log("pathsSet: ", pathsSet);
+            // To get rid of duplicates, we obtain a set from paths and covert back to an array
+            paths = Array.from(pathsSet);
+            console.log("paths: ", paths);
 
-            paths.push(node.key);
-            var checkDepositSizeURL = /*[[@{/checkdepositsize}]]*/ 'replaced-by-tl';
             $.ajax({
                 url: checkDepositSizeURL,
                 type: "GET",
                 data: {filepath: paths},
                 dataType: 'json',
                 success: function (result) {
+                    console.log("result: ", result);
                     if (result.success == "false") {
                         isFull = true
                     }
 
                     if(!isFull) {
-                        // Add the path to the hidden control
-                        $('.file-path')
-                            .append($('<option>', { value : node.key })
-                                .text(node.key)
-                                .prop('selected', true));
+                        // Clear file-path and storageNode
+                        $('.file-path').empty();
+                        if (storageNode) {
+                            storageNode.removeChildren();
+                        }
 
-                        //Show tree
-                        $("#upload-tree").show();
+                        // Loop over selectedNodes array, but first remove duplicates.
+                        $.map(selectedNodes, function(node) {
+
+                            // Get upload tree and its root node
+                            const uploadTree = $.ui.fancytree.getTree("#upload-tree");
+                            const rootNode = uploadTree.rootNode;
 
                             if (!storageNode) {
-                            var rootNode = $("#upload-tree").fancytree("getRootNode");
+
                                 storageNode = rootNode.addChildren({
                                     key: "storage",
                                     title: "Data Storage",
@@ -373,6 +397,12 @@
                                 });
                             }
 
+
+                            // Add the path to the hidden control
+                            $('.file-path').append($('<option>', { value : node.key })
+                                .text(node.key)
+                                .prop('selected', true));
+
                             // Add the path to the hidden control
                             storageNode.addChildren({
                                 key: node.key,
@@ -380,9 +410,13 @@
                                 tooltip: "Path: " + node.key,
                                 folder: node.folder
                             });
-                    }
-                    else{
-                        alert("A deposit is limited to " + result.max + "!")
+                        });
+
+                        $("#deposit-size").text("Deposit size: " + result.sizeWithUnits);
+                        //Show tree
+                        $("#upload-tree").show();
+                    } else {
+                        alert("A deposit is limited to " + result.max + "!\nYour deposit is of size: " + result.sizeWithUnits);
                     }
                 }
             })
@@ -442,8 +476,8 @@
             'placement': 'top'
         });
         
-        var modalContentMinWidth = 350;
-        var modalContentMinHeight = modalContentMinWidth*0.7;
+        const modalContentMinWidth = 350;
+        const modalContentMinHeight = modalContentMinWidth*0.7;
         // Make "Add files from storage" modal resizable and draggable
         $('.modal-content').resizable({
 			alsoResize: ".modal-dialog",
@@ -455,31 +489,31 @@
     });
 
     function readablizeBytes(bytes) {
-        var s = ['bytes', 'kB', 'MB', 'GB', 'TB', 'PB'];
-        var e = Math.floor(Math.log(bytes) / Math.log(1024));
+        const s = ['bytes', 'kB', 'MB', 'GB', 'TB', 'PB'];
+        const e = Math.floor(Math.log(bytes) / Math.log(1024));
         return (bytes / Math.pow(1024, e)).toFixed(2) + " " + s[e];
     }
     function secondsToStr (temp) {
         function numberEnding (number) {
             return (number > 1) ? 's' : '';
         }
-        var years = Math.floor(temp / 31536000);
+        const years = Math.floor(temp / 31536000);
         if (years) {
             return years + ' year' + numberEnding(years);
         }
-        var days = Math.floor((temp %= 31536000) / 86400);
+        const days = Math.floor((temp %= 31536000) / 86400);
         if (days) {
             return days + ' day' + numberEnding(days);
         }
-        var hours = Math.floor((temp %= 86400) / 3600);
+        const hours = Math.floor((temp %= 86400) / 3600);
         if (hours) {
             return hours + ' hour' + numberEnding(hours);
         }
-        var minutes = Math.floor((temp %= 3600) / 60);
+        const minutes = Math.floor((temp %= 3600) / 60);
         if (minutes) {
             return minutes + ' minute' + numberEnding(minutes);
         }
-        var seconds = temp % 60;
+        const seconds = temp % 60;
         return seconds + ' second' + numberEnding(seconds);
     }
 
