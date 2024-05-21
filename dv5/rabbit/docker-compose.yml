@@ -1,0 +1,16 @@
+version: "3.7"
+services:
+  rabbit:
+    container_name: dv-solo-rabbit
+    image: rabbitmq:3.13.2-management-alpine
+    restart: always
+    environment:
+      - RABBITMQ_DEFAULT_USER=rabbit
+      - RABBITMQ_DEFAULT_PASS=twin2port
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    volumes:
+      - v-local-solo-rabbit:/var/lib/rabbitmq
+volumes:
+  v-local-solo-rabbit:

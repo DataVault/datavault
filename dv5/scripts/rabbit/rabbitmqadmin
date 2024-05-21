@@ -4,7 +4,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 #
-# Copyright (c) 2007-2020 VMware, Inc. or its affiliates.  All rights reserved.
+# Copyright (c) 2007-2024 Broadcom. All Rights Reserved. The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries. All rights reserved.
 
 from __future__ import print_function
 
@@ -61,7 +61,7 @@ if sys.version_info[0] == 2:
     class ConnectionRefusedError(ConnectionError):
         pass
 
-VERSION = '%%VSN%%'
+VERSION = '3.13.2'
 
 LISTABLE = {'connections': {'vhost': False, 'cols': ['name', 'user', 'channels']},
             'channels':    {'vhost': False, 'cols': ['name', 'user']},
@@ -632,6 +632,8 @@ class Management:
             die("Access refused: {0}".format(path))
         if resp.status == 404:
             die("Not found: {0}".format(path))
+        if resp.status == 405:
+            die("Method not allowed: {0}".format(json.loads(resp.read())['reason']))
         if resp.status == 301:
             url = urlparse.urlparse(resp.getheader('location'))
             [host, port] = url.netloc.split(':')

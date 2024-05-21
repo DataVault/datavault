@@ -1,8 +1,8 @@
 {
-    "rabbit_version": "3.13.2",
-    "rabbitmq_version": "3.13.2",
+    "rabbit_version": "3.13.1",
+    "rabbitmq_version": "3.13.1",
     "product_name": "RabbitMQ",
-    "product_version": "3.13.2",
+    "product_version": "3.13.1",
     "users": [
         {
             "name": "datavault",

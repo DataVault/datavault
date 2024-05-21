@@ -14,6 +14,9 @@ When the scripts interrogate the state of RabbitMQ - they data may be out of dat
 
 * **datavault** - messages for the worker to process
 * **datavault-event** - messages about what the worker has done - for the broker
+* **restart-worker-1** - restart messages for tasks that are in progress on worker 1
+* **restart-worker-2** - restart messages for tasks that are in progress on worker 2
+* **restart-worker-3** - restart messages for tasks that are in progress on worker 3
 
 ## RabbitMQ Scripts
 
