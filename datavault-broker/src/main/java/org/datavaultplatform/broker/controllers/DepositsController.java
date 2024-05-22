@@ -59,9 +59,9 @@ public class DepositsController {
     private final String ociBucketName;
 
     private final String tsmReverse;
-    private final int userFsRetrieveMaxAttempts;
-    private final long userFsRetrieveDelaySeconds1;
-    private final long userFsRetrieveDelaySeconds2;
+    private final int userFsRetryMaxAttempts;
+    private final long userFsRetryDelaySeconds1;
+    private final long userFsRetryDelaySeconds2;
 
     private final ObjectMapper mapper;
 
@@ -86,9 +86,9 @@ public class DepositsController {
         @Value("${ociNameSpace:#{null}}") String ociNameSpace,
         @Value("${tsmReverse:#{false}}") String tsmReverse,
         @Value("${ociBucketName:#{null}}") String ociBucketName,
-        @Value("${userFsRetrieveMaxAttempts:10}") int userFsRetrieveMaxAttempts,
-        @Value("${userFsRetrieveDelaySeconds1:60}") long userFsRetrieveDelaySeconds1,
-        @Value("${userFsRetrieveDelaySeconds2:60}") long userFsRetrieveDelaySeconds2,
+        @Value("${userFsRetryMaxAttempts:10}") int userFsRetryMaxAttempts,
+        @Value("${userFsRetryDelaySeconds1:60}") long userFsRetryDelaySeconds1,
+        @Value("${userFsRetryDelaySeconds2:60}") long userFsRetryDelaySeconds2,
         ObjectMapper mapper) {
         this.vaultsService = vaultsService;
         this.depositsService = depositsService;
@@ -114,9 +114,9 @@ public class DepositsController {
         this.ociNameSpace = ociNameSpace;
         this.ociBucketName = ociBucketName;
         this.tsmReverse = tsmReverse;
-        this.userFsRetrieveMaxAttempts = userFsRetrieveMaxAttempts;
-        this.userFsRetrieveDelaySeconds1 = userFsRetrieveDelaySeconds1;
-        this.userFsRetrieveDelaySeconds2 = userFsRetrieveDelaySeconds2;
+        this.userFsRetryMaxAttempts = userFsRetryMaxAttempts;
+        this.userFsRetryDelaySeconds1 = userFsRetryDelaySeconds1;
+        this.userFsRetryDelaySeconds2 = userFsRetryDelaySeconds2;
         this.mapper = mapper;
     }
 
@@ -319,9 +319,9 @@ public class DepositsController {
             retrieveProperties.put(PropNames.ARCHIVE_DIGEST, deposit.getArchiveDigest());
             retrieveProperties.put(PropNames.ARCHIVE_DIGEST_ALGORITHM, deposit.getArchiveDigestAlgorithm());
             retrieveProperties.put(PropNames.NUM_OF_CHUNKS, Integer.toString(deposit.getNumOfChunks()));
-            retrieveProperties.put(PropNames.USER_FS_RETRIEVE_MAX_ATTEMPTS, String.valueOf(this.userFsRetrieveMaxAttempts));
-            retrieveProperties.put(PropNames.USER_FS_RETRIEVE_DELAY_MS_1, String.valueOf(this.userFsRetrieveDelaySeconds1));
-            retrieveProperties.put(PropNames.USER_FS_RETRIEVE_DELAY_MS_2, String.valueOf(this.userFsRetrieveDelaySeconds2));
+            retrieveProperties.put(PropNames.USER_FS_RETRY_MAX_ATTEMPTS, String.valueOf(this.userFsRetryMaxAttempts));
+            retrieveProperties.put(PropNames.USER_FS_RETRY_DELAY_MS_1, String.valueOf(this.userFsRetryDelaySeconds1));
+            retrieveProperties.put(PropNames.USER_FS_RETRY_DELAY_MS_2, String.valueOf(this.userFsRetryDelaySeconds2));
 
             // Add a single entry for the user file storage
             Map<String, String> userFileStoreClasses = new HashMap<>();
@@ -609,6 +609,9 @@ public class DepositsController {
                 }
             }
         }
+        depositProperties.put(PropNames.USER_FS_RETRY_MAX_ATTEMPTS, String.valueOf(this.userFsRetryMaxAttempts));
+        depositProperties.put(PropNames.USER_FS_RETRY_DELAY_MS_1, String.valueOf(this.userFsRetryDelaySeconds1));
+        depositProperties.put(PropNames.USER_FS_RETRY_DELAY_MS_2, String.valueOf(this.userFsRetryDelaySeconds2));
 
         Task depositTask = new Task(
                 job, depositProperties, archiveStores,

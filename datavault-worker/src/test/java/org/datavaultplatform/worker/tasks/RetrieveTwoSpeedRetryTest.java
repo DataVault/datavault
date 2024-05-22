@@ -29,9 +29,9 @@ public class RetrieveTwoSpeedRetryTest {
     @Test
     void testRetrieveTwoSpeedRetry() {
         Map<String, String> properties = new HashMap<>();
-        properties.put(PropNames.USER_FS_RETRIEVE_DELAY_MS_1, "1000");
-        properties.put(PropNames.USER_FS_RETRIEVE_DELAY_MS_2, "1000");
-        properties.put(PropNames.USER_FS_RETRIEVE_MAX_ATTEMPTS, "4");
+        properties.put(PropNames.USER_FS_RETRY_DELAY_MS_1, "1000");
+        properties.put(PropNames.USER_FS_RETRY_DELAY_MS_2, "1000");
+        properties.put(PropNames.USER_FS_RETRY_MAX_ATTEMPTS, "4");
         TwoSpeedRetry retry = Retrieve.getUserFsTwoSpeedRetry(properties);
 
         AtomicInteger counter = new AtomicInteger(1);
