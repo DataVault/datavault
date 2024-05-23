@@ -17,8 +17,8 @@ import org.datavaultplatform.common.task.Context.AESMode;
 import org.datavaultplatform.common.task.Task;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.datavaultplatform.worker.WorkerInstance;
-import org.datavaultplatform.worker.rabbit.MessageInfo;
-import org.datavaultplatform.worker.rabbit.MessageProcessor;
+import org.datavaultplatform.worker.rabbit.RabbitMessageInfo;
+import org.datavaultplatform.worker.rabbit.RabbitMessageProcessor;
 import org.datavaultplatform.worker.tasks.Deposit;
 import org.datavaultplatform.worker.utils.DepositEvents;
 import org.slf4j.Logger;
@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 /**
  * A class to review messages from the message queue then process them.
  */
-public class Receiver implements MessageProcessor {
+public class Receiver implements RabbitMessageProcessor{
 
     private static final Logger logger = LoggerFactory.getLogger(Receiver.class);
 
@@ -81,17 +81,17 @@ public class Receiver implements MessageProcessor {
     }
 
     @Override
-    public boolean processMessage(MessageInfo messageInfo) {
+    public void onMessage(RabbitMessageInfo rabbitMessageInfo) {
         try {
             if (eventSender instanceof RecordingEventSender) {
                 ((RecordingEventSender) eventSender).clear();
             }
-            return processMessageInternal(messageInfo);
+            processMessageInternal(rabbitMessageInfo);
         } finally {
             if (eventSender instanceof RecordingEventSender res) {
                 List<Event> events = res.getEvents();
 
-                generateRetrieveMessageForDeposit(messageInfo, events, new File("/tmp/retrieve"),
+                generateRetrieveMessageForDeposit(rabbitMessageInfo, events, new File("/tmp/retrieve"),
                     "retDir");
 
                 if (logger.isTraceEnabled()) {
@@ -101,9 +101,9 @@ public class Receiver implements MessageProcessor {
         }
     }
 
-    private void generateRetrieveMessageForDeposit(MessageInfo messageInfo, List<Event> events, File retrieveBaseDir, String retrievePath ) {
+    private void generateRetrieveMessageForDeposit(RabbitMessageInfo messageInfo, List<Event> events, File retrieveBaseDir, String retrievePath ) {
         try {
-            String message = messageInfo.getValue();
+            String message = messageInfo.getMessageBody();
             Task task = new ObjectMapper().readValue(message, Task.class);
             if (!"org.datavaultplatform.worker.tasks.Deposit".equals(task.getTaskClass())) {
                 return;
@@ -117,9 +117,9 @@ public class Receiver implements MessageProcessor {
         }
     }
 
-    private boolean processMessageInternal(MessageInfo messageInfo) {
+    private void processMessageInternal(RabbitMessageInfo messageInfo) {
             long start = System.currentTimeMillis();
-            String message = messageInfo.getValue();
+            String message = messageInfo.getMessageBody();
 
             // Decode and begin the job ...
             Path tempDirPath;
@@ -128,7 +128,7 @@ public class Receiver implements MessageProcessor {
 
                 String json = mapper.writerWithDefaultPrettyPrinter()
                     .writeValueAsString(mapper.readTree(message));
-                logger.info("messageId[{}] json[{}]", messageInfo.getId(), json);
+                logger.info("messageId[{}] json[{}]", messageInfo.message().getMessageProperties().getMessageId(), json);
 
                 Task commonTask = mapper.readValue(message, Task.class);
                 
@@ -136,7 +136,7 @@ public class Receiver implements MessageProcessor {
                 Task concreteTask = (Task) mapper.readValue(message, clazz);
 
                 // Is the message a redelivery?
-                if (messageInfo.getIsRedeliver()) {
+                if (messageInfo.message().getMessageProperties().isRedelivered()) {
                     concreteTask.setIsRedeliver(true);
                 }
 
@@ -181,9 +181,7 @@ public class Receiver implements MessageProcessor {
                 logger.info("Finished Processing message[{}]. Took [{}]secs",
                     messageInfo, TimeUnit.MILLISECONDS.toSeconds(diff));
             }
-
-            return false;
-        }
+     }
 
     public boolean isEncryptionEnabled() {
         return encryptionEnabled;

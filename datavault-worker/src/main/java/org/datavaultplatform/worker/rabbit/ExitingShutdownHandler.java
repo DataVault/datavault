@@ -1,20 +1,26 @@
 package org.datavaultplatform.worker.rabbit;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ConfigurableApplicationContext;
 
 @Slf4j
 public class ExitingShutdownHandler implements ShutdownHandler {
 
   private final String applicationName;
-  public static final int NORMAL_TERMINATION = 0;
 
-  public ExitingShutdownHandler(String applicationName) {
+  private ApplicationEventPublisher applicationEventPublisher;
+  
+  private final ConfigurableApplicationContext ctx;
+
+  public ExitingShutdownHandler(String applicationName, ConfigurableApplicationContext ctx) {
     this.applicationName = applicationName;
+    this.ctx = ctx;
   }
 
   @Override
-  public void handleShutdown(MessageInfo messageInfo) {
+  public void handleShutdown(RabbitMessageInfo messageInfo) {
     log.warn("SHUTDOWN MESSAGE [{}] - Worker[{}] exiting.", messageInfo, applicationName);
-    System.exit(NORMAL_TERMINATION);
+    ctx.close();
   }
 }

@@ -10,6 +10,7 @@ import java.util.concurrent.CountDownLatch;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.worker.app.DataVaultWorkerInstanceApp;
+import org.datavaultplatform.worker.queue.Receiver;
 import org.datavaultplatform.worker.test.AddTestProperties;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,13 +35,13 @@ class MessageReceiveHiPriorityIT extends BaseReceiveIT {
   private static final int MESSAGES_TO_PROCESS = 1;
 
   @MockBean
-  MessageProcessor mProcessor;
+  Receiver mProcessor;
 
   @MockBean
   ShutdownHandler mShutdownHandler;
 
   @Captor
-  ArgumentCaptor<MessageInfo> argMessageInfo;
+  ArgumentCaptor<RabbitMessageInfo> argMessageInfo;
 
   CountDownLatch shutdownLatch;
 
@@ -54,17 +55,17 @@ class MessageReceiveHiPriorityIT extends BaseReceiveIT {
       sendNormalMessage(i);
     }
     //wait long enough for processing of first normal message
-    Thread.sleep(100);
-    //okay is true only after we've recvd 1 shutdown message
+    Thread.sleep(200);
+    // okay is true only after we've recvd 1 shutdown message
     String shutdownMessageId = sendShutdownTestMessage(HI_PRIORITY);
     shutdownLatch.await();
     Assertions.assertEquals(MESSAGES_TO_PROCESS, messageInfos.size());
 
     // check that the shutdown message id is the one we expected
-    Assertions.assertEquals(shutdownMessageId, argMessageInfo.getValue().getId());
+    Assertions.assertEquals(shutdownMessageId, argMessageInfo.getValue().message().getMessageProperties().getMessageId());
 
-    verify(mProcessor, times(MESSAGES_TO_PROCESS)).processMessage(any(MessageInfo.class));
-    verify(mShutdownHandler, times(1)).handleShutdown(any(MessageInfo.class));
+    verify(mProcessor, times(MESSAGES_TO_PROCESS)).onMessage(any(RabbitMessageInfo.class));
+    verify(mShutdownHandler, times(1)).handleShutdown(any(RabbitMessageInfo.class));
     verifyNoMoreInteractions(mProcessor, mShutdownHandler);
 
     Assertions.assertEquals(LO_MESSAGES_TO_SEND - 1,
@@ -77,16 +78,19 @@ class MessageReceiveHiPriorityIT extends BaseReceiveIT {
 
     // when we process a message, we record it
     doAnswer(invocation -> {
+      Assertions.assertEquals(1, invocation.getArguments().length);
+      RabbitMessageInfo info = invocation.getArgument(0);
+      log.info("processing normal message [{}]", info.getMessageBody());
+      
       // by sleeping, we ensure the hi-priority message has time to get to head of the queue
       Thread.sleep(1000);
-      Assertions.assertEquals(1, invocation.getArguments().length);
-      MessageInfo info = invocation.getArgument(0);
       messageInfos.add(info);
       return false;
-    }).when(mProcessor).processMessage(any(MessageInfo.class));
+    }).when(mProcessor).onMessage(any(RabbitMessageInfo.class));
 
     // when we get a shutdown message, we count down the latch
     doAnswer(invocation -> {
+      log.info("processing shutdown message");
       Assertions.assertEquals(1, invocation.getArguments().length);
       this.shutdownLatch.countDown();
       return null;
