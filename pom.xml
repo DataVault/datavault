@@ -13,7 +13,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.2.5</version>
+    <version>3.3.0</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
 
@@ -40,44 +40,54 @@
     <!-- dependency versions -->
 
     <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-bom -->
-    <aws.java.sdk.bom.version>1.12.715</aws.java.sdk.bom.version>
+    <aws.java.sdk.bom.version>1.12.728</aws.java.sdk.bom.version>
 
+    <!-- https://mvnrepository.com/artifact/org.springframework.retry/spring-retry -->
+    <spring.retry.version>2.0.6</spring.retry.version>
+
+    <!-- https://mvnrepository.com/artifact/org.owasp/dependency-check-maven -->
+    <owasp.dependency.check.version>9.2.0</owasp.dependency.check.version>
+
+    <!-- https://mvnrepository.com/artifact/org.testcontainers/testcontainers -->
+    <testcontainers.version>1.19.8</testcontainers.version>
+
+    <!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
+    <mockito.version>5.12.0</mockito.version>
+
+    <!-- above here, updated 23may2024 -->
+    
     <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core -->
     <jackson.version>2.17.1</jackson.version>
 
     <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
     <guava.version>33.2.0-jre</guava.version>
 
+    <!-- https://mvnrepository.com/artifact/org.hibernate.orm/hibernate-core -->
+    <hibernate.version>6.5.2.Final</hibernate.version>
+
     <!-- above here, updated 06may2024 -->
 
-    <!-- https://mvnrepository.com/artifact/org.hibernate.orm/hibernate-core -->
-    <hibernate.version>6.4.8.Final</hibernate.version>
 
     <!-- https://mvnrepository.com/artifact/org.testng/testng -->
     <testng.version>7.10.2</testng.version>
 
+    <!-- don't change - had problems with this - we have no integration test for Oracle Device/Archive -->
     <!-- https://mvnrepository.com/artifact/com.oracle.oci.sdk/oci-java-sdk-bom -->
     <oci.java.sdk.bom.version>3.31.1</oci.java.sdk.bom.version>
 
     <!-- above here, updated 30apr2024 -->
-    
-    <!-- https://mvnrepository.com/artifact/org.springframework.retry/spring-retry -->
-    <spring.retry.version>2.0.5</spring.retry.version>
-    
+
     <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on -->
     <bouncy.castle.version>1.78.1</bouncy.castle.version>
 
     <!-- above here, updated 26apr2024 -->
 
-    <!-- https://mvnrepository.com/artifact/org.owasp/dependency-check-maven -->
-    <owasp.dependency.check.version>9.1.0</owasp.dependency.check.version>
-
     <!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-contract-stub-runner -->
     <spring.cloud.version>4.1.2</spring.cloud.version>
-    
+
     <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-text -->
     <commons.text.version>1.12.0</commons.text.version>
-    
+
     <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
     <commons.io.version>2.16.1</commons.io.version>
 
@@ -88,12 +98,6 @@
     <commons.collections4.version>4.5.0-M1</commons.collections4.version>
 
     <!-- above here, updated 19Apr2024 -->
-
-    <!-- https://mvnrepository.com/artifact/org.testcontainers/testcontainers -->
-    <testcontainers.version>1.19.7</testcontainers.version>
-
-    <!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
-    <mockito.version>5.11.0</mockito.version>
 
     <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
     <commons.compress.version>1.26.1</commons.compress.version>
