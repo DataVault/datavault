@@ -1,0 +1,23 @@
+{
+  "priority": 1,
+  "request": {
+    "urlPath": "/vaults/vault-abc/updatereviewdate",
+    "bodyPatterns" : [ {
+      "equalTo" : "2112-12-21"
+    } ],
+    "method": "POST"
+  },
+  "response": {
+    "status": 200,
+    "headers" : {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id" : "vault-abc-id",
+      "name": "test-vault-info",
+      "description":"test-vault-info-description",
+      "notes" : "test-vault-info-notes",
+      "reviewDate": "2112-12-21"
+    }
+  }
+}
