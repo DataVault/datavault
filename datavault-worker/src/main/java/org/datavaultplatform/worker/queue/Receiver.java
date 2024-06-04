@@ -7,7 +7,9 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.event.EventSender;
 import org.datavaultplatform.common.event.RecordingEventSender;
@@ -27,9 +29,8 @@ import org.slf4j.LoggerFactory;
 /**
  * A class to review messages from the message queue then process them.
  */
+@Slf4j
 public class Receiver implements RabbitMessageProcessor{
-
-    private static final Logger logger = LoggerFactory.getLogger(Receiver.class);
 
     private final String tempDir;
     private final String metaDir;
@@ -47,7 +48,9 @@ public class Receiver implements RabbitMessageProcessor{
     private final boolean oldRecompose;
 
     private final String recomposeDate;
-
+    
+    private final ProcessedJobStore processedJobStore;
+    
     public Receiver(
         String tempDir,
         String metaDir,
@@ -63,7 +66,8 @@ public class Receiver implements RabbitMessageProcessor{
 
         EventSender eventSender,
         StorageClassNameResolver storageClassNameResolver,
-        boolean oldRecompose, String recomposeDate) {
+        boolean oldRecompose, String recomposeDate,
+        ProcessedJobStore processedJobStore) {
         this.tempDir = tempDir;
         this.metaDir = metaDir;
         this.chunkingEnabled = chunkingEnabled;
@@ -78,6 +82,7 @@ public class Receiver implements RabbitMessageProcessor{
         this.storageClassNameResolver = storageClassNameResolver;
         this.oldRecompose = oldRecompose;
         this.recomposeDate = recomposeDate;
+        this.processedJobStore = processedJobStore;
     }
 
     @Override
@@ -94,8 +99,8 @@ public class Receiver implements RabbitMessageProcessor{
                 generateRetrieveMessageForDeposit(rabbitMessageInfo, events, new File("/tmp/retrieve"),
                     "retDir");
 
-                if (logger.isTraceEnabled()) {
-                    logger.trace("events send by worker: {}", events);
+                if (log.isTraceEnabled()) {
+                    log.trace("events send by worker: {}", events);
                 }
             }
         }
@@ -111,9 +116,9 @@ public class Receiver implements RabbitMessageProcessor{
             Deposit deposit = new ObjectMapper().readValue(message, Deposit.class);
             DepositEvents de = new DepositEvents(deposit, events);
             String retrieveMessage = de.generateRetrieveMessage(retrieveBaseDir, retrievePath);
-            logger.info("retrieveMessageForDeposit {}", retrieveMessage);
+            log.info("retrieveMessageForDeposit {}", retrieveMessage);
         } catch(Exception ex) {
-            logger.warn("Failed to generate retrieveMessageForDeposit", ex);
+            log.warn("Failed to generate retrieveMessageForDeposit", ex);
         }
     }
 
@@ -128,7 +133,7 @@ public class Receiver implements RabbitMessageProcessor{
 
                 String json = mapper.writerWithDefaultPrettyPrinter()
                     .writeValueAsString(mapper.readTree(message));
-                logger.info("messageId[{}] json[{}]", messageInfo.message().getMessageProperties().getMessageId(), json);
+                log.info("messageId[{}] json[{}]", messageInfo.message().getMessageProperties().getMessageId(), json);
 
                 Task commonTask = mapper.readValue(message, Task.class);
                 
@@ -143,13 +148,13 @@ public class Receiver implements RabbitMessageProcessor{
                 // Set up the worker temporary directory
                 Event lastEvent = concreteTask.getLastEvent();
                 if (lastEvent != null) {
-                    logger.debug("Restart using old temp dir");
+                    log.debug("Restart using old temp dir");
                     tempDirPath = Paths.get(tempDir,  lastEvent.getAgent());
                 } else {
-                    logger.debug("Normal using default temp dir");
+                    log.debug("Normal using default temp dir");
                     tempDirPath = Paths.get(tempDir, WorkerInstance.getWorkerName());
                 }
-                logger.debug("The temp dir:" + tempDirPath);
+                log.debug("The temp dir:" + tempDirPath);
                 tempDirPath.toFile().mkdir();
                 
                 Path metaDirPath = Paths.get(metaDir);
@@ -170,18 +175,38 @@ public class Receiver implements RabbitMessageProcessor{
                         this.storageClassNameResolver,
                         this.oldRecompose,
                         this.recomposeDate);
+                /*               
+                if(isTaskRestartForOtherWorker(commonTask)) {
+                    log.info("ignoring restart task[{}] with job[{}] NOT for this worker",commonTask.getTaskClass(), commonTask.getJobID());
+                    return false;
+                }
+                 */
                 concreteTask.performAction(context);
 
                 // Clean up the temporary directory (if success if failure we need it for retries)
                 FileUtils.deleteDirectory(tempDirPath.toFile());
             } catch (Exception ex) {
-                logger.error("Error processing message[{}]", messageInfo, ex);
+                log.error("Error processing message[{}]", messageInfo, ex);
             } finally {
                 long diff = System.currentTimeMillis() - start;
-                logger.info("Finished Processing message[{}]. Took [{}]secs",
+                log.info("Finished Processing message[{}]. Took [{}]secs",
                     messageInfo, TimeUnit.MILLISECONDS.toSeconds(diff));
             }
      }
+
+    private boolean isTaskRestartForOtherWorker(Task commonTask) {
+        String jobID = commonTask.getJobID();
+        if(StringUtils.isBlank(jobID)) {
+            return false;
+        }
+        boolean isRestart = commonTask.getLastEvent() != null;
+        if(isRestart) {
+            return !processedJobStore.isProcessedJob(jobID);
+        } else {
+            processedJobStore.storeProcessedJob(jobID);
+            return false;
+        }
+    }
 
     public boolean isEncryptionEnabled() {
         return encryptionEnabled;
@@ -189,4 +214,5 @@ public class Receiver implements RabbitMessageProcessor{
     public AESMode getEncryptionMode() {
         return this.encryptionMode;
     }
+    
 }

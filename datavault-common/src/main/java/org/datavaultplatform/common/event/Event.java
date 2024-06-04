@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
 import org.datavaultplatform.common.util.DateTimeUtils;
 import org.datavaultplatform.common.model.*;
@@ -164,11 +166,23 @@ public class Event {
     private RoleModel role;
     @Transient
     public String roleId;
+
+    @Getter
+    @Setter
+    @Column(name = "chunkNumber", columnDefinition = "INT NULL")
+    private Integer chunkNumber;
+
+    @Getter
+    @Setter
+    @Column(name = "archive_store_id", columnDefinition = "VARCHAR(255) NULL")
+    private String archiveStoreId;
     
-    public Event() {}
+    public Event() {
+        this.eventClass = this.getClass().getCanonicalName();
+    }
 
     public Event(String message) {
-        this.eventClass = Event.class.getCanonicalName();
+        this();
         this.message = message;
         this.timestamp = new Date();
         this.sequence = 0;

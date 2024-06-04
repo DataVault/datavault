@@ -496,9 +496,11 @@ public class EventListenerTest {
     void test01InitStates() {
 
       InitStates event = new InitStates();
+      @SuppressWarnings("unchecked")
       ArrayList<String> states = mock(ArrayList.class);
       event.setStates(states);
 
+      @SuppressWarnings("unchecked") 
       ArgumentCaptor<ArrayList<String>> argStates = ArgumentCaptor.forClass(ArrayList.class);
       ArgumentCaptor<Job> argJob = ArgumentCaptor.forClass(Job.class);
 
@@ -771,7 +773,7 @@ public class EventListenerTest {
       doReturn(store2).when(archiveStoreService).getArchiveStore("store-id-2");
       doReturn(store3).when(archiveStoreService).getArchiveStore("store-id-3");
 
-      doNothing().when(archivesService).addArchive(any(), any(), any());
+      doNothing().when(archivesService).saveOrUpdateArchive(any(), any(), any());
 
       Deposit deposit = new Deposit();
 
@@ -781,9 +783,9 @@ public class EventListenerTest {
       verify(archiveStoreService).getArchiveStore("store-id-2");
       verify(archiveStoreService).getArchiveStore("store-id-3");
 
-      verify(archivesService).addArchive(deposit, store1, "archive-id-1");
-      verify(archivesService).addArchive(deposit, store2, "archive-id-2");
-      verify(archivesService).addArchive(deposit, store3, "archive-id-3");
+      verify(archivesService).saveOrUpdateArchive(deposit, store1, "archive-id-1");
+      verify(archivesService).saveOrUpdateArchive(deposit, store2, "archive-id-2");
+      verify(archivesService).saveOrUpdateArchive(deposit, store3, "archive-id-3");
     }
 
     @Test
@@ -1218,6 +1220,44 @@ public class EventListenerTest {
       verify(spy).sendAuditEmails(event, EmailTemplate.AUDIT_CHUNK_ERROR);
     }
 
+    @Test
+    void testCopyCompleteUploadWIthChunk() {
+      CompleteCopyUpload event = new CompleteCopyUpload("depositId","jobId","test-type",123,"archiveStoreId","archiveId");
+      
+      Deposit mDeposit = mock(Deposit.class);
+
+      ArchiveStore mArchiveStore = mock(ArchiveStore.class);
+      
+      when(archiveStoreService.getArchiveStore("archiveStoreId")).thenReturn(mArchiveStore);
+
+      ArgumentCaptor<Event> argEvent = ArgumentCaptor.forClass(Event.class);
+      doNothing().when(eventService).addEvent(argEvent.capture());
+      sut.process23CompleteCopyUpload(event, mDeposit);
+      
+      verify(eventService).addEvent(argEvent.getValue());
+      verify(archivesService).saveOrUpdateArchive(mDeposit, mArchiveStore, "archiveId");
+      verifyNoMoreInteractions(eventService, archivesService, mDeposit, mArchiveStore);
+    }
+    
+    @Test
+    void testCopyCompleteUploadWithoutChunk() {
+      CompleteCopyUpload event = new CompleteCopyUpload("depositId","jobId","test-type",null,"archiveStoreId","archiveId");
+
+      Deposit mDeposit = mock(Deposit.class);
+
+      ArchiveStore mArchiveStore = mock(ArchiveStore.class);
+      
+      when(archiveStoreService.getArchiveStore("archiveStoreId")).thenReturn(mArchiveStore);
+
+      ArgumentCaptor<Event> argEvent = ArgumentCaptor.forClass(Event.class);
+      doNothing().when(eventService).addEvent(argEvent.capture());
+      sut.process23CompleteCopyUpload(event, mDeposit);
+      
+      verify(eventService).addEvent(argEvent.getValue());
+      verify(archivesService).saveOrUpdateArchive(mDeposit, mArchiveStore, "archiveId");
+      verifyNoMoreInteractions(eventService, archivesService, mDeposit, mArchiveStore);
+    }
+
     @Nested
     class IgnoreEvents {
 
@@ -1237,12 +1277,6 @@ public class EventListenerTest {
       @SneakyThrows
       void test22StartCopyUpload() {
         sut.process22StartCopyUpload(new StartCopyUpload());
-      }
-
-      @Test
-      @SneakyThrows
-      void test23CompleteCopyUpload() {
-        sut.process23CompleteCopyUpload(new CompleteCopyUpload());
       }
 
       @Test
@@ -1468,9 +1502,9 @@ public class EventListenerTest {
     @SneakyThrows
     void test23() {
       CompleteCopyUpload event = new CompleteCopyUpload();
-      doNothing().when(spy).process23CompleteCopyUpload(event);
+      doNothing().when(spy).process23CompleteCopyUpload(event, deposit);
       spy.processEvent("message", event, deposit, job);
-      verify(spy).process23CompleteCopyUpload(event);
+      verify(spy).process23CompleteCopyUpload(event, deposit);
     }
 
     @Test
@@ -1671,6 +1705,7 @@ public class EventListenerTest {
       }
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     void testSendAuditEmails() {
       AuditError auditError = new AuditError();
@@ -1857,7 +1892,7 @@ public class EventListenerTest {
 
     @ParameterizedTest
     @ValueSource(ints = {1,2})
-    void testProcessAuditChunkStatus(int numChukStatus) {
+    void testProcessAuditChunkStatus(int numChunkStatus) {
       Audit mAudit = mock(Audit.class);
       DepositChunk mDepositChunk = mock(DepositChunk.class);
       EventListener spy = spy(sut);
@@ -1871,7 +1906,7 @@ public class EventListenerTest {
       assertNull(auditChunkStatus.getCompleteTime());
 
       List<AuditChunkStatus> values = new ArrayList<>();
-      for (int i = 0; i < numChukStatus; i++) {
+      for (int i = 0; i < numChunkStatus; i++) {
         values.add(auditChunkStatus);
       }
 

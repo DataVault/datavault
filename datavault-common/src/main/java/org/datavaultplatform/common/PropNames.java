@@ -17,6 +17,7 @@ public interface PropNames {
   String CHUNK_NUM = "chunkNum";
   String DEPOSIT_CHUNK = "depositChunk";
   String DEPOSIT_ID = "depositId";
+  String DEPOSIT_CHUNKS_STORED = "depositChunksStored";
   /**
    * DepositCreationDate: Date Value in Basic ISO Format e.g. '20240131'
    * <p/>TODO - change to '2024-01-31'

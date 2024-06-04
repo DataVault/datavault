@@ -12,6 +12,7 @@ import org.datavaultplatform.common.config.BaseQueueConfig;
 import org.datavaultplatform.common.crypto.Encryption;
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.event.deposit.Complete;
+import org.datavaultplatform.common.event.deposit.CompleteCopyUpload;
 import org.datavaultplatform.common.event.deposit.ComputedDigest;
 import org.datavaultplatform.common.event.deposit.ComputedEncryption;
 import org.datavaultplatform.common.event.retrieve.RetrieveComplete;
@@ -233,6 +234,8 @@ public abstract class BaseMultiPerformDepositThenRetrieveIT extends BaseRabbitTC
     // delete files from the first location, the retrieve should work using the second location !
     Arrays.stream(destDir1.listFiles()).forEach(File::delete);
 
+    checkDepositEvents();
+
     buildAndSendRetrieveMessage(depositEvents);
     checkRetrieve();
 
@@ -384,5 +387,15 @@ public abstract class BaseMultiPerformDepositThenRetrieveIT extends BaseRabbitTC
   @SneakyThrows
   private String getSha1Hash(File file) {
     return Verify.getDigest(file);
+  }
+
+  public List<CompleteCopyUpload> getCopyUploadCompleteEvents(){
+    return events.stream()
+            .filter(e -> e.getClass().equals(CompleteCopyUpload.class))
+            .map(CompleteCopyUpload.class::cast)
+            .toList();
+  }
+
+  protected void checkDepositEvents() {
   }
 }

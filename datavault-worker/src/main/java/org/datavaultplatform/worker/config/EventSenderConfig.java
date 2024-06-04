@@ -11,6 +11,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.time.Clock;
+
 @Configuration
 @ConditionalOnExpression("${worker.rabbit.enabled:true}")
 public class EventSenderConfig {
@@ -29,11 +31,11 @@ public class EventSenderConfig {
 
   @Bean
   public EventSender eventSender(ObjectMapper mapper,
-      @Value("${use.recording.event.sender:false}") boolean useRecordingEventSender) {
+      @Value("${use.recording.event.sender:false}") boolean useRecordingEventSender, Clock clock) {
     final EventSender result;
     RabbitEventSender rabbitEventSender = new RabbitEventSender(template, brokerQueueName,
         workerName,
-        sequenceStart, mapper);
+        sequenceStart, mapper, clock);
     if (useRecordingEventSender) {
       result = new RecordingEventSender(rabbitEventSender);
     } else {

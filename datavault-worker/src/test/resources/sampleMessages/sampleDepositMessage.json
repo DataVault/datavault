@@ -1,6 +1,6 @@
 {
   "taskClass" : "org.datavaultplatform.worker.tasks.Deposit",
-  "jobID" : null,
+  "jobID" : "test-job-id",
   "properties" : {
     "bagId" : "bf73a7f5-42d1-4c3f-864a-a171af8373d4",
     "vaultMetadata" : "\"VAULT\":\"META-DATA\"",

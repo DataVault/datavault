@@ -7,6 +7,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 
 import org.datavaultplatform.common.event.deposit.Complete;
+import org.datavaultplatform.common.event.deposit.CompleteCopyUpload;
 import org.datavaultplatform.common.event.retrieve.RetrieveComplete;
 import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.worker.utils.DepositEvents;
@@ -21,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -97,6 +99,8 @@ public abstract class BasePerformDepositThenRetrieveIT extends BaseDepositIntegr
 
     DepositEvents depositEvents = new DepositEvents(deposit, this.events);
 
+    checkDepositEvents();
+    
     checkDepositWorkedOkay(depositMessage, depositEvents);
 
     File hiddenFile = new File(this.retrieveDir, DATA_VAULT_HIDDEN_FILE_NAME);
@@ -104,6 +108,11 @@ public abstract class BasePerformDepositThenRetrieveIT extends BaseDepositIntegr
     buildAndSendRetrieveMessage(depositEvents);
     checkRetrieve();
     assertThat(hiddenFile).exists().isFile().isReadable();
+    
+    
+  }
+
+  protected void checkDepositEvents() {
   }
 
   @SneakyThrows
@@ -119,6 +128,13 @@ public abstract class BasePerformDepositThenRetrieveIT extends BaseDepositIntegr
     assertEquals(digestOriginal, digestRetrieved);
   }
 
+  public List<CompleteCopyUpload> getCopyUploadCompleteEvents(){
+    return events.stream()
+            .filter(e -> e.getClass().equals(CompleteCopyUpload.class))
+            .map(CompleteCopyUpload.class::cast)
+            .toList();
+  }
+  
   boolean foundRetrieveComplete() {
     return events.stream()
             .anyMatch(e -> e.getClass().equals(RetrieveComplete.class));

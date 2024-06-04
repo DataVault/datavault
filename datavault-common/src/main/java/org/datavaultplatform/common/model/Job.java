@@ -40,6 +40,9 @@ import org.hibernate.annotations.UuidGenerator;
 )
 public class Job {
 
+    public static final String TASK_CLASS_RETRIEVE = "org.datavaultplatform.worker.tasks.Retrieve";
+    public static final String TASK_CLASS_DEPOSIT  = "org.datavaultplatform.worker.tasks.Deposit";
+    
     public static final String EG_JOB = "eg.Job.1";
 
     // Job Identifier

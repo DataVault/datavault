@@ -10,7 +10,9 @@ public class TransferProgress extends Event {
     @Transient
     public long bytesPerSec;
 
-    TransferProgress() {}
+    public TransferProgress() {
+        this.eventClass = TransferProgress.class.getCanonicalName();
+    }
 
     public TransferProgress(String jobId, String depositId, long bytes, long bytesPerSec) {
         super("Bytes transferred: " + bytes + " bytes");

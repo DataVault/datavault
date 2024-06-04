@@ -14,6 +14,7 @@ import org.datavaultplatform.common.response.EventInfo;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.task.Task;
 import org.datavaultplatform.common.util.DateTimeUtils;
+import org.datavaultplatform.common.util.Utils;
 import org.jsondoc.core.annotation.Api;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -299,7 +300,7 @@ public class DepositsController {
         }
 
         // Create a job to track this retrieve
-        Job job = new Job("org.datavaultplatform.worker.tasks.Retrieve");
+        Job job = new Job(Job.TASK_CLASS_RETRIEVE);
         jobsService.addJob(deposit, job);
 
         // Add the retrieve object
@@ -462,7 +463,7 @@ public class DepositsController {
             throw new Exception("There are no file paths for restarted deposit - Exiting");
         }
         // Get last Deposit Event
-        Event lastEvent = deposit.getLastNotFailedEvent();
+        Event lastEvent = depositsService.getLastNotFailedDepositEvent(deposit.getID());
         List<ArchiveStore> archiveStores = archiveStoreService.getArchiveStores();
         archiveStores = this.addArchiveSpecificOptions(archiveStores);
         runDeposit(archiveStores, deposit, paths, lastEvent);
@@ -537,7 +538,7 @@ public class DepositsController {
         }
 
         // Create a job to track this deposit
-        Job job = new Job("org.datavaultplatform.worker.tasks.Deposit");
+        Job job = new Job(Job.TASK_CLASS_DEPOSIT);
         jobsService.addJob(deposit, job);
 
         HashMap<String, String> depositProperties = new HashMap<>();
@@ -612,6 +613,10 @@ public class DepositsController {
         depositProperties.put(PropNames.USER_FS_RETRY_MAX_ATTEMPTS, String.valueOf(this.userFsRetryMaxAttempts));
         depositProperties.put(PropNames.USER_FS_RETRY_DELAY_MS_1, String.valueOf(this.userFsRetryDelaySeconds1));
         depositProperties.put(PropNames.USER_FS_RETRY_DELAY_MS_2, String.valueOf(this.userFsRetryDelaySeconds2));
+
+        List<Integer> depositChunksStored = depositsService.getChunksStored(deposit.getID());
+        String chunksStoredAsString = Utils.toCommaSeparatedString(depositChunksStored);
+        depositProperties.put(PropNames.DEPOSIT_CHUNKS_STORED, chunksStoredAsString);
 
         Task depositTask = new Task(
                 job, depositProperties, archiveStores,

@@ -331,7 +331,7 @@ public class EventListener implements MessageListener {
       process22StartCopyUpload((StartCopyUpload) event);
 
     } else if (event instanceof CompleteCopyUpload) {
-      process23CompleteCopyUpload((CompleteCopyUpload) event);
+      process23CompleteCopyUpload((CompleteCopyUpload) event, deposit);
 
     } else if (event instanceof ValidationComplete) {
       process24ValidationComplete((ValidationComplete) event);
@@ -603,13 +603,9 @@ public class EventListener implements MessageListener {
         String archiveStoreId = keyPair.getKey();
         String archiveId = keyPair.getValue();
         ArchiveStore archiveStore = archiveStoreService.getArchiveStore(archiveStoreId);
-        archivesService.addArchive($deposit, archiveStore, archiveId);
+        archivesService.saveOrUpdateArchive($deposit, archiveStore, archiveId);
       }
     });
-
-    // Get related information for emails
-    //String type = "complete";
-    //this.sendEmails(deposit, completeEvent, type, EmailTemplate.USER_DEPOSIT_COMPLETE, EmailTemplate.GROUP_ADMIN_DEPOSIT_COMPLETE);
   }
 
   void process09Complete(Complete completeEvent, Deposit deposit) {
@@ -782,8 +778,19 @@ public class EventListener implements MessageListener {
     ignore(event);
   }
 
-  void process23CompleteCopyUpload(CompleteCopyUpload event) {
-    ignore(event);
+  void process23CompleteCopyUpload(CompleteCopyUpload event, Deposit deposit) {
+    
+    processDeposit(deposit, $deposit -> {
+      //make sure the event is correctly linked to the deposit - depositId is not enough
+      event.setDeposit($deposit);
+
+      eventService.addEvent(event);
+
+      String archiveStoreId = event.getArchiveStoreId();
+        String archiveId = event.getArchiveId();
+        ArchiveStore archiveStore = archiveStoreService.getArchiveStore(archiveStoreId);
+        archivesService.saveOrUpdateArchive($deposit, archiveStore, archiveId);
+    });
   }
 
   void process24ValidationComplete(ValidationComplete event) {

@@ -1,13 +1,17 @@
 package org.datavaultplatform.worker.config;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.security.Security;
+import java.time.Clock;
+
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.datavaultplatform.common.event.EventSender;
 import org.datavaultplatform.common.task.Context.AESMode;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
+import org.datavaultplatform.worker.queue.ProcessedJobStore;
 import org.datavaultplatform.worker.queue.Receiver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -52,6 +56,9 @@ public class ReceiverConfig {
   @Value("${recomposeDate:20230309}")
   private String recomposeDate;
 
+  @Value("${processed.job.store.path:/tmp/processedJobStore.json}")
+  private Path processedJobStorePath;
+
   @Autowired
   EventSender eventSender;
 
@@ -72,7 +79,7 @@ public class ReceiverConfig {
 
    */
   @Bean
-  public Receiver receiver(StorageClassNameResolver resolver) {
+  public Receiver receiver(StorageClassNameResolver resolver, ProcessedJobStore processedJobStore) {
     Receiver result = new Receiver(
         this.tempDir,
         this.metaDir,
@@ -85,7 +92,8 @@ public class ReceiverConfig {
         this.eventSender,
         resolver,
         this.oldRecompose,
-        this.recomposeDate
+        this.recomposeDate,
+        processedJobStore
     );
     if(result.isEncryptionEnabled() && result.getEncryptionMode() == AESMode.GCM ) {
       Security.addProvider(new BouncyCastleProvider());
@@ -93,6 +101,11 @@ public class ReceiverConfig {
     return result;
   }
 
+  @Bean
+  ProcessedJobStore processedJobStore(@Autowired Clock clock) {
+    return new ProcessedJobStore(clock, processedJobStorePath);
+  }
+  
   @PostConstruct
   void init() {
     checkFileExistsAndIsDirectory("tempDir", tempDir);

@@ -15,7 +15,6 @@ public abstract class Device {
     // Some public information about a device or storage system
     public final String name;
     
-    
     // Some private configuration properties
     protected final Map<String,String> config;
     protected Boolean multipleCopies = false;
@@ -36,11 +35,6 @@ public abstract class Device {
     // Progress information should be updated for monitoring as the copy occurs
     public abstract void retrieve(String path, File working, Progress progress) throws Exception;
     
-    // This method should be overridden by plugins that allow the retrieval of a specific copy id'd by the vaultId
-    //public void retrieve(String path, File working, Progress progress, String depositId) throws Exception {
-    	//	throw new UnsupportedOperationException();
-    //}
-
     // This method should be overridden by plugins that allow the retrieval of multiple copies to get a specific copy
     public void retrieve(String path, File working, Progress progress, String location) throws Exception {
     		throw new UnsupportedOperationException();
@@ -84,10 +78,6 @@ public abstract class Device {
     public String store(String path, File working, Progress progress, String timeStampDirname) throws Exception {
         throw new UnsupportedOperationException();
     }
-    
-    //public String store(String path, File working, Progress progress, String depositId) throws Exception {
-    //		throw new UnsupportedOperationException();
-    //}
     
     public Boolean hasMultipleCopies() {
     		return this.multipleCopies;

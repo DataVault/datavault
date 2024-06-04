@@ -5,7 +5,10 @@ import org.datavaultplatform.common.storage.Verify;
 import org.springframework.util.Assert;
 
 import java.io.File;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class Utils {
@@ -51,4 +54,28 @@ public class Utils {
       throw new Exception(msg);
     }
   }
+  
+  public static <T> String toCommaSeparatedString(Collection<?> collection) {
+    if (collection == null || collection.isEmpty()) {
+      return "";
+    }
+    return collection.stream()
+            .filter(Objects::nonNull)
+            .map(Object::toString)
+            .collect(Collectors.joining(","));
+  }
+  
+  public static <T> List<T> fromCommaSeparatedString(String value, Function<String,T> parser) {
+    Assert.isTrue(parser != null, "The parser cannot be null");
+    if(value == null || value.isEmpty()) {
+      return Collections.emptyList();
+    }
+    String[] tokens = value.split("\\s*,\\s*");
+    List<T> result = new ArrayList<>();
+    for(String token: tokens){
+      result.add(parser.apply(token));
+    }
+    return result;
+  }
+  
 }

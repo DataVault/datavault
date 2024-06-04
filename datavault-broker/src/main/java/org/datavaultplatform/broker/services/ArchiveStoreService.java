@@ -80,6 +80,9 @@ public class ArchiveStoreService {
     }
 
     public ArchiveStore getArchiveStore(String archiveStoreID) {
+        if (archiveStoreID == null) {
+            return null;
+        }
         return archiveStoreDAO.findById(archiveStoreID).orElse(null);
     }
 
