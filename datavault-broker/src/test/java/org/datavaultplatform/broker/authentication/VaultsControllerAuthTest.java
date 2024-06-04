@@ -361,15 +361,17 @@ public class VaultsControllerAuthTest extends BaseControllerAuthTest {
 
   @Test
   void testPostUpdateVaultReviewDate() throws Exception {
-    when(controller.updateVaultReviewDate(USER_ID_1, "vault-id-1", "review-date-1")).thenReturn(
+    String reviewDateString = "2112-12-12";
+    
+    when(controller.updateVaultReviewDate(USER_ID_1, "vault-id-1", reviewDateString)).thenReturn(
         AuthTestData.VAULT_INFO_1);
 
     checkWorksWhenAuthenticatedFailsOtherwise(
         post("/vaults/vault-id-1/updatereviewdate")
-            .content("review-date-1"),
+            .content(reviewDateString),
         AuthTestData.VAULT_INFO_1);
 
-    verify(controller).updateVaultReviewDate(USER_ID_1, "vault-id-1", "review-date-1");
+    verify(controller).updateVaultReviewDate(USER_ID_1, "vault-id-1", reviewDateString);
   }
 
   @AfterEach

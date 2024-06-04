@@ -4,6 +4,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.dto.PausedDepositStateDTO;
 import org.datavaultplatform.common.dto.PausedRetrieveStateDTO;
+import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.webapp.app.DataVaultWebApp;
 import org.datavaultplatform.webapp.app.services.BaseRestTemplateWithLoggingTest;
 import org.datavaultplatform.webapp.test.ProfileDatabase;
@@ -15,7 +16,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.Date;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -108,4 +112,34 @@ class RestServiceTest extends BaseRestTemplateWithLoggingTest {
             assertThat(dto2.created()).isEqualTo(LocalDateTime.of(2010, 10, 10, 10, 10, 10));
         }
     }
+    
+    @Nested
+    class UpdateReviewDateTests {
+        
+        @Test
+        @WithMockUser(username = "user1")
+        void testUpdateReviewDateIsOkay() {
+            LocalDate localVaultReviewDate = LocalDate.of(2112, 12, 21);
+            Date vaultReviewDate = convertToDateViaInstant(localVaultReviewDate);
+            VaultInfo vaultInfo = restService.updateVaultReviewDate("vault-abc",vaultReviewDate);
+
+            assertThat(vaultInfo.getID()).isEqualTo("vault-abc-id");
+            assertThat(vaultInfo.getName()).isEqualTo("test-vault-info");
+            assertThat(vaultInfo.getNotes()).isEqualTo("test-vault-info-notes");
+            assertThat(vaultInfo.getDescription()).isEqualTo("test-vault-info-description");
+            assertThat(convertToLocalDateViaInstant(vaultInfo.getReviewDate())).isEqualTo(localVaultReviewDate);
+        }
+    }
+
+    public LocalDate convertToLocalDateViaInstant(Date dateToConvert) {
+        return dateToConvert.toInstant()
+                .atZone(ZoneOffset.UTC)
+                .toLocalDate();
+    }
+    public Date convertToDateViaInstant(LocalDate dateToConvert) {
+        return java.util.Date.from(dateToConvert.atStartOfDay()
+                .atZone(ZoneOffset.UTC)
+                .toInstant());
+    }
+    
 }
