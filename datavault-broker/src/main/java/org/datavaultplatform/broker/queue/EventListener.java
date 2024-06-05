@@ -354,8 +354,7 @@ public class EventListener implements MessageListener {
     Event commonEvent = mapper.readValue(messageBody, Event.class);
 
     @SuppressWarnings("unchecked")
-    Class<? extends Event> clazz = (Class<? extends Event>) Class.forName(
-        commonEvent.getEventClass());
+    Class<? extends Event> clazz = Class.forName(commonEvent.getEventClass()).asSubclass(Event.class);
     Event concreteEvent = mapper.readValue(messageBody, clazz);
     return concreteEvent;
   }

@@ -7,6 +7,8 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import lombok.Getter;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -15,6 +17,7 @@ import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.event.EventSender;
 import org.datavaultplatform.common.event.RecordingEventSender;
 import org.datavaultplatform.common.io.DataVaultFileUtils;
+import org.datavaultplatform.common.model.Job;
 import org.datavaultplatform.common.task.Context;
 import org.datavaultplatform.common.task.Context.AESMode;
 import org.datavaultplatform.common.task.Task;
@@ -24,8 +27,7 @@ import org.datavaultplatform.worker.rabbit.RabbitMessageInfo;
 import org.datavaultplatform.worker.rabbit.RabbitMessageProcessor;
 import org.datavaultplatform.worker.tasks.Deposit;
 import org.datavaultplatform.worker.utils.DepositEvents;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.amqp.core.MessageProperties;
 import org.springframework.util.Assert;
 
 /**
@@ -38,7 +40,9 @@ public class Receiver implements RabbitMessageProcessor{
     private final String metaDir;
     private final boolean chunkingEnabled;
     private final long chunkingByteSize;
+    @Getter
     private final boolean encryptionEnabled;
+    @Getter
     private final AESMode  encryptionMode;
     private final boolean multipleValidationEnabled;
     private final int noChunkThreads;
@@ -90,8 +94,8 @@ public class Receiver implements RabbitMessageProcessor{
     @Override
     public void onMessage(RabbitMessageInfo rabbitMessageInfo) {
         try {
-            if (eventSender instanceof RecordingEventSender) {
-                ((RecordingEventSender) eventSender).clear();
+            if (eventSender instanceof RecordingEventSender res) {
+                res.clear();
             }
             processMessageInternal(rabbitMessageInfo);
         } finally {
@@ -112,7 +116,7 @@ public class Receiver implements RabbitMessageProcessor{
         try {
             String message = messageInfo.getMessageBody();
             Task task = new ObjectMapper().readValue(message, Task.class);
-            if (!"org.datavaultplatform.worker.tasks.Deposit".equals(task.getTaskClass())) {
+            if (!Job.TASK_CLASS_DEPOSIT.equals(task.getTaskClass())) {
                 return;
             }
             Deposit deposit = new ObjectMapper().readValue(message, Deposit.class);
@@ -127,58 +131,25 @@ public class Receiver implements RabbitMessageProcessor{
     private void processMessageInternal(RabbitMessageInfo messageInfo) {
             long start = System.currentTimeMillis();
             String message = messageInfo.getMessageBody();
-
+            MessageProperties props = messageInfo.message().getMessageProperties();
             // Decode and begin the job ...
-            Path tempDirPath;
             try {
-                ObjectMapper mapper = new ObjectMapper();
+                logMessageAsFormattedJson(props.getMessageId(), message);
+ 
+                Task concreteTask = getConcreteTask(message);
 
-                String json = mapper.writerWithDefaultPrettyPrinter()
-                    .writeValueAsString(mapper.readTree(message));
-                log.info("messageId[{}] json[{}]", messageInfo.message().getMessageProperties().getMessageId(), json);
-
-                Task commonTask = mapper.readValue(message, Task.class);
-                
-                Class<?> clazz = Class.forName(commonTask.getTaskClass());
-                Task concreteTask = (Task) mapper.readValue(message, clazz);
-
-                // Is the message a redelivery?
-                if (messageInfo.message().getMessageProperties().isRedelivered()) {
+                // Is the message a redelivery ?
+                if (props.isRedelivered()) {
                     concreteTask.setIsRedeliver(true);
                 }
 
                 // Set up the worker temporary directory
                 Event lastEvent = concreteTask.getLastEvent();
-                if (lastEvent != null) {
-                    log.debug("Restart using old temp dir");
-                    tempDirPath = Paths.get(tempDir,  lastEvent.getAgent());
-                } else {
-                    log.debug("Normal using default temp dir");
-                    tempDirPath = Paths.get(tempDir, WorkerInstance.getWorkerName());
-                }
-                log.debug("The temp dir:" + tempDirPath);
-                tempDirPath.toFile().mkdir();
+                Path tempDirPath = getTempDirPath(lastEvent);
                 
-                Path metaDirPath = Paths.get(metaDir);
+                Context context = getContext(tempDirPath);
 
-                String vaultAddress = null;
-                String vaultToken = null;
-                String vaultKeyName = null;
-                String vaultKeyPath = null;
-                String vaultSslPEMPath = null;
-
-                Context context = new Context(
-                        tempDirPath, metaDirPath, eventSender,
-                        chunkingEnabled, chunkingByteSize,
-                        encryptionEnabled, encryptionMode, 
-                        vaultAddress, vaultToken, 
-                        vaultKeyPath, vaultKeyName, vaultSslPEMPath,
-                        this.multipleValidationEnabled, this.noChunkThreads,
-                        this.storageClassNameResolver,
-                        this.oldRecompose,
-                        this.recomposeDate);
-
-                if (isRestartTaskForOtherWorker(commonTask)) {
+                if (isRestartTaskForOtherWorker(concreteTask)) {
                     return;
                 }
                 processedJobStore.storeProcessedJob(concreteTask.getJobID());
@@ -195,6 +166,20 @@ public class Receiver implements RabbitMessageProcessor{
             }
      }
 
+    private Path getTempDirPath(Event lastEvent) {
+        Path tempDirPath;
+        if (lastEvent != null) {
+            log.debug("Restart using old temp dir");
+            tempDirPath = Paths.get(tempDir,  lastEvent.getAgent());
+        } else {
+            log.debug("Normal using default temp dir");
+            tempDirPath = Paths.get(tempDir, WorkerInstance.getWorkerName());
+        }
+        log.debug("The temp dir: [{}]",tempDirPath);
+        tempDirPath.toFile().mkdir();
+        return tempDirPath;
+    }
+
     private boolean isRestartTaskForOtherWorker(Task commonTask) {
         Assert.isTrue(commonTask != null, "The commonTask cannot be null");
         Assert.isTrue(StringUtils.isNotBlank(commonTask.getJobID()), "The commonTask.JobID cannot be null");
@@ -207,12 +192,46 @@ public class Receiver implements RabbitMessageProcessor{
             return false;
         }
     }
-    
-    public boolean isEncryptionEnabled() {
-        return encryptionEnabled;
+
+
+    @SneakyThrows
+    private Task getConcreteTask(String message) {
+        ObjectMapper mapper = new ObjectMapper();
+        Task commonTask = mapper.readValue(message, Task.class);
+
+        Class<? extends Task> clazz = Class.forName(commonTask.getTaskClass()).asSubclass(Task.class);
+        return mapper.readValue(message, clazz);
     }
-    public AESMode getEncryptionMode() {
-        return this.encryptionMode;
+
+    @SneakyThrows
+    private void logMessageAsFormattedJson(String messageId, String message) {
+        ObjectMapper mapper = new ObjectMapper();
+        String json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(mapper.readTree(message));
+        log.info("messageId[{}] json[{}]", messageId, json);
     }
-    
+
+    protected Context getContext(Path tempDirPath) {
+
+        Path metaDirPath = Paths.get(metaDir);
+
+        String vaultAddress = null;
+        String vaultToken = null;
+        String vaultKeyName = null;
+        String vaultKeyPath = null;
+        String vaultSslPEMPath = null;
+
+        return new Context(
+                tempDirPath, metaDirPath, this.eventSender,
+                this.chunkingEnabled, this.chunkingByteSize,
+                this.encryptionEnabled, this.encryptionMode,
+                vaultAddress, vaultToken,
+                vaultKeyPath, vaultKeyName, vaultSslPEMPath,
+                this.multipleValidationEnabled, this.noChunkThreads,
+                this.storageClassNameResolver,
+                this.oldRecompose,
+                this.recomposeDate);
+    }
+
+
+
 }

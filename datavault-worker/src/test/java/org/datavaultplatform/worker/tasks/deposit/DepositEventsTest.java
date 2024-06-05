@@ -93,6 +93,6 @@ class DepositEventsTest {
     @SuppressWarnings("unchecked")
     @SneakyThrows
     private static Class<? extends Event> getEventClass(int idx) {
-        return (Class<? extends Event>)Class.forName(DepositEvents.EVENT_ORDER.get(idx));
+        return Class.forName(DepositEvents.EVENT_ORDER.get(idx)).asSubclass(Event.class);
     }
 }

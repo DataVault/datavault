@@ -380,7 +380,7 @@ public abstract class BaseMultiPerformDepositThenRetrieveIT extends BaseRabbitTC
   private Event extractEvent(String message) {
     Event event = mapper.readValue(message, Event.class);
     String eventClassName = event.getEventClass();
-    Class<? extends Event> eventClass = (Class<? extends Event>) Class.forName(eventClassName);
+    Class<? extends Event> eventClass = Class.forName(eventClassName).asSubclass(Event.class);
     return mapper.readValue(message, eventClass);
   }
 

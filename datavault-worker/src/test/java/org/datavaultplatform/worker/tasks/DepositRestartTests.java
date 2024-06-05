@@ -487,7 +487,7 @@ public class DepositRestartTests {
     @SuppressWarnings("unchecked")
     @SneakyThrows
     private static Event eventFromClassName(String evenClassName) {
-        Class<? extends Event> eventClass = (Class<? extends Event>) Class.forName(evenClassName);
+        Class<? extends Event> eventClass = Class.forName(evenClassName).asSubclass(Event.class);
         Event event = eventClass.getConstructor().newInstance();
         event.setEventClass(eventClass.getName());
         return event;
