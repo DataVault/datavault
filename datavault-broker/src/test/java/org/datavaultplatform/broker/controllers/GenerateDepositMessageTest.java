@@ -170,6 +170,7 @@ public class GenerateDepositMessageTest extends BaseGenerateMessageTest {
         + "    \"userFsRetryMaxAttempts\": \"10\","
         + "    \"userFsRetryDelayMs1\": \"60\","
         + "    \"userFsRetryDelayMs2\": \"300\","
+        + "    \"nonRestartJobId\": null,"
         + "    \"depositChunksStored\": \"\"" 
         + "  },"
         + "  \"fileStorePaths\" : [ \"FILE-STORE-SRC-ID/src-path-1\" ],"

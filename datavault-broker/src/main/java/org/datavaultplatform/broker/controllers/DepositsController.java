@@ -541,10 +541,18 @@ public class DepositsController {
         Job job = new Job(Job.TASK_CLASS_DEPOSIT);
         jobsService.addJob(deposit, job);
 
+        boolean isRestart = lastEvent != null;
+        if (!isRestart) {
+            deposit.setNonRestartJobId(job.getID());
+            depositsService.updateDeposit(deposit);
+        }
+
         HashMap<String, String> depositProperties = new HashMap<>();
         depositProperties.put(PropNames.DEPOSIT_ID, deposit.getID());
         depositProperties.put(PropNames.BAG_ID, deposit.getBagId());
         depositProperties.put(PropNames.USER_ID, user.getID());
+        depositProperties.put(PropNames.NON_RESTART_JOB_ID, deposit.getNonRestartJobId());
+
         if (deposit.getNumOfChunks() != 0) {
             logger.debug("Restart num of chunks: " + deposit.getNumOfChunks());
             depositProperties.put(PropNames.NUM_OF_CHUNKS, Integer.toString(deposit.getNumOfChunks()));

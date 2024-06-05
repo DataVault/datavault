@@ -28,6 +28,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIterable;
@@ -181,8 +182,8 @@ public class RabbitMessageSelectorIT extends BaseRabbitIT {
         }
 
         @Bean
-        public ArrayList<ReceivedMessage> receivedMessages() {
-            return new ArrayList<>();
+        public List<ReceivedMessage> receivedMessages() {
+            return new CopyOnWriteArrayList<>();
         }
         
     }

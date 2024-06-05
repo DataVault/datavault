@@ -2,8 +2,6 @@ package org.datavaultplatform.worker.queue;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Assert;
@@ -19,7 +17,7 @@ import java.util.ArrayList;
 
 /**
  * This is not an efficient implementation, but the number of jobs that DataVault processes is low volume ATM.
- * TODO : We can revisit if Workers ever get a connection to the datavault database.
+ * TODO : We could revisit if Workers ever get a connection to the datavault database.
  */
 @Slf4j
 public class ProcessedJobStore {
@@ -32,7 +30,8 @@ public class ProcessedJobStore {
     private final ObjectMapper mapper;
 
     @SneakyThrows
-    public ProcessedJobStore(Clock clock, Path jobStorePath) {
+    public ProcessedJobStore(ObjectMapper mapper,Clock clock, Path jobStorePath) {
+        this.mapper = mapper;
         this.clock = clock;
         this.jobStorePath = jobStorePath;
         if (!Files.exists(jobStorePath)) {
@@ -41,19 +40,14 @@ public class ProcessedJobStore {
         Assert.isTrue(Files.isRegularFile(jobStorePath), "The jobStore path [%s] is not a regular file".formatted(jobStorePath));
         Assert.isTrue(Files.isReadable(jobStorePath), "The jobStore path [%s] is not readable".formatted(jobStorePath));
         Assert.isTrue(Files.isWritable(jobStorePath), "The jobStore path [%s] is not writable".formatted(jobStorePath));
-        mapper = JsonMapper.builder()
-                .findAndAddModules()
-                .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-                .build();
-        mapper.enable(SerializationFeature.INDENT_OUTPUT);
     }
 
     @SneakyThrows
-    protected synchronized void storeProcessedJob(String jobID) {
-        if (this.isProcessedJob(jobID)) {
+    protected synchronized void storeProcessedJob(String jobId) {
+        if (this.isProcessedJob(jobId)) {
             return;
         }
-        ProcessedJob processedJob = new ProcessedJob(jobID, ZonedDateTime.now(clock));
+        ProcessedJob processedJob = new ProcessedJob(jobId, ZonedDateTime.now(clock));
         ArrayList<ProcessedJob> processedJobs = getExistingJobs();
         processedJobs.add(processedJob);
         String json = mapper.writeValueAsString(processedJobs);
@@ -72,14 +66,14 @@ public class ProcessedJobStore {
         }
     }
 
-    protected boolean isProcessedJob(String jobID) {
-        return this.getExistingJobs().stream().anyMatch(pj -> jobID.equals(pj.JobID));
+    protected boolean isProcessedJob(String jobId) {
+        return this.getExistingJobs().stream().anyMatch(pj -> jobId.equals(pj.jobId));
     }
 
     public synchronized long size() {
         return getExistingJobs().size();
     }
 
-    record ProcessedJob(String JobID, ZonedDateTime timestamp) {
+    record ProcessedJob(String jobId, ZonedDateTime timestamp) {
     }
 }

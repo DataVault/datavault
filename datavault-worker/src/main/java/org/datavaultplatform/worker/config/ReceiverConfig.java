@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.security.Security;
 import java.time.Clock;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -102,8 +103,8 @@ public class ReceiverConfig {
   }
 
   @Bean
-  ProcessedJobStore processedJobStore(@Autowired Clock clock) {
-    return new ProcessedJobStore(clock, processedJobStorePath);
+  ProcessedJobStore processedJobStore(ObjectMapper mapper, @Autowired Clock clock) {
+    return new ProcessedJobStore(mapper, clock, processedJobStorePath);
   }
   
   @PostConstruct

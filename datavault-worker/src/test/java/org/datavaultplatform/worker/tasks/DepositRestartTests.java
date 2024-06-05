@@ -8,6 +8,7 @@ import org.datavaultplatform.common.event.InitStates;
 import org.datavaultplatform.common.event.deposit.*;
 import org.datavaultplatform.common.event.EventSender;
 import org.datavaultplatform.common.model.ArchiveStore;
+import org.datavaultplatform.common.model.Job;
 import org.datavaultplatform.common.storage.impl.LocalFileSystem;
 import org.datavaultplatform.common.storage.impl.MultiLocalFileSystem;
 import org.datavaultplatform.common.task.Context;
@@ -89,7 +90,7 @@ public class DepositRestartTests {
         properties.put(PropNames.USER_ID, TEST_USER_ID);
         properties.put(PropNames.BAG_ID, TEST_BAG_ID);
 
-        deposit.setTaskClass(Deposit.class.getName());
+        deposit.setTaskClass(Job.TASK_CLASS_DEPOSIT);
         deposit.setProperties(properties);
 
         //USER FILE STORE STUFF

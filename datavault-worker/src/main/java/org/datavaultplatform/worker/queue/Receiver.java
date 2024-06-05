@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.event.EventSender;
 import org.datavaultplatform.common.event.RecordingEventSender;
@@ -25,6 +26,7 @@ import org.datavaultplatform.worker.tasks.Deposit;
 import org.datavaultplatform.worker.utils.DepositEvents;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.Assert;
 
 /**
  * A class to review messages from the message queue then process them.
@@ -175,12 +177,11 @@ public class Receiver implements RabbitMessageProcessor{
                         this.storageClassNameResolver,
                         this.oldRecompose,
                         this.recomposeDate);
-                /*               
-                if(isTaskRestartForOtherWorker(commonTask)) {
-                    log.info("ignoring restart task[{}] with job[{}] NOT for this worker",commonTask.getTaskClass(), commonTask.getJobID());
-                    return false;
+
+                if (isRestartTaskForOtherWorker(commonTask)) {
+                    return;
                 }
-                 */
+                processedJobStore.storeProcessedJob(concreteTask.getJobID());
                 concreteTask.performAction(context);
 
                 // Clean up the temporary directory (if success if failure we need it for retries)
@@ -194,20 +195,19 @@ public class Receiver implements RabbitMessageProcessor{
             }
      }
 
-    private boolean isTaskRestartForOtherWorker(Task commonTask) {
-        String jobID = commonTask.getJobID();
-        if(StringUtils.isBlank(jobID)) {
-            return false;
-        }
+    private boolean isRestartTaskForOtherWorker(Task commonTask) {
+        Assert.isTrue(commonTask != null, "The commonTask cannot be null");
+        Assert.isTrue(StringUtils.isNotBlank(commonTask.getJobID()), "The commonTask.JobID cannot be null");
+
         boolean isRestart = commonTask.getLastEvent() != null;
-        if(isRestart) {
-            return !processedJobStore.isProcessedJob(jobID);
+        if (isRestart) {
+            String nonRestartJobId = commonTask.getProperties().get(PropNames.NON_RESTART_JOB_ID);
+            return !processedJobStore.isProcessedJob(nonRestartJobId);
         } else {
-            processedJobStore.storeProcessedJob(jobID);
             return false;
         }
     }
-
+    
     public boolean isEncryptionEnabled() {
         return encryptionEnabled;
     }

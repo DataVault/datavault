@@ -612,6 +612,8 @@ public class EventListener implements MessageListener {
     // Update the deposit status and add archives
 
     processDeposit(deposit, $deposit -> {
+
+      $deposit.setNonRestartJobId(null);
       $deposit.setStatus(Deposit.Status.COMPLETE);
       $deposit.setArchiveSize(completeEvent.getArchiveSize());
       depositsService.updateDeposit($deposit);

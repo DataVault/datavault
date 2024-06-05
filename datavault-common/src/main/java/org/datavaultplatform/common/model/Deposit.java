@@ -168,6 +168,9 @@ public class Deposit {
     @ManyToOne
     private User user;
     
+    @Column(name = "non_restart_job_id", columnDefinition = "VARCHAR(255) NULL")
+    private String nonRestartJobId;
+    
     public Deposit() {}
     public Deposit(String name, String description, Boolean hasPersonalData) {
         this.name = name;
@@ -345,6 +348,14 @@ public class Deposit {
     
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public String getNonRestartJobId() {
+        return nonRestartJobId;
+    }
+
+    public void setNonRestartJobId(String nonRestartJobId) {
+        this.nonRestartJobId = nonRestartJobId;
     }
 
     @JsonIgnore
