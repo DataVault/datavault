@@ -165,6 +165,7 @@ public class Receiver implements RabbitMessageProcessor{
                     messageInfo, TimeUnit.MILLISECONDS.toSeconds(diff));
             }
      }
+    
 
     private Path getTempDirPath(Event lastEvent) {
         Path tempDirPath;
@@ -192,10 +193,9 @@ public class Receiver implements RabbitMessageProcessor{
             return false;
         }
     }
-
-
+    
     @SneakyThrows
-    private Task getConcreteTask(String message) {
+    protected Task getConcreteTask(String message) {
         ObjectMapper mapper = new ObjectMapper();
         Task commonTask = mapper.readValue(message, Task.class);
 
@@ -231,7 +231,4 @@ public class Receiver implements RabbitMessageProcessor{
                 this.oldRecompose,
                 this.recomposeDate);
     }
-
-
-
 }
