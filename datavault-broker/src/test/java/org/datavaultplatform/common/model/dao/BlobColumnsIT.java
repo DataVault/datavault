@@ -46,7 +46,6 @@ public class BlobColumnsIT extends BaseDatabaseTest {
   }
 
   @Test
-  @Disabled("Works with MariaDB 10 - fails with MariaDB:5.5.64")
   void testComputedEnctryptionTarIVTinyBlobColFailsAt256() {
     assertThrows(Exception.class, ()-> checkComputedEncryptionTarIVColumn(MariaDBConstants.MARIADB_MAX_TINYBLOB_SIZE + 1));
   }

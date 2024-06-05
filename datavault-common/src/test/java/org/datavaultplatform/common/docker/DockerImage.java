@@ -9,7 +9,7 @@ public abstract class DockerImage {
   public static final DockerImageName LDAP_IMAGE = parse("bitnami/openldap@sha256:23ebcaa52331a6521f2e512b971943a3a8b99d15459d59105d6a0eeb31220c86");
 
   // https://hub.docker.com/_/mariadb/tags
-  public static final DockerImageName MARIADB_IMAGE = parse("mariadb:5.5.64");
+  public static final DockerImageName MARIADB_IMAGE = parse("mariadb:10.3.39");
 
   // https://hub.docker.com/r/mailhog/mailhog/tags
   public static final DockerImageName MAIL_IMAGE = parse("mailhog/mailhog:v1.0.1");
