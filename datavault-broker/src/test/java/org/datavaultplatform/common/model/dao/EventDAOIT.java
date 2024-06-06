@@ -23,6 +23,7 @@ import org.datavaultplatform.common.event.retrieve.RetrieveStart;
 import org.datavaultplatform.common.model.Deposit;
 import org.datavaultplatform.common.model.Job;
 import org.datavaultplatform.common.model.Vault;
+import org.datavaultplatform.common.util.StoredChunks;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -370,18 +371,18 @@ public class EventDAOIT extends BaseDatabaseTest {
       e3ForRetJobForDeposit2 = createEvent(RetrieveStart.class, deposit2, retJobForDeposit2,  date2, 2, "e3ForRetJobForDeposit2");
       e4ForRetJobForDeposit2 = createError(deposit2, retJobForDeposit2,  date2, 4, "e4ForRetJobForDeposit2");
 
-      e1ForDepJobForDeposit3 = createEvent(CompleteCopyUpload.class, deposit3, depJobForDeposit3,  date1, 1, "e1ForDepJobForDeposit3");
+      e1ForDepJobForDeposit3 = createCompleteCopyUpload(deposit3, depJobForDeposit3,  date1, 1, "arcStoreId1","e1ForDepJobForDeposit3");
       e2ForDepJobForDeposit3 = createEvent(Complete.class,           deposit3, depJobForDeposit3,  date2, 2, "e2ForDepJobForDeposit3");
-      e3ForDepJobForDeposit3 = createEvent(CompleteCopyUpload.class, deposit3, depJobForDeposit3,  date3, 3, "e3ForDepJobForDeposit3");
+      e3ForDepJobForDeposit3 = createCompleteCopyUpload(deposit3, depJobForDeposit3,  date3, 3, "arcStoreId2","e3ForDepJobForDeposit3");
       e4ForDepJobForDeposit3 = createError(deposit3, depJobForDeposit3,  date3, 4, "e4ForDepJobForDeposit3");
-      e5ForDepJobForDeposit3 = createEvent(CompleteCopyUpload.class, deposit3, depJobForDeposit3,  date4, 5, "e5ForDepJobForDeposit3");
-      e6ForDepJobForDeposit3 = createEvent(CompleteCopyUpload.class, deposit3, depJobForDeposit3,  date4, 6, "e6ForDepJobForDeposit3");
+      e5ForDepJobForDeposit3 = createCompleteCopyUpload(deposit3, depJobForDeposit3,  date4, 5, "arcStoreId1","e5ForDepJobForDeposit3");
+      e6ForDepJobForDeposit3 = createCompleteCopyUpload(deposit3, depJobForDeposit3,  date4, 6, "arcStoreId2","e6ForDepJobForDeposit3");
 
-      e1ForDepJobForDeposit4 = createEvent(CompleteCopyUpload.class, deposit4, depJobForDeposit4,  date1, 12345, "e1ForDepJobForDeposit4");
-      e2ForDepJobForDeposit4 = createEvent(CompleteCopyUpload.class, deposit4, depJobForDeposit4,  date2, 1, "e2ForDepJobForDeposit4");
+      e1ForDepJobForDeposit4 = createCompleteCopyUpload(deposit4, depJobForDeposit4,  date1, 12345, "arcStoreId1", "e1ForDepJobForDeposit4");
+      e2ForDepJobForDeposit4 = createCompleteCopyUpload(deposit4, depJobForDeposit4,  date2, 1, "arcStoreId2","e2ForDepJobForDeposit4");
       e3ForDepJobForDeposit4 = createError(deposit4, depJobForDeposit4,  date3, 123, "e3ForDepJobForDeposit4");
-      e4ForDepJobForDeposit4 = createEvent(CompleteCopyUpload.class, deposit4, depJobForDeposit4,  date3, 12, "e3ForDepJobForDeposit4");
-      e5ForDepJobForDeposit4 = createEvent(CompleteCopyUpload.class, deposit4, depJobForDeposit4,  date4, 1234, "e5ForDepJobForDeposit4");
+      e4ForDepJobForDeposit4 = createCompleteCopyUpload(deposit4, depJobForDeposit4,  date3, 1234, "arcStoreId1","e3ForDepJobForDeposit4");
+      e5ForDepJobForDeposit4 = createCompleteCopyUpload(deposit4, depJobForDeposit4,  date4, 12, "arcStoreId2","e5ForDepJobForDeposit4");
 
       assertThat(dao.count()).isEqualTo(27);
     }
@@ -401,8 +402,8 @@ public class EventDAOIT extends BaseDatabaseTest {
     
     @Test
     void testUploadedChunkNumbers() {
-      checkUploadedChunkNumbers(deposit3, List.of(3,5,6));
-      checkUploadedChunkNumbers(deposit4, List.of(1,12,1234,12345));
+      checkUploadedChunkNumbers(deposit3, getStoredChunks(Map.of("arcStoreId1", Set.of(5),          "arcStoreId2", Set.of(3, 6))));
+      checkUploadedChunkNumbers(deposit4, getStoredChunks(Map.of("arcStoreId1", Set.of(12345, 1234),"arcStoreId2", Set.of(1, 12))));
     }
     
     @SuppressWarnings("OptionalGetWithoutIsPresent")
@@ -411,31 +412,44 @@ public class EventDAOIT extends BaseDatabaseTest {
       assertThat(result.get().getID()).isEqualTo(expectedEvent.getID());
     }
     
-    void checkUploadedChunkNumbers(Deposit deposit, List<Integer> expectedChunkNumbers){
-      assertThat(dao.findDepositChunksStored(deposit.getID())).isEqualTo(expectedChunkNumbers);
+    void checkUploadedChunkNumbers(Deposit deposit, StoredChunks expectedStoredChunks){
+      StoredChunks storedChunks = dao.findDepositChunksStored(deposit.getID());
+      assertThat(storedChunks).isEqualTo(expectedStoredChunks);
     }
+  }
+
+  private StoredChunks getStoredChunks(Map<String, Set<Integer>> data) {
+    StoredChunks storedChunks = new StoredChunks();
+    storedChunks.setStoredChunks(data);
+    return storedChunks;
   }
 
   @Nested
   class FindDepositChunksStoredTests {
     @Test
     void testNullDepositIt() {
-      assertThat(dao.findDepositChunksStored(null)).isEqualTo(Collections.emptyList());
+      assertThat(dao.findDepositChunksStored(null).size()).isEqualTo(0);
     }
 
     @Test
     @Transactional
     void testSingleChunkStored() {
-      checkChunksStored(List.of(123));
+      StoredChunks storedChunks = new StoredChunks();
+      storedChunks.addStoredChunk("archiveStoreId1",123);
+      checkChunksStored(storedChunks);
     }
 
     @Test
     @Transactional
     void testManyChunks() {
-      checkChunksStored(IntStream.rangeClosed(1, 1000).boxed().toList());
+      StoredChunks storedChunks = new StoredChunks();
+      IntStream.rangeClosed(1, 1000).forEach( chunkNumber -> {
+        storedChunks.addStoredChunk("archiveStoreId1",chunkNumber);
+      });
+      checkChunksStored(storedChunks);
     }
 
-    void checkChunksStored(List<Integer> chunkNumbers) {
+    void checkChunksStored(StoredChunks chunksToStore) {
       Deposit deposit = new Deposit();
       deposit.setName("test-deposit");
       deposit.setHasPersonalData(false);
@@ -443,25 +457,28 @@ public class EventDAOIT extends BaseDatabaseTest {
 
       em.flush();
 
-      String archiveStoreId = "dummy-archive-store-id";
-      String archiveId = "test-archive-id";
       String jobId = "dummy-job-id";
-      for (var chunkNumber : chunkNumbers) {
-        CompleteCopyUpload event = new CompleteCopyUpload(deposit.getID(), jobId, "test-type", chunkNumber, archiveStoreId, archiveId);
+      for (Map.Entry<String, Set<Integer>> entry : chunksToStore.getStoredChunks().entrySet()) {
 
-        assertThat(event.getID()).isNull();
+        String archiveStoreId = entry.getKey();
+        for (Integer chunkNumber : entry.getValue()) {
+          String archiveId = archiveStoreId + "-" + chunkNumber;
+          CompleteCopyUpload event = new CompleteCopyUpload(deposit.getID(), jobId, "test-type", chunkNumber, archiveStoreId, archiveId);
 
-        // Because of the strange way the deposit/depositId is mapped using JPA - we have to use deposit NOT (Transient) depositId
-        event.setDeposit(deposit);
+          assertThat(event.getID()).isNull();
 
-        dao.save(event);
+          // Because of the strange way the deposit/depositId is mapped using JPA - we have to use deposit NOT (Transient) depositId
+          event.setDeposit(deposit);
+
+          dao.save(event);
+        }
       }
 
       em.flush();
-      assertThat(dao.count()).isEqualTo(chunkNumbers.size());
+      assertThat(dao.count()).isEqualTo(chunksToStore.size());
 
-      List<Integer> result = dao.findDepositChunksStored(deposit.getID());
-      assertThat(result).isEqualTo(chunkNumbers);
+      StoredChunks storedChunks = dao.findDepositChunksStored(deposit.getID());
+      assertThat(storedChunks).isEqualTo(chunksToStore);
     }
 
     @Transactional
@@ -493,8 +510,8 @@ public class EventDAOIT extends BaseDatabaseTest {
       assertThat(stored.getID()).isEqualTo(event.getID());
       assertThat(stored.getChunkNumber()).isNull();
       
-      List<Integer> result = dao.findDepositChunksStored(deposit.getID());
-      assertThat(result).isEmpty();
+      StoredChunks storedChunks = dao.findDepositChunksStored(deposit.getID());
+      assertThat(storedChunks.size()).isEqualTo(0);
     }
   }
   @SneakyThrows
@@ -509,6 +526,21 @@ public class EventDAOIT extends BaseDatabaseTest {
     if (clazz.equals(CompleteCopyUpload.class)){
       event.setChunkNumber(sequence);
     }
+    dao.save(event);
+    return event;
+  }
+
+  @SneakyThrows
+  CompleteCopyUpload createCompleteCopyUpload(Deposit deposit, Job job, Date timestamp, int chunkNumber, String archiveStoreId, String message) {
+    CompleteCopyUpload event = new CompleteCopyUpload();
+    event.setEventClass(event.getClass().getName());
+    event.setMessage(message);
+    event.setDeposit(deposit);
+    event.setJob(job);
+    event.setTimestamp(timestamp);
+    event.setSequence(chunkNumber);
+    event.setChunkNumber(chunkNumber);
+    event.setArchiveStoreId(archiveStoreId);
     dao.save(event);
     return event;
   }

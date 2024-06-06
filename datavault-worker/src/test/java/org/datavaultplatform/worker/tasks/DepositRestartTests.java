@@ -13,6 +13,7 @@ import org.datavaultplatform.common.storage.impl.LocalFileSystem;
 import org.datavaultplatform.common.storage.impl.MultiLocalFileSystem;
 import org.datavaultplatform.common.task.Context;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
+import org.datavaultplatform.common.util.StoredChunks;
 import org.datavaultplatform.worker.tasks.deposit.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,6 +35,7 @@ import static org.assertj.core.api.Assertions.assertThatIterable;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
+@SuppressWarnings("unchecked")
 @ExtendWith(MockitoExtension.class)
 public class DepositRestartTests {
 
@@ -293,7 +295,7 @@ public class DepositRestartTests {
         DepositArchiveStoresUploader mUploader = Mockito.mock(DepositArchiveStoresUploader.class);
         
         doReturn(mUploader).when(deposit).getDepositArchiveStoresUploader(any(ArchiveStoreContext.class));
-        when(mUploader.uploadToStorage(any(PackageHelper.class), any(List.class))).thenThrow(new RuntimeException("oops"));
+        when(mUploader.uploadToStorage(any(PackageHelper.class), any(StoredChunks.class))).thenThrow(new RuntimeException("oops"));
         
         RuntimeException ex = assertThrows(RuntimeException.class, () -> {
             Context context = getContext(true, true, true);
@@ -311,7 +313,7 @@ public class DepositRestartTests {
         verify(mPackager, atMost(1)).packageStep(bagDir);
 
         verify(deposit).getDepositArchiveStoresUploader(any(ArchiveStoreContext.class));
-        verify(mUploader).uploadToStorage(any(PackageHelper.class), any(List.class));
+        verify(mUploader).uploadToStorage(any(PackageHelper.class), any(StoredChunks.class));
 
         checkEvents(3);
         checkEventIsInitStates(events.get(0));
@@ -348,7 +350,7 @@ public class DepositRestartTests {
         // we are checking that this step gets invoked
         DepositArchiveStoresUploader mUploader = Mockito.mock(DepositArchiveStoresUploader.class);
         lenient().doReturn(mUploader).when(deposit).getDepositArchiveStoresUploader(any(ArchiveStoreContext.class));
-        lenient().when(mUploader.uploadToStorage(any(PackageHelper.class),any(List.class))).thenReturn(null);
+        lenient().when(mUploader.uploadToStorage(any(PackageHelper.class),any(StoredChunks.class))).thenReturn(null);
 
         // we are checking that this step gets invoked
         DepositVerifier mVerifier = Mockito.mock(DepositVerifier.class);
@@ -371,7 +373,7 @@ public class DepositRestartTests {
         verify(mPackager, atMost(1)).packageStep(bagDir);
         
         verify(deposit, atMost(1)).getDepositArchiveStoresUploader(any(ArchiveStoreContext.class));
-        verify(mUploader, atMost(1)).uploadToStorage(any(PackageHelper.class), any(List.class));
+        verify(mUploader, atMost(1)).uploadToStorage(any(PackageHelper.class), any(StoredChunks.class));
 
         verify(deposit).getDepositVerifier(any(Set.class));
         verify(mVerifier).verifyArchive(any(PackageHelper.class));
@@ -411,7 +413,7 @@ public class DepositRestartTests {
         // if we are staring from UploadComplete - this step is skipped
         DepositArchiveStoresUploader mUploader = Mockito.mock(DepositArchiveStoresUploader.class);
         lenient().doReturn(mUploader).when(deposit).getDepositArchiveStoresUploader(any(ArchiveStoreContext.class));
-        lenient().when(mUploader.uploadToStorage(any(PackageHelper.class), any(List.class))).thenReturn(null);
+        lenient().when(mUploader.uploadToStorage(any(PackageHelper.class), any(StoredChunks.class))).thenReturn(null);
 
         // if we are staring from ValidationComplete - this step is skipped
         DepositVerifier mVerifier = Mockito.mock(DepositVerifier.class);
@@ -432,7 +434,7 @@ public class DepositRestartTests {
         verify(mPackager, atMost(1)).packageStep(bagDir);
 
         verify(deposit, atMost(1)).getDepositArchiveStoresUploader(any(ArchiveStoreContext.class));
-        verify(mUploader, atMost(1)).uploadToStorage(any(PackageHelper.class), any(List.class));
+        verify(mUploader, atMost(1)).uploadToStorage(any(PackageHelper.class), any(StoredChunks.class));
 
         verify(deposit, atMost(1)).getDepositVerifier(any(Set.class));
         verify(mVerifier, atMost(1)).verifyArchive(any(PackageHelper.class));
@@ -484,7 +486,6 @@ public class DepositRestartTests {
                 .map(Arguments::of);
     }
 
-    @SuppressWarnings("unchecked")
     @SneakyThrows
     private static Event eventFromClassName(String evenClassName) {
         Class<? extends Event> eventClass = Class.forName(evenClassName).asSubclass(Event.class);

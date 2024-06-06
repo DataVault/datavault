@@ -9,6 +9,7 @@ import org.datavaultplatform.common.event.deposit.UploadComplete;
 import org.datavaultplatform.common.storage.ArchiveStore;
 import org.datavaultplatform.common.task.Context;
 import org.datavaultplatform.common.task.TaskExecutor;
+import org.datavaultplatform.common.util.StoredChunks;
 import org.datavaultplatform.worker.operations.ChunkUploadTracker;
 import org.datavaultplatform.worker.operations.DeviceTracker;
 import org.datavaultplatform.worker.tasks.PackageHelper;
@@ -108,23 +109,23 @@ class DepositArchiveStoresUploaderTest {
         PackageHelper helper = new PackageHelper();
         helper.setTarFile(Files.newTemporaryFile());
 
-        uploader.uploadToStorage(helper, new ArrayList<>());
+        uploader.uploadToStorage(helper, new StoredChunks());
         
         verify(mTaskExecutor, times(2)).add(any(DeviceTracker.class));
 
         assertThat(deviceTrackers).hasSize(2);
 
-        Collections.sort(deviceTrackers, Comparator.comparing(DeviceTracker::getArchiveStoreId));
+        deviceTrackers.sort(Comparator.comparing(DeviceTracker::getArchiveStoreId));
         
         DeviceTracker dt1 = deviceTrackers.get(0);
         DeviceTracker dt2 = deviceTrackers.get(1);
 
-        deviceTrackers.stream().allMatch(dt -> dt.getOptChunkNumber().isEmpty());
-        deviceTrackers.stream().allMatch(dt -> dt.getDepositId().equals(DEPOSIT_ID));
-        deviceTrackers.stream().allMatch(dt -> dt.getUserEventSender().equals(mUserEventSender));
-        deviceTrackers.stream().allMatch(dt -> dt.getJobID().equals(JOB_ID));
-        deviceTrackers.stream().allMatch(dt -> dt.getTarFile().equals(helper.getTarFile()));
-        deviceTrackers.stream().allMatch(dt -> dt.getArchiveStoreDepositedFiles() != null);
+        assertThat(deviceTrackers.stream().allMatch(dt -> dt.getOptChunkNumber().isEmpty())).isTrue();
+        assertThat(deviceTrackers.stream().allMatch(dt -> dt.getDepositId().equals(DEPOSIT_ID))).isTrue();
+        assertThat(deviceTrackers.stream().allMatch(dt -> dt.getUserEventSender().equals(mUserEventSender))).isTrue();
+        assertThat(deviceTrackers.stream().allMatch(dt -> dt.getJobID().equals(JOB_ID))).isTrue();
+        assertThat(deviceTrackers.stream().allMatch(dt -> dt.getTarFile().equals(helper.getTarFile()))).isTrue();
+        assertThat(deviceTrackers.stream().allMatch(dt -> dt.getArchiveStoreDepositedFiles() != null)).isTrue();
 
         assertThat(dt1.getArchiveStoreId()).isEqualTo(ARCHIVE_STORE_ID_1);
         assertThat(dt1.getArchiveStore()).isEqualTo(mArchiveStore1);
@@ -170,7 +171,7 @@ class DepositArchiveStoresUploaderTest {
         helper.addChunkHelper(chunkHelper3);
         helper.addChunkHelper(chunkHelper4);
         
-        uploader.uploadToStorage(helper, new ArrayList<>());
+        uploader.uploadToStorage(helper, new StoredChunks());
 
         verify(mTaskExecutor, times(4)).add(any(ChunkUploadTracker.class));
 
@@ -181,11 +182,11 @@ class DepositArchiveStoresUploaderTest {
         ChunkUploadTracker cut3 = chunkUploadTrackers.get(2);
         ChunkUploadTracker cut4 = chunkUploadTrackers.get(3);
 
-        chunkUploadTrackers.stream().allMatch(cut -> cut.depositId().equals(DEPOSIT_ID));
-        chunkUploadTrackers.stream().allMatch(cut -> cut.jobID().equals(JOB_ID));
-        chunkUploadTrackers.stream().allMatch(cut -> cut.archiveStores().equals(archiveStoreContext.getArchiveStores()));
-        chunkUploadTrackers.stream().allMatch(cut -> cut.archiveStoresDepositedFiles() != null);
-        chunkUploadTrackers.stream().allMatch(cut -> cut.userEventSender().equals(mUserEventSender));
+        assertThat(chunkUploadTrackers.stream().allMatch(cut -> cut.depositId().equals(DEPOSIT_ID))).isTrue();
+        assertThat(chunkUploadTrackers.stream().allMatch(cut -> cut.jobID().equals(JOB_ID))).isTrue();
+        assertThat(chunkUploadTrackers.stream().allMatch(cut -> cut.archiveStores().equals(archiveStoreContext.getArchiveStores()))).isTrue();
+        assertThat(chunkUploadTrackers.stream().allMatch(cut -> cut.archiveStoresDepositedFiles() != null)).isTrue();
+        assertThat(chunkUploadTrackers.stream().allMatch(cut -> cut.userEventSender().equals(mUserEventSender))).isTrue();
         
         assertThat(cut1.chunk()).isEqualTo(chunkHelper1.getChunkFile());
         assertThat(cut1.chunkNumber()).isEqualTo(1);
@@ -230,7 +231,7 @@ class DepositArchiveStoresUploaderTest {
 
         helper.addChunkHelper(chunkHelper2);
         helper.addChunkHelper(chunkHelper3);
-        uploader.uploadToStorage(helper, new ArrayList<>(List.of(1, 4)));
+        uploader.uploadToStorage(helper, new StoredChunks());
 
         verify(mTaskExecutor, times(2)).add(any(ChunkUploadTracker.class));
 

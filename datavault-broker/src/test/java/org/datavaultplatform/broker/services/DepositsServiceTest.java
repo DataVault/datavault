@@ -5,6 +5,7 @@ import org.datavaultplatform.common.model.dao.AuditChunkStatusDAO;
 import org.datavaultplatform.common.model.dao.DepositChunkDAO;
 import org.datavaultplatform.common.model.dao.DepositDAO;
 import org.datavaultplatform.common.model.dao.EventDAO;
+import org.datavaultplatform.common.util.StoredChunks;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -60,18 +61,9 @@ class DepositsServiceTest {
     class ChunksStoredTests {
         
         @Test
-        void testNull() {
-            assertThat(depositsService.getChunksStored(null)).isEmpty();
-            verifyNoMoreInteractions(mEventDAO);
-        }
-
-        @Test
-        void testNonNull() {
+        void testGetChunksStored() {
             
-            Complete complete = new Complete("depositId","jobId", new HashMap<>(), 1234L);
-            Date completeDate = complete.getTimestamp();
-            
-            List<Integer> result = new ArrayList<>();
+            StoredChunks result = new StoredChunks();
 
             when(mEventDAO.findDepositChunksStored("depositId")).thenReturn(result);
 

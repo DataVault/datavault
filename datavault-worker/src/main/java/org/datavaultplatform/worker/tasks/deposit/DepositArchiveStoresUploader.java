@@ -8,6 +8,7 @@ import org.datavaultplatform.common.event.deposit.UploadComplete;
 import org.datavaultplatform.common.storage.ArchiveStore;
 import org.datavaultplatform.common.task.Context;
 import org.datavaultplatform.common.task.TaskExecutor;
+import org.datavaultplatform.common.util.StoredChunks;
 import org.datavaultplatform.worker.operations.ChunkUploadTracker;
 import org.datavaultplatform.worker.operations.DeviceTracker;
 import org.datavaultplatform.worker.tasks.ArchiveStoresDepositedFiles;
@@ -32,7 +33,7 @@ public class DepositArchiveStoresUploader extends DepositSupport {
         this.archiveStoresDepositedFiles = new ArchiveStoresDepositedFiles();
     }
 
-    public ArchiveStoresDepositedFiles uploadToStorage(PackageHelper packageHelper, List<Integer> previouslyStoredChunks) throws Exception {
+    public ArchiveStoresDepositedFiles uploadToStorage(PackageHelper packageHelper, StoredChunks previouslyStoredChunks) throws Exception {
         Assert.isTrue(packageHelper != null, "The packageHelper cannot be null");
         Assert.isTrue(previouslyStoredChunks != null, "The previouslyStoredChunks cannot be null");
 
@@ -42,17 +43,12 @@ public class DepositArchiveStoresUploader extends DepositSupport {
             TaskExecutor<HashMap<String, String>> executor = getTaskExecutor(getNumberOfChunkThreads(), "Chunk upload failed.");
 
             packageHelper.getChunkHelpers().forEach((chunkNumber, chunkHelper) -> {
-                
-                if (!previouslyStoredChunks.contains(chunkNumber)) {
-                    File chunkFile = chunkHelper.getChunkFile();
-                    ChunkUploadTracker cut = new ChunkUploadTracker(archiveStoresDepositedFiles, chunkNumber, chunkFile,
-                            archiveStoreContext.getArchiveStores(), depositId,
-                            userEventSender, jobID);
-                    log.debug("Creating chunk upload task: [{}]", chunkNumber);
-                    executor.add(cut);
-                } else {
-                    log.info("The chunkNumber[{}] has been uploaded already.", chunkNumber);
-                }
+                File chunkFile = chunkHelper.getChunkFile();
+                ChunkUploadTracker cut = new ChunkUploadTracker(previouslyStoredChunks, archiveStoresDepositedFiles, chunkNumber, chunkFile,
+                        archiveStoreContext.getArchiveStores(), depositId,
+                        userEventSender, jobID);
+                log.debug("Creating chunk upload task: [{}]", chunkNumber);
+                executor.add(cut);
             });
 
             executor.execute(result -> {

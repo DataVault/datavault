@@ -357,11 +357,6 @@ public class Deposit {
     public void setNonRestartJobId(String nonRestartJobId) {
         this.nonRestartJobId = nonRestartJobId;
     }
-
-    @JsonIgnore
-    public Event getLastEvent(){
-        throw new UnsupportedOperationException();
-    }
     
     public DepositInfo convertToResponse() {
         return new DepositInfo(

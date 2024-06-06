@@ -8,6 +8,7 @@ import org.datavaultplatform.common.model.dao.AuditChunkStatusDAO;
 import org.datavaultplatform.common.model.dao.DepositChunkDAO;
 import org.datavaultplatform.common.model.dao.DepositDAO;
 import org.datavaultplatform.common.model.dao.EventDAO;
+import org.datavaultplatform.common.util.StoredChunks;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -273,10 +274,7 @@ public class DepositsService {
         depositChunkDAO.update(chunk);
     }
 
-    public List<Integer> getChunksStored(String depositId) {
-        if (depositId == null) {
-            return Collections.emptyList();
-        }
+    public StoredChunks getChunksStored(String depositId) {
         return eventDAO.findDepositChunksStored(depositId);
     }
     

@@ -14,7 +14,7 @@ import org.datavaultplatform.common.response.EventInfo;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.task.Task;
 import org.datavaultplatform.common.util.DateTimeUtils;
-import org.datavaultplatform.common.util.Utils;
+import org.datavaultplatform.common.util.StoredChunks;
 import org.jsondoc.core.annotation.Api;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -622,9 +622,9 @@ public class DepositsController {
         depositProperties.put(PropNames.USER_FS_RETRY_DELAY_MS_1, String.valueOf(this.userFsRetryDelaySeconds1));
         depositProperties.put(PropNames.USER_FS_RETRY_DELAY_MS_2, String.valueOf(this.userFsRetryDelaySeconds2));
 
-        List<Integer> depositChunksStored = depositsService.getChunksStored(deposit.getID());
-        String chunksStoredAsString = Utils.toCommaSeparatedString(depositChunksStored);
-        depositProperties.put(PropNames.DEPOSIT_CHUNKS_STORED, chunksStoredAsString);
+        StoredChunks storedChunks = depositsService.getChunksStored(deposit.getID());
+        String storedChunksJson = mapper.writeValueAsString(storedChunks);
+        depositProperties.put(PropNames.DEPOSIT_CHUNKS_STORED, storedChunksJson);
 
         Task depositTask = new Task(
                 job, depositProperties, archiveStores,

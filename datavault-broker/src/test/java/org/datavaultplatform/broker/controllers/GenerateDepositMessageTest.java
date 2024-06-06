@@ -171,7 +171,7 @@ public class GenerateDepositMessageTest extends BaseGenerateMessageTest {
         + "    \"userFsRetryDelayMs1\": \"60\","
         + "    \"userFsRetryDelayMs2\": \"300\","
         + "    \"nonRestartJobId\": null,"
-        + "    \"depositChunksStored\": \"\"" 
+        + "    \"depositChunksStored\": \"null\"" 
         + "  },"
         + "  \"fileStorePaths\" : [ \"FILE-STORE-SRC-ID/src-path-1\" ],"
         + "  \"fileUploadPaths\" : [ \"src-file-upload-handle\" ],"

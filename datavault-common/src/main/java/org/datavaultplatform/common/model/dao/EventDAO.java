@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.model.dao.custom.EventCustomDAO;
+import org.datavaultplatform.common.util.StoredChunks;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -56,7 +57,7 @@ public interface EventDAO extends BaseDAO<Event>, EventCustomDAO {
     Optional<Event> findLatestEventByDepositIdAndJobTaskClass1(String depositId, String jobTaskClass);
 
     @Query("""
-              SELECT   e.chunkNumber
+              SELECT   e
               FROM     Event e
               WHERE    e.eventClass = 'org.datavaultplatform.common.event.deposit.CompleteCopyUpload'
               AND      e.deposit.id = :depositId
@@ -67,12 +68,11 @@ public interface EventDAO extends BaseDAO<Event>, EventCustomDAO {
                   WHERE  comp.eventClass = 'org.datavaultplatform.common.event.deposit.Complete'
                   AND    comp.deposit.id = :depositId
               )
-              ORDER BY 1 ASC
             """)
-    List<Integer> findDepositChunksStoredNoComplete(String depositId);
+    List<Event> findEventsForStoredChunksWhereNoLastComplete(String depositId);
 
     @Query("""
-              SELECT   e.chunkNumber
+              SELECT   e
               FROM     Event e
               WHERE    e.eventClass = 'org.datavaultplatform.common.event.deposit.CompleteCopyUpload'
               AND      e.deposit.id = :depositId
@@ -83,20 +83,23 @@ public interface EventDAO extends BaseDAO<Event>, EventCustomDAO {
                   WHERE  comp.eventClass = 'org.datavaultplatform.common.event.deposit.Complete'
                   AND    comp.deposit.id = :depositId
               )
-              ORDER BY 1 ASC
             """)
-    List<Integer> findDepositChunksStoredSinceLastComplete(String depositId);
+    List<Event> findEventsForStoredChunksSinceLastComplete(String depositId);
 
     default Optional<Event> findLatestEventByDepositIdAndJobTaskClass(String depositId, String jobTaskClass) {
         return findLatestEventByDepositIdAndJobTaskClass2(depositId, jobTaskClass)
                 .or(() -> findLatestEventByDepositIdAndJobTaskClass1(depositId, jobTaskClass));
     }
 
-    default List<Integer> findDepositChunksStored(String depositId) {
-        ArrayList<Integer> chunks = new ArrayList<>(findDepositChunksStoredSinceLastComplete(depositId));
-        if (chunks.isEmpty()) {
-            chunks.addAll(findDepositChunksStoredNoComplete(depositId));
+    default StoredChunks findDepositChunksStored(String depositId) {
+        StoredChunks result = new StoredChunks();
+        if (depositId != null) {
+            ArrayList<Event> events = new ArrayList<>(findEventsForStoredChunksSinceLastComplete(depositId));
+            if (events.isEmpty()) {
+                events.addAll(findEventsForStoredChunksWhereNoLastComplete(depositId));
+            }
+            result.addEvents(events);
         }
-        return chunks;
+        return result;
     }
 }

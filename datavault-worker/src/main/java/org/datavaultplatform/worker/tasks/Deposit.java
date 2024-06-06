@@ -1,5 +1,7 @@
 package org.datavaultplatform.worker.tasks;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.datavaultplatform.common.PropNames;
@@ -10,8 +12,9 @@ import org.datavaultplatform.common.storage.*;
 import org.datavaultplatform.common.task.Context;
 import org.datavaultplatform.common.task.Task;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
-import org.datavaultplatform.common.util.Utils;
+import org.datavaultplatform.common.util.StoredChunks;
 import org.datavaultplatform.worker.tasks.deposit.*;
+import org.springframework.security.core.parameters.P;
 import org.springframework.util.Assert;
 
 import java.io.File;
@@ -71,7 +74,7 @@ public class Deposit extends Task {
             // PACKAGE DOWNLOAD INTO ENCRYPTED CHUNKS
             PackageHelper packageHelper = packageStep(bagDir);
 
-            List<Integer> previouslyStoredChunks = getStoredChunks();
+            StoredChunks previouslyStoredChunks = getStoredChunks();
 
             // returns archive ids for verification
             Set<ArchiveStoreInfo> archiveStoreInfos = uploadToStorage(packageHelper, previouslyStoredChunks, archiveStoreContext);
@@ -105,8 +108,15 @@ public class Deposit extends Task {
         return result;
     }
 
-    private List<Integer> getStoredChunks() {
-        return Utils.fromCommaSeparatedString(getProperties().get(PropNames.DEPOSIT_CHUNKS_STORED), Integer::parseInt);
+    @SneakyThrows
+    private StoredChunks getStoredChunks() {
+        String storedChunksJson = getProperties().get(PropNames.DEPOSIT_CHUNKS_STORED);
+        if (StringUtils.isBlank(storedChunksJson)) {
+            return new StoredChunks();
+        } else {
+            StoredChunks result = new ObjectMapper().readValue(storedChunksJson, StoredChunks.class);
+            return result;
+        }
     }
 
     private void sendError(String message) {
@@ -127,7 +137,7 @@ public class Deposit extends Task {
         }
     }
 
-    private Set<ArchiveStoreInfo> uploadToStorage(PackageHelper packageHelper, List<Integer> previouslyStoredChunks, ArchiveStoreContext archiveStoreContext) throws Exception {
+    private Set<ArchiveStoreInfo> uploadToStorage(PackageHelper packageHelper, StoredChunks previouslyStoredChunks, ArchiveStoreContext archiveStoreContext) throws Exception {
         if (isLastEventIsBefore(UploadComplete.class)) {
             // Copy the resulting tar file to the archive area
             log.info("Copying tar file(s) to archive ...");
