@@ -58,7 +58,7 @@ public abstract class DepositSupport {
         sendEvent(new Error(jobID, depositId, message));
     }
 
-    protected void sendEvent( Event event) {
+    protected void sendEvent(Event event) {
         this.userEventSender.send(event);
     }
 
@@ -92,5 +92,12 @@ public abstract class DepositSupport {
 
     public boolean eventHasNotBeenSeenBefore(Class<? extends Event> eventClass) {
         return DepositEvents.isLastEventBefore(lastEvent, eventClass);
+    }
+
+    protected void sendInvalidArgumentMessage(String msg) {
+        var ex = new IllegalArgumentException(msg);
+        log.error(msg);
+        sendError(msg);
+        throw ex;
     }
 }

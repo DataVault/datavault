@@ -38,17 +38,10 @@ public class DepositVerifier extends DepositSupport {
         this.archiveStoresInfos = archiveStoresInfos;
     }
     
-    private void sendInvalidArgumentMessage(String msg) {
-        var ex = new IllegalArgumentException(msg);
-        log.error(msg);
-        sendError(msg);
-        throw ex;
-    }
-
     public void verifyArchive(PackageHelper packageHelper) throws Exception {
         File tarFile = packageHelper.getTarFile();
         String tarHash = packageHelper.getTarHash();
-        if( context.isChunkingEnabled() ) {
+        if(context.isChunkingEnabled() ) {
             verifyArchiveWithChunks(context, packageHelper);
         } else {
             String encTarHash = packageHelper.getEncTarHash();

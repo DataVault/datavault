@@ -1,9 +1,12 @@
 package org.datavaultplatform.worker.tasks.deposit;
 
+import lombok.SneakyThrows;
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.event.UserEventSender;
 import org.datavaultplatform.common.task.Context;
+import org.datavaultplatform.worker.tasks.PackageHelper;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -14,6 +17,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -65,7 +69,5 @@ class DepositVerifierTest {
                 Arguments.of("userid", "jobId", "depositId", sender, "bagId", context, null,  props, null,    "Deposit failed: null list of userStores", true)
         );
     }
-
-
-
+    
 }

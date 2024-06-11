@@ -25,6 +25,7 @@ import static org.datavaultplatform.worker.tasks.deposit.DepositState.DepositSta
 @Slf4j
 public class DepositUserStoreDownloader extends DepositSupport {
 
+    private static final String UPLOADS = "uploads";
     private final List<String> fileStorePaths;
     private final Map<String, UserStore> userStores;
     private final List<String> fileUploadPaths;
@@ -32,6 +33,14 @@ public class DepositUserStoreDownloader extends DepositSupport {
     public DepositUserStoreDownloader(String userID, String jobID, String depositId, UserEventSender userEventSender, String bagID, Context context, Event lastEvent, Map<String, String> properties,
                                       List<String> fileStorePaths, Map<String,UserStore> userStores, List<String> fileUploadPaths) {
         super(userID, jobID, depositId, userEventSender, bagID, context, lastEvent, properties);
+        if (fileStorePaths == null) {
+            String msg = "Deposit failed: null list of fileStorePaths";
+            sendInvalidArgumentMessage(msg);
+        }
+        if (userStores == null) {
+            String msg = "Deposit failed: null list of userStores";
+            sendInvalidArgumentMessage(msg);
+        }
         this.fileStorePaths = fileStorePaths;
         this.userStores = userStores;
         this.fileUploadPaths = fileUploadPaths;
@@ -81,7 +90,7 @@ public class DepositUserStoreDownloader extends DepositSupport {
 
                 } else {
                     String msg = String.format("StoragePath[%s] does not exist on userStore[%s]", storagePath, userStore);
-                    sendError(msg);
+                    throw new RuntimeException(msg);
                 }
             } catch (Exception e) {
                 String msg = "Deposit failed: " + e.getMessage();
@@ -110,13 +119,15 @@ public class DepositUserStoreDownloader extends DepositSupport {
      */
     private void moveFromUserUploads(Path tempPath, Path bagPath, String uploadPath) throws Exception {
 
-        File outputFile = bagPath.resolve("uploads").toFile();
+        File outputFile = bagPath.resolve(UPLOADS).resolve(uploadPath).toFile();
 
         // TODO: this is a bit of a hack to escape the per-worker temp directory
-        File uploadDir = tempPath.getParent().resolve("uploads").resolve(userID).resolve(uploadPath).toFile();
+        File uploadDir = tempPath.getParent().resolve(UPLOADS).resolve(userID).resolve(uploadPath).toFile();
         if (uploadDir.exists()) {
-            log.info("Moving user uploads to bag directory");
+            log.info("Moving user uploads [{}] to bag directory [{}]", uploadDir, outputFile);
             FileUtils.moveDirectory(uploadDir, outputFile);
+        } else {
+            log.warn("The uploadDir [{}] does not exist", uploadDir);
         }
     }
 

@@ -32,13 +32,6 @@ public class DepositSizeComputer extends DepositSupport {
         this.fileStorePaths = fileStorePaths;
     }
     
-    private void sendInvalidArgumentMessage(String msg) {
-        var ex = new IllegalArgumentException(msg);
-        log.error(msg);
-        sendError(msg);
-        throw ex;
-    }
-
     public long calculateTotalDepositSize() {
         // Calculate the total deposit size of selected files
         long depositTotalSize = fileStorePaths.stream()
@@ -70,5 +63,6 @@ public class DepositSizeComputer extends DepositSupport {
             throw new RuntimeException(e);
         }
     }
+    
 
 }
