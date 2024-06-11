@@ -12,17 +12,8 @@ public record ChecksumTracker(File chunk, int chunkNumber) implements Callable<C
 
     @Override
     public ChecksumHelper call() throws Exception {
-
         String hash = Verify.getDigest(this.chunk);
         ChecksumHelper retVal = new ChecksumHelper(this.chunkNumber, hash, chunk);
         return retVal;
-
-//        long chunkSize = this.chunk.length();
-//        logger.info("Chunk file " + i + ": " + chunkSize + " bytes");
-//        logger.info("Chunk file location: " + chunk.getAbsolutePath());
-//        logger.info("Checksum algorithm: " + tarHashAlgorithm);
-//        logger.info("Checksum: " + chunksHash[i]);
-//
-//        chunksDigest.put(i+1, chunksHash[i]);
     }
 }

@@ -129,9 +129,18 @@ class StoredChunksTest {
             }
         }
 
-        static final String EMPTY_JSON = """
+        static final String EMPTY_JSON_1 = """
                 {
                     "storedChunks" : { }
+                }
+                """;
+        static final String EMPTY_JSON_2 = """
+                {
+                    "storedChunks" : null
+                }
+                """;
+        static final String EMPTY_JSON_3 = """
+                {
                 }
                 """;
 
@@ -171,14 +180,15 @@ class StoredChunksTest {
         @SneakyThrows
         void testSerializeEmpty() {
             StoredChunks empty = new StoredChunks();
-            JSONAssert.assertEquals(EMPTY_JSON,
+            JSONAssert.assertEquals(EMPTY_JSON_1,
                     toJson(empty), true);
         }
 
-        @Test
+        @ParameterizedTest
+        @ValueSource(strings = {EMPTY_JSON_1, EMPTY_JSON_2, EMPTY_JSON_3})
         @SneakyThrows
-        void testDeSerializeEmpty() {
-            assertThat(fromJson(EMPTY_JSON)).isEqualTo(new StoredChunks());
+        void testDeSerializeEmpty(String emptyJson) {
+            assertThat(fromJson(emptyJson)).isEqualTo(new StoredChunks());
         }
 
         @Test

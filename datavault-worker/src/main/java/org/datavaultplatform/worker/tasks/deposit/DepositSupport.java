@@ -1,5 +1,6 @@
 package org.datavaultplatform.worker.tasks.deposit;
 
+import com.oracle.bmc.util.internal.StringUtils;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.PropNames;
@@ -8,6 +9,7 @@ import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.event.UserEventSender;
 import org.datavaultplatform.common.task.Context;
 import org.datavaultplatform.worker.retry.TwoSpeedRetry;
+import org.springframework.util.Assert;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -32,6 +34,14 @@ public abstract class DepositSupport {
     protected final String lastEventClass = "DUMMY";
 
     public DepositSupport(String userID, String jobID, String depositId, UserEventSender userEventSender, String bagID, Context context, Event lastEvent, Map<String,String> properties) {
+        Assert.isTrue(StringUtils.isNotBlank(userID), "The userID cannot be blank");
+        Assert.isTrue(StringUtils.isNotBlank(jobID), "The jobID cannot be blank");
+        Assert.isTrue(StringUtils.isNotBlank(depositId), "The depositId cannot be blank");
+        Assert.isTrue(userEventSender != null, "The userEventSender cannot be null");
+        Assert.isTrue(StringUtils.isNotBlank(bagID), "The bagID cannot be blank");
+        Assert.isTrue(context != null, "The context cannot be null");
+        //lastEvent CAN BE NULL
+        Assert.isTrue(properties != null, "The properties cannot be null");
         this.userID = userID;
         this.jobID = jobID;
         this.depositId = depositId;
@@ -57,7 +67,7 @@ public abstract class DepositSupport {
         if (noOfThreads < 0) {
             noOfThreads = 25;
         }
-        log.debug("Number of threads:" + noOfThreads);
+        log.debug("Number of threads: [{}]", noOfThreads);
         return noOfThreads;
     }
 

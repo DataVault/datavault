@@ -31,7 +31,18 @@ public class DepositVerifier extends DepositSupport {
                             Set<ArchiveStoreInfo> archiveStoresInfos
     ) {
         super(userID, jobID, depositId, userEventSender, bagID, context, lastEvent, properties);
+        if (archiveStoresInfos == null) {
+            String msg = "Deposit failed: null list of userStores";
+            sendInvalidArgumentMessage(msg);
+        }
         this.archiveStoresInfos = archiveStoresInfos;
+    }
+    
+    private void sendInvalidArgumentMessage(String msg) {
+        var ex = new IllegalArgumentException(msg);
+        log.error(msg);
+        sendError(msg);
+        throw ex;
     }
 
     public void verifyArchive(PackageHelper packageHelper) throws Exception {
@@ -103,9 +114,9 @@ public class DepositVerifier extends DepositSupport {
             String archiveId = archiveStoreInfo.archiveId();
 
             Verify.Method vm = archiveStore.getVerifyMethod();
-            log.info("Verification method: " + vm);
+            log.info("Verification method: [{}]", vm);
 
-            log.debug("verifyArchive - archiveId: "+archiveId);
+            log.debug("verifyArchive - archiveId: [{}]", archiveId);
 
             // Get the tar file
 
@@ -170,7 +181,7 @@ public class DepositVerifier extends DepositSupport {
         String[] encChunksHash = packageHelper.getEncChunksHash();
         
         int noOfThreads = context.getNoChunkThreads();
-        log.debug("Number of threads: " + noOfThreads);
+        log.debug("Number of threads: [{}]", noOfThreads);
         TaskExecutor<Object> executor = new TaskExecutor<>(noOfThreads, "Chunk download failed.");
         for (int i = 0; i < chunkFiles.length; i++) {
             int chunkNumber = i + 1;
@@ -184,7 +195,7 @@ public class DepositVerifier extends DepositSupport {
                     chunkNumber, doVerification,
                     encChunksHash, ivs,
                     location, multipleCopies);
-            log.debug("Creating chunk download task:" + chunkNumber);
+            log.debug("Creating chunk download task: [{}]", chunkNumber);
             executor.add(cdt);
         }
         executor.execute(result -> {});
