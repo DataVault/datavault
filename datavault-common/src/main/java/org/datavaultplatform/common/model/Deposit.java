@@ -168,7 +168,7 @@ public class Deposit {
     @ManyToOne
     private User user;
     
-    @Column(name = "non_restart_job_id", columnDefinition = "VARCHAR(255) NULL")
+    @Column(name = "non_restart_job_id", columnDefinition = "VARCHAR(256) NULL")
     private String nonRestartJobId;
     
     public Deposit() {}

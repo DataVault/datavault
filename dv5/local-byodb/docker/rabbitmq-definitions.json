@@ -74,7 +74,8 @@
             "durable": true,
             "auto_delete": false,
             "arguments": {
-                "x-queue-type": "classic"
+                "x-queue-type": "classic",
+                "x-max-priority" : 2
             }
         },
         {

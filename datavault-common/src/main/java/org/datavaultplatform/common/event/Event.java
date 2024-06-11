@@ -174,7 +174,7 @@ public class Event {
 
     @Getter
     @Setter
-    @Column(name = "archive_store_id", columnDefinition = "VARCHAR(255) DEFAULT NULL")
+    @Column(name = "archive_store_id", columnDefinition = "VARCHAR(256) DEFAULT NULL")
     private String archiveStoreId;
     
     public Event() {

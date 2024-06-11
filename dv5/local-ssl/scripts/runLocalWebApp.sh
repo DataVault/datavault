@@ -48,7 +48,7 @@ JAVA_TOOL_OPTS=\
  -Duser.country=GB \
  -Duser.home=$HOME \
  -Duser.dir=$SCRIPT_DIR \
- -Duser.timezone=Europe/London \
+ -Duser.timezone=Europe/London -Djava.net.preferIPv4Stack=true \
  -Xdebug \
  -Xms1024M -Xmx2024M \
  -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5050"
