@@ -82,7 +82,7 @@ public class GenerateDepositMessageTest extends BaseGenerateMessageTest {
 
     User mockUser = mock(User.class);
     when(mockUser.getID()).thenReturn("used-id-one");
-    when(sender.send(argMessage.capture())).thenReturn("MESSAGE_ID");
+    when(sender.send(argMessage.capture(), any(Boolean.class))).thenReturn("MESSAGE_ID");
 
     Vault mockVault = mock(Vault.class);
     VaultInfo mockVaultInfo = mock(VaultInfo.class);

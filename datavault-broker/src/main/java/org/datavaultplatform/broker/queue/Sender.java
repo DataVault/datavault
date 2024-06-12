@@ -13,15 +13,26 @@ public class Sender {
 
   private final RabbitTemplate template;
   private final String workerQueueName;
+  private final String restartExchangeName;
 
   @Autowired
-  public Sender(@Value(BaseQueueConfig.WORKER_QUEUE_NAME) String workerQueueName, RabbitTemplate template) {
+  public Sender(@Value(BaseQueueConfig.WORKER_QUEUE_NAME) String workerQueueName,
+                @Value(BaseQueueConfig.RESTART_EXCHANGE_NAME) String restartExchangeName,
+                RabbitTemplate template) {
     this.template = template;
     this.workerQueueName = workerQueueName;
+    this.restartExchangeName = restartExchangeName;
   }
 
+  public String send(String messageText, boolean restart) {
+    if (restart) {
+      return RabbitUtils.sendToExchange(template, restartExchangeName, messageText);
+    } else {
+      return RabbitUtils.sendDirectToQueue(template, workerQueueName, messageText);
+    }
+  }
+  
   public String send(String messageText) {
-    return RabbitUtils.sendDirectToQueue(template, workerQueueName, messageText);
+      return send(messageText, false);
   }
-
 }

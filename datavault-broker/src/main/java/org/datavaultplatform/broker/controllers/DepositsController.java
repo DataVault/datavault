@@ -636,7 +636,7 @@ public class DepositsController {
             depositTask.setRestartArchiveIds(archiveIDs);
         }
         String jsonDeposit = this.mapper.writeValueAsString(depositTask);
-        sender.send(jsonDeposit);
+        sender.send(jsonDeposit, isRestart);
 
         return job;
     }

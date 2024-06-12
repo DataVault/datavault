@@ -14,7 +14,10 @@ public abstract class BaseQueueConfig {
 
   public static final String WORKER_QUEUE_NAME = "${queue.name}";
   public static final String BROKER_QUEUE_NAME = "${queue.events}";
-
+  public static final String RESTART_EXCHANGE_NAME = "${exchange.restarts:restart-worker}";
+  public static final String RESTART_WORKER_ONE_QUEUE_NAME = "${queue.name.worker.1:restart-worker-1}";
+  public static final String RESTART_WORKER_TWO_QUEUE_NAME = "${queue.name.worker.2:restart-worker-2}";
+  public static final String RESTART_WORKER_THREE_QUEUE_NAME = "${queue.name.worker.3:restart-worker-3}";
   public static final String X_MAX_PRIORITY = "x-max-priority";
 
   //will create Q if it does not exist
@@ -37,27 +40,27 @@ public abstract class BaseQueueConfig {
   //will create Q if it does not exist
   @Bean
   @ConditionalOnProperty(value="rabbitmq.define.queue.restarts", havingValue = "true",  matchIfMissing = false)
-  public Queue restartWorker1Queue() {
-    return new Queue("restart-worker-1", true, false, false);
+  public Queue restartWorker1Queue(@Value(RESTART_WORKER_ONE_QUEUE_NAME) String restartWorker1queueName) {
+    return new Queue(restartWorker1queueName, true, false, false);
   }
   
   //will create Q if it does not exist
   @Bean
   @ConditionalOnProperty(value="rabbitmq.define.queue.restarts", havingValue = "true",  matchIfMissing = false)
-  public Queue restartWorker2Queue() {
-    return new Queue("restart-worker-2", true, false, false);
+  public Queue restartWorker2Queue(@Value(RESTART_WORKER_TWO_QUEUE_NAME) String restartWorker2queueName) {
+    return new Queue(restartWorker2queueName, true, false, false);
   }
   //will create Q if it does not exist
   @Bean
   @ConditionalOnProperty(value="rabbitmq.define.queue.restarts", havingValue = "true",  matchIfMissing = false)
-  public Queue restartWorker3Queue() {
-    return new Queue("restart-worker-3", true, false, false);
+  public Queue restartWorker3Queue(@Value(RESTART_WORKER_THREE_QUEUE_NAME) String restartWorker3queueName) {
+    return new Queue(restartWorker3queueName, true, false, false);
   }
   
   @Bean
   @ConditionalOnProperty(value="rabbitmq.define.queue.restarts", havingValue = "true",  matchIfMissing = false)
-  public FanoutExchange restartWorkerExchange() {
-    return new FanoutExchange("restart-worker", true, false);
+  public FanoutExchange restartWorkerExchange(@Value(RESTART_EXCHANGE_NAME) String restartExchangeName) {
+    return new FanoutExchange(restartExchangeName, true, false);
   }
   
   @Bean
