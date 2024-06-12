@@ -16,6 +16,7 @@ import org.datavaultplatform.common.storage.UserStore;
 import org.datavaultplatform.common.storage.impl.LocalFileSystem;
 import org.datavaultplatform.common.task.Context;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -60,7 +61,7 @@ class DepositUserStoreDownloaderTest {
     @Captor
     ArgumentCaptor<Event> argEvent;
 
-    List<String> fileStorePaths = new ArrayList<>();
+    final List<String> fileStorePaths = new ArrayList<>();
 
     static final UserEventSender SENDER = Mockito.mock(UserEventSender.class);
     static final Context CONTEXT = Mockito.mock(Context.class);
@@ -249,7 +250,7 @@ class DepositUserStoreDownloaderTest {
 
         checkTextFiles(bagIdDataPath, 0);
 
-        RuntimeException ex = assertThrows(RuntimeException.class, () -> downloader.transferFromUserStoreToWorker());
+        RuntimeException ex = assertThrows(RuntimeException.class, downloader::transferFromUserStoreToWorker);
 
         assertThat(ex).hasMessage("java.lang.RuntimeException: StoragePath[MISSING] does not exist on userStore[test-local-file-system]");
 
@@ -507,52 +508,77 @@ class DepositUserStoreDownloaderTest {
         );
     }
     
-    @Test
-    @SneakyThrows
-    void testAlreadyCopiedAndBagIdDoesExist() {
+    @Nested
+    class SkipCopyTests {
 
-        ArgumentCaptor<Path> argBagIdDataPath = ArgumentCaptor.forClass(Path.class);
-        
-        Path bagIdPath = tempDir.resolve(BAG_ID);
-        assertThat(Files.exists(bagIdPath)).isFalse();
-        Path bagIdDataPath = bagIdPath.resolve(DATA);
-        assertThat(Files.exists(bagIdDataPath)).isFalse();
+        @Test
+        @SneakyThrows
+        void testAlreadyCopiedAndBagIdDoesExist() {
 
-        //we create this directory to force the skip
-        Files.createDirectories(bagIdDataPath);
+            ArgumentCaptor<Path> argBagIdDataPath = ArgumentCaptor.forClass(Path.class);
 
-        Event lastEvent = new TransferComplete();
-        lastEvent.eventClass = TransferComplete.class.getName();
-        
-        var downloader = Mockito.spy(new DepositUserStoreDownloader(USER_ID, JOB_ID, DEPOSIT_ID, SENDER, BAG_ID, CONTEXT, lastEvent, PROPS,
-                fileStorePaths, userStores, null));
+            Path bagIdPath = tempDir.resolve(BAG_ID);
+            assertThat(Files.exists(bagIdPath)).isFalse();
+            Path bagIdDataPath = bagIdPath.resolve(DATA);
+            assertThat(Files.exists(bagIdDataPath)).isFalse();
 
-        File downloadResult = downloader.transferFromUserStoreToWorker();
-        assertThat(downloadResult).isEqualTo(bagIdPath.toFile());
-        
-        verify(downloader, never()).copySelectedUserDataToBagDataDir(any(Path.class));
-    }
-    
-    @Test
-    @SneakyThrows
-    void testAlreadyCopiedAndBagIdDoesNotExist() {
+            //we create this directory to force the skip
+            Files.createDirectories(bagIdDataPath);
 
-        Path bagIdPath = tempDir.resolve(BAG_ID);
-        assertThat(Files.exists(bagIdPath)).isFalse();
-        Path bagIdDataPath = bagIdPath.resolve(DATA);
-        assertThat(Files.exists(bagIdDataPath)).isFalse();
+            Event lastEvent = new TransferComplete();
+            lastEvent.eventClass = TransferComplete.class.getName();
 
-        Event lastEvent = new TransferComplete();
-        lastEvent.eventClass = TransferComplete.class.getName();
-        
-        var downloader = Mockito.spy(new DepositUserStoreDownloader(USER_ID, JOB_ID, DEPOSIT_ID, SENDER, BAG_ID, CONTEXT, lastEvent, PROPS,
-                fileStorePaths, userStores, null));
-        
-        doNothing().when(downloader).copySelectedUserDataToBagDataDir(bagIdDataPath);
+            var downloader = Mockito.spy(new DepositUserStoreDownloader(USER_ID, JOB_ID, DEPOSIT_ID, SENDER, BAG_ID, CONTEXT, lastEvent, PROPS,
+                    fileStorePaths, userStores, null));
 
-        File downloadResult = downloader.transferFromUserStoreToWorker();
-        assertThat(downloadResult).isEqualTo(bagIdPath.toFile());
-        
-        verify(downloader).copySelectedUserDataToBagDataDir(any(Path.class));
+            File downloadResult = downloader.transferFromUserStoreToWorker();
+            assertThat(downloadResult).isEqualTo(bagIdPath.toFile());
+
+            verify(downloader, never()).copySelectedUserDataToBagDataDir(any(Path.class));
+        }
+
+        @Test
+        @SneakyThrows
+        void testAlreadyCopiedAndBagIdDoesNotExist() {
+
+            Path bagIdPath = tempDir.resolve(BAG_ID);
+            assertThat(Files.exists(bagIdPath)).isFalse();
+            Path bagIdDataPath = bagIdPath.resolve(DATA);
+            assertThat(Files.exists(bagIdDataPath)).isFalse();
+
+            Event lastEvent = new TransferComplete();
+            lastEvent.eventClass = TransferComplete.class.getName();
+
+            var downloader = Mockito.spy(new DepositUserStoreDownloader(USER_ID, JOB_ID, DEPOSIT_ID, SENDER, BAG_ID, CONTEXT, lastEvent, PROPS,
+                    fileStorePaths, userStores, null));
+
+            doNothing().when(downloader).copySelectedUserDataToBagDataDir(bagIdDataPath);
+
+            File downloadResult = downloader.transferFromUserStoreToWorker();
+            assertThat(downloadResult).isEqualTo(bagIdPath.toFile());
+
+            verify(downloader).copySelectedUserDataToBagDataDir(any(Path.class));
+        }
+
+        @Test
+        @SneakyThrows
+        void testNotCopied() {
+
+            Path bagIdPath = tempDir.resolve(BAG_ID);
+            assertThat(Files.exists(bagIdPath)).isFalse();
+            Path bagIdDataPath = bagIdPath.resolve(DATA);
+            assertThat(Files.exists(bagIdDataPath)).isFalse();
+
+            Event lastEvent = null;
+            var downloader = Mockito.spy(new DepositUserStoreDownloader(USER_ID, JOB_ID, DEPOSIT_ID, SENDER, BAG_ID, CONTEXT, lastEvent, PROPS,
+                    fileStorePaths, userStores, null));
+
+            doNothing().when(downloader).copySelectedUserDataToBagDataDir(bagIdDataPath);
+
+            File downloadResult = downloader.transferFromUserStoreToWorker();
+            assertThat(downloadResult).isEqualTo(bagIdPath.toFile());
+
+            verify(downloader).copySelectedUserDataToBagDataDir(any(Path.class));
+        }
     }
 }

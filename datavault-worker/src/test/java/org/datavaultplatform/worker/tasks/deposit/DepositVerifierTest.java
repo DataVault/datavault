@@ -70,4 +70,13 @@ class DepositVerifierTest {
         );
     }
     
+    @Test
+    @SneakyThrows
+    void testVerify() {
+        Set<ArchiveStoreInfo> archiveStoreInfos = new HashSet<>();
+        PackageHelper packageHelper = new PackageHelper();
+        var verifier = new DepositVerifier("userId", "jobId", "depositId", sender, "bagId", context, null, props, archiveStoreInfos);
+        verifier.verifyArchive(packageHelper);
+        // TODO - hard to test !
+    }
 }

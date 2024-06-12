@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -236,11 +237,31 @@ public class DepositsController {
                                   @PathVariable("depositid") String depositID,
                                   @RequestBody Retrieve retrieve) throws Exception {
         User user = usersService.getUser(userID);
-        Deposit deposit = depositsService.getUserDeposit(user, depositID);
-        
         if (user == null) {
             throw new Exception("User '" + userID + "' does not exist");
         }
+        Deposit deposit = depositsService.getUserDeposit(user, depositID);
+        return runRetrieveDeposit(user, deposit, retrieve, null);
+    }
+
+    @PostMapping( "/deposits/{depositid}/retrieve/restart")
+    public Boolean retrieveDepositRestart(@RequestHeader(HEADER_USER_ID) String userID,
+                                   @PathVariable("depositid") String depositID,
+                                   @RequestBody Retrieve retrieve) throws Exception {
+        User user = usersService.getUser(userID);
+        if (user == null) {
+            throw new Exception("User '" + userID + "' does not exist");
+        }
+        Deposit deposit = depositsService.getUserDeposit(user, depositID);
+        Event lastEvent = depositsService.getLastNotFailedRetrieveEvent(depositID);
+        return runRetrieveDeposit(user, deposit, retrieve, lastEvent);
+    }
+
+    protected boolean runRetrieveDeposit(User user, Deposit deposit, Retrieve retrieve, Event lastEvent) throws Exception {
+        Assert.isTrue(user != null, "The user cannot be null");
+        Assert.isTrue(deposit != null, "The deposit cannot be null");
+        Assert.isTrue(retrieve != null, "The retrieve cannot be null");
+
         retrieve.setUser(user);
         
         List<Job> jobs = deposit.getJobs();
@@ -357,9 +378,11 @@ public class DepositsController {
                     null, null, 
                     chunksDigest,
                     tarIVs, chunksIVs,
-                    encTarDigest, encChunksDigests, null);
+                    encTarDigest, encChunksDigests, lastEvent);
             String jsonRetrieve = this.mapper.writeValueAsString(retrieveTask);
-            sender.send(jsonRetrieve);
+
+            boolean isRestart = lastEvent != null;
+            sender.send(jsonRetrieve, isRestart);
         } catch (Exception e) {
             logger.error("unexpected exception", e);
         }
@@ -426,9 +449,6 @@ public class DepositsController {
 		        		asProps.put(PropNames.AWS_SECRET_KEY, this.awsSecretKey);
 		        	}
 
-		        	//if (this.authDir != null && ! this.authDir.equals("")) {
-		        	//	asProps.put("authDir", this.authDir);
-		        	//}
 		        	archiveStore.setProperties(asProps);
 		        }
 	        }

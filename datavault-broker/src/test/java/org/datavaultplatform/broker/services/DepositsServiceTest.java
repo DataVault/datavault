@@ -1,6 +1,7 @@
 package org.datavaultplatform.broker.services;
 
-import org.datavaultplatform.common.event.deposit.Complete;
+import org.datavaultplatform.common.event.Event;
+import org.datavaultplatform.common.model.Job;
 import org.datavaultplatform.common.model.dao.AuditChunkStatusDAO;
 import org.datavaultplatform.common.model.dao.DepositChunkDAO;
 import org.datavaultplatform.common.model.dao.DepositDAO;
@@ -10,7 +11,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.*;
@@ -74,4 +78,66 @@ class DepositsServiceTest {
             verifyNoMoreInteractions(mEventDAO);
         }
     }
+    
+    @Captor
+    ArgumentCaptor<String> argDepositId;
+
+    @Captor
+    ArgumentCaptor<String> argJobClass;
+    
+    @Test
+    void testGetLastEventForDepositFound() {
+        Event mEvent = Mockito.mock(Event.class);
+        when(mEventDAO.findLatestEventByDepositIdAndJobTaskClass(argDepositId.capture(), argJobClass.capture())).thenReturn(Optional.of(mEvent));
+        
+        Event lastEvent = depositsService.getLastNotFailedDepositEvent("depositId123");
+        assertThat(lastEvent).isEqualTo(mEvent);
+        String actualDepositId = argDepositId.getValue();
+        String actualJobClass = argJobClass.getValue();
+        assertThat(actualDepositId).isEqualTo("depositId123");
+        assertThat(actualJobClass).isEqualTo(Job.TASK_CLASS_DEPOSIT);
+        verify(mEventDAO).findLatestEventByDepositIdAndJobTaskClass(actualDepositId, actualJobClass);
+        verifyNoMoreInteractions(mEventDAO);
+    }
+    @Test
+    void testGetLastEventForDepositNotFound() {
+        when(mEventDAO.findLatestEventByDepositIdAndJobTaskClass(argDepositId.capture(), argJobClass.capture())).thenReturn(Optional.empty());
+
+        Event lastEvent = depositsService.getLastNotFailedDepositEvent("depositId123");
+        assertThat(lastEvent).isNull();
+        String actualDepositId = argDepositId.getValue();
+        String actualJobClass = argJobClass.getValue();
+        assertThat(actualDepositId).isEqualTo("depositId123");
+        assertThat(actualJobClass).isEqualTo(Job.TASK_CLASS_DEPOSIT);
+        verify(mEventDAO).findLatestEventByDepositIdAndJobTaskClass(actualDepositId, actualJobClass);
+        verifyNoMoreInteractions(mEventDAO);
+    }
+    @Test
+    void testGetLastEventForRetrieveFound() {
+        Event mEvent = Mockito.mock(Event.class);
+        when(mEventDAO.findLatestEventByDepositIdAndJobTaskClass(argDepositId.capture(), argJobClass.capture())).thenReturn(Optional.of(mEvent));
+
+        Event lastEvent = depositsService.getLastNotFailedRetrieveEvent("depositId123");
+        assertThat(lastEvent).isEqualTo(mEvent);
+        String actualDepositId = argDepositId.getValue();
+        String actualJobClass = argJobClass.getValue();
+        assertThat(actualDepositId).isEqualTo("depositId123");
+        assertThat(actualJobClass).isEqualTo(Job.TASK_CLASS_RETRIEVE);
+        verify(mEventDAO).findLatestEventByDepositIdAndJobTaskClass(actualDepositId, actualJobClass);
+        verifyNoMoreInteractions(mEventDAO);
+    }
+    @Test
+    void testGetLastEventForRetrieveNotFound() {
+        when(mEventDAO.findLatestEventByDepositIdAndJobTaskClass(argDepositId.capture(), argJobClass.capture())).thenReturn(Optional.empty());
+
+        Event lastEvent = depositsService.getLastNotFailedRetrieveEvent("depositId123");
+        assertThat(lastEvent).isNull();
+        String actualDepositId = argDepositId.getValue();
+        String actualJobClass = argJobClass.getValue();
+        assertThat(actualDepositId).isEqualTo("depositId123");
+        assertThat(actualJobClass).isEqualTo(Job.TASK_CLASS_RETRIEVE);
+        verify(mEventDAO).findLatestEventByDepositIdAndJobTaskClass(actualDepositId, actualJobClass);
+        verifyNoMoreInteractions(mEventDAO);
+    }
+
 }
