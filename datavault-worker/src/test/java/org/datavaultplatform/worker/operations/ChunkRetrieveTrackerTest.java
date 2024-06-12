@@ -6,6 +6,8 @@ import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.task.Context;
 import org.datavaultplatform.common.util.Utils;
+import org.datavaultplatform.worker.tasks.retrieve.ArchiveDeviceInfo;
+import org.datavaultplatform.worker.tasks.retrieve.RetrieveChunkInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -117,11 +119,13 @@ class ChunkRetrieveTrackerTest {
                 } else {
                     Mockito.doNothing().when(mDevice).retrieve(argArchiveId.capture(), argChunkFile.capture(), argProgress.capture());
                 }
-
+                ArchiveDeviceInfo archiveDeviceInfo = new ArchiveDeviceInfo(mDevice, isMulti, Arrays.asList(TEST_LOCATION));
+                String encChunkDigest = encChunksDigest.get(TEST_CHUNK_NUMBER);
+                String chunkDigest = chunksDigest.get(TEST_CHUNK_NUMBER);
+                byte[] iv = ivs.get(TEST_CHUNK_NUMBER);
+                RetrieveChunkInfo chunkInfo = new RetrieveChunkInfo(TEST_CHUNK_NUMBER, chunkFile, encChunkDigest, iv, chunkDigest);
                 ChunkRetrieveTracker retriever = new ChunkRetrieveTracker(
-                        TEST_ARCHIVE_ID, mDevice, mContext, TEST_CHUNK_NUMBER,
-                        ivs, Arrays.asList(TEST_LOCATION), isMulti, progress, chunksDigest, encChunksDigest,
-                        chunkFile);
+                        TEST_ARCHIVE_ID, archiveDeviceInfo, mContext, progress, chunkInfo);
                 File result = retriever.call();
                 assertThat(result).isEqualTo(chunkFile);
 

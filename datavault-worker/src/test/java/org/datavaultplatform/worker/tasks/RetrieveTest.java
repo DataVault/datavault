@@ -17,7 +17,9 @@ import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.datavaultplatform.common.util.StorageClassUtils;
 import org.datavaultplatform.worker.retry.DvRetryException;
 import org.datavaultplatform.worker.retry.TwoSpeedRetry;
+import org.datavaultplatform.worker.tasks.retrieve.ArchiveDeviceInfo;
 import org.datavaultplatform.worker.tasks.retrieve.RetrieveUtils;
+import org.datavaultplatform.worker.tasks.retrieve.UserStoreInfo;
 import org.datavaultplatform.worker.test.TestClockConfig;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,6 +41,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.datavaultplatform.common.storage.Verify.SHA_1_ALGORITHM;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 @Slf4j
@@ -82,16 +85,15 @@ public class RetrieveTest {
     ArgumentCaptor<Context> argContext;
 
     @Captor
-    ArgumentCaptor<String> argTarFileName;
-
-    @Captor
     ArgumentCaptor<File> argTarFile;
 
     @Captor
-    ArgumentCaptor<Device> argArchiveFs;
+    ArgumentCaptor<ArchiveDeviceInfo> argArchiveDeviceInfo;
 
     @Captor
-    ArgumentCaptor<Device> argUserStoreFs;
+    ArgumentCaptor<UserStoreInfo> argUserStoreInfo;
+    //@Captor
+    //ArgumentCaptor<ArchiveDeviceInfo> argArchiveDeviceInfo;
     
     @Captor
     ArgumentCaptor<File> argDataVaultHiddenFile;
@@ -184,7 +186,7 @@ public class RetrieveTest {
         properties.put(PropNames.ARCHIVE_ID, "archive-id");
         properties.put(PropNames.USER_ID, "user-id");
         properties.put(PropNames.ARCHIVE_DIGEST, "archive-digest");
-        properties.put(PropNames.ARCHIVE_DIGEST_ALGORITHM, "archive-digest-algorithm");
+        properties.put(PropNames.ARCHIVE_DIGEST_ALGORITHM, SHA_1_ALGORITHM);
         properties.put(PropNames.NUM_OF_CHUNKS, "1");
         properties.put(PropNames.ARCHIVE_SIZE, "2112");
         properties.put(PropNames.USER_FS_RETRY_MAX_ATTEMPTS, "10");
@@ -210,23 +212,12 @@ public class RetrieveTest {
 
         // override the clock with a fixed clock for testing
         lenient().when(retrieve.getClock()).thenReturn(TestClockConfig.TEST_CLOCK);
-        if (singleCopy) {
-            lenient().doNothing().when(retrieve).fromArchiveStoreSingleCopy(
-                    argContext.capture(),
-                    argTarFileName.capture(),
-                    argTarFile.capture(),
-                    argArchiveFs.capture(),
-                    argUserStoreFs.capture(),
-                    argTimestampDirName2.capture());
-        } else {
-            lenient().doNothing().when(retrieve).fromArchiveStoreMultipleCopies(
-                    argContext.capture(),
-                    argTarFileName.capture(),
-                    argTarFile.capture(),
-                    argArchiveFs.capture(),
-                    argUserStoreFs.capture(),
-                    argTimestampDirName2.capture());
-        }
+
+        lenient().doNothing().when(retrieve).fromArchiveStore(
+                argContext.capture(),
+                argTarFile.capture(),
+                argArchiveDeviceInfo.capture(),
+                argUserStoreInfo.capture());
 
         try (MockedStatic<StorageClassUtils> storageClassUtilsStatic = Mockito.mockStatic(StorageClassUtils.class)) {
 
@@ -291,22 +282,21 @@ public class RetrieveTest {
                 Context actualContext = argContext.getValue();
                 assertThat(actualContext).isEqualTo(mContext);
 
-                String actualTarFileName = argTarFileName.getValue();
-                assertThat(actualTarFileName).isEqualTo("bag-id.tar");
-
                 File actualTarFile = argTarFile.getValue();
                 assertThat(actualTarFile).isEqualTo(new File("/tmp/dir/bag-id.tar"));
 
-                Device actualArchiveFs = argArchiveFs.getValue();
+                ArchiveDeviceInfo actualArchiveDeviceInfo = argArchiveDeviceInfo.getValue();
+                Device actualArchiveFs = actualArchiveDeviceInfo.archiveFs();         
+                //Device actualArchiveFs = argArchiveFs.getValue();
                 assertThat(actualArchiveFs).isEqualTo(mArchiveFS);
 
-                Device actualUserStoreFs = argUserStoreFs.getValue();
+                Device actualUserStoreFs = argUserStoreInfo.getValue().userFs();
 
                 if (useSftpUserStore) {
                     assertThat(actualUserStoreFs).isEqualTo(mSftpUserStore);
 
                     String actualTimestampDir1 = argTimestampDirName1.getValue();
-                    String actualTimestampDir2 = argTimestampDirName2.getValue();
+                    String actualTimestampDir2 = argUserStoreInfo.getValue().timeStampDirName();
 
                     assertThat(actualTimestampDir1).isEqualTo(actualTimestampDir2);
                     assertThat(actualTimestampDir1).isEqualTo(TEST_TIMESTAMP_DIR_NAME);
@@ -316,17 +306,12 @@ public class RetrieveTest {
                     assertThat(actualUserStoreFs).isEqualTo(mNonSftpUserStore);
 
                 }
-
-                if (singleCopy) {
-                    verify(retrieve).fromArchiveStoreSingleCopy(actualContext, actualTarFileName, actualTarFile, actualArchiveFs, actualUserStoreFs, TEST_TIMESTAMP_DIR_NAME);
-                } else {
-                    verify(retrieve).fromArchiveStoreMultipleCopies(actualContext, actualTarFileName, actualTarFile, actualArchiveFs, actualUserStoreFs, TEST_TIMESTAMP_DIR_NAME);
-                }
-
+                
+                verify(retrieve).fromArchiveStore(actualContext, actualTarFile, actualArchiveDeviceInfo, new UserStoreInfo(actualUserStoreFs, TEST_TIMESTAMP_DIR_NAME));
                 checkErrorMessages("Job states: 5", "Deposit retrieve started", "Job progress update");
             } else {
-                verify(retrieve, never()).fromArchiveStoreSingleCopy(any(), any(), any(), any(), any(), any());
-                verify(retrieve, never()).fromArchiveStoreMultipleCopies(any(), any(), any(), any(), any(), any());
+                verify(retrieve, never()).fromArchiveStore(
+                        any(Context.class), any(File.class), any(ArchiveDeviceInfo.class), any(UserStoreInfo.class));
 
                 checkErrorMessages(
                         "Job states: 5",
@@ -687,7 +672,7 @@ public class RetrieveTest {
 
             }).when(mUserFs).store(any(), any(), any());
 
-            ret.copyFilesToUserFs(progress, payloadDir, mUserFs, 123_3456L, TEST_TIMESTAMP_DIR_NAME);
+            ret.copyFilesToUserFs(progress, payloadDir, new UserStoreInfo(mUserFs,TEST_TIMESTAMP_DIR_NAME), 123_3456L);
         }
     }
 }
