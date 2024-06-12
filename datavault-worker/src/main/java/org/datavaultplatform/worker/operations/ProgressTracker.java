@@ -1,21 +1,22 @@
 package org.datavaultplatform.worker.operations;
 
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.datavaultplatform.common.event.EventSender;
 import org.datavaultplatform.common.event.UpdateProgress;
 import org.datavaultplatform.common.io.Progress;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * A class to track the progress of a deposit (or maybe any Task not sure)
  */
+@Slf4j
 public class ProgressTracker implements Runnable {
     
     private static final int SLEEP_INTERVAL_MS = 250;
-    private boolean active = true;
+    private AtomicBoolean active = new AtomicBoolean(true);
     private long lastByteCount = 0;
     private final long expectedBytes;
 
@@ -23,8 +24,6 @@ public class ProgressTracker implements Runnable {
     private final String jobId;
     private final String depositId;
     private final EventSender eventSender;
-    
-    private static final Logger logger = LoggerFactory.getLogger(ProgressTracker.class);
     
     /**
      * ProgressTracker constructor
@@ -46,7 +45,7 @@ public class ProgressTracker implements Runnable {
      * Stop method for threading
      */
     public void stop() {
-        active = false;
+        active.set(false);
     }
     
     /**
@@ -76,7 +75,7 @@ public class ProgressTracker implements Runnable {
                              FileUtils.byteCountToDisplaySize(expectedBytes) +
                              " (" + FileUtils.byteCountToDisplaySize(bytesPerSec) + "/sec)";
             
-            logger.info(message);
+            log.info(message);
             
             // Signal progress to the broker
             
@@ -96,16 +95,15 @@ public class ProgressTracker implements Runnable {
         progress.setStartTime(System.currentTimeMillis());
         
         try {
-            while(active) {
+            while(active.get()) {
                 reportProgress();
-                Thread.sleep(SLEEP_INTERVAL_MS);
+                TimeUnit.MILLISECONDS.sleep(SLEEP_INTERVAL_MS);
             }
-            
+        } catch (Exception e) {
+            log.error("Error in progress tracker", e);
+        } finally {
             // Report final counts before exiting
             reportProgress();
-            
-        } catch (Exception e) {
-            logger.error("Error in progress tracker", e);
         }
     }
     
@@ -116,7 +114,7 @@ public class ProgressTracker implements Runnable {
             trackable.track();
         } finally {
             // Stop the tracking thread
-            this.stop();
+            stop();
             trackerThread.join();
         }
     }

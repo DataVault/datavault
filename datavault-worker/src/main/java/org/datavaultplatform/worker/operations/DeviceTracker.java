@@ -14,6 +14,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Optional;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
 @Getter
@@ -48,36 +49,33 @@ public class DeviceTracker implements Callable<HashMap<String, String>> {
         // Progress tracking (threaded)
         Progress progress = new Progress();
         ProgressTracker tracker = new ProgressTracker(progress, jobID, depositId, tarFile.length(), userEventSender);
-        Thread trackerThread = new Thread(tracker);
-        trackerThread.start();
         final String depositIdWithOptionalChunkNumber = optChunkNumber
                 .map(chunkNum -> depositId + "." + chunkNum)
                 .orElse(depositId);
-        String archiveId;
-        // kick off new task for each device ( we may already have kicked off x threads for chunks)
-        try {
+
+        AtomicReference<String> archiveIdHolder = new AtomicReference<>();
+        tracker.track(() -> {
             Device device = (Device) archiveStore;
             userEventSender.send(new StartCopyUpload(jobID, depositId, device.name, optChunkNumber));
+            String archiveId;
             if (device.hasDepositIdStorageKey()) {
                 archiveId = device.store(depositIdWithOptionalChunkNumber, tarFile, progress);
             } else {
                 archiveId = device.store("/", tarFile, progress);
             }
+            archiveIdHolder.set(archiveId);
+            
             // TODO : ArchiveStoreDepositedFiles will probably end up being INPUT and OUTPUT - might use read only interface
             archiveStoreDepositedFiles.recordChunkDepositedFile(optChunkNumber, tarFile, archiveId);
             Integer chunkNum = optChunkNumber.orElse(null);
             String eventType = device.name;
             userEventSender.send(new CompleteCopyUpload(depositId, jobID, eventType, chunkNum, archiveStoreId, archiveId));
-        } finally {
-            // Stop the tracking thread
-            tracker.stop();
-            trackerThread.join();
-        }
-
+        });
 
         log.info("Copied: " + progress.getDirCount() + " directories, " + progress.getFileCount() + " files, " + progress.getByteCount() + " bytes");
         // wait for all 3 to finish
 
+        String archiveId = archiveIdHolder.get();
         if (optChunkNumber.isPresent() ) {
             if(!archiveIds.containsKey(archiveStoreId)) {
                 archiveId = formatArchiveId(archiveId);

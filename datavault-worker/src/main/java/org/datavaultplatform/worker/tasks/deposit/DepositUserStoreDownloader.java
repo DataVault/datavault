@@ -154,19 +154,12 @@ public class DepositUserStoreDownloader extends DepositSupport {
         // Progress tracking (threaded)
         Progress progress = new Progress();
         ProgressTracker tracker = new ProgressTracker(progress, jobID, depositId, expectedBytes, userEventSender);
-        Thread trackerThread = new Thread(tracker);
-        trackerThread.start();
-
-        try {
+        tracker.track(() -> {
             // Ask the driver to copy files to our working directory
             log.debug("CopyFromUserStorage filePath:" + filePath);
             log.debug("CopyFromUserStorage outputFile:" + outputFile.getAbsolutePath());
             ((Device) userStore).retrieve(filePath, outputFile, progress);
-        } finally {
-            // Stop the tracking thread
-            tracker.stop();
-            trackerThread.join();
-        }
+        });
     }
     
     private DepositTransferHelper initialTransferStep() {
