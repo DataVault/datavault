@@ -191,7 +191,7 @@ public class DepositVerifier extends DepositSupport {
             log.debug("Creating chunk download task: [{}]", chunkNumber);
             executor.add(cdt);
         }
-        executor.execute(result -> {});
+        executor.execute();
         
         if(doVerification) {
             File tarFile = packageHelper.getTarFile();

@@ -17,6 +17,7 @@ import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.datavaultplatform.common.util.StorageClassUtils;
 import org.datavaultplatform.worker.retry.DvRetryException;
 import org.datavaultplatform.worker.retry.TwoSpeedRetry;
+import org.datavaultplatform.worker.tasks.retrieve.RetrieveUtils;
 import org.datavaultplatform.worker.test.TestClockConfig;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -102,17 +103,7 @@ public class RetrieveTest {
         this.storageModel = new ArchiveStore();
         this.storageModel.setStorageClass("ARCHIVE_STORE_STORAGE_CLASS_NAME");
     }
-
-    @Test
-    @SneakyThrows
-    void testThrowCheckSumError() {
-        File mFile = mock(File.class);
-        when(mFile.getCanonicalPath()).thenReturn("/tmp/some/file.1.tar");
-        Exception ex = assertThrows(Exception.class, () -> Retrieve.throwChecksumError("<actualCS>", "<expectedCS>",
-                mFile, "test"));
-        assertEquals("Checksum failed:test:(actual)<actualCS> != (expected)<expectedCS>:/tmp/some/file.1.tar", ex.getMessage());
-    }
-
+    
     @Nested
     class SftpUserStoreTests {
 
@@ -220,7 +211,7 @@ public class RetrieveTest {
         // override the clock with a fixed clock for testing
         lenient().when(retrieve.getClock()).thenReturn(TestClockConfig.TEST_CLOCK);
         if (singleCopy) {
-            lenient().doNothing().when(retrieve).singleCopy(
+            lenient().doNothing().when(retrieve).fromArchiveStoreSingleCopy(
                     argContext.capture(),
                     argTarFileName.capture(),
                     argTarFile.capture(),
@@ -228,7 +219,7 @@ public class RetrieveTest {
                     argUserStoreFs.capture(),
                     argTimestampDirName2.capture());
         } else {
-            lenient().doNothing().when(retrieve).multipleCopies(
+            lenient().doNothing().when(retrieve).fromArchiveStoreMultipleCopies(
                     argContext.capture(),
                     argTarFileName.capture(),
                     argTarFile.capture(),
@@ -320,22 +311,22 @@ public class RetrieveTest {
                     assertThat(actualTimestampDir1).isEqualTo(actualTimestampDir2);
                     assertThat(actualTimestampDir1).isEqualTo(TEST_TIMESTAMP_DIR_NAME);
                     
-                    assertThat(argDataVaultHiddenFile.getValue().getName()).isEqualTo(Retrieve.DATA_VAULT_HIDDEN_FILE_NAME);
+                    assertThat(argDataVaultHiddenFile.getValue().getName()).isEqualTo(RetrieveUtils.DATA_VAULT_HIDDEN_FILE_NAME);
                 } else {
                     assertThat(actualUserStoreFs).isEqualTo(mNonSftpUserStore);
 
                 }
 
                 if (singleCopy) {
-                    verify(retrieve).singleCopy(actualContext, actualTarFileName, actualTarFile, actualArchiveFs, actualUserStoreFs, TEST_TIMESTAMP_DIR_NAME);
+                    verify(retrieve).fromArchiveStoreSingleCopy(actualContext, actualTarFileName, actualTarFile, actualArchiveFs, actualUserStoreFs, TEST_TIMESTAMP_DIR_NAME);
                 } else {
-                    verify(retrieve).multipleCopies(actualContext, actualTarFileName, actualTarFile, actualArchiveFs, actualUserStoreFs, TEST_TIMESTAMP_DIR_NAME);
+                    verify(retrieve).fromArchiveStoreMultipleCopies(actualContext, actualTarFileName, actualTarFile, actualArchiveFs, actualUserStoreFs, TEST_TIMESTAMP_DIR_NAME);
                 }
 
                 checkErrorMessages("Job states: 5", "Deposit retrieve started", "Job progress update");
             } else {
-                verify(retrieve, never()).singleCopy(any(), any(), any(), any(), any(), any());
-                verify(retrieve, never()).multipleCopies(any(), any(), any(), any(), any(), any());
+                verify(retrieve, never()).fromArchiveStoreSingleCopy(any(), any(), any(), any(), any(), any());
+                verify(retrieve, never()).fromArchiveStoreMultipleCopies(any(), any(), any(), any(), any(), any());
 
                 checkErrorMessages(
                         "Job states: 5",

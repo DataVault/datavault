@@ -77,6 +77,7 @@ public class ChunkRetrieveTracker implements Callable<File> {
         Utils.checkFileHash("ret-chunk", this.getChunkFile(), archivedChunkFileHash);
 
         log.debug("Chunk download task completed: " + this.getChunkNumber());
+        // SEND EVENT - updating progressed chunk (deposit id,chunkNumber)
         return this.getChunkFile();
     }
 

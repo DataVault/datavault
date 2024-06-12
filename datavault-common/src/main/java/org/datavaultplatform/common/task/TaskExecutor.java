@@ -35,6 +35,10 @@ public class TaskExecutor<T> {
     tasks.add(task);
   }
 
+  public synchronized void execute() throws Exception {
+      execute(result -> {});
+  }
+  
   public synchronized void execute(Consumer<T> consumer) throws Exception {
     if (executed.getAndSet(true)) {
       throw new IllegalStateException("Already executed");

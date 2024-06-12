@@ -108,4 +108,16 @@ public class ProgressTracker implements Runnable {
             logger.error("Error in progress tracker", e);
         }
     }
+    
+    public void track(Trackable trackable) throws Exception {
+        Thread trackerThread = new Thread(this);
+        trackerThread.start();
+        try {
+            trackable.track();
+        } finally {
+            // Stop the tracking thread
+            this.stop();
+            trackerThread.join();
+        }
+    }
 }
