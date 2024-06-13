@@ -2,13 +2,12 @@ package org.datavaultplatform.worker.operations;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.datavaultplatform.common.crypto.Encryption;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.task.Context;
-import org.datavaultplatform.common.util.Utils;
 import org.datavaultplatform.worker.tasks.retrieve.ArchiveDeviceInfo;
 import org.datavaultplatform.worker.tasks.retrieve.RetrieveChunkInfo;
+import org.datavaultplatform.worker.tasks.retrieve.RetrieveUtils;
 
 import java.io.File;
 import java.util.List;
@@ -60,22 +59,10 @@ public class ChunkRetrieveTracker implements Callable<File> {
             archiveStore.retrieve(chunkArchiveId, chunkFile, progress);
         }
 
-        if( iv != null ) {
+        RetrieveUtils.decryptAndCheckTarFile("chunk-"+chunkNumber, context, iv, chunkFile, encChunkDigest, chunkDigest);
 
-            // Check encrypted file checksum
-            Utils.checkFileHash("ret-enc-chunk", chunkFile, encChunkDigest);
-            Encryption.decryptFile(this.getContext(), chunkFile, iv);
-        }
-
-        // Check file
-
-        // TODO: Should we check algorithm each time or assume main tar file algorithm is the same
-        // We might also want to move algorithm check before this loop
-
-        Utils.checkFileHash("ret-chunk", chunkFile, chunkDigest);
-
-        log.debug("Chunk download task completed: " + this.getChunkNumber());
-        // SEND EVENT - updating progressed chunk (deposit id,chunkNumber)
+        log.debug("Chunk download task completed: " + chunkNumber);
+        // TODO: SEND EVENT - updating progressed chunk (deposit id,chunkNumber)
         return chunkFile;
     }
 }

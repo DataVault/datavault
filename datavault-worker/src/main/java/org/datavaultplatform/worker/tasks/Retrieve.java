@@ -124,11 +124,11 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
         File[] chunks = new File[numOfChunks];
         log.info("Retrieving [{}] chunk(s)", numOfChunks);
         
-        TaskExecutor<File> executor = getTaskExector(context);
+        TaskExecutor<File> executor = getTaskExecutor(context);
         for (int chunkNum = 1; chunkNum <= numOfChunks; chunkNum++) {
             log.debug("Creating chunk download task: [{}]", chunkNum);
             RetrieveChunkInfo chunkInfo = getChunkInfo(context, tarFile, chunkNum);
-            File chunkFile = chunkInfo.chunkFile();
+            chunks[chunkNum - 1] = chunkInfo.chunkFile();
             
             //if not a restart OR (chunk not retrieved OR decrypted chunk file does not exist) then execute a task to retrieve it.
             
@@ -137,7 +137,6 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
                     context, progress, chunkInfo
             );
             executor.add(crt);
-            chunks[chunkNum - 1] = chunkFile;
         }
 
         executor.execute();
@@ -150,7 +149,7 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
         Arrays.stream(chunks).filter(Objects::nonNull).forEach(File::delete);
     }
     
-    private TaskExecutor<File> getTaskExector(Context context) {
+    private TaskExecutor<File> getTaskExecutor(Context context) {
         int noOfThreads = context.getNoChunkThreads();
         log.debug("Number of threads: [{}]", noOfThreads);
         return new TaskExecutor<>(noOfThreads, "Chunk download failed.");
@@ -287,7 +286,7 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
                 recompose(context, archiveDeviceInfo, progress, tarFile);
             } else {
                 archiveDeviceInfo.retrieve(archiveId, tarFile, progress);
-                RetrieveUtils.decryptTarFile(getTarIV(), context, tarFile, encTarDigest);
+                RetrieveUtils.decryptAndCheckTarFile("no-chunk", context, getTarIV(), tarFile, encTarDigest, archiveDigest);
             }
             doRetrieveFromWorkerToUserFs(context, userStoreInfo, tarFile, progress);
         });

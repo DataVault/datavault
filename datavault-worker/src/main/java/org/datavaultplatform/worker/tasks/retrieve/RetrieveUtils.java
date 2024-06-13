@@ -94,12 +94,13 @@ public abstract class RetrieveUtils {
                 Device.class, storageClassNameResolver);
         return device;
     }
-    public static void decryptTarFile(byte[] tarIV, Context context, File tarFile, String encTarDigest) throws Exception {
+    public static void decryptAndCheckTarFile(String label, Context context, byte[] tarIV, File tarFile, String encTarDigest, String tarDigest) throws Exception {
         if (tarIV != null) {
             // Decrypt tar file
-            Utils.checkFileHash("ret-single-tar", tarFile, encTarDigest);
+            Utils.checkFileHash(label+"-enc", tarFile, encTarDigest);
             Encryption.decryptFile(context, tarFile, tarIV);
         }
+        Utils.checkFileHash(label+"-non-enc", tarFile, tarDigest);
     }
 
     public static String getTarFileName(String bagID) {
