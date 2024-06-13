@@ -92,9 +92,16 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
         StorageClassNameResolver resolver = context.getStorageClassNameResolver();
         Device userFs = setupUserFileStores(resolver);
         Device archiveFs = setupArchiveFileStores(resolver);
+
         String timestampDirName = SftpUtils.getTimestampedDirectoryName(getClock());
         var userStoreInfo = new UserStoreInfo(userFs, timestampDirName);
+
         try {
+            // Verify integrity with deposit checksum
+            if (!Verify.getAlgorithm().equals(archiveDigestAlgorithm)) {
+                throw new Exception("Unsupported checksum algorithm: [%s]".formatted(archiveDigestAlgorithm));
+            }
+
             checkUserStoreFreeSpaceAndPermissions(userStoreInfo);
 
             // Retrieve the archived data
@@ -104,11 +111,6 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
             File tarFile = context.getTempDir().resolve(tarFileName).toFile();
             
             sendEvent(getUpdateProgress(archiveSize).withNextState(RetrieveState01RetrievingFromArchive.getStateNumber()));
-
-            // Verify integrity with deposit checksum
-            if (!Verify.getAlgorithm().equals(archiveDigestAlgorithm)) {
-                throw new Exception("Unsupported checksum algorithm: [%s]".formatted(archiveDigestAlgorithm));
-            }
 
             var archiveDeviceInfo = ArchiveDeviceInfo.fromArchiveFs(archiveFs);
             fromArchiveStore(context, tarFile, archiveDeviceInfo, userStoreInfo);
@@ -120,7 +122,18 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
 
     private void recompose(Context context, ArchiveDeviceInfo archiveDeviceInfo, Progress progress,
                            File tarFile ) throws Exception {
+        
+        File[] chunks = retrieveFiles(context, archiveDeviceInfo, progress, tarFile);
 
+        log.info("Recomposing tar file from [{}] chunk(s)", numOfChunks);
+        doRecomposeUsingCorrectVersion(context, chunks, tarFile);
+
+        // On the assumption that we have the tarfile now, delete the chunks
+        log.info("Deleting the chunks now we have the recomposed tarfile");
+        Arrays.stream(chunks).filter(Objects::nonNull).forEach(File::delete);
+    }
+
+    private File[] retrieveFiles(Context context, ArchiveDeviceInfo archiveDeviceInfo, Progress progress, File tarFile) throws Exception {
         File[] chunks = new File[numOfChunks];
         log.info("Retrieving [{}] chunk(s)", numOfChunks);
         
@@ -140,13 +153,7 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
         }
 
         executor.execute();
-
-        log.info("Recomposing tar file from [{}] chunk(s)", numOfChunks);
-        doRecomposeUsingCorrectVersion(context, chunks, tarFile);
-
-        // On the assumption that we have the tarfile now, delete the chunks
-        log.info("Deleting the chunks now we have the recomposed tarfile");
-        Arrays.stream(chunks).filter(Objects::nonNull).forEach(File::delete);
+        return chunks;
     }
     
     private TaskExecutor<File> getTaskExecutor(Context context) {
@@ -294,11 +301,10 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
 
     protected void copyFilesToUserFs(Progress progress, File payloadDir, UserStoreInfo userStoreInfo, long bagDirSize) throws Exception {
         trackProgress(progress, bagDirSize, () -> {
-            Path basePath = payloadDir.toPath();
             File[] contents = payloadDir.listFiles();
             Arrays.sort(contents);
             for (File content : contents) {
-                String taskDesc = basePath.relativize(content.toPath()).toString();
+                String taskDesc = payloadDir.toPath().relativize(content.toPath()).toString();
                 TwoSpeedRetry.DvRetryTemplate template = userFsTwoSpeedRetry.getRetryTemplate(String.format("toUserFs - %s", taskDesc));
                 template.execute(retryContext -> store(userStoreInfo, content, progress));
             }

@@ -366,7 +366,7 @@ class TivoliStorageManagerTest {
     }
 
     @Nested
-    class RetrieveTests {
+    class sts {
         
         Path tsmTemp;
         TivoliStorageManager tsm;
