@@ -311,12 +311,12 @@ public class RetrieveTest {
                 }
                 
                 verify(retrieve).fromArchiveStore(actualContext, actualTarFile, actualArchiveDeviceInfo, new UserStoreInfo(actualUserStoreFs, TEST_TIMESTAMP_DIR_NAME), null);
-                checkErrorMessages("Job states: 5", "Deposit retrieve started", "Job progress update");
+                checkEventMessages("Job states: 5", "Deposit retrieve started", "User Store Space Available Checked", "Job progress update");
             } else {
                 verify(retrieve, never()).fromArchiveStore(
                         any(Context.class), any(File.class), any(ArchiveDeviceInfo.class), any(UserStoreInfo.class), any(Event.class));
 
-                checkErrorMessages(
+                checkEventMessages(
                         "Job states: 5",
                         "Deposit retrieve started",
                         "Unable to perform test write of file[.datavault] to user space",
@@ -344,7 +344,7 @@ public class RetrieveTest {
                 assertThat(ex).hasMessage("problem creating UserStore");
             }
 
-            checkErrorMessages("Job states: 5",
+            checkEventMessages("Job states: 5",
                     "Deposit retrieve started",
                     "Retrieve failed: could not access user filesystem");
         }
@@ -372,7 +372,7 @@ public class RetrieveTest {
                 assertThat(ex).hasMessage("problem creating ArchiveStore");
             }
 
-            checkErrorMessages("Job states: 5",
+            checkEventMessages("Job states: 5",
                     "Deposit retrieve started",
                     "Retrieve failed: could not access archive filesystem");
         }
@@ -383,7 +383,7 @@ public class RetrieveTest {
         Retrieve retrieve = getRetrieveForTest(true);
         retrieve.setIsRedeliver(true);
         retrieve.performAction(mContext);
-        checkErrorMessages("Retrieve stopped: the message had been redelivered, please investigate");
+        checkEventMessages("Retrieve stopped: the message had been redelivered, please investigate");
     }
 
     @Test
@@ -413,7 +413,7 @@ public class RetrieveTest {
                 assertThat(ex).hasMessage("Not enough free space to retrieve data!");
             }
 
-            checkErrorMessages("Job states: 5",
+            checkEventMessages("Job states: 5",
                     "Deposit retrieve started",
                     "Not enough free space to retrieve data!",
                     "Data retrieve failed: Not enough free space to retrieve data!");
@@ -447,7 +447,7 @@ public class RetrieveTest {
                 assertThat(ex).hasMessage("org.datavaultplatform.worker.retry.DvRetryException: task[calcSizeToFS - retrieve-path]failed after[10] attempts");
             }
 
-            checkErrorMessages("Job states: 5",
+            checkEventMessages("Job states: 5",
                     "Deposit retrieve started",
                     "Unable to determine free space",
                     "Data retrieve failed: task[calcSizeToFS - retrieve-path]failed after[10] attempts");
@@ -455,7 +455,7 @@ public class RetrieveTest {
     }
 
 
-    private void checkErrorMessages(String... expectedMessages) {
+    private void checkEventMessages(String... expectedMessages) {
         String[] actualMessages = argEvent.getAllValues().stream().map(Event::getMessage).toArray(String[]::new);
         assertThat(actualMessages).isEqualTo(expectedMessages);
     }
@@ -512,7 +512,7 @@ public class RetrieveTest {
                     assertThat(ex).hasMessage("Target directory not found or is not a directory ! [retrieve-path]");
                 }
 
-                checkErrorMessages("Job states: 5",
+                checkEventMessages("Job states: 5",
                         "Deposit retrieve started",
                         "Target directory not found or is not a directory ! [retrieve-path]",
                         "Data retrieve failed: Target directory not found or is not a directory ! [retrieve-path]"
@@ -650,9 +650,10 @@ public class RetrieveTest {
             properties.put(PropNames.USER_FS_RETRY_MAX_ATTEMPTS, String.valueOf(MAX_ATTEMPTS));
             properties.put(PropNames.USER_FS_RETRY_DELAY_MS_1, "10");
             properties.put(PropNames.USER_FS_RETRY_DELAY_MS_2, "20");
-            Retrieve ret = new Retrieve();
+            Retrieve ret = spy(new Retrieve());
+            lenient().doNothing().when(ret).sendEvent(argEvent.capture());
+            
             ret.setupUserFsTwoSpeedRetry(properties);
-
             Map<File, Integer> attemptCountsPerFile = new HashMap<>();
             doAnswer(invocation -> {
                 assertThat(invocation.getArguments()).hasSize(3);

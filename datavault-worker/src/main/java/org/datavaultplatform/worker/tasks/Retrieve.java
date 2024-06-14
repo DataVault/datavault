@@ -7,9 +7,7 @@ import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.event.EventSender;
 import org.datavaultplatform.common.event.InitStates;
 import org.datavaultplatform.common.event.UpdateProgress;
-import org.datavaultplatform.common.event.retrieve.RetrieveComplete;
-import org.datavaultplatform.common.event.retrieve.RetrieveError;
-import org.datavaultplatform.common.event.retrieve.RetrieveStart;
+import org.datavaultplatform.common.event.retrieve.*;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.model.ArchiveStore;
 import org.datavaultplatform.common.storage.Device;
@@ -30,6 +28,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.time.Clock;
 import java.util.*;
+import java.util.function.Consumer;
 
 import static org.datavaultplatform.worker.operations.FileSplitter.CHUNK_SEPARATOR;
 import static org.datavaultplatform.worker.tasks.retrieve.RetrieveState.*;
@@ -138,6 +137,10 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
         File[] chunks = new File[numOfChunks];
         log.info("Retrieving [{}] chunk(s)", numOfChunks);
         
+        Consumer<Integer> chunkRetrievedEventSender = chunkNumber -> {
+            sendEvent(new ArchiveStoreRetrievedChunk(jobID, depositId,retrieveId,chunkNumber));            
+        };
+        
         TaskExecutor<File> executor = getTaskExecutor(context);
         for (int chunkNum = 1; chunkNum <= numOfChunks; chunkNum++) {
             log.debug("Creating chunk download task: [{}]", chunkNum);
@@ -148,7 +151,7 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
             
             ChunkRetrieveTracker crt = new ChunkRetrieveTracker(
                     archiveId, archiveDeviceInfo,
-                    context, progress, chunkInfo
+                    context, progress, chunkInfo, chunkRetrievedEventSender
             );
             executor.add(crt);
         }
@@ -186,7 +189,7 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
         logProgress(progress);
         log.info("Validating data ...");
         sendEvent(new UpdateProgress(jobID, depositId).withNextState(RetrieveState02ValidatingData.getStateNumber()));
-        Utils.checkFileHash("ret-tar", tarFile, archiveDigest);
+        Utils.checkFileHash("ret-tar", tarFile, archiveDigest); 
         // Decompress to the temporary directory
         File bagDir = Tar.unTar(tarFile, context.getTempDir());
         long bagDirSize = FileUtils.sizeOfDirectory(bagDir);
@@ -286,7 +289,9 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
         } catch (Exception e) {
             throw getRuntimeException(e, "Unable to perform test write of file[" + DATA_VAULT_HIDDEN_FILE_NAME  + "] to user space");
         }
+        sendEvent(new UserStoreSpaceAvailableChecked(jobID, depositId, retrieveId));
     }
+    
     protected void fromArchiveStore(Context context, File tarFile, ArchiveDeviceInfo archiveDeviceInfo, UserStoreInfo userStoreInfo, Event lastEvent) throws Exception {
         var progress = new Progress();
         trackProgress(progress, archiveSize, () -> {
@@ -296,6 +301,7 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
                 archiveDeviceInfo.retrieve(archiveId, tarFile, progress);
                 RetrieveUtils.decryptAndCheckTarFile("no-chunk", context, getTarIV(), tarFile, encTarDigest, archiveDigest);
             }
+            sendEvent(new ArchiveStoreRetrievedAll(jobID, depositId, retrieveId));
             doRetrieveFromWorkerToUserFs(context, userStoreInfo, tarFile, progress, lastEvent);
         });
     }
@@ -310,6 +316,7 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
                 template.execute(retryContext -> store(userStoreInfo, content, progress));
             }
         });
+        sendEvent(new UploadedToUserStore(jobID, depositId, retrieveId));
     }
     private void sendError(String msg) {
         sendEvent(new RetrieveError(jobID, depositId, retrieveId, msg));
@@ -317,7 +324,7 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
     private void logProgress(Progress progress) {
         log.info("Copied: [{}] directories, [{}] files, [{}] bytes", progress.getDirCount(), progress.getFileCount(), progress.getByteCount());
     }
-    private void sendEvent(Event event) {
+    protected void sendEvent(Event event) {
         eventSender.send(event.withUserId(userID));
     }
     /*
@@ -346,7 +353,7 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
         sendError(msg);
         return RetrieveUtils.getRuntimeException(ex);
     }
-    private void init(Context context) {
+    protected void init(Context context) {
         eventSender = context.getEventSender();
         {
             Map<String, String> properties = getProperties();

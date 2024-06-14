@@ -14,6 +14,7 @@ import org.datavaultplatform.common.response.EventInfo;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.task.Task;
 import org.datavaultplatform.common.util.DateTimeUtils;
+import org.datavaultplatform.common.util.RetrievedChunks;
 import org.datavaultplatform.common.util.StoredChunks;
 import org.jsondoc.core.annotation.Api;
 import org.slf4j.Logger;
@@ -371,6 +372,10 @@ public class DepositsController {
             for( DepositChunk chunks : deposit.getDepositChunks() ) {
                 encChunksDigests.put(chunks.getChunkNum(), chunks.getEcnArchiveDigest());
             }
+
+            RetrievedChunks retrievedChunks = depositsService.getChunksRetrieved(deposit.getID());
+            String storedChunksJson = mapper.writeValueAsString(retrievedChunks);
+            retrieveProperties.put(PropNames.DEPOSIT_CHUNKS_RETRIEVED, storedChunksJson);
             
             Task retrieveTask = new Task(
                     job, retrieveProperties, archiveStores, 

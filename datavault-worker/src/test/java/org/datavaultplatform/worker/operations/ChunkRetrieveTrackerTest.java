@@ -15,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
@@ -44,6 +45,9 @@ public class ChunkRetrieveTrackerTest {
 
     @Mock
     RetrieveChunkInfo mChunkInfo;
+
+    @Mock
+    Consumer<Integer> mChunkEventSender;
 
     byte[] testIV = new byte[0];
     
@@ -75,8 +79,10 @@ public class ChunkRetrieveTrackerTest {
             when(mArchiveDeviceInfo.multiCopy()).thenReturn(true);
 
             doNothing().when(mDevice).retrieve(argChunkArchiveId.capture(), eq(mChunkFile), eq(progress), eq(locations));
+            
+            doNothing().when(mChunkEventSender).accept(TEST_CHUNK_NUMBER);
 
-            ChunkRetrieveTracker tracker = new ChunkRetrieveTracker(archiveId, mArchiveDeviceInfo, mContext, progress, mChunkInfo);
+            ChunkRetrieveTracker tracker = new ChunkRetrieveTracker(archiveId, mArchiveDeviceInfo, mContext, progress, mChunkInfo, mChunkEventSender);
 
             File result = tracker.call();
             assertThat(result).isEqualTo(mChunkFile);
@@ -84,8 +90,9 @@ public class ChunkRetrieveTrackerTest {
             String actualChunkArchiveId = argChunkArchiveId.getValue();
             assertThat(actualChunkArchiveId).isEqualTo(archiveId+"."+TEST_CHUNK_NUMBER);
 
-            verify(mDevice).retrieve(actualChunkArchiveId, mChunkFile, progress,locations);
-            
+            verify(mDevice).retrieve(actualChunkArchiveId, mChunkFile, progress, locations);
+            verify(mChunkEventSender).accept(TEST_CHUNK_NUMBER);
+
             mockUtils.verify(() -> RetrieveUtils.decryptAndCheckTarFile("chunk-2112", mContext, testIV, mChunkFile, TEST_ENC_CHUNK_DIGEST, TEST_CHUNK_DIGEST ));
 
             mockUtils.verifyNoMoreInteractions();
@@ -101,7 +108,9 @@ public class ChunkRetrieveTrackerTest {
 
             doNothing().when(mDevice).retrieve(argChunkArchiveId.capture(), eq(mChunkFile), eq(progress));
 
-            ChunkRetrieveTracker tracker = new ChunkRetrieveTracker(archiveId, mArchiveDeviceInfo, mContext, progress, mChunkInfo);
+            doNothing().when(mChunkEventSender).accept(TEST_CHUNK_NUMBER);
+            
+            ChunkRetrieveTracker tracker = new ChunkRetrieveTracker(archiveId, mArchiveDeviceInfo, mContext, progress, mChunkInfo, mChunkEventSender);
 
             File result = tracker.call();
             assertThat(result).isEqualTo(mChunkFile);
@@ -110,6 +119,7 @@ public class ChunkRetrieveTrackerTest {
             assertThat(actualChunkArchiveId).isEqualTo(archiveId+"."+TEST_CHUNK_NUMBER);
 
             verify(mDevice).retrieve(actualChunkArchiveId, mChunkFile, progress);
+            verify(mChunkEventSender).accept(TEST_CHUNK_NUMBER);
 
             mockUtils.verify(() -> RetrieveUtils.decryptAndCheckTarFile("chunk-2112", mContext, testIV, mChunkFile, TEST_ENC_CHUNK_DIGEST, TEST_CHUNK_DIGEST ));
 

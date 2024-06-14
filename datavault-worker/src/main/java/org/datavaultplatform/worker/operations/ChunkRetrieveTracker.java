@@ -2,6 +2,7 @@ package org.datavaultplatform.worker.operations;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.datavaultplatform.common.event.retrieve.UserStoreSpaceAvailableChecked;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.task.Context;
@@ -12,6 +13,7 @@ import org.datavaultplatform.worker.tasks.retrieve.RetrieveUtils;
 import java.io.File;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.function.Consumer;
 
 @Getter
 @Slf4j
@@ -27,13 +29,15 @@ public class ChunkRetrieveTracker implements Callable<File> {
     private final String chunkDigest;
     private final String encChunkDigest;
     private final File chunkFile;
+    private final Consumer<Integer> chunkStoredEventSender;
 
 
     public ChunkRetrieveTracker(String archiveId,
                                 ArchiveDeviceInfo archiveDeviceInfo,
                                 Context context,
                                 Progress progress,
-                                RetrieveChunkInfo chunkInfo
+                                RetrieveChunkInfo chunkInfo,
+                                Consumer<Integer> chunkStoredEventSender
   ) {
         this.context = context;
         this.archiveId = archiveId;
@@ -47,6 +51,7 @@ public class ChunkRetrieveTracker implements Callable<File> {
         this.encChunkDigest = chunkInfo.encChunkDigest();
         this.iv = chunkInfo.iv();
         this.chunkDigest = chunkInfo.chunkDigest();
+        this.chunkStoredEventSender = chunkStoredEventSender;
     }
 
     @Override
@@ -61,8 +66,8 @@ public class ChunkRetrieveTracker implements Callable<File> {
 
         RetrieveUtils.decryptAndCheckTarFile("chunk-"+chunkNumber, context, iv, chunkFile, encChunkDigest, chunkDigest);
 
+        chunkStoredEventSender.accept(chunkNumber);
         log.debug("Chunk download task completed: " + chunkNumber);
-        // TODO: SEND EVENT - updating progressed chunk (deposit id,chunkNumber)
         return chunkFile;
     }
 }
