@@ -10,6 +10,8 @@ import java.util.*;
 import java.util.stream.IntStream;
 
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.app.DataVaultBrokerApp;
@@ -19,7 +21,7 @@ import org.datavaultplatform.broker.test.TestUtils;
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.event.deposit.*;
 import org.datavaultplatform.common.event.Error;
-import org.datavaultplatform.common.event.retrieve.RetrieveStart;
+import org.datavaultplatform.common.event.retrieve.*;
 import org.datavaultplatform.common.model.Deposit;
 import org.datavaultplatform.common.model.Job;
 import org.datavaultplatform.common.model.Vault;
@@ -60,6 +62,9 @@ public class EventDAOIT extends BaseDatabaseTest {
   @Autowired
   JdbcTemplate template;
 
+  @PersistenceContext
+  EntityManager em;
+  
   @Nested
   class BlobTests {
 
@@ -555,5 +560,139 @@ public class EventDAOIT extends BaseDatabaseTest {
     event.setSequence(sequence);
     dao.save(event);
     return event;
+  }
+
+  @Nested
+  class RetrieveEventTests {
+
+    @Transactional
+    @Test
+    void testWriteThenReadEvents() {
+
+      Deposit deposit = new Deposit();
+      deposit.setHasPersonalData(false);
+      deposit.setName("test-deposit");
+      depositDAO.save(deposit);
+
+      Job job = new Job();
+      jobDAO.save(job);
+
+      RetrieveError event00 = get00RetrieveError("job00", "deposit00", "retrieve00", "message00");
+      RetrieveStart event01 = get01RetrieveStart("job01", "deposit01", "retrieve01");
+      UserStoreSpaceAvailableChecked event02 = get02UserStoreSpaceAvailableChecked("job02", "deposit02", "retrieve02");
+      ArchiveStoreRetrievedChunk event03 = get03ArchiveStoreRetrievedChunk("job03", "deposit03", "retrieve03", 2112);
+      ArchiveStoreRetrievedAll event04 = get04ArchiveStoreRetrievedAll("job04", "deposit04", "retrieve04");
+      UploadedToUserStore event05 = get05UploadedToUserStore("job05", "deposit05", "retrieve05");
+      RetrieveComplete event06 = get06RetrieveComplete("job06", "deposit06", "retrieve06");
+
+      List<Event> events = List.of(event00, event01, event02, event03, event04, event05, event06);
+      for (int i = 0; i < events.size(); i++) {
+        Event event = events.get(i);
+        assertThat(event.getEventClass()).isEqualTo(event.getClass().getCanonicalName());
+        assertThat(event.getID()).isNull();
+        assertThat(event.getDeposit()).isNull();
+        assertThat(event.getDepositId()).isEqualTo("deposit%02d".formatted(i));
+        assertThat(event.getJobId()).isEqualTo("job%02d".formatted(i));
+        assertThat(event.getRetrieveId()).isEqualTo("retrieve%02d".formatted(i));
+
+        //depositIds are not persisted but deposits are
+        event.setDeposit(deposit);
+
+        //jobIds are not persisted but jobs are
+        event.setJob(job);
+
+        dao.save(event);
+      }
+
+      // force save to db
+      em.flush();
+
+      // clear the cache - force re-read from db
+      em.clear();
+
+      for (int i = 0; i < events.size(); i++) {
+        Event event = events.get(i);
+        assertThat(event.getID()).isNotNull();
+
+        Event fromDb = dao.findById(event.getID()).get();
+        assertThat(fromDb.getClass()).isEqualTo(event.getClass());
+
+        // different Object
+        assertThat(fromDb).isNotSameAs(event);
+
+        // but read event is equal to saved event
+        assertThat(fromDb).isEqualTo(event);
+
+        assertThat(fromDb.getID()).isEqualTo(event.getID());
+        assertThat(fromDb.getEventClass()).isEqualTo(event.getEventClass());
+
+        // depositId is not persisted
+        assertThat(fromDb.getDepositId()).isNull();
+        assertThat(fromDb.getDeposit()).isEqualTo(deposit);
+
+        // jobId is not persisted
+        assertThat(fromDb.getJobId()).isNull();
+        assertThat(fromDb.getJob()).isEqualTo(job);
+
+        assertThat(fromDb.getRetrieveId()).isNotNull();
+        assertThat(fromDb.getRetrieveId()).isEqualTo(event.getRetrieveId());
+
+        assertThat(fromDb.getMessage()).isNotNull();
+
+        if (fromDb instanceof RetrieveError) {
+          assertThat(fromDb.message).isEqualTo("message00");
+        } else if (fromDb instanceof RetrieveStart) {
+          assertThat(fromDb.message).isEqualTo(RetrieveStart.MESSAGE);
+        } else if (fromDb instanceof UserStoreSpaceAvailableChecked) {
+          assertThat(fromDb.message).isEqualTo(UserStoreSpaceAvailableChecked.MESSAGE);
+        } else if (fromDb instanceof ArchiveStoreRetrievedChunk) {
+          assertThat(fromDb.message).isEqualTo(ArchiveStoreRetrievedChunk.MESSAGE);
+        } else if (fromDb instanceof ArchiveStoreRetrievedAll) {
+          assertThat(fromDb.message).isEqualTo(ArchiveStoreRetrievedAll.MESSAGE);
+        } else if (fromDb instanceof UploadedToUserStore) {
+          assertThat(fromDb.message).isEqualTo(UploadedToUserStore.MESSAGE);
+        } else if (fromDb instanceof RetrieveComplete) {
+          assertThat(fromDb.message).isEqualTo(RetrieveComplete.MESSAGE);
+        } else {
+          throw new IllegalStateException("unexpected event " + fromDb.getClass().getName());
+        }
+        assertThat(fromDb.getMessage()).isEqualTo(event.getMessage());
+
+        if (fromDb instanceof ArchiveStoreRetrievedChunk) {
+          assertThat(fromDb.getChunkNumber()).isGreaterThan(0);
+        } else {
+          assertThat(fromDb.getChunkNumber()).isNull();
+        }
+        assertThat(fromDb.getChunkNumber()).isEqualTo(event.getChunkNumber());
+      }
+    }
+
+    RetrieveError get00RetrieveError(String jobId, String depositId, String retrieveId, String msg) {
+      return new RetrieveError(jobId, depositId, retrieveId, msg);
+    }
+
+    RetrieveStart get01RetrieveStart(String jobId, String depositId, String retrieveId) {
+      return new RetrieveStart(jobId, depositId, retrieveId);
+    }
+
+    UserStoreSpaceAvailableChecked get02UserStoreSpaceAvailableChecked(String jobId, String depositId, String retrieveId) {
+      return new UserStoreSpaceAvailableChecked(jobId, depositId, retrieveId);
+    }
+
+    ArchiveStoreRetrievedChunk get03ArchiveStoreRetrievedChunk(String jobId, String depositId, String retrieveId, int chunkNumber) {
+      return new ArchiveStoreRetrievedChunk(jobId, depositId, retrieveId, chunkNumber);
+    }
+
+    ArchiveStoreRetrievedAll get04ArchiveStoreRetrievedAll(String jobId, String depositId, String retrieveId) {
+      return new ArchiveStoreRetrievedAll(jobId, depositId, retrieveId);
+    }
+
+    UploadedToUserStore get05UploadedToUserStore(String jobId, String depositId, String retrieveId) {
+      return new UploadedToUserStore(jobId, depositId, retrieveId);
+    }
+
+    RetrieveComplete get06RetrieveComplete(String jobId, String depositId, String retrieveId) {
+      return new RetrieveComplete(jobId, depositId, retrieveId);
+    }
   }
 }
