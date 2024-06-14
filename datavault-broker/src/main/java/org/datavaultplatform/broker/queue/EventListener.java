@@ -51,9 +51,7 @@ import org.datavaultplatform.common.event.deposit.StartCopyUpload;
 import org.datavaultplatform.common.event.deposit.TransferComplete;
 import org.datavaultplatform.common.event.deposit.UploadComplete;
 import org.datavaultplatform.common.event.deposit.ValidationComplete;
-import org.datavaultplatform.common.event.retrieve.RetrieveComplete;
-import org.datavaultplatform.common.event.retrieve.RetrieveError;
-import org.datavaultplatform.common.event.retrieve.RetrieveStart;
+import org.datavaultplatform.common.event.retrieve.*;
 import org.datavaultplatform.common.model.ArchiveStore;
 import org.datavaultplatform.common.model.Audit;
 import org.datavaultplatform.common.model.AuditChunkStatus;
@@ -339,6 +337,14 @@ public class EventListener implements MessageListener {
     } else if (event instanceof RetrieveError) {
       process25RetrieveError((RetrieveError) event);
 
+    } else if (event instanceof ArchiveStoreRetrievedAll archiveStoreRetrievedAll){
+      process26ArchiveStoreRetrievedAll(archiveStoreRetrievedAll);
+    } else if (event instanceof ArchiveStoreRetrievedChunk archiveStoreRetrievedChunk){
+      process27ArchiveStoreRetrievedChunk(archiveStoreRetrievedChunk);
+    } else if (event instanceof UploadedToUserStore uploadedToUserStore) {
+      process28UploadedToUserStore(uploadedToUserStore);
+    } else if (event instanceof UserStoreSpaceAvailableChecked userStoreSpaceAvailableChecked ){
+      process29UserStoreSpaceAvailableChecked(userStoreSpaceAvailableChecked);
     } else {
       throw new Exception(
           String.format("Failed to process unknown Event class[%s]message[%s]", event.getClass(),
@@ -813,6 +819,19 @@ public class EventListener implements MessageListener {
     this.sendEmails(getDeposit(event.getDepositId()), event, TYPE_ERROR,
             EmailTemplate.USER_DEPOSIT_ERROR,
             EmailTemplate.GROUP_ADMIN_DEPOSIT_ERROR);
+  }
+
+  private void process26ArchiveStoreRetrievedAll(ArchiveStoreRetrievedAll event) {
+    ignore(event);
+  }
+  private void process27ArchiveStoreRetrievedChunk(ArchiveStoreRetrievedChunk event) {
+    ignore(event);
+  }
+  private void process28UploadedToUserStore(UploadedToUserStore event) {
+    ignore(event);
+  }
+  private void process29UserStoreSpaceAvailableChecked(UserStoreSpaceAvailableChecked event) {
+    ignore(event);
   }
 
   String getUserSubject(String type) {

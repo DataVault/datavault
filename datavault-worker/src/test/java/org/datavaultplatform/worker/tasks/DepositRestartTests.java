@@ -481,7 +481,7 @@ public class DepositRestartTests {
 
     @SneakyThrows
     private static Stream<Arguments> priorEvents(Class<? extends Event> event) {
-        return DepositEvents.getEventsBefore(event).stream()
+        return DepositEvents.INSTANCE.getEventsBefore(event).stream()
                 .map(DepositRestartTests::eventFromClassName)
                 .map(Arguments::of);
     }

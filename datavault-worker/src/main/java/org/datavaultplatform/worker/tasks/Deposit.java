@@ -200,7 +200,7 @@ public class Deposit extends Task {
     }
 
     protected boolean isLastEventIsBefore(Class<? extends Event> eventClass) {
-        return DepositEvents.isLastEventBefore(getLastEvent(), eventClass);
+        return DepositEvents.INSTANCE.isLastEventBefore(getLastEvent(), eventClass);
     }
 
     protected DepositUserStoreDownloader getDepositUserStoreDownloader(Map<String, UserStore> userStores) {

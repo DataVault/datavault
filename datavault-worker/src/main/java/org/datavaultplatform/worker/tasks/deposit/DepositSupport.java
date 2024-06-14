@@ -91,7 +91,7 @@ public abstract class DepositSupport {
     }
 
     public boolean eventHasNotBeenSeenBefore(Class<? extends Event> eventClass) {
-        return DepositEvents.isLastEventBefore(lastEvent, eventClass);
+        return DepositEvents.INSTANCE.isLastEventBefore(lastEvent, eventClass);
     }
 
     protected void sendInvalidArgumentMessage(String msg) {

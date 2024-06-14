@@ -1,18 +1,19 @@
-package org.datavaultplatform.worker.tasks.deposit;
+package org.datavaultplatform.worker.tasks.retrieve;
 
 import lombok.SneakyThrows;
-import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.event.Error;
+import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.event.UpdateProgress;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import java.util.stream.*;
+import java.util.stream.Stream;
 
-class DepositEventsTest {
+import static org.assertj.core.api.Assertions.assertThat;
+
+class RetrieveEventsTest {
 
     @Nested
     class IsLastEventBeforeTests {
@@ -50,14 +51,14 @@ class DepositEventsTest {
         }
         
         void checkIsLastEventBefore(Event lastEvent, Class<? extends Event> eventClass, boolean expectedIsBefore) {
-            assertThat(DepositEvents.INSTANCE.isLastEventBefore(lastEvent, eventClass)).isEqualTo(expectedIsBefore);
+            assertThat(RetrieveEvents.INSTANCE.isLastEventBefore(lastEvent, eventClass)).isEqualTo(expectedIsBefore);
         }
 
 
         @SneakyThrows
         static Stream<Arguments> isBeforeArgs() {
             Stream.Builder<Arguments> builder = Stream.builder();
-            for (int limit = 1; limit < DepositEvents.EVENT_ORDER.size(); limit++) {
+            for (int limit = 1; limit < RetrieveEvents.EVENT_ORDER.size(); limit++) {
                 Class<? extends Event> eventClass = getEventClass(limit);
                 for (int eventIdx = 0; eventIdx < limit; eventIdx++) {
                     assertThat(eventIdx).isLessThan(limit);
@@ -71,9 +72,9 @@ class DepositEventsTest {
         @SneakyThrows
         static Stream<Arguments> isNotBeforeArgs() {
             Stream.Builder<Arguments> builder = Stream.builder();
-            for (int limit = 0; limit < DepositEvents.EVENT_ORDER.size(); limit++) {
+            for (int limit = 0; limit < RetrieveEvents.EVENT_ORDER.size(); limit++) {
                 Class<? extends Event> eventClass = getEventClass(limit);
-                for (int eventIdx = limit; eventIdx < DepositEvents.EVENT_ORDER.size(); eventIdx++) {
+                for (int eventIdx = limit; eventIdx < RetrieveEvents.EVENT_ORDER.size(); eventIdx++) {
                     assertThat(eventIdx).isGreaterThanOrEqualTo(limit);
                     Event lastEvent = getEventClass(eventIdx).getDeclaredConstructor().newInstance();
                     builder.add(Arguments.of(lastEvent, eventClass));
@@ -83,7 +84,7 @@ class DepositEventsTest {
         }
         static Stream<Arguments> allEventClasses() {
             Stream.Builder<Arguments> builder = Stream.builder();
-            for (int i = 0; i < DepositEvents.EVENT_ORDER.size(); i++) {
+            for (int i = 0; i < RetrieveEvents.EVENT_ORDER.size(); i++) {
                 builder.add(Arguments.of(getEventClass(i)));
             }
             return builder.build();
@@ -93,6 +94,6 @@ class DepositEventsTest {
     @SuppressWarnings("unchecked")
     @SneakyThrows
     private static Class<? extends Event> getEventClass(int idx) {
-        return Class.forName(DepositEvents.EVENT_ORDER.get(idx)).asSubclass(Event.class);
+        return Class.forName(RetrieveEvents.EVENT_ORDER.get(idx)).asSubclass(Event.class);
     }
 }

@@ -41,8 +41,7 @@ import org.datavaultplatform.common.event.deposit.StartCopyUpload;
 import org.datavaultplatform.common.event.deposit.TransferComplete;
 import org.datavaultplatform.common.event.deposit.UploadComplete;
 import org.datavaultplatform.common.event.deposit.ValidationComplete;
-import org.datavaultplatform.common.event.retrieve.RetrieveComplete;
-import org.datavaultplatform.common.event.retrieve.RetrieveStart;
+import org.datavaultplatform.common.event.retrieve.*;
 import org.datavaultplatform.common.model.Deposit;
 import org.datavaultplatform.common.model.DepositChunk;
 import org.datavaultplatform.common.model.Group;
@@ -783,5 +782,100 @@ public class EventListenerIT extends BaseDatabaseTest {
         + "    }";
     Event event = eventListener.onMessageInternal(message);
     assertEquals(ValidationComplete.class, event.getClass());
+  }
+
+  @Test
+  @SneakyThrows
+  void test26archiveStoreRetrievedAll() {
+    String message = "{"
+            + "      \"message\": \"Archive Store Retrieved All\","
+            + "      \"eventClass\": \"org.datavaultplatform.common.event.retrieve.ArchiveStoreRetrievedAll\","
+            + "      \"nextState\": null,"
+            + "      \"timestamp\": \"2022-09-16T15:12:40.150Z\","
+            + "      \"sequence\": 35,"
+            + "      \"persistent\": true,"
+            + "      \"depositId\":  \"" + depositId + "\","
+            + "      \"retrieveId\": \"test-retrieve-id\","
+            + "      \"vaultId\"  : \"" + vaultId + "\","
+            + "      \"jobId\"    : \"" + jobId + "\","
+            + "      \"userId\"   : \"" + userId + "\","
+            + "      \"agent\": \"datavault-worker-1\","
+            + "      \"agentType\": \"WORKER\""
+            + "    }";
+    Event event = eventListener.onMessageInternal(message);
+    assertEquals(ArchiveStoreRetrievedAll.class, event.getClass());
+    assertEquals("test-retrieve-id",event.getRetrieveId());
+    assertEquals(ArchiveStoreRetrievedAll.MESSAGE, event.getMessage());
+  }
+  @Test
+  @SneakyThrows
+  void test27archiveStoreRetrievedChunk() {
+    String message = "{"
+            + "      \"message\": \"Archive Store Retrieved Chunk\","
+            + "      \"eventClass\": \"org.datavaultplatform.common.event.retrieve.ArchiveStoreRetrievedChunk\","
+            + "      \"nextState\": null,"
+            + "      \"timestamp\": \"2022-09-16T15:12:40.150Z\","
+            + "      \"sequence\": 35,"
+            + "      \"persistent\": true,"
+            + "      \"depositId\":  \"" + depositId + "\","
+            + "      \"retrieveId\": \"test-retrieve-id\","
+            + "      \"chunkNumber\": 2112,"
+            + "      \"vaultId\"  : \"" + vaultId + "\","
+            + "      \"jobId\"    : \"" + jobId + "\","
+            + "      \"userId\"   : \"" + userId + "\","
+            + "      \"agent\": \"datavault-worker-1\","
+            + "      \"agentType\": \"WORKER\""
+            + "    }";
+    Event event = eventListener.onMessageInternal(message);
+    assertEquals(ArchiveStoreRetrievedChunk.class, event.getClass());
+    assertEquals("test-retrieve-id",event.getRetrieveId());
+    assertEquals(2112,event.getChunkNumber());
+    assertEquals(ArchiveStoreRetrievedChunk.MESSAGE, event.getMessage());
+  }
+  @Test
+  @SneakyThrows
+  void test28userStoreSpaceAvailableChecked() {
+    String message = "{"
+            + "      \"message\": \"User Store Space Available Checked\","
+            + "      \"eventClass\": \"org.datavaultplatform.common.event.retrieve.UserStoreSpaceAvailableChecked\","
+            + "      \"nextState\": null,"
+            + "      \"timestamp\": \"2022-09-16T15:12:40.150Z\","
+            + "      \"sequence\": 35,"
+            + "      \"persistent\": true,"
+            + "      \"depositId\":  \"" + depositId + "\","
+            + "      \"retrieveId\": \"test-retrieve-id\","
+            + "      \"vaultId\"  : \"" + vaultId + "\","
+            + "      \"jobId\"    : \"" + jobId + "\","
+            + "      \"userId\"   : \"" + userId + "\","
+            + "      \"agent\": \"datavault-worker-1\","
+            + "      \"agentType\": \"WORKER\""
+            + "    }";
+    Event event = eventListener.onMessageInternal(message);
+    assertEquals(UserStoreSpaceAvailableChecked.class, event.getClass());
+    assertEquals("test-retrieve-id",event.getRetrieveId());
+    assertEquals(UserStoreSpaceAvailableChecked.MESSAGE, event.getMessage());
+  }
+  @Test
+  @SneakyThrows
+  void test29UserStoreSpaceAvailableChecked() {
+    String message = "{"
+            + "      \"message\": \"User Store Space Available Checked\","
+            + "      \"eventClass\": \"org.datavaultplatform.common.event.retrieve.UserStoreSpaceAvailableChecked\","
+            + "      \"nextState\": null,"
+            + "      \"timestamp\": \"2022-09-16T15:12:40.150Z\","
+            + "      \"sequence\": 35,"
+            + "      \"persistent\": true,"
+            + "      \"depositId\":  \"" + depositId + "\","
+            + "      \"retrieveId\": \"test-retrieve-id\","
+            + "      \"vaultId\"  : \"" + vaultId + "\","
+            + "      \"jobId\"    : \"" + jobId + "\","
+            + "      \"userId\"   : \"" + userId + "\","
+            + "      \"agent\": \"datavault-worker-1\","
+            + "      \"agentType\": \"WORKER\""
+            + "    }";
+    Event event = eventListener.onMessageInternal(message);
+    assertEquals(UserStoreSpaceAvailableChecked.class, event.getClass());
+    assertEquals("test-retrieve-id",event.getRetrieveId());
+    assertEquals(UserStoreSpaceAvailableChecked.MESSAGE, event.getMessage());
   }
 }
