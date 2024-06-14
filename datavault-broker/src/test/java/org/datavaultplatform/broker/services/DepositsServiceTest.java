@@ -6,6 +6,7 @@ import org.datavaultplatform.common.model.dao.AuditChunkStatusDAO;
 import org.datavaultplatform.common.model.dao.DepositChunkDAO;
 import org.datavaultplatform.common.model.dao.DepositDAO;
 import org.datavaultplatform.common.model.dao.EventDAO;
+import org.datavaultplatform.common.util.RetrievedChunks;
 import org.datavaultplatform.common.util.StoredChunks;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -74,6 +75,24 @@ class DepositsServiceTest {
             assertThat(depositsService.getChunksStored("depositId")).isEqualTo(result);
 
             verify(mEventDAO).findDepositChunksStored("depositId");
+
+            verifyNoMoreInteractions(mEventDAO);
+        }
+    }
+
+    @Nested
+    class ChunksRetrievedTests {
+
+        @Test
+        void testGetChunksRetrieved() {
+
+            RetrievedChunks result = new RetrievedChunks();
+
+            when(mEventDAO.findDepositChunksRetrieved("depositId")).thenReturn(result);
+
+            assertThat(depositsService.getChunksRetrieved("depositId")).isEqualTo(result);
+
+            verify(mEventDAO).findDepositChunksRetrieved("depositId");
 
             verifyNoMoreInteractions(mEventDAO);
         }

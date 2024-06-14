@@ -171,8 +171,9 @@ class StoredChunksTest {
                           "asid-1":  [1,3,2],
                           "asid-3":  [9,8,7],
                           "asid-4":  null,
-                          "asid-5" :  [null, -1, 0]
-                        }
+                          "asid-5" :  [null, -1, 0]                          
+                        },
+                        "extra":"x-value"
                 }
                 """;
 

@@ -1,5 +1,6 @@
 package org.datavaultplatform.common.util;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -12,6 +13,7 @@ import org.springframework.util.Assert;
 import java.util.*;
 
 @Slf4j
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class StoredChunks {
 
     private final Map<String, Set<Integer>> storedChunksByArchiveStoredId = new HashMap<>();

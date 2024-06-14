@@ -8,6 +8,7 @@ import org.datavaultplatform.common.model.dao.AuditChunkStatusDAO;
 import org.datavaultplatform.common.model.dao.DepositChunkDAO;
 import org.datavaultplatform.common.model.dao.DepositDAO;
 import org.datavaultplatform.common.model.dao.EventDAO;
+import org.datavaultplatform.common.util.RetrievedChunks;
 import org.datavaultplatform.common.util.StoredChunks;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -277,7 +278,11 @@ public class DepositsService {
     public StoredChunks getChunksStored(String depositId) {
         return eventDAO.findDepositChunksStored(depositId);
     }
-    
+
+    public RetrievedChunks getChunksRetrieved(String depositId) {
+        return eventDAO.findDepositChunksRetrieved(depositId);
+    }
+
     public Event getLastNotFailedDepositEvent(String depositId) {
         return eventDAO.findLatestEventByDepositIdAndJobTaskClass(depositId, Job.TASK_CLASS_DEPOSIT).orElse(null);
     }

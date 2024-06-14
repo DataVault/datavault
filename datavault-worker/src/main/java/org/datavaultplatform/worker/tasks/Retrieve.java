@@ -101,8 +101,9 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
             if (!Verify.getAlgorithm().equals(archiveDigestAlgorithm)) {
                 throw new Exception("Unsupported checksum algorithm: [%s]".formatted(archiveDigestAlgorithm));
             }
+            Event lastEvent = getLastEvent();
 
-            checkUserStoreFreeSpaceAndPermissions(userStoreInfo);
+            checkUserStoreFreeSpaceAndPermissions(userStoreInfo, lastEvent);
 
             // Retrieve the archived data
             String tarFileName = RetrieveUtils.getTarFileName(bagID);
@@ -113,7 +114,7 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
             sendEvent(getUpdateProgress(archiveSize).withNextState(RetrieveState01RetrievingFromArchive.getStateNumber()));
 
             var archiveDeviceInfo = ArchiveDeviceInfo.fromArchiveFs(archiveFs);
-            fromArchiveStore(context, tarFile, archiveDeviceInfo, userStoreInfo);
+            fromArchiveStore(context, tarFile, archiveDeviceInfo, userStoreInfo, lastEvent);
             
         } catch (Exception e) {
             throw getRuntimeException(e, "Data retrieve failed: " + e.getMessage());
@@ -181,7 +182,7 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
         }
     }
 
-    private void doRetrieveFromWorkerToUserFs(Context context, UserStoreInfo userStoreInfo, File tarFile, Progress progress) throws Exception {
+    private void doRetrieveFromWorkerToUserFs(Context context, UserStoreInfo userStoreInfo, File tarFile, Progress progress, Event lastEvent) throws Exception {
         logProgress(progress);
         log.info("Validating data ...");
         sendEvent(new UpdateProgress(jobID, depositId).withNextState(RetrieveState02ValidatingData.getStateNumber()));
@@ -248,7 +249,7 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
         }
     }
     
-    private void checkUserStoreFreeSpaceAndPermissions(UserStoreInfo userStoreInfo) throws Exception {
+    private void checkUserStoreFreeSpaceAndPermissions(UserStoreInfo userStoreInfo, Event lastEvent) throws Exception {
         var userFs = userStoreInfo.userFs();
    	    UserStore userStore = ((UserStore) userFs);
         if (!userStore.exists(retrievePath) || !userStore.isDirectory(retrievePath)) {
@@ -286,7 +287,7 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
             throw getRuntimeException(e, "Unable to perform test write of file[" + DATA_VAULT_HIDDEN_FILE_NAME  + "] to user space");
         }
     }
-    protected void fromArchiveStore(Context context, File tarFile, ArchiveDeviceInfo archiveDeviceInfo, UserStoreInfo userStoreInfo) throws Exception {
+    protected void fromArchiveStore(Context context, File tarFile, ArchiveDeviceInfo archiveDeviceInfo, UserStoreInfo userStoreInfo, Event lastEvent) throws Exception {
         var progress = new Progress();
         trackProgress(progress, archiveSize, () -> {
             if (context.isChunkingEnabled()) {
@@ -295,7 +296,7 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
                 archiveDeviceInfo.retrieve(archiveId, tarFile, progress);
                 RetrieveUtils.decryptAndCheckTarFile("no-chunk", context, getTarIV(), tarFile, encTarDigest, archiveDigest);
             }
-            doRetrieveFromWorkerToUserFs(context, userStoreInfo, tarFile, progress);
+            doRetrieveFromWorkerToUserFs(context, userStoreInfo, tarFile, progress, lastEvent);
         });
     }
 

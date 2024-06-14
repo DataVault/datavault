@@ -25,6 +25,7 @@ import org.datavaultplatform.common.event.retrieve.*;
 import org.datavaultplatform.common.model.Deposit;
 import org.datavaultplatform.common.model.Job;
 import org.datavaultplatform.common.model.Vault;
+import org.datavaultplatform.common.util.RetrievedChunks;
 import org.datavaultplatform.common.util.StoredChunks;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -432,7 +433,7 @@ public class EventDAOIT extends BaseDatabaseTest {
   @Nested
   class FindDepositChunksStoredTests {
     @Test
-    void testNullDepositIt() {
+    void testNullDepositId() {
       assertThat(dao.findDepositChunksStored(null).size()).isEqualTo(0);
     }
 
@@ -484,6 +485,61 @@ public class EventDAOIT extends BaseDatabaseTest {
 
       StoredChunks storedChunks = dao.findDepositChunksStored(deposit.getID());
       assertThat(storedChunks).isEqualTo(chunksToStore);
+    }
+
+    @Nested
+    class FindDepositChunksRetrievedTests {
+      @Test
+      void testNullDepositId() {
+        assertThat(dao.findDepositChunksRetrieved(null).size()).isEqualTo(0);
+      }
+
+      @Test
+      @Transactional
+      void testSingleChunkRetrieved() {
+        RetrievedChunks retrievedChunks = new RetrievedChunks();
+        retrievedChunks.addRetrievedChunk(123);
+        checkChunksRetrieved(retrievedChunks);
+      }
+
+      @Test
+      @Transactional
+      void testManyChunks() {
+        StoredChunks storedChunks = new StoredChunks();
+        IntStream.rangeClosed(1, 1000).forEach(chunkNumber -> {
+          storedChunks.addStoredChunk("archiveStoreId1", chunkNumber);
+        });
+        checkChunksStored(storedChunks);
+      }
+
+      void checkChunksRetrieved(RetrievedChunks chunksToRetrieve) {
+        Deposit deposit = new Deposit();
+        deposit.setName("test-deposit");
+        deposit.setHasPersonalData(false);
+        depositDAO.save(deposit);
+
+        em.flush();
+
+        String jobId = "dummy-job-id";
+        for (Integer chunkNumber : chunksToRetrieve.getRetrievedChunks()) {
+
+          ArchiveStoreRetrievedChunk event = new ArchiveStoreRetrievedChunk(deposit.getID(), jobId, "retrieveId", chunkNumber);
+
+          assertThat(event.getID()).isNull();
+
+          // Because of the strange way the deposit/depositId is mapped using JPA - we have to use deposit NOT (Transient) depositId
+          event.setDeposit(deposit);
+
+          dao.save(event);
+        }
+
+
+        em.flush();
+        assertThat(dao.count()).isEqualTo(chunksToRetrieve.size());
+
+        RetrievedChunks retrievedChunks = dao.findDepositChunksRetrieved(deposit.getID());
+        assertThat(retrievedChunks).isEqualTo(chunksToRetrieve);
+      }
     }
 
     @Transactional

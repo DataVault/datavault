@@ -97,8 +97,10 @@ public class RetrieveTest {
     
     @Captor
     ArgumentCaptor<File> argDataVaultHiddenFile;
-
-
+    
+    @Captor
+    ArgumentCaptor<Event> argLastEvent;
+    
     @BeforeEach
     void setup() {
         RetryTestUtils.setLoggingLevelInfo(log);
@@ -217,7 +219,8 @@ public class RetrieveTest {
                 argContext.capture(),
                 argTarFile.capture(),
                 argArchiveDeviceInfo.capture(),
-                argUserStoreInfo.capture());
+                argUserStoreInfo.capture(), 
+                argLastEvent.capture());
 
         try (MockedStatic<StorageClassUtils> storageClassUtilsStatic = Mockito.mockStatic(StorageClassUtils.class)) {
 
@@ -307,11 +310,11 @@ public class RetrieveTest {
 
                 }
                 
-                verify(retrieve).fromArchiveStore(actualContext, actualTarFile, actualArchiveDeviceInfo, new UserStoreInfo(actualUserStoreFs, TEST_TIMESTAMP_DIR_NAME));
+                verify(retrieve).fromArchiveStore(actualContext, actualTarFile, actualArchiveDeviceInfo, new UserStoreInfo(actualUserStoreFs, TEST_TIMESTAMP_DIR_NAME), null);
                 checkErrorMessages("Job states: 5", "Deposit retrieve started", "Job progress update");
             } else {
                 verify(retrieve, never()).fromArchiveStore(
-                        any(Context.class), any(File.class), any(ArchiveDeviceInfo.class), any(UserStoreInfo.class));
+                        any(Context.class), any(File.class), any(ArchiveDeviceInfo.class), any(UserStoreInfo.class), any(Event.class));
 
                 checkErrorMessages(
                         "Job states: 5",
