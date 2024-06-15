@@ -2,6 +2,8 @@ package org.datavaultplatform.common.util;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -98,4 +100,14 @@ public class StoredChunks {
                 .append("storedChunks", storedChunksByArchiveStoredId)
                 .toString();
     }
+    
+    public static StoredChunks fromJsop(String storedChunksJson) throws JsonProcessingException {
+        if (StringUtils.isBlank(storedChunksJson)) {
+            return new StoredChunks();
+        } else {
+            StoredChunks result = new ObjectMapper().readValue(storedChunksJson, StoredChunks.class);
+            return result;
+        }
+    }
+
 }

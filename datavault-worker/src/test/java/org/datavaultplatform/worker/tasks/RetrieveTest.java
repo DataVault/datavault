@@ -13,6 +13,7 @@ import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.storage.impl.LocalFileSystem;
 import org.datavaultplatform.common.storage.impl.SFTPFileSystemSSHD;
 import org.datavaultplatform.common.task.Context;
+import org.datavaultplatform.common.util.RetrievedChunks;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.datavaultplatform.common.util.StorageClassUtils;
 import org.datavaultplatform.worker.retry.DvRetryException;
@@ -99,8 +100,8 @@ public class RetrieveTest {
     ArgumentCaptor<File> argDataVaultHiddenFile;
     
     @Captor
-    ArgumentCaptor<Event> argLastEvent;
-    
+    ArgumentCaptor<RetrievedChunks> argRetrievedChunks;
+
     @BeforeEach
     void setup() {
         RetryTestUtils.setLoggingLevelInfo(log);
@@ -215,12 +216,12 @@ public class RetrieveTest {
         // override the clock with a fixed clock for testing
         lenient().when(retrieve.getClock()).thenReturn(TestClockConfig.TEST_CLOCK);
 
-        lenient().doNothing().when(retrieve).fromArchiveStore(
+        lenient().doNothing().when(retrieve).fromArchiveStoreToUserStore(
                 argContext.capture(),
                 argTarFile.capture(),
                 argArchiveDeviceInfo.capture(),
-                argUserStoreInfo.capture(), 
-                argLastEvent.capture());
+                argUserStoreInfo.capture(),
+                argRetrievedChunks.capture());
 
         try (MockedStatic<StorageClassUtils> storageClassUtilsStatic = Mockito.mockStatic(StorageClassUtils.class)) {
 
@@ -310,11 +311,11 @@ public class RetrieveTest {
 
                 }
                 
-                verify(retrieve).fromArchiveStore(actualContext, actualTarFile, actualArchiveDeviceInfo, new UserStoreInfo(actualUserStoreFs, TEST_TIMESTAMP_DIR_NAME), null);
+                verify(retrieve).fromArchiveStoreToUserStore(actualContext, actualTarFile, actualArchiveDeviceInfo, new UserStoreInfo(actualUserStoreFs, TEST_TIMESTAMP_DIR_NAME),  new RetrievedChunks());
                 checkEventMessages("Job states: 5", "Deposit retrieve started", "User Store Space Available Checked", "Job progress update");
             } else {
-                verify(retrieve, never()).fromArchiveStore(
-                        any(Context.class), any(File.class), any(ArchiveDeviceInfo.class), any(UserStoreInfo.class), any(Event.class));
+                verify(retrieve, never()).fromArchiveStoreToUserStore(
+                        any(Context.class), any(File.class), any(ArchiveDeviceInfo.class), any(UserStoreInfo.class), any(RetrievedChunks.class));
 
                 checkEventMessages(
                         "Job states: 5",

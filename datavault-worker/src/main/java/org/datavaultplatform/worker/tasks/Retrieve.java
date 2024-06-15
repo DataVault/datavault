@@ -1,5 +1,6 @@
 package org.datavaultplatform.worker.tasks;
 
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.datavaultplatform.common.PropNames;
@@ -17,6 +18,7 @@ import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.common.storage.impl.SftpUtils;
 import org.datavaultplatform.common.task.Context;
 import org.datavaultplatform.common.task.TaskExecutor;
+import org.datavaultplatform.common.util.RetrievedChunks;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.datavaultplatform.common.util.Utils;
 import org.datavaultplatform.worker.operations.*;
@@ -25,7 +27,6 @@ import org.datavaultplatform.worker.tasks.retrieve.*;
 import org.springframework.util.Assert;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.time.Clock;
 import java.util.*;
 import java.util.function.Consumer;
@@ -100,9 +101,11 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
             if (!Verify.getAlgorithm().equals(archiveDigestAlgorithm)) {
                 throw new Exception("Unsupported checksum algorithm: [%s]".formatted(archiveDigestAlgorithm));
             }
-            Event lastEvent = getLastEvent();
 
-            checkUserStoreFreeSpaceAndPermissions(userStoreInfo, lastEvent);
+            if (isLastEventBefore(UserStoreSpaceAvailableChecked.class)) {
+                checkUserStoreFreeSpaceAndPermissions(userStoreInfo);
+                sendEvent(new UserStoreSpaceAvailableChecked(jobID, depositId, retrieveId));
+            }
 
             // Retrieve the archived data
             String tarFileName = RetrieveUtils.getTarFileName(bagID);
@@ -113,17 +116,18 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
             sendEvent(getUpdateProgress(archiveSize).withNextState(RetrieveState01RetrievingFromArchive.getStateNumber()));
 
             var archiveDeviceInfo = ArchiveDeviceInfo.fromArchiveFs(archiveFs);
-            fromArchiveStore(context, tarFile, archiveDeviceInfo, userStoreInfo, lastEvent);
-            
+            var retrievedChunks = getRetrievedChunks();
+            fromArchiveStoreToUserStore(context, tarFile, archiveDeviceInfo, userStoreInfo, retrievedChunks);
+
         } catch (Exception e) {
             throw getRuntimeException(e, "Data retrieve failed: " + e.getMessage());
         }
     }
 
-    private void recompose(Context context, ArchiveDeviceInfo archiveDeviceInfo, Progress progress,
-                           File tarFile ) throws Exception {
-        
-        File[] chunks = retrieveFiles(context, archiveDeviceInfo, progress, tarFile);
+    private void retrieveChunksAndRecompose(Context context, ArchiveDeviceInfo archiveDeviceInfo, Progress progress,
+                                            File tarFile, RetrievedChunks retrievedChunks) throws Exception {
+
+        File[] chunks = retrieveFiles(context, archiveDeviceInfo, progress, tarFile, retrievedChunks);
 
         log.info("Recomposing tar file from [{}] chunk(s)", numOfChunks);
         doRecomposeUsingCorrectVersion(context, chunks, tarFile);
@@ -133,12 +137,12 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
         Arrays.stream(chunks).filter(Objects::nonNull).forEach(File::delete);
     }
 
-    private File[] retrieveFiles(Context context, ArchiveDeviceInfo archiveDeviceInfo, Progress progress, File tarFile) throws Exception {
+    private File[] retrieveFiles(Context context, ArchiveDeviceInfo archiveDeviceInfo, Progress progress, File tarFile, RetrievedChunks retrievedChunks) throws Exception {
         File[] chunks = new File[numOfChunks];
         log.info("Retrieving [{}] chunk(s)", numOfChunks);
         
         Consumer<Integer> chunkRetrievedEventSender = chunkNumber -> {
-            sendEvent(new ArchiveStoreRetrievedChunk(jobID, depositId,retrieveId,chunkNumber));            
+            sendEvent(new ArchiveStoreRetrievedChunk(jobID, depositId, retrieveId, chunkNumber));            
         };
         
         TaskExecutor<File> executor = getTaskExecutor(context);
@@ -147,13 +151,15 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
             RetrieveChunkInfo chunkInfo = getChunkInfo(context, tarFile, chunkNum);
             chunks[chunkNum - 1] = chunkInfo.chunkFile();
             
-            //if not a restart OR (chunk not retrieved OR decrypted chunk file does not exist) then execute a task to retrieve it.
-            
-            ChunkRetrieveTracker crt = new ChunkRetrieveTracker(
-                    archiveId, archiveDeviceInfo,
-                    context, progress, chunkInfo, chunkRetrievedEventSender
-            );
-            executor.add(crt);
+            if(retrievedChunks.isRetrieved(chunkNum) && chunkInfo.isRetrieveValid()) {
+                log.info("chunkNum[{}] retrieved already - skipping...", chunkNum);
+            } else {
+                ChunkRetrieveTracker crt = new ChunkRetrieveTracker(
+                        archiveId, archiveDeviceInfo,
+                        context, progress, chunkInfo, chunkRetrievedEventSender
+                );
+                executor.add(crt);
+            }
         }
 
         executor.execute();
@@ -185,34 +191,37 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
         }
     }
 
-    private void doRetrieveFromWorkerToUserFs(Context context, UserStoreInfo userStoreInfo, File tarFile, Progress progress, Event lastEvent) throws Exception {
+    private void doRetrieveFromWorkerToUserFs(Context context, UserStoreInfo userStoreInfo, File tarFile, Progress progress) throws Exception {
         logProgress(progress);
         log.info("Validating data ...");
         sendEvent(new UpdateProgress(jobID, depositId).withNextState(RetrieveState02ValidatingData.getStateNumber()));
         Utils.checkFileHash("ret-tar", tarFile, archiveDigest); 
         // Decompress to the temporary directory
         File bagDir = Tar.unTar(tarFile, context.getTempDir());
-        long bagDirSize = FileUtils.sizeOfDirectory(bagDir);
+        try {
+            long bagDirSize = FileUtils.sizeOfDirectory(bagDir);
 
-        // Get the payload data directory
-        File payloadDir = bagDir.toPath().resolve(DATA).toFile();
+            // Get the payload data directory
+            File payloadDir = bagDir.toPath().resolve(DATA).toFile();
 
-        // Copy the extracted files to the target retrieve area
-        log.info("Copying to user directory ...");
-        sendEvent(getUpdateProgress(bagDirSize).withNextState(RetrieveState03TransferrinfFiles.getStateNumber()));
+            // Copy the extracted files to the target retrieve area
+            log.info("Copying to user directory ...");
+            sendEvent(getUpdateProgress(bagDirSize).withNextState(RetrieveState03TransferrinfFiles.getStateNumber()));
 
-        // COPY FILES FROM WORKER BACK TO USER FS
-        copyFilesToUserFs(progress, payloadDir, userStoreInfo, bagDirSize);
+            // COPY FILES FROM WORKER BACK TO USER FS
+            copyFilesToUserFs(progress, payloadDir, userStoreInfo, bagDirSize);
 
-        logProgress(progress);
+            logProgress(progress);
 
-        // Cleanup
-        log.info("Cleaning up ...");
-        FileUtils.deleteDirectory(bagDir);
-        tarFile.delete();
+            tarFile.delete();
 
-        log.info("Data retrieve complete: [{}]", retrievePath);
-        sendEvent(new RetrieveComplete(jobID, depositId, retrieveId).withNextState(RetrieveState04DataRetrieveComplete.getStateNumber()));
+            log.info("Data retrieve complete: [{}]", retrievePath);
+            sendEvent(new RetrieveComplete(jobID, depositId, retrieveId).withNextState(RetrieveState04DataRetrieveComplete.getStateNumber()));
+        } finally {
+            // Cleanup
+            log.info("Cleaning up ...");
+            FileUtils.deleteDirectory(bagDir);
+        }
     }
 
     private Device setupUserFileStores(StorageClassNameResolver resolver) {
@@ -252,7 +261,7 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
         }
     }
     
-    private void checkUserStoreFreeSpaceAndPermissions(UserStoreInfo userStoreInfo, Event lastEvent) throws Exception {
+    private void checkUserStoreFreeSpaceAndPermissions(UserStoreInfo userStoreInfo) throws Exception {
         var userFs = userStoreInfo.userFs();
    	    UserStore userStore = ((UserStore) userFs);
         if (!userStore.exists(retrievePath) || !userStore.isDirectory(retrievePath)) {
@@ -289,34 +298,48 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
         } catch (Exception e) {
             throw getRuntimeException(e, "Unable to perform test write of file[" + DATA_VAULT_HIDDEN_FILE_NAME  + "] to user space");
         }
-        sendEvent(new UserStoreSpaceAvailableChecked(jobID, depositId, retrieveId));
     }
     
-    protected void fromArchiveStore(Context context, File tarFile, ArchiveDeviceInfo archiveDeviceInfo, UserStoreInfo userStoreInfo, Event lastEvent) throws Exception {
+    protected boolean isFinalTarValid(File tarFile, String archiveDigest) throws Exception {
+        try {
+            Utils.checkFileHash("single-verified-tar", tarFile, archiveDigest);
+            return true;
+        } catch (Exception ex) {
+            return false;
+        }
+    }
+    
+    protected void fromArchiveStoreToUserStore(Context context, File tarFile, ArchiveDeviceInfo archiveDeviceInfo, UserStoreInfo userStoreInfo, RetrievedChunks retrievedChunks) throws Exception {
         var progress = new Progress();
         trackProgress(progress, archiveSize, () -> {
-            if (context.isChunkingEnabled()) {
-                recompose(context, archiveDeviceInfo, progress, tarFile);
-            } else {
-                archiveDeviceInfo.retrieve(archiveId, tarFile, progress);
-                RetrieveUtils.decryptAndCheckTarFile("no-chunk", context, getTarIV(), tarFile, encTarDigest, archiveDigest);
+            
+            if (isLastEventBefore(ArchiveStoreRetrievedAll.class) && isFinalTarValid(tarFile, archiveDigest)) {
+                if (context.isChunkingEnabled()) {
+                    retrieveChunksAndRecompose(context, archiveDeviceInfo, progress, tarFile, retrievedChunks);
+                } else {
+                    archiveDeviceInfo.retrieve(archiveId, tarFile, progress);
+                    RetrieveUtils.decryptAndCheckTarFile("no-chunk", context, getTarIV(), tarFile, encTarDigest, archiveDigest);
+                }
+                sendEvent(new ArchiveStoreRetrievedAll(jobID, depositId, retrieveId));
             }
-            sendEvent(new ArchiveStoreRetrievedAll(jobID, depositId, retrieveId));
-            doRetrieveFromWorkerToUserFs(context, userStoreInfo, tarFile, progress, lastEvent);
+
+            doRetrieveFromWorkerToUserFs(context, userStoreInfo, tarFile, progress);
         });
     }
 
     protected void copyFilesToUserFs(Progress progress, File payloadDir, UserStoreInfo userStoreInfo, long bagDirSize) throws Exception {
-        trackProgress(progress, bagDirSize, () -> {
-            File[] contents = payloadDir.listFiles();
-            Arrays.sort(contents);
-            for (File content : contents) {
-                String taskDesc = payloadDir.toPath().relativize(content.toPath()).toString();
-                TwoSpeedRetry.DvRetryTemplate template = userFsTwoSpeedRetry.getRetryTemplate(String.format("toUserFs - %s", taskDesc));
-                template.execute(retryContext -> store(userStoreInfo, content, progress));
-            }
-        });
-        sendEvent(new UploadedToUserStore(jobID, depositId, retrieveId));
+        if (isLastEventBefore(UploadedToUserStore.class)) {
+            trackProgress(progress, bagDirSize, () -> {
+                File[] contents = payloadDir.listFiles();
+                Arrays.sort(contents);
+                for (File content : contents) {
+                    String taskDesc = payloadDir.toPath().relativize(content.toPath()).toString();
+                    TwoSpeedRetry.DvRetryTemplate template = userFsTwoSpeedRetry.getRetryTemplate(String.format("toUserFs - %s", taskDesc));
+                    template.execute(retryContext -> store(userStoreInfo, content, progress));
+                }
+            });
+            sendEvent(new UploadedToUserStore(jobID, depositId, retrieveId));
+        }
     }
     private void sendError(String msg) {
         sendEvent(new RetrieveError(jobID, depositId, retrieveId, msg));
@@ -387,5 +410,15 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
         String encChunkDigest = encChunksDigest.get(chunkNum);
         String chunkDigest = chunksDigest.get(chunkNum);
         return new RetrieveChunkInfo(chunkNum, chunkFile, encChunkDigest, iv, chunkDigest);
+    }
+    
+    protected boolean isLastEventBefore(Class<? extends Event> eventClass) {
+        return RetrieveEvents.INSTANCE.isLastEventBefore(getLastEvent(), eventClass);
+    }
+
+    @SneakyThrows
+    private RetrievedChunks getRetrievedChunks() {
+        String retrievedChunksJson = getProperties().get(PropNames.DEPOSIT_CHUNKS_RETRIEVED);
+        return RetrievedChunks.fromJson(retrievedChunksJson);
     }
 }

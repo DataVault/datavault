@@ -2,6 +2,9 @@ package org.datavaultplatform.common.util;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.datavaultplatform.common.event.Event;
@@ -59,6 +62,15 @@ public class RetrievedChunks {
             if (event instanceof ArchiveStoreRetrievedChunk archiveStoreRetrievedChunk) {
                 addRetrievedChunk(archiveStoreRetrievedChunk.getChunkNumber());
             }
+        }
+    }
+
+    public static RetrievedChunks fromJson(String retrievedChunksJson) throws JsonProcessingException {
+        if (StringUtils.isBlank(retrievedChunksJson)) {
+            return new RetrievedChunks();
+        } else {
+            RetrievedChunks result = new ObjectMapper().readValue(retrievedChunksJson, RetrievedChunks.class);
+            return result;
         }
     }
 
