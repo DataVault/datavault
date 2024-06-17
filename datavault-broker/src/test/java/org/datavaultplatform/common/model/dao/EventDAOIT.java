@@ -367,14 +367,14 @@ public class EventDAOIT extends BaseDatabaseTest {
       e3ForDepJobForDeposit2 = createEvent(Start.class, deposit2, depJobForDeposit2,  date3, 2, "e3ForDepJobForDeposit2");
       e4ForDepJobForDeposit2 = createError(deposit2, depJobForDeposit2,  date4, 1, "e4ForDepJobForDeposit2");
 
-      e1ForRetJobForDeposit1 = createEvent(RetrieveStart.class, deposit1, retJobForDeposit1,  date1, 1, "e1ForRetJobForDeposit1");
-      e2ForRetJobForDeposit1 = createEvent(RetrieveStart.class, deposit1, retJobForDeposit1,  date2, 3, "e2ForRetJobForDeposit1");
-      e3ForRetJobForDeposit1 = createEvent(RetrieveStart.class, deposit1, retJobForDeposit1,  date2, 2, "e3ForRetJobForDeposit1");
+      e1ForRetJobForDeposit1 = createRetrieveEvent(RetrieveStart.class, deposit1, retJobForDeposit1,  date1, 1, "e1ForRetJobForDeposit1", "retrieve123");
+      e2ForRetJobForDeposit1 = createRetrieveEvent(RetrieveStart.class, deposit1, retJobForDeposit1,  date2, 3, "e2ForRetJobForDeposit1","retrieve123");
+      e3ForRetJobForDeposit1 = createRetrieveEvent(RetrieveStart.class, deposit1, retJobForDeposit1,  date2, 2, "e3ForRetJobForDeposit1","retrieve123");
       e4ForRetJobForDeposit1 = createError(deposit1, retJobForDeposit1,  date4, 4, "e4ForRetJobForDeposit1");
 
-      e1ForRetJobForDeposit2 = createEvent(RetrieveStart.class, deposit2, retJobForDeposit2,  date1, 1, "e1ForRetJobForDeposit2");
-      e2ForRetJobForDeposit2 = createEvent(RetrieveStart.class, deposit2, retJobForDeposit2,  date2, 3, "e2ForRetJobForDeposit2");
-      e3ForRetJobForDeposit2 = createEvent(RetrieveStart.class, deposit2, retJobForDeposit2,  date2, 2, "e3ForRetJobForDeposit2");
+      e1ForRetJobForDeposit2 = createRetrieveEvent(RetrieveStart.class, deposit2, retJobForDeposit2,  date1, 1, "e1ForRetJobForDeposit2","retrieve234");
+      e2ForRetJobForDeposit2 = createRetrieveEvent(RetrieveStart.class, deposit2, retJobForDeposit2,  date2, 3, "e2ForRetJobForDeposit2","retrieve234");
+      e3ForRetJobForDeposit2 = createRetrieveEvent(RetrieveStart.class, deposit2, retJobForDeposit2,  date2, 2, "e3ForRetJobForDeposit2","retrieve234");
       e4ForRetJobForDeposit2 = createError(deposit2, retJobForDeposit2,  date2, 4, "e4ForRetJobForDeposit2");
 
       e1ForDepJobForDeposit3 = createCompleteCopyUpload(deposit3, depJobForDeposit3,  date1, 1, "arcStoreId1","e1ForDepJobForDeposit3");
@@ -395,15 +395,19 @@ public class EventDAOIT extends BaseDatabaseTest {
     
     @Test
     void testNoneFound() {
-        assertThat(dao.findLatestEventByDepositIdAndJobTaskClass("depositId","bob")).isEmpty();
+        assertThat(dao.findLatestDepositEvent("depositId")).isEmpty();
     }
     
     @Test
-    void testFindLatestEvent() {
-      checkFindLatestEvent(deposit1, depJobForDeposit1, e3ForDepJobForDeposit1);
-      checkFindLatestEvent(deposit1, retJobForDeposit1, e2ForRetJobForDeposit1);
-      checkFindLatestEvent(deposit2, depJobForDeposit2, e3ForDepJobForDeposit2);
-      checkFindLatestEvent(deposit2, retJobForDeposit2, e2ForRetJobForDeposit2);
+    void testFindLatestDepositEvent() {
+      checkFindLatestDepositEvent(deposit1, e3ForDepJobForDeposit1);
+      checkFindLatestDepositEvent(deposit2, e3ForDepJobForDeposit2);
+    }
+    
+    @Test
+    void testFindLatestRetrieveEvent() {
+      checkFindLatestRetrieveEvent(deposit1, "retrieve123", e2ForRetJobForDeposit1);
+      checkFindLatestRetrieveEvent(deposit2, "retrieve234", e2ForRetJobForDeposit2);
     }
     
     @Test
@@ -413,8 +417,14 @@ public class EventDAOIT extends BaseDatabaseTest {
     }
     
     @SuppressWarnings("OptionalGetWithoutIsPresent")
-    void checkFindLatestEvent(Deposit deposit, Job job, Event expectedEvent) {
-      Optional<Event> result = dao.findLatestEventByDepositIdAndJobTaskClass(deposit.getID(), job.getTaskClass());
+    void checkFindLatestDepositEvent(Deposit deposit, Event expectedEvent) {
+      Optional<Event> result = dao.findLatestDepositEvent(deposit.getID());
+      assertThat(result.get().getID()).isEqualTo(expectedEvent.getID());
+    }
+
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    void checkFindLatestRetrieveEvent(Deposit deposit, String retrieveId, Event expectedEvent) {
+      Optional<Event> result = dao.findLatestRetrieveEvent(deposit.getID(), retrieveId);
       assertThat(result.get().getID()).isEqualTo(expectedEvent.getID());
     }
     
@@ -491,7 +501,7 @@ public class EventDAOIT extends BaseDatabaseTest {
     class FindDepositChunksRetrievedTests {
       @Test
       void testNullDepositId() {
-        assertThat(dao.findDepositChunksRetrieved(null).size()).isEqualTo(0);
+        assertThat(dao.findDepositChunksRetrieved(null,null).size()).isEqualTo(0);
       }
 
       @Test
@@ -537,7 +547,7 @@ public class EventDAOIT extends BaseDatabaseTest {
         em.flush();
         assertThat(dao.count()).isEqualTo(chunksToRetrieve.size());
 
-        RetrievedChunks retrievedChunks = dao.findDepositChunksRetrieved(deposit.getID());
+        RetrievedChunks retrievedChunks = dao.findDepositChunksRetrieved(deposit.getID(), "retrieveId");
         assertThat(retrievedChunks).isEqualTo(chunksToRetrieve);
       }
     }
@@ -587,6 +597,23 @@ public class EventDAOIT extends BaseDatabaseTest {
     if (clazz.equals(CompleteCopyUpload.class)){
       event.setChunkNumber(sequence);
     }
+    dao.save(event);
+    return event;
+  }
+
+  @SneakyThrows
+  <T extends Event> T createRetrieveEvent(Class<T> clazz, Deposit deposit, Job job, Date timestamp, int sequence, String message, String retrieveId) {
+    T event = clazz.getConstructor().newInstance();
+    event.setEventClass(event.getClass().getName());
+    event.setMessage(message);
+    event.setDeposit(deposit);
+    event.setJob(job);
+    event.setTimestamp(timestamp);
+    event.setSequence(sequence);
+    if (clazz.equals(CompleteCopyUpload.class)){
+      event.setChunkNumber(sequence);
+    }
+    event.setRetrieveId(retrieveId);
     dao.save(event);
     return event;
   }

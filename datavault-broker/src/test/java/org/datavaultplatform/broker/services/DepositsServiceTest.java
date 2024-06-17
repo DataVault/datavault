@@ -1,7 +1,6 @@
 package org.datavaultplatform.broker.services;
 
 import org.datavaultplatform.common.event.Event;
-import org.datavaultplatform.common.model.Job;
 import org.datavaultplatform.common.model.dao.AuditChunkStatusDAO;
 import org.datavaultplatform.common.model.dao.DepositChunkDAO;
 import org.datavaultplatform.common.model.dao.DepositDAO;
@@ -88,11 +87,11 @@ class DepositsServiceTest {
 
             RetrievedChunks result = new RetrievedChunks();
 
-            when(mEventDAO.findDepositChunksRetrieved("depositId")).thenReturn(result);
+            when(mEventDAO.findDepositChunksRetrieved("depositId", "retriveId")).thenReturn(result);
 
-            assertThat(depositsService.getChunksRetrieved("depositId")).isEqualTo(result);
+            assertThat(depositsService.getChunksRetrieved("depositId", "retriveId")).isEqualTo(result);
 
-            verify(mEventDAO).findDepositChunksRetrieved("depositId");
+            verify(mEventDAO).findDepositChunksRetrieved("depositId", "retriveId");
 
             verifyNoMoreInteractions(mEventDAO);
         }
@@ -102,60 +101,61 @@ class DepositsServiceTest {
     ArgumentCaptor<String> argDepositId;
 
     @Captor
-    ArgumentCaptor<String> argJobClass;
+    ArgumentCaptor<String> argRetrieveId;
     
     @Test
     void testGetLastEventForDepositFound() {
         Event mEvent = Mockito.mock(Event.class);
-        when(mEventDAO.findLatestEventByDepositIdAndJobTaskClass(argDepositId.capture(), argJobClass.capture())).thenReturn(Optional.of(mEvent));
+        when(mEventDAO.findLatestDepositEvent((argDepositId.capture()))).thenReturn(Optional.of(mEvent));
         
         Event lastEvent = depositsService.getLastNotFailedDepositEvent("depositId123");
         assertThat(lastEvent).isEqualTo(mEvent);
         String actualDepositId = argDepositId.getValue();
-        String actualJobClass = argJobClass.getValue();
         assertThat(actualDepositId).isEqualTo("depositId123");
-        assertThat(actualJobClass).isEqualTo(Job.TASK_CLASS_DEPOSIT);
-        verify(mEventDAO).findLatestEventByDepositIdAndJobTaskClass(actualDepositId, actualJobClass);
+        verify(mEventDAO).findLatestDepositEvent(actualDepositId);
         verifyNoMoreInteractions(mEventDAO);
     }
     @Test
     void testGetLastEventForDepositNotFound() {
-        when(mEventDAO.findLatestEventByDepositIdAndJobTaskClass(argDepositId.capture(), argJobClass.capture())).thenReturn(Optional.empty());
+        when(mEventDAO.findLatestDepositEvent(argDepositId.capture())).thenReturn(Optional.empty());
 
         Event lastEvent = depositsService.getLastNotFailedDepositEvent("depositId123");
         assertThat(lastEvent).isNull();
         String actualDepositId = argDepositId.getValue();
-        String actualJobClass = argJobClass.getValue();
         assertThat(actualDepositId).isEqualTo("depositId123");
-        assertThat(actualJobClass).isEqualTo(Job.TASK_CLASS_DEPOSIT);
-        verify(mEventDAO).findLatestEventByDepositIdAndJobTaskClass(actualDepositId, actualJobClass);
+        verify(mEventDAO).findLatestDepositEvent(actualDepositId);
         verifyNoMoreInteractions(mEventDAO);
     }
     @Test
     void testGetLastEventForRetrieveFound() {
         Event mEvent = Mockito.mock(Event.class);
-        when(mEventDAO.findLatestEventByDepositIdAndJobTaskClass(argDepositId.capture(), argJobClass.capture())).thenReturn(Optional.of(mEvent));
+        when(mEventDAO.findLatestRetrieveEvent(argDepositId.capture(), argRetrieveId.capture())).thenReturn(Optional.of(mEvent));
 
-        Event lastEvent = depositsService.getLastNotFailedRetrieveEvent("depositId123");
+        Event lastEvent = depositsService.getLastNotFailedRetrieveEvent("depositId123","retrieve123");
         assertThat(lastEvent).isEqualTo(mEvent);
         String actualDepositId = argDepositId.getValue();
-        String actualJobClass = argJobClass.getValue();
         assertThat(actualDepositId).isEqualTo("depositId123");
-        assertThat(actualJobClass).isEqualTo(Job.TASK_CLASS_RETRIEVE);
-        verify(mEventDAO).findLatestEventByDepositIdAndJobTaskClass(actualDepositId, actualJobClass);
+
+        String actualRetrieveId = argRetrieveId.getValue();
+        assertThat(actualRetrieveId).isEqualTo("retrieve123");
+
+        verify(mEventDAO).findLatestRetrieveEvent(actualDepositId, actualRetrieveId);
         verifyNoMoreInteractions(mEventDAO);
     }
+
     @Test
     void testGetLastEventForRetrieveNotFound() {
-        when(mEventDAO.findLatestEventByDepositIdAndJobTaskClass(argDepositId.capture(), argJobClass.capture())).thenReturn(Optional.empty());
+        when(mEventDAO.findLatestRetrieveEvent(argDepositId.capture(), argRetrieveId.capture())).thenReturn(Optional.empty());
 
-        Event lastEvent = depositsService.getLastNotFailedRetrieveEvent("depositId123");
+        Event lastEvent = depositsService.getLastNotFailedRetrieveEvent("depositId123","retrieve123");
         assertThat(lastEvent).isNull();
         String actualDepositId = argDepositId.getValue();
-        String actualJobClass = argJobClass.getValue();
         assertThat(actualDepositId).isEqualTo("depositId123");
-        assertThat(actualJobClass).isEqualTo(Job.TASK_CLASS_RETRIEVE);
-        verify(mEventDAO).findLatestEventByDepositIdAndJobTaskClass(actualDepositId, actualJobClass);
+
+        String actualRetreiveId = argRetrieveId.getValue();
+        assertThat(actualRetreiveId).isEqualTo("retrieve123");
+
+        verify(mEventDAO).findLatestRetrieveEvent(actualDepositId, actualRetreiveId);
         verifyNoMoreInteractions(mEventDAO);
     }
 

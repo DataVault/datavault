@@ -93,8 +93,6 @@ public class RetrieveTest {
 
     @Captor
     ArgumentCaptor<UserStoreInfo> argUserStoreInfo;
-    //@Captor
-    //ArgumentCaptor<ArchiveDeviceInfo> argArchiveDeviceInfo;
     
     @Captor
     ArgumentCaptor<File> argDataVaultHiddenFile;

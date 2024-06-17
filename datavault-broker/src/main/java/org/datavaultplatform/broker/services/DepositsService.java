@@ -279,16 +279,16 @@ public class DepositsService {
         return eventDAO.findDepositChunksStored(depositId);
     }
 
-    public RetrievedChunks getChunksRetrieved(String depositId) {
-        return eventDAO.findDepositChunksRetrieved(depositId);
+    public RetrievedChunks getChunksRetrieved(String depositId, String retrieveId) {
+        return eventDAO.findDepositChunksRetrieved(depositId, retrieveId);
     }
 
     public Event getLastNotFailedDepositEvent(String depositId) {
-        return eventDAO.findLatestEventByDepositIdAndJobTaskClass(depositId, Job.TASK_CLASS_DEPOSIT).orElse(null);
+        return eventDAO.findLatestDepositEvent(depositId).orElse(null);
     }
     
-    public Event getLastNotFailedRetrieveEvent(String depositId) {
-        return eventDAO.findLatestEventByDepositIdAndJobTaskClass(depositId, Job.TASK_CLASS_RETRIEVE).orElse(null);
+    public Event getLastNotFailedRetrieveEvent(String depositId, String retrieveId) {
+        return eventDAO.findLatestRetrieveEvent(depositId, retrieveId).orElse(null);
     }
 }
 

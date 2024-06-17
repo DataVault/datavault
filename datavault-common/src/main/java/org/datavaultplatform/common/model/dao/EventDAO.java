@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.Optional;
 
 import org.datavaultplatform.common.event.Event;
+import org.datavaultplatform.common.event.deposit.Complete;
+import org.datavaultplatform.common.event.retrieve.RetrieveComplete;
+import org.datavaultplatform.common.model.Job;
 import org.datavaultplatform.common.model.dao.custom.EventCustomDAO;
 import org.datavaultplatform.common.util.RetrievedChunks;
 import org.datavaultplatform.common.util.StoredChunks;
@@ -32,14 +35,14 @@ public interface EventDAO extends BaseDAO<Event>, EventCustomDAO {
               AND      e.deposit.id = :depositId
               AND      e.job.taskClass = :jobTaskClass
               AND      e.timestamp >= (
-                  SELECT MAX(comp.timestamp) FROM Event comp where comp.eventClass = 'org.datavaultplatform.common.event.deposit.Complete'
+                  SELECT MAX(comp.timestamp) FROM Event comp where comp.eventClass = :completeEventClass
                   AND comp.deposit.id = :depositId
                   AND e.job.taskClass = :jobTaskClass
               )
               ORDER BY e.timestamp DESC, e.sequence DESC
               LIMIT 1
             """)
-    Optional<Event> findLatestEventByDepositIdAndJobTaskClass1(String depositId, String jobTaskClass);
+    Optional<Event> findLatestDepositEventSinceLastComplete(String depositId, String jobTaskClass, String completeEventClass);
 
     @Query("""
               SELECT   e
@@ -48,16 +51,20 @@ public interface EventDAO extends BaseDAO<Event>, EventCustomDAO {
               AND      e.deposit.id = :depositId
               AND      e.job.taskClass = :jobTaskClass
               AND      NOT EXISTS (
-                  SELECT comp FROM Event comp where comp.eventClass = 'org.datavaultplatform.common.event.deposit.Complete'
+                  SELECT comp FROM Event comp where comp.eventClass = :completeEventClass
                   AND comp.deposit.id = :depositId
                   AND e.job.taskClass = :jobTaskClass
               )
               ORDER BY e.timestamp DESC, e.sequence DESC
               LIMIT 1
             """)
-    Optional<Event> findLatestEventByDepositIdAndJobTaskClass2(String depositId, String jobTaskClass);
+    Optional<Event> findLatestEventWhereNoLastComplete(String depositId, String jobTaskClass, String completeEventClass);
 
 
+    default Optional<Event> findLatestDepositEvent(String depositId) {
+        return findLatestDepositEventSinceLastComplete(depositId, Job.TASK_CLASS_DEPOSIT, Complete.class.getName())
+                .or(() -> findLatestEventWhereNoLastComplete(depositId, Job.TASK_CLASS_DEPOSIT, Complete.class.getName()));
+    }
     @Query("""
               SELECT   e
               FROM     Event e
@@ -88,10 +95,6 @@ public interface EventDAO extends BaseDAO<Event>, EventCustomDAO {
             """)
     List<Event> findEventsForStoredChunksSinceLastComplete(String depositId);
 
-    default Optional<Event> findLatestEventByDepositIdAndJobTaskClass(String depositId, String jobTaskClass) {
-        return findLatestEventByDepositIdAndJobTaskClass2(depositId, jobTaskClass)
-                .or(() -> findLatestEventByDepositIdAndJobTaskClass1(depositId, jobTaskClass));
-    }
 
     default StoredChunks findDepositChunksStored(String depositId) {
         StoredChunks result = new StoredChunks();
@@ -108,17 +111,43 @@ public interface EventDAO extends BaseDAO<Event>, EventCustomDAO {
     @Query("""
               SELECT   e
               FROM     Event e
-              WHERE    e.eventClass = 'org.datavaultplatform.common.event.retrieve.ArchiveStoreRetrievedChunk'
+              WHERE    ((e.eventClass IS NULL) OR (e.eventClass <> 'org.datavaultplatform.common.event.Error'))
               AND      e.deposit.id = :depositId
-              AND      e.chunkNumber IS NOT NULL
-              AND      NOT EXISTS (
-                  SELECT comp
-                  FROM   Event comp
-                  WHERE  comp.eventClass = 'org.datavaultplatform.common.retrieve.RetrieveComplete'
-                  AND    comp.deposit.id = :depositId
+              AND      e.job.taskClass = :jobTaskClass
+              AND      e.retrieveId = :retrieveId
+              AND      e.timestamp >= (
+                  SELECT MAX(comp.timestamp) FROM Event comp where comp.eventClass = :completeEventClass
+                  AND comp.deposit.id = :depositId
+                  AND e.job.taskClass = :jobTaskClass
+                  AND e.retrieveId = :retrieveId
               )
+              ORDER BY e.timestamp DESC, e.sequence DESC
+              LIMIT 1
             """)
-    List<Event> findEventsForRetrievedChunksWhereNoLastComplete(String depositId);
+    Optional<Event> findLatestRetrieveEventSinceLastComplete(String depositId, String retrieveId, String jobTaskClass, String completeEventClass);
+
+    @Query("""
+              SELECT   e
+              FROM     Event e
+              WHERE    ((e.eventClass IS NULL) OR (e.eventClass <> 'org.datavaultplatform.common.event.Error'))
+              AND      e.deposit.id = :depositId
+              AND      e.job.taskClass = :jobTaskClass
+              AND      e.retrieveId = :retrieveId
+              AND      NOT EXISTS (
+                  SELECT comp FROM Event comp where comp.eventClass = :completeEventClass
+                  AND comp.deposit.id = :depositId
+                  AND e.job.taskClass = :jobTaskClass
+                  AND e.retrieveId = :retrieveId
+              )
+              ORDER BY e.timestamp DESC, e.sequence DESC
+              LIMIT 1
+            """)
+    Optional<Event> findLatestRetrieveEventWhereNoLastComplete(String depositId, String retrieveId, String jobTaskClass, String completeEventClass);
+
+    default Optional<Event> findLatestRetrieveEvent(String depositId, String retrieveId) {
+        return findLatestRetrieveEventSinceLastComplete(depositId, retrieveId, Job.TASK_CLASS_RETRIEVE, RetrieveComplete.class.getName())
+                .or(() -> findLatestRetrieveEventWhereNoLastComplete(depositId, retrieveId, Job.TASK_CLASS_RETRIEVE, RetrieveComplete.class.getName()));
+    }
 
     @Query("""
               SELECT   e
@@ -126,21 +155,40 @@ public interface EventDAO extends BaseDAO<Event>, EventCustomDAO {
               WHERE    e.eventClass = 'org.datavaultplatform.common.event.retrieve.ArchiveStoreRetrievedChunk'
               AND      e.deposit.id = :depositId
               AND      e.chunkNumber IS NOT NULL
+              AND      e.retrieveId = :retrieveId
+              AND      NOT EXISTS (
+                  SELECT comp
+                  FROM   Event comp
+                  WHERE  comp.eventClass = 'org.datavaultplatform.common.retrieve.RetrieveComplete'
+                  AND    comp.deposit.id = :depositId
+                  AND    comp.retrieveId = :retrieveId
+              )
+            """)
+    List<Event> findEventsForRetrievedChunksWhereNoLastComplete(String depositId, String retrieveId);
+
+    @Query("""
+              SELECT   e
+              FROM     Event e
+              WHERE    e.eventClass = 'org.datavaultplatform.common.event.retrieve.ArchiveStoreRetrievedChunk'
+              AND      e.deposit.id = :depositId
+              AND      e.chunkNumber IS NOT NULL
+              AND      e.retrieveId = :retrieveId
               AND      e.timestamp >= (
                   SELECT MAX(comp.timestamp)
                   FROM   Event comp
                   WHERE  comp.eventClass = 'org.datavaultplatform.common.event.retrieve.RetrieveComplete'
                   AND    comp.deposit.id = :depositId
+                  AND    comp.retrieveId = :retrieveId
               )
             """)
-    List<Event> findEventsForRetrievedChunksSinceLastRetrieveComplete(String depositId);
+    List<Event> findEventsForRetrievedChunksSinceLastRetrieveComplete(String depositId, String retrieveId);
 
-    default RetrievedChunks findDepositChunksRetrieved(String depositId) {
+    default RetrievedChunks findDepositChunksRetrieved(String depositId, String retrieveId) {
         RetrievedChunks result = new RetrievedChunks();
         if (depositId != null) {
-            ArrayList<Event> events = new ArrayList<>(findEventsForRetrievedChunksSinceLastRetrieveComplete(depositId));
+            ArrayList<Event> events = new ArrayList<>(findEventsForRetrievedChunksSinceLastRetrieveComplete(depositId, retrieveId));
             if (events.isEmpty()) {
-                events.addAll(findEventsForRetrievedChunksWhereNoLastComplete(depositId));
+                events.addAll(findEventsForRetrievedChunksWhereNoLastComplete(depositId, retrieveId));
             }
             result.addEvents(events);
         }

@@ -245,16 +245,16 @@ public class DepositsController {
         return runRetrieveDeposit(user, deposit, retrieve, null);
     }
 
-    @PostMapping( "/deposits/{depositid}/retrieve/restart")
+    @PostMapping( "/deposits/{depositId}/retrieve/{retrieveId}/restart")
     public Boolean retrieveDepositRestart(@RequestHeader(HEADER_USER_ID) String userID,
-                                   @PathVariable("depositid") String depositID,
-                                   @RequestBody Retrieve retrieve) throws Exception {
+                                   @PathVariable("depositId") String depositId,
+                                   @PathVariable("retrieveId") String retrieveId) throws Exception {
         User user = usersService.getUser(userID);
         if (user == null) {
-            throw new Exception("User '" + userID + "' does not exist");
-        }
-        Deposit deposit = depositsService.getUserDeposit(user, depositID);
-        Event lastEvent = depositsService.getLastNotFailedRetrieveEvent(depositID);
+            throw new Exception("User '" + userID + "' does not exist");}
+        Deposit deposit = depositsService.getUserDeposit(user, depositId);
+        Retrieve retrieve = retrievesService.getRetrieve(retrieveId);
+        Event lastEvent = depositsService.getLastNotFailedRetrieveEvent(depositId, retrieveId);
         return runRetrieveDeposit(user, deposit, retrieve, lastEvent);
     }
 
@@ -373,7 +373,7 @@ public class DepositsController {
                 encChunksDigests.put(chunks.getChunkNum(), chunks.getEcnArchiveDigest());
             }
 
-            RetrievedChunks retrievedChunks = depositsService.getChunksRetrieved(deposit.getID());
+            RetrievedChunks retrievedChunks = depositsService.getChunksRetrieved(deposit.getID(), retrieve.getID());
             String storedChunksJson = mapper.writeValueAsString(retrievedChunks);
             retrieveProperties.put(PropNames.DEPOSIT_CHUNKS_RETRIEVED, storedChunksJson);
             

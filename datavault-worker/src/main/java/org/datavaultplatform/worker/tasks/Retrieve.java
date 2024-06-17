@@ -32,13 +32,14 @@ import java.util.*;
 import java.util.function.Consumer;
 
 import static org.datavaultplatform.worker.operations.FileSplitter.CHUNK_SEPARATOR;
+import static org.datavaultplatform.worker.tasks.deposit.DepositUtils.getTarFile;
 import static org.datavaultplatform.worker.tasks.retrieve.RetrieveState.*;
 import static org.datavaultplatform.worker.tasks.retrieve.RetrieveUtils.DATA_VAULT_HIDDEN_FILE_NAME;
 
 /**
  * A class that extends Task which is used to handle Retrievals from the vault
  */
-@SuppressWarnings("ResultOfMethodCallIgnored")
+@SuppressWarnings({"ResultOfMethodCallIgnored", "CodeBlock2Expr"})
 @Slf4j
 public class Retrieve extends BaseTwoSpeedRetryTask {
     public static final String STARTING_TXFR = "Starting transfer ...";
@@ -150,8 +151,8 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
             log.debug("Creating chunk download task: [{}]", chunkNum);
             RetrieveChunkInfo chunkInfo = getChunkInfo(context, tarFile, chunkNum);
             chunks[chunkNum - 1] = chunkInfo.chunkFile();
-            
-            if(retrievedChunks.isRetrieved(chunkNum) && chunkInfo.isRetrieveValid()) {
+
+            if (retrievedChunks.isRetrieved(chunkNum) && chunkInfo.isRetrieveValid()) {
                 log.info("chunkNum[{}] retrieved already - skipping...", chunkNum);
             } else {
                 ChunkRetrieveTracker crt = new ChunkRetrieveTracker(
@@ -199,26 +200,29 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
         // Decompress to the temporary directory
         File bagDir = Tar.unTar(tarFile, context.getTempDir());
         try {
-            long bagDirSize = FileUtils.sizeOfDirectory(bagDir);
+            if (isLastEventBefore(UploadedToUserStore.class)) {
+                // Get the payload data directory
+                File payloadDir = bagDir.toPath().resolve(DATA).toFile();
 
-            // Get the payload data directory
-            File payloadDir = bagDir.toPath().resolve(DATA).toFile();
+                long bagDirSize = FileUtils.sizeOfDirectory(bagDir);
 
-            // Copy the extracted files to the target retrieve area
-            log.info("Copying to user directory ...");
-            sendEvent(getUpdateProgress(bagDirSize).withNextState(RetrieveState03TransferrinfFiles.getStateNumber()));
+                // Copy the extracted files to the target retrieve area
+                log.info("Copying to user directory ...");
+                sendEvent(getUpdateProgress(bagDirSize).withNextState(RetrieveState03TransferrinfFiles.getStateNumber()));
 
-            // COPY FILES FROM WORKER BACK TO USER FS
-            copyFilesToUserFs(progress, payloadDir, userStoreInfo, bagDirSize);
+                // COPY FILES FROM WORKER BACK TO USER FS
+                copyFilesToUserFs(progress, payloadDir, userStoreInfo, bagDirSize);
 
-            logProgress(progress);
-
-            tarFile.delete();
-
+                logProgress(progress);
+                sendEvent(new UploadedToUserStore(jobID, depositId, retrieveId));
+            }
             log.info("Data retrieve complete: [{}]", retrievePath);
             sendEvent(new RetrieveComplete(jobID, depositId, retrieveId).withNextState(RetrieveState04DataRetrieveComplete.getStateNumber()));
+
+            //only delete the tarFile AFTER we've sent the final message
+            tarFile.delete();
         } finally {
-            // Cleanup
+            // Cleanup - keep the tar file in case of restarts
             log.info("Cleaning up ...");
             FileUtils.deleteDirectory(bagDir);
         }
@@ -300,7 +304,7 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
         }
     }
     
-    protected boolean isFinalTarValid(File tarFile, String archiveDigest) throws Exception {
+    protected boolean isFinalTarValid(File tarFile, String archiveDigest) {
         try {
             Utils.checkFileHash("single-verified-tar", tarFile, archiveDigest);
             return true;
@@ -312,8 +316,8 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
     protected void fromArchiveStoreToUserStore(Context context, File tarFile, ArchiveDeviceInfo archiveDeviceInfo, UserStoreInfo userStoreInfo, RetrievedChunks retrievedChunks) throws Exception {
         var progress = new Progress();
         trackProgress(progress, archiveSize, () -> {
-            
-            if (isLastEventBefore(ArchiveStoreRetrievedAll.class) && isFinalTarValid(tarFile, archiveDigest)) {
+
+            if ( isLastEventBefore(ArchiveStoreRetrievedAll.class) || ! isFinalTarValid(tarFile, archiveDigest)) {
                 if (context.isChunkingEnabled()) {
                     retrieveChunksAndRecompose(context, archiveDeviceInfo, progress, tarFile, retrievedChunks);
                 } else {
@@ -328,18 +332,15 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
     }
 
     protected void copyFilesToUserFs(Progress progress, File payloadDir, UserStoreInfo userStoreInfo, long bagDirSize) throws Exception {
-        if (isLastEventBefore(UploadedToUserStore.class)) {
-            trackProgress(progress, bagDirSize, () -> {
-                File[] contents = payloadDir.listFiles();
-                Arrays.sort(contents);
-                for (File content : contents) {
-                    String taskDesc = payloadDir.toPath().relativize(content.toPath()).toString();
-                    TwoSpeedRetry.DvRetryTemplate template = userFsTwoSpeedRetry.getRetryTemplate(String.format("toUserFs - %s", taskDesc));
-                    template.execute(retryContext -> store(userStoreInfo, content, progress));
-                }
-            });
-            sendEvent(new UploadedToUserStore(jobID, depositId, retrieveId));
-        }
+        trackProgress(progress, bagDirSize, () -> {
+            File[] contents = payloadDir.listFiles();
+            Arrays.sort(contents);
+            for (File content : contents) {
+                String taskDesc = payloadDir.toPath().relativize(content.toPath()).toString();
+                TwoSpeedRetry.DvRetryTemplate template = userFsTwoSpeedRetry.getRetryTemplate(String.format("toUserFs - %s", taskDesc));
+                template.execute(retryContext -> store(userStoreInfo, content, progress));
+            }
+        });
     }
     private void sendError(String msg) {
         sendEvent(new RetrieveError(jobID, depositId, retrieveId, msg));
