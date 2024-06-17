@@ -3,6 +3,7 @@ package org.datavaultplatform.broker.controllers;
 import static org.datavaultplatform.common.util.Constants.HEADER_USER_ID;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.datavaultplatform.broker.queue.Sender;
 import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.common.PropNames;
@@ -26,10 +27,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Predicate;
 
 
 @RestController
@@ -69,7 +68,7 @@ public class DepositsController {
     private final ObjectMapper mapper;
 
     private static final Logger logger = LoggerFactory.getLogger(DepositsController.class);
-
+    
     @Autowired
     public DepositsController(VaultsService vaultsService, DepositsService depositsService,
         RetrievesService retrievesService, MetadataService metadataService,
@@ -129,18 +128,18 @@ public class DepositsController {
     public DepositInfo getDeposit(@RequestHeader(HEADER_USER_ID) String userID,
                                   @PathVariable("depositid") String depositID) throws Exception {
 
-        User user = usersService.getUser(userID);
-
-        return depositsService.getUserDeposit(user, depositID).convertToResponse();
+        User user = getUser(userID);
+        return getUserDeposit(user, depositID).convertToResponse();
     }
 
     @PostMapping("/deposits")
     public ResponseEntity<DepositInfo> addDeposit(@RequestHeader(HEADER_USER_ID) String userID,
                                              @RequestBody CreateDeposit createDeposit) throws Exception {
 
+        User user = getUser(userID);
+
         Deposit deposit = new Deposit();
 
-        User user = usersService.getUser(userID);
         Vault vault = vaultsService.getUserVault(user, createDeposit.getVaultID());
 
         deposit.setName(createDeposit.getName());
@@ -149,9 +148,6 @@ public class DepositsController {
         deposit.setPersonalDataStatement(createDeposit.getPersonalDataStatement());
         deposit.setDepositPaths(new ArrayList<>());
 
-        if (user == null) {
-            throw new Exception("User '" + userID + "' does not exist");
-        }
         deposit.setUser(user);
 
         // Add the file upload path
@@ -163,7 +159,7 @@ public class DepositsController {
             throw new Exception("No configured archive storage");
         }
 
-        archiveStores = this.addArchiveSpecificOptions(archiveStores);
+        this.addArchiveSpecificOptions(archiveStores);
 
         logger.info("Deposit File Path: ");
         for (DepositPath dPath : deposit.getDepositPaths()){
@@ -185,8 +181,8 @@ public class DepositsController {
     public List<FileFixity> getDepositManifest(@RequestHeader(HEADER_USER_ID) String userID,
                                                @PathVariable("depositid") String depositID) throws Exception {
 
-        User user = usersService.getUser(userID);
-        Deposit deposit = depositsService.getUserDeposit(user, depositID);
+        User user = getUser(userID);
+        Deposit deposit = getUserDeposit(user, depositID);
 
         List<FileFixity> manifest = new ArrayList<>();
         
@@ -201,8 +197,8 @@ public class DepositsController {
     public List<EventInfo> getDepositEvents(@RequestHeader(HEADER_USER_ID) String userID,
                                             @PathVariable("depositid") String depositID) throws Exception {
 
-        User user = usersService.getUser(userID);
-        Deposit deposit = depositsService.getUserDeposit(user, depositID);
+        User user = getUser(userID);
+        Deposit deposit = getUserDeposit(user, depositID);
 
         List<EventInfo> events = new ArrayList<>();
         
@@ -217,8 +213,8 @@ public class DepositsController {
     public List<Retrieve> getDepositRetrieves(@RequestHeader(HEADER_USER_ID) String userID,
                                             @PathVariable("depositid") String depositID) throws Exception {
 
-        User user = usersService.getUser(userID);
-        Deposit deposit = depositsService.getUserDeposit(user, depositID);
+        User user = getUser(userID);
+        Deposit deposit = getUserDeposit(user, depositID);
 
         return deposit.getRetrieves();
     }
@@ -227,8 +223,8 @@ public class DepositsController {
     public List<Job> getDepositJobs(@RequestHeader(HEADER_USER_ID) String userID,
                                     @PathVariable("depositid") String depositID) throws Exception {
 
-        User user = usersService.getUser(userID);
-        Deposit deposit = depositsService.getUserDeposit(user, depositID);
+        User user = getUser(userID);
+        Deposit deposit = getUserDeposit(user, depositID);
 
         return deposit.getJobs();
     }
@@ -237,11 +233,8 @@ public class DepositsController {
     public Boolean retrieveDeposit(@RequestHeader(HEADER_USER_ID) String userID,
                                   @PathVariable("depositid") String depositID,
                                   @RequestBody Retrieve retrieve) throws Exception {
-        User user = usersService.getUser(userID);
-        if (user == null) {
-            throw new Exception("User '" + userID + "' does not exist");
-        }
-        Deposit deposit = depositsService.getUserDeposit(user, depositID);
+        User user = getUser(userID);
+        Deposit deposit = getUserDeposit(user, depositID);
         return runRetrieveDeposit(user, deposit, retrieve, null);
     }
 
@@ -249,11 +242,11 @@ public class DepositsController {
     public Boolean retrieveDepositRestart(@RequestHeader(HEADER_USER_ID) String userID,
                                    @PathVariable("depositId") String depositId,
                                    @PathVariable("retrieveId") String retrieveId) throws Exception {
-        User user = usersService.getUser(userID);
-        if (user == null) {
-            throw new Exception("User '" + userID + "' does not exist");}
-        Deposit deposit = depositsService.getUserDeposit(user, depositId);
-        Retrieve retrieve = retrievesService.getRetrieve(retrieveId);
+        User user = getUser(userID);
+        Deposit deposit = getUserDeposit(user, depositId);
+        Retrieve retrieve = retrievesService.getRetrieve(retrieveId);   
+        boolean retrieveMatchesDeposit = retrieve.getDeposit().equals(deposit);
+        Assert.isTrue(retrieveMatchesDeposit, "The depositId[%s] does not match retrieve's depositId[%s]".formatted(depositId, retrieve.getDeposit().getID()));
         Event lastEvent = depositsService.getLastNotFailedRetrieveEvent(depositId, retrieveId);
         return runRetrieveDeposit(user, deposit, retrieve, lastEvent);
     }
@@ -263,58 +256,26 @@ public class DepositsController {
         Assert.isTrue(deposit != null, "The deposit cannot be null");
         Assert.isTrue(retrieve != null, "The retrieve cannot be null");
 
-        retrieve.setUser(user);
-        
-        List<Job> jobs = deposit.getJobs();
-        for (Job job : jobs) {
-            if (!job.isError() && job.getState() != job.getStates().size() - 1) {
-                // There's an in-progress job for this deposit
-                throw new IllegalArgumentException("Job in-progress for this Deposit");
-            }
-        }
-        
-        String fullPath = retrieve.getRetrievePath();
-        String storageID, retrievePath;
-        if (!fullPath.contains("/")) {
-            // A request to retrieve the whole share/device
-            storageID = fullPath;
-            retrievePath = "/";
+        if (lastEvent == null) {
+            retrieve.setUser(user);
+            checkForInProgressJob(deposit.getJobs());
         } else {
-            // A request to retrieve a sub-directory
-            storageID = fullPath.substring(0, fullPath.indexOf("/"));
-            retrievePath = fullPath.replaceFirst(storageID + "/", "");
+            Assert.isTrue(retrieve.getUser().equals(user),"The user does not match the retrieve user");
         }
 
+        StorageIdAndRetrievePath storageIdAndRetrievePath = StorageIdAndRetrievePath.fromFullPath(retrieve.getRetrievePath());
+        String storageID = storageIdAndRetrievePath.storageID;
+        String retrievePath = storageIdAndRetrievePath.retrievePath;
+        
         // Fetch the ArchiveStore that is flagged for retrieval. We store it in a list as the Task parameters require a list.
         ArchiveStore archiveStore = archiveStoreService.getForRetrieval();
-        List<ArchiveStore> archiveStores = new ArrayList<>();
-        archiveStores.add(archiveStore);
-        archiveStores = this.addArchiveSpecificOptions(archiveStores);
+        List<ArchiveStore> archiveStores = List.of(archiveStore);
+        addArchiveSpecificOptions(archiveStores);
 
         // Find the Archive that matches the ArchiveStore.
-        String archiveID = null;
-        for (Archive archive : deposit.getArchives()) {
-            if (archive.getArchiveStore().getID().equals(archiveStore.getID())) {
-                archiveID = archive.getArchiveId();
-            }
-        }
-
-        // Worth checking that we found a matching Archive for the ArchiveStore.
-        if (archiveID == null) {
-            throw new Exception("No valid archive for retrieval");
-        }
+        String archiveID = getDepositArchive(deposit, archiveStore);
         
-        FileStore userStore = null;
-        List<FileStore> userStores = user.getFileStores();
-        for (FileStore store : userStores) {
-            if (store.getID().equals(storageID)) {
-                userStore = store;
-            }
-        }
-
-        if (userStore == null) {
-            throw new IllegalArgumentException("Storage ID '" + storageID + "' is invalid");
-        }
+        FileStore userStore = getUserStore(user, storageID);
 
         // Check the source file path is valid
         if (!filesService.validPath(retrievePath, userStore)) {
@@ -325,53 +286,32 @@ public class DepositsController {
         Job job = new Job(Job.TASK_CLASS_RETRIEVE);
         jobsService.addJob(deposit, job);
 
-        // Add the retrieve object
-        retrievesService.addRetrieve(retrieve, deposit, retrievePath);
-        
+        if (lastEvent == null) {
+            // Add the retrieve object
+            retrievesService.addRetrieve(retrieve, deposit, retrievePath);
+        }
+
         // Ask the worker to process the data retrieve
         try {
-            HashMap<String, String> retrieveProperties = new HashMap<>();
-            retrieveProperties.put(PropNames.DEPOSIT_ID, deposit.getID());
-            retrieveProperties.put(PropNames.DEPOSIT_CREATION_DATE, DateTimeUtils.formatDateBasicISO(deposit.getCreationTime()));
-            retrieveProperties.put(PropNames.RETRIEVE_ID, retrieve.getID());
-            retrieveProperties.put(PropNames.BAG_ID, deposit.getBagId());
-            retrieveProperties.put(PropNames.RETRIEVE_PATH, retrievePath); // No longer the absolute path
-            retrieveProperties.put(PropNames.ARCHIVE_ID, archiveID);
-            retrieveProperties.put(PropNames.ARCHIVE_SIZE, Long.toString(deposit.getArchiveSize()));
-            retrieveProperties.put(PropNames.USER_ID, user.getID());
-            retrieveProperties.put(PropNames.ARCHIVE_DIGEST, deposit.getArchiveDigest());
-            retrieveProperties.put(PropNames.ARCHIVE_DIGEST_ALGORITHM, deposit.getArchiveDigestAlgorithm());
-            retrieveProperties.put(PropNames.NUM_OF_CHUNKS, Integer.toString(deposit.getNumOfChunks()));
-            retrieveProperties.put(PropNames.USER_FS_RETRY_MAX_ATTEMPTS, String.valueOf(this.userFsRetryMaxAttempts));
-            retrieveProperties.put(PropNames.USER_FS_RETRY_DELAY_MS_1, String.valueOf(this.userFsRetryDelaySeconds1));
-            retrieveProperties.put(PropNames.USER_FS_RETRY_DELAY_MS_2, String.valueOf(this.userFsRetryDelaySeconds2));
+            HashMap<String, String> retrieveProperties = getRetrieveProperties(user, deposit, retrieve, retrievePath, archiveID);
 
             // Add a single entry for the user file storage
-            Map<String, String> userFileStoreClasses = new HashMap<>();
-            Map<String, Map<String, String>> userFileStoreProperties = new HashMap<>();
-            userFileStoreClasses.put(storageID, userStore.getStorageClass());
-            userFileStoreProperties.put(storageID, userStore.getProperties());
+            Map<String, String> userFileStoreClasses = Map.of(storageID, userStore.getStorageClass());
+            Map<String, Map<String, String>> userFileStoreProperties = Map.of(storageID, userStore.getProperties());
             
             // get chunks checksums
-            HashMap<Integer, String> chunksDigest = new HashMap<>();
-            List<DepositChunk> depositChunks = deposit.getDepositChunks();
-            for (DepositChunk depositChunk : depositChunks) {
-                chunksDigest.put(depositChunk.getChunkNum(), depositChunk.getArchiveDigest());
-            }
+            var chunksDigest = new HashMap<Integer,String>();
+            deposit.getDepositChunks().forEach(dc -> chunksDigest.put(dc.getChunkNum(), dc.getArchiveDigest()));
             
             // Get encryption IVs
             byte[] tarIVs = deposit.getEncIV();
-            HashMap<Integer, byte[]> chunksIVs = new HashMap<>();
-            for( DepositChunk chunks : deposit.getDepositChunks() ) {
-                chunksIVs.put(chunks.getChunkNum(), chunks.getEncIV());
-            }
+            var chunksIVs = new HashMap<Integer,byte[]>();
+            deposit.getDepositChunks().forEach(dc -> chunksIVs.put(dc.getChunkNum(), dc.getEncIV()));
             
             // Get encrypted digests
             String encTarDigest = deposit.getEncArchiveDigest();
-            HashMap<Integer, String> encChunksDigests = new HashMap<>();
-            for( DepositChunk chunks : deposit.getDepositChunks() ) {
-                encChunksDigests.put(chunks.getChunkNum(), chunks.getEcnArchiveDigest());
-            }
+            var encChunksDigests = new HashMap<Integer, String>();
+            deposit.getDepositChunks().forEach(dc -> encChunksDigests.put(dc.getChunkNum(), dc.getEcnArchiveDigest()));
 
             RetrievedChunks retrievedChunks = depositsService.getChunksRetrieved(deposit.getID(), retrieve.getID());
             String storedChunksJson = mapper.writeValueAsString(retrievedChunks);
@@ -384,7 +324,7 @@ public class DepositsController {
                     chunksDigest,
                     tarIVs, chunksIVs,
                     encTarDigest, encChunksDigests, lastEvent);
-            String jsonRetrieve = this.mapper.writeValueAsString(retrieveTask);
+            String jsonRetrieve = mapper.writeValueAsString(retrieveTask);
 
             boolean isRestart = lastEvent != null;
             sender.send(jsonRetrieve, isRestart);
@@ -397,69 +337,131 @@ public class DepositsController {
 
         return true;
     }
-    
-    private List<ArchiveStore> addArchiveSpecificOptions(List<ArchiveStore> archiveStores) {
-    	if (archiveStores != null && ! archiveStores.isEmpty()) {
-	    	for (ArchiveStore archiveStore : archiveStores) {
-		        if (archiveStore.isTivoliStorageManager()) {
-		        	HashMap<String, String> asProps = archiveStore.getProperties();
-		        	if (this.optionsDir != null && !this.optionsDir.isEmpty()) {
-		        		asProps.put(PropNames.OPTIONS_DIR, this.optionsDir);
-		        	}
-		        	if (this.tempDir != null && !this.tempDir.isEmpty()) {
-		        		asProps.put(PropNames.TEMP_DIR, this.tempDir);
-		        	}
-		        	if (this.tsmRetryTime != null && !this.tsmRetryTime.isEmpty()) {
-		        	    asProps.put(PropNames.TSM_RETRY_TIME, this.tsmRetryTime);
-                    }
-                    if (this.tsmMaxRetries != null && !this.tsmMaxRetries.isEmpty()) {
-                        asProps.put(PropNames.TSM_MAX_RETRIES, this.tsmMaxRetries);
-                    }
-                    if (this.tsmReverse != null && !this.tsmReverse.isEmpty()) {
-                        asProps.put(PropNames.TSM_REVERSE, this.tsmReverse);
-                    }
 
-		        	archiveStore.setProperties(asProps);
-		        }
+    protected String getDepositArchive(Deposit deposit, ArchiveStore archiveStore) throws Exception {
+        String archiveID = null;
+        for (Archive archive : deposit.getArchives()) {
+            if (archive.getArchiveStore().getID().equals(archiveStore.getID())) {
+                archiveID = archive.getArchiveId();
+            }
+        }
 
-		        if (archiveStore.isOracle()) {
-                    HashMap<String, String> asProps = archiveStore.getProperties();
-                    if (this.occRetryTime != null && !this.occRetryTime.isEmpty()) {
-                        asProps.put(PropNames.OCC_RETRY_TIME, this.occRetryTime);
-                    }
-                    if (this.occMaxRetries != null && !this.occMaxRetries.isEmpty()) {
-                        asProps.put(PropNames.OCC_MAX_RETRIES, this.occMaxRetries);
-                    }
-                    if (this.ociBucketName != null && !this.ociBucketName.isEmpty()) {
-                        asProps.put(PropNames.OCI_BUCKET_NAME, this.ociBucketName);
-                    }
-                    if (this.ociNameSpace != null && !this.ociNameSpace.isEmpty()) {
-                        asProps.put(PropNames.OCI_NAME_SPACE, this.ociNameSpace);
-                    }
-                    archiveStore.setProperties(asProps);
+        // Worth checking that we found a matching Archive for the ArchiveStore.
+        if (archiveID == null) {
+            throw new Exception("No valid archive for retrieval");
+        }
+        return archiveID;
+    }
+
+    protected void checkForInProgressJob(List<Job> jobs) {
+        for (Job job : jobs) {
+            if (!job.isError() && job.getState() != job.getStates().size() - 1) {
+                // There's an in-progress job for this deposit
+                throw new IllegalArgumentException("Job in-progress for this Deposit");
+            }
+        }
+    }
+
+    private ArchiveStore getArchiveStore() {
+        ArchiveStore archiveStore = archiveStoreService.getForRetrieval();
+        List<ArchiveStore> archiveStores = new ArrayList<>();
+        archiveStores.add(archiveStore);
+        this.addArchiveSpecificOptions(archiveStores);
+        return  archiveStore;
+    }
+
+    private HashMap<String,String> getRetrieveProperties(User user, Deposit deposit, Retrieve retrieve, String retrievePath, String archiveID) {
+        var result = new HashMap<String,String>();
+        result.put(PropNames.DEPOSIT_ID, deposit.getID());
+        result.put(PropNames.DEPOSIT_CREATION_DATE, DateTimeUtils.formatDateBasicISO(deposit.getCreationTime()));
+        result.put(PropNames.RETRIEVE_ID, retrieve.getID());
+        result.put(PropNames.BAG_ID, deposit.getBagId());
+        result.put(PropNames.RETRIEVE_PATH, retrievePath); // No longer the absolute path
+        result.put(PropNames.ARCHIVE_ID, archiveID);
+        result.put(PropNames.ARCHIVE_SIZE, Long.toString(deposit.getArchiveSize()));
+        result.put(PropNames.USER_ID, user.getID());
+        result.put(PropNames.ARCHIVE_DIGEST, deposit.getArchiveDigest());
+        result.put(PropNames.ARCHIVE_DIGEST_ALGORITHM, deposit.getArchiveDigestAlgorithm());
+        result.put(PropNames.NUM_OF_CHUNKS, Integer.toString(deposit.getNumOfChunks()));
+        result.put(PropNames.USER_FS_RETRY_MAX_ATTEMPTS, String.valueOf(this.userFsRetryMaxAttempts));
+        result.put(PropNames.USER_FS_RETRY_DELAY_MS_1, String.valueOf(this.userFsRetryDelaySeconds1));
+        result.put(PropNames.USER_FS_RETRY_DELAY_MS_2, String.valueOf(this.userFsRetryDelaySeconds2));
+        return result;
+    }
+
+    private FileStore getUserStore(User user, String storageID) {
+        FileStore userStore = null;
+        List<FileStore> userStores = user.getFileStores();
+        for (FileStore store : userStores) {
+            if (store.getID().equals(storageID)) {
+                userStore = store;
+            }
+        }
+
+        if (userStore == null) {
+            throw new IllegalArgumentException("Storage ID '" + storageID + "' is invalid");
+        }
+        return userStore;
+    }
+
+    private void addArchiveSpecificOptions(List<ArchiveStore> archiveStores) {
+        if (archiveStores == null || archiveStores.isEmpty()) {
+            return;
+        }
+        for (ArchiveStore archiveStore : archiveStores) {
+            final HashMap<String, String> asProps = archiveStore.getProperties();
+            if (archiveStore.isTivoliStorageManager()) {
+                if (StringUtils.isNotEmpty(optionsDir)) {
+                    asProps.put(PropNames.OPTIONS_DIR, optionsDir);
+                }
+                if (StringUtils.isNotEmpty(tempDir)) {
+                    asProps.put(PropNames.TEMP_DIR, tempDir);
+                }
+                if (StringUtils.isNotEmpty(tsmRetryTime)) {
+                    asProps.put(PropNames.TSM_RETRY_TIME, tsmRetryTime);
+                }
+                if (StringUtils.isNotEmpty(tsmMaxRetries)) {
+                    asProps.put(PropNames.TSM_MAX_RETRIES, tsmMaxRetries);
+                }
+                if (StringUtils.isNotEmpty(tsmReverse)) {
+                    asProps.put(PropNames.TSM_REVERSE, tsmReverse);
+                }
+                archiveStore.setProperties(asProps);
+            }
+
+            if (archiveStore.isOracle()) {
+                if (StringUtils.isEmpty(occRetryTime)) {
+                    asProps.put(PropNames.OCC_RETRY_TIME, occRetryTime);
+                }
+                if (StringUtils.isEmpty(occMaxRetries)) {
+                    asProps.put(PropNames.OCC_MAX_RETRIES, occMaxRetries);
+                }
+                if (StringUtils.isEmpty(ociBucketName)) {
+                    asProps.put(PropNames.OCI_BUCKET_NAME, ociBucketName);
+                }
+                if (StringUtils.isNotEmpty(ociNameSpace)) {
+                    asProps.put(PropNames.OCI_NAME_SPACE, ociNameSpace);
+                }
+                archiveStore.setProperties(asProps);
+            }
+
+            if (archiveStore.isAmazonS3()) {
+                if (StringUtils.isNotBlank(bucketName)) {
+                    asProps.put(PropNames.AWS_S3_BUCKET_NAME, bucketName);
+                }
+                if (StringUtils.isNotBlank(region)) {
+                    asProps.put(PropNames.AWS_S3_REGION, region);
+                }
+                if (StringUtils.isNotBlank(awsAccessKey)) {
+                    asProps.put(PropNames.AWS_ACCESS_KEY, awsAccessKey);
+                }
+                if (StringUtils.isNotBlank(awsSecretKey)) {
+                    asProps.put(PropNames.AWS_SECRET_KEY, awsSecretKey);
                 }
 
-		        if (archiveStore.isAmazonS3()) {
-		        	HashMap<String, String> asProps = archiveStore.getProperties();
-		        	if (this.bucketName != null && !this.bucketName.isEmpty()) {
-		        		asProps.put(PropNames.AWS_S3_BUCKET_NAME, this.bucketName);
-		        	}
-		        	if (this.region != null && !this.region.isEmpty()) {
-		        		asProps.put(PropNames.AWS_S3_REGION, this.region);
-		        	}
-		        	if (this.awsAccessKey != null && !this.awsAccessKey.isEmpty()) {
-		        		asProps.put(PropNames.AWS_ACCESS_KEY, this.awsAccessKey);
-		        	}
-		        	if (this.awsSecretKey != null && !this.awsSecretKey.isEmpty()) {
-		        		asProps.put(PropNames.AWS_SECRET_KEY, this.awsSecretKey);
-		        	}
-
-		        	archiveStore.setProperties(asProps);
-		        }
-	        }
-    	}
-
-    	return archiveStores;
+                archiveStore.setProperties(asProps);
+            }
+        }
     }
 
     @PostMapping("/deposits/{depositid}/restart")
@@ -467,12 +469,7 @@ public class DepositsController {
                                    @PathVariable("depositid") String depositID) throws Exception{
 
         User user = adminService.ensureAdminUser(userID);
-        Deposit deposit = depositsService.getUserDeposit(user, depositID);
-
-
-        if (deposit == null) {
-            throw new Exception("Deposit '" + depositID + "' does not exist");
-        }
+        Deposit deposit = getUserDeposit(user, depositID);
 
         List<FileStore> userStores = user.getFileStores();
         logger.info("There is " + userStores.size() + "user stores.");
@@ -490,7 +487,7 @@ public class DepositsController {
         // Get last Deposit Event
         Event lastEvent = depositsService.getLastNotFailedDepositEvent(deposit.getID());
         List<ArchiveStore> archiveStores = archiveStoreService.getArchiveStores();
-        archiveStores = this.addArchiveSpecificOptions(archiveStores);
+        addArchiveSpecificOptions(archiveStores);
         runDeposit(archiveStores, deposit, paths, lastEvent);
 
         return deposit;
@@ -664,5 +661,37 @@ public class DepositsController {
         sender.send(jsonDeposit, isRestart);
 
         return job;
+    }
+    record StorageIdAndRetrievePath(String storageID, String retrievePath) {
+
+        public static StorageIdAndRetrievePath fromFullPath(String fullPath){
+            String storageID;
+            String retrievePath;
+            if (!fullPath.contains("/")) {
+                // A request to retrieve the whole share/device
+                storageID = fullPath;
+                retrievePath = "/";
+                
+            } else {
+                // A request to retrieve a sub-directory
+                storageID = fullPath.substring(0, fullPath.indexOf("/"));
+                retrievePath = fullPath.replaceFirst(storageID + "/", "");
+            }
+            return new StorageIdAndRetrievePath(storageID, retrievePath);
+        }
+    }
+    private User getUser(String userID) throws Exception {
+        User user = usersService.getUser(userID);
+        if (user == null) {
+            throw new Exception("User '" + userID + "' does not exist");
+        }
+        return user;
+    }
+    private Deposit getUserDeposit(User user, String depositID) throws  Exception {
+        Deposit deposit = depositsService.getUserDeposit(user, depositID);
+        if (deposit == null) {
+            throw new Exception("Deposit '" + depositID + "' does not exist");
+        }  
+        return deposit;
     }
 }

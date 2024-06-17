@@ -27,8 +27,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @DirtiesContext
 @Testcontainers(disabledWithoutDocker = true)
 public abstract class BaseDatabaseTest {
-
-
+  
   @Autowired
   UserDAO userDAO;
 

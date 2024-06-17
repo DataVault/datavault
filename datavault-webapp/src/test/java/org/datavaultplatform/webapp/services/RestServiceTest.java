@@ -142,4 +142,15 @@ class RestServiceTest extends BaseRestTemplateWithLoggingTest {
                 .toInstant());
     }
     
+    @Nested
+    class RestartTests {
+        
+        @Test
+        @WithMockUser(username = "user1")
+        void testRestartRetrieve() {
+            boolean result = restService.restartRetrieve("deposit123","retrieve456");
+            assertThat(result).isTrue();
+        }
+    }
+    
 }
