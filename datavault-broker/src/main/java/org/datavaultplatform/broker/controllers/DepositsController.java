@@ -28,7 +28,6 @@ import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
-import java.util.function.Predicate;
 
 
 @RestController
@@ -68,7 +67,7 @@ public class DepositsController {
     private final ObjectMapper mapper;
 
     private static final Logger logger = LoggerFactory.getLogger(DepositsController.class);
-    
+
     @Autowired
     public DepositsController(VaultsService vaultsService, DepositsService depositsService,
         RetrievesService retrievesService, MetadataService metadataService,
@@ -159,11 +158,11 @@ public class DepositsController {
             throw new Exception("No configured archive storage");
         }
 
-        this.addArchiveSpecificOptions(archiveStores);
+        addArchiveSpecificOptions(archiveStores);
 
         logger.info("Deposit File Path: ");
         for (DepositPath dPath : deposit.getDepositPaths()){
-            logger.info("\t- " + dPath.getFilePath());
+            logger.info("\t- {}", dPath.getFilePath());
         }
 
         // Add the deposit object
@@ -239,7 +238,7 @@ public class DepositsController {
     }
 
     @PostMapping( "/deposits/{depositId}/retrieve/{retrieveId}/restart")
-    public Boolean retrieveDepositRestart(@RequestHeader(HEADER_USER_ID) String userID,
+    public boolean retrieveDepositRestart(@RequestHeader(HEADER_USER_ID) String userID,
                                    @PathVariable("depositId") String depositId,
                                    @PathVariable("retrieveId") String retrieveId) throws Exception {
         User user = getUser(userID);
@@ -472,7 +471,7 @@ public class DepositsController {
         Deposit deposit = getUserDeposit(user, depositID);
 
         List<FileStore> userStores = user.getFileStores();
-        logger.info("There is " + userStores.size() + "user stores.");
+        logger.info("There is {}user stores.", userStores.size());
 
         ArrayList<String> paths = new ArrayList<>();
         for(DepositPath dPath : deposit.getDepositPaths()){
@@ -480,7 +479,7 @@ public class DepositsController {
                 paths.add(dPath.getFilePath());
             }
         }
-        logger.info("There is " + paths.size() + " deposit path");
+        logger.info("There is {} deposit path", paths.size());
         if (paths.isEmpty()) {
             throw new Exception("There are no file paths for restarted deposit - Exiting");
         }
@@ -547,7 +546,7 @@ public class DepositsController {
                 }
 
                 if (lastEvent == null) {
-                    logger.info("Add deposit path: " + path);
+                    logger.info("Add deposit path: {}", path);
                     DepositPath depositPath = new DepositPath(deposit, path, Path.PathType.FILESTORE);
                     deposit.getDepositPaths().add(depositPath);
                     logger.debug("Prior to creating the jobs we have the following depositPaths:");
@@ -576,7 +575,7 @@ public class DepositsController {
         depositProperties.put(PropNames.NON_RESTART_JOB_ID, deposit.getNonRestartJobId());
 
         if (deposit.getNumOfChunks() != 0) {
-            logger.debug("Restart num of chunks: " + deposit.getNumOfChunks());
+            logger.debug("Restart num of chunks: {}", deposit.getNumOfChunks());
             depositProperties.put(PropNames.NUM_OF_CHUNKS, Integer.toString(deposit.getNumOfChunks()));
         }
         if (deposit.getArchiveDigest() != null) {
@@ -601,10 +600,10 @@ public class DepositsController {
 
         for (DepositPath path : deposit.getDepositPaths()) {
             if (path.getPathType() == Path.PathType.FILESTORE) {
-                logger.debug("Adding Filestore path " + path.getFilePath());
+                logger.debug("Adding Filestore path {}", path.getFilePath());
                 filestorePaths.add(path.getFilePath());
             } else if (path.getPathType() == Path.PathType.USER_UPLOAD) {
-                logger.debug("Adding User upload path " + path.getFilePath());
+                logger.debug("Adding User upload path {}", path.getFilePath());
                 userUploadPaths.add(path.getFilePath());
             }
         }

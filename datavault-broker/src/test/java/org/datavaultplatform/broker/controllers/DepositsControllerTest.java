@@ -5,10 +5,13 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import org.datavaultplatform.broker.queue.Sender;
 import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.common.event.Event;
+import org.datavaultplatform.common.event.retrieve.ArchiveStoreRetrievedChunk;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.request.CreateDeposit;
+import org.datavaultplatform.common.storage.SFTPFileSystemDriver;
 import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.common.storage.impl.TivoliStorageManager;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -18,75 +21,288 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.skyscreamer.jsonassert.JSONAssert;
 
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.in;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class DepositsControllerTest {
+
+    static final String TEST_ARCHIVE_ID = "test-archive-id";
+    static final String TEST_BAG_ID = "test-bag-id";
+    static final String TEST_DEPOSIT_ID = "test-deposit-id";
+    static final String TEST_RETRIEVE_ID = "test-retrieve-id";
+    static final String TEST_RETRIEVE_PATH = "test-retrieve-path";
+    static final String TEST_STORAGE_ID = "test-bag-id";
+    static final String TEST_USER_ID = "test-user-id";
+    static final String TEST_VAULT_ID = "test-vault-id";
+    static final String TEST_EVENT_ID = "test-event-id";
+    static final String NEW_JOB_ID = "new-job-id";
+    static final String DUMMY = "dummy-value";
+    static final String RETRIEVE_JSON_NO_RESTART = """
+            {
+              "taskClass" : "org.datavaultplatform.worker.tasks.Retrieve",
+              "jobID" : "new-job-id",
+              "properties" : {
+                "retrieveId" : "test-retrieve-id",
+                "depositId" : "test-deposit-id",
+                "userFsRetryDelayMs2" : "234",
+                "userFsRetryMaxAttempts" : "222",
+                "userFsRetryDelayMs1" : "123",
+                "depositCreationDate" : "20240617",
+                "archiveSize" : "123456789",
+                "userId" : "test-user-id",
+                "archiveId" : "test-archive-id",
+                "archiveDigestAlgorithm" : "SHA-1",
+                "bagId" : "test-bag-id",
+                "numOfChunks" : "3",
+                "retrievePath" : "test-retrieve-path",
+                "depositChunksRetrieved" : "null",
+                "archiveDigest" : "tar-digest"
+              },
+              "fileStorePaths" : null,
+              "fileUploadPaths" : null,
+              "archiveFileStores" : [ {
+                "id" : "archive-store-id",
+                "storageClass" : "org.datavaultplatform.common.storage.impl.TivoliStorageManager",
+                "label" : "archive-store-label",
+                "retrieveEnabled" : true,
+                "properties" : {
+                  "arc-prop1" : "arc-value1",
+                  "arc-prop2" : "arc-value2",
+                  "optionsDir" : "test-options-dir",
+                  "tempDir" : "test-temp-dir",
+                  "tsmRetryTime" : "dummy-value",
+                  "tsmMaxRetries" : "dummy-value",
+                  "tsmReverse" : "dummy-value"
+                }
+              } ],
+              "userFileStoreProperties" : {
+                "test-bag-id" : {
+                  "fs-prop1" : "fs-value1",
+                  "fs-prop2" : "fs-value2"
+                }
+              },
+              "userFileStoreClasses" : {
+                "test-bag-id" : "org.datavaultplatform.common.storage.SFTPFileSystemDriver"
+              },
+              "chunkFilesDigest" : {
+                "1" : "digest-1",
+                "2" : "digest-2",
+                "3" : "digest-3"
+              },
+              "tarIV" : "ZW5jLXRhci1pdg==",
+              "chunksIVs" : {
+                "1" : "b25l",
+                "2" : "dHdv",
+                "3" : "dGhyZWU="
+              },
+              "encTarDigest" : "enc-tar-digest",
+              "encChunksDigest" : {
+                "1" : "enc-digest-1",
+                "2" : "enc-digest-2",
+                "3" : "enc-digest-3"
+              },
+              "lastEvent" : null,
+              "chunksToAudit" : null,
+              "archiveIds" : null,
+              "restartArchiveIds" : { },
+              "redeliver" : false
+            }
+            """;
+    static final String RETRIEVE_JSON_FOR_RESTART = """
+               {
+                   "taskClass": "org.datavaultplatform.worker.tasks.Retrieve",
+                   "jobID": "new-job-id",
+                   "properties": {
+                       "retrieveId": "test-retrieve-id",
+                       "depositId": "test-deposit-id",
+                       "userFsRetryDelayMs2": "234",
+                       "userFsRetryMaxAttempts": "222",
+                       "userFsRetryDelayMs1": "123",
+                       "depositCreationDate": "20240617",
+                       "archiveSize": "123456789",
+                       "userId": "test-user-id",
+                       "archiveId": "test-archive-id",
+                       "archiveDigestAlgorithm": "SHA-1",
+                       "bagId": "test-bag-id",
+                       "numOfChunks": "3",
+                       "retrievePath": "test-retrieve-path",
+                       "depositChunksRetrieved": "null",
+                       "archiveDigest": "tar-digest"
+                   },
+                   "fileStorePaths": null,
+                   "fileUploadPaths": null,
+                   "archiveFileStores": [
+                       {
+                           "id": "archive-store-id",
+                           "storageClass": "org.datavaultplatform.common.storage.impl.TivoliStorageManager",
+                           "label": "archive-store-label",
+                           "retrieveEnabled": true,
+                           "properties": {
+                               "arc-prop1": "arc-value1",
+                               "arc-prop2": "arc-value2",
+                               "optionsDir": "test-options-dir",
+                               "tempDir": "test-temp-dir",
+                               "tsmRetryTime": "dummy-value",
+                               "tsmMaxRetries": "dummy-value",
+                               "tsmReverse": "dummy-value"
+                           }
+                       }
+                   ],
+                   "userFileStoreProperties": {
+                       "test-bag-id": {
+                           "fs-prop1": "fs-value1",
+                           "fs-prop2": "fs-value2"
+                       }
+                   },
+                   "userFileStoreClasses": {
+                       "test-bag-id": "org.datavaultplatform.common.storage.SFTPFileSystemDriver"
+                   },
+                   "chunkFilesDigest": {
+                       "1": "digest-1",
+                       "2": "digest-2",
+                       "3": "digest-3"
+                   },
+                   "tarIV": "ZW5jLXRhci1pdg==",
+                   "chunksIVs": {
+                       "1": "b25l",
+                       "2": "dHdv",
+                       "3": "dGhyZWU="
+                   },
+                   "encTarDigest": "enc-tar-digest",
+                   "encChunksDigest": {
+                       "1": "enc-digest-1",
+                       "2": "enc-digest-2",
+                       "3": "enc-digest-3"
+                   },
+                   "lastEvent": {
+                       "id": "test-event-id",
+                       "message": "Archive Store Retrieved Chunk",
+                       "retrieveId": "test-retrieve-id",
+                       "eventClass": "org.datavaultplatform.common.event.retrieve.ArchiveStoreRetrievedChunk",
+                       "sequence": 0,
+                       "persistent": true,
+                       "depositId": "test-deposit-id",
+                       "jobId": "new-job-id",
+                       "userId": "test-user-id"
+                   },
+                   "chunksToAudit": null,
+                   "archiveIds": null,
+                   "restartArchiveIds": {},
+                   "redeliver": false
+               }
+       """;
     
-    static String TEST_USER_ID = "test-user-id";
-    static String TEST_DEPOSIT_ID = "test-deposit-id";
-    static String TEST_RETRIEVE_ID = "test-retrieve-id";
-    static String TEST_BAG_ID = "test-bag-id";
-    
     @Mock
-    VaultsService mVaultsService;
+    AdminService mAdminService;
 
     @Mock
-    RetrievesService mRetrievesService;
-
-    @Mock
-    DepositsService mDepositsService;
-
-    @Mock
-    MetadataService mMetaDataService;
-
-    @Mock
-    ExternalMetadataService mExternalMetaDataService;
-
-    @Mock
-    UsersService mUsersService;
-
-    @Mock
-    FilesService mFilesService;
+    Archive mArchive;
 
     @Mock
     ArchiveStoreService mArchiveStoreService;
 
     @Mock
+    CreateDeposit mCreateDeposit;
+
+    @Mock
+    Deposit mDeposit;
+
+    @Mock
+    DepositsService mDepositsService;
+
+    @Mock
+    ExternalMetadataService mExternalMetaDataService;
+
+    @Mock
+    FilesService mFilesService;
+
+    @Mock
+    Job mJob;
+
+    @Mock
     JobsService mJobsService;
 
     @Mock
-    AdminService mAdminService;
+    MetadataService mMetaDataService;
+
+    @Mock
+    Event mLastEvent;
+
+    @Mock
+    Retrieve mRetrieve;
+
+    @Mock
+    RetrievesService mRetrievesService;
 
     @Mock
     Sender mSender;
-    
+
+    @Mock
+    User mUser;
+
+    @Mock
+    UsersService mUsersService;
+
+    @Mock
+    Vault mVault;
+
+    @Mock
+    VaultsService mVaultsService;
+
+    FileStore fileStore;
+
+    @Captor
+    ArgumentCaptor<Job> argJob;
+
+    @Captor
+    ArgumentCaptor<String> argRetrieveJson;
+
+    @Captor
+    ArgumentCaptor<Boolean> argIsRestart;
+
+    @Captor
+    ArgumentCaptor<String> argVaultId;
+
+
+    Field jobField;
+
+    ArchiveStore archiveStore;
+
+    DepositChunk dc1;
+    DepositChunk dc2;
+    DepositChunk dc3;
+
+    Date fixedDate;
+
     DepositsController controller;
 
-    String optionsDir = "test-options-dir";
-    String tempDir = "test-temp-dir";
+    final String optionsDir = "test-options-dir";
+    final String tempDir = "test-temp-dir";
     
-    String s3bucketName = "";
-    String s3region = "";
-    String s3accessKey;
-    String s3secretKey;
-    String tsmRetryTime = "";
-    String occRetryTime = "";
-    String tsmMaxRetries = "";
-    String occMaxRetries = "";
-    String ociNameSpace;
-    String tsmReverse;
-    String ociBucketName;
-    int maxRetryAttempts = 222;
-    long userFsRetryDelaySeconds1 = 123;
-    long userFsRetryDelaySeconds2 = 234;
+    final String s3bucketName = DUMMY;
+    final String s3region = DUMMY;
+    final String s3accessKey=DUMMY;
+    final String s3secretKey=DUMMY;
+    final String tsmRetryTime = DUMMY;
+    final String occRetryTime = DUMMY;
+    final String tsmMaxRetries = DUMMY;
+    final String occMaxRetries = DUMMY;
+    final String ociNameSpace = DUMMY;
+    final String tsmReverse = DUMMY;
+    final String ociBucketName = DUMMY;
+    final int maxRetryAttempts = 222;
+    final long userFsRetryDelaySeconds1 = 123;
+    final long userFsRetryDelaySeconds2 = 234;
     ObjectMapper mapper;
     
     @BeforeEach
@@ -110,58 +326,15 @@ public class DepositsControllerTest {
                 tsmReverse, ociBucketName, maxRetryAttempts, 
                 userFsRetryDelaySeconds1,userFsRetryDelaySeconds2, mapper));
     }
+
     
-    @Mock
-    User mUser;
-
-    @Mock
-    Deposit mDeposit;
-
-    @Mock
-    Retrieve mRetrieve;
-    
-    @Mock
-    Event mLastEvent;
-
-    @Mock
-    CreateDeposit mCreateDeposit;
-
-    @Mock
-    FileStore mFileStore;
-
-    @Mock
-    Archive mArchive;
-    
-    @Captor
-    ArgumentCaptor<Job> argJob;
-
-    @Captor
-    ArgumentCaptor<String> argRetrieveJson;
-
-    @Captor
-    ArgumentCaptor<Boolean> argIsRestart;
-
-    @Captor
-    ArgumentCaptor<String> argVaultId;
-
-    @Mock
-    Vault mVault;
-
-    @Mock
-    Job mJob;
-
-    Field jobField;
-
-    ArchiveStore archiveStore;
-
-    DepositChunk dc1;
-    DepositChunk dc2;
-    DepositChunk dc3;
-
     @Nested
     class RetrieveTests {
         @BeforeEach
         void setup() throws Exception {
+            
+            ZonedDateTime ltd = ZonedDateTime.of(LocalDateTime.of(2024,6,17, 20, 15, 0), ZoneOffset.UTC);
+            fixedDate = Date.from(ltd.toInstant());
             
             dc1 = new DepositChunk();
             dc1.setChunkNum(1);
@@ -197,15 +370,23 @@ public class DepositsControllerTest {
                 }
             };
             archiveStore.setLabel("archive-store-label");
-            archiveStore.setProperties(new HashMap<>(Map.of("prop1","value1","prop2","value2")));
+            archiveStore.setProperties(hashMapOf("arc-prop1","arc-value1","arc-prop2","arc-value2"));
             archiveStore.setRetrieveEnabled(true);
             archiveStore.setStorageClass(TivoliStorageManager.class.getName());
-            //lenient().when(mJob.getID()).thenReturn("job-id-123");
             lenient().when(mJob.isError()).thenReturn(true);
-            //lenient().when(mJob.getState()).thenReturn(0);
-            //lenient().when(mJob.getStates()).thenReturn(new ArrayList(List.of("one-state")));
+            
+            fileStore = new FileStore(){
+                @Override
+                public String getID(){
+                    return TEST_STORAGE_ID;
+                }
+            };
+            fileStore.setProperties(hashMapOf("fs-prop1","fs-value1","fs-prop2","fs-value2"));
+            fileStore.setLabel("file-store-label");
+            fileStore.setStorageClass(SFTPFileSystemDriver.class.getName());
         }
 
+        @SuppressWarnings("EqualsWithItself")
         @Test
         void testRetrieveDepositRestart1() throws Exception {
             assertThat(mDeposit).isEqualTo(mDeposit);
@@ -218,8 +399,13 @@ public class DepositsControllerTest {
             
             boolean result = controller.retrieveDepositRestart(TEST_USER_ID,TEST_DEPOSIT_ID,TEST_RETRIEVE_ID);
             assertThat(result).isTrue();
+            
             verify(controller).runRetrieveDeposit(mUser, mDeposit, mRetrieve, null);
+            verify(mRetrieve, times(2)).getDeposit();
+            verify(mDeposit).getID();
+            verify(mDepositsService).getLastNotFailedRetrieveEvent(TEST_DEPOSIT_ID, TEST_RETRIEVE_ID);
         }
+        @SuppressWarnings("EqualsWithItself")
         @Test
         void testRetrieveDepositRestart2() throws Exception {
             assertThat(mDeposit).isEqualTo(mDeposit);
@@ -233,8 +419,13 @@ public class DepositsControllerTest {
             boolean result = controller.retrieveDepositRestart(TEST_USER_ID,TEST_DEPOSIT_ID,TEST_RETRIEVE_ID);
             assertThat(result).isTrue();
             verify(controller).runRetrieveDeposit(mUser, mDeposit, mRetrieve, mLastEvent);
+            
+            verify(mRetrieve, times(2)).getDeposit();
+            verify(mDeposit).getID();
+            verify(mDepositsService).getLastNotFailedRetrieveEvent(TEST_DEPOSIT_ID, TEST_RETRIEVE_ID);
         }
 
+        @SuppressWarnings("EqualsWithItself")
         @Test
         void testRetrieveDeposit() throws Exception {
             assertThat(mDeposit).isEqualTo(mDeposit);
@@ -249,53 +440,141 @@ public class DepositsControllerTest {
             
             verify(controller).runRetrieveDeposit(mUser, mDeposit, mRetrieve, null);
         }
-        
+
         @Test
         void testRunDepositRetrieveForNonRestart() throws Exception {
-            when(mFileStore.getStorageClass()).thenReturn("USER_STORE_CLASS");
+            checkRunDeposit(null, RETRIEVE_JSON_NO_RESTART);
+        }
+        
+        @Test
+        void testRunDepositRetrieveForRestart() throws Exception {
+            ArchiveStoreRetrievedChunk lastEvent = new ArchiveStoreRetrievedChunk(){
+                @Override
+                public String getID() {
+                    return TEST_EVENT_ID;
+                }
+            };
+            lastEvent.setEventClass(ArchiveStoreRetrievedChunk.class.getCanonicalName());
+            lastEvent.setJobId(NEW_JOB_ID);
+            lastEvent.setChunkNumber(123);
+            lastEvent.setDepositId(TEST_DEPOSIT_ID);
+            lastEvent.setUserId(TEST_USER_ID);
+            lastEvent.setRetrieveId(TEST_RETRIEVE_ID);
+            checkRunDeposit(lastEvent, RETRIEVE_JSON_FOR_RESTART);
+        }
+        
+        void checkRunDeposit(Event lastEvent, String expectedJson) throws Exception {
+
+            if(lastEvent != null){
+                when(mRetrieve.getUser()).thenReturn(mUser);
+            }
+            
+            when(mArchive.getArchiveStore()).thenReturn(archiveStore);
+            when(mArchive.getArchiveId()).thenReturn(TEST_ARCHIVE_ID);
+
             when(mArchiveStoreService.getForRetrieval()).thenReturn(archiveStore);
-            when(mArchive.getArchiveId()).thenReturn("archive-id-1");
-            when(mRetrieve.getRetrievePath()).thenReturn("abc");
-            when(mDeposit.getJobs()).thenReturn(List.of(mJob));
+
+            if(lastEvent == null) {
+                when(mDeposit.getJobs()).thenReturn(List.of(mJob));
+            }
             when(mDeposit.getArchives()).thenReturn(List.of(mArchive));
             when(mDeposit.getArchiveSize()).thenReturn(123_456_789L);
             when(mDeposit.getDepositChunks()).thenReturn(List.of(dc1,dc2,dc3));
-            when(mDeposit.getNumOfChunks()).thenReturn(4);
+            when(mDeposit.getNumOfChunks()).thenReturn(3);
             when(mDeposit.getArchiveDigestAlgorithm()).thenReturn(Verify.SHA_1_ALGORITHM);
-            when(mArchive.getArchiveStore()).thenReturn(archiveStore);
             when(mDeposit.getArchiveDigest()).thenReturn("tar-digest");
             when(mDeposit.getEncArchiveDigest()).thenReturn("enc-tar-digest");
             when(mDeposit.getEncIV()).thenReturn("enc-tar-iv".getBytes(StandardCharsets.UTF_8));
-            lenient().when(mArchiveStoreService.getArchiveStores()).thenReturn(List.of(archiveStore));
-            doNothing().when(mRetrieve).setUser(mUser);
-            
-            when(mFileStore.getID()).thenReturn("abc");
-            when(mUser.getFileStores()).thenReturn(List.of(mFileStore));
-            
-            when(mRetrieve.getRetrievePath()).thenReturn("abc/def");
-            when(mDeposit.getCreationTime()).thenReturn(new Date());
-            
-            when(mFilesService.validPath("def", mFileStore)).thenReturn(true);
+            when(mDeposit.getCreationTime()).thenReturn(fixedDate);
 
+            when(mFilesService.validPath(TEST_RETRIEVE_PATH, fileStore)).thenReturn(true);
+
+            // within doAnswer we can simulate the id being generated when the job is added
             doAnswer(invocation -> {
                         Job job = invocation.getArgument(1, Job.class);
-                        jobField.set(job, "new-job-id");
+                        jobField.set(job, NEW_JOB_ID);
                         return null;
                     }
             ).when(mJobsService).addJob(eq(mDeposit), argJob.capture());
 
-            doNothing().when(mRetrievesService).addRetrieve(eq(mRetrieve), eq(mDeposit), any(String.class));
-            
+            if (lastEvent == null) {
+                doNothing().when(mRetrieve).setUser(mUser);
+            }
+            when(mRetrieve.getRetrievePath()).thenReturn(TEST_STORAGE_ID+"/" + TEST_RETRIEVE_PATH);
+
+            if (lastEvent == null) {
+                doNothing().when(mRetrievesService).addRetrieve(eq(mRetrieve), eq(mDeposit), any(String.class));
+            }
             when(mSender.send(argRetrieveJson.capture(), argIsRestart.capture())).thenReturn("MESSAGE_ID_123");
-            
+
+            when(mUser.getFileStores()).thenReturn(List.of(fileStore));
+
+            when(mVault.getID()).thenReturn(TEST_VAULT_ID);
+
             when(mVaultsService.checkRetentionPolicy(argVaultId.capture())).thenReturn(mVault);
-            
+
             doReturn(mVault).when(mDeposit).getVault();
-            
-            boolean result = controller.runRetrieveDeposit(mUser, mDeposit, mRetrieve, null);
+
+            boolean result = controller.runRetrieveDeposit(mUser, mDeposit, mRetrieve, lastEvent);
             assertThat(result).isTrue();
-            
+
             System.out.println(argRetrieveJson.getValue());
+            JSONAssert.assertEquals(expectedJson, argRetrieveJson.getValue(), false);
+
+            verify(mArchive).getArchiveStore();
+            verify(mArchive).getArchiveId();
+
+            verify(mArchiveStoreService).getForRetrieval();
+
+            verify(mFilesService).validPath(TEST_RETRIEVE_PATH, fileStore);
+
+            Job addedJob = argJob.getValue();
+            assertThat(addedJob.getID()).isEqualTo(NEW_JOB_ID);
+            verify(mJobsService).addJob(any(Deposit.class),any(Job.class));
+
+            if(lastEvent == null) {
+                verify(mDeposit).getJobs();
+            }
+            verify(mDeposit).getArchives();
+            verify(mDeposit).getArchiveSize();
+            verify(mDeposit, times(3)).getDepositChunks();
+            verify(mDeposit).getNumOfChunks();
+            verify(mDeposit).getArchiveDigestAlgorithm();
+            verify(mDeposit).getArchiveDigest();
+            verify(mDeposit).getEncArchiveDigest();
+            verify(mDeposit, times(2)).getID();
+            verify(mDeposit).getBagId();
+
+            verify(mDepositsService).getChunksRetrieved(TEST_DEPOSIT_ID, TEST_RETRIEVE_ID);
+
+            if(lastEvent == null) {
+                verify(mJob).isError();
+            }
+
+            verify(mRetrieve,times(2)).getID();
+            if(lastEvent == null) {
+                verify(mRetrieve).setUser(mUser);
+            }
+            verify(mRetrieve).getRetrievePath();
+
+            verify(mUser).getID();
+            verify(mUser).getFileStores();
+
+            verify(mVaultsService).checkRetentionPolicy(TEST_VAULT_ID);
+        }
+        
+        private HashMap<String,String> hashMapOf(String k1, String p1, String k2, String p2){
+            return new LinkedHashMap<>(new TreeMap<>(Map.of(k1,p1,k2,p2)));
+        }
+        
+        @AfterEach
+        void tearDown(){
+            verifyNoMoreInteractions(
+                    mAdminService, mArchive, mArchiveStoreService, mCreateDeposit,
+                    mDeposit, mDepositsService, mExternalMetaDataService, mFilesService,
+                    mJob, mJobsService, mMetaDataService,
+                    mRetrieve, mRetrievesService, mSender,
+                    mUser, mUsersService, mVault, mVaultsService);
         }
     }
 }

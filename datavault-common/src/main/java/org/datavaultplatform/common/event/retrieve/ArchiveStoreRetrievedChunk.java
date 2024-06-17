@@ -7,6 +7,7 @@ public class ArchiveStoreRetrievedChunk extends BaseRetrieveEvent {
     public static final String MESSAGE = "Archive Store Retrieved Chunk";
 
     public ArchiveStoreRetrievedChunk() {
+        this.message = MESSAGE;
     }
 
     public ArchiveStoreRetrievedChunk(String jobId, String depositId, String retrieveId, int chunkNumber) {
