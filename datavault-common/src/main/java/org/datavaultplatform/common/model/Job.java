@@ -38,7 +38,7 @@ import org.hibernate.annotations.UuidGenerator;
         @NamedAttributeNode(Deposit_.VAULT)
     })
 )
-public class Job {
+public class Job implements Identified {
 
     public static final String TASK_CLASS_RETRIEVE = "org.datavaultplatform.worker.tasks.Retrieve";
     public static final String TASK_CLASS_DEPOSIT  = "org.datavaultplatform.worker.tasks.Deposit";

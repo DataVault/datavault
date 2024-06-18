@@ -463,4 +463,20 @@ public class Event {
     public int hashCode() {
         return getClass().hashCode();
     }
+
+    public Event refreshIdFields() {
+        setUserId(getIdentifiedId(getUser()));
+        setDepositId(getIdentifiedId(getDeposit()));
+        setJobId(getIdentifiedId(getJob()));
+        setVaultId(getIdentifiedId(getVault()));
+        return this;
+    }
+
+    private String getIdentifiedId(Identified identified) {
+        if (identified == null) {
+            return null;
+        } else {
+            return identified.getID();
+        }
+    }
 }

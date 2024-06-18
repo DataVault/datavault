@@ -284,11 +284,14 @@ public class DepositsService {
     }
 
     public Event getLastNotFailedDepositEvent(String depositId) {
-        return eventDAO.findLatestDepositEvent(depositId).orElse(null);
+        return eventDAO.findLatestDepositEvent(depositId)
+                .map(Event::refreshIdFields)
+                .orElse(null);
     }
-    
     public Event getLastNotFailedRetrieveEvent(String depositId, String retrieveId) {
-        return eventDAO.findLatestRetrieveEvent(depositId, retrieveId).orElse(null);
+        return eventDAO.findLatestRetrieveEvent(depositId, retrieveId)
+                .map(Event::refreshIdFields)
+                .orElse(null);
     }
 }
 

@@ -106,6 +106,8 @@ class DepositsServiceTest {
     @Test
     void testGetLastEventForDepositFound() {
         Event mEvent = Mockito.mock(Event.class);
+        when(mEvent.refreshIdFields()).thenReturn(mEvent);
+        
         when(mEventDAO.findLatestDepositEvent((argDepositId.capture()))).thenReturn(Optional.of(mEvent));
         
         Event lastEvent = depositsService.getLastNotFailedDepositEvent("depositId123");
@@ -129,6 +131,8 @@ class DepositsServiceTest {
     @Test
     void testGetLastEventForRetrieveFound() {
         Event mEvent = Mockito.mock(Event.class);
+        when(mEvent.refreshIdFields()).thenReturn(mEvent);
+
         when(mEventDAO.findLatestRetrieveEvent(argDepositId.capture(), argRetrieveId.capture())).thenReturn(Optional.of(mEvent));
 
         Event lastEvent = depositsService.getLastNotFailedRetrieveEvent("depositId123","retrieve123");

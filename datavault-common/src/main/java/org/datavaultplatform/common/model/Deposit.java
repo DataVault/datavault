@@ -31,7 +31,7 @@ import org.jsondoc.core.annotation.ApiObjectField;
         @NamedAttributeNode(Vault_.DATASET)
     })
 )
-public class Deposit {
+public class Deposit implements Identified {
 
     public static final String EG_DEPOSIT = "eg.Deposit.1";
     // Deposit Identifier
