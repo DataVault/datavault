@@ -441,6 +441,28 @@ public class DepositsControllerTest {
             verify(controller).runRetrieveDeposit(mUser, mDeposit, mRetrieve, null);
         }
 
+        @SuppressWarnings("EqualsWithItself")
+        @Test
+        void testRetrieveRestart() throws Exception {
+            assertThat(mDeposit).isEqualTo(mDeposit);
+            when(mRetrievesService.getRetrieve(TEST_RETRIEVE_ID)).thenReturn(mRetrieve);
+            when(mRetrieve.getDeposit()).thenReturn(mDeposit);
+            when(mRetrieve.getUser()).thenReturn(mUser);
+            when(mUser.getID()).thenReturn(TEST_USER_ID);
+            when(mDeposit.getID()).thenReturn(TEST_DEPOSIT_ID);
+            doReturn(true).when(controller).retrieveDepositRestart(TEST_USER_ID, TEST_DEPOSIT_ID, TEST_RETRIEVE_ID);
+
+            boolean result = controller.retrieveRestart(TEST_RETRIEVE_ID);
+            assertThat(result).isTrue();
+
+            verify(mRetrievesService).getRetrieve(TEST_RETRIEVE_ID);
+            verify(mRetrieve).getDeposit();
+            verify(mRetrieve).getUser();
+            verify(mUser).getID();
+            verify(mDeposit).getID();
+            verify(controller).retrieveDepositRestart(TEST_USER_ID, TEST_DEPOSIT_ID, TEST_RETRIEVE_ID);
+        }
+
         @Test
         void testRunDepositRetrieveForNonRestart() throws Exception {
             checkRunDeposit(null, RETRIEVE_JSON_NO_RESTART);

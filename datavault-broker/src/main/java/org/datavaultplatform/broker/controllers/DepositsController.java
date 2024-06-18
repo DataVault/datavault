@@ -237,6 +237,17 @@ public class DepositsController {
         return runRetrieveDeposit(user, deposit, retrieve, null);
     }
 
+    /*
+    Added this method to easier testing of retrieve restarts with just a retrieve id
+     */
+    @PostMapping( "/retrieve/{retrieveId}/restart")
+    public boolean retrieveRestart(@PathVariable("retrieveId") String retrieveId) throws Exception {
+        Retrieve retrieve = retrievesService.getRetrieve(retrieveId);
+        Deposit deposit = retrieve.getDeposit();
+        User user = retrieve.getUser();
+        return retrieveDepositRestart(user.getID(), deposit.getID(), retrieveId );
+    }
+
     @PostMapping( "/deposits/{depositId}/retrieve/{retrieveId}/restart")
     public boolean retrieveDepositRestart(@RequestHeader(HEADER_USER_ID) String userID,
                                    @PathVariable("depositId") String depositId,
