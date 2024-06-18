@@ -1,7 +1,7 @@
 {
   "priority": 1,
   "request": {
-    "urlPath": "/retrieve/retrieve456/restart",
+    "urlPath": "/deposits/deposit123/retrieve/retrieve456/restart",
     "method": "POST",
     "headers": {
       "X-UserID": {

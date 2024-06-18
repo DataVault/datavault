@@ -624,6 +624,12 @@ public class RestService implements NotifyLogoutService, NotifyLoginService, Eva
         return response.getBody();
     }
 
+    public boolean restartRetrieve(String retrieveId) {
+        String url = "%s/retrieve/%s/restart".formatted(brokerURL, retrieveId);
+        ResponseEntity<Boolean> response = post(url, Boolean.class, null);
+        return response.getBody();
+    }
+
     public User addUser(User user) {
         ResponseEntity<User> response = post(brokerURL + "/users/", User.class, user);
         return response.getBody();
