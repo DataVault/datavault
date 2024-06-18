@@ -31,6 +31,7 @@ import java.time.ZonedDateTime;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -443,7 +444,7 @@ public class DepositsControllerTest {
 
         @SuppressWarnings("EqualsWithItself")
         @Test
-        void testRetrieveRestart() throws Exception {
+        void testRetrieveDepositRestart() throws Exception {
             assertThat(mDeposit).isEqualTo(mDeposit);
             when(mRetrievesService.getRetrieve(TEST_RETRIEVE_ID)).thenReturn(mRetrieve);
             when(mRetrieve.getDeposit()).thenReturn(mDeposit);
@@ -461,6 +462,32 @@ public class DepositsControllerTest {
             verify(mUser).getID();
             verify(mDeposit).getID();
             verify(controller).retrieveDepositRestart(TEST_USER_ID, TEST_DEPOSIT_ID, TEST_RETRIEVE_ID);
+        }
+        
+        @SuppressWarnings("EqualsWithItself")
+        @Test
+        void testRetrieveRestartWhenRetrieveNotFound() throws Exception {
+            assertThat(mDeposit).isEqualTo(mDeposit);
+            when(mRetrievesService.getRetrieve(TEST_RETRIEVE_ID)).thenReturn(null);
+
+            Exception ex = assertThrows(Exception.class, () -> controller.retrieveRestart(TEST_RETRIEVE_ID));
+            assertThat(ex).hasMessage("Retrieve 'test-retrieve-id' does not exist");
+                    
+
+            verify(mRetrievesService).getRetrieve(TEST_RETRIEVE_ID);
+            verify(controller, never()).retrieveDepositRestart(TEST_USER_ID, TEST_DEPOSIT_ID, TEST_RETRIEVE_ID);
+        }
+        
+        @Test
+        void testRetrieveDepositRestartWhenRetrieveNotFound() throws Exception {
+            when(mUsersService.getUser(TEST_USER_ID)).thenReturn(mUser);
+            when(mDepositsService.getUserDeposit(mUser, TEST_DEPOSIT_ID)).thenReturn(mDeposit);
+            Exception ex = assertThrows(Exception.class, () -> controller.retrieveDepositRestart(TEST_USER_ID, TEST_DEPOSIT_ID, TEST_RETRIEVE_ID));
+            assertThat(ex).hasMessage("Retrieve 'test-retrieve-id' does not exist");
+            
+            verify(mUsersService).getUser(TEST_USER_ID);
+            verify(mDepositsService).getUserDeposit(mUser, TEST_DEPOSIT_ID);
+            verify(mRetrievesService).getRetrieve(TEST_RETRIEVE_ID);
         }
 
         @Test

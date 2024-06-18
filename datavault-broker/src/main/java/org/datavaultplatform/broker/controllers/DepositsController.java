@@ -242,7 +242,7 @@ public class DepositsController {
      */
     @PostMapping( "/retrieve/{retrieveId}/restart")
     public boolean retrieveRestart(@PathVariable("retrieveId") String retrieveId) throws Exception {
-        Retrieve retrieve = retrievesService.getRetrieve(retrieveId);
+        Retrieve retrieve = getRetrieve(retrieveId);
         Deposit deposit = retrieve.getDeposit();
         User user = retrieve.getUser();
         return retrieveDepositRestart(user.getID(), deposit.getID(), retrieveId );
@@ -254,7 +254,7 @@ public class DepositsController {
                                    @PathVariable("retrieveId") String retrieveId) throws Exception {
         User user = getUser(userID);
         Deposit deposit = getUserDeposit(user, depositId);
-        Retrieve retrieve = retrievesService.getRetrieve(retrieveId);   
+        Retrieve retrieve = getRetrieve(retrieveId);   
         boolean retrieveMatchesDeposit = retrieve.getDeposit().equals(deposit);
         Assert.isTrue(retrieveMatchesDeposit, "The depositId[%s] does not match retrieve's depositId[%s]".formatted(depositId, retrieve.getDeposit().getID()));
         Event lastEvent = depositsService.getLastNotFailedRetrieveEvent(depositId, retrieveId);
@@ -703,5 +703,12 @@ public class DepositsController {
             throw new Exception("Deposit '" + depositID + "' does not exist");
         }  
         return deposit;
+    }
+    private Retrieve getRetrieve(String retrieveId) throws Exception {
+        Retrieve retrieve = retrievesService.getRetrieve(retrieveId);
+        if(retrieve == null){
+            throw new Exception("Retrieve '" + retrieveId + "' does not exist");
+        }
+        return retrieve;
     }
 }
