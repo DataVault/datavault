@@ -124,7 +124,7 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
         }
     }
 
-    private void retrieveChunksAndRecompose(Context context, ArchiveDeviceInfo archiveDeviceInfo, Progress progress,
+    protected void retrieveChunksAndRecompose(Context context, ArchiveDeviceInfo archiveDeviceInfo, Progress progress,
                                             File tarFile, RetrievedChunks retrievedChunks) throws Exception {
 
         File[] chunks = retrieveFiles(context, archiveDeviceInfo, progress, tarFile, retrievedChunks);
@@ -191,7 +191,8 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
         }
     }
 
-    private void doRetrieveFromWorkerToUserFs(Context context, UserStoreInfo userStoreInfo, File tarFile, Progress progress) throws Exception {
+    protected void doRetrieveFromWorkerToUserFs(Context context, UserStoreInfo userStoreInfo, File tarFile, Progress progress) throws Exception {
+        Assert.isTrue(tarFile.exists(), "The tar file [%s] does not exist".formatted(tarFile.toString()));
         logProgress(progress);
         log.info("Validating data ...");
         sendEvent(new UpdateProgress(jobID, depositId).withNextState(RetrieveState02ValidatingData.getStateNumber()));
@@ -216,9 +217,7 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
                 sendEvent(new UploadedToUserStore(jobID, depositId, retrieveId));
             }
             log.info("Data retrieve complete: [{}]", retrievePath);
-            sendEvent(new RetrieveComplete(jobID, depositId, retrieveId).withNextState(RetrieveState04DataRetrieveComplete.getStateNumber()));
-
-            //only delete the tarFile AFTER we've sent the final message
+            // only delete the tarFile AFTER we've sent the UploadedToUserStore message
             tarFile.delete();
         } finally {
             // Cleanup - keep the tar file in case of restarts
@@ -264,7 +263,7 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
         }
     }
     
-    private void checkUserStoreFreeSpaceAndPermissions(UserStoreInfo userStoreInfo) throws Exception {
+    protected void checkUserStoreFreeSpaceAndPermissions(UserStoreInfo userStoreInfo) throws Exception {
         var userFs = userStoreInfo.userFs();
    	    UserStore userStore = ((UserStore) userFs);
         if (!userStore.exists(retrievePath) || !userStore.isDirectory(retrievePath)) {
@@ -305,6 +304,7 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
     
     protected boolean isFinalTarValid(File tarFile, String archiveDigest) {
         try {
+            log.info("tarFile[{}] archiveDigest[{}]", tarFile, archiveDigest);
             Utils.checkFileHash("single-verified-tar", tarFile, archiveDigest);
             return true;
         } catch (Exception ex) {
@@ -315,8 +315,8 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
     protected void fromArchiveStoreToUserStore(Context context, File tarFile, ArchiveDeviceInfo archiveDeviceInfo, UserStoreInfo userStoreInfo, RetrievedChunks retrievedChunks) throws Exception {
         var progress = new Progress();
         trackProgress(progress, archiveSize, () -> {
-
-            if ( isLastEventBefore(ArchiveStoreRetrievedAll.class) || ! isFinalTarValid(tarFile, archiveDigest)) {
+            System.out.printf("YYY [%s]%n", archiveDigest);
+            if ( isLastEventBefore(ArchiveStoreRetrievedAll.class) || !isFinalTarValid(tarFile, archiveDigest)) {
                 if (context.isChunkingEnabled()) {
                     retrieveChunksAndRecompose(context, archiveDeviceInfo, progress, tarFile, retrievedChunks);
                 } else {
@@ -328,6 +328,7 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
 
             doRetrieveFromWorkerToUserFs(context, userStoreInfo, tarFile, progress);
         });
+        sendEvent(new RetrieveComplete(jobID, depositId, retrieveId).withNextState(RetrieveState04DataRetrieveComplete.getStateNumber()));
     }
 
     protected void copyFilesToUserFs(Progress progress, File payloadDir, UserStoreInfo userStoreInfo, long bagDirSize) throws Exception {

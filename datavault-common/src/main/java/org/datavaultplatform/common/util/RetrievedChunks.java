@@ -73,5 +73,9 @@ public class RetrievedChunks {
             return result;
         }
     }
-
+    
+    public static String toJson(RetrievedChunks retrievedChunks) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.writeValueAsString(retrievedChunks);
+    }
 }

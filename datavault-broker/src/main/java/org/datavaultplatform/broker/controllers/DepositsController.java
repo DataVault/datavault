@@ -327,10 +327,10 @@ public class DepositsController {
             deposit.getDepositChunks().forEach(dc -> encChunksDigests.put(dc.getChunkNum(), dc.getEcnArchiveDigest()));
 
             RetrievedChunks retrievedChunks = depositsService.getChunksRetrieved(deposit.getID(), retrieve.getID());
-            String storedChunksJson = mapper.writeValueAsString(retrievedChunks);
+            String retrievedChunksJson = RetrievedChunks.toJson(retrievedChunks);
             // for restarts
             retrieveProperties.put(PropNames.NON_RESTART_JOB_ID, deposit.getNonRestartJobId());
-            retrieveProperties.put(PropNames.DEPOSIT_CHUNKS_RETRIEVED, storedChunksJson);
+            retrieveProperties.put(PropNames.DEPOSIT_CHUNKS_RETRIEVED, retrievedChunksJson);
             
             Task retrieveTask = new Task(
                     job, retrieveProperties, archiveStores, 
