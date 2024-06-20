@@ -1,6 +1,5 @@
 package org.datavaultplatform.worker.tasks;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -14,7 +13,6 @@ import org.datavaultplatform.common.task.Task;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.datavaultplatform.common.util.StoredChunks;
 import org.datavaultplatform.worker.tasks.deposit.*;
-import org.springframework.security.core.parameters.P;
 import org.springframework.util.Assert;
 
 import java.io.File;
@@ -195,7 +193,8 @@ public class Deposit extends Task {
     }
 
     protected boolean isLastEventIsBefore(Class<? extends Event> eventClass) {
-        return DepositEvents.INSTANCE.isLastEventBefore(getLastEvent(), eventClass);
+        boolean result =  DepositEvents.INSTANCE.isLastEventBefore(getLastEvent(), eventClass);
+        return result;
     }
 
     protected DepositUserStoreDownloader getDepositUserStoreDownloader(Map<String, UserStore> userStores) {

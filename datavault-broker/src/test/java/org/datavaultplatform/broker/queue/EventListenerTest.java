@@ -953,7 +953,7 @@ public class EventListenerTest {
     }
 
     @Test
-    void test12RetrieveStart() {
+    void test12RetrieveComplete() {
       RetrieveComplete event = new RetrieveComplete();
       event.setRetrieveId("ret-id-123");
       Deposit mDeposit = mock(Deposit.class);
@@ -976,6 +976,8 @@ public class EventListenerTest {
       doNothing().when(spy).sendEmails(argDeposit.capture(),
           argEvent.capture(), argType.capture(),
           argUserTemplate.capture(), argAdminTemplate.capture());
+      
+      doNothing().when(mDeposit).setNonRestartJobId(null);
 
       spy.process12RetrieveComplete(event, mDeposit);
 
@@ -985,6 +987,8 @@ public class EventListenerTest {
       assertEquals(mRetrieve, argRetrieve.getValue());
       verify(retrievesService).updateRetrieve(argRetrieve.getValue());
 
+      verify(mDeposit).setNonRestartJobId(null);
+      
       assertEquals(mDeposit, argDeposit.getValue());
       assertEquals(event, argEvent.getValue());
       assertEquals(TYPE_RETRIEVE_COMPLETE, argType.getValue());
@@ -993,7 +997,7 @@ public class EventListenerTest {
 
       verify(spy).sendEmails(argDeposit.getValue(), argEvent.getValue(), argType.getValue(),
           argUserTemplate.getValue(), argAdminTemplate.getValue());
-      verifyNoInteractions(mDeposit);
+      verifyNoMoreInteractions(mDeposit);
     }
 
     @Test

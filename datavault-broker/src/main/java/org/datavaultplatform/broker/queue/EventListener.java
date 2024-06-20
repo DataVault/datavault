@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.TreeSet;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+
+import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -156,8 +158,11 @@ public class EventListener implements MessageListener {
   private final UsersService usersService;
   private final EmailService emailService;
   private final AuditsService auditsService;
+  @Getter
   private final String homeUrl;
+  @Getter
   private final String helpUrl;
+  @Getter
   private final String helpMail;
   private final String auditAdminEmail;
 
@@ -359,7 +364,6 @@ public class EventListener implements MessageListener {
     //Event Mapper using wrong Event constructor for AuditComplete? 4 param v 6 v message?  hopefully using message instead of 6 for audit
     Event commonEvent = mapper.readValue(messageBody, Event.class);
 
-    @SuppressWarnings("unchecked")
     Class<? extends Event> clazz = Class.forName(commonEvent.getEventClass()).asSubclass(Event.class);
     Event concreteEvent = mapper.readValue(messageBody, clazz);
     return concreteEvent;
@@ -685,6 +689,10 @@ public class EventListener implements MessageListener {
     Retrieve retrieve = getRetrieve(completeEvent.getRetrieveId());
     retrieve.setStatus(Retrieve.Status.COMPLETE);
     retrievesService.updateRetrieve(retrieve);
+    
+    processDeposit(deposit, $deposit -> {
+      $deposit.setNonRestartJobId(null);
+    });
 
     this.sendEmails(deposit, completeEvent, TYPE_RETRIEVE_COMPLETE,
         EmailTemplate.USER_RETRIEVE_COMPLETE,
@@ -950,19 +958,7 @@ public class EventListener implements MessageListener {
     return user;
   }
 
-  public String getHomeUrl() {
-    return this.homeUrl;
-  }
-
-  public String getHelpUrl() {
-    return this.helpUrl;
-  }
-
-  public String getHelpMail() {
-    return this.helpMail;
-  }
-
-  void updateDepositWithChunks(Deposit deposit, ChunksDigestEvent event) {
+    void updateDepositWithChunks(Deposit deposit, ChunksDigestEvent event) {
     Map<Integer, String> chunksDigest = event.getChunksDigest();
     String algorithm = event.getDigestAlgorithm();
     deposit.setNumOfChunks(chunksDigest.size());

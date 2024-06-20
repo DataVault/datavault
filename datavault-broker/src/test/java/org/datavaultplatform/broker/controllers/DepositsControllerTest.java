@@ -514,9 +514,12 @@ public class DepositsControllerTest {
         
         void checkRunDeposit(Event lastEvent, String expectedJson) throws Exception {
 
-            if(lastEvent != null){
+            if (lastEvent != null) {
                 when(mRetrieve.getUser()).thenReturn(mUser);
+            } else {
+                doNothing().when(mDeposit).setNonRestartJobId(NEW_JOB_ID);
             }
+            doReturn(NEW_JOB_ID).when(mDeposit).getNonRestartJobId();
             
             when(mArchive.getArchiveStore()).thenReturn(archiveStore);
             when(mArchive.getArchiveId()).thenReturn(TEST_ARCHIVE_ID);

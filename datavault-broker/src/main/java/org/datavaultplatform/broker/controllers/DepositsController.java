@@ -296,7 +296,10 @@ public class DepositsController {
         Job job = new Job(Job.TASK_CLASS_RETRIEVE);
         jobsService.addJob(deposit, job);
 
-        if (lastEvent == null) {
+        boolean isRestart = lastEvent != null;
+
+        if (!isRestart) {
+            deposit.setNonRestartJobId(job.getID());
             // Add the retrieve object
             retrievesService.addRetrieve(retrieve, deposit, retrievePath);
         }
@@ -325,6 +328,8 @@ public class DepositsController {
 
             RetrievedChunks retrievedChunks = depositsService.getChunksRetrieved(deposit.getID(), retrieve.getID());
             String storedChunksJson = mapper.writeValueAsString(retrievedChunks);
+            // for restarts
+            retrieveProperties.put(PropNames.NON_RESTART_JOB_ID, deposit.getNonRestartJobId());
             retrieveProperties.put(PropNames.DEPOSIT_CHUNKS_RETRIEVED, storedChunksJson);
             
             Task retrieveTask = new Task(
@@ -336,7 +341,6 @@ public class DepositsController {
                     encTarDigest, encChunksDigests, lastEvent);
             String jsonRetrieve = mapper.writeValueAsString(retrieveTask);
 
-            boolean isRestart = lastEvent != null;
             sender.send(jsonRetrieve, isRestart);
         } catch (Exception e) {
             logger.error("unexpected exception", e);
@@ -583,7 +587,6 @@ public class DepositsController {
         depositProperties.put(PropNames.DEPOSIT_ID, deposit.getID());
         depositProperties.put(PropNames.BAG_ID, deposit.getBagId());
         depositProperties.put(PropNames.USER_ID, user.getID());
-        depositProperties.put(PropNames.NON_RESTART_JOB_ID, deposit.getNonRestartJobId());
 
         if (deposit.getNumOfChunks() != 0) {
             logger.debug("Restart num of chunks: {}", deposit.getNumOfChunks());
@@ -656,6 +659,8 @@ public class DepositsController {
 
         StoredChunks storedChunks = depositsService.getChunksStored(deposit.getID());
         String storedChunksJson = mapper.writeValueAsString(storedChunks);
+        // for restarts        
+        depositProperties.put(PropNames.NON_RESTART_JOB_ID, deposit.getNonRestartJobId());
         depositProperties.put(PropNames.DEPOSIT_CHUNKS_STORED, storedChunksJson);
 
         Task depositTask = new Task(
@@ -710,5 +715,13 @@ public class DepositsController {
             throw new Exception("Retrieve '" + retrieveId + "' does not exist");
         }
         return retrieve;
+    }
+    
+    private Deposit getDeposit(String depositId) throws Exception {
+        Deposit deposit = depositsService.getDeposit(depositId);
+        if(deposit == null){
+            throw new Exception("Deposit '" + depositId + "' does not exist");
+        }
+        return deposit;
     }
 }
