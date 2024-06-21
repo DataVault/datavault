@@ -1,10 +1,12 @@
 package org.datavaultplatform.worker.tasks;
 
+import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.event.Event;
 import org.springframework.util.Assert;
 
 import java.util.List;
 
+@Slf4j
 public abstract class BaseOrderedEvents {
 
     private final List<String> ordered;
@@ -25,6 +27,7 @@ public abstract class BaseOrderedEvents {
         Assert.isTrue(eventIndex >= 0, "Unexpected eventClass [%s]".formatted(eventClassName));
 
         String lastEventClassName = lastEvent.getClass().getName();
+        log.info("lastEventClassName[{}]", lastEventClassName);
         int lastEventClassIndex = ordered.indexOf(lastEventClassName);
 
         if (lastEventClassIndex < 0) {

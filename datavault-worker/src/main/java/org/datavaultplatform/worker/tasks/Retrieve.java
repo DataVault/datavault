@@ -32,7 +32,6 @@ import java.util.*;
 import java.util.function.Consumer;
 
 import static org.datavaultplatform.worker.operations.FileSplitter.CHUNK_SEPARATOR;
-import static org.datavaultplatform.worker.tasks.deposit.DepositUtils.getTarFile;
 import static org.datavaultplatform.worker.tasks.retrieve.RetrieveState.*;
 import static org.datavaultplatform.worker.tasks.retrieve.RetrieveUtils.DATA_VAULT_HIDDEN_FILE_NAME;
 

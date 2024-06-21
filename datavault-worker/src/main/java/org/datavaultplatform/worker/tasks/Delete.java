@@ -35,7 +35,7 @@ public class Delete extends Task {
     private int numOfChunks = 0;
     
     private String depositId = null;
-  private long archiveSize = 0;
+    private long archiveSize = 0;
     private EventSender eventSender = null;
     // Maps the model ArchiveStore ID to the storage equivalent
     private final HashMap<String, ArchiveStore> archiveStores = new HashMap<>();
@@ -59,8 +59,8 @@ public class Delete extends Task {
         }
         
         this.initStates();
-        
-        logger.info("bagID: " + bagID);
+
+        logger.info("bagID: {}", bagID);
         
         //userStores = this.setupUserFileStores();
         this.setupArchiveFileStores(context.getStorageClassNameResolver());
@@ -77,7 +77,7 @@ public class Delete extends Task {
             for (String archiveStoreId : archiveStores.keySet() ) {
                 ArchiveStore archiveStore = archiveStores.get(archiveStoreId);
                 this.archiveId = properties.get(archiveStoreId);
-                logger.info("archiveId: " + this.archiveId);
+                logger.info("archiveId: {}", this.archiveId);
                 Device archiveFs = ((Device)archiveStore);
                 if(archiveFs.hasMultipleCopies()) {
                 	deleteMultipleCopiesFromArchiveStorage(context, archiveFs, tarFileName, tarFile);

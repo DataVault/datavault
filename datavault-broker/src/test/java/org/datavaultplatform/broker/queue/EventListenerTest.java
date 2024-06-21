@@ -249,20 +249,11 @@ public class EventListenerTest {
       event.setDepositId("deposit123");
       event.setUserId("user123");
 
-      Deposit mDeposit = mock(Deposit.class);
-      Job mJob = mock(Job.class);
-      User mUser = mock(User.class);
-
-      when(depositsService.getDeposit("deposit123")).thenReturn(mDeposit);
-      when(jobsService.getJob("job123")).thenReturn(mJob);
-      when(usersService.getUser("user123")).thenReturn(mUser);
-
       event.setEventClass(TestEvent.class.getName());
       String messageBody = new ObjectMapper().writeValueAsString(event);
 
       Exception ex = assertThrows(Exception.class, () -> sut.onMessageInternal(messageBody));
-      assertTrue(ex.getMessage().startsWith(
-          "Failed to process unknown Event class[class org.datavaultplatform.broker.queue.EventListenerTest$TestEvent]message[{"));
+      assertTrue(ex.getMessage().contains("Could not resolve type id 'org.datavaultplatform.broker.queue.EventListenerTest$TestEvent' as a subtype of `org.datavaultplatform.common.event.Event"));
     }
 
     @Test

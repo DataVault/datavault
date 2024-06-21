@@ -3,18 +3,85 @@ package org.datavaultplatform.common.event;
 import java.util.Date;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
 import lombok.Setter;
+import org.datavaultplatform.common.event.audit.*;
+import org.datavaultplatform.common.event.client.*;
+import org.datavaultplatform.common.event.delete.*;
+import org.datavaultplatform.common.event.deposit.*;
+import org.datavaultplatform.common.event.retrieve.*;
+import org.datavaultplatform.common.event.roles.*;
+import org.datavaultplatform.common.event.vault.*;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.UuidGenerator;
 import org.datavaultplatform.common.util.DateTimeUtils;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.response.EventInfo;
 
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "eventClass", visible = true)
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = AuditComplete.class, name = "org.datavaultplatform.common.event.audit.AuditComplete"),
+        @JsonSubTypes.Type(value = AuditError.class, name = "org.datavaultplatform.common.event.audit.AuditError"),
+        @JsonSubTypes.Type(value = AuditStart.class, name = "org.datavaultplatform.common.event.audit.AuditStart"),
+        @JsonSubTypes.Type(value = ChunkAuditComplete.class, name = "org.datavaultplatform.common.event.audit.ChunkAuditComplete"),
+        @JsonSubTypes.Type(value = ChunkAuditStarted.class, name = "org.datavaultplatform.common.event.audit.ChunkAuditStarted"),
+
+        @JsonSubTypes.Type(value = Login.class, name = "org.datavaultplatform.common.event.client.Login"),
+        @JsonSubTypes.Type(value = Logout.class, name = "org.datavaultplatform.common.event.client.Logout"),
+
+        @JsonSubTypes.Type(value = DeleteStart.class, name = "org.datavaultplatform.common.event.delete.DeleteStart"),
+        @JsonSubTypes.Type(value = DeleteComplete.class, name = "org.datavaultplatform.common.event.delete.DeleteComplete"),
+
+        @JsonSubTypes.Type(value = ValidationComplete.class, name = "org.datavaultplatform.common.event.deposit.ValidationComplete"),
+        @JsonSubTypes.Type(value = ComputedSize.class,       name = "org.datavaultplatform.common.event.deposit.ComputedSize"),
+        @JsonSubTypes.Type(value = StartCopyUpload.class,    name = "org.datavaultplatform.common.event.deposit.StartCopyUpload"),
+        @JsonSubTypes.Type(value = UploadComplete.class,     name = "org.datavaultplatform.common.event.deposit.UploadComplete"),
+        @JsonSubTypes.Type(value = Complete.class,           name = "org.datavaultplatform.common.event.deposit.Complete"),
+
+        @JsonSubTypes.Type(value = StartTarValidation.class, name = "org.datavaultplatform.common.event.deposit.StartTarValidation"),
+        @JsonSubTypes.Type(value = ComputedEncryption.class, name = "org.datavaultplatform.common.event.deposit.ComputedEncryption"),
+        @JsonSubTypes.Type(value = Start.class,              name = "org.datavaultplatform.common.event.deposit.Start"),
+        @JsonSubTypes.Type(value = CompleteCopyUpload.class, name = "org.datavaultplatform.common.event.deposit.CompleteCopyUpload"),
+        @JsonSubTypes.Type(value = TransferComplete.class,   name = "org.datavaultplatform.common.event.deposit.TransferComplete"),
+
+        @JsonSubTypes.Type(value = PackageComplete.class,       name = "org.datavaultplatform.common.event.deposit.PackageComplete"),
+        @JsonSubTypes.Type(value = ComputedChunks.class,        name = "org.datavaultplatform.common.event.deposit.ComputedChunks"),
+        @JsonSubTypes.Type(value = TransferProgress.class,      name = "org.datavaultplatform.common.event.deposit.TransferProgress"),
+        @JsonSubTypes.Type(value = ComputedDigest.class,        name = "org.datavaultplatform.common.event.deposit.ComputedDigest"),
+        @JsonSubTypes.Type(value = CompleteTarValidation.class, name = "org.datavaultplatform.common.event.deposit.CompleteTarValidation"),
+
+        @JsonSubTypes.Type(value = StartChunkValidation.class,    name = "org.datavaultplatform.common.event.deposit.StartChunkValidation"),
+        @JsonSubTypes.Type(value = CompleteChunkValidation.class, name = "org.datavaultplatform.common.event.deposit.CompleteChunkValidation"),
+
+        @JsonSubTypes.Type(value = ArchiveStoreRetrievedChunk.class,    name = "org.datavaultplatform.common.event.retrieve.ArchiveStoreRetrievedChunk"),
+        @JsonSubTypes.Type(value = UserStoreSpaceAvailableChecked.class, name = "org.datavaultplatform.common.event.retrieve.UserStoreSpaceAvailableChecked"),
+        @JsonSubTypes.Type(value = UploadedToUserStore.class,    name = "org.datavaultplatform.common.event.retrieve.UploadedToUserStore"),
+        
+        @JsonSubTypes.Type(value = RetrieveError.class, name = "org.datavaultplatform.common.event.retrieve.RetrieveError"),
+        @JsonSubTypes.Type(value = RetrieveStart.class,    name = "org.datavaultplatform.common.event.retrieve.RetrieveStart"),
+        @JsonSubTypes.Type(value = RetrieveComplete.class, name = "org.datavaultplatform.common.event.retrieve.RetrieveComplete"),
+
+        @JsonSubTypes.Type(value = ArchiveStoreRetrievedAll.class,    name = "org.datavaultplatform.common.event.retrieve.ArchiveStoreRetrievedAll"),
+
+        @JsonSubTypes.Type(value = CreateRoleAssignment.class,   name = "org.datavaultplatform.common.event.roles.CreateRoleAssignment"),
+        @JsonSubTypes.Type(value = DeleteRoleAssignment.class,   name = "org.datavaultplatform.common.event.roles.DeleteRoleAssignment"),
+        @JsonSubTypes.Type(value = OrphanVault.class,            name = "org.datavaultplatform.common.event.roles.OrphanVault"),
+        @JsonSubTypes.Type(value = TransferVaultOwnership.class, name = "org.datavaultplatform.common.event.roles.TransferVaultOwnership"),
+        @JsonSubTypes.Type(value = UpdateRoleAssignment.class,   name = "org.datavaultplatform.common.event.roles.UpdateRoleAssignment"),
+
+        @JsonSubTypes.Type(value = Create.class,             name = "org.datavaultplatform.common.event.vault.Create"),
+        @JsonSubTypes.Type(value = Pending.class,            name = "org.datavaultplatform.common.event.vault.Pending"),
+        @JsonSubTypes.Type(value = Review.class,             name = "org.datavaultplatform.common.event.vault.Review"),
+        @JsonSubTypes.Type(value = UpdatedDescription.class, name = "org.datavaultplatform.common.event.vault.UpdatedDescription"),
+        @JsonSubTypes.Type(value = UpdatedName.class,        name = "org.datavaultplatform.common.event.vault.UpdatedName"),
+
+        @JsonSubTypes.Type(value = Event.class,            name = "org.datavaultplatform.common.event.Event"),
+        @JsonSubTypes.Type(value = Error.class,            name = "org.datavaultplatform.common.event.Error"),
+        @JsonSubTypes.Type(value = InitStates.class,       name = "org.datavaultplatform.common.event.InitStates"),
+        @JsonSubTypes.Type(value = UpdateProgress.class,   name = "org.datavaultplatform.common.event.UpdateProgress")
+})
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @Table(name="Events")

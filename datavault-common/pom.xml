@@ -188,6 +188,7 @@
                 <include>**/Base*Test*</include>
                 <include>**/*.ldif</include>
                 <include>**/SshRsaKeyUtils*</include>
+                <include>**/EventTest*</include>
               </includes>
             </configuration>
           </execution>
