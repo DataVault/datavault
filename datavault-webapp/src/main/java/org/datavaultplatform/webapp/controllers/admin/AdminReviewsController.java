@@ -130,7 +130,7 @@ public class AdminReviewsController {
 
         if ("Submit".equals(action)) {
             // Throw back an error if a new review date has not been entered but some deposits are being retained.
-            if (vaultReviewModel.getNewReviewDate() != null) {
+            if (vaultReviewModel.getNewReviewDate() == null) {
                 if (vaultReviewModel.getDepositReviewModels() != null) {
                     for (DepositReviewModel drm : vaultReviewModel.getDepositReviewModels()) {
                         if (drm.getDeleteStatus() == DepositReviewDeleteStatus.RETAIN) {
