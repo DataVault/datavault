@@ -156,22 +156,17 @@ class DepositArchiveStoresUploaderTest {
         when(mContext.isChunkingEnabled()).thenReturn(true);
 
         PackageHelper helper = new PackageHelper();
-        PackageHelper.ChunkHelper chunkHelper1 = new PackageHelper.ChunkHelper(1);
-        PackageHelper.ChunkHelper chunkHelper2 = new PackageHelper.ChunkHelper(2);
-        PackageHelper.ChunkHelper chunkHelper3 = new PackageHelper.ChunkHelper(3);
-        PackageHelper.ChunkHelper chunkHelper4 = new PackageHelper.ChunkHelper(4);
-
-        chunkHelper1.setChunkFile(Files.newTemporaryFile());
-        chunkHelper2.setChunkFile(Files.newTemporaryFile());
-        chunkHelper3.setChunkFile(Files.newTemporaryFile());
-        chunkHelper4.setChunkFile(Files.newTemporaryFile());
-
-        helper.addChunkHelper(chunkHelper1);
-        helper.addChunkHelper(chunkHelper2);
-        helper.addChunkHelper(chunkHelper3);
-        helper.addChunkHelper(chunkHelper4);
+        helper.getChunkHelper(1).setChunkFile(Files.newTemporaryFile());
+        helper.getChunkHelper(2).setChunkFile(Files.newTemporaryFile());
+        helper.getChunkHelper(3).setChunkFile(Files.newTemporaryFile());
+        helper.getChunkHelper(4).setChunkFile(Files.newTemporaryFile());
         
         uploader.uploadToStorage(helper, new StoredChunks());
+
+        PackageHelper.ChunkHelper chunkHelper1 = helper.getChunkHelper(1);
+        PackageHelper.ChunkHelper chunkHelper2 = helper.getChunkHelper(2);
+        PackageHelper.ChunkHelper chunkHelper3 = helper.getChunkHelper(3);
+        PackageHelper.ChunkHelper chunkHelper4 = helper.getChunkHelper(4);
 
         verify(mTaskExecutor, times(4)).add(any(ChunkUploadTracker.class));
 

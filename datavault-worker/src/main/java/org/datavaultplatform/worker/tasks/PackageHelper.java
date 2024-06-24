@@ -38,7 +38,7 @@ public class PackageHelper implements Serializable {
     private final Map<Integer, ChunkHelper> chunkHelpers = new HashMap<>();
 
     public ChunkHelper getChunkHelper(int chunkNumber) {
-        return this.chunkHelpers.get(chunkNumber);
+        return this.chunkHelpers.computeIfAbsent(chunkNumber, cn -> new ChunkHelper(cn));
     }
 
     public void addChunkHelper(ChunkHelper chunkHelper) {
@@ -134,6 +134,7 @@ public class PackageHelper implements Serializable {
             validateChunkMap("chunkIVs", numberOfChunks, chunkIVs);
 
             for (int chunkNumber = 1; chunkNumber <= numberOfChunks; chunkNumber++) {
+
                 ChunkHelper helper = result.getChunkHelper(numberOfChunks);
                 helper.setChunkFile(DepositUtils.getChunkTarFile(context, bagID, chunkNumber));
                 helper.setChunkHash(chunkFilesDigest.get(chunkNumber));
