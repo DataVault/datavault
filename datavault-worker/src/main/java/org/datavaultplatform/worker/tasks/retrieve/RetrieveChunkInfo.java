@@ -5,7 +5,6 @@ import org.datavaultplatform.common.io.DataVaultFileUtils;
 import org.datavaultplatform.common.util.Utils;
 
 import java.io.File;
-import java.io.IOException;
 
 @Slf4j
 public record RetrieveChunkInfo(int chunkNumber,
@@ -21,8 +20,8 @@ public record RetrieveChunkInfo(int chunkNumber,
         try {
             DataVaultFileUtils.checkFileExists(chunkFile, false);
             return true;
-        } catch (IOException ex) {
-            log.warn("Chunk File does not exist [{}]", chunkFile, ex.getMessage());
+        } catch (Exception ex) {
+            log.warn("Chunk File does not exist [{}/{}", chunkFile, ex.getMessage());
             return false;
         }
     }
@@ -32,7 +31,7 @@ public record RetrieveChunkInfo(int chunkNumber,
             Utils.checkFileHash("chunk-file-check", chunkFile, chunkDigest);
             return true;
         } catch (Exception ex) {
-            log.warn("Chunk File does not have expected hash [{}]", chunkFile, ex.getMessage());
+            log.warn("Chunk File does not have expected hash [{}/{}]", chunkFile, ex.getMessage());
             return false;
         }
     }

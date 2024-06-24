@@ -2,13 +2,12 @@ package org.datavaultplatform.worker.operations;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.datavaultplatform.common.event.retrieve.UserStoreSpaceAvailableChecked;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.task.Context;
+import org.datavaultplatform.worker.tasks.RetrievedChunkFileChecker;
 import org.datavaultplatform.worker.tasks.retrieve.ArchiveDeviceInfo;
 import org.datavaultplatform.worker.tasks.retrieve.RetrieveChunkInfo;
-import org.datavaultplatform.worker.tasks.retrieve.RetrieveUtils;
 
 import java.io.File;
 import java.util.List;
@@ -23,13 +22,10 @@ public class ChunkRetrieveTracker implements Callable<File> {
     private final boolean multipleCopies;
     private final List<String> locations;
     private final Device archiveStore;
-    private final int chunkNumber;
-    private final byte[] iv;
     private final Progress progress;
-    private final String chunkDigest;
-    private final String encChunkDigest;
-    private final File chunkFile;
     private final Consumer<Integer> chunkStoredEventSender;
+    private final RetrievedChunkFileChecker chunkFileChecker;
+    private final RetrieveChunkInfo chunkInfo;
 
 
     public ChunkRetrieveTracker(String archiveId,
@@ -37,7 +33,8 @@ public class ChunkRetrieveTracker implements Callable<File> {
                                 Context context,
                                 Progress progress,
                                 RetrieveChunkInfo chunkInfo,
-                                Consumer<Integer> chunkStoredEventSender
+                                Consumer<Integer> chunkStoredEventSender,
+                                RetrievedChunkFileChecker chunkFileChecker
   ) {
         this.context = context;
         this.archiveId = archiveId;
@@ -46,17 +43,18 @@ public class ChunkRetrieveTracker implements Callable<File> {
         this.archiveStore = archiveDeviceInfo.archiveFs();
         this.progress = progress;
         
-        this.chunkNumber = chunkInfo.chunkNumber();
-        this.chunkFile = chunkInfo.chunkFile();
-        this.encChunkDigest = chunkInfo.encChunkDigest();
-        this.iv = chunkInfo.iv();
-        this.chunkDigest = chunkInfo.chunkDigest();
+        this.chunkInfo = chunkInfo;
         this.chunkStoredEventSender = chunkStoredEventSender;
+        this.chunkFileChecker = chunkFileChecker;
     }
 
     @Override
     public File call() throws Exception {
-        String chunkArchiveId = this.getArchiveId() + FileSplitter.CHUNK_SEPARATOR + this.getChunkNumber();
+
+        int chunkNumber = chunkInfo.chunkNumber();
+        File chunkFile = chunkInfo.chunkFile();
+        
+        String chunkArchiveId = this.getArchiveId() + FileSplitter.CHUNK_SEPARATOR + this.chunkInfo.chunkNumber();
 
         if (multipleCopies) {
             archiveStore.retrieve(chunkArchiveId, chunkFile, progress, locations);
@@ -64,8 +62,8 @@ public class ChunkRetrieveTracker implements Callable<File> {
             archiveStore.retrieve(chunkArchiveId, chunkFile, progress);
         }
 
-        RetrieveUtils.decryptAndCheckTarFile("chunk-"+chunkNumber, context, iv, chunkFile, encChunkDigest, chunkDigest);
-
+        chunkFileChecker.decryptAndCheckTarFile(context, chunkInfo);
+ 
         chunkStoredEventSender.accept(chunkNumber);
         log.debug("Chunk download task completed: " + chunkNumber);
         return chunkFile;

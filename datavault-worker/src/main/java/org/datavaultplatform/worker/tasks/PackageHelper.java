@@ -38,7 +38,7 @@ public class PackageHelper implements Serializable {
     private final Map<Integer, ChunkHelper> chunkHelpers = new HashMap<>();
 
     public ChunkHelper getChunkHelper(int chunkNumber) {
-        return this.chunkHelpers.computeIfAbsent(chunkNumber, cn -> new ChunkHelper(cn));
+        return this.chunkHelpers.computeIfAbsent(chunkNumber, ChunkHelper::new);
     }
 
     public void addChunkHelper(ChunkHelper chunkHelper) {

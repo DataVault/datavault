@@ -156,7 +156,7 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
             } else {
                 ChunkRetrieveTracker crt = new ChunkRetrieveTracker(
                         archiveId, archiveDeviceInfo,
-                        context, progress, chunkInfo, chunkRetrievedEventSender
+                        context, progress, chunkInfo, chunkRetrievedEventSender, getChunkFileChecker()
                 );
                 executor.add(crt);
             }
@@ -172,7 +172,7 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
         return new TaskExecutor<>(noOfThreads, "Chunk download failed.");
     }
 
-    private void doRecomposeUsingCorrectVersion(Context context, File[] chunks, File tarFile) throws Exception {
+    protected void doRecomposeUsingCorrectVersion(Context context, File[] chunks, File tarFile) throws Exception {
         // if we have a recompose date, oldRecompose is false and the deposit was created before the date set oldRecompose to true
         // set oldRecompose to true
         // if oldRecompose is false
@@ -315,7 +315,6 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
     protected void fromArchiveStoreToUserStore(Context context, File tarFile, ArchiveDeviceInfo archiveDeviceInfo, UserStoreInfo userStoreInfo, RetrievedChunks retrievedChunks) throws Exception {
         var progress = new Progress();
         trackProgress(progress, archiveSize, () -> {
-            System.out.printf("YYY [%s]%n", archiveDigest);
             if ( isLastEventBefore(ArchiveStoreRetrievedAll.class) || !isFinalTarValid(tarFile, archiveDigest)) {
                 if (context.isChunkingEnabled()) {
                     retrieveChunksAndRecompose(context, archiveDeviceInfo, progress, tarFile, retrievedChunks);
@@ -422,4 +421,9 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
         String retrievedChunksJson = getProperties().get(PropNames.DEPOSIT_CHUNKS_RETRIEVED);
         return RetrievedChunks.fromJson(retrievedChunksJson);
     }
+
+    protected RetrievedChunkFileChecker getChunkFileChecker() {
+        return new RetrievedChunkFileChecker();
+    }
+
 }

@@ -3,6 +3,7 @@ package org.datavaultplatform.worker.operations;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.task.Context;
+import org.datavaultplatform.worker.tasks.RetrievedChunkFileChecker;
 import org.datavaultplatform.worker.tasks.retrieve.ArchiveDeviceInfo;
 import org.datavaultplatform.worker.tasks.retrieve.RetrieveChunkInfo;
 import org.datavaultplatform.worker.tasks.retrieve.RetrieveUtils;
@@ -46,6 +47,8 @@ public class ChunkRetrieveTrackerTest {
     @Mock
     RetrieveChunkInfo mChunkInfo;
 
+    RetrievedChunkFileChecker chunkFileChecker = new RetrievedChunkFileChecker();
+
     @Mock
     Consumer<Integer> mChunkEventSender;
 
@@ -82,7 +85,7 @@ public class ChunkRetrieveTrackerTest {
             
             doNothing().when(mChunkEventSender).accept(TEST_CHUNK_NUMBER);
 
-            ChunkRetrieveTracker tracker = new ChunkRetrieveTracker(archiveId, mArchiveDeviceInfo, mContext, progress, mChunkInfo, mChunkEventSender);
+            ChunkRetrieveTracker tracker = new ChunkRetrieveTracker(archiveId, mArchiveDeviceInfo, mContext, progress, mChunkInfo, mChunkEventSender, chunkFileChecker);
 
             File result = tracker.call();
             assertThat(result).isEqualTo(mChunkFile);
@@ -110,7 +113,7 @@ public class ChunkRetrieveTrackerTest {
 
             doNothing().when(mChunkEventSender).accept(TEST_CHUNK_NUMBER);
             
-            ChunkRetrieveTracker tracker = new ChunkRetrieveTracker(archiveId, mArchiveDeviceInfo, mContext, progress, mChunkInfo, mChunkEventSender);
+            ChunkRetrieveTracker tracker = new ChunkRetrieveTracker(archiveId, mArchiveDeviceInfo, mContext, progress, mChunkInfo, mChunkEventSender, chunkFileChecker);
 
             File result = tracker.call();
             assertThat(result).isEqualTo(mChunkFile);

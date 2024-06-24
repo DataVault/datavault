@@ -9,10 +9,7 @@ import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.event.*;
 import org.datavaultplatform.common.event.Error;
 import org.datavaultplatform.common.event.deposit.UploadComplete;
-import org.datavaultplatform.common.event.retrieve.ArchiveStoreRetrievedAll;
-import org.datavaultplatform.common.event.retrieve.RetrieveStart;
-import org.datavaultplatform.common.event.retrieve.UploadedToUserStore;
-import org.datavaultplatform.common.event.retrieve.UserStoreSpaceAvailableChecked;
+import org.datavaultplatform.common.event.retrieve.*;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.model.ArchiveStore;
 import org.datavaultplatform.common.storage.Verify;
@@ -56,6 +53,7 @@ public class RetrieveRestartTest {
     static final String TEST_DEPOSIT_ID = "test-deposit-id";
     static final String TEST_BAG_ID = "test-bag-id";
     static final String TEST_USER_ID = "test-user-id";
+    static final String TEST_RETRIEVE_ID = "test-retrieve-id";
     private static final String FILE_STORE_ONE = "user-file-store-one";
     Path tempPath;
     Path metaPath;
@@ -415,5 +413,4 @@ public class RetrieveRestartTest {
                 "org.datavaultplatform.common.event.retrieve.RetrieveComplete"
         ));
     }
-    
 }
