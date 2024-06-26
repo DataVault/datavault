@@ -16,7 +16,7 @@ import org.datavaultplatform.common.io.Progress;
 public class ProgressTracker implements Runnable {
     
     private static final int SLEEP_INTERVAL_MS = 250;
-    private AtomicBoolean active = new AtomicBoolean(true);
+    private final AtomicBoolean active = new AtomicBoolean(true);
     private long lastByteCount = 0;
     private final long expectedBytes;
 
@@ -24,21 +24,27 @@ public class ProgressTracker implements Runnable {
     private final String jobId;
     private final String depositId;
     private final EventSender eventSender;
+    private final String retrieveId;
     
     /**
      * ProgressTracker constructor
      * @param progress The progress object
      * @param jobId Identifier for the job
      * @param depositId Identifier for the deposit
+     * @param retrieveId Identified for the retrieve - may be null for non-retrieves (e.g. deposits!)              
      * @param expectedBytes The expected size of the deposit
      * @param eventSender The event sender
      */
-    public ProgressTracker(Progress progress, String jobId, String depositId, long expectedBytes, EventSender eventSender) {
+    public ProgressTracker(Progress progress, String jobId, String depositId, String retrieveId, long expectedBytes, EventSender eventSender) {
         this.progress = progress;
         this.jobId = jobId;
         this.depositId = depositId;
         this.expectedBytes = expectedBytes;
         this.eventSender = eventSender;
+        this.retrieveId = retrieveId;
+    }
+    public ProgressTracker(Progress progress, String jobId, String depositId, long expectedBytes, EventSender eventSender) {
+        this(progress, jobId, depositId, null, expectedBytes, eventSender);
     }
     
     /**
@@ -80,6 +86,7 @@ public class ProgressTracker implements Runnable {
             // Signal progress to the broker
             
             UpdateProgress updateState = new UpdateProgress(jobId, depositId, byteCount, expectedBytes, message);
+            updateState.setRetrieveId(retrieveId);
             lastByteCount = byteCount;
             eventSender.send(updateState);
         }
@@ -88,7 +95,6 @@ public class ProgressTracker implements Runnable {
     /* (non-Javadoc)
      * @see java.lang.Runnable#run()
      */
-    @SuppressWarnings("BusyWait")
     @Override
     public void run() {
         

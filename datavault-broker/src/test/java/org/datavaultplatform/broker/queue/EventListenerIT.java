@@ -72,7 +72,7 @@ import org.springframework.transaction.annotation.Transactional;
     "broker.scheduled.enabled=false",
     "broker.email.enabled=false"
 })
-@Import({EventListener.class})
+@Import({EventListener.class, TaskTimerSupport.class})
 @Slf4j
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public class EventListenerIT extends BaseDatabaseTest {

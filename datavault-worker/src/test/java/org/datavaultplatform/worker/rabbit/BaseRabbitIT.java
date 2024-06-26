@@ -2,6 +2,7 @@ package org.datavaultplatform.worker.rabbit;
 
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import org.datavaultplatform.common.docker.DockerImage;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.RabbitMQContainer;
@@ -14,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Slf4j
 public abstract class BaseRabbitIT {
     @Container
-    private static final RabbitMQContainer RABBIT = new RabbitMQContainer("rabbitmq:3.12.14-management")
+    private static final RabbitMQContainer RABBIT = new RabbitMQContainer(DockerImage.RABBIT_IMAGE_NAME)
             .withExposedPorts(5672, 15672);
 
     @DynamicPropertySource

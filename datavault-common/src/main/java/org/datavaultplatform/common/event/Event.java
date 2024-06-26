@@ -435,6 +435,11 @@ public class Event {
         this.userId = userId;
         return this;
     }
+
+    public Event withRetrieveId(String retrieveId) {
+        this.retrieveId = retrieveId;
+        return this;
+    }
     
     public EventInfo convertToResponse() {
         return new EventInfo(id,

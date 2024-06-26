@@ -170,6 +170,8 @@ public class EventListener implements MessageListener {
   // it should at least be in a map keyed by job id ????
   Deposit.Status preDeletionStatus;
 
+  private final TaskTimerSupport eventTimerSupport;
+  
   @Autowired
   public EventListener(
       Clock clock,
@@ -183,6 +185,7 @@ public class EventListener implements MessageListener {
       UsersService usersService,
       EmailService emailService,
       AuditsService auditsService,
+      TaskTimerSupport eventTimerSupport,
       @Value("${home.page}") String homeUrl,
       @Value("${help.page}") String helpUrl,
       @Value("${help.mail}") String helpMail,
@@ -202,11 +205,13 @@ public class EventListener implements MessageListener {
     this.helpUrl = helpUrl;
     this.helpMail = helpMail;
     this.auditAdminEmail = auditAdminEmail;
+    this.eventTimerSupport = eventTimerSupport;
 
     Assert.isTrue(StringUtils.isNotBlank(this.homeUrl), () -> "homeUrl is blank");
     Assert.isTrue(StringUtils.isNotBlank(this.helpMail), () -> "helpMail is blank");
     Assert.isTrue(StringUtils.isNotBlank(this.helpUrl), () -> "helpUrl is blank");
     Assert.isTrue(StringUtils.isNotBlank(this.auditAdminEmail), () -> "auditAdminEmail is blank");
+    Assert.isTrue(eventTimerSupport != null, () -> "the eventTimerSupport cannot be null");
   }
 
 
@@ -267,80 +272,80 @@ public class EventListener implements MessageListener {
     log.info("[{}] JobId[{}]", event.getClass().getSimpleName(), event.getJobId());
 
     // perform an action based on the event type ...
-    if (event instanceof InitStates) {
-      process01InitStates((InitStates) event, job);
+    if (event instanceof InitStates initStates) {
+      process01InitStates(initStates, job);
 
-    } else if (event instanceof UpdateProgress) {
-      process02UpdateProcess((UpdateProgress) event, job);
+    } else if (event instanceof UpdateProgress updateProgress) {
+      process02UpdateProcess(updateProgress, job);
 
-    } else if (event instanceof Start) {
-      process03Start((Start) event, deposit);
+    } else if (event instanceof Start start) {
+      process03Start(start, deposit);
 
-    } else if (event instanceof ComputedSize) {
-      process04ComputedSize((ComputedSize) event, deposit);
+    } else if (event instanceof ComputedSize computedSize) {
+      process04ComputedSize(computedSize, deposit);
 
-    } else if (event instanceof ComputedChunks) {
-      process05ComputedChunks((ComputedChunks) event, deposit);
+    } else if (event instanceof ComputedChunks computedChunks) {
+      process05ComputedChunks(computedChunks, deposit);
 
-    } else if (event instanceof ComputedEncryption) {
-      process06ComputedEncryption((ComputedEncryption) event, deposit);
+    } else if (event instanceof ComputedEncryption computedEncryption) {
+      process06ComputedEncryption(computedEncryption, deposit);
 
-    } else if (event instanceof ComputedDigest) {
-      process07ComputedDigest((ComputedDigest) event, deposit);
+    } else if (event instanceof ComputedDigest computedDigest) {
+      process07ComputedDigest(computedDigest, deposit);
 
-    } else if (event instanceof UploadComplete) {
-      process08UploadComplete((UploadComplete) event, deposit);
+    } else if (event instanceof UploadComplete uploadComplete) {
+      process08UploadComplete(uploadComplete, deposit);
 
-    } else if (event instanceof Complete) {
-      process09Complete((Complete) event, deposit);
+    } else if (event instanceof Complete complete) {
+      process09Complete(complete, deposit);
 
-    } else if (event instanceof Error) {
-      process10Error((Error) event, deposit, job);
+    } else if (event instanceof Error error) {
+      process10Error(error, deposit, job);
 
-    } else if (event instanceof RetrieveStart) {
-      process11RetrieveStart((RetrieveStart) event, deposit);
+    } else if (event instanceof RetrieveStart retrieveStart) {
+      process11RetrieveStart(retrieveStart, deposit);
 
-    } else if (event instanceof RetrieveComplete) {
-      process12RetrieveComplete((RetrieveComplete) event, deposit);
+    } else if (event instanceof RetrieveComplete retrieveComplete) {
+      process12RetrieveComplete(retrieveComplete, deposit);
 
-    } else if (event instanceof DeleteStart) {
-      process13DeleteStart((DeleteStart) event, deposit);
+    } else if (event instanceof DeleteStart deleteStart) {
+      process13DeleteStart(deleteStart, deposit);
 
-    } else if (event instanceof DeleteComplete) {
-      process14DeleteComplete((DeleteComplete) event, deposit);
+    } else if (event instanceof DeleteComplete deleteComplete) {
+      process14DeleteComplete(deleteComplete, deposit);
 
-    } else if (event instanceof AuditStart) {
-      process15AuditStart((AuditStart) event);
+    } else if (event instanceof AuditStart auditStart) {
+      process15AuditStart(auditStart);
 
-    } else if (event instanceof ChunkAuditStarted) {
-      process16ChunkAuditStarted((ChunkAuditStarted) event);
+    } else if (event instanceof ChunkAuditStarted chunkAuditStarted) {
+      process16ChunkAuditStarted(chunkAuditStarted);
 
-    } else if (event instanceof ChunkAuditComplete) {
-      process17ChunkAuditComplete((ChunkAuditComplete) event);
+    } else if (event instanceof ChunkAuditComplete chunkAuditComplete) {
+      process17ChunkAuditComplete(chunkAuditComplete);
 
-    } else if (event instanceof AuditComplete) {
-      process18AuditComplete((AuditComplete) event);
+    } else if (event instanceof AuditComplete auditComplete) {
+      process18AuditComplete(auditComplete);
 
-    } else if (event instanceof AuditError) {
-      process19AuditError((AuditError) event);
+    } else if (event instanceof AuditError auditError) {
+      process19AuditError(auditError);
 
-    } else if (event instanceof TransferComplete) {
-      process20TransferComplete((TransferComplete) event);
+    } else if (event instanceof TransferComplete transferComplete) {
+      process20TransferComplete(transferComplete);
 
-    } else if (event instanceof PackageComplete) {
-      process21PackageComplete((PackageComplete) event);
+    } else if (event instanceof PackageComplete packageComplete) {
+      process21PackageComplete(packageComplete);
 
-    } else if (event instanceof StartCopyUpload) {
-      process22StartCopyUpload((StartCopyUpload) event);
+    } else if (event instanceof StartCopyUpload startCopyUpload) {
+      process22StartCopyUpload(startCopyUpload);
 
-    } else if (event instanceof CompleteCopyUpload) {
-      process23CompleteCopyUpload((CompleteCopyUpload) event, deposit);
+    } else if (event instanceof CompleteCopyUpload completeCopyUpload) {
+      process23CompleteCopyUpload(completeCopyUpload, deposit);
 
-    } else if (event instanceof ValidationComplete) {
-      process24ValidationComplete((ValidationComplete) event);
+    } else if (event instanceof ValidationComplete validationComplete) {
+      process24ValidationComplete(validationComplete);
 
-    } else if (event instanceof RetrieveError) {
-      process25RetrieveError((RetrieveError) event);
+    } else if (event instanceof RetrieveError retrieveError) {
+      process25RetrieveError(retrieveError);
 
     } else if (event instanceof ArchiveStoreRetrievedAll archiveStoreRetrievedAll){
       process26ArchiveStoreRetrievedAll(archiveStoreRetrievedAll);
@@ -362,11 +367,8 @@ public class EventListener implements MessageListener {
     ObjectMapper mapper = new ObjectMapper();
 
     //Event Mapper using wrong Event constructor for AuditComplete? 4 param v 6 v message?  hopefully using message instead of 6 for audit
-    Event commonEvent = mapper.readValue(messageBody, Event.class);
-
-    Class<? extends Event> clazz = Class.forName(commonEvent.getEventClass()).asSubclass(Event.class);
-    Event concreteEvent = mapper.readValue(messageBody, clazz);
-    return concreteEvent;
+    Event event = mapper.readValue(messageBody, Event.class);
+    return event;
   }
 
   void updateJobToNextState(Event event, Job job) {
@@ -416,7 +418,7 @@ public class EventListener implements MessageListener {
     // Send email to group owners
     for (User groupAdmin : group.getOwners()) {
       String adminEmail = groupAdmin.getEmail();
-      log.info("GroupAdmin email is " + adminEmail);
+      log.info("GroupAdmin email is {}", adminEmail);
       sendTemplateEmail(adminEmail,
           adminSubject,
           adminTemplate,
@@ -425,7 +427,7 @@ public class EventListener implements MessageListener {
 
     // Send email to the deposit user
     String depositUserEmail = depositUser.getEmail();
-    log.info("DepositUser email is " + depositUserEmail);
+    log.info("DepositUser email is {}", depositUserEmail);
     sendTemplateEmail(depositUserEmail,
         userSubject,
         userTemplate,
@@ -497,6 +499,12 @@ public class EventListener implements MessageListener {
         consumer);
   }
 
+  void processRetrieve(Retrieve retrieve, Consumer<Retrieve> consumer) {
+    processWithRefresh(retrieve,
+            () -> getRetrieve(retrieve.getID()),
+            consumer);
+  }
+
   void processJob(Job job, Consumer<Job> consumer) {
     processWithRefresh(job,
         () -> getJob(job.getID()),
@@ -528,6 +536,8 @@ public class EventListener implements MessageListener {
       $job.setProgressMessage(updateProgressEvent.getProgressMessage());
       jobsService.updateJob($job);
     });
+    
+    resetTimer(updateProgressEvent, job);
   }
 
   void process03Start(Start event, Deposit deposit) {
@@ -543,6 +553,8 @@ public class EventListener implements MessageListener {
     this.sendEmails(deposit, event, TYPE_START,
         EmailTemplate.USER_DEPOSIT_START,
         EmailTemplate.GROUP_ADMIN_DEPOSIT_START);
+    
+    startDepositTimer(event);
   }
 
   void process04ComputedSize(ComputedSize computedSizeEvent, Deposit deposit) {
@@ -550,7 +562,7 @@ public class EventListener implements MessageListener {
 
     long sizeInBytes = computedSizeEvent.getBytes();
     processDeposit(deposit, $deposit -> {
-      log.info("Setting Deposit Size from computedSizeEvent to: " + sizeInBytes);
+      log.info("Setting Deposit Size from computedSizeEvent to: {}", sizeInBytes);
       $deposit.setSize(sizeInBytes);
       depositsService.updateDeposit($deposit);
     });
@@ -566,7 +578,7 @@ public class EventListener implements MessageListener {
   }
 
   void process06ComputedEncryption(
-      ComputedEncryption computedEncryptionEvent, Deposit deposit) {
+          ComputedEncryption computedEncryptionEvent, Deposit deposit) {
     // Update the deposit with the computed digest
 
     processDeposit(deposit, $deposit -> {
@@ -641,6 +653,8 @@ public class EventListener implements MessageListener {
     this.sendEmails(deposit, completeEvent, TYPE_COMPLETE,
         EmailTemplate.USER_DEPOSIT_COMPLETE,
         EmailTemplate.GROUP_ADMIN_DEPOSIT_COMPLETE);
+    
+    removeDepositTimer(completeEvent);
   }
 
   void process10Error(Error errorEvent, Deposit deposit, Job job) {
@@ -672,6 +686,12 @@ public class EventListener implements MessageListener {
     } else if (errorEvent.getAuditId() != null) {
       // TODO: what to do with audit error
     }
+    if (job.isDepositJob()) {
+      removeDepositTimer(errorEvent);
+    }
+    if (job.isRetrieveJob()) {
+      removeRetrieveTimer(errorEvent);
+    }
   }
 
   void process11RetrieveStart(RetrieveStart startEvent, Deposit deposit) {
@@ -679,6 +699,8 @@ public class EventListener implements MessageListener {
     Retrieve retrieve = getRetrieve(startEvent.getRetrieveId());
     retrieve.setStatus(Retrieve.Status.IN_PROGRESS);
     retrievesService.updateRetrieve(retrieve);
+
+    startRetrieveTimer(startEvent);
 
     this.sendEmails(deposit, startEvent, TYPE_RETRIEVE_START, EmailTemplate.USER_RETRIEVE_START,
         EmailTemplate.GROUP_ADMIN_RETRIEVE_START);
@@ -689,7 +711,9 @@ public class EventListener implements MessageListener {
     Retrieve retrieve = getRetrieve(completeEvent.getRetrieveId());
     retrieve.setStatus(Retrieve.Status.COMPLETE);
     retrievesService.updateRetrieve(retrieve);
-    
+
+    removeRetrieveTimer(completeEvent);
+
     processDeposit(deposit, $deposit -> {
       $deposit.setNonRestartJobId(null);
     });
@@ -701,7 +725,7 @@ public class EventListener implements MessageListener {
 
   void process13DeleteStart(DeleteStart event, Deposit deposit) {
     preDeletionStatus = deposit.getStatus();
-    log.info("Pre Deletion Status:" + preDeletionStatus);
+    log.info("Pre Deletion Status:{}", preDeletionStatus);
     deposit.setStatus(Deposit.Status.DELETE_IN_PROGRESS);
     depositsService.updateDeposit(deposit);
   }
@@ -827,24 +851,26 @@ public class EventListener implements MessageListener {
     this.sendEmails(getDeposit(event.getDepositId()), event, TYPE_ERROR,
             EmailTemplate.USER_DEPOSIT_ERROR,
             EmailTemplate.GROUP_ADMIN_DEPOSIT_ERROR);
+    
+    removeRetrieveTimer(event);
   }
 
-  private void process26ArchiveStoreRetrievedAll(ArchiveStoreRetrievedAll event) {
+  protected void process26ArchiveStoreRetrievedAll(ArchiveStoreRetrievedAll event) {
     ignore(event);
   }
-  private void process27ArchiveStoreRetrievedChunk(ArchiveStoreRetrievedChunk event) {
+  protected void process27ArchiveStoreRetrievedChunk(ArchiveStoreRetrievedChunk event) {
     ignore(event);
   }
-  private void process28UploadedToUserStore(UploadedToUserStore event) {
+  protected void process28UploadedToUserStore(UploadedToUserStore event) {
     ignore(event);
   }
-  private void process29UserStoreSpaceAvailableChecked(UserStoreSpaceAvailableChecked event) {
+  protected void process29UserStoreSpaceAvailableChecked(UserStoreSpaceAvailableChecked event) {
     ignore(event);
   }
 
   String getUserSubject(String type) {
     String userSubjectKey = USER_DEPOSIT_PREFIX + type;
-    log.info("User Subject key: " + userSubjectKey);
+    log.info("User Subject key: {}", userSubjectKey);
     if (EMAIL_SUBJECTS.containsKey(userSubjectKey) == false) {
       throw new IllegalArgumentException("User Subject key not found: " + userSubjectKey);
     }
@@ -854,7 +880,7 @@ public class EventListener implements MessageListener {
 
   String getAdminSubject(String type) {
     String adminSubjectKey = ADMIN_DEPOSIT_PREFIX + type;
-    log.info("Admin Subject key: " + adminSubjectKey);
+    log.info("Admin Subject key: {}", adminSubjectKey);
     if (EMAIL_SUBJECTS.containsKey(adminSubjectKey) == false) {
       throw new IllegalArgumentException("Admin Subject key not found: " + adminSubjectKey);
     }
@@ -864,7 +890,7 @@ public class EventListener implements MessageListener {
 
   String getAuditErrorSubject(String type) {
     String auditSubjectKey = AUDIT_CHUNK_PREFIX + type;
-    log.info("Audit Error Subject key: " + auditSubjectKey);
+    log.info("Audit Error Subject key: {}", auditSubjectKey);
     if (EMAIL_SUBJECTS.containsKey(auditSubjectKey) == false) {
       throw new IllegalArgumentException("Audit Error Subject key not found: " + auditSubjectKey);
     }
@@ -878,7 +904,7 @@ public class EventListener implements MessageListener {
 
     Map<String, Object> model = getErrorModel(event);
 
-    log.info("Audit admin email is " + auditAdminEmail);
+    log.info("Audit admin email is {}", auditAdminEmail);
     sendTemplateEmail(auditAdminEmail, auditSubject, template, model);
   }
 
@@ -988,11 +1014,69 @@ public class EventListener implements MessageListener {
 
     if (auditChunkStatus.size() != 1) {
       // TODO: Make sure it never happen
-      log.error("Unexpected number of running audit chunks (should be 1) it is : " + auditChunkStatus.size());
+      log.error("Unexpected number of running audit chunks (should be 1) it is : {}", auditChunkStatus.size());
     }
     AuditChunkStatus auditInfo = auditChunkStatus.get(0);
     auditInfo.setCompleteTime(new Date(clock.millis()));
     return auditInfo;
   }
 
+  private void startRetrieveTimer(Event event) {
+    if (event == null) {
+      return;
+    }
+    final String retrieveId = event.getRetrieveId();
+    final String depositId = event.getDepositId();
+    if (StringUtils.isBlank(retrieveId) || StringUtils.isBlank(depositId)) {
+      return;
+    }
+    eventTimerSupport.startTimer(retrieveId, "RETRIEVE", $retrieveId -> {
+      Retrieve retrieve = getRetrieve(retrieveId);
+      processRetrieve(retrieve, $retrieve -> {
+        retrieve.setStatus(Retrieve.Status.FAILED);
+      });
+    });
+  }
+  private void startDepositTimer(Event event) {
+    if (event == null) {
+      return;
+    }
+    final String depositId = event.getDepositId();
+    if (StringUtils.isBlank(depositId)) {
+      return;
+    }
+    eventTimerSupport.startTimer(depositId, "DEPOSIT", $depositId -> {
+      Deposit deposit = getDeposit(depositId);
+      processDeposit(deposit, $deposit -> {
+        deposit.setStatus(Deposit.Status.FAILED);
+      });
+    });
+  }
+  private void removeDepositTimer(Event event) {
+    if (event == null) {
+      return;
+    }
+    String depositId = event.getDepositId();
+    eventTimerSupport.removeTimer(depositId);
+  }
+  private void removeRetrieveTimer(Event event) {
+    if (event == null) {
+      return;
+    }
+      String retrieveId = event.getRetrieveId();
+      eventTimerSupport.removeTimer(retrieveId);
+  }
+  private void resetTimer(Event event, Job job) {
+    if (event == null || job == null) {
+      return;
+    }
+    if (job.isDepositJob()) {
+      String depositId = event.getDepositId();
+      eventTimerSupport.resetTimer(depositId);
+    }
+    if (job.isRetrieveJob()) {
+      String retrieveId = event.getRetrieveId();
+      eventTimerSupport.resetTimer(retrieveId);
+    }
+  }
 }

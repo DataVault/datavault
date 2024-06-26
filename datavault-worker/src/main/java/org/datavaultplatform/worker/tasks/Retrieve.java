@@ -333,6 +333,9 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
     protected void copyFilesToUserFs(Progress progress, File payloadDir, UserStoreInfo userStoreInfo, long bagDirSize) throws Exception {
         trackProgress(progress, bagDirSize, () -> {
             File[] contents = payloadDir.listFiles();
+            if (contents == null) {
+                return;
+            }
             Arrays.sort(contents);
             for (File content : contents) {
                 String taskDesc = payloadDir.toPath().relativize(content.toPath()).toString();
@@ -348,7 +351,7 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
         log.info("Copied: [{}] directories, [{}] files, [{}] bytes", progress.getDirCount(), progress.getFileCount(), progress.getByteCount());
     }
     protected void sendEvent(Event event) {
-        eventSender.send(event.withUserId(userID));
+        eventSender.send(event.withUserId(userID).withRetrieveId(retrieveId));
     }
     /*
     This method allows us to override the clock in tests.
@@ -357,7 +360,7 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
         return Clock.systemDefaultZone();
     }
     private void trackProgress(Progress progress, long expectedSizeBytes, Trackable trackable) throws Exception {
-        var tracker = new ProgressTracker(progress, jobID, depositId, expectedSizeBytes, eventSender);
+        var tracker = new ProgressTracker(progress, jobID, depositId, retrieveId, expectedSizeBytes, eventSender);
         tracker.track(trackable);
     }
     private String store(UserStoreInfo userStoreInfo, File content, Progress progress) throws Exception {

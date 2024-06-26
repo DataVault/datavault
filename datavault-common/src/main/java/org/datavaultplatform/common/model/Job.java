@@ -193,4 +193,12 @@ public class Job implements Identified {
     public int hashCode() {
         return getClass().hashCode();
     }
+    
+    public boolean isDepositJob() {
+        return TASK_CLASS_DEPOSIT.equals(this.taskClass);
+    }
+    
+    public boolean isRetrieveJob() {
+        return TASK_CLASS_RETRIEVE.equals(this.taskClass);
+    }
 }

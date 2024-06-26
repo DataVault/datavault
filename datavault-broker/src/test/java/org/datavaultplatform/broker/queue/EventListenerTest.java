@@ -36,6 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -44,7 +45,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -63,6 +63,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.services.ArchiveStoreService;
@@ -76,10 +77,8 @@ import org.datavaultplatform.broker.services.RetrievesService;
 import org.datavaultplatform.broker.services.UsersService;
 import org.datavaultplatform.broker.services.VaultsService;
 import org.datavaultplatform.common.email.EmailTemplate;
+import org.datavaultplatform.common.event.*;
 import org.datavaultplatform.common.event.Error;
-import org.datavaultplatform.common.event.Event;
-import org.datavaultplatform.common.event.InitStates;
-import org.datavaultplatform.common.event.UpdateProgress;
 import org.datavaultplatform.common.event.audit.AuditComplete;
 import org.datavaultplatform.common.event.audit.AuditError;
 import org.datavaultplatform.common.event.audit.AuditStart;
@@ -100,8 +99,7 @@ import org.datavaultplatform.common.event.deposit.StartCopyUpload;
 import org.datavaultplatform.common.event.deposit.TransferComplete;
 import org.datavaultplatform.common.event.deposit.UploadComplete;
 import org.datavaultplatform.common.event.deposit.ValidationComplete;
-import org.datavaultplatform.common.event.retrieve.RetrieveComplete;
-import org.datavaultplatform.common.event.retrieve.RetrieveStart;
+import org.datavaultplatform.common.event.retrieve.*;
 import org.datavaultplatform.common.model.ArchiveStore;
 import org.datavaultplatform.common.model.Audit;
 import org.datavaultplatform.common.model.AuditChunkStatus;
@@ -114,11 +112,8 @@ import org.datavaultplatform.common.model.Retrieve;
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.model.Vault;
 import org.hibernate.StaleObjectStateException;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.MethodOrderer.MethodName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -160,6 +155,9 @@ public class EventListenerTest {
   @Mock
   AuditsService auditsService;
 
+  @Mock
+  TaskTimerSupport eventTimerSupport;
+
   final String homeUrl = "MOCK_HOME_URL";
 
   final String helpUrl = "MOCK_HELP_URL";
@@ -186,6 +184,7 @@ public class EventListenerTest {
         usersService,
         emailService,
         auditsService,
+        eventTimerSupport,
         homeUrl,
         helpUrl,
         helpMail,
@@ -472,6 +471,7 @@ public class EventListenerTest {
 
 
   @Nested
+  @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
   class EventSpecificTests {
 
     Job job;
@@ -483,6 +483,7 @@ public class EventListenerTest {
       deposit = mock(Deposit.class);
     }
 
+    @Order(1)
     @Test
     void test01InitStates() {
 
@@ -507,8 +508,11 @@ public class EventListenerTest {
       assertEquals(states, argStates.getValue());
     }
 
-    @Test
-    void test02UpdateProgress() {
+
+    @Order(2)
+    @ParameterizedTest
+    @ValueSource(booleans = {true,false})
+    void test02UpdateProgress(boolean isDepositJob) {
 
       ArgumentCaptor<Job> argJob = ArgumentCaptor.forClass(Job.class);
       ArgumentCaptor<Long> argProgress = ArgumentCaptor.forClass(Long.class);
@@ -516,14 +520,20 @@ public class EventListenerTest {
       ArgumentCaptor<String> argProgressMessage = ArgumentCaptor.forClass(String.class);
 
       UpdateProgress event = new UpdateProgress();
+      event.setDepositId("test-deposit-id");
+      event.setRetrieveId("test-retrieve-id");
       event.setProgress(1234L);
       event.setProgressMax(2345L);
       event.setProgressMessage("the-progress-message");
 
+      when(job.isRetrieveJob()).thenReturn(!isDepositJob);
+      when(job.isDepositJob()).thenReturn(isDepositJob);
+      
       doNothing().when(job).setProgress(argProgress.capture());
       doNothing().when(job).setProgressMax(argProgressMax.capture());
       doNothing().when(job).setProgressMessage(argProgressMessage.capture());
       doNothing().when(jobsService).updateJob(argJob.capture());
+      doNothing().when(eventTimerSupport).resetTimer(any(String.class));
 
       sut.process02UpdateProcess(event, job);
 
@@ -536,8 +546,16 @@ public class EventListenerTest {
       verify(job).setProgressMax(argProgressMax.getValue());
       verify(job).setProgressMessage(argProgressMessage.getValue());
       verify(jobsService).updateJob(argJob.getValue());
+
+      if (isDepositJob) {
+        verify(eventTimerSupport).resetTimer(eq("test-deposit-id"));
+      } else {
+        verify(eventTimerSupport).resetTimer(eq("test-retrieve-id"));
+      }
+      verifyNoMoreInteractions(eventTimerSupport);
     }
 
+    @Order(3)
     @Nested
     class Test03StartEvent {
 
@@ -581,6 +599,7 @@ public class EventListenerTest {
             argUserTemplate.getValue(), argAdminTemplate.getValue());
       }
 
+      @Order(4)
       @Test
       void test03StartStatusComplete() {
 
@@ -606,6 +625,7 @@ public class EventListenerTest {
       }
     }
 
+    @Order(5)
     @Test
     void test04ComputedSize() {
 
@@ -625,6 +645,7 @@ public class EventListenerTest {
       verify(depositsService).updateDeposit(deposit);
     }
 
+    @Order(6)
     @Test
     void test05ComputedChunks() {
       ArgumentCaptor<ComputedChunks> argEvent = ArgumentCaptor.forClass(ComputedChunks.class);
@@ -649,6 +670,7 @@ public class EventListenerTest {
       verify(depositsService).updateDeposit(deposit);
     }
 
+    @Order(7)
     @Test
     void test06ComputedEncryption() {
       ArgumentCaptor<ComputedChunks> argEvent = ArgumentCaptor.forClass(ComputedChunks.class);
@@ -716,6 +738,7 @@ public class EventListenerTest {
 
     }
 
+    @Order(8)
     @Test
     void test07ComputedDigest() {
       ArgumentCaptor<String> argDigest = ArgumentCaptor.forClass(String.class);
@@ -735,6 +758,7 @@ public class EventListenerTest {
       verify(deposit).setArchiveDigestAlgorithm(argArchiveAlgorithm.getValue());
     }
 
+    @Order(9)
     @Test
     void test08UploadComplete() {
       UploadComplete event = new UploadComplete();
@@ -779,6 +803,7 @@ public class EventListenerTest {
       verify(archivesService).saveOrUpdateArchive(deposit, store3, "archive-id-3");
     }
 
+    @Order(10)
     @Test
     void test09Complete() {
       EventListener spy = spy(sut);
@@ -792,8 +817,10 @@ public class EventListenerTest {
       deposit.setVault(vault);
 
       Complete event = new Complete();
+      event.setDepositId("test-deposit-id");
       event.setArchiveSize(2345L);
 
+      doNothing().when(eventTimerSupport).removeTimer("test-deposit-id");
       doNothing().when(depositsService).updateDeposit(deposit);
       doNothing().when(vaultsService).updateVault(vault);
       doNothing().when(spy).sendEmails(deposit, event, TYPE_COMPLETE,
@@ -807,11 +834,13 @@ public class EventListenerTest {
       verify(spy).sendEmails(deposit, event, TYPE_COMPLETE,
           EmailTemplate.USER_DEPOSIT_COMPLETE,
           EmailTemplate.GROUP_ADMIN_DEPOSIT_COMPLETE);
-
+      verify(eventTimerSupport).removeTimer("test-deposit-id");
+      
       assertEquals(Status.COMPLETE, deposit.getStatus());
       assertEquals(2345L, deposit.getArchiveSize());
       assertEquals(2234L, vault.getSize());
     }
+    @Order(11)
     @Nested
     class ErrorTests {
       EventListener spy;
@@ -827,13 +856,21 @@ public class EventListenerTest {
       @BeforeEach
       void setup() {
         event = new Error();
+        event.setRetrieveId("test-retrieve-id");
+        event.setDepositId("test-deposit-id");
         event.setMessage("test-error-message");
 
-        job = new Job();
+        job = new Job(); 
+        job.setTaskClass(Job.TASK_CLASS_DEPOSIT);
 
         spy = spy(sut);
 
-        deposit = new Deposit();
+        deposit = new Deposit() {
+          @Override
+          public String getID() {
+            return "test-deposit-id";
+          }
+        };
 
         argEvent = ArgumentCaptor.forClass(Event.class);
         argDeposit = ArgumentCaptor.forClass(Deposit.class);
@@ -850,9 +887,8 @@ public class EventListenerTest {
             argType.capture(), argUserTemplate.capture(), argAdminTemplate.capture());
 
       }
-
       @Test
-      void testErrorWithNullDeposit() {
+      void testDepositErrorWithNullDeposit() {
 
         spy.process10Error(event, null, job);
 
@@ -862,13 +898,27 @@ public class EventListenerTest {
         assertEquals("test-error-message", job.getErrorMessage());
 
         verify(spy, times(0)).sendEmails(any(), any(), any(), any(), any());
-
-        verifyNoMoreInteractions(depositsService, jobsService);
+        verify(eventTimerSupport).removeTimer("test-deposit-id");
+        verifyNoMoreInteractions(depositsService, jobsService, eventTimerSupport);
       }
+      @Test
+      void testRetrieveErrorWithNullDeposit() {
 
+        job.setTaskClass(Job.TASK_CLASS_RETRIEVE);
+        spy.process10Error(event, null, job);
+
+        verify(jobsService).updateJob(job);
+
+        assertTrue(job.isError());
+        assertEquals("test-error-message", job.getErrorMessage());
+
+        verify(spy, times(0)).sendEmails(any(), any(), any(), any(), any());
+        verify(eventTimerSupport).removeTimer("test-retrieve-id");
+        verifyNoMoreInteractions(depositsService, jobsService, eventTimerSupport);
+      }
       @ParameterizedTest
       @EnumSource(Deposit.Status.class)
-      void testErrorWithNonNullDeposit(Deposit.Status depositStatus) {
+      void testDepositErrorWithNonNullDeposit(Deposit.Status depositStatus) {
 
         deposit.setStatus(depositStatus);
 
@@ -896,12 +946,51 @@ public class EventListenerTest {
             argDeposit.getValue(), argEvent.getValue(),
             argType.getValue(), argUserTemplate.getValue(), argAdminTemplate.getValue());
 
-        verifyNoMoreInteractions(depositsService, jobsService);
+        verify(eventTimerSupport).removeTimer("test-deposit-id");
+        verifyNoMoreInteractions(depositsService, jobsService, eventTimerSupport);
+      }
+
+      @ParameterizedTest
+      @EnumSource(Deposit.Status.class)
+      void testRetrieveErrorWithNonNullDeposit(Deposit.Status depositStatus) {
+
+        job.setTaskClass(Job.TASK_CLASS_RETRIEVE);
+
+        deposit.setStatus(depositStatus);
+
+        spy.process10Error(event, deposit, job);
+
+        assertTrue(job.isError());
+        assertEquals("test-error-message", job.getErrorMessage());
+
+        final Deposit.Status expectedStatus;
+        if (depositStatus == Status.COMPLETE) {
+          expectedStatus = depositStatus;
+        } else if (depositStatus == Status.DELETE_IN_PROGRESS) {
+          expectedStatus = Status.DELETE_FAILED;
+        } else {
+          expectedStatus = Status.FAILED;
+        }
+        assertEquals(expectedStatus, deposit.getStatus());
+
+        int expectedInvocations = depositStatus == Status.COMPLETE ? 0 : 1;
+        verify(depositsService, times(expectedInvocations)).updateDeposit(deposit);
+
+        verify(jobsService).updateJob(job);
+
+        verify(spy, times(1)).sendEmails(
+                argDeposit.getValue(), argEvent.getValue(),
+                argType.getValue(), argUserTemplate.getValue(), argAdminTemplate.getValue());
+
+        verify(eventTimerSupport).removeTimer("test-retrieve-id");
+        verifyNoMoreInteractions(depositsService, jobsService, eventTimerSupport);
       }
     }
+    @Order(12)
     @Test
     void test11RetrieveStart() {
       RetrieveStart event = new RetrieveStart();
+      event.setDepositId("test-deposit-id");
       event.setRetrieveId("ret-id-123");
       Deposit mDeposit = mock(Deposit.class);
       Retrieve mRetrieve = mock(Retrieve.class);
@@ -913,6 +1002,9 @@ public class EventListenerTest {
       ArgumentCaptor<String> argUserTemplate = ArgumentCaptor.forClass(String.class);
       ArgumentCaptor<String> argAdminTemplate = ArgumentCaptor.forClass(String.class);
       ArgumentCaptor<Retrieve.Status> argStatus = ArgumentCaptor.forClass(Retrieve.Status.class);
+      ArgumentCaptor<String> argRetrieveId = ArgumentCaptor.forClass(String.class);
+      ArgumentCaptor<Consumer<String>> argTimeoutAction = ArgumentCaptor.forClass(Consumer.class);
+      ArgumentCaptor<String> argLabel = ArgumentCaptor.forClass(String.class);
 
       EventListener spy = spy(sut);
 
@@ -924,6 +1016,8 @@ public class EventListenerTest {
           argEvent.capture(), argType.capture(),
           argUserTemplate.capture(), argAdminTemplate.capture());
 
+      doNothing().when(eventTimerSupport).startTimer(argRetrieveId.capture(), argLabel.capture(), argTimeoutAction.capture());
+      
       spy.process11RetrieveStart(event, mDeposit);
 
       verify(spy).getRetrieve("ret-id-123");
@@ -940,9 +1034,21 @@ public class EventListenerTest {
 
       verify(spy).sendEmails(argDeposit.getValue(), argEvent.getValue(), argType.getValue(),
           argUserTemplate.getValue(), argAdminTemplate.getValue());
-      verifyNoInteractions(mDeposit);
+      
+      String actualRetrieveId = argRetrieveId.getValue();
+      assertThat(actualRetrieveId).isEqualTo("ret-id-123");
+
+      Consumer<String> actualTimeoutAction = argTimeoutAction.getValue();
+      assertThat(actualTimeoutAction).isNotNull();     
+      
+      String actualLabel = argLabel.getValue();
+      assertThat(actualLabel).isEqualTo("RETRIEVE");
+      
+      verify(eventTimerSupport).startTimer(actualRetrieveId, actualLabel, actualTimeoutAction);
+      verifyNoMoreInteractions(eventTimerSupport, mDeposit);
     }
 
+    @Order(13)
     @Test
     void test12RetrieveComplete() {
       RetrieveComplete event = new RetrieveComplete();
@@ -986,11 +1092,14 @@ public class EventListenerTest {
       assertEquals(USER_RETRIEVE_COMPLETE, argUserTemplate.getValue());
       assertEquals(GROUP_ADMIN_RETRIEVE_COMPLETE, argAdminTemplate.getValue());
 
+      verify(eventTimerSupport).removeTimer("ret-id-123");
+      
       verify(spy).sendEmails(argDeposit.getValue(), argEvent.getValue(), argType.getValue(),
           argUserTemplate.getValue(), argAdminTemplate.getValue());
-      verifyNoMoreInteractions(mDeposit);
+      verifyNoMoreInteractions(eventTimerSupport, mDeposit);
     }
 
+    @Order(14)
     @Test
     void test13DeleteStart() {
       ArgumentCaptor<Deposit.Status> argStatus = ArgumentCaptor.forClass(Deposit.Status.class);
@@ -1016,6 +1125,7 @@ public class EventListenerTest {
       verify(depositsService).updateDeposit(argDeposit.getValue());
     }
 
+    @Order(15)
     @ParameterizedTest
     @EnumSource(Deposit.Status.class)
     void test14DeleteComplete(Deposit.Status preDeletionStatus) {
@@ -1053,6 +1163,7 @@ public class EventListenerTest {
       }
     }
 
+    @Order(16)
     @Test
     void test15AuditStart() {
       AuditStart event = new AuditStart();
@@ -1079,6 +1190,7 @@ public class EventListenerTest {
       verify(auditsService).updateAudit(argAudit.getValue());
     }
 
+    @Order(17)
     @Test
     void test16ChunkAuditStarted() {
       EventListener spy = spy(sut);
@@ -1126,6 +1238,7 @@ public class EventListenerTest {
 
     }
 
+    @Order(18)
     @Test
     void test17ChunkAuditComplete() {
       ChunkAuditComplete event = new ChunkAuditComplete();
@@ -1143,6 +1256,7 @@ public class EventListenerTest {
       verify(auditsService).updateAuditChunkStatus(mChunkStatus);
     }
 
+    @Order(19)
     @Nested
     class AuditCompleteTests {
 
@@ -1185,6 +1299,7 @@ public class EventListenerTest {
 
     }
 
+    @Order(20)
     @Test
     void test19AuditError() {
       ArgumentCaptor<String> argNote = ArgumentCaptor.forClass(String.class);
@@ -1215,8 +1330,9 @@ public class EventListenerTest {
       verify(spy).sendAuditEmails(event, EmailTemplate.AUDIT_CHUNK_ERROR);
     }
 
+    @Order(20)
     @Test
-    void testCopyCompleteUploadWIthChunk() {
+    void test23CopyCompleteUploadWIthChunk() {
       CompleteCopyUpload event = new CompleteCopyUpload("depositId","jobId","test-type",123,"archiveStoreId","archiveId");
       
       Deposit mDeposit = mock(Deposit.class);
@@ -1233,9 +1349,10 @@ public class EventListenerTest {
       verify(archivesService).saveOrUpdateArchive(mDeposit, mArchiveStore, "archiveId");
       verifyNoMoreInteractions(eventService, archivesService, mDeposit, mArchiveStore);
     }
-    
+
+    @Order(21)
     @Test
-    void testCopyCompleteUploadWithoutChunk() {
+    void test23CopyCompleteUploadWithoutChunk() {
       CompleteCopyUpload event = new CompleteCopyUpload("depositId","jobId","test-type",null,"archiveStoreId","archiveId");
 
       Deposit mDeposit = mock(Deposit.class);
@@ -1253,6 +1370,62 @@ public class EventListenerTest {
       verifyNoMoreInteractions(eventService, archivesService, mDeposit, mArchiveStore);
     }
 
+    @Order(22)
+    @Test
+    void test25RetrieveError() {
+
+      ArgumentCaptor<Deposit> argDeposit = ArgumentCaptor.forClass(Deposit.class);
+      ArgumentCaptor<Event> argEvent = ArgumentCaptor.forClass(Event.class);
+      ArgumentCaptor<String> argType = ArgumentCaptor.forClass(String.class);
+      ArgumentCaptor<String> argUserTemplate = ArgumentCaptor.forClass(String.class);
+      ArgumentCaptor<String> argAdminTemplate = ArgumentCaptor.forClass(String.class);
+      
+      Retrieve mRetrieve = mock(Retrieve.class);
+      Job mJob = mock(Job.class);
+      Deposit mDeposit = mock(Deposit.class);
+
+      doNothing().when(mRetrieve).setStatus(Retrieve.Status.FAILED);
+
+      RetrieveError event = new RetrieveError();
+      event.setMessage("event-message-123");
+      event.setJobId("test-job-id");
+      event.setDepositId("test-deposit-id");
+      event.setRetrieveId("test-retrieve-id");
+
+      doReturn(mDeposit).when(depositsService).getDeposit("test-deposit-id");
+      doReturn(mJob).when(jobsService).getJob("test-job-id");
+      doReturn(mRetrieve).when(retrievesService).getRetrieve("test-retrieve-id");
+      
+      doNothing().when(retrievesService).updateRetrieve(mRetrieve);
+      doNothing().when(jobsService).updateJob(mJob);
+      
+      doNothing().when(eventTimerSupport).removeTimer("test-retrieve-id");
+      
+      EventListener spy = spy(sut);
+      
+      doNothing().when(spy).sendEmails(
+              argDeposit.capture(),
+              argEvent.capture(),
+              argType.capture(),
+              argUserTemplate.capture(),
+              argAdminTemplate.capture());
+
+      spy.process25RetrieveError(event);
+      
+      assertThat(argDeposit.getValue()).isEqualTo(mDeposit);
+      assertThat(argEvent.getValue()).isEqualTo(event);
+      assertThat(argType.getValue()).isEqualTo("error");
+      assertThat(argAdminTemplate.getValue()).isEqualTo("group-admin-deposit-error.vm");
+      assertThat(argUserTemplate.getValue()).isEqualTo("user-deposit-error.vm");
+
+      verify(spy).process25RetrieveError(event);
+    
+      verify(eventTimerSupport).removeTimer("test-retrieve-id");
+      
+      verifyNoMoreInteractions(retrievesService, depositsService, jobsService, eventTimerSupport);
+    }
+
+    @Order(23)
     @Nested
     class IgnoreEvents {
 
@@ -1280,10 +1453,10 @@ public class EventListenerTest {
         sut.process24ValidationComplete(new ValidationComplete());
       }
     }
-
   }
 
   @Nested
+  @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
   class ProcessEventTests {
 
     EventListener spy;
@@ -1295,117 +1468,130 @@ public class EventListenerTest {
       spy = spy(sut);
     }
 
+    @Order(1)
     @Test
     @SneakyThrows
-    void test01() {
+    void test01InitStates() {
       InitStates event = new InitStates();
       doNothing().when(spy).process01InitStates(event, job);
       spy.processEvent("message", event, deposit, job);
       verify(spy).process01InitStates(event, job);
     }
 
+    @Order(2)
     @Test
     @SneakyThrows
-    void test02() {
+    void test02UpdateProgress() {
       UpdateProgress event = new UpdateProgress();
       doNothing().when(spy).process02UpdateProcess(event, job);
       spy.processEvent("message", event, deposit, job);
       verify(spy).process02UpdateProcess(event, job);
     }
 
+    @Order(3)
     @Test
     @SneakyThrows
-    void test03() {
+    void test03Start() {
       Start event = new Start();
       doNothing().when(spy).process03Start(event, deposit);
       spy.processEvent("message", event, deposit, job);
       verify(spy).process03Start(event, deposit);
     }
 
+    @Order(4)
     @Test
     @SneakyThrows
-    void test04() {
+    void test04ComputedSize() {
       ComputedSize event = new ComputedSize();
       doNothing().when(spy).process04ComputedSize(event, deposit);
       spy.processEvent("message", event, deposit, job);
       verify(spy).process04ComputedSize(event, deposit);
     }
 
+    @Order(5)
     @Test
     @SneakyThrows
-    void test05() {
+    void test05ComputedChunks() {
       ComputedChunks event = new ComputedChunks();
       doNothing().when(spy).process05ComputedChunks(event, deposit);
       spy.processEvent("message", event, deposit, job);
       verify(spy).process05ComputedChunks(event, deposit);
     }
 
+    @Order(6)
     @Test
     @SneakyThrows
-    void test06() {
+    void test06ComputedEncryption() {
       ComputedEncryption event = new ComputedEncryption();
       doNothing().when(spy).process06ComputedEncryption(event, deposit);
       spy.processEvent("message", event, deposit, job);
       verify(spy).process06ComputedEncryption(event, deposit);
     }
 
+    @Order(7)
     @Test
     @SneakyThrows
-    void test07() {
+    void test07ComputedDigest() {
       ComputedDigest event = new ComputedDigest();
       doNothing().when(spy).process07ComputedDigest(event, deposit);
       spy.processEvent("message", event, deposit, job);
       verify(spy).process07ComputedDigest(event, deposit);
     }
 
+    @Order(8)
     @Test
     @SneakyThrows
-    void test08() {
+    void test08UploadComplete() {
       UploadComplete event = new UploadComplete();
       doNothing().when(spy).process08UploadComplete(event, deposit);
       spy.processEvent("message", event, deposit, job);
       verify(spy).process08UploadComplete(event, deposit);
     }
 
+    @Order(9)
     @Test
     @SneakyThrows
-    void test09() {
+    void test09Complete() {
       Complete event = new Complete();
       doNothing().when(spy).process09Complete(event, deposit);
       spy.processEvent("message", event, deposit, job);
       verify(spy).process09Complete(event, deposit);
     }
 
+    @Order(10)
     @Test
     @SneakyThrows
-    void test10() {
+    void test10Error() {
       Error event = new Error();
       doNothing().when(spy).process10Error(event, deposit, job);
       spy.processEvent("message", event, deposit, job);
       verify(spy).process10Error(event, deposit, job);
     }
 
+    @Order(11)
     @Test
     @SneakyThrows
-    void test11() {
+    void test11RetrieveStart() {
       RetrieveStart event = new RetrieveStart();
       doNothing().when(spy).process11RetrieveStart(event, deposit);
       spy.processEvent("message", event, deposit, job);
       verify(spy).process11RetrieveStart(event, deposit);
     }
 
+    @Order(12)
     @Test
     @SneakyThrows
-    void test12() {
+    void test12RetrieveComplete() {
       RetrieveComplete event = new RetrieveComplete();
       doNothing().when(spy).process12RetrieveComplete(event, deposit);
       spy.processEvent("message", event, deposit, job);
       verify(spy).process12RetrieveComplete(event, deposit);
     }
 
+    @Order(13)
     @Test
     @SneakyThrows
-    void test13() {
+    void test13DeleteStart() {
       DeleteStart event = new DeleteStart();
       doNothing().when(spy).process13DeleteStart(event, deposit);
       spy.processEvent("message", event, deposit, job);
@@ -1414,7 +1600,7 @@ public class EventListenerTest {
 
     @Test
     @SneakyThrows
-    void test14() {
+    void test14DeleteComplete() {
       DeleteComplete event = new DeleteComplete();
       doNothing().when(spy).process14DeleteComplete(event, deposit);
       spy.processEvent("message", event, deposit, job);
@@ -1423,7 +1609,7 @@ public class EventListenerTest {
 
     @Test
     @SneakyThrows
-    void test15() {
+    void test15AuditStart() {
       AuditStart event = new AuditStart();
       doNothing().when(spy).process15AuditStart(event);
       spy.processEvent("message", event, deposit, job);
@@ -1432,7 +1618,7 @@ public class EventListenerTest {
 
     @Test
     @SneakyThrows
-    void test16() {
+    void test16ChunkAuditStarted() {
       ChunkAuditStarted event = new ChunkAuditStarted();
       doNothing().when(spy).process16ChunkAuditStarted(event);
       spy.processEvent("message", event, deposit, job);
@@ -1441,7 +1627,7 @@ public class EventListenerTest {
 
     @Test
     @SneakyThrows
-    void test17() {
+    void test17ChunkAuditComplete() {
       ChunkAuditComplete event = new ChunkAuditComplete();
       doNothing().when(spy).process17ChunkAuditComplete(event);
       spy.processEvent("message", event, deposit, job);
@@ -1450,7 +1636,7 @@ public class EventListenerTest {
 
     @Test
     @SneakyThrows
-    void test18() {
+    void test18AuditComplete() {
       AuditComplete event = new AuditComplete();
       doNothing().when(spy).process18AuditComplete(event);
       spy.processEvent("message", event, deposit, job);
@@ -1459,7 +1645,7 @@ public class EventListenerTest {
 
     @Test
     @SneakyThrows
-    void test19() {
+    void test19AuditError() {
       AuditError event = new AuditError();
       doNothing().when(spy).process19AuditError(event);
       spy.processEvent("message", event, deposit, job);
@@ -1468,7 +1654,7 @@ public class EventListenerTest {
 
     @Test
     @SneakyThrows
-    void test20() {
+    void test20TransferComplete() {
       TransferComplete event = new TransferComplete();
       doNothing().when(spy).process20TransferComplete(event);
       spy.processEvent("message", event, deposit, job);
@@ -1477,7 +1663,7 @@ public class EventListenerTest {
 
     @Test
     @SneakyThrows
-    void test21() {
+    void test21PackageComplete() {
       PackageComplete event = new PackageComplete();
       doNothing().when(spy).process21PackageComplete(event);
       spy.processEvent("message", event, deposit, job);
@@ -1486,7 +1672,7 @@ public class EventListenerTest {
 
     @Test
     @SneakyThrows
-    void test22() {
+    void test22StartCopyUpload() {
       StartCopyUpload event = new StartCopyUpload();
       doNothing().when(spy).process22StartCopyUpload(event);
       spy.processEvent("message", event, deposit, job);
@@ -1495,7 +1681,7 @@ public class EventListenerTest {
 
     @Test
     @SneakyThrows
-    void test23() {
+    void test23CompleteCopyUpload() {
       CompleteCopyUpload event = new CompleteCopyUpload();
       doNothing().when(spy).process23CompleteCopyUpload(event, deposit);
       spy.processEvent("message", event, deposit, job);
@@ -1504,11 +1690,51 @@ public class EventListenerTest {
 
     @Test
     @SneakyThrows
-    void test24() {
+    void test24ValidationComplete() {
       ValidationComplete event = new ValidationComplete();
       doNothing().when(spy).process24ValidationComplete(event);
       spy.processEvent("message", event, deposit, job);
       verify(spy).process24ValidationComplete(event);
+    }
+    @Test
+    @SneakyThrows
+    void test25RetrieveError() {
+      RetrieveError event = new RetrieveError();
+      doNothing().when(spy).process25RetrieveError(event);
+      spy.processEvent("message", event, deposit, job);
+      verify(spy).process25RetrieveError(event);
+    }
+    @Test
+    @SneakyThrows
+    void test26ArchiveStoreRetrievedAll() {
+      ArchiveStoreRetrievedAll event = new ArchiveStoreRetrievedAll();
+      doNothing().when(spy).process26ArchiveStoreRetrievedAll(event);
+      spy.processEvent("message", event, deposit, job);
+      verify(spy).process26ArchiveStoreRetrievedAll(event);
+    }
+    @Test
+    @SneakyThrows
+    void test27ArchiveStoreRetrievedChunk() {
+      ArchiveStoreRetrievedChunk event = new ArchiveStoreRetrievedChunk();
+      doNothing().when(spy).process27ArchiveStoreRetrievedChunk(event);
+      spy.processEvent("message", event, deposit, job);
+      verify(spy).process27ArchiveStoreRetrievedChunk(event);
+    }
+    @Test
+    @SneakyThrows
+    void test28UploadedToUserStore() {
+      UploadedToUserStore event = new UploadedToUserStore();
+      doNothing().when(spy).process28UploadedToUserStore(event);
+      spy.processEvent("message", event, deposit, job);
+      verify(spy).process28UploadedToUserStore(event);
+    }
+    @Test
+    @SneakyThrows
+    void test29UserStoreSpaceAvailableChecked() {
+      UserStoreSpaceAvailableChecked event = new UserStoreSpaceAvailableChecked();
+      doNothing().when(spy).process29UserStoreSpaceAvailableChecked(event);
+      spy.processEvent("message", event, deposit, job);
+      verify(spy).process29UserStoreSpaceAvailableChecked(event);
     }
   }
 
