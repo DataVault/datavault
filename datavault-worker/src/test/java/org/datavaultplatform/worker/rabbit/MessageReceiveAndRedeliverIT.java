@@ -26,15 +26,14 @@ import org.springframework.test.annotation.DirtiesContext;
 @DirtiesContext
 @Slf4j
 /*
- Checks that a message can be marked for redelivery. When it's redelivered - it's marked as a redelivery
- AND has original message id.
+ checks that messages are sent and not re-delivered.
 */
-class MessageReceiveAndRedeliverIT extends BaseReceiveIT {
+class MessageReceiveAndNoRedeliverIT extends BaseReceiveIT {
 
   public static final int MESSAGES_TO_SEND = 10;
 
-  // half of the messages are re-delivered but just once
-  public static final int MESSAGES_TO_RECV = 15;
+  // none of the messages are re-delivered
+  public static final int MESSAGES_TO_RECV = 10;
 
   @MockBean
   MessageProcessor mProcessor;
@@ -66,8 +65,7 @@ class MessageReceiveAndRedeliverIT extends BaseReceiveIT {
     for (Long index : messages.keySet()) {
       String id = messages.get(index);
       long recvdCount = this.messageInfos.stream().filter(mi -> mi.getId().equals(id)).count();
-      long expected = index % 2 == 0 ? 1 : 2;
-      Assertions.assertEquals(expected, recvdCount);
+      Assertions.assertEquals(1, recvdCount);
     }
   }
 
@@ -77,10 +75,8 @@ class MessageReceiveAndRedeliverIT extends BaseReceiveIT {
       Assertions.assertEquals(1, invocation.getArguments().length);
       MessageInfo info = invocation.getArgument(0);
       messageInfos.add(info);
-      long value = Long.parseLong(info.getValue());
-      boolean redeliver = !info.getIsRedeliver() && value % 2 != 0;
       this.latch.countDown();
-      return redeliver;
+      return null;
     }).when(mProcessor).processMessage(any(MessageInfo.class));
   }
 

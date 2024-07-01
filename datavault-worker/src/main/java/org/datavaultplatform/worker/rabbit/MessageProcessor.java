@@ -7,6 +7,6 @@ public interface MessageProcessor {
    * @param messageInfo - the message to process
    * @return true if the message should be redelivered
    */
-  boolean processMessage(MessageInfo messageInfo);
+  void processMessage(MessageInfo messageInfo);
 
 }

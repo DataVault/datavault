@@ -1,10 +1,9 @@
 package org.datavaultplatform.worker.rabbit;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.*;
 
 import java.util.concurrent.CountDownLatch;
 import lombok.SneakyThrows;
@@ -16,6 +15,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.springframework.amqp.rabbit.listener.MessageListenerContainer;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.DirtiesContext;
@@ -30,8 +30,7 @@ import org.springframework.test.annotation.DirtiesContext;
 */
 class MessageReceiveHiPriorityIT extends BaseReceiveIT {
 
-  private static final int LO_MESSAGES_TO_SEND = 100;
-  private static final int MESSAGES_TO_PROCESS = 1;
+  private static final int LO_MESSAGES_TO_SEND = 10;
 
   @MockBean
   MessageProcessor mProcessor;
@@ -48,26 +47,37 @@ class MessageReceiveHiPriorityIT extends BaseReceiveIT {
   @SneakyThrows
   void testSendAndRecvMessages() {
 
+    MessageListenerContainer container = registry.getListenerContainer("rabbit-listener");
+
+    container.stop();
+
     this.shutdownLatch = new CountDownLatch(1);
 
-    for (long i = 0; i < LO_MESSAGES_TO_SEND; i++) {
+    for (int i = 0; i < LO_MESSAGES_TO_SEND; i++) {
       sendNormalMessage(i);
     }
-    //wait long enough for processing of first normal message
-    Thread.sleep(100);
+    
     //okay is true only after we've recvd 1 shutdown message
-    String shutdownMessageId = sendShutdownTestMessage(HI_PRIORITY);
-    shutdownLatch.await();
-    Assertions.assertEquals(MESSAGES_TO_PROCESS, messageInfos.size());
+    String shutdownMessageId = sendShutdownTestMessage();
+
+    Thread.sleep(100);
+    //wait long enough for rabbit to put shutdown message first
+
+    container.start();
+    
+    this.shutdownLatch.await();
 
     // check that the shutdown message id is the one we expected
     Assertions.assertEquals(shutdownMessageId, argMessageInfo.getValue().getId());
+    Assertions.assertEquals(shutdownMessageId, messageInfos.get(0).getId());
 
-    verify(mProcessor, times(MESSAGES_TO_PROCESS)).processMessage(any(MessageInfo.class));
     verify(mShutdownHandler, times(1)).handleShutdown(any(MessageInfo.class));
+    verify(mProcessor, never()).processMessage(any(MessageInfo.class));
     verifyNoMoreInteractions(mProcessor, mShutdownHandler);
 
-    Assertions.assertEquals(LO_MESSAGES_TO_SEND - 1,
+    assertEquals(1, messageInfos.size());
+    
+    Assertions.assertEquals(LO_MESSAGES_TO_SEND,
         admin.getQueueInfo(this.workerQueue.getActualName()).getMessageCount());
   }
 
@@ -77,20 +87,23 @@ class MessageReceiveHiPriorityIT extends BaseReceiveIT {
 
     // when we process a message, we record it
     doAnswer(invocation -> {
-      // by sleeping, we ensure the hi-priority message has time to get to head of the queue
-      Thread.sleep(1000);
       Assertions.assertEquals(1, invocation.getArguments().length);
-      MessageInfo info = invocation.getArgument(0);
+      MessageInfo info = invocation.getArgument(0, MessageInfo.class);
       messageInfos.add(info);
-      return false;
+
+      return null;
     }).when(mProcessor).processMessage(any(MessageInfo.class));
 
     // when we get a shutdown message, we count down the latch
     doAnswer(invocation -> {
       Assertions.assertEquals(1, invocation.getArguments().length);
+      MessageInfo info = invocation.getArgument(0, MessageInfo.class);
+      messageInfos.add(info);
+
       this.shutdownLatch.countDown();
       return null;
     }).when(mShutdownHandler).handleShutdown(argMessageInfo.capture());
+
   }
 
 }

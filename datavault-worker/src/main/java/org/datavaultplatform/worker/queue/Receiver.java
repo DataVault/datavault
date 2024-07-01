@@ -81,12 +81,12 @@ public class Receiver implements MessageProcessor {
     }
 
     @Override
-    public boolean processMessage(MessageInfo messageInfo) {
+    public void processMessage(MessageInfo messageInfo) {
         try {
             if (eventSender instanceof RecordingEventSender) {
                 ((RecordingEventSender) eventSender).clear();
             }
-            return processMessageInternal(messageInfo);
+            processMessageInternal(messageInfo);
         } finally {
             if (eventSender instanceof RecordingEventSender res) {
                 List<Event> events = res.getEvents();
@@ -117,7 +117,7 @@ public class Receiver implements MessageProcessor {
         }
     }
 
-    private boolean processMessageInternal(MessageInfo messageInfo) {
+    private void processMessageInternal(MessageInfo messageInfo) {
             long start = System.currentTimeMillis();
             String message = messageInfo.getValue();
 
@@ -181,9 +181,7 @@ public class Receiver implements MessageProcessor {
                 logger.info("Finished Processing message[{}]. Took [{}]secs",
                     messageInfo, TimeUnit.MILLISECONDS.toSeconds(diff));
             }
-
-            return false;
-        }
+     }
 
     public boolean isEncryptionEnabled() {
         return encryptionEnabled;
