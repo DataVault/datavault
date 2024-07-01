@@ -2,7 +2,7 @@ version: "3.7"
 services:
   db:
     container_name: dv-byodb-mariadb
-    image: mariadb:5.5.64
+    image: mariadb:10.3.39
     platform: linux/x86_64
     restart: always
     environment:

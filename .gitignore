@@ -43,3 +43,4 @@ datavault-webapp/pids
 # ignore intellij run files
 .run/
 TEMPLATES/*
+dv5/local-db/docker/backup.D.SPEED.sql

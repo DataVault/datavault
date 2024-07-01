@@ -1,0 +1,17 @@
+{
+  "priority": 1,
+  "request": {
+    "urlPath": "/admin/paused/deposit/state",
+    "method": "GET"
+  },
+  "response": {
+    "status": 200,
+    "headers" : {
+      "Content-Type" : "application/json"
+    },
+    "jsonBody": {
+      "isPaused":true,
+      "created":"2007-12-03T10:15:30"
+    }
+  }
+}

@@ -3,7 +3,7 @@ package org.datavaultplatform.common.event.roles;
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.model.Vault;
 
-import javax.persistence.Entity;
+import jakarta.persistence.Entity;
 
 @Entity
 public class OrphanVault extends Event {

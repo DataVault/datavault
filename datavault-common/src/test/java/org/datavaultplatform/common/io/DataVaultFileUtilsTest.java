@@ -1,17 +1,23 @@
 package org.datavaultplatform.common.io;
 
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 
-public class FileUtilsTest {
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.attribute.PosixFilePermissions;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class DataVaultFileUtilsTest {
 
     @Test
     public void testParseFormattedSizeToBytesWithNumber() {
         long expectedValue = 123456789L;
         
-        long valueReturn = FileUtils.parseFormattedSizeToBytes("123456789");
+        long valueReturn = DataVaultFileUtils.parseFormattedSizeToBytes("123456789");
         
         assertEquals(expectedValue, valueReturn);
     }
@@ -20,7 +26,7 @@ public class FileUtilsTest {
     public void testParseFormattedSizeToBytesWithKiloByteString() {
         long expectedValue = 500000;
         
-        long valueReturn = FileUtils.parseFormattedSizeToBytes("500KB");
+        long valueReturn = DataVaultFileUtils.parseFormattedSizeToBytes("500KB");
         
         assertEquals(expectedValue, valueReturn);
     }
@@ -29,7 +35,7 @@ public class FileUtilsTest {
     public void testParseFormattedSizeToBytesWithKiloByteStringAndNoB() {
         long expectedValue = 500000L;
         
-        long valueReturn = FileUtils.parseFormattedSizeToBytes("500 KB");
+        long valueReturn = DataVaultFileUtils.parseFormattedSizeToBytes("500 KB");
         
         assertEquals(expectedValue, valueReturn);
     }
@@ -38,7 +44,7 @@ public class FileUtilsTest {
     public void testParseFormattedSizeToBytesWithKiloByteStringAndSpace() {
         long expectedValue = 500000L;
         
-        long valueReturn = FileUtils.parseFormattedSizeToBytes("500 KB");
+        long valueReturn = DataVaultFileUtils.parseFormattedSizeToBytes("500 KB");
         
         assertEquals(expectedValue, valueReturn);
     }
@@ -47,7 +53,7 @@ public class FileUtilsTest {
     public void testParseFormattedSizeToBytesWithKiloByteStringAndSpaceAndNoB() {
         long expectedValue = 500000L;
         
-        long valueReturn = FileUtils.parseFormattedSizeToBytes("500 K");
+        long valueReturn = DataVaultFileUtils.parseFormattedSizeToBytes("500 K");
         
         assertEquals(expectedValue, valueReturn);
     }
@@ -56,7 +62,7 @@ public class FileUtilsTest {
     public void testParseFormattedSizeToBytesWithMegaByteString() {
         long expectedValue = 500000000L;
         
-        long valueReturn = FileUtils.parseFormattedSizeToBytes("500MB");
+        long valueReturn = DataVaultFileUtils.parseFormattedSizeToBytes("500MB");
         
         assertEquals(expectedValue, valueReturn);
     }
@@ -67,7 +73,7 @@ public class FileUtilsTest {
     public void testParseFormattedSizeToBytesWithGigaByteString() {
         long expectedValue = 5000000000L;
         
-        long valueReturn = FileUtils.parseFormattedSizeToBytes("5GB");
+        long valueReturn = DataVaultFileUtils.parseFormattedSizeToBytes("5GB");
         
         assertEquals(expectedValue, valueReturn);
     }
@@ -76,7 +82,7 @@ public class FileUtilsTest {
     public void testParseFormattedSizeToBytesWithTeraByteString() {
         long expectedValue = 5000000000000L;
         
-        long valueReturn = FileUtils.parseFormattedSizeToBytes("5TB");
+        long valueReturn = DataVaultFileUtils.parseFormattedSizeToBytes("5TB");
         
         assertEquals(expectedValue, valueReturn);
     }
@@ -85,7 +91,7 @@ public class FileUtilsTest {
     public void testParseFormattedSizeToBytesWithGigyByteString() {
         long expectedValue = 5368709120L;
         
-        long valueReturn = FileUtils.parseFormattedSizeToBytes("5GiB");
+        long valueReturn = DataVaultFileUtils.parseFormattedSizeToBytes("5GiB");
         
         assertEquals(expectedValue, valueReturn);
     }
@@ -94,7 +100,7 @@ public class FileUtilsTest {
     public void testParseFormattedSizeToBytesWithLowerCaseString() {
         long expectedValue = 500000L;
         
-        long valueReturn = FileUtils.parseFormattedSizeToBytes("500kb");
+        long valueReturn = DataVaultFileUtils.parseFormattedSizeToBytes("500kb");
         
         assertEquals(expectedValue, valueReturn);
     }
@@ -103,9 +109,19 @@ public class FileUtilsTest {
     public void testParseFormattedSizeToBytesWithGigaByteFullString() {
         long expectedValue = 5000000000L;
         
-        long valueReturn = FileUtils.parseFormattedSizeToBytes("5 Giga");
+        long valueReturn = DataVaultFileUtils.parseFormattedSizeToBytes("5 Giga");
         
         assertEquals(expectedValue, valueReturn);
     }
 
+    @Test
+    @SneakyThrows
+    void testFilePermissions() {
+        File tempFile = Files.createTempFile("tmp", "txt").toFile();
+
+        Files.setPosixFilePermissions(tempFile.toPath(), PosixFilePermissions.fromString("rwxr-xr--"));
+
+        String result = DataVaultFileUtils.getPermissions(tempFile);
+        assertThat(result).isEqualTo("rwxr-xr--");
+    }
 }

@@ -1,12 +1,12 @@
 package org.datavaultplatform.worker.app;
 
-import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
-import ch.qos.logback.classic.Logger;
+
 import java.io.File;
 import java.nio.file.Files;
 import lombok.SneakyThrows;
@@ -21,7 +21,7 @@ public class OracleObjectStorageConfigTest {
 
   static File tempHome;
 
-  static ListAppender<ILoggingEvent> logBackListAppender = new ListAppender<>();
+  static final ListAppender<ILoggingEvent> logBackListAppender = new ListAppender<>();
 
   private static ch.qos.logback.classic.Logger getOracleClassicLogger() {
     ch.qos.logback.classic.Logger result = (ch.qos.logback.classic.Logger) OracleObjectStorageClassic.LOGGER;

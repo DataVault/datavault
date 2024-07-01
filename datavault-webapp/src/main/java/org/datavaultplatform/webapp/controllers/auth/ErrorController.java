@@ -9,8 +9,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.MessageFormat;
@@ -26,8 +26,8 @@ class ErrorController implements org.springframework.boot.web.servlet.error.Erro
     @RequestMapping("/error")
     public String customError(HttpServletRequest request, HttpServletResponse response, Model model) {
         // Retrieve some useful information from the request
-        Integer statusCode = (Integer) request.getAttribute("javax.servlet.error.status_code");
-        Throwable throwable = (Throwable) request.getAttribute("javax.servlet.error.exception");
+        Integer statusCode = (Integer) request.getAttribute("jakarta.servlet.error.status_code");
+        Throwable throwable = (Throwable) request.getAttribute("jakarta.servlet.error.exception");
         String exceptionMessage = getExceptionMessage(throwable, statusCode, response);
 
         logger.error("----------");
@@ -38,7 +38,7 @@ class ErrorController implements org.springframework.boot.web.servlet.error.Erro
             return "auth/denied";
         }
 
-        String requestUri = (String) request.getAttribute("javax.servlet.error.request_uri");
+        String requestUri = (String) request.getAttribute("jakarta.servlet.error.request_uri");
         if (requestUri == null) {
             requestUri = "Unknown";
         }
@@ -55,7 +55,7 @@ class ErrorController implements org.springframework.boot.web.servlet.error.Erro
             .list(request.getAttributeNames())
             .stream()
             .filter(Objects::nonNull)
-            .filter(aName -> aName.startsWith("javax.servlet.error."))
+            .filter(aName -> aName.startsWith("jakarta.servlet.error."))
             .forEach(aName -> logger.error("error attr [{}] -> [{}]", aName, request.getAttribute(aName)));
     }
 

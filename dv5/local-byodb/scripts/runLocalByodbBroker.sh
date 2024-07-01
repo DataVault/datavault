@@ -17,7 +17,7 @@ cd $PROJECT_ROOT
  SPRING_SQL_INIT_MODE=never \
  SPRING_DATASOURCE_USERNAME=root \
  SPRING_DATASOURCE_PASSWORD=rootpass \
- SPRING_DATASOURCE_URL='jdbc:mariadb://localhost:53306/test?useSSL=false&serverTimezone=UTC' \
+ SPRING_DATASOURCE_URL='jdbc:mariadb://localhost:53306/datavault?useSSL=false&serverTimezone=UTC' \
 #KEYSTORE_ENABLE=true \
 #KEYSTORE_PATH=XXX/PATH/TO/KEYSTORE.ks \
 #KEYSTORE_SHA1=4499a0663669cc06e7099632ba360c15a404943c \
@@ -31,7 +31,7 @@ cd $PROJECT_ROOT
  ./mvnw spring-boot:run  \
  -Dspring-boot.run.jvmArguments="-Xdebug \
  -Xms1024M -Xmx2024M \
- -Duser.language=en -Duser.country=GB -Duser.timezone=Europe/London \
- -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005" \
+ -Duser.language=en -Duser.country=GB -Duser.timezone=Europe/London -Djava.net.preferIPv4Stack=true \
+ -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005" \
  --projects datavault-broker
 

@@ -9,9 +9,8 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 
-import java.util.Collections;
+import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +53,7 @@ public class Packager {
     public static Bag createBag(File dir) throws Exception {        
         return BagCreator.bagInPlace(
                 dir.toPath(),
-            Collections.singletonList(StandardSupportedAlgorithms.MD5),
+            List.of(StandardSupportedAlgorithms.MD5),
                 true); // include hidden files
     }
     

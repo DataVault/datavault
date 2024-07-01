@@ -4,7 +4,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
-import java.util.Arrays;
+import java.util.List;
 import org.datavaultplatform.broker.controllers.MetadataController;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -31,11 +31,11 @@ public class MetaDataControllerAuthTest extends BaseControllerAuthTest {
   void testGetDatasets() {
 
     when(controller.getDatasets(USER_ID_1)).thenReturn(
-        Arrays.asList(AuthTestData.DATASET_1, AuthTestData.DATASET_2));
+        List.of(AuthTestData.DATASET_1, AuthTestData.DATASET_2));
 
     checkWorksWhenAuthenticatedFailsOtherwise(
         get("/metadata/datasets"),
-        Arrays.asList(AuthTestData.DATASET_1, AuthTestData.DATASET_2));
+        List.of(AuthTestData.DATASET_1, AuthTestData.DATASET_2));
 
     verify(controller).getDatasets(USER_ID_1);
   }

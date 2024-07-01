@@ -17,7 +17,6 @@ import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.response.*;
 
-import org.datavaultplatform.common.storage.StorageConstants;
 import org.datavaultplatform.common.task.Task;
 import org.jsondoc.core.annotation.Api;
 import org.jsondoc.core.annotation.ApiHeader;
@@ -36,7 +35,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Created by Robin Taylor on 08/03/2016.
@@ -336,7 +335,7 @@ public class AdminController {
         }
 
         List<ArchiveStore> archiveStores = archiveStoreService.getArchiveStores();
-        if (archiveStores.size() == 0) {
+        if (archiveStores.isEmpty()) {
             throw new Exception("No configured archive storage");
         }
         LOGGER.info("Delete deposit archiveStores : {}", archiveStores);
@@ -386,10 +385,10 @@ public class AdminController {
             for (ArchiveStore archiveStore : archiveStores) {
                 if (archiveStore.isTivoliStorageManager()) {
                     HashMap<String, String> asProps = archiveStore.getProperties();
-                    if (this.optionsDir != null && ! this.optionsDir.equals("")) {
+                    if (this.optionsDir != null && !this.optionsDir.isEmpty()) {
                         asProps.put(PropNames.OPTIONS_DIR, this.optionsDir);
                     }
-                    if (this.tempDir != null && ! this.tempDir.equals("")) {
+                    if (this.tempDir != null && !this.tempDir.isEmpty()) {
                         asProps.put(PropNames.TEMP_DIR, this.tempDir);
                     }
                     archiveStore.setProperties(asProps);
@@ -397,16 +396,16 @@ public class AdminController {
 
                 if (archiveStore.isAmazonS3()) {
                     HashMap<String, String> asProps = archiveStore.getProperties();
-                    if (this.bucketName != null && ! this.bucketName.equals("")) {
+                    if (this.bucketName != null && !this.bucketName.isEmpty()) {
                         asProps.put(PropNames.AWS_S3_BUCKET_NAME, this.bucketName);
                     }
-                    if (this.region != null && ! this.region.equals("")) {
+                    if (this.region != null && !this.region.isEmpty()) {
                         asProps.put(PropNames.AWS_S3_REGION, this.region);
                     }
-                    if (this.awsAccessKey != null && ! this.awsAccessKey.equals("")) {
+                    if (this.awsAccessKey != null && !this.awsAccessKey.isEmpty()) {
                         asProps.put(PropNames.AWS_ACCESS_KEY, this.awsAccessKey);
                     }
-                    if (this.awsSecretKey != null && ! this.awsSecretKey.equals("")) {
+                    if (this.awsSecretKey != null && !this.awsSecretKey.isEmpty()) {
                         asProps.put(PropNames.AWS_SECRET_KEY, this.awsSecretKey);
                     }
 

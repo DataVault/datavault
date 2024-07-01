@@ -1,7 +1,5 @@
 package org.datavaultplatform.common.crypto;
 
-import static org.junit.Assert.assertEquals;
-
 import java.io.File;
 import java.math.BigInteger;
 import java.net.URLDecoder;
@@ -19,6 +17,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Takes example, Base64 encoded, RSA public/private key pair - formatted (for ssh/sftp)
@@ -70,14 +70,14 @@ public class SshRsaKeyUtilsTest {
     RSAPublicKey rsaPublicKey = SshRsaKeyUtils.readPublicKey(testPublicKey);
     BigInteger expectedModulus = new BigInteger(
         "145819497446504665407052454873049578702605434271985535289477974800824103967370144831619755390946889058701098955910318621017852918758875105210827549183463503443000501645102031182177258964161879484467749566840583633960627631427812469962241441974819543825063777374868339736348045780148884786447901424407496204987");
-    Assertions.assertEquals(expectedModulus, rsaPrivateKey.getModulus());
-    Assertions.assertEquals(rsaPublicKey.getModulus(), rsaPrivateKey.getModulus());
+    assertEquals(expectedModulus, rsaPrivateKey.getModulus());
+    assertEquals(rsaPublicKey.getModulus(), rsaPrivateKey.getModulus());
   }
 
   @SneakyThrows
   private String decode(String encoded) {
 
-    String temp = URLDecoder.decode(encoded, StandardCharsets.UTF_8.name());
+    String temp = URLDecoder.decode(encoded, StandardCharsets.UTF_8);
 
     temp = temp.replace("\n","");
 
@@ -97,7 +97,7 @@ public class SshRsaKeyUtilsTest {
   void testEncodeDecode() {
     String plainText1 = UUID.randomUUID().toString();
     String plainText2 = decode(encode(plainText1));
-    Assertions.assertEquals(plainText1, plainText2);
+    assertEquals(plainText1, plainText2);
   }
 
 

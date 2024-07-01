@@ -41,7 +41,7 @@ public class BaseFT {
 
         if ("firefox".equals(browser)) {
             FirefoxOptions options = new FirefoxOptions();
-            options.setHeadless(true);
+            options.addArguments("--headless=new");
             if (remoteDriverUrl != null) {
                 driver = new RemoteWebDriver(new URL(remoteDriverUrl), options);
                 ((RemoteWebDriver) driver).setFileDetector(new LocalFileDetector());
@@ -52,7 +52,7 @@ public class BaseFT {
         }
         else if ("chrome".equals(browser)) {
             ChromeOptions options = new ChromeOptions();
-            options.setHeadless(true);
+            options.addArguments("--headless=new");
             if (remoteDriverUrl != null) {
                 driver = new RemoteWebDriver(new URL(remoteDriverUrl), options);
                 ((RemoteWebDriver) driver).setFileDetector(new LocalFileDetector());

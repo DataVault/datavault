@@ -5,10 +5,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.model.Permission;
 import org.datavaultplatform.common.model.PermissionModel;
@@ -86,7 +86,7 @@ public class RoleCustomDAOImpl extends BaseCustomDAOImpl implements RoleCustomDA
     }
 
     private void ensureVaultCreatorExists() {
-        List<PermissionModel> vaultPermissions = getPermissionModelsByType(PermissionModel.PermissionType.VAULT);
+        List<PermissionModel> vaultPermissions = getPermissionModelsByType(PermissionType.VAULT);
 
         RoleModel storedVaultCreator = getRoleModelByName(RoleUtils.VAULT_CREATOR_ROLE_NAME);
         if (storedVaultCreator != null) {
@@ -234,7 +234,11 @@ public class RoleCustomDAOImpl extends BaseCustomDAOImpl implements RoleCustomDA
         CriteriaQuery<RoleModel> cq = cb.createQuery(RoleModel.class).distinct(true);
         Root<RoleModel> root = cq.from(RoleModel.class);
         cq.select(root);
-        cq.where(cb.equal(root.get(RoleModel_.type), roleType));
+        if (roleType == null) {
+            cq.where(cb.isNull(root.get(RoleModel_.type)));
+        } else {
+            cq.where(cb.equal(root.get(RoleModel_.type), roleType));
+        }
         List<RoleModel> roles = getResults(cq);
         for (RoleModel role : roles) {
             populateAssignedUserCount(role);
@@ -268,7 +272,7 @@ public class RoleCustomDAOImpl extends BaseCustomDAOImpl implements RoleCustomDA
         return getSingleResult(cq);
     }
 
-    private List<PermissionModel> getPermissionModelsByType(PermissionModel.PermissionType type){
+    private List<PermissionModel> getPermissionModelsByType(PermissionType type){
         return PermissionCustomDAOImpl.findPermissionModelsByType(em, type);
     }
 

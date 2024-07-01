@@ -7,7 +7,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.datavaultplatform.broker.services.AdminService;
 import org.datavaultplatform.broker.services.FilesService;
 import org.datavaultplatform.broker.services.UsersService;
-import org.datavaultplatform.common.io.FileUtils;
+import org.datavaultplatform.common.io.DataVaultFileUtils;
 import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.common.model.FileStore;
 import org.datavaultplatform.common.model.User;
@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.HandlerMapping;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
@@ -56,8 +56,8 @@ public class FilesController {
         this.usersService = usersService;
         this.adminService = adminService;
         this.tempDir = tempDir;
-        this.maxDepositByteSize = FileUtils.parseFormattedSizeToBytes(maxDepositByteSize);
-        this.maxAdminDepositByteSize = FileUtils.parseFormattedSizeToBytes(maxAdminDepositByteSize);
+        this.maxDepositByteSize = DataVaultFileUtils.parseFormattedSizeToBytes(maxDepositByteSize);
+        this.maxAdminDepositByteSize = DataVaultFileUtils.parseFormattedSizeToBytes(maxAdminDepositByteSize);
     }
 
     @GetMapping("/files")
@@ -151,7 +151,7 @@ public class FilesController {
         if (size == null) {
             return "File information not available";
         } else {
-            return FileUtils.getGibibyteSizeStr(size);
+            return DataVaultFileUtils.getGibibyteSizeStr(size);
         }
     }
 
@@ -165,7 +165,7 @@ public class FilesController {
             // Start timing
             long start = System.nanoTime();
 
-            Set<String> storageIDSet = new HashSet<String>();
+            Set<String> storageIDSet = new HashSet<>();
             for (String filePath : filePaths) {
                 String fileStorageID = filePath.split("/")[1];
                 storageIDSet.add(fileStorageID);
@@ -211,7 +211,7 @@ public class FilesController {
             if (size == 0L) {
                 return "File information not available.";
             } else {
-                return FileUtils.getGibibyteSizeStr(size);
+                return DataVaultFileUtils.getGibibyteSizeStr(size);
             }
         } else {
             return "File information not available.";
@@ -263,7 +263,7 @@ public class FilesController {
         }
 
         log.info("Total size: " + size);
-        String sizeWithUnits = FileUtils.getGibibyteSizeStr(size);
+        String sizeWithUnits = DataVaultFileUtils.getGibibyteSizeStr(size);
         log.info("checkDepositSize() - sizeWithUnits:" + sizeWithUnits);
         long finish = System.nanoTime();
         long timeElapsed = TimeUnit.SECONDS.convert(finish - start, TimeUnit.NANOSECONDS);

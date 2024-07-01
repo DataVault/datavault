@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import org.datavaultplatform.common.model.Vault;
@@ -73,7 +72,7 @@ public class VaultsReviewServiceTest {
 
         VaultReview vaultReview = new VaultReview();
         vaultReview.setActionedDate(actionedDate);
-        List<VaultReview> vaultReviews = Collections.singletonList(vaultReview);
+        List<VaultReview> vaultReviews = List.of(vaultReview);
 
         Vault vault = new Vault();
         vault.setReviewDate(reviewDate);
@@ -97,7 +96,7 @@ public class VaultsReviewServiceTest {
         if (actioned) {
             vaultReview.setActionedDate(actionedDate);
         }
-        List<VaultReview> vaultReviews = Collections.singletonList(vaultReview);
+        List<VaultReview> vaultReviews = List.of(vaultReview);
 
         Vault vault = new Vault();
         vault.setReviewDate(reviewDate);

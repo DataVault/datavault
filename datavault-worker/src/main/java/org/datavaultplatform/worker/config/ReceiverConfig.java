@@ -2,7 +2,7 @@ package org.datavaultplatform.worker.config;
 
 import java.io.File;
 import java.security.Security;
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.datavaultplatform.common.event.EventSender;

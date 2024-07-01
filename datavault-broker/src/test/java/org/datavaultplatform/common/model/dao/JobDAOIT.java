@@ -40,6 +40,7 @@ public class JobDAOIT extends BaseReuseDatabaseTest {
 
     dao.save(job1);
     assertNotNull(job1.getID());
+    UUIDUtils.assertIsUUID(job1.getID());
     assertEquals(1, count());
 
     dao.save(job2);
@@ -112,6 +113,11 @@ public class JobDAOIT extends BaseReuseDatabaseTest {
 
   private Job getJob1() {
     Job archive = new Job();
+    archive.getStates().add(null);
+    archive.getStates().addAll(List.of("state1","state2"));
+    archive.getStates().add(null);
+    archive.getStates().addAll(List.of("state3","state4"));
+    archive.getStates().add(null);
     archive.setTaskClass("111");
     return archive;
   }

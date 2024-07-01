@@ -3,7 +3,7 @@ package org.datavaultplatform.common.storage;
 import java.io.*;
 import java.nio.file.Files;
 import java.security.*;
-import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
+import jakarta.xml.bind.annotation.adapters.HexBinaryAdapter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j

@@ -1,6 +1,6 @@
 package org.datavaultplatform.common.event.deposit;
 
-import javax.persistence.Transient;
+import jakarta.persistence.Transient;
 import org.datavaultplatform.common.event.Event;
 
 public class TransferProgress extends Event {

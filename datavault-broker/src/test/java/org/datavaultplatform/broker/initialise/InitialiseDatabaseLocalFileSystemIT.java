@@ -2,6 +2,7 @@ package org.datavaultplatform.broker.initialise;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
@@ -30,7 +31,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
-import org.testcontainers.shaded.org.awaitility.Awaitility;
+import org.awaitility.Awaitility;
 
 @SpringBootTest(classes = DataVaultBrokerApp.class)
 @TestPropertySource("classpath:datavault-test.properties")
@@ -90,7 +91,7 @@ public class InitialiseDatabaseLocalFileSystemIT extends BaseDatabaseTest {
 
     Device device = local.getDevice(StorageClassNameResolver.FIXED_SSHD);
     assertThat(device).isInstanceOf(LocalFileSystem.class);
-    assertTrue(device instanceof LocalFileSystem);
+    assertInstanceOf(LocalFileSystem.class, device);
   }
 
   @TestConfiguration

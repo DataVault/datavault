@@ -18,7 +18,6 @@ import org.datavaultplatform.common.storage.UserStore;
 import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.common.storage.impl.SftpUtils;
 import org.datavaultplatform.common.task.Context;
-import org.datavaultplatform.common.task.Task;
 import org.datavaultplatform.common.task.TaskExecutor;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.datavaultplatform.common.util.StorageClassUtils;
@@ -36,19 +35,15 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 import org.springframework.retry.RetryCallback;
 
 /**
  * A class that extends Task which is used to handle Retrievals from the vault
  */
-public class Retrieve extends Task {
+public class Retrieve extends BaseTwoSpeedRetryTask {
     public static final String DATA_VAULT_HIDDEN_FILE_NAME = ".datavault";
     private static final String DV_TEMP_DIR_PREFIX = "dvTempDir";
-    private static final int DEFAULT_USERFS_RETRIEVE_ATTEMPTS = 10;
-    private static final int DEFAULT_USERFS_DELAY_SECS_1 = 60;
-    private static final int DEFAULT_USERFS_DELAY_SECS_2 = 60;
     private static final Logger logger = LoggerFactory.getLogger(Retrieve.class);
     private String archiveId = null;
     private String archiveDigestAlgorithm = null;
@@ -64,8 +59,6 @@ public class Retrieve extends Task {
     private String depositCreationDate = null;
     private long archiveSize = 0;
     private EventSender eventSender = null;
-
-    private TwoSpeedRetry userFsTwoSpeedRetry;
 
     /* (non-Javadoc)
      * @see org.datavaultplatform.common.task.Task#performAction(org.datavaultplatform.common.task.Context)
@@ -218,11 +211,11 @@ public class Retrieve extends Task {
             LocalDate depositDate = null;
             if (this.depositCreationDate != null) {
                 depositDate = LocalDate.parse(this.depositCreationDate, DateTimeFormatter.BASIC_ISO_DATE);
-                logger.info("DepositDate is:" + depositDate.toString());
+                logger.info("DepositDate is:" + depositDate);
             }
             if (context.getRecomposeDate() != null) {
                 recomposeDate = LocalDate.parse(context.getRecomposeDate(), DateTimeFormatter.BASIC_ISO_DATE);
-                logger.info("RecomposeDate is:" + recomposeDate.toString());
+                logger.info("RecomposeDate is:" + recomposeDate);
             }
             // if deposit creation date is before the recomposeDate
             if ( depositDate.isBefore(recomposeDate)) {
@@ -348,7 +341,9 @@ public class Retrieve extends Task {
         // Check that there's enough free space ...
         final long freespace;
         try {
-            freespace = userFs.getUsableSpace();
+            TwoSpeedRetry.DvRetryTemplate template = userFsTwoSpeedRetry.getRetryTemplate(String.format("calcSizeToFS - %s", retrievePath));
+            freespace = template.execute(retryContext -> userFs.getUsableSpace());
+
         } catch (Exception e) {
             String msg = "Unable to determine free space";
             logger.error(msg, e);
@@ -384,10 +379,10 @@ public class Retrieve extends Task {
         File tempDir = Files.createTempDirectory(DV_TEMP_DIR_PREFIX).toFile();
         File tempDataVaultHiddenFile = new File(tempDir, DATA_VAULT_HIDDEN_FILE_NAME);
         tempDataVaultHiddenFile.createNewFile();
-        Assert.isTrue(tempDataVaultHiddenFile.exists());
-        Assert.isTrue(tempDataVaultHiddenFile.isFile());
-        Assert.isTrue(tempDataVaultHiddenFile.canRead());
-        Assert.isTrue(tempDataVaultHiddenFile.length() == 0);
+        Assert.isTrue(tempDataVaultHiddenFile.exists(),"temp data hidden file does not exist");
+        Assert.isTrue(tempDataVaultHiddenFile.isFile(),"temp data hidden file is not a file");
+        Assert.isTrue(tempDataVaultHiddenFile.canRead(), "temp data hidden file is not readable");
+        Assert.isTrue(tempDataVaultHiddenFile.length() == 0, "temp data hidden file is not empty");
         return tempDataVaultHiddenFile;
     }
     
@@ -475,28 +470,7 @@ public class Retrieve extends Task {
         logger.error(msg);
         throw new Exception(msg);
     }
-    protected void setupUserFsTwoSpeedRetry(Map<String, String> properties) {
-        this.userFsTwoSpeedRetry = getUserFsTwoSpeedRetry(properties);
-    }
 
-    protected static TwoSpeedRetry getUserFsTwoSpeedRetry(Map<String, String> properties) {
-
-        int userFsRetrieveMaxAttempts = DEFAULT_USERFS_RETRIEVE_ATTEMPTS;
-        long userFsRetrieveDelayMs1 = TimeUnit.SECONDS.toMillis(DEFAULT_USERFS_DELAY_SECS_1);
-        long userFsRetrieveDelayMs2 = TimeUnit.SECONDS.toMillis(DEFAULT_USERFS_DELAY_SECS_2);
-
-        if (properties.containsKey(PropNames.USER_FS_RETRIEVE_MAX_ATTEMPTS)) {
-            userFsRetrieveMaxAttempts = Integer.parseInt(properties.get(PropNames.USER_FS_RETRIEVE_MAX_ATTEMPTS));
-        }
-        if (properties.containsKey(PropNames.USER_FS_RETRIEVE_DELAY_MS_1)) {
-            userFsRetrieveDelayMs1 = Long.parseLong(properties.get(PropNames.USER_FS_RETRIEVE_DELAY_MS_1));
-        }
-        if (properties.containsKey(PropNames.USER_FS_RETRIEVE_DELAY_MS_2)) {
-            userFsRetrieveDelayMs2 = Long.parseLong(properties.get(PropNames.USER_FS_RETRIEVE_DELAY_MS_2));
-        }
-
-        return new TwoSpeedRetry(userFsRetrieveMaxAttempts, userFsRetrieveDelayMs1, userFsRetrieveDelayMs2);
-    }
     protected void copyFilesToUserFs(Progress progress, File payloadDir, Device userFs, long bagDirSize, String timeStampDirName) throws Exception {
         ProgressTracker tracker = new ProgressTracker(progress, this.jobID, this.depositId, bagDirSize, this.eventSender);
         Thread trackerThread = new Thread(tracker);

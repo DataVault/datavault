@@ -11,28 +11,9 @@ import org.datavaultplatform.common.task.TaskExecutor;
 
 
 @Slf4j
-public class ChunkUploadTracker implements Callable<HashMap<String, String>> {
-
-    private final File chunk;
-    private final int chunkNumber;
-    private final HashMap<String, ArchiveStore> archiveStores;
-    private final String depositId;
-    private final String jobID;
-    private final EventSender eventSender;
-    private final File tarFile;
-    private final String userID;
-
-    public ChunkUploadTracker(int chunkNumber, File chunk, HashMap<String, ArchiveStore> archiveStores, String depositId, EventSender eventSender, String jobID, File tarFile,
-        String userID) {
-        this.chunkNumber = chunkNumber;
-        this.chunk = chunk;
-        this.archiveStores = archiveStores;
-        this.depositId = depositId;
-        this.eventSender = eventSender;
-        this.jobID = jobID;
-        this.tarFile = tarFile;
-        this.userID = userID;
-    }
+public record ChunkUploadTracker(int chunkNumber, File chunk, HashMap<String, ArchiveStore> archiveStores,
+                                 String depositId, EventSender eventSender, String jobID, File tarFile,
+                                 String userID) implements Callable<HashMap<String, String>> {
 
     @Override
     public HashMap<String, String> call() throws Exception {
@@ -53,39 +34,5 @@ public class ChunkUploadTracker implements Callable<HashMap<String, String>> {
         executor.execute(archiveIds::putAll);
         log.debug("Chunk upload task completed: " + this.chunkNumber);
         return archiveIds;
-    }
-
-    public File getChunk() {
-        return this.chunk;
-    }
-
-
-    public int getChunkNumber() {
-        return this.chunkNumber;
-    }
-
-    public HashMap<String, ArchiveStore> getArchiveStores() {
-        return this.archiveStores;
-    }
-
-    public String getDepositId() {
-        return this.depositId;
-    }
-
-    public String getJobID() {
-        return this.jobID;
-    }
-
-
-    public EventSender getEventSender() {
-        return this.eventSender;
-    }
-
-    public File getTarFile() {
-        return this.tarFile;
-    }
-
-    public String getUserID() {
-        return userID;
     }
 }

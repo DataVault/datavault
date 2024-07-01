@@ -7,8 +7,6 @@ import static org.springframework.security.web.context.HttpSessionSecurityContex
 import java.net.URI;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -124,10 +122,6 @@ public abstract class TestUtils {
 
   public static String stripPrefix(String prefix, String value){
     return value.replaceFirst("^"+prefix,"");
-  }
-
-  public static Set<String> toSet(String... items) {
-    return new HashSet<>(Arrays.asList(items));
   }
 
   public static void cleanRegistry(SessionRegistry registry) {

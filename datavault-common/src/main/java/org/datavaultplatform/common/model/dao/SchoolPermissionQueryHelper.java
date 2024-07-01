@@ -7,16 +7,17 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Order;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Order;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.model.Group;
 import org.datavaultplatform.common.model.Group_;
@@ -124,7 +125,10 @@ public class SchoolPermissionQueryHelper<T> {
     CriteriaQuery<Long> cq = cb.createQuery(Long.class);
     Root<T> root = cq.from(this.criteriaType);
     cq.select(cb.countDistinct(root));
-    cq.where(this.getPredicates(root));
+    Predicate[] preds = this.getPredicates(root);
+    if (preds.length > 0) {
+      cq.where(preds);
+    }
     return getQueryWithFirstAndMaxRestrictions(cq).getSingleResult();
   }
 

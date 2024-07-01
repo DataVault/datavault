@@ -26,7 +26,7 @@ cd $PROJECT_ROOT
  ./mvnw spring-boot:run \
  -Dspring-boot.run.jvmArguments="-Xdebug \
  -Xms1024M -Xmx2024M \
- -Duser.language=en -Duser.country=GB -Duser.timezone=Europe/London \
- -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5555" \
+ -Duser.language=en -Duser.country=GB -Duser.timezone=Europe/London -Djava.net.preferIPv4Stack=true \
+ -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5555" \
  --projects datavault-worker
 

@@ -31,7 +31,7 @@ public class ExternalVelocityTemplateEmailServiceIT extends BaseEmailServiceTest
   @Autowired
   VelocityEngine engine;
 
-  private static final Map<String,Object> TEMPLATE_MODEL = new HashMap<String,Object>(){{
+  private static final Map<String,Object> TEMPLATE_MODEL = new HashMap<>(){{
     put("audit-id","ext-aud-id-001");
     put("timestamp","ext-timestamp-002");
     put("chunk-id","ext-chunk-id-003");

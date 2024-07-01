@@ -1,8 +1,8 @@
 package org.datavaultplatform.common.event;
 
-import javax.persistence.Entity;
+import jakarta.persistence.Entity;
 import java.util.ArrayList;
-import javax.persistence.Transient;
+import jakarta.persistence.Transient;
 
 @Entity
 public class InitStates extends Event {

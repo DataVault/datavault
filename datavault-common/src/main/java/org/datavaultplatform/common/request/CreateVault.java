@@ -7,9 +7,11 @@ import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiObject(name = "CreateVault")
@@ -365,13 +367,7 @@ public class CreateVault {
     }
 
     public void setNominatedDataManagers(List<String> nominatedDataManagers) {
-        // Remove all null or empty strings from input
-        List<String> ndms = new ArrayList<>();
-        if (nominatedDataManagers != null) {
-            ndms = nominatedDataManagers;
-            ndms.removeAll(Arrays.asList("", null));
-        }
-        this.nominatedDataManagers = ndms;
+        this.nominatedDataManagers = cleanse(nominatedDataManagers);
     }
 
     public List<String> getDepositors() {
@@ -379,13 +375,18 @@ public class CreateVault {
     }
 
     public void setDepositors(List<String> depositors) {
-        // Remove all null or empty strings from input
-        List<String> deps = new ArrayList<>();
-        if (depositors != null) {
-            deps = depositors;
-            deps.removeAll(Arrays.asList("", null));
+        this.depositors = cleanse(depositors);
+    }
+
+    private static List<String> cleanse(List<String> items){
+        if (items == null) {
+            return new ArrayList<>();
         }
-        this.depositors = deps;
+        return items
+                .stream()
+                .filter(Objects::nonNull)
+                .filter(Predicate.not(String::isEmpty))
+                .collect(Collectors.toList());
     }
 
     public String getContactPerson() {
@@ -432,13 +433,7 @@ public class CreateVault {
     }
 
     public void setDataCreators(List<String> dataCreators) {
-        // Remove all null or empty strings from input
-        List<String> dcs = new ArrayList<>();
-        if (dataCreators != null) {
-            dcs = dataCreators;
-            dcs.removeAll(Arrays.asList("", null));
-        }
-        this.dataCreators = dcs;
+        this.dataCreators = cleanse(dataCreators);
     }
 
     public Boolean getIsOwner() {

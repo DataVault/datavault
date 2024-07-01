@@ -1,8 +1,6 @@
 package org.datavaultplatform.common.model;
 
-import javax.persistence.NamedAttributeNode;
-import javax.persistence.NamedEntityGraph;
-import javax.persistence.NamedSubgraph;
+import jakarta.persistence.*;
 import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.common.event.Event;
 
@@ -11,23 +9,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.util.*;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.CascadeType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.OrderBy;
-import javax.persistence.Version;
-
 import org.datavaultplatform.common.util.DateTimeUtils;
 import org.hibernate.Hibernate;
-import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.UuidGenerator;
 import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
 
@@ -53,8 +37,7 @@ public class Deposit {
     // Deposit Identifier
     @Id
     @ApiObjectField(description = "Universally Unique Identifier for the Deposit", name="Deposit")
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid2")
+    @UuidGenerator
     @Column(name = "id", unique = true, length = 36)
     private String id;
 
@@ -111,6 +94,7 @@ public class Deposit {
 
 
     @ApiObjectField(description = "Status of the Deposit", allowedvalues={"NOT_STARTED", "IN_PROGRESS", "COMPLETE"})
+    @Column(columnDefinition = "INT(11)")
     private Status status;
 
     // THE ORDER OF THESE ENUM VALUES IS IMPORTANT. DO NOT CHANGE.
@@ -162,6 +146,7 @@ public class Deposit {
     private String encArchiveDigest;
     
     // Encryption
+    @Lob
     @Column(columnDefinition = "BLOB")
     private byte[] encIV;
 

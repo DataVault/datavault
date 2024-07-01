@@ -3,7 +3,7 @@ package org.datavaultplatform.webapp.controllers.admin;
 
 import java.util.List;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.datavaultplatform.common.model.PendingVault;
 import org.datavaultplatform.common.response.BillingInformation;
@@ -63,7 +63,7 @@ public class AdminBillingController {
         model.addAttribute("vaults", filteredBillingData.getData());
         model.addAttribute("query", query);
 
-        boolean isFiltered = !query.equals("");
+        boolean isFiltered = !query.isEmpty();
         model.addAttribute("recordsInfo",
                 constructTableRecordsInfo(offset, filteredBillingData.getRecordsTotal(),
                         filteredRecordsTotal, filteredBillingData.getData().size(), isFiltered));

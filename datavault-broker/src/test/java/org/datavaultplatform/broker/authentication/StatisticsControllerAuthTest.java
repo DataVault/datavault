@@ -4,7 +4,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
-import java.util.Arrays;
+import java.util.List;
 import org.datavaultplatform.broker.controllers.StatisticsController;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -29,11 +29,11 @@ public class StatisticsControllerAuthTest extends BaseControllerAuthTest {
   @Test
   void testGetDepositsInProgress() {
     when(controller.getDepositsInProgress(USER_ID_1)).thenReturn(
-        Arrays.asList(AuthTestData.DEPOSIT_1, AuthTestData.DEPOSIT_2));
+        List.of(AuthTestData.DEPOSIT_1, AuthTestData.DEPOSIT_2));
 
     checkWorksWhenAuthenticatedFailsOtherwise(
         get("/vaults/depositinprogress"),
-        Arrays.asList(AuthTestData.DEPOSIT_1, AuthTestData.DEPOSIT_2));
+        List.of(AuthTestData.DEPOSIT_1, AuthTestData.DEPOSIT_2));
 
     verify(controller).getDepositsInProgress(USER_ID_1);
   }
@@ -97,11 +97,11 @@ public class StatisticsControllerAuthTest extends BaseControllerAuthTest {
   @Test
   void testGetRetrievesInProgress() {
     when(controller.getRetrievesInProgress(USER_ID_1)).thenReturn(
-        Arrays.asList(AuthTestData.RETRIEVE_1, AuthTestData.RETRIEVE_2));
+        List.of(AuthTestData.RETRIEVE_1, AuthTestData.RETRIEVE_2));
 
     checkWorksWhenAuthenticatedFailsOtherwise(
         get("/vaults/retrieveinprogress"),
-        Arrays.asList(AuthTestData.RETRIEVE_1, AuthTestData.RETRIEVE_2));
+        List.of(AuthTestData.RETRIEVE_1, AuthTestData.RETRIEVE_2));
 
     verify(controller).getRetrievesInProgress(USER_ID_1);
   }

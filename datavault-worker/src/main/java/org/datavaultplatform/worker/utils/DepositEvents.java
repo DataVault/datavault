@@ -14,6 +14,7 @@ import java.time.ZoneOffset;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.event.deposit.Complete;
 import org.datavaultplatform.common.event.deposit.ComputedDigest;
@@ -22,7 +23,6 @@ import org.datavaultplatform.common.event.deposit.UploadComplete;
 import org.datavaultplatform.common.model.ArchiveStore;
 import org.datavaultplatform.common.storage.StorageConstants;
 import org.datavaultplatform.common.storage.Verify;
-import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.worker.tasks.Audit;
 import org.datavaultplatform.common.util.DateTimeUtils;
 import org.datavaultplatform.worker.tasks.Deposit;
@@ -58,9 +58,9 @@ public class DepositEvents {
     topLevelProps.put(PropNames.ARCHIVE_DIGEST, info.archiveDigest);
     topLevelProps.put(PropNames.ARCHIVE_ID, info.archiveId);
     topLevelProps.put(PropNames.DEPOSIT_CREATION_DATE, "20240111");
-    topLevelProps.put(PropNames.USER_FS_RETRIEVE_MAX_ATTEMPTS, "10");
-    topLevelProps.put(PropNames.USER_FS_RETRIEVE_DELAY_MS_1, "60000");
-    topLevelProps.put(PropNames.USER_FS_RETRIEVE_DELAY_MS_2, "300000");
+    topLevelProps.put(PropNames.USER_FS_RETRY_MAX_ATTEMPTS, "10");
+    topLevelProps.put(PropNames.USER_FS_RETRY_DELAY_MS_1, "60000");
+    topLevelProps.put(PropNames.USER_FS_RETRY_DELAY_MS_2, "300000");
     Instant testInstant = LocalDate.of(2024, 1, 11)
             .atStartOfDay(ZoneOffset.UTC)
             .toInstant();
@@ -69,7 +69,7 @@ public class DepositEvents {
 
     retrieve.setProperties(topLevelProps);
     retrieve.setTarIV(info.tarIV);
-    retrieve.setArchiveFileStores(Collections.singletonList(getArchiveStoreForRetrieve()));
+    retrieve.setArchiveFileStores(List.of(getArchiveStoreForRetrieve()));
     //CHUNKS
     retrieve.setChunkFilesDigest(info.chunkDigests);
     retrieve.setEncChunksDigest(info.chunkEncDigests);

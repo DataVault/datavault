@@ -3,20 +3,17 @@ package org.datavaultplatform.webapp.services;
 import static org.datavaultplatform.common.util.Constants.HEADER_CLIENT_KEY;
 
 import lombok.extern.slf4j.Slf4j;
+import org.datavaultplatform.common.dto.PausedDepositStateDTO;
+import org.datavaultplatform.common.dto.PausedRetrieveStateDTO;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.request.*;
 import org.datavaultplatform.common.response.*;
 import org.datavaultplatform.common.util.Constants;
 import org.datavaultplatform.common.util.DateTimeUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -26,6 +23,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * User: Robin Taylor
@@ -36,8 +34,6 @@ import java.util.Optional;
 @Profile("!standalone")
 @Slf4j
 public class RestService implements NotifyLogoutService, NotifyLoginService, EvaluatorService {
-
-    private static final Logger logger = LoggerFactory.getLogger(RestService.class);
 
     private final String brokerURL;
     private final String brokerApiKey;
@@ -82,7 +78,7 @@ public class RestService implements NotifyLogoutService, NotifyLoginService, Eva
             throw new IllegalArgumentException("REST method not implemented!");
         }
 
-        logger.debug("Calling Broker with url:" + url + " Method:" + method);
+        log.debug("Calling Broker with url:{} Method:{}", url, method);
 
         // todo : check the http status code before returning?
 
@@ -173,11 +169,11 @@ public class RestService implements NotifyLogoutService, NotifyLoginService, Eva
             parameters.append("filepath=").append(filePath).append("&");
         }
 
-        logger.debug("parameters: " + parameters);
+        log.debug("parameters: {}", parameters);
 
         ResponseEntity<DepositSize> response = get(brokerURL + "/checkdepositsize" + parameters, DepositSize.class);
 
-        logger.debug("return: " + response.getBody());
+        log.debug("return: {}", response.getBody());
 
         return response.getBody();
     }
@@ -541,9 +537,9 @@ public class RestService implements NotifyLogoutService, NotifyLoginService, Eva
     }
 
     public ArchiveStore addArchiveStore(ArchiveStore archiveStore) {
-        logger.debug("Post request to broker");
+        log.debug("Post request to broker");
         ResponseEntity<ArchiveStore> response = post(brokerURL + "/admin/archivestores/", ArchiveStore.class, archiveStore);
-        logger.debug("Done");
+        log.debug("Done");
         return response.getBody();
     }
 
@@ -714,7 +710,7 @@ public class RestService implements NotifyLogoutService, NotifyLoginService, Eva
     }
 
     public VaultInfo updateVaultReviewDate(String vaultId, Date reviewDate) {
-        String reviewDateString = DateTimeUtils.formatDateBasicISO(reviewDate);
+        String reviewDateString = DateTimeUtils.formatDate(reviewDate);
         ResponseEntity<VaultInfo> response = post(brokerURL + "/vaults/" + vaultId + "/updatereviewdate", VaultInfo.class, reviewDateString);
         return response.getBody();
     }
@@ -741,11 +737,11 @@ public class RestService implements NotifyLogoutService, NotifyLoginService, Eva
     }
 
     public List<PermissionModel> getSchoolPermissions() {
-        return Arrays.asList(get(brokerURL + "/permissions/school", PermissionModel[].class).getBody());
+        return List.of(get(brokerURL + "/permissions/school", PermissionModel[].class).getBody());
     }
 
     public List<PermissionModel> getVaultPermissions() {
-        return Arrays.asList(get(brokerURL + "/permissions/vault", PermissionModel[].class).getBody());
+        return List.of(get(brokerURL + "/permissions/vault", PermissionModel[].class).getBody());
     }
 
     public Optional<RoleModel> getRole(long id) {
@@ -757,19 +753,19 @@ public class RestService implements NotifyLogoutService, NotifyLoginService, Eva
     }
 
     public List<RoleModel> getEditableRoles() {
-        return Arrays.asList(get(brokerURL + "/permissions/roles", RoleModel[].class).getBody());
+        return List.of(get(brokerURL + "/permissions/roles", RoleModel[].class).getBody());
     }
 
     public List<RoleModel> getViewableRoles() {
-        return Arrays.asList(get(brokerURL + "/permissions/roles/readOnly", RoleModel[].class).getBody());
+        return List.of(get(brokerURL + "/permissions/roles/readOnly", RoleModel[].class).getBody());
     }
 
     public List<RoleModel> getSchoolRoles() {
-        return Arrays.asList(get(brokerURL + "/permissions/roles/school", RoleModel[].class).getBody());
+        return List.of(get(brokerURL + "/permissions/roles/school", RoleModel[].class).getBody());
     }
 
     public List<RoleModel> getVaultRoles() {
-        return Arrays.asList(get(brokerURL + "/permissions/roles/vault", RoleModel[].class).getBody());
+        return List.of(get(brokerURL + "/permissions/roles/vault", RoleModel[].class).getBody());
     }
 
     public Optional<RoleAssignment> getRoleAssignment(Long id) {
@@ -777,19 +773,19 @@ public class RestService implements NotifyLogoutService, NotifyLoginService, Eva
     }
 
     public List<RoleAssignment> getRoleAssignmentsForSchool(String schoolId) {
-        return Arrays.asList(get(brokerURL + "/permissions/roleAssignments/school/" + schoolId, RoleAssignment[].class).getBody());
+        return List.of(get(brokerURL + "/permissions/roleAssignments/school/" + schoolId, RoleAssignment[].class).getBody());
     }
 
     public List<RoleAssignment> getRoleAssignmentsForVault(String vaultId) {
-        return Arrays.asList(get(brokerURL + "/permissions/roleAssignments/vault/" + vaultId, RoleAssignment[].class).getBody());
+        return List.of(get(brokerURL + "/permissions/roleAssignments/vault/" + vaultId, RoleAssignment[].class).getBody());
     }
 
     public List<RoleAssignment> getRoleAssignmentsForUser(String userId) {
-        return Arrays.asList(get(brokerURL + "/permissions/roleAssignments/user/" + userId, RoleAssignment[].class).getBody());
+        return List.of(get(brokerURL + "/permissions/roleAssignments/user/" + userId, RoleAssignment[].class).getBody());
     }
 
     public List<RoleAssignment> getRoleAssignmentsForRole(long roleId) {
-        return Arrays.asList(get(brokerURL + "/permissions/roleAssignments/role/" + roleId, RoleAssignment[].class).getBody());
+        return List.of(get(brokerURL + "/permissions/roleAssignments/role/" + roleId, RoleAssignment[].class).getBody());
     }
 
     public RoleModel updateRole(RoleModel role) {
@@ -848,15 +844,63 @@ public class RestService implements NotifyLogoutService, NotifyLoginService, Eva
             parameters.append("filepath=").append(filePath).append("&");
         }
 
-        logger.info("parameters: " + parameters);
+        log.info("parameters: {}", parameters);
 
         ResponseEntity<String> response = get(brokerURL + "/sizeofselectedfiles" + parameters, String.class);
 
-        logger.info("return: " + response.getBody());
+        log.info("return: {}", response.getBody());
 
         return response.getBody();
     }
 
+    public PausedRetrieveStateDTO getCurrentRetrievePausedState() {
+        ResponseEntity<PausedRetrieveStateDTO> response = get(brokerURL + "/admin/paused/retrieve/state", PausedRetrieveStateDTO.class);
+        return response.getBody();
+    }
+    
+    public PausedDepositStateDTO getCurrentDepositPausedState() {
+        ResponseEntity<PausedDepositStateDTO> response = get(brokerURL + "/admin/paused/deposit/state", PausedDepositStateDTO.class);
+        return response.getBody();
+    }
+    
+    public List<PausedRetrieveStateDTO> getPausedRetrieveStateHistory(Integer limit) {
+        String requestURL = brokerURL + "/admin/paused/retrieve/history";
+        if (limit != null) {
+            requestURL += "/" + limit;
+        }
+        ResponseEntity<PausedRetrieveStateDTO[]> response = get(requestURL, PausedRetrieveStateDTO[].class);
+        PausedRetrieveStateDTO[] data = response.getBody();
+        return Arrays.stream(data).collect(Collectors.toList());
+    }
+    
+    public List<PausedDepositStateDTO> getPausedDepositStateHistory(Integer limit) {
+        String requestURL = brokerURL + "/admin/paused/deposit/history";
+        if (limit != null) {
+            requestURL += "/" + limit;
+        }
+        ResponseEntity<PausedDepositStateDTO[]> response = get(requestURL, PausedDepositStateDTO[].class);
+        PausedDepositStateDTO[] data = response.getBody();
+        return Arrays.stream(data).collect(Collectors.toList());
+    }
 
+    public void toggleDepositPausedState() {
+        ResponseEntity<?> response = post(brokerURL + "/admin/paused/deposit/toggle",Void.class,null);
+        HttpStatusCode code = response.getStatusCode();
+        if(!code.is2xxSuccessful()){
+            String msg = "Expected 200 status code, got [%s]".formatted(code.value());
+            log.error(msg);
+            throw new RuntimeException(msg);
+        }
+    }
+    
+    public void toggleRetrievePausedState() {
+        ResponseEntity<?> response = post(brokerURL + "/admin/paused/retrieve/toggle",Void.class,null);
+        HttpStatusCode code = response.getStatusCode();
+        if(!code.is2xxSuccessful()){
+            String msg = "Expected 200 status code, got [%s]".formatted(code.value());
+            log.error(msg);
+            throw new RuntimeException(msg);
+        }
+    }
 
 }

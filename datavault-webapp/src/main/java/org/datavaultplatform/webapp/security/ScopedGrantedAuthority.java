@@ -1,5 +1,6 @@
 package org.datavaultplatform.webapp.security;
 
+import lombok.ToString;
 import org.datavaultplatform.common.model.Group;
 import org.datavaultplatform.common.model.Permission;
 import org.datavaultplatform.common.model.PermissionModel;
@@ -13,6 +14,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@ToString
 public class ScopedGrantedAuthority implements GrantedAuthority {
 
     private final Class<?> type;
@@ -27,7 +29,7 @@ public class ScopedGrantedAuthority implements GrantedAuthority {
 
     @Override
     public String getAuthority() {
-        return null;
+        return "n/a";
     }
 
     public Serializable getId() {

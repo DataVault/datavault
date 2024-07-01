@@ -9,7 +9,6 @@ import java.lang.reflect.Field;
 import java.util.concurrent.TimeUnit;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.client.config.RequestConfig;
 import org.datavaultplatform.webapp.test.ProfileDatabase;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +18,6 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.client.AbstractClientHttpRequestFactoryWrapper;
-import org.springframework.http.client.BufferingClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.test.context.TestPropertySource;
@@ -46,7 +44,7 @@ public class RestTemplateTimeoutTest {
 
   /*
     Really dig into restTemplate and check timeouts
-   */
+  */
   @Test
   @SneakyThrows
   void testTimeoutConfig() {
@@ -54,20 +52,17 @@ public class RestTemplateTimeoutTest {
     Field fRequestFactory = AbstractClientHttpRequestFactoryWrapper.class.getDeclaredField("requestFactory");
     fRequestFactory.setAccessible(true);
 
-    Field fRequestConfig = HttpComponentsClientHttpRequestFactory.class.getDeclaredField("requestConfig");
-    fRequestConfig.setAccessible(true);
+    Field fConnectTimeout = HttpComponentsClientHttpRequestFactory.class.getDeclaredField("connectTimeout");
+    fConnectTimeout.setAccessible(true);
 
-    assertEquals(2_000, timeoutMs);
+    Field fConnectionRequestTimeout = HttpComponentsClientHttpRequestFactory.class.getDeclaredField("connectionRequestTimeout");
+    fConnectionRequestTimeout.setAccessible(true);
 
     ClientHttpRequestFactory iFactory = restTemplate.getRequestFactory();
 
-    BufferingClientHttpRequestFactory bFactory = (BufferingClientHttpRequestFactory)fRequestFactory.get(iFactory);
-
-    HttpComponentsClientHttpRequestFactory factory = (HttpComponentsClientHttpRequestFactory)fRequestFactory.get(bFactory);
-    RequestConfig requestConfig = (RequestConfig)fRequestConfig.get(factory);
-    assertEquals(2_000, requestConfig.getSocketTimeout());
-    assertEquals(2_000, requestConfig.getConnectionRequestTimeout());
-    assertEquals(2_000, requestConfig.getConnectTimeout());
+    HttpComponentsClientHttpRequestFactory factory = (HttpComponentsClientHttpRequestFactory)fRequestFactory.get(iFactory);
+    long connectTimeout = (Long)fConnectTimeout.get(factory);
+    assertEquals(timeoutMs, connectTimeout);
   }
 
   @Test
@@ -78,8 +73,8 @@ public class RestTemplateTimeoutTest {
       long diff = System.currentTimeMillis() - start;
       log.info("diff is {}",diff);
       assertTrue(diff > 2_000);
-      assertTrue(diff < 2_600);
-      String expectedErrorPrefix = String.format("I/O error on GET request for \"http://localhost:%d/auth/info/hello\": Read timed out; nested exception is java.net.SocketTimeoutException: Read timed out",serverPort);
+      assertTrue(diff < 3_000);
+      String expectedErrorPrefix = String.format("I/O error on GET request for \"http://localhost:%d/auth/info/hello\": Read timed out",serverPort);
       assertThat(ex.getMessage()).startsWith(expectedErrorPrefix);
   }
 

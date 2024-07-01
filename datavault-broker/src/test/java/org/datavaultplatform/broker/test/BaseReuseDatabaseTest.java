@@ -3,7 +3,7 @@ package org.datavaultplatform.broker.test;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.util.List;
-import java.util.stream.Collectors;
+
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.initialise.InitialiseDatabase;
 import org.datavaultplatform.common.docker.DockerImage;
@@ -31,7 +31,7 @@ public abstract class BaseReuseDatabaseTest  {
 
   // This container is once per class - not once per method. Methods can 'dirty' the database.
 
-  static MariaDBContainer mariadb = new MariaDBContainer<>(DockerImage.MARIADB_IMAGE).withReuse(true);
+  static final MariaDBContainer<?> mariadb = new MariaDBContainer<>(DockerImage.MARIADB_IMAGE).withReuse(true);
   @Autowired
   InitialiseDatabase initialiseDatabase;
 
@@ -83,9 +83,10 @@ public abstract class BaseReuseDatabaseTest  {
     String SQL_2 = "show tables";
     List<String> tableNames = template.query(SQL_2,
         (rs, rowNum) -> rs.getString(1));
-    return tableNames.stream().filter(name ->  !name.equalsIgnoreCase("hibernate_sequence")).collect(Collectors.toList());
+    return tableNames.stream().filter(name ->  !name.equalsIgnoreCase("hibernate_sequence")).toList();
   }
 
+  @SuppressWarnings("SqlSourceToSinkFlow")
   void emptyTable(String tableName) {
     try {
       template.execute(String.format("delete from %s", tableName));
@@ -95,6 +96,7 @@ public abstract class BaseReuseDatabaseTest  {
     }
   }
 
+  @SuppressWarnings("SqlSourceToSinkFlow")
   public boolean allEmpty(List<String> tableNames) {
     for (String tableName : tableNames) {
       long count = template.queryForObject("select count(*) from " + tableName, Long.class);

@@ -3,7 +3,7 @@ package org.datavaultplatform.webapp.app.setup;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 import org.datavaultplatform.webapp.test.ProfileStandalone;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

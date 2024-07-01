@@ -1,10 +1,13 @@
 package org.datavaultplatform.webapp.controllers;
 
 
+import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.model.Job;
 import org.datavaultplatform.common.model.Retrieve;
 import org.datavaultplatform.common.request.CreateDeposit;
 import org.datavaultplatform.common.response.DepositInfo;
+import org.datavaultplatform.webapp.security.UsesDepositsPaused;
+import org.datavaultplatform.webapp.security.UsesRetrievesPaused;
 import org.datavaultplatform.webapp.services.RestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -21,10 +24,13 @@ import java.util.UUID;
  * Time: 13:32
  */
 
+@Slf4j
 @Controller
 @ConditionalOnBean(RestService.class)
 public class DepositsController {
 
+    private static final String HAS_PERMISSION_TO_RETRIEVE = "(hasPermission(#vaultID, 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') or hasPermission(#vaultID, 'GROUP_VAULT', 'CAN_RETRIEVE_DATA'))            and (hasRole('IS_ADMIN') or (!@permissionsService.retrievesPaused()))";
+    private static final String HAS_PERMISSION_TO_DEPOSIT  = "(hasPermission(#vaultID, 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') or hasPermission(#vaultID, 'GROUP_VAULT', 'MANAGE_SCHOOL_VAULT_DEPOSITS')) and (hasRole('IS_ADMIN') or (!@permissionsService.depositsPaused()))";
     private final RestService restService;
 
     @Autowired
@@ -49,20 +55,18 @@ public class DepositsController {
     }
 
     // Process the completed 'create new deposit' page
-    @RequestMapping(value = "/vaults/{vaultid}/deposits/create", method = RequestMethod.POST)
-    @PreAuthorize("hasPermission(#vaultID, 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') or hasPermission(#vaultID, 'GROUP_VAULT', 'MANAGE_SCHOOL_VAULT_DEPOSITS')")
-    public String addDeposit(@ModelAttribute CreateDeposit deposit, ModelMap model,
-                             @PathVariable("vaultid") String vaultID, @RequestParam String action) throws Exception {
-        // Was the cancel button pressed?
-        if ("cancel".equals(action)) {
-            return "redirect:/vaults/" + vaultID;
-        }
+    // templates/deposits/create.html
+    @UsesDepositsPaused
+    @PostMapping("/vaults/{vaultid}/deposits/create")
+    @PreAuthorize(HAS_PERMISSION_TO_DEPOSIT)
+    public String createAndAddDeposit(@ModelAttribute CreateDeposit deposit,
+                                      @PathVariable("vaultid") String vaultID) {
         
         // Set the Vault ID for the new deposit
         deposit.setVaultID(vaultID);
         
         // Remove personal statement if has personalstatement is false
-        if( deposit.getHasPersonalData().equals("No") ) {
+        if("No".equalsIgnoreCase(deposit.getHasPersonalData())) {
             deposit.setPersonalDataStatement("");
         }
         
@@ -106,15 +110,18 @@ public class DepositsController {
     }
     
     // Process the completed 'retrieve deposit' page
-    @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}/retrieve", method = RequestMethod.POST)
-    public String processRetrieve(@ModelAttribute Retrieve retrieve, ModelMap model,
-                                 @PathVariable("vaultid") String vaultID, @PathVariable("depositid") String depositID,
-                                 @RequestParam String action) throws Exception {
+    // templates/deposits/retrieve.html
+    @UsesRetrievesPaused
+    @PostMapping("/vaults/{vaultid}/deposits/{depositid}/retrieve")
+    @PreAuthorize(HAS_PERMISSION_TO_RETRIEVE)
+    public String processRetrieve(@ModelAttribute Retrieve retrieve,
+                                 @PathVariable("vaultid") String vaultID,
+                                 @PathVariable("depositid") String depositID
+    ) {
 
-
-        // If the cancel button wasn't pressed, perform the retrieve
-        if (!"cancel".equals(action)) {
-            Boolean result = restService.retrieveDeposit(depositID, retrieve);
+        Boolean result = restService.retrieveDeposit(depositID, retrieve);
+        if (Boolean.TRUE != result) {
+            log.warn("Failed to retrieve deposit depositID[{}]", depositID);
         }
 
         String depositUrl = "/vaults/" + vaultID + "/deposits/" + depositID + "/";

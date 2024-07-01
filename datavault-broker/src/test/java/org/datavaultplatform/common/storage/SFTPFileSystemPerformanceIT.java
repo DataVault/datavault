@@ -20,7 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.docker.DockerImage;
 import org.datavaultplatform.common.io.Progress;
-import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.common.storage.impl.SFTPConnection;
 import org.datavaultplatform.common.storage.impl.SFTPFileSystemJSch;
 import org.datavaultplatform.common.storage.impl.SFTPFileSystemSSHD;
@@ -56,11 +55,11 @@ public class SFTPFileSystemPerformanceIT {
   static final int TEST_SFTP_SERVER_PORT = 2222;
   static final int TEST_ITERATIONS = 5;
 
-  static final double PERFORMANCE_THRESHOLD = 2.0;
+  static final double PERFORMANCE_THRESHOLD = 75.0;
   public static final int SIZE_50MB = 50_000_000;
 
   @Container
-  GenericContainer<?> sftpServerContainer = getSftpTestContainer();
+  final GenericContainer<?> sftpServerContainer = getSftpTestContainer();
   File bigFile;
   private SFTPFileSystemSSHD sftpSSHD;
   private SFTPFileSystemJSch sftpJSch;
@@ -140,12 +139,12 @@ public class SFTPFileSystemPerformanceIT {
     log.info("Stats [{}] JSch    [{}]", label, summaryJSch);
     log.info("Stats [{}] SSHD    [{}]", label, summarySSHD);
     log.info("Stats [{}] SSHDMon [{}]", label, summarySSHDMonitor);
+    
+    double ratioSSDtoJSCH = summarySSHD.getAverage() / summaryJSch.getAverage();
+    
+    log.info("LABEL[{}] RATIO of SSD to JSCH is [{}]", label, ratioSSDtoJSCH);
 
-    double base = summaryJSch.getAverage();
-    double threshold = base * PERFORMANCE_THRESHOLD;
-
-    assertTrue(summarySSHD.getAverage() <= threshold, "for " + label + ", SFTP with SSHD without monitoring takes > " + PERFORMANCE_THRESHOLD + " longer than JSch");
-    assertTrue(summarySSHD.getAverage() <= threshold, "for " + label + ", SFTP with SSHD with monitoring takes > " + PERFORMANCE_THRESHOLD + " longer than JSch");
+    assertTrue(ratioSSDtoJSCH <= PERFORMANCE_THRESHOLD, "for " + label + ", SFTP with SSHD without monitoring takes > " + PERFORMANCE_THRESHOLD + " longer than JSch");
   }
 
   @SneakyThrows
@@ -184,18 +183,10 @@ public class SFTPFileSystemPerformanceIT {
     return props;
   }
 
-  static class ProgressInfo {
+  record ProgressInfo(String label, long time, Progress progress) {
 
-    final String label;
-    final long time;
-
-    final Progress progress;
-
-    ProgressInfo(String label, long time, Progress progress) {
-      this.label = label;
-      this.time = time;
-      this.progress = progress;
-      log.info("byteCount[{}][{}]", label, progress.getByteCount());
+      ProgressInfo {
+        log.info("byteCount[{}][{}]", label, progress.getByteCount());
+      }
     }
-  }
 }

@@ -1,10 +1,8 @@
 package org.datavaultplatform.common.io;
 
-import static org.junit.Assert.assertEquals;
-
 
 import java.util.concurrent.atomic.AtomicReference;
-import org.junit.jupiter.api.Assertions;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -41,7 +39,7 @@ public class ProgressEventListenerTest {
     lastProgressEvent.set(null);
     runnable.run();
     ProgressEvent lastEvent = this.lastProgressEvent.get();
-    Assertions.assertEquals(expectedType, lastEvent.getType());
-    Assertions.assertEquals(expectedValue, lastEvent.getValue());
+    assertEquals(expectedType, lastEvent.getType());
+    assertEquals(expectedValue, lastEvent.getValue());
   }
 }

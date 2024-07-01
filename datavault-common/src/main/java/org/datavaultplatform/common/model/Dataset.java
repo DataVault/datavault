@@ -3,7 +3,7 @@ package org.datavaultplatform.common.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.Objects;
-import javax.persistence.*;
+import jakarta.persistence.*;
 import org.hibernate.Hibernate;
 
 @JsonIgnoreProperties(ignoreUnknown = true)

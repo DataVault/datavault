@@ -9,7 +9,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import java.util.Arrays;
+import java.util.List;
 import org.datavaultplatform.broker.controllers.FileStoreController;
 import org.datavaultplatform.common.model.FileStore;
 import org.junit.jupiter.api.AfterEach;
@@ -99,11 +99,11 @@ public class FileStoreControllerAuthTest extends BaseControllerAuthTest {
   @Test
   void testGetFileStores() {
     when(controller.getFileStores(USER_ID_1)).thenReturn(
-        ResponseEntity.ok(Arrays.asList(AuthTestData.FILESTORE_1, AuthTestData.FILESTORE_2)));
+        ResponseEntity.ok(List.of(AuthTestData.FILESTORE_1, AuthTestData.FILESTORE_2)));
 
     checkWorksWhenAuthenticatedFailsOtherwise(
         get("/filestores"),
-        Arrays.asList(AuthTestData.FILESTORE_1, AuthTestData.FILESTORE_2));
+        List.of(AuthTestData.FILESTORE_1, AuthTestData.FILESTORE_2));
 
     verify(controller).getFileStores(USER_ID_1);
   }
@@ -111,11 +111,11 @@ public class FileStoreControllerAuthTest extends BaseControllerAuthTest {
   @Test
   void testGetFileStoresLocal() {
     when(controller.getFileStoresLocal(USER_ID_1)).thenReturn(
-        ResponseEntity.ok(Arrays.asList(AuthTestData.FILESTORE_1, AuthTestData.FILESTORE_2)));
+        ResponseEntity.ok(List.of(AuthTestData.FILESTORE_1, AuthTestData.FILESTORE_2)));
 
     checkWorksWhenAuthenticatedFailsOtherwise(
         get("/filestores/local"),
-        Arrays.asList(AuthTestData.FILESTORE_1, AuthTestData.FILESTORE_2));
+        List.of(AuthTestData.FILESTORE_1, AuthTestData.FILESTORE_2));
 
     verify(controller).getFileStoresLocal(USER_ID_1);
   }
@@ -123,11 +123,11 @@ public class FileStoreControllerAuthTest extends BaseControllerAuthTest {
   @Test
   void testGetFileStoresSFTP() {
     when(controller.getFileStoresSFTP(USER_ID_1)).thenReturn(
-        ResponseEntity.ok(Arrays.asList(AuthTestData.FILESTORE_1, AuthTestData.FILESTORE_2)));
+        ResponseEntity.ok(List.of(AuthTestData.FILESTORE_1, AuthTestData.FILESTORE_2)));
 
     checkWorksWhenAuthenticatedFailsOtherwise(
         get("/filestores/sftp"),
-        Arrays.asList(AuthTestData.FILESTORE_1, AuthTestData.FILESTORE_2));
+        List.of(AuthTestData.FILESTORE_1, AuthTestData.FILESTORE_2));
 
     verify(controller).getFileStoresSFTP(USER_ID_1);
   }

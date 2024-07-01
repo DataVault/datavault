@@ -13,7 +13,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
-import java.util.Arrays;
+import java.util.List;
 import org.datavaultplatform.broker.controllers.GroupsController;
 import org.datavaultplatform.common.model.Group;
 import org.junit.jupiter.api.Test;
@@ -119,22 +119,22 @@ public class GroupsControllerAuthTest extends BaseControllerAuthTest {
   @Test
   void testGetGroupVaults() {
     when(controller.getGroupVaults(USER_ID_1, "group-id-abc")).thenReturn(
-        Arrays.asList(VAULT_INFO_1, VAULT_INFO_2));
+        List.of(VAULT_INFO_1, VAULT_INFO_2));
 
     checkWorksWhenAuthenticatedFailsOtherwise(
         get("/groups/{groupid}/vaults", "group-id-abc"),
-        Arrays.asList(VAULT_INFO_1, VAULT_INFO_2));
+        List.of(VAULT_INFO_1, VAULT_INFO_2));
 
     verify(controller).getGroupVaults(USER_ID_1, "group-id-abc");
   }
 
   @Test
   void testGetGroups() {
-    when(controller.getGroups(USER_ID_1)).thenReturn(Arrays.asList(GROUP_1, GROUP_2));
+    when(controller.getGroups(USER_ID_1)).thenReturn(List.of(GROUP_1, GROUP_2));
 
     checkWorksWhenAuthenticatedFailsOtherwise(
         get("/groups"),
-        Arrays.asList(GROUP_1, GROUP_2));
+        List.of(GROUP_1, GROUP_2));
 
     verify(controller).getGroups(USER_ID_1);
   }
@@ -142,11 +142,11 @@ public class GroupsControllerAuthTest extends BaseControllerAuthTest {
   @Test
   void testGetGroupsByScopedPermissions() {
     when(controller.getGroupsByScopedPermissions(USER_ID_1)).thenReturn(
-        Arrays.asList(GROUP_1, GROUP_2));
+        List.of(GROUP_1, GROUP_2));
 
     checkWorksWhenAuthenticatedFailsOtherwise(
         get("/groups/byScopedPermissions"),
-        Arrays.asList(GROUP_1, GROUP_2));
+        List.of(GROUP_1, GROUP_2));
 
     verify(controller).getGroupsByScopedPermissions(USER_ID_1);
   }

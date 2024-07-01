@@ -6,7 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import java.util.Arrays;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.controllers.UsersController;
 import org.junit.jupiter.api.AfterEach;
@@ -23,11 +23,11 @@ public class UsersControllerAuthTest extends BaseControllerAuthTest {
   @Test
   void testGetUsers() {
     when(controller.getUsers(USER_ID_1)).thenReturn(
-        Arrays.asList(AuthTestData.USER_1, AuthTestData.USER_2));
+        List.of(AuthTestData.USER_1, AuthTestData.USER_2));
 
     checkWorksWhenAuthenticatedFailsOtherwise(
         get("/users"),
-        Arrays.asList(AuthTestData.USER_1, AuthTestData.USER_2));
+        List.of(AuthTestData.USER_1, AuthTestData.USER_2));
 
     verify(controller).getUsers(USER_ID_1);
   }

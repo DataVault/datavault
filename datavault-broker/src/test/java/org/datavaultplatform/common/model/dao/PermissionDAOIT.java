@@ -149,8 +149,8 @@ public class PermissionDAOIT extends BaseDatabaseTest {
 
   void checkSamePermissionModelIds(Collection<PermissionModel> actual, PermissionModel... expected){
     assertEquals(
-        Arrays.stream(expected).map(PermissionModel::getId).sorted().collect(Collectors.toList()),
-        actual.stream().map(PermissionModel::getId).sorted().collect(Collectors.toList()));
+        Arrays.stream(expected).map(PermissionModel::getId).sorted().toList(),
+        actual.stream().map(PermissionModel::getId).sorted().toList());
   }
 
   @BeforeEach

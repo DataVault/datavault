@@ -1,7 +1,5 @@
 package org.datavaultplatform.webapp.app;
 
-import static java.util.Collections.singletonList;
-
 import java.io.File;
 import java.util.Arrays;
 import lombok.SneakyThrows;
@@ -18,7 +16,6 @@ import org.datavaultplatform.webapp.config.SecurityActuatorConfig;
 import org.datavaultplatform.webapp.config.SecurityConfig;
 import org.datavaultplatform.webapp.config.TomcatAjpConfig;
 import org.datavaultplatform.webapp.config.WebConfig;
-import org.datavaultplatform.webapp.config.ThymeleafConfig;
 import org.datavaultplatform.webapp.config.database.DatabaseProfileConfig;
 import org.datavaultplatform.webapp.config.shib.ShibProfileConfig;
 import org.datavaultplatform.webapp.config.standalone.StandaloneProfileConfig;
@@ -43,7 +40,7 @@ import org.springframework.core.env.Environment;
 @Import({PropertiesConfig.class, WebConfig.class, MvcConfig.class, ActutatorConfig.class,
     SecurityActuatorConfig.class, SecurityConfig.class, MailConfig.class, LdapConfig.class,
         StandaloneProfileConfig.class, DatabaseProfileConfig.class,
-    ShibProfileConfig.class, RestTemplateConfig.class, TomcatAjpConfig.class, ThymeleafConfig.class})
+    ShibProfileConfig.class, RestTemplateConfig.class, TomcatAjpConfig.class})
 @Slf4j
 public class DataVaultWebApp implements CommandLineRunner {
 

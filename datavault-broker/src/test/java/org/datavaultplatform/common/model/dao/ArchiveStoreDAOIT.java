@@ -44,6 +44,7 @@ public class ArchiveStoreDAOIT extends BaseDatabaseTest {
 
     dao.save(archiveStore1);
     assertNotNull(archiveStore1.getID());
+    UUIDUtils.assertIsUUID(archiveStore1.getID());
     assertEquals(1, count());
 
     dao.save(archiveStore2);
@@ -95,7 +96,9 @@ public class ArchiveStoreDAOIT extends BaseDatabaseTest {
   @Test
   void testArchiveStorePropertiesBLOB() {
     ArchiveStore store = getArchiveStoreWithProperties();
+    assertNull(store.getID());
     dao.save(store);
+    assertNotNull(store.getID());
 
     ArchiveStore found = dao.findById(store.getID()).get();
 
@@ -131,6 +134,10 @@ public class ArchiveStoreDAOIT extends BaseDatabaseTest {
     ArchiveStore archiveStore = new ArchiveStore();
     archiveStore.setLabel("222");
     archiveStore.setRetrieveEnabled(true);
+    archiveStore.getProperties().put("key-1", "value-1");
+    archiveStore.getProperties().put("key-2", "value-2");
+    archiveStore.getProperties().put("key-3", null);
+    archiveStore.getProperties().put(null, "TEST");
     return archiveStore;
   }
 

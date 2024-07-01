@@ -65,4 +65,19 @@ public class PermissionsService {
                         && roleAssignment.getVaultId() == null;
         return isAdminPermission || isSchoolPermissionOnGlobalAdminRole || isVaultPermissionOnGlobalAdminRole;
     }
+
+    public boolean depositsPaused() {
+        return areDepositsPaused();
+    }
+
+    public boolean retrievesPaused() {
+        return areRetrievesPaused();
+    }
+
+    private boolean areDepositsPaused() {
+        return restService.getCurrentDepositPausedState().isPaused();
+    }
+    private boolean areRetrievesPaused() {
+        return restService.getCurrentRetrievePausedState().isPaused();
+    }
 }

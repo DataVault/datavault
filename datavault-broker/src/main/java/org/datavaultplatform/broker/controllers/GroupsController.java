@@ -242,7 +242,7 @@ public class GroupsController {
 
         Group group = groupsService.getGroup(groupID);
         // Only attempt to delete if there are no associated vaults or group owners
-        if ((group.getVaults().size() == 0) && (group.getOwners().size() == 0)) {
+        if ((group.getVaults().isEmpty()) && (group.getOwners().isEmpty())) {
             groupsService.deleteGroup(group);
             return true;
         }

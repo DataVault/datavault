@@ -8,11 +8,12 @@
     <module>datavault-webapp</module>
     <module>datavault-broker</module>
     <module>datavault-worker</module>
+    <module>datavault-report</module>
   </modules>
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>2.7.6</version>
+    <version>3.3.0</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
 
@@ -28,62 +29,108 @@
 
   <properties>
     <!-- general -->
-    <java.version>1.8</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <skip.git.commit>false</skip.git.commit>
     <skip.unit.tests>false</skip.unit.tests>
     <skip.integration.tests>false</skip.integration.tests>
-
+    <surefire.plugin.version>3.2.5</surefire.plugin.version>
+    <failsafe.plugin.version>3.2.5</failsafe.plugin.version>
+    <jacoco.plugin.version>0.8.12</jacoco.plugin.version>
+    
     <!-- dependency versions -->
-    <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-bom -->
-    <aws.java.sdk.bom.version>1.12.334</aws.java.sdk.bom.version>
 
+    <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-bom -->
+    <aws.java.sdk.bom.version>1.12.728</aws.java.sdk.bom.version>
+
+    <!-- https://mvnrepository.com/artifact/org.springframework.retry/spring-retry -->
+    <spring.retry.version>2.0.6</spring.retry.version>
+
+    <!-- https://mvnrepository.com/artifact/org.owasp/dependency-check-maven -->
+    <owasp.dependency.check.version>9.2.0</owasp.dependency.check.version>
+
+    <!-- https://mvnrepository.com/artifact/org.testcontainers/testcontainers -->
+    <testcontainers.version>1.19.8</testcontainers.version>
+
+    <!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
+    <mockito.version>5.12.0</mockito.version>
+
+    <!-- above here, updated 23may2024 -->
+    
+    <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core -->
+    <jackson.version>2.17.1</jackson.version>
+
+    <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
+    <guava.version>33.2.0-jre</guava.version>
+
+    <!-- https://mvnrepository.com/artifact/org.hibernate.orm/hibernate-core -->
+    <hibernate.version>6.5.2.Final</hibernate.version>
+
+    <!-- above here, updated 06may2024 -->
+
+
+    <!-- https://mvnrepository.com/artifact/org.testng/testng -->
+    <testng.version>7.10.2</testng.version>
+
+    <!-- don't change - had problems with this - we have no integration test for Oracle Device/Archive -->
     <!-- https://mvnrepository.com/artifact/com.oracle.oci.sdk/oci-java-sdk-bom -->
     <oci.java.sdk.bom.version>3.31.1</oci.java.sdk.bom.version>
 
-    <!-- https://mvnrepository.com/artifact/org.testcontainers/testcontainers -->
-    <testcontainers.version>1.17.6</testcontainers.version>
-
-    <!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-contract-stub-runner -->
-    <spring.cloud.version>3.1.5</spring.cloud.version>
-
-    <!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
-    <mockito.version>4.11.0</mockito.version>
-
-    <!-- https://mvnrepository.com/artifact/org.owasp/dependency-check-maven -->
-    <owasp.dependency.check.version>7.3.1</owasp.dependency.check.version>
-
-    <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
-    <commons.compress.version>1.24.0</commons.compress.version>
-
-    <!-- https://mvnrepository.com/artifact/org.apache.sshd/sshd-sftp -->
-    <sshd.sftp.version>2.9.3</sshd.sftp.version>
-
-    <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
-    <guava.version>32.0.0-jre</guava.version>
-
-    <!-- https://mvnrepository.com/artifact/org.springframework.retry/spring-retry -->
-    <spring.retry.version>1.3.4</spring.retry.version>
-
-    <!-- above here, updated 16nov2022-->
-
-    <!-- https://mvnrepository.com/artifact/org.apache.directory.api/api-all -->
-    <apache.directory.api.version>2.1.2</apache.directory.api.version>
+    <!-- above here, updated 30apr2024 -->
 
     <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on -->
-    <bouncy.castle.version>1.74</bouncy.castle.version>
+    <bouncy.castle.version>1.78.1</bouncy.castle.version>
+
+    <!-- above here, updated 26apr2024 -->
+
+    <!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-contract-stub-runner -->
+    <spring.cloud.version>4.1.2</spring.cloud.version>
 
     <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-text -->
-    <commons.text.version>1.10.0</commons.text.version>
+    <commons.text.version>1.12.0</commons.text.version>
+
+    <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
+    <commons.io.version>2.16.1</commons.io.version>
+
+    <!-- https://mvnrepository.com/artifact/it.burning/cron-expression-descriptor -->
+    <cron.expr.desc.version>1.2.10</cron.expr.desc.version>
+
+    <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-collections4 -->
+    <commons.collections4.version>4.5.0-M1</commons.collections4.version>
+
+    <!-- above here, updated 19Apr2024 -->
+
+    <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
+    <commons.compress.version>1.26.1</commons.compress.version>
+
+    <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-exec -->
+    <commons.exec.version>1.4.0</commons.exec.version>
+
+    <!-- https://mvnrepository.com/artifact/org.thymeleaf.extras/thymeleaf-extras-springsecurity6 -->
+    <thymeleaf.extras.version>3.1.2.RELEASE</thymeleaf.extras.version>
+
+    <!-- https://mvnrepository.com/artifact/nz.net.ultraq.thymeleaf/thymeleaf-layout-dialect -->
+    <thymeleaf.layout.version>3.3.0</thymeleaf.layout.version>
+    <!-- above here, updated 22Mar2024 -->
+
+    <!-- https://mvnrepository.com/artifact/io.github.git-commit-id/git-commit-id-maven-plugin -->
+    <git.commit.id.maven.plugin.version>8.0.2</git.commit.id.maven.plugin.version>
+
+    <!-- https://mvnrepository.com/artifact/org.apache.sshd/sshd-sftp -->
+    <sshd.sftp.version>2.12.1</sshd.sftp.version>
+
+    <!-- https://mvnrepository.com/artifact/org.apache.directory.api/api-all -->
+    <apache.directory.api.version>2.1.6</apache.directory.api.version>
 
     <!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
-    <jsoup.version>1.15.3</jsoup.version>
+    <jsoup.version>1.17.2</jsoup.version>
+
+    <!-- https://mvnrepository.com/artifact/com.jayway.jsonpath/json-path -->
+    <json-path.version>2.9.0</json-path.version>
+
+    <!-- above here, updated 21Feb2024-->
 
     <!-- https://mvnrepository.com/artifact/com.bettercloud/vault-java-driver -->
     <vault.java.driver.version>5.1.0</vault.java.driver.version>
-
-    <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
-    <commons.io.version>2.11.0</commons.io.version>
 
     <!-- https://mvnrepository.com/artifact/org.jsondoc/jsondoc-core -->
     <jsondoc.core.version>1.2.23</jsondoc.core.version>
@@ -97,33 +144,38 @@
     <!-- https://mvnrepository.com/artifact/gov.loc/bagit -->
     <bagit.version>5.2.0</bagit.version>
 
-    <!-- https://mvnrepository.com/artifact/org.testng/testng -->
-    <testng.version>7.5.1</testng.version>
-
     <!-- https://mvnrepository.com/artifact/org.apache.velocity/velocity-engine-core -->
     <velocity.version>2.3</velocity.version>
 
     <!-- https://mvnrepository.com/artifact/oro/oro -->
     <oro.version>2.0.8</oro.version>
 
-    <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-collections4 -->
-    <commons.collections4.version>4.4</commons.collections4.version>
-
-    <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-exec -->
-    <commons.exec.version>1.3</commons.exec.version>
-
-    <!-- https://mvnrepository.com/artifact/javax.interceptor/javax.interceptor-api -->
-    <javax.interceptor.version>1.2.2</javax.interceptor.version>
-
-    <!-- https://mvnrepository.com/artifact/it.burning/cron-expression-descriptor -->
-    <cron.expr.desc.version>1.2.6</cron.expr.desc.version>
-
     <!-- https://mvnrepository.com/artifact/net.i2p.crypto/eddsa -->
     <eddsa.version>0.3.0</eddsa.version>
+
+    <!-- https://mvnrepository.com/artifact/org.apache.tika/tika-core -->
+    <tika.version>2.4.1</tika.version><!-- don't change -->
   </properties>
 
   <dependencyManagement>
     <dependencies>
+      <dependency>
+        <groupId>datavault</groupId>
+        <artifactId>datavault-common</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>datavault</groupId>
+        <artifactId>datavault-common</artifactId>
+        <version>${project.version}</version>
+        <classifier>tests</classifier>
+      </dependency>
+      <dependency>
+        <groupId>com.jayway.jsonpath</groupId>
+        <artifactId>json-path</artifactId>
+        <version>${json-path.version}</version>
+        <scope>test</scope>
+      </dependency>
       <dependency>
         <groupId>org.springframework.retry</groupId>
         <artifactId>spring-retry</artifactId>
@@ -308,10 +360,61 @@
         <artifactId>eddsa</artifactId>
         <version>${eddsa.version}</version>
       </dependency>
+      <dependency>
+        <groupId>it.burning</groupId>
+        <artifactId>cron-expression-descriptor</artifactId>
+        <version>${cron.expr.desc.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-annotations</artifactId>
+        <version>${jackson.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>${jackson.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-core</artifactId>
+        <version>${jackson.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>jakarta.xml.bind</groupId>
+        <artifactId>jakarta.xml.bind-api</artifactId>
+        <version>${jakarta-xml-bind.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.tika</groupId>
+        <artifactId>tika-core</artifactId>
+        <version>${tika.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.thymeleaf.extras</groupId>
+        <artifactId>thymeleaf-extras-springsecurity6</artifactId>
+        <version>${thymeleaf.extras.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>nz.net.ultraq.thymeleaf</groupId>
+        <artifactId>thymeleaf-layout-dialect</artifactId>
+        <version>${thymeleaf.layout.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
   <dependencies>
+    <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-json -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-json</artifactId>
+    </dependency>
     <dependency>
       <groupId>org.apache.sshd</groupId>
       <artifactId>sshd-sftp</artifactId>
@@ -330,6 +433,11 @@
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-testcontainers</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
       <exclusions>
@@ -341,16 +449,15 @@
           <groupId>org.mockito</groupId>
           <artifactId>mockito-junit-jupiter</artifactId>
         </exclusion>
+          <exclusion>
+            <groupId>org.junit.vintage</groupId>
+            <artifactId>junit-vintage-engine</artifactId>
+          </exclusion>
       </exclusions>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-inline</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -368,21 +475,6 @@
       <artifactId>spring-boot-configuration-processor</artifactId>
       <optional>true</optional>
     </dependency>
-    <dependency>
-      <groupId>javax.interceptor</groupId>
-      <artifactId>javax.interceptor-api</artifactId>
-      <version>${javax.interceptor.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.oracle.oci.sdk</groupId>
-      <artifactId>oci-java-sdk-common-httpclient-jersey</artifactId>
-      <version>${oci.java.sdk.bom.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.oracle.oci.sdk</groupId>
-      <artifactId>oci-java-sdk-addons-resteasy-client-configurator</artifactId>
-      <version>${oci.java.sdk.bom.version}</version>
-    </dependency>
   </dependencies>
 
 
@@ -392,11 +484,12 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-site-plugin</artifactId>
-          <version>3.12.0</version>
+          <version>3.12.1</version>
         </plugin>
         <plugin>
-          <groupId>pl.project13.maven</groupId>
-          <artifactId>git-commit-id-plugin</artifactId>
+          <groupId>io.github.git-commit-id</groupId>
+          <artifactId>git-commit-id-maven-plugin</artifactId>
+          <version>${git.commit.id.maven.plugin.version}</version>
           <configuration>
             <offline>true</offline>
             <verbose>false</verbose>
@@ -421,12 +514,23 @@
               <goals>
                 <goal>build-info</goal>
               </goals>
+              <configuration>
+                <additionalProperties>
+                  <encoding.source>UTF-8</encoding.source>
+                  <encoding.reporting>UTF-8</encoding.reporting>
+                  <java.source>17</java.source>
+                  <java.target>17</java.target>
+                  <!--suppress UnresolvedMavenProperty -->
+                  <git.commit.id>${git.commit.id}</git.commit.id>
+                </additionalProperties>
+              </configuration>
             </execution>
           </executions>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-failsafe-plugin</artifactId>
+          <version>${failsafe.plugin.version}</version>
           <configuration>
             <skipITs>${skip.integration.tests}</skipITs>
           </configuration>
@@ -434,13 +538,10 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
+          <version>${surefire.plugin.version}</version>
           <configuration>
             <skipTests>${skip.unit.tests}</skipTests>
             <excludedGroups>slow,org.datavaultplatform.test.TSMTest</excludedGroups>
-              <systemPropertyVariables>
-                <user.language>en</user.language>
-                <user.region>GB</user.region>
-              </systemPropertyVariables>
           </configuration>
         </plugin>
         <plugin>
@@ -462,8 +563,8 @@
         <artifactId>maven-failsafe-plugin</artifactId>
       </plugin>
       <plugin>
-        <groupId>pl.project13.maven</groupId>
-        <artifactId>git-commit-id-plugin</artifactId>
+        <groupId>io.github.git-commit-id</groupId>
+        <artifactId>git-commit-id-maven-plugin</artifactId>
         <configuration>
           <skip>${skip.git.commit}</skip>
         </configuration>
@@ -520,18 +621,12 @@
           <plugin>
             <groupId>org.jacoco</groupId>
             <artifactId>jacoco-maven-plugin</artifactId>
-            <version>0.8.8</version>
+            <version>${jacoco.plugin.version}</version>
             <executions>
               <execution>
+                <id>prepare-agent</id>
                 <goals>
                   <goal>prepare-agent</goal>
-                </goals>
-              </execution>
-              <execution>
-                <id>report</id>
-                <phase>prepare-package</phase>
-                <goals>
-                  <goal>report</goal>
                 </goals>
               </execution>
             </executions>
@@ -540,6 +635,9 @@
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-compiler-plugin</artifactId>
             <configuration>
+              <source>17</source>
+              <target>17</target>
+              <release>17</release>
               <testExcludes>
                 <testExclude>**/*FT.java</testExclude>
               </testExcludes>

@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
+
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.app.DataVaultBrokerApp;
 import org.datavaultplatform.broker.test.AddTestProperties;
@@ -56,6 +56,7 @@ public class RetrieveDAOIT extends BaseReuseDatabaseTest {
 
     dao.save(retrieve1);
     assertNotNull(retrieve1.getID());
+    UUIDUtils.assertIsUUID(retrieve1.getID());
     assertEquals(1, count());
 
     dao.save(retrieve2);
@@ -124,8 +125,8 @@ public class RetrieveDAOIT extends BaseReuseDatabaseTest {
 
   void checkOrderOfRetrives(Collection<Retrieve> actual, Retrieve... expected){
     assertEquals(
-        Arrays.stream(expected).map(Retrieve::getNote).collect(Collectors.toList()),
-        actual.stream().map(Retrieve::getNote).collect(Collectors.toList()));
+        Arrays.stream(expected).map(Retrieve::getNote).toList(),
+        actual.stream().map(Retrieve::getNote).toList());
   }
 
 
@@ -274,8 +275,8 @@ public class RetrieveDAOIT extends BaseReuseDatabaseTest {
 
     //the returned Retrieves should be sorted by ascending timestamp
     assertEquals(
-        Arrays.asList(ret2.getID(), ret3.getID(), ret1.getID())
-        , dao.list("allowed").stream().map(Retrieve::getID).collect(Collectors.toList()));
+        List.of(ret2.getID(), ret3.getID(), ret1.getID())
+        , dao.list("allowed").stream().map(Retrieve::getID).toList());
   }
 
   @Test

@@ -188,14 +188,14 @@ public class VaultInfo {
         this.crisID = crisID;
     }
 
-     public VaultInfo(String id,String userName, Date creationTime, String name,  
-    		long vaultSize, Date reviewDate, Date grantEndDate, BigDecimal amountToBeBilled,BigDecimal amountBilled, String projectId, 
+     public VaultInfo(String id,String userName, Date creationTime, String name,
+    		long vaultSize, Date reviewDate, Date grantEndDate, BigDecimal amountToBeBilled,BigDecimal amountBilled, String projectId,
             String paymentDetails) {
-        this.id = id;        
-        this.userName = userName;    
+        this.id = id;
+        this.userName = userName;
         this.creationTime = creationTime;
-        this.name = name;        
-        this.vaultSize = vaultSize;        
+        this.name = name;
+        this.vaultSize = vaultSize;
         this.reviewDate = reviewDate;
         this.grantEndDate = grantEndDate;
         this.amountToBeBilled = amountToBeBilled;
@@ -203,9 +203,9 @@ public class VaultInfo {
         this.projectId = projectId;
         this.paymentDetails = paymentDetails;
     }
-    
-    public VaultInfo(String id,String userName, Date creationTime, String name,  
-    		long vaultSize, Date reviewDate,BigDecimal amountToBeBilled,BigDecimal amountBilled, String projectId, 
+
+    public VaultInfo(String id,String userName, Date creationTime, String name,
+    		long vaultSize, Date reviewDate,BigDecimal amountToBeBilled,BigDecimal amountBilled, String projectId,
             String paymentDetails) {
         this.id = id;        
         this.userName = userName;    
@@ -628,7 +628,7 @@ public class VaultInfo {
         if (this.getBillingType() != null) {
             cv.setBillingType(this.getBillingType().toString());
             cv.setSliceID(this.getSliceID());
-            
+
             if (this.getBillingType().equals(PendingVault.Billing_Type.GRANT_FUNDING)) {
                 cv.setGrantAuthoriser(this.getAuthoriser());
                 cv.setGrantSchoolOrUnit(this.getSchoolOrUnit());
@@ -654,21 +654,21 @@ public class VaultInfo {
                 cv.setBudgetSubunit(this.getSubunit());
                 cv.setProjectTitle(this.getProjectTitle());
                 cv.setPaymentDetails(this.paymentDetails);
-                
+
                 if (this.getGrantEndDate() != null) {
                     cv.setBillingGrantEndDate(this.getGrantEndDate());
                     cv.setGrantEndDate(this.getGrantEndDate());
                 }
             }
-            
+
             if (this.getBillingType().equals(PendingVault.Billing_Type.FEEWAIVER)) {
                // TBD
             }
-            
+
             if (this.getBillingType().equals(PendingVault.Billing_Type.BUY_NEW_SLICE)) {
                 // TBD
              }
-            
+
             if (this.getBillingType().equals(PendingVault.Billing_Type.FUNDING_NO_OR_DO_NOT_KNOW)) {
                 // TBD
             }
@@ -694,10 +694,7 @@ public class VaultInfo {
         // if vault owner is null set isowner to true
         // if vault owner is the same as the logged in user set isowner to true
         // if vault owner is different ot hte logged in user set to false
-        boolean isOwner = true;
-        if (this.getOwnerId() != null && ! this.getOwnerId().equals(this.getUserID())) {
-            isOwner = false;
-        }
+        boolean isOwner = this.getOwnerId() == null || this.getOwnerId().equals(this.getUserID());
         cv.setIsOwner(isOwner);
         cv.setVaultOwner(this.getOwnerId());
         cv.setNominatedDataManagers(this.getNominatedDataManagerIds());
@@ -711,7 +708,7 @@ public class VaultInfo {
         // Billing page checkbox information
         if (this.getSliceQueryChoice() != null) {
             cv.setSliceQueryChoice(this.getSliceQueryChoice().toString());
-        } 
+        }
         if (this.getFundingQueryChoice() != null) {
             cv.setFundingQueryChoice(this.getFundingQueryChoice().toString());
         }

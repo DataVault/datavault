@@ -4,10 +4,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.Objects;
 import org.hibernate.Hibernate;
-import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.UuidGenerator;
 import org.jsondoc.core.annotation.ApiObject;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiObject(name = "DataCreator")
@@ -29,8 +29,7 @@ public class DataCreator {
     public static final String EG_DATA_CREATOR = "eg.DataCreator.1";
     // PDC Identifier
     @Id
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid2")
+    @UuidGenerator
     @Column(name = "id", unique = true, length = 36)
     private String id;
 

@@ -61,7 +61,7 @@ public class DecryptedTarBuilder {
   public static List<Integer> getNumbersInRange(int start, int end) {
     return IntStream.rangeClosed(start, end)
         .boxed()
-        .collect(Collectors.toList());
+        .toList();
   }
 
   public static void main(String[] args) throws Exception {
@@ -271,7 +271,7 @@ public class DecryptedTarBuilder {
         new BufferedInputStream(Files.newInputStream(finalTar.toPath())))) {
       TarArchiveEntry entry;
       int count = 1;
-      while ((entry = (TarArchiveEntry) tis.getNextEntry()) != null) {
+      while ((entry = tis.getNextEntry()) != null) {
         if (entry.isDirectory()) {
           continue;
         }
@@ -334,7 +334,7 @@ public class DecryptedTarBuilder {
     List<ChunkFileInfo> chunkFiles = Arrays.stream(tarFiles)
         .map(ChunkFileInfo::new)
         .sorted(Comparator.comparing(ChunkFileInfo::getChunkNumber))
-        .collect(Collectors.toList());
+        .toList();
 
     Set<String> tarNames = chunkFiles
         .stream().map(ChunkFileInfo::getPrefix)

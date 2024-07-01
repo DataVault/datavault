@@ -3,17 +3,22 @@ package org.datavaultplatform.common.io;
 import java.io.File;
 import java.io.IOException;
 import java.math.RoundingMode;
+import java.nio.file.Files;
+import java.nio.file.attribute.PosixFileAttributeView;
+import java.nio.file.attribute.PosixFileAttributes;
+import java.nio.file.attribute.PosixFilePermission;
 import java.text.DecimalFormat;
+import lombok.SneakyThrows;
+import org.apache.commons.io.FileUtils;
 import org.springframework.util.Assert;
 
 /**
  * This Class is an extension of {@link org.apache.commons.io.FileUtils} to add some util features required for the
  * datavault project.
  */
-public class FileUtils extends org.apache.commons.io.FileUtils {
+public class DataVaultFileUtils {
     
     public static final char[] units = new char[] { 'K','M','G','T' };
-
 
     /**
      * Take a human readable size (i.e 1GB, 50MB, 10K) and turn it in a long representing the number of Bytes.
@@ -41,7 +46,7 @@ public class FileUtils extends org.apache.commons.io.FileUtils {
                 // identifier followed by "iB" then use Binary size i.e. GiB, MiB, KiB ect...
                 si = false;
             }
-            
+
             for (int i = 0; i <= units_index; i++) {
                 value = value * (si ? 1000 : 1024);
             }
@@ -105,4 +110,37 @@ public class FileUtils extends org.apache.commons.io.FileUtils {
             () -> String.format("The directory [%s] is not writable", dir));
     }
 
+    @SneakyThrows
+    public static String getPermissions(File file) {
+        PosixFileAttributes attrs = Files.getFileAttributeView(file.toPath(), PosixFileAttributeView.class)
+                .readAttributes();
+
+        return getPermissions(attrs);
+    }
+
+
+    private static String getPermissions(PosixFileAttributes attrs) {
+        String permissions = "";
+
+        // Owner permissions
+        permissions += getPermissionString("r",attrs, PosixFilePermission.OWNER_READ);
+        permissions += getPermissionString("w",attrs, PosixFilePermission.OWNER_WRITE);
+        permissions += getPermissionString("x",attrs, PosixFilePermission.OWNER_EXECUTE);
+
+        // Group permissions
+        permissions += getPermissionString("r",attrs, PosixFilePermission.GROUP_READ);
+        permissions += getPermissionString("w",attrs, PosixFilePermission.GROUP_WRITE);
+        permissions += getPermissionString("x",attrs, PosixFilePermission.GROUP_EXECUTE);
+
+        // Other permissions
+        permissions += getPermissionString("r",attrs, PosixFilePermission.OTHERS_READ);
+        permissions += getPermissionString("w",attrs, PosixFilePermission.OTHERS_WRITE);
+        permissions += getPermissionString("x",attrs, PosixFilePermission.OTHERS_EXECUTE);
+
+        return permissions;
+    }
+
+    private static String getPermissionString(String function, PosixFileAttributes attrs, PosixFilePermission perm) {
+        return attrs.permissions().contains(perm) ? function : "-";
+    }
 }

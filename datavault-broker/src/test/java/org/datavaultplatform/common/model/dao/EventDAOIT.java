@@ -2,14 +2,13 @@ package org.datavaultplatform.common.model.dao;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.app.DataVaultBrokerApp;
 import org.datavaultplatform.broker.test.AddTestProperties;
@@ -22,6 +21,7 @@ import org.datavaultplatform.common.event.deposit.ComputedEncryption;
 import org.datavaultplatform.common.event.deposit.UploadComplete;
 import org.datavaultplatform.common.model.Vault;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -48,58 +48,66 @@ public class EventDAOIT extends BaseDatabaseTest {
   @Autowired
   JdbcTemplate template;
 
-  @Test
-  public void testComputedChunksChunksDigestBLOB() {
-    ComputedChunks event = getEvent1_ComputedChunkEvent();
-    dao.save(event);
+  @Nested
+  class BlobTests {
 
-    Event foundEvent = dao.findById(event.getID()).get();
-    assertTrue(foundEvent instanceof ComputedChunks);
-    ComputedChunks foundCCEvent = (ComputedChunks) foundEvent;
 
-    assertEquals(event.getChunksDigest(), foundCCEvent.getChunksDigest());
-  }
+    @Test
+    public void testComputedChunksChunksDigestBLOB() {
+      ComputedChunks event = getEvent1_ComputedChunkEvent();
+      dao.save(event);
 
-  @Test
-  public void testCompleteArchiveIdsBLOB() {
-    Complete event = getEvent2_CompleteEvent();
-    dao.save(event);
+      Event foundEvent = dao.findById(event.getID()).get();
+      assertInstanceOf(ComputedChunks.class, foundEvent);
+      ComputedChunks foundCCEvent = (ComputedChunks) foundEvent;
 
-    Event foundEvent = dao.findById(event.getID()).get();
-    assertTrue(foundEvent instanceof Complete);
-    Complete foundCompleteEvent = (Complete) foundEvent;
-
-    assertEquals(event.getArchiveIds(), foundCompleteEvent.getArchiveIds());
-  }
-
-  @Test
-  public void testComputedEncryptionEventBLOBS() {
-    ComputedEncryption event = getEvent3_ComputedEncryption();
-    dao.save(event);
-
-    Event foundEvent = dao.findById(event.getID()).get();
-    assertTrue(foundEvent instanceof ComputedEncryption);
-    ComputedEncryption foundComputedEncryptionEvent = (ComputedEncryption) foundEvent;
-
-    assertEquals(event.getChunksDigest(), foundComputedEncryptionEvent.getChunksDigest());
-    assertEquals(event.getEncChunkDigests(), foundComputedEncryptionEvent.getEncChunkDigests());
-    assertEquals(event.getChunkIVs().keySet(), foundComputedEncryptionEvent.getChunkIVs().keySet());
-
-    for(Integer key : event.getChunkIVs().keySet()){
-      assertArrayEquals(event.getChunkIVs().get(key), foundComputedEncryptionEvent.getChunkIVs().get(key));
+      assertEquals(event.getChunksDigest(), foundCCEvent.getChunksDigest());
     }
-  }
 
-  @Test
-  public void testUploadCompleteArchiveIdsBLOB() {
-    UploadComplete event = getEvent4_UploadComplete();
-    dao.save(event);
+    @Test
+    public void testCompleteArchiveIdsBLOB() {
+      Complete event = getEvent2_CompleteEvent();
+      dao.save(event);
 
-    Event foundEvent = dao.findById(event.getID()).get();
-    assertTrue(foundEvent instanceof UploadComplete);
-    UploadComplete foundCompleteEvent = (UploadComplete) foundEvent;
+      Event foundEvent = dao.findById(event.getID()).get();
+      assertInstanceOf(Complete.class, foundEvent);
+      Complete foundCompleteEvent = (Complete) foundEvent;
 
-    assertEquals(event.getArchiveIds(), foundCompleteEvent.getArchiveIds());
+      assertEquals(event.getArchiveIds(), foundCompleteEvent.getArchiveIds());
+    }
+
+    @Test
+    public void testComputedEncryptionEventBLOBS() {
+      ComputedEncryption event = getEvent3_ComputedEncryption();
+      dao.save(event);
+
+      Event foundEvent = dao.findById(event.getID()).get();
+      assertInstanceOf(ComputedEncryption.class, foundEvent);
+      ComputedEncryption foundComputedEncryptionEvent = (ComputedEncryption) foundEvent;
+
+      assertEquals(event.getMessage(), foundComputedEncryptionEvent.getMessage());
+      assertArrayEquals(event.getTarIV(), foundComputedEncryptionEvent.getTarIV());
+
+      assertEquals(event.getChunksDigest(), foundComputedEncryptionEvent.getChunksDigest());
+      assertEquals(event.getEncChunkDigests(), foundComputedEncryptionEvent.getEncChunkDigests());
+      assertEquals(event.getChunkIVs().keySet(), foundComputedEncryptionEvent.getChunkIVs().keySet());
+
+      for (Integer key : event.getChunkIVs().keySet()) {
+        assertArrayEquals(event.getChunkIVs().get(key), foundComputedEncryptionEvent.getChunkIVs().get(key));
+      }
+    }
+
+    @Test
+    public void testUploadCompleteArchiveIdsBLOB() {
+      UploadComplete event = getEvent4_UploadComplete();
+      dao.save(event);
+
+      Event foundEvent = dao.findById(event.getID()).get();
+      assertInstanceOf(UploadComplete.class, foundEvent);
+      UploadComplete foundCompleteEvent = (UploadComplete) foundEvent;
+
+      assertEquals(event.getArchiveIds(), foundCompleteEvent.getArchiveIds());
+    }
   }
 
   @Test
@@ -163,13 +171,13 @@ public class EventDAOIT extends BaseDatabaseTest {
 
   void checkSameEventMessages(Collection<Event> actual, Event... expected){
     assertEquals(
-        Arrays.stream(expected).map(Event::getMessage).sorted().collect(Collectors.toList()),
-        actual.stream().map(Event::getMessage).sorted().collect(Collectors.toList()));
+        Arrays.stream(expected).map(Event::getMessage).sorted().toList(),
+        actual.stream().map(Event::getMessage).sorted().toList());
   }
   void checkOrderOfEventMessages(Collection<Event> actual, Event... expected){
     assertEquals(
-        Arrays.stream(expected).map(Event::getMessage).collect(Collectors.toList()),
-        actual.stream().map(Event::getMessage).collect(Collectors.toList()));
+        Arrays.stream(expected).map(Event::getMessage).toList(),
+        actual.stream().map(Event::getMessage).toList());
   }
 
 

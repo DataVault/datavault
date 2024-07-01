@@ -8,9 +8,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.app.DataVaultBrokerApp;
 import org.datavaultplatform.broker.test.AddTestProperties;
@@ -108,11 +108,6 @@ public class DaoUtilsIT extends BaseReuseDatabaseTest {
     return user;
   }
 
-  @SafeVarargs
-  final <T> Set<T> setOf(T... items) {
-    return new HashSet<>(Arrays.asList(items));
-  }
-
   void setupUsers() {
     user1 = getUser1();
     userDAO.save(user1);
@@ -160,7 +155,7 @@ public class DaoUtilsIT extends BaseReuseDatabaseTest {
     PermissionModel pm1 = permissionDAO.find(Permission.CAN_VIEW_QUEUES);
     PermissionModel pm2 = permissionDAO.find(Permission.CAN_VIEW_EVENTS);
 
-    nonAdmin.setPermissions(Arrays.asList(pm1, pm2));
+    nonAdmin.setPermissions(List.of(pm1, pm2));
     nonAdmin.setStatus("active");
     nonAdmin.setDescription("non-admin-role");
     nonAdmin.setType(RoleType.VAULT);
@@ -199,13 +194,13 @@ public class DaoUtilsIT extends BaseReuseDatabaseTest {
       //for each permission, there is one school for user1
       for (Permission p : Permission.values()) {
         Set<String> res1 = DaoUtils.getPermittedSchoolIds(em, user1.getID(), p);
-        assertEquals(setOf("SCHOOL1"), res1);
+        assertEquals(Set.of("SCHOOL1"), res1);
       }
 
       //for each permission, there are two schools for user2
       for (Permission p : Permission.values()) {
         Set<String> res1 = DaoUtils.getPermittedSchoolIds(em, user2.getID(), p);
-        assertEquals(setOf("SCHOOL2", "SCHOOL3"), res1);
+        assertEquals(Set.of("SCHOOL2", "SCHOOL3"), res1);
       }
 
       //for each permission, there are no schools for user id 'XXX'
@@ -217,7 +212,7 @@ public class DaoUtilsIT extends BaseReuseDatabaseTest {
       //for each permission, there is the special case '*' for user3
       for (Permission p : Permission.values()) {
         Set<String> res1 = DaoUtils.getPermittedSchoolIds(em, user3.getID(), p);
-        assertEquals(setOf("*"), res1);
+        assertEquals(Set.of("*"), res1);
       }
     }
 
@@ -227,7 +222,7 @@ public class DaoUtilsIT extends BaseReuseDatabaseTest {
       setupUsers();
       setupNonAdminRoleAssignments();
 
-      List<Permission> validPerms = Arrays.asList(
+      List<Permission> validPerms = List.of(
           Permission.CAN_VIEW_QUEUES,
           Permission.CAN_VIEW_EVENTS);
 
@@ -235,7 +230,7 @@ public class DaoUtilsIT extends BaseReuseDatabaseTest {
       for (Permission p : Permission.values()) {
         Set<String> res1 = DaoUtils.getPermittedSchoolIds(em, user1.getID(), p);
         if (validPerms.contains(p)) {
-          assertEquals(setOf("SCHOOL1"), res1);
+          assertEquals(Set.of("SCHOOL1"), res1);
         } else {
           assertEquals(Collections.emptySet(), res1);
         }
@@ -245,7 +240,7 @@ public class DaoUtilsIT extends BaseReuseDatabaseTest {
       for (Permission p : Permission.values()) {
         Set<String> res1 = DaoUtils.getPermittedSchoolIds(em, user2.getID(), p);
         if (validPerms.contains(p)) {
-          assertEquals(setOf("SCHOOL2", "SCHOOL3"), res1);
+          assertEquals(Set.of("SCHOOL2", "SCHOOL3"), res1);
         } else {
           assertEquals(Collections.emptySet(), res1);
         }

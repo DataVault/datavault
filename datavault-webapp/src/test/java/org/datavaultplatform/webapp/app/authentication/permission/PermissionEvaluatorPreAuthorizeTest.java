@@ -9,7 +9,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Map;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -53,7 +52,7 @@ import org.springframework.web.bind.annotation.RestController;
  * the actual PermissionEvaluator - just that it gets called correctly.
  */
 class PermissionEvaluatorPreAuthorizeTest {
-  
+
   @Autowired
   MockMvc mvc;
 
@@ -134,7 +133,7 @@ class PermissionEvaluatorPreAuthorizeTest {
        * Checks that the PermissionEvaluator.hasPermission with 3 args is called as expected.
        */
       @Nested
-      class PathOneUsesHasPersmissionFourArgs {
+      class PathOneUsesHasPermissionFourArgs {
 
         @Captor
         ArgumentCaptor<Serializable> argTargetId;
@@ -186,7 +185,7 @@ class PermissionEvaluatorPreAuthorizeTest {
 
         private void checkEvaluatorWasCalledWithExpectedArgs() {
           assertEquals("testuser", argAuth.getValue().getName());
-          assertEquals(Integer.valueOf(1), argTargetId.getValue());
+          assertEquals(1, argTargetId.getValue());
 
           assertEquals("java.lang.String", argTargetType.getValue());
 
@@ -288,11 +287,11 @@ class PermissionEvaluatorPreAuthorizeTest {
   @RequestMapping("/test/info")
   static class InfoController {
 
-    final Map<Integer,String> info = new HashMap<Integer,String>(){{
-      put(1, "info_one");
-      put(2, "info_two");
-      put(3, "info_three");
-    }};
+    final Map<Integer,String> info = Map.of(
+          1, "info_one",
+          2, "info_two",
+          3, "info_three"
+    );
 
     @GetMapping("/unsecure/{id}")
     String getInfoUnsecure(@PathVariable int id) {

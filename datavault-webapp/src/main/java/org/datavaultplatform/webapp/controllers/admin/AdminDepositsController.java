@@ -1,7 +1,7 @@
 package org.datavaultplatform.webapp.controllers.admin;
 
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.common.response.DepositsData;

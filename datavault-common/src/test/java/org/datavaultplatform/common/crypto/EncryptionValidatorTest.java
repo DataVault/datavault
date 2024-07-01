@@ -9,10 +9,10 @@ import java.io.File;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.storage.Verify;
-import org.datavaultplatform.common.utils.NullableConverter;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.converter.ConvertWith;
+
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EmptySource;
 import org.junit.jupiter.params.provider.NullSource;
@@ -64,7 +64,7 @@ public class EncryptionValidatorTest extends BaseTempKeyStoreTest{
   }
 
   @ParameterizedTest
-  @CsvSource({
+  @CsvSource(nullValues = "null", value = {
       "null,      true,  true,  true",
       "null,      true,  false, true",
       "null,      false, true,  true",
@@ -80,7 +80,7 @@ public class EncryptionValidatorTest extends BaseTempKeyStoreTest{
       "key-name, false, true,  false",
       "key-name, false, false, false",
   })
-  void testSameKeyNames(@ConvertWith(NullableConverter.class) String keyName, boolean validateDataKey, boolean validatePrivateKeysKey, boolean errorExpected) {
+  void testSameKeyNames(String keyName, boolean validateDataKey, boolean validatePrivateKeysKey, boolean errorExpected) {
     Encryption enc = new Encryption();
 
     enc.setVaultPrivateKeyEncryptionKeyName(keyName);

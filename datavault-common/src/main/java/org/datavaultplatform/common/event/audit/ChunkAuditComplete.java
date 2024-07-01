@@ -2,7 +2,7 @@ package org.datavaultplatform.common.event.audit;
 
 import org.datavaultplatform.common.event.Event;
 
-import javax.persistence.Entity;
+import jakarta.persistence.Entity;
 
 @Entity
 public class ChunkAuditComplete extends Event {

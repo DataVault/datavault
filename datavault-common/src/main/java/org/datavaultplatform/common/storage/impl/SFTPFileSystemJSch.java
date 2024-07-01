@@ -88,7 +88,7 @@ public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
         } else {
             byte[] privateKey = Encryption.decryptSecret(encPrivateKey, encIV);
 
-            log.debug("Private Key: "+new String(privateKey));
+            log.debug("Private Key: {}", new String(privateKey));
             jsch.addIdentity(username, privateKey, null, passphrase.getBytes());
         }
 
@@ -407,6 +407,5 @@ public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
     @Override
     public Logger getLogger() {
         return log;
-    }
-
+    } 
 }

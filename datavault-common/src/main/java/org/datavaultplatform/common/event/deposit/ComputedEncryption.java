@@ -2,25 +2,37 @@ package org.datavaultplatform.common.event.deposit;
 
 import java.util.HashMap;
 
-import javax.persistence.Entity;
-import javax.persistence.Lob;
-import javax.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Lob;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import org.datavaultplatform.common.event.Event;
+import org.datavaultplatform.common.model.custom.HashMapConverter;
 
 @Entity
 public class ComputedEncryption extends Event implements ChunksDigestEvent {
-    
+
+    @Lob
+    @Convert(converter = HashMapConverter.IntegerByteArray.class)
     @Column(name="chunkIVs", columnDefinition="LONGBLOB")
     private HashMap<Integer, byte[]> chunkIVs = new HashMap<>();
+
+    @Lob
+    @Convert(converter = HashMapConverter.IntegerString.class)
     @Column(name="encChunkDigests", columnDefinition="LONGBLOB")
     private HashMap<Integer, String> encChunkDigests = new HashMap<>();
+
     @Lob
     @Column(name="tarIV", columnDefinition="TINYBLOB")
     private byte[] tarIV;
     private String encTarDigest;
     private String aesMode;
+
+    @Lob
+    @Convert(converter = HashMapConverter.IntegerString.class)
     @Column(name="chunksDigest", columnDefinition="LONGBLOB")
     private HashMap<Integer, String> chunksDigest = new HashMap<>();
+
     private String digestAlgorithm;
     
     public ComputedEncryption() {

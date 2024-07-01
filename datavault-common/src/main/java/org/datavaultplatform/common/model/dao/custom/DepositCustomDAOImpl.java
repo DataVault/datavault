@@ -1,15 +1,15 @@
 package org.datavaultplatform.common.model.dao.custom;
 
 import java.util.ArrayList;
-import java.util.Collections;
+
 import java.util.Date;
 import java.util.List;
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Order;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Root;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Order;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Root;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.datavaultplatform.common.model.Deposit;
@@ -37,7 +37,7 @@ public class DepositCustomDAOImpl extends BaseCustomDAOImpl implements DepositCu
     }
 
     log.info("DAO.list query="+query);
-    if((query == null || "".equals(query)) == false) {
+    if((query == null || query.isEmpty()) == false) {
       log.info("apply restrictions");
 
       String queryLower = getQueryLower(query);
@@ -72,7 +72,7 @@ public class DepositCustomDAOImpl extends BaseCustomDAOImpl implements DepositCu
       } else {
         order = cb.desc(sortPath);
       }
-      return Collections.singletonList(order);
+      return List.of(order);
     });
     helper.setMaxResults(maxResult);
     helper.setFirstResult(offset);
@@ -88,7 +88,7 @@ public class DepositCustomDAOImpl extends BaseCustomDAOImpl implements DepositCu
       return 0;
     }
 
-    if((query == null || "".equals(query)) == false) {
+    if((query == null || query.isEmpty()) == false) {
       log.info("apply restrictions");
       String queryLower = getQueryLower(query);
       helper.setSinglePredicateHelper((cb, rt) -> cb.or(
@@ -168,7 +168,7 @@ public class DepositCustomDAOImpl extends BaseCustomDAOImpl implements DepositCu
       } else {
         order = cb.desc(sortPath);
       }
-      return Collections.singletonList(order);
+      return List.of(order);
     });
 
     List<Deposit> deposits = helper.getItems();
@@ -198,7 +198,7 @@ public class DepositCustomDAOImpl extends BaseCustomDAOImpl implements DepositCu
     Root<Deposit> root = cq.from(Deposit.class);
     cq.where(cb.and(
         cb.lessThanOrEqualTo(root.get(Deposit_.CREATION_TIME), olderThanDate),
-        cb.lessThanOrEqualTo(root.get(Deposit_.STATUS), Deposit.Status.COMPLETE)
+        cb.lessThanOrEqualTo(root.get(Deposit_.STATUS), Status.COMPLETE)
     ));
     cq.orderBy(cb.asc(root.get(Deposit_.CREATION_TIME)));
 

@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -40,14 +41,14 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.util.SocketUtils;
+import org.springframework.test.util.TestSocketUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.shaded.com.google.common.io.Files;
+import com.google.common.io.Files;
 import org.testcontainers.utility.MountableFile;
 
 @DisabledInsideDocker
@@ -80,11 +81,11 @@ class AjpConnectorIT {
   @Captor
   ArgumentCaptor<AuthenticationSuccessEvent> argAuthSuccessEvent;
 
-  static int springBootAppPort = SocketUtils.findAvailableTcpPort();
-  static int springBootAjpPort = SocketUtils.findAvailableTcpPort();
+  static final int springBootAppPort = TestSocketUtils.findAvailableTcpPort();
+  static final int springBootAjpPort = TestSocketUtils.findAvailableTcpPort();
 
   @Container
-  static GenericContainer<?> httpdContainer;
+  static final GenericContainer<?> httpdContainer;
 
   static File tempHttpdConf;
 
@@ -106,11 +107,11 @@ class AjpConnectorIT {
 
     ClassPathResource resource = new ClassPathResource("httpd.conf");
     InputStream is = resource.getInputStream();
-    String content =  IOUtils.toString(is, "UTF-8");
+    String content =  IOUtils.toString(is, StandardCharsets.UTF_8);
     content = content.replaceAll("8009", String.valueOf(springBootAjpPort));
 
     try(OutputStream os = new FileOutputStream(tempHttpdConf)){
-      IOUtils.write(content, os, "UTF-8");
+      IOUtils.write(content, os, StandardCharsets.UTF_8);
     }
   }
 
@@ -169,7 +170,7 @@ class AjpConnectorIT {
   static class TestConfig {
 
     @RestController
-    public class TestAuthController {
+    public static class TestAuthController {
 
       @GetMapping("/test/auth")
       public AuthUserDetails admin(Authentication authentication) {

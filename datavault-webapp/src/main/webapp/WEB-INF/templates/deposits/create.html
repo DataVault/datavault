@@ -88,7 +88,7 @@
                 </p>
             </div>
 
-            <form id="create-deposit" class="form" role="form" action="" method="post" th:object="${deposit}">
+            <form id="create-deposit" class="form" role="form" th:action="@{|/vaults/${vault.getID()}/deposits/create|}" method="post" th:object="${deposit}">
                 <div class="row">
                     <div class="col-sm-10">
     
@@ -130,7 +130,7 @@
                        multiple="true"
                        class="file-path"
                        style="display:none;"
-                       th:field="*{depositPaths}" />
+                       th:field="*{depositPaths}">
                 </select>
         
                 <div class="flow-drop">
@@ -277,10 +277,21 @@
                 
                 <div class="btn-toolbar pull-right">
                     <a class="btn btn-lg btn-link" th:href="@{|/vaults/${vault.getID()}|}">Cancel</a>
-                    <button type="submit" value="submit" class="btn btn-lg btn-primary">
-                        <i class="fa fa-download fa-rotate-180" aria-hidden="true"></i>
-                        Deposit data
-                    </button>
+                    <!--/* UsesDepositsPaused */-->
+                    <th:block th:with="notAffectedByDepositsPaused=|hasRole('IS_ADMIN') or (!@permissionsService.depositsPaused())|">
+                        <th:block th:if="${#authorization.expression(notAffectedByDepositsPaused)}">
+                            <button type="submit" value="submit" class="btn btn-lg btn-primary">
+                                <i class="fa fa-download fa-rotate-180" aria-hidden="true"></i>
+                                Deposit data
+                            </button>
+                        </th:block>
+                        <th:block th:unless="${#authorization.expression(notAffectedByDepositsPaused)}">
+                            <button type="button" class="btn btn-lg btn-primary" disabled>
+                                <i class="fa fa-download fa-rotate-180" aria-hidden="true"></i>
+                                Deposit data : PAUSED
+                            </button>
+                        </th:block>
+                    </th:block>
                 </div>
 
                 <input type="hidden" id="submitAction" name="action" value="submit"/>

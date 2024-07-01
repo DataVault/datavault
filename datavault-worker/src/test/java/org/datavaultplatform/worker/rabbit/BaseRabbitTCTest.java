@@ -1,11 +1,9 @@
 package org.datavaultplatform.worker.rabbit;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.docker.DockerImage;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -17,36 +15,17 @@ public abstract class BaseRabbitTCTest {
   public static final int HI_PRIORITY = 2;
   public static final int NORMAL_PRIORITY = 1;
 
-  @Value("${spring.rabbitmq.username}")
-  private String rabbitUsername;
-
-  @Value("${spring.rabbitmq.password}")
-  private String rabbitPassword;
-
-  @Value("${spring.rabbitmq.host}")
-  private String rabbitHost;
-
-  @Value("${spring.rabbitmq.port}")
-  private int rabbitPort;
-
   @Container
+  @ServiceConnection
   private static final RabbitMQContainer RABBIT = new RabbitMQContainer(DockerImage.RABBIT_IMAGE_NAME)
       .withExposedPorts(5672, 15672);
-
-  @DynamicPropertySource
-  static void setupProperties(DynamicPropertyRegistry registry) {
-    registry.add("spring.rabbitmq.host", RABBIT::getHost);
-    registry.add("spring.rabbitmq.port", RABBIT::getAmqpPort);
-    registry.add("spring.rabbitmq.username", RABBIT::getAdminUsername);
-    registry.add("spring.rabbitmq.password", RABBIT::getAdminPassword);
-  }
 
   @PostConstruct
   void init() {
     log.info("RABBIT HTTP URL [ {} ]", RABBIT.getHttpUrl());
-    log.info("rabbit username [{}]", this.rabbitUsername);
-    log.info("rabbit password [{}]", this.rabbitPassword);
-    log.info("rabbit host [{}]", this.rabbitHost);
-    log.info("rabbit AMQP port [{}]", this.rabbitPort);
+    log.info("rabbit username [{}]", RABBIT.getAdminUsername());
+    log.info("rabbit password [{}]", RABBIT.getAdminPassword());
+    log.info("rabbit host [{}]", RABBIT.getHost());
+    log.info("rabbit AMQP port [{}]", RABBIT.getAmqpPort());
   }
 }

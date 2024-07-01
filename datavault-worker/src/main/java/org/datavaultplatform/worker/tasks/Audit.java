@@ -68,7 +68,8 @@ public class Audit extends Task {
         this.depositChunksToAudit = this.getChunksToAudit();
         this.archiveIds = this.getArchiveIds();
         
-        Assert.isTrue(depositChunksToAudit.size() == archiveIds.length);
+        Assert.isTrue(depositChunksToAudit.size() == archiveIds.length,
+                String.format("depositChunksToAudit.size()[%s] != archiveIds.length[%s]", depositChunksToAudit.size(), archiveIds.length));
 
         if (this.isRedeliver()) {
             eventSender.send(new Error(this.jobID, this.auditId,

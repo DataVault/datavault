@@ -4,26 +4,32 @@ import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.webapp.authentication.AuthenticationSuccess;
 import org.datavaultplatform.webapp.config.HttpSecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.authentication.AuthenticationEventPublisher;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.SecurityFilterChain;
 
 @EnableWebSecurity
 @Slf4j
-@EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
-@Order(2)
-public class StandaloneWebSecurityConfig extends WebSecurityConfigurerAdapter {
-
-  @Value("${spring.security.debug:false}")
-  boolean securityDebug;
+@EnableMethodSecurity(prePostEnabled = true, securedEnabled = true)
+@Configuration
+public class StandaloneWebSecurityConfig {
 
   @Value("${datavault.csrf.disabled:false}")
   boolean csrfDisabled;
@@ -34,15 +40,10 @@ public class StandaloneWebSecurityConfig extends WebSecurityConfigurerAdapter {
   @Autowired
   AuthenticationSuccess authenticationSuccess;
 
-  @Override
-  public void configure(WebSecurity web) throws Exception {
-    web.debug(securityDebug);
-    //TODO - do we need to do this?
-    //web.expressionHandler(expressionHandler);
-  }
-
-  @Override
-  protected void configure(HttpSecurity http) throws Exception {
+  @Bean
+  @Order(2)
+  public SecurityFilterChain filterChain(HttpSecurity http,
+                                         @Qualifier("standaloneAuthenticationProvider") AuthenticationProvider authenticationProvider) throws Exception {
 
     HttpSecurityUtils.formLogin(http, authenticationSuccess);
 
@@ -54,20 +55,40 @@ public class StandaloneWebSecurityConfig extends WebSecurityConfigurerAdapter {
     if (csrfDisabled) {
       //only for testing 'standalone' profile
       log.warn("CSRF PROTECTION DISABLED!!!!");
-      http.csrf().disable();
+      http.csrf(AbstractHttpConfigurer::disable);
     }
-  }
 
-  @Override
-  protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-    auth.inMemoryAuthentication().withUser("user").password("password").roles("USER");
-    auth.inMemoryAuthentication().withUser("admin").password("admin").roles("USER","ADMIN");
+    http.authenticationProvider(authenticationProvider);
+
+    return http.build();
   }
 
   @Bean
-  public AuthenticationManager authenticationManagerBean() throws Exception {
-    // ALTHOUGH THIS SEEMS LIKE USELESS CODE,
-    // IT'S REQUIRED TO PREVENT SPRING BOOT AUTO-CONFIGURATION
-    return super.authenticationManagerBean();
+  public UserDetailsService  standaloneUsers() {
+    UserDetails user = User.builder()
+            .username("user").password("{noop}" + "password").roles("USER").build();
+    UserDetails admin = User.builder()
+            .username("admin").password("{noop}" + "admin").roles("USER","ADMIN").build();
+    return new InMemoryUserDetailsManager(user, admin);
+  }
+
+  @Bean
+  @Qualifier("standaloneAuthenticationProvider")
+  public DaoAuthenticationProvider standaloneAuthenticationProvider(@Qualifier("standaloneUsers") UserDetailsService uds) {
+    DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+    provider.setUserDetailsService(uds);
+    return provider;
+  }
+
+  @Bean
+  public AuthenticationManager authenticationManager(
+          AuthenticationEventPublisher eventPublisher,
+          @Qualifier("actuatorAuthenticationProvider") AuthenticationProvider authenticationProvider1,
+          @Qualifier("standaloneAuthenticationProvider") AuthenticationProvider authenticationProvider2
+  ) {
+    ProviderManager result = new ProviderManager(authenticationProvider1, authenticationProvider2);
+    result.setAuthenticationEventPublisher(eventPublisher);
+    result.afterPropertiesSet();
+    return result;
   }
 }

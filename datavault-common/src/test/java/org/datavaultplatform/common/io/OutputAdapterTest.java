@@ -6,7 +6,7 @@ import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
+
 import org.junit.jupiter.api.Test;
 
 public class OutputAdapterTest {

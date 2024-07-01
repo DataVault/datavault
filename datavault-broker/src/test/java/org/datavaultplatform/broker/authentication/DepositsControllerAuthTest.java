@@ -10,7 +10,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Date;
 import lombok.SneakyThrows;
 import org.datavaultplatform.broker.controllers.DepositsController;
@@ -69,11 +70,11 @@ public class DepositsControllerAuthTest extends BaseControllerAuthTest {
   @Test
   void testGetDepositEvents() throws Exception {
     when(controller.getDepositEvents(USER_ID_1, "deposit-id-1")).thenReturn(
-        Arrays.asList(AuthTestData.EVENT_INFO_1, AuthTestData.EVENT_INFO_2));
+        List.of(AuthTestData.EVENT_INFO_1, AuthTestData.EVENT_INFO_2));
 
     checkWorksWhenAuthenticatedFailsOtherwise(
         get("/deposits/{depositid}/events", "deposit-id-1"),
-        Arrays.asList(AuthTestData.EVENT_INFO_1, AuthTestData.EVENT_INFO_2));
+        List.of(AuthTestData.EVENT_INFO_1, AuthTestData.EVENT_INFO_2));
 
     verify(controller).getDepositEvents(USER_ID_1, "deposit-id-1");
   }
@@ -81,11 +82,11 @@ public class DepositsControllerAuthTest extends BaseControllerAuthTest {
   @Test
   void testGetDepositJobs() throws Exception {
     when(controller.getDepositJobs(USER_ID_1, "deposit-id-1")).thenReturn(
-        Arrays.asList(AuthTestData.JOB_1, AuthTestData.JOB_2));
+        List.of(AuthTestData.JOB_1, AuthTestData.JOB_2));
 
     checkWorksWhenAuthenticatedFailsOtherwise(
         get("/deposits/{depositid}/jobs", "deposit-id-1"),
-        Arrays.asList(AuthTestData.JOB_1, AuthTestData.JOB_2));
+        List.of(AuthTestData.JOB_1, AuthTestData.JOB_2));
 
     verify(controller).getDepositJobs(USER_ID_1, "deposit-id-1");
   }
@@ -93,12 +94,12 @@ public class DepositsControllerAuthTest extends BaseControllerAuthTest {
   @Test
   void testGetDepositManifest() throws Exception {
     when(controller.getDepositManifest(USER_ID_1, "deposit-id-1")).thenReturn(
-        Arrays.asList(AuthTestData.FILE_FIXITY_1,
+        List.of(AuthTestData.FILE_FIXITY_1,
             AuthTestData.FILE_FIXITY_2));
 
     checkWorksWhenAuthenticatedFailsOtherwise(
         get("/deposits/{depositid}/manifest", "deposit-id-1"),
-        Arrays.asList(AuthTestData.FILE_FIXITY_1, AuthTestData.FILE_FIXITY_2));
+        List.of(AuthTestData.FILE_FIXITY_1, AuthTestData.FILE_FIXITY_2));
 
     verify(controller).getDepositManifest(USER_ID_1, "deposit-id-1");
   }
@@ -106,12 +107,12 @@ public class DepositsControllerAuthTest extends BaseControllerAuthTest {
   @Test
   void testGetDepositRetrieves() throws Exception {
     when(controller.getDepositRetrieves(USER_ID_1, "deposit-id-1")).thenReturn(
-        Arrays.asList(AuthTestData.RETRIEVE_1,
+        List.of(AuthTestData.RETRIEVE_1,
             AuthTestData.RETRIEVE_2));
 
     checkWorksWhenAuthenticatedFailsOtherwise(
         get("/deposits/{depositid}/retrieves", "deposit-id-1"),
-        Arrays.asList(AuthTestData.RETRIEVE_1, AuthTestData.RETRIEVE_2));
+        List.of(AuthTestData.RETRIEVE_1, AuthTestData.RETRIEVE_2));
 
     verify(controller).getDepositRetrieves(USER_ID_1, "deposit-id-1");
   }
@@ -160,7 +161,7 @@ public class DepositsControllerAuthTest extends BaseControllerAuthTest {
     when(mUserService.getUser(USER_ID_1)).thenReturn(mLoginUser);
     when(mAdminService.isAdminUser(mLoginUser)).thenReturn(isAdminUser);
     when(mLoginUser.getID()).thenReturn(USER_ID_1);
-    when(mRolesAndPermissionService.getUserPermissions(USER_ID_1)).thenReturn(getPermissions());
+    when(mRolesAndPermissionService.getUserPermissions(USER_ID_1)).thenReturn(Collections.emptySet());
 
     when(controller.retrieveDeposit(argUserId.capture(), argDepositId.capture(),
         argRetrieve.capture())).thenThrow(ex);

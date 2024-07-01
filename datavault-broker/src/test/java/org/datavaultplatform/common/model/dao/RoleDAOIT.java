@@ -1,5 +1,6 @@
 package org.datavaultplatform.common.model.dao;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -7,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -16,9 +16,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.persistence.Cache;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.persistence.Cache;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.app.DataVaultBrokerApp;
 import org.datavaultplatform.broker.test.AddTestProperties;
@@ -88,6 +88,8 @@ public class RoleDAOIT extends BaseDatabaseTest {
 
     RoleModel foundById2 = dao.findById(RoleModel2.getId()).get();
     assertEquals(RoleModel2.getName(), foundById2.getName());
+
+    assertThat(foundById2.getId()).isEqualTo(foundById1.getId() + 1);
   }
 
   @Test
@@ -134,7 +136,7 @@ public class RoleDAOIT extends BaseDatabaseTest {
     RoleModel roleModel2 = getRoleModel2();
     RoleModel roleModel3 = getRoleModel3isAdminRoleName();
 
-    dao.saveAll(Arrays.asList(roleModel1, roleModel2, roleModel3));
+    dao.saveAll(List.of(roleModel1, roleModel2, roleModel3));
 
     RoleModel isAdminRole = dao.getIsAdmin();
 
@@ -152,7 +154,7 @@ public class RoleDAOIT extends BaseDatabaseTest {
     assertEquals(RoleType.SCHOOL, roleModel2.getType());
     assertEquals(RoleType.VAULT, roleModel3.getType());
 
-    dao.saveAll(Arrays.asList(roleModel1, roleModel2, roleModel3));
+    dao.saveAll(List.of(roleModel1, roleModel2, roleModel3));
 
     Collection<RoleModel> all = dao.findAll((RoleType) null);
     assertEquals(0, all.size());
@@ -183,7 +185,7 @@ public class RoleDAOIT extends BaseDatabaseTest {
     assertEquals(RoleType.VAULT, roleModel3.getType());
     assertEquals(RoleType.ADMIN, roleModel4.getType());
 
-    dao.saveAll(Arrays.asList(roleModel1, roleModel2, roleModel3, roleModel4));
+    dao.saveAll(List.of(roleModel1, roleModel2, roleModel3, roleModel4));
     List<RoleModel> editable = dao.findAllEditableRoles();
     assertEquals(3, editable.size());
     assertTrue(editable.contains(roleModel1));
@@ -201,7 +203,7 @@ public class RoleDAOIT extends BaseDatabaseTest {
     RoleModel roleModel3 = getRoleModel3isAdminRoleName();
     RoleModel roleModel4 = getRoleModel4adminRoleType();
     RoleModel roleModel5 = getRoleModel5dataOwner();
-    dao.saveAll(Arrays.asList(roleModel1, roleModel2, roleModel3, roleModel4, roleModel5));
+    dao.saveAll(List.of(roleModel1, roleModel2, roleModel3, roleModel4, roleModel5));
 
     RoleModel dataOwner = dao.getDataOwner();
     assertEquals(roleModel5, dataOwner);
@@ -217,7 +219,7 @@ public class RoleDAOIT extends BaseDatabaseTest {
     RoleModel roleModel4 = getRoleModel4adminRoleType();
     RoleModel roleModel5 = getRoleModel5dataOwner();
     RoleModel roleModel6 = getRoleModel6depositor();
-    dao.saveAll(Arrays.asList(roleModel1, roleModel2, roleModel3, roleModel4, roleModel5, roleModel6));
+    dao.saveAll(List.of(roleModel1, roleModel2, roleModel3, roleModel4, roleModel5, roleModel6));
 
     RoleModel depositor = dao.getDepositor();
     assertEquals(roleModel6, depositor);
@@ -235,7 +237,7 @@ public class RoleDAOIT extends BaseDatabaseTest {
     RoleModel roleModel5 = getRoleModel5dataOwner();
     RoleModel roleModel6 = getRoleModel6depositor();
     RoleModel roleModel7 = getRoleModel7nominatedDataManager();
-    dao.saveAll(Arrays.asList(roleModel1, roleModel2, roleModel3,
+    dao.saveAll(List.of(roleModel1, roleModel2, roleModel3,
         roleModel4, roleModel5, roleModel6, roleModel7));
 
     RoleModel nominatedDataManager = dao.getNominatedDataManager();
@@ -254,7 +256,7 @@ public class RoleDAOIT extends BaseDatabaseTest {
     RoleModel roleModel6 = getRoleModel6depositor();
     RoleModel roleModel7 = getRoleModel7nominatedDataManager();
     RoleModel roleModel8 = getRoleModel8nominatedDataManager();
-    dao.saveAll(Arrays.asList(roleModel1, roleModel2, roleModel3,
+    dao.saveAll(List.of(roleModel1, roleModel2, roleModel3,
         roleModel4, roleModel5, roleModel6, roleModel7, roleModel8));
 
     RoleModel vaultCreator = dao.getVaultCreator();

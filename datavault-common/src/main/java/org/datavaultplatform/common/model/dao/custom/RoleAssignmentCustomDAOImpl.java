@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import org.datavaultplatform.common.model.Permission;
 import org.datavaultplatform.common.model.PermissionModel;
 import org.datavaultplatform.common.model.RoleAssignment;
@@ -51,10 +51,11 @@ public class RoleAssignmentCustomDAOImpl extends BaseCustomDAOImpl implements
     @Override
     public Set<Permission> findUserPermissions(String userId) {
 
-      Query query = em.createQuery("SELECT DISTINCT role.permissions \n" +
-        "FROM org.datavaultplatform.common.model.RoleAssignment ra\n" +
-        "INNER JOIN ra.role as role\n" +
-        "WHERE ra.userId = :userId");
+      Query query = em.createQuery("""
+              SELECT DISTINCT role.permissions
+              FROM org.datavaultplatform.common.model.RoleAssignment ra
+              INNER JOIN ra.role as role
+              WHERE ra.userId = :userId""");
       query.setParameter("userId", userId);
 
       return ((List<PermissionModel>) query.getResultList())
@@ -72,7 +73,11 @@ public class RoleAssignmentCustomDAOImpl extends BaseCustomDAOImpl implements
       CriteriaBuilder cb = em.getCriteriaBuilder();
       CriteriaQuery<T> cr = cb.createQuery(type).distinct(true);
       Root<T> rt = cr.from(type);
-      cr.where(cb.equal(rt.get(idName), idValue));
+      if (idValue == null) {
+        cr.where(cb.isNull(rt.get(idName)));
+      } else {
+        cr.where(cb.equal(rt.get(idName), idValue));
+      }
       return getSingleResult(cr);
     }
 
@@ -80,7 +85,11 @@ public class RoleAssignmentCustomDAOImpl extends BaseCustomDAOImpl implements
       CriteriaBuilder cb = em.getCriteriaBuilder();
       CriteriaQuery<RoleAssignment> cr = cb.createQuery(RoleAssignment.class).distinct(true);
       Root<RoleAssignment> rt = cr.from(RoleAssignment.class);
-      cr.where(cb.equal(rt.get(columnName), columnValue));
+      if (columnValue == null) {
+        cr.where(cb.isNull(rt.get(columnName)));
+      } else {
+        cr.where(cb.equal(rt.get(columnName), columnValue));
+      }
       return getResults(cr);
     }
 

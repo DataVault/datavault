@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -241,10 +240,9 @@ public class EventListener implements MessageListener {
     event.setJob(job);
 
     // Get the related User
-    User initUser = null;
     String userId = event.getUserId();
     if (userId != null) {
-      initUser = getUser(event.getUserId());
+      User initUser = getUser(event.getUserId());
       event.setUser(initUser);
     }
 
@@ -379,13 +377,13 @@ public class EventListener implements MessageListener {
   }
 
   void validateType(String type) {
-    List<String> validTypes = Arrays.asList(
+    List<String> validTypes = List.of(
         TYPE_START,
         TYPE_COMPLETE,
         TYPE_RETRIEVE_START,
         TYPE_RETRIEVE_COMPLETE,
         TYPE_ERROR);
-    if (validTypes.contains(type) == false) {
+    if (type == null || validTypes.contains(type) == false) {
       throw new IllegalArgumentException("Invalid Type " + type);
     }
   }

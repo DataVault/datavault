@@ -1,13 +1,13 @@
 package org.datavaultplatform.webapp.controllers;
 
 import lombok.extern.slf4j.Slf4j;
-import org.datavaultplatform.common.io.FileUtils;
+import org.datavaultplatform.common.io.DataVaultFileUtils;
 import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.common.response.DepositSize;
 import org.datavaultplatform.webapp.model.FancytreeNode;
 import org.datavaultplatform.webapp.services.RestService;
 import java.util.ArrayList;
-import javax.servlet.http.*;
+import jakarta.servlet.http.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Controller;
@@ -99,7 +99,7 @@ public class FilesController {
 
         DepositSize result = restService.checkDepositSize(filePaths);
         Boolean success = result.getResult();
-        String max = FileUtils.getGibibyteSizeStr(result.getMax());
+        String max = DataVaultFileUtils.getGibibyteSizeStr(result.getMax());
         log.info("Max deposit (web): " + max);
         return "{ \"success\":\"" + success + "\", \"max\":\"" + max + "\"}";
     }

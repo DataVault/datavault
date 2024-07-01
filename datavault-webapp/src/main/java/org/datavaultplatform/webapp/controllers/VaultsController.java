@@ -2,6 +2,7 @@ package org.datavaultplatform.webapp.controllers;
 
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
+import jakarta.validation.constraints.NotEmpty;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.request.CreateVault;
@@ -21,7 +22,6 @@ import org.datavaultplatform.webapp.services.ForceLogoutService;
 import org.datavaultplatform.webapp.services.RestService;
 import org.datavaultplatform.webapp.services.UserLookupService;
 import org.datavaultplatform.webapp.services.ValidateService;
-import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,15 +35,14 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
-import javax.validation.Valid;
-import javax.validation.constraints.AssertTrue;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.AssertTrue;
 import java.security.Principal;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Controller
 @ConditionalOnBean(RestService.class)
-//@RequestMapping("/vaults")
 public class VaultsController {
 
     private static final Logger logger = LoggerFactory.getLogger(VaultsController.class);

@@ -70,9 +70,7 @@ public class CheckEncryptionData implements ScheduledTask {
                     // We found a dodgy chunk, so look for a matching Event that contains the missing data.
                     for (Event event : deposit.getEvents()) {
 
-                        if (event instanceof ComputedEncryption) {
-
-                            ComputedEncryption computedEncryptionEvent = (ComputedEncryption) event;
+                        if (event instanceof ComputedEncryption computedEncryptionEvent) {
 
                             HashMap<Integer, byte[]> chunkIVs = computedEncryptionEvent.getChunkIVs();
                             byte[] chunkIV = chunkIVs.get(chunk.getChunkNum());

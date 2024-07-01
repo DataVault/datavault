@@ -61,12 +61,8 @@ public class UsersService {
             return true;
         }
 
-        if (password.equals(user.getPassword())) {
-            // Passwords match so its tickety boo!
-            return true;
-        }
-
-        return false;
+        // Passwords match so its tickety boo!
+        return password.equals(user.getPassword());
     }
 }
 

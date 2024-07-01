@@ -3,7 +3,7 @@ package org.datavaultplatform.common.event.roles;
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.model.RoleAssignment;
 
-import javax.persistence.Entity;
+import jakarta.persistence.Entity;
 
 @Entity
 public class DeleteRoleAssignment extends Event {

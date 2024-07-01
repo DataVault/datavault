@@ -150,11 +150,8 @@ public class PureFlatFileProvider implements Provider {
 					    		ds.setID(dsUUID);
 					    		String status = info.get(1);
 					    		ds.setName(info.get(0) + " (" + status + ")");
-					    		boolean visible = true;
-					    		if (! status.equals(PureFlatFileProvider.PURE_VALIDATED)) {
-					    			visible = false;
-					    		}
-					    		ds.setVisible(visible);
+					    		boolean visible = status.equals(PureFlatFileProvider.PURE_VALIDATED);
+                                ds.setVisible(visible);
 					    		retVal.add(ds);
 				    		}
 				    	}

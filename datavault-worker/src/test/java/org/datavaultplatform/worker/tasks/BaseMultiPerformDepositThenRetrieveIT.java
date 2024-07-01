@@ -6,6 +6,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.io.FileUtils;
 import org.awaitility.Awaitility;
 import org.datavaultplatform.common.config.BaseQueueConfig;
 import org.datavaultplatform.common.crypto.Encryption;
@@ -14,7 +15,6 @@ import org.datavaultplatform.common.event.deposit.Complete;
 import org.datavaultplatform.common.event.deposit.ComputedDigest;
 import org.datavaultplatform.common.event.deposit.ComputedEncryption;
 import org.datavaultplatform.common.event.retrieve.RetrieveComplete;
-import org.datavaultplatform.common.io.FileUtils;
 import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.common.task.Context.AESMode;
 import org.datavaultplatform.worker.rabbit.BaseRabbitTCTest;
@@ -52,7 +52,6 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j

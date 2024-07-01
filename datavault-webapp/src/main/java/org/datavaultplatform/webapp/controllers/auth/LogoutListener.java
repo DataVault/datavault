@@ -1,7 +1,7 @@
 package org.datavaultplatform.webapp.controllers.auth;
 
 import java.util.List;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 import org.datavaultplatform.common.request.CreateClientEvent;
 import org.datavaultplatform.webapp.services.NotifyLogoutService;
 import org.slf4j.Logger;
@@ -42,8 +42,7 @@ public class LogoutListener implements ApplicationListener<SessionDestroyedEvent
             CreateClientEvent clientEvent = new CreateClientEvent(remoteAddress, null);
 
             //If available, add the sessionId to the clientEvent - this is just to aid testing
-            if (event instanceof HttpSessionDestroyedEvent) {
-                HttpSessionDestroyedEvent httpSessionEvent = (HttpSessionDestroyedEvent) event;
+            if (event instanceof HttpSessionDestroyedEvent httpSessionEvent) {
                 HttpSession session = httpSessionEvent.getSession();
                 if (session != null) {
                     clientEvent.setSessionId(session.getId());

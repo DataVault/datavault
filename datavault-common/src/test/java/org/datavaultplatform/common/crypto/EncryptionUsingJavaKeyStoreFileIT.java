@@ -13,7 +13,6 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -22,7 +21,7 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 import javax.crypto.SecretKey;
-import javax.xml.bind.DatatypeConverter;
+import jakarta.xml.bind.DatatypeConverter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeAll;
@@ -102,7 +101,7 @@ public class EncryptionUsingJavaKeyStoreFileIT {
     }
 
     // Alias names are stored in JKS as lowercase!
-    assertIterableEquals(Arrays.asList(KEY_NAME_PRIVATE_KEYS, KEY_NAME_DATA), al);
+    assertIterableEquals(List.of(KEY_NAME_PRIVATE_KEYS, KEY_NAME_DATA), al);
     SecretKey directFromKSPrivateKeys = (SecretKey) ks.getKey(KEY_NAME_PRIVATE_KEYS, KEY_PASSWORD.toCharArray());
     checkAES(directFromKSPrivateKeys);
     SecretKey directFromKSData = (SecretKey) ks.getKey(KEY_NAME_DATA, KEY_PASSWORD.toCharArray());

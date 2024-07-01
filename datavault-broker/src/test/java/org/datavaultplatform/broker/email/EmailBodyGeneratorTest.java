@@ -2,7 +2,6 @@ package org.datavaultplatform.broker.email;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
@@ -44,9 +43,7 @@ public class EmailBodyGeneratorTest {
   @Test
   void testBasicVeloctyTemplateWithVariable() {
     String random = UUID.randomUUID().toString();
-    Map<String,Object> model = new HashMap<String,Object>(){{
-          put("data-data-data",random);
-    }};
+    Map<String,Object> model = Map.of("data-data-data", random);
     String body = generator.generate("test.vm", model);
     assertEquals(String.format("BEFORE%sAFTER", random), body);
   }

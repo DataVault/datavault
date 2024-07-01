@@ -1,23 +1,27 @@
 package org.datavaultplatform.webapp.config;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.SecurityFilterChain;
 
 @ConditionalOnExpression("${broker.security.enabled:true}")
 @Slf4j
 @Order(1)
-public class SecurityActuatorConfig extends WebSecurityConfigurerAdapter {
-
-  @Value("${spring.security.debug:false}")
-  boolean securityDebug;
+public class SecurityActuatorConfig  {
 
   @Value("${webapp.actuator.username:wactor}")
   String username;
@@ -25,35 +29,43 @@ public class SecurityActuatorConfig extends WebSecurityConfigurerAdapter {
   @Value("${webapp.actuator.password:wactorpass}")
   String password;
 
-  @Override
-  public void configure(WebSecurity web) {
-    web.debug(securityDebug);
+  @Bean
+  public UserDetailsService actuatorUsers() {
+    UserDetails user = User.builder()
+            .username(username).password("{noop}" + password).roles("ACTUATOR").build();
+
+    return new InMemoryUserDetailsManager(user);
   }
 
-  @Override
-  protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-    auth.inMemoryAuthentication()
-        .withUser(username).password("{noop}"+password).roles("ACTUATOR")
-        .and()
-        .passwordEncoder(PasswordEncoderFactories.createDelegatingPasswordEncoder());
+  @Bean
+  public DaoAuthenticationProvider actuatorAuthenticationProvider(@Qualifier("actuatorUsers") UserDetailsService uds) {
+    DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+    provider.setUserDetailsService(uds);
+    return provider;
   }
 
-  @Override
-  protected void configure(HttpSecurity http) throws Exception {
+  @Bean
+  @Order(1)
+  public SecurityFilterChain actuatorSecurityFilterChain(HttpSecurity http,
+          @Qualifier("actuatorAuthenticationProvider") AuthenticationProvider authenticationProvider) throws Exception {
 
-    http.antMatcher("/actuator/**")
-        .httpBasic().and()
-        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-        .authorizeRequests()
-        .antMatchers(
+    http.securityMatcher("/actuator/**")
+        .authenticationProvider(authenticationProvider)
+        .csrf(AbstractHttpConfigurer::disable)
+        .httpBasic(Customizer.withDefaults())
+        .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authorizeHttpRequests(authz -> authz.requestMatchers(
             "/actuator",
             "/actuator/info",
             "/actuator/health",
+            "/actuator/brokerstatus",
             "/actuator/customtime",
-            "/actuator/metrics", "/actuator/metrics/*", "/actuator/memoryinfo").permitAll()
-        .anyRequest().authenticated();
+            "/actuator/metrics",
+            "/actuator/metrics/*",
+            "/actuator/memoryinfo").permitAll()
+        .anyRequest().authenticated());
+
+    return http.build();
   }
-
-
 
 }

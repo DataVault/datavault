@@ -61,7 +61,7 @@ public class PureProvider implements Provider {
         URLConnection conn = queryURL.openConnection();
 
         if (queryURL.getUserInfo() != null) {
-            String basicAuth = "Basic " + javax.xml.bind.DatatypeConverter.printBase64Binary(queryURL.getUserInfo().getBytes());
+            String basicAuth = "Basic " + jakarta.xml.bind.DatatypeConverter.printBase64Binary(queryURL.getUserInfo().getBytes());
             conn.setRequestProperty("Authorization", basicAuth);
         }
 
@@ -82,15 +82,12 @@ public class PureProvider implements Provider {
     static class PureNamespaceContent implements NamespaceContext {
         @Override
         public String getNamespaceURI(String prefix) {
-            switch (prefix) {
-                case "dataset":
-                    return "http://atira.dk/schemas/pure4/wsdl/template/dataset/stable";
-                case "core":
-                    return "http://atira.dk/schemas/pure4/model/core/stable";
-                case "stab":
-                    return "http://atira.dk/schemas/pure4/model/template/dataset/stable";
-            }
-            return XMLConstants.NULL_NS_URI;
+            return switch (prefix) {
+                case "dataset" -> "http://atira.dk/schemas/pure4/wsdl/template/dataset/stable";
+                case "core" -> "http://atira.dk/schemas/pure4/model/core/stable";
+                case "stab" -> "http://atira.dk/schemas/pure4/model/template/dataset/stable";
+                default -> XMLConstants.NULL_NS_URI;
+            };
         }
         @Override
         public String getPrefix(String namespaceURI) {

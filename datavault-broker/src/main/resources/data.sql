@@ -168,3 +168,24 @@ insert ignore into Role_assignments (id,user_id,school_id,role_id) select 2,'use
 
 -- this prevents means new Role Ids added by Java (uses hibernate_sequence) clashing with Role Ids added by this script
 update hibernate_sequence set next_val = 100 where next_val < 100;
+
+DELETE FROM paused_deposit_state;
+
+INSERT INTO paused_deposit_state  VALUES ('301', '2001-07-22 12:12:12.123456', true);
+
+INSERT INTO paused_deposit_state  VALUES ('302', '2002-07-22 12:12:12.123456', false);
+
+INSERT INTO paused_deposit_state  VALUES ('303', '2003-07-22 12:12:12.123456', true);
+
+INSERT INTO paused_deposit_state  VALUES ('304', '2004-07-22 12:12:12.123456', false);
+
+DELETE FROM paused_retrieve_state;
+
+INSERT INTO paused_retrieve_state  VALUES ('401', '2001-07-22 12:12:12.123456', true);
+
+INSERT INTO paused_retrieve_state  VALUES ('402', '2002-07-22 12:12:12.123456', false);
+
+INSERT INTO paused_retrieve_state  VALUES ('403', '2003-07-22 12:12:12.123456', true);
+
+INSERT INTO paused_retrieve_state  VALUES ('404', '2004-07-22 12:12:12.123456', false);
+

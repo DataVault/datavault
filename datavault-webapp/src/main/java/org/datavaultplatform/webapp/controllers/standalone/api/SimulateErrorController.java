@@ -1,6 +1,6 @@
 package org.datavaultplatform.webapp.controllers.standalone.api;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.webapp.controllers.auth.ValidationExceptionHandler;
 import org.datavaultplatform.webapp.exception.EntityNotFoundException;

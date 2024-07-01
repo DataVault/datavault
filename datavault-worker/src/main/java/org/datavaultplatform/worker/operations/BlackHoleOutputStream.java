@@ -10,7 +10,7 @@ import java.io.OutputStream;
 public class BlackHoleOutputStream extends OutputStream {
 
     @Override
-    public void write(byte b[]) throws IOException {
+    public void write(byte[] b) throws IOException {
     }
 
     @Override
@@ -18,7 +18,7 @@ public class BlackHoleOutputStream extends OutputStream {
     }
 
     @Override
-    public void write(byte b[], int off, int len) throws IOException {
+    public void write(byte[] b, int off, int len) throws IOException {
     }
 
 }

@@ -2,11 +2,11 @@ package org.datavaultplatform.webapp.authentication.shib;
 
 import java.io.IOException;
 import java.util.Arrays;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedCredentialsNotFoundException;
 import org.springframework.util.Assert;
@@ -78,8 +78,7 @@ public class ShibAuthenticationFilter extends AbstractPreAuthenticatedProcessing
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        if (request instanceof HttpServletRequest) {
-            HttpServletRequest req = (HttpServletRequest) request;
+        if (request instanceof HttpServletRequest req) {
             String path = req.getRequestURI();
 
             //We allow the error page and resources to bypass this filter

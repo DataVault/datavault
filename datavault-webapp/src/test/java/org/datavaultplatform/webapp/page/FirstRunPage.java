@@ -29,7 +29,7 @@ public class FirstRunPage extends Page {
 
     public boolean isDatasetDefined() {
         List<WebElement> success = driver.findElements(By.cssSelector(".jumbotron .text-success"));
-        return success.size() >= 1;
+        return !success.isEmpty();
     }
 
     public boolean isStorageDefined() {

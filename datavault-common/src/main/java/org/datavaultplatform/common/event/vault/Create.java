@@ -1,6 +1,6 @@
 package org.datavaultplatform.common.event.vault;
 
-import javax.persistence.Entity;
+import jakarta.persistence.Entity;
 import org.datavaultplatform.common.event.Event;
 
 @Entity

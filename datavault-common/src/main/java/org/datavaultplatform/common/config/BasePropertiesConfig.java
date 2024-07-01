@@ -1,7 +1,7 @@
 package org.datavaultplatform.common.config;
 
-import java.util.Arrays;
-import javax.annotation.PostConstruct;
+import java.util.List;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -38,7 +38,7 @@ public abstract class BasePropertiesConfig {
 
   @PostConstruct
   void init() {
-    Arrays.asList("DATAVAULT_HOME", "DATAVAULT_ETC", "HOME").forEach(
+    List.of("DATAVAULT_HOME", "DATAVAULT_ETC", "HOME").forEach(
         name ->
             log.info("ENV VARIABLE [{}]=[{}]", name, env.getProperty(name))
     );

@@ -1,7 +1,7 @@
 package org.datavaultplatform.broker.authentication;
 
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * User: Robin Taylor

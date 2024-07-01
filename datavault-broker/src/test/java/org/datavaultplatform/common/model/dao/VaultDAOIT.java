@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -58,6 +57,7 @@ public class VaultDAOIT extends BaseReuseDatabaseTest {
 
     dao.save(vault1);
     assertNotNull(vault1.getID());
+    UUIDUtils.assertIsUUID(vault1.getID());
     assertEquals(1, count());
 
     dao.save(vault2);
@@ -96,11 +96,11 @@ public class VaultDAOIT extends BaseReuseDatabaseTest {
 
     // The Vaults should be ordered by Ascending Creation Time
     assertEquals(
-        Arrays.asList(
+        List.of(
             vault3.getID(),
             vault1.getID(),
             vault2.getID()),
-        items.stream().map(Vault::getID).collect(Collectors.toList()));
+        items.stream().map(Vault::getID).toList());
   }
 
 
@@ -323,15 +323,15 @@ public class VaultDAOIT extends BaseReuseDatabaseTest {
     assertEquals(3, from0.size());
 
     //from 1..
-    List<Vault> from1 = dao.list("allowed", "description", "desc", "1", String.valueOf(Integer.MAX_VALUE));
+    List<Vault> from1 = dao.list("allowed", "description", "desc", "1", String.valueOf(Integer.MAX_VALUE-1));
     assertEquals(2, from1.size());
 
     //from 2..
-    List<Vault> from2 = dao.list("allowed", "description", "desc", "2", String.valueOf(Integer.MAX_VALUE));
+    List<Vault> from2 = dao.list("allowed", "description", "desc", "2", String.valueOf(Integer.MAX_VALUE-2));
     assertEquals(1, from2.size());
 
     //from 3..
-    List<Vault> from3 = dao.list("allowed", "description", "desc", "3", String.valueOf(Integer.MAX_VALUE));
+    List<Vault> from3 = dao.list("allowed", "description", "desc", "3", String.valueOf(Integer.MAX_VALUE-3));
     assertEquals(0, from3.size());
 
     //Max result of 0 is ignored - this is intended
@@ -467,15 +467,15 @@ public class VaultDAOIT extends BaseReuseDatabaseTest {
     assertEquals(3, from0.size());
 
     //from 1..
-    List<Vault> from1 = dao.search("allowed", null, "description", "desc", "1", String.valueOf(Integer.MAX_VALUE));
+    List<Vault> from1 = dao.search("allowed", null, "description", "desc", "1", String.valueOf(Integer.MAX_VALUE-1));
     assertEquals(2, from1.size());
 
     //from 2..
-    List<Vault> from2 = dao.search("allowed", null, "description", "desc", "2", String.valueOf(Integer.MAX_VALUE));
+    List<Vault> from2 = dao.search("allowed", null, "description", "desc", "2", String.valueOf(Integer.MAX_VALUE-2));
     assertEquals(1, from2.size());
 
     //from 3..
-    List<Vault> from3 = dao.search("allowed", null, "description", "desc", "3", String.valueOf(Integer.MAX_VALUE));
+    List<Vault> from3 = dao.search("allowed", null, "description", "desc", "3", String.valueOf(Integer.MAX_VALUE-3));
     assertEquals(0, from3.size());
 
     //Max result of 0 is ignored - this is intended

@@ -1,7 +1,7 @@
 package org.datavaultplatform.common.model.dao.custom;
 
 import java.util.List;
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import org.datavaultplatform.common.model.PendingDataCreator;
 
 public class PendingDataCreatorCustomDAOImpl

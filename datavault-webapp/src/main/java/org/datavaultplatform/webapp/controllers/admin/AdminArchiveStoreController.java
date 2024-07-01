@@ -1,6 +1,5 @@
 package org.datavaultplatform.webapp.controllers.admin;
 
-import java.util.Optional;
 import org.datavaultplatform.common.model.ArchiveStore;
 import org.datavaultplatform.common.storage.StorageConstants;
 import org.datavaultplatform.webapp.services.RestService;
@@ -118,12 +117,12 @@ public class AdminArchiveStoreController {
     private HashMap<String,String> buildStoreProperties(String properties){
         HashMap<String,String> storeProperties = new HashMap<>();
 
-        String lines[] = properties.split("\\r?\\n");
+        String[] lines = properties.split("\\r?\\n");
         int lineCount = 0;
         for(String line : lines){
             lineCount++;
             if(line.contains("=")){
-                String prop[] = line.split("=");
+                String[] prop = line.split("=");
                 if(prop.length == 2) {
                     logger.info(prop[0].trim()+" = "+prop[1].trim());
                     storeProperties.put(prop[0].trim(), prop[1].trim());

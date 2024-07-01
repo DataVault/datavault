@@ -8,7 +8,7 @@ import org.datavaultplatform.common.model.DepositPath;
 import org.datavaultplatform.common.util.DateTimeUtils;
 import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
-import org.datavaultplatform.common.io.FileUtils;
+import org.datavaultplatform.common.io.DataVaultFileUtils;
 
 import java.util.Date;
 import java.util.List;
@@ -219,7 +219,7 @@ public class DepositInfo {
         this.depositSize = depositSize;
     }
 
-    public String getSizeStr() { return FileUtils.getGibibyteSizeStr(depositSize); }
+    public String getSizeStr() { return DataVaultFileUtils.getGibibyteSizeStr(depositSize); }
 
     public List<DepositPath> getDepositPaths() {
         return depositPaths;

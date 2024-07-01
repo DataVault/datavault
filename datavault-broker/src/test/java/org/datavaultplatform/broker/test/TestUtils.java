@@ -16,7 +16,7 @@ import java.util.Random;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.xml.bind.DatatypeConverter;
+import jakarta.xml.bind.DatatypeConverter;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.function.Executable;
 import org.springframework.util.DigestUtils;
@@ -79,8 +79,8 @@ public abstract class TestUtils {
         .limit(100)
         .collect(Collectors.toMap(
             Function.identity(),
-            (item) -> item.toString(), (
-            k1,k2)->k2,
+            Object::toString,
+            (k1,k2) ->k2,
             HashMap::new));
   }
 

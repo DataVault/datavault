@@ -296,7 +296,7 @@ class TivoliStorageManagerTest {
         @Captor
         ArgumentCaptor<String> argDesc;
         @Captor
-        ArgumentCaptor<String> argCommands;
+        ArgumentCaptor<String[]> argCommands;
 
         @BeforeEach
         void setup() throws IOException {
@@ -327,7 +327,7 @@ class TivoliStorageManagerTest {
             assertThat(argDesc.getValue()).isEqualTo("tsmDelete");
             
             String expectedTsmFile = tsmTemp.resolve("testDepositId").resolve(fileToDelete.getName()).toString();
-            assertThat(argCommands.getAllValues()).containsExactly("dsmc","delete","archive", expectedTsmFile, "-noprompt","-optfile=specificLocation");
+            assertThat(argCommands.getValue()).isEqualTo(new String[]{"dsmc","delete","archive", expectedTsmFile, "-noprompt","-optfile=specificLocation"});
 
             //Check that the local file has not been deleted. We are trying to delete file on TSM ONLY
             assertThat(fileToDelete).exists();
@@ -357,7 +357,7 @@ class TivoliStorageManagerTest {
 
             assertThat(argDesc.getValue()).isEqualTo("tsmDelete");
 
-            assertThat(argCommands.getAllValues()).containsExactly("dsmc","delete","archive", expectedTsmFile, "-noprompt","-optfile=specificLocation");
+            assertThat(argCommands.getValue()).isEqualTo(new String[]{"dsmc","delete","archive", expectedTsmFile, "-noprompt","-optfile=specificLocation"});
 
             //Check that the local file has not been deleted. We are trying to delete file on TSM ONLY
             assertThat(fileToDelete).exists();
@@ -374,7 +374,7 @@ class TivoliStorageManagerTest {
         @Captor
         ArgumentCaptor<String> argDesc;
         @Captor
-        ArgumentCaptor<String> argCommands;
+        ArgumentCaptor<String[]> argCommands;
         
         File targetFile;
         

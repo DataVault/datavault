@@ -51,7 +51,7 @@ public interface PropNames {
   String MONITOR_SFTP = "monitorSftp";
 
   String TSM_REVERSE = "tsmReverse";
-  String USER_FS_RETRIEVE_MAX_ATTEMPTS = "userFsRetrieveMaxAttempts";
-  String USER_FS_RETRIEVE_DELAY_MS_1 = "userFsRetrieveDelayMs1";
-  String USER_FS_RETRIEVE_DELAY_MS_2 = "userFsRetrieveDelayMs2";
+  String USER_FS_RETRY_MAX_ATTEMPTS = "userFsRetryMaxAttempts";
+  String USER_FS_RETRY_DELAY_MS_1 = "userFsRetryDelayMs1";
+  String USER_FS_RETRY_DELAY_MS_2 = "userFsRetryDelayMs2";
 }

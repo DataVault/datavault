@@ -38,6 +38,7 @@ public class ArchiveDAOIT extends BaseReuseDatabaseTest {
 
     dao.save(archive1);
     assertNotNull(archive1.getId());
+    UUIDUtils.assertIsUUID(archive1.getId());
     assertEquals(1, count());
 
     dao.save(archive2);

@@ -23,8 +23,8 @@ import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
 import org.thymeleaf.DialectConfiguration;
 import org.thymeleaf.EngineConfiguration;
-import org.thymeleaf.spring5.SpringTemplateEngine;
-import org.thymeleaf.spring5.templateresolver.SpringResourceTemplateResolver;
+import org.thymeleaf.spring6.SpringTemplateEngine;
+import org.thymeleaf.spring6.templateresolver.SpringResourceTemplateResolver;
 import org.thymeleaf.templateresolver.ITemplateResolver;
 
 import java.io.Serializable;
@@ -68,6 +68,7 @@ public class ThymeleafConfigTest extends BaseThymeleafTest{
     void setup() {
         this.mRequest = new MockHttpServletRequest();
         this.mRequest.setContextPath("/dv");
+        this.mRequest.setRequestURI("/dv/test");
         this.mResponse = new MockHttpServletResponse();
         RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(mRequest));
         assertThat(this.templateEngine.getConfiguration()).isInstanceOf(EngineConfiguration.class);
@@ -108,7 +109,7 @@ public class ThymeleafConfigTest extends BaseThymeleafTest{
     void testThymeleafConfiguration() {
         Set<DialectConfiguration> dialectConfigs = tlConfig.getDialectConfigurations();
         Set<String> dialectNames = dialectConfigs.stream().map(dc -> dc.getDialect().getName()).collect(Collectors.toSet());
-        assertThat(dialectNames).containsAll(Arrays.asList("SpringSecurity", "Layout", "SpringStandard", "java8time"));
+        assertThat(dialectNames).containsAll(Arrays.asList("SpringSecurity", "Layout", "SpringStandard"));
         log.info(tlConfig.toString());
         assertThat(tlConfig.getTemplateResolvers()).hasSize(1);
         ITemplateResolver firstTemplateResolver = tlConfig.getTemplateResolvers().iterator().next();

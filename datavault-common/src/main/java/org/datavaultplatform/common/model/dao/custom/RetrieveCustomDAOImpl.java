@@ -1,12 +1,12 @@
 package org.datavaultplatform.common.model.dao.custom;
 
 import java.util.ArrayList;
-import java.util.Collections;
+
 import java.util.List;
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 import org.datavaultplatform.common.model.Deposit_;
 import org.datavaultplatform.common.model.Permission;
 import org.datavaultplatform.common.model.Retrieve;
@@ -29,7 +29,7 @@ public class RetrieveCustomDAOImpl extends BaseCustomDAOImpl implements Retrieve
         if (helper.hasNoAccess()) {
             return new ArrayList<>();
         }
-        helper.setOrderByHelper((cb,rt) -> Collections.singletonList(cb.asc(rt.get(Retrieve_.TIMESTAMP))));
+        helper.setOrderByHelper((cb,rt) -> List.of(cb.asc(rt.get(Retrieve_.TIMESTAMP))));
         List<Retrieve> retrieves = helper.getItems();
         return retrieves;
     }

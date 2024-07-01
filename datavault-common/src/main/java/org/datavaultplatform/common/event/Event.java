@@ -1,30 +1,13 @@
 package org.datavaultplatform.common.event;
 
 import java.util.Date;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.NamedAttributeNode;
-import javax.persistence.NamedEntityGraph;
-import javax.persistence.NamedSubgraph;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.DiscriminatorType;
-import javax.persistence.DiscriminatorColumn;
-import javax.persistence.Enumerated;
-import javax.persistence.EnumType;
+
+import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import javax.persistence.ManyToOne;
-
+import org.hibernate.annotations.UuidGenerator;
 import org.datavaultplatform.common.util.DateTimeUtils;
-import org.hibernate.annotations.GenericGenerator;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.response.EventInfo;
 
@@ -32,7 +15,7 @@ import org.datavaultplatform.common.response.EventInfo;
 @Entity
 @Table(name="Events")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name="eventType", discriminatorType = DiscriminatorType.STRING)
+@DiscriminatorColumn(name="eventType", discriminatorType = DiscriminatorType.STRING, columnDefinition = "VARCHAR(31)")
 @NamedEntityGraph(name = Event.EG_EVENT, attributeNodes = {
     @NamedAttributeNode(value = Event_.ARCHIVE, subgraph = "subArchive"),
     @NamedAttributeNode(value = Event_.DEPOSIT, subgraph = "subDeposit"),
@@ -73,12 +56,12 @@ public class Event {
 
     // Event Identifier
     @Id
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid2")
+    @UuidGenerator
     @Column(name = "id", unique = true, length = 36)
     private String id;
     
     // Event properties
+    @Lob
     @Column(name = "message", columnDefinition = "LONGTEXT", length = 4000)
     public String message;
     public String retrieveId;
@@ -133,6 +116,7 @@ public class Event {
     public String userAgent;
     
     @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "VARCHAR(255)")
     private Agent.AgentType agentType;
 
     // For Audit

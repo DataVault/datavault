@@ -30,5 +30,5 @@ cd ${DATAVAULT_HOME}
 # the broker jar has all the classes we need but we want a different 'main class' - org.datavaultplatform.common.crypto.Encryption
 java -cp datavault-broker/target/datavault-broker.jar \
  -Dloader.main=org.datavaultplatform.common.crypto.Encryption \
- org.springframework.boot.loader.PropertiesLauncher generateSecretKeyAndAddToJCEKS "$JSON_FILE"
+ org.springframework.boot.loader.launch.PropertiesLauncher generateSecretKeyAndAddToJCEKS "$JSON_FILE"
 

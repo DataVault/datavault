@@ -26,6 +26,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.apache.commons.lang3.StringUtils;
+import org.datavaultplatform.common.io.DataVaultFileUtils;
 import org.datavaultplatform.common.task.Context;
 import org.datavaultplatform.common.task.Context.AESMode;
 import org.slf4j.Logger;
@@ -49,13 +50,12 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.EnumSet;
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import java.security.Security;
 import java.security.Provider;
 import org.springframework.util.Assert;
 
 import com.google.common.base.Splitter;
-import java.util.stream.Collectors;
 import lombok.SneakyThrows;
 import org.apache.commons.codec.digest.DigestUtils;
 
@@ -326,9 +326,9 @@ public class Encryption {
                 .token(getVaultToken());
 
         logger.info("Vault PEM path: '"+getVaultSslPEMPath()+"'");
-        logger.info("context.getVaultSslPEMPath().trim().equals(\"\"): "+getVaultSslPEMPath().equals(""));
+        logger.info("context.getVaultSslPEMPath().trim().equals(\"\"): "+getVaultSslPEMPath().isEmpty());
 
-        if(getVaultSslPEMPath().trim().equals("")) {
+        if(getVaultSslPEMPath().trim().isEmpty()) {
             logger.debug("Won't use SSL Certificate.");
         } else {
             logger.debug("Use PEM file: '"+getVaultSslPEMPath().trim()+"'");
@@ -387,9 +387,8 @@ public class Encryption {
         digest.append("-");
 
         // We use md5 here because it's short. We don't need a secure hash
-        String md5 = Splitter.fixedLength(5)
-            .splitToStream(DigestUtils.md5Hex(iv))
-            .collect(Collectors.joining("-"));
+        String md5 = String.join("-",
+            Splitter.fixedLength(5).splitToList(DigestUtils.md5Hex(iv)));
 
         digest.append(md5);
         return digest.toString();
@@ -406,14 +405,10 @@ public class Encryption {
             logger.info("Decrypting [{}] using iv-byte[] with digest [{}]/bas64[{}]", file, ivDigest, base64iv);
         }
 
-        final Cipher cipher;
-        switch (aesMode) {
-            case CBC:
-                cipher = Encryption.initCBCCipher(getVaultDataEncryptionKeyName(), encryptMode, iv); break;
-            case GCM:
-            default:
-                cipher = Encryption.initGCMCipher(getVaultDataEncryptionKeyName(), encryptMode, iv); break;
-        }
+        final Cipher cipher = switch (aesMode) {
+            case CBC -> Encryption.initCBCCipher(getVaultDataEncryptionKeyName(), encryptMode, iv);
+            default  -> Encryption.initGCMCipher(getVaultDataEncryptionKeyName(), encryptMode, iv);
+        };
 
         File tempFile = new File(file.getAbsoluteFile() + ".temp");
         String action = encryptMode == Cipher.ENCRYPT_MODE ? "encrypting" : "decrypting";
@@ -521,7 +516,7 @@ public class Encryption {
     public static int getEncBufferSize() { return encBufferSize; }
 
     public void setEncBufferSize(String encBufferSize) {
-        int bytes = Math.toIntExact(org.datavaultplatform.common.io.FileUtils.parseFormattedSizeToBytes(encBufferSize));
+        int bytes = Math.toIntExact(DataVaultFileUtils.parseFormattedSizeToBytes(encBufferSize));
         Encryption.encBufferSize = bytes;
     }
 
@@ -678,7 +673,7 @@ public class Encryption {
             KeyStoreInfo keyStoreInfo = extractKeyStoreInfo(keyStoreFileName);
             generateSecretKeyAndAddToJCEKS(keyStoreInfo);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("unexpected exception", e);
             System.exit(1);
         }
     }
@@ -814,9 +809,8 @@ public class Encryption {
     public static String getKeyDigest(SecretKey key) {
         String encoded =  new BigInteger(1, key.getEncoded()).toString(16).toUpperCase();
         String digest = encoded.substring(0,40);
-        String readableDigest = Splitter.fixedLength(5)
-            .splitToStream(digest)
-            .collect(Collectors.joining("-"));
+        String readableDigest = String.join("-",
+            Splitter.fixedLength(5).splitToList(digest));
         return readableDigest;
     }
 

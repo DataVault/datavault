@@ -7,7 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.util.Map;
-import java.util.stream.Stream;
+
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.event.RecordingEventSender;
@@ -16,6 +16,8 @@ import org.datavaultplatform.worker.test.AddTestProperties;
 import org.datavaultplatform.worker.test.TestClockConfig;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -32,6 +34,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @TestPropertySource(properties = {
     "worker.rabbit.enabled=false",
     "management.endpoints.web.exposure.include=*",
+    "worker.security.enabled=true",
+    "management.endpoints.web.base-path=/actuator",
+    "management.endpoints.enabled-by-default=true",
     "management.health.rabbit.enabled=false"})
 @AutoConfigureMockMvc
 @Import(TestClockConfig.class)
@@ -46,24 +51,25 @@ public class ActuatorTest {
   @MockBean
   RecordingEventSender eventSender;
 
-  @Test
+  @ParameterizedTest
+  @ValueSource(strings = {"/actuator/info", "/actuator/health", "/actuator/metrics", "/actuator/memoryinfo"})
   @SneakyThrows
-  void testActuatorPublicAccess() {
-    Stream.of("/actuator/info", "/actuator/health", "/actuator/metrics", "/actuator/memoryinfo").forEach(this::checkPublic);
+  void testActuatorPublicAccess(String path) {
+    checkPublic(path);
   }
 
-  @Test
+  @ParameterizedTest
+  @ValueSource(strings={"/actuator", "/actuator/", "/actuator/env"})
   @SneakyThrows
-  void testActuatorUnauthorized() {
-    Stream.of("/actuator", "/actuator/", "/actuator/env")
-        .forEach(this::checkUnauthorized);
+  void testActuatorUnauthorized(String path) {
+    checkUnauthorized(path);
   }
 
-  @Test
+  @ParameterizedTest
+  @ValueSource(strings={"/actuator", "/actuator/", "/actuator/env"})
   @SneakyThrows
-  void testActuatorAuthorized() {
-    Stream.of("/actuator", "/actuator/", "/actuator/env")
-        .forEach(url -> checkAuthorized(url, "wactu", "wactupass"));
+  void testActuatorAuthorized(String path) {
+    checkAuthorized(path, "wactu", "wactupass");
   }
 
   @SneakyThrows
@@ -91,17 +97,18 @@ public class ActuatorTest {
             .andReturn();
 
     String json = mvcResult.getResponse().getContentAsString();
-    Map<String,Object> infoMap = mapper.createParser(json).readValueAs(Map.class);
+    try (var parser = mapper.createParser(json)) {
+      Map<String,Object> infoMap = parser.readValueAs(Map.class);
 
-    String ct = (String)infoMap.get("timestamp");
-    Assertions.assertEquals("2022-03-29T13:15:16.101Z",ct);
+      String ct = (String)infoMap.get("timestamp");
+      Assertions.assertEquals("2022-03-29T13:15:16.101Z",ct);
 
-    assertTrue(infoMap.containsKey("memory"));
-    Map<String,Object> innerMap = (Map<String,Object>)infoMap.get("memory");
-    assertTrue(innerMap.containsKey("total"));
-    assertTrue(innerMap.containsKey("free"));
-    assertTrue(innerMap.containsKey("max"));
-
+      assertTrue(infoMap.containsKey("memory"));
+      Map<String,Object> innerMap = (Map<String,Object>)infoMap.get("memory");
+      assertTrue(innerMap.containsKey("total"));
+      assertTrue(innerMap.containsKey("free"));
+      assertTrue(innerMap.containsKey("max"));
+    }
   }
 
 }

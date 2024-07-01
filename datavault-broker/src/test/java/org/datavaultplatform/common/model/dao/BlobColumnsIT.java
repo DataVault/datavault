@@ -5,8 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Random;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.app.DataVaultBrokerApp;
 import org.datavaultplatform.broker.test.AddTestProperties;
@@ -46,9 +46,8 @@ public class BlobColumnsIT extends BaseDatabaseTest {
   }
 
   @Test
-  @Disabled("Works with MariaDB 10 - fails with MariaDB:5.5.64")
   void testComputedEnctryptionTarIVTinyBlobColFailsAt256() {
-    assertThrows(Exception.class, ()-> checkComputedEncryptionTarIVColumn(256));
+    assertThrows(Exception.class, ()-> checkComputedEncryptionTarIVColumn(MariaDBConstants.MARIADB_MAX_TINYBLOB_SIZE + 1));
   }
 
   void checkComputedEncryptionTarIVColumn(int length){
@@ -63,7 +62,7 @@ public class BlobColumnsIT extends BaseDatabaseTest {
   }
 
   private byte[] getRandomBytes(int length){
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
     for(int i=0;i<length;i++){
       sb.append(getRandomLetter());
     }

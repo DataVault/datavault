@@ -9,7 +9,6 @@ import org.datavaultplatform.webapp.exception.InvalidUunException;
 import org.datavaultplatform.webapp.services.ForceLogoutService;
 import org.datavaultplatform.webapp.services.RestService;
 import org.datavaultplatform.webapp.services.UserLookupService;
-import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.http.HttpStatus;
@@ -20,9 +19,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotEmpty;
 @Controller
 @ConditionalOnBean(RestService.class)
 public class RoleAssignmentController {
@@ -42,7 +41,7 @@ public class RoleAssignmentController {
 
     @PostMapping("/security/roles/{roleType}/{target}/user/update")
     @PreAuthorize("hasPermission(#targetId, #type, 'ASSIGN_VAULT_ROLES') or hasPermission(#targetId, 'GROUP_VAULT', 'ASSIGN_SCHOOL_VAULT_ROLES')")
-    public ResponseEntity updateRoleAssignment(
+    public ResponseEntity<?> updateRoleAssignment(
             @PathVariable("roleType") String type,
             @PathVariable("target") String targetId,
             @Valid @NotNull @RequestParam("assignment") Long assignmentId,
@@ -70,7 +69,7 @@ public class RoleAssignmentController {
 
     @PostMapping("/security/roles/{roleType}/{target}/user/delete")
     @PreAuthorize("hasPermission(#targetId, #type, 'ASSIGN_VAULT_ROLES') or hasPermission(#targetId, 'GROUP_VAULT', 'ASSIGN_SCHOOL_VAULT_ROLES')")
-    public ResponseEntity removeRoleAssignment(@PathVariable("roleType") String type,
+    public ResponseEntity<?> removeRoleAssignment(@PathVariable("roleType") String type,
                                                @PathVariable("target") String targetId,
                                                @RequestParam("assignment") long assignmentId) {
 
@@ -92,7 +91,7 @@ public class RoleAssignmentController {
 
     @PreAuthorize("hasPermission(#targetId, #type, 'ASSIGN_VAULT_ROLES') or hasPermission(#targetId, 'GROUP_VAULT', 'ASSIGN_SCHOOL_VAULT_ROLES')")
     @PostMapping("/security/roles/{roleType}/{target}/user")
-    public ResponseEntity createRoleAssignment(
+    public ResponseEntity<?> createRoleAssignment(
             @PathVariable("roleType") String type,
             @PathVariable("target") String targetId,
             @Valid  RoleAssignmentRequest request) {

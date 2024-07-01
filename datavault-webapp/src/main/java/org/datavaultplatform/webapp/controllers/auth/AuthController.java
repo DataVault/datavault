@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 @RequestMapping("/auth")
@@ -23,7 +23,7 @@ public class AuthController {
     public AuthController(
         @Value("${webapp.welcome}") String welcome,
         @Value("${webapp.logout.url}") String logoutUrl) {
-        if (logoutUrl == null || logoutUrl.equals("")) {
+        if (logoutUrl == null || logoutUrl.isEmpty()) {
             logoutUrl = AuthController.DEFAULT_LOGOUT_URL;
         }
         this.welcome = welcome;

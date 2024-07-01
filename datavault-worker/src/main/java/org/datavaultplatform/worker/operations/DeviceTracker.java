@@ -81,7 +81,7 @@ public class DeviceTracker implements Callable<HashMap<String, String>> {
             log.debug("Add to archiveIds: key: "+this.archiveStoreId+" ,value:"+archiveId);
             archiveIds.put(archiveStoreId, archiveId);
             log.debug("archiveIds: "+archiveIds);
-        } else if(!this.optChunkNumber.isPresent()) {
+        } else if(this.optChunkNumber.isEmpty()) {
             archiveIds.put(archiveStoreId, archiveId);
         }
         log.debug("DeviceTracker task completed: " + archiveId);

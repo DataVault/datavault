@@ -7,7 +7,6 @@ import static org.mockito.Mockito.doAnswer;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
@@ -44,7 +43,7 @@ public class ScheduledTasksIT extends BaseScheduledTest {
   CheckRetentionPolicies task5CheckRetentionPolicies;
   final List<Instant> timestamps5 = new ArrayList<>();
 
-  final List<List<Instant>> allTimestamps = Arrays.asList(timestamps1, timestamps2, timestamps3, timestamps4, timestamps5);
+  final List<List<Instant>> allTimestamps = List.of(timestamps1, timestamps2, timestamps3, timestamps4, timestamps5);
 
 
   @Test

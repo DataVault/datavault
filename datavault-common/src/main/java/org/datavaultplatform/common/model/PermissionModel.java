@@ -2,7 +2,7 @@ package org.datavaultplatform.common.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.Objects;
-import javax.persistence.*;
+import jakarta.persistence.*;
 import org.hibernate.Hibernate;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -90,16 +90,12 @@ public class PermissionModel {
     }
 
     public boolean isAllowedForRoleType(RoleType roleType) {
-        switch (roleType) {
-            case ADMIN:
-                return true;
-            case SCHOOL:
-                return isSchoolPermission();
-            case VAULT:
-                return isVaultPermission();
-            default:
-                return false;
-        }
+        return switch (roleType) {
+            case ADMIN -> true;
+            case SCHOOL -> isSchoolPermission();
+            case VAULT -> isVaultPermission();
+            default -> false;
+        };
     }
     @Override
     public boolean equals(Object o) {

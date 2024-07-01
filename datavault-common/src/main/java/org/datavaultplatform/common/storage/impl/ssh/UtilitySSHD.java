@@ -42,7 +42,7 @@ public abstract class UtilitySSHD {
             workingDir = remoteDirFullPath;
         }
 
-        for (SftpClient.DirEntry entry : con.sftpClient.readDir(workingDir)) {
+        for (DirEntry entry : con.sftpClient.readDir(workingDir)) {
 
             if (entry.getFilename().equals(".") ||
                 entry.getFilename().equals("..")) {

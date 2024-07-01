@@ -7,6 +7,8 @@ import org.datavaultplatform.webapp.services.NotifyLoginService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.PermissionEvaluator;
+import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
+import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
 
@@ -26,6 +28,13 @@ public class SecurityConfig {
   @Bean
   public PermissionEvaluator permissionEvaluator(EvaluatorService evaluatorService) {
     return new ScopedPermissionEvaluator(evaluatorService);
+  }
+
+  @Bean
+  public static MethodSecurityExpressionHandler expressionHandler(PermissionEvaluator evaluator){
+    var expressionHandler = new DefaultMethodSecurityExpressionHandler();
+    expressionHandler.setPermissionEvaluator(evaluator);
+    return expressionHandler;
   }
 
 }

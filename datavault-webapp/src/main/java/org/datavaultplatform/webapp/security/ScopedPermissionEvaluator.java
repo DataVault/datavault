@@ -89,8 +89,7 @@ public class ScopedPermissionEvaluator implements PermissionEvaluator {
     public boolean hasPermission(Authentication auth, Object targetDomainObject, Object permissionId) {
         final ScopedPermissionKey key;
 
-        if (targetDomainObject instanceof Vault) {
-            Vault vault = (Vault) targetDomainObject;
+        if (targetDomainObject instanceof Vault vault) {
 
             // TODO: Stop gap, need to imply permissions for data owners either via Vaults.user, or a RoleAssignment
             // relation.

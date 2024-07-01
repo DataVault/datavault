@@ -2,7 +2,7 @@ package org.datavaultplatform.webapp.authentication.shib;
 
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * User: Robin Taylor

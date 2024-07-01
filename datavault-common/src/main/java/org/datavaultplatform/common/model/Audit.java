@@ -5,20 +5,20 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.NamedEntityGraph;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.NamedEntityGraph;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.Transient;
 import org.datavaultplatform.common.response.AuditInfo;
 import org.datavaultplatform.common.util.DateTimeUtils;
 import org.hibernate.Hibernate;
-import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.UuidGenerator;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
@@ -29,8 +29,7 @@ public class Audit {
     public static final String EG_AUDIT = "eg.Audit.1";
     // Deposit Identifier
     @Id
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid2")
+    @UuidGenerator
     @Column(name = "id", unique = true, length = 36)
     private String id;
 
@@ -39,8 +38,13 @@ public class Audit {
     @Temporal(TemporalType.TIMESTAMP)
     private Date timestamp;
 
-    @OneToMany(targetEntity = DepositChunk.class, mappedBy = "deposit", fetch=FetchType.LAZY)
+    //@OneToMany(targetEntity = DepositChunk.class, mappedBy = "deposit", fetch=FetchType.LAZY)
+    //THIS WAS A BUG - NOW TRANSIENT
+    @Transient
     private List<DepositChunk> chunks;
+
+    @OneToMany(targetEntity = AuditChunkStatus.class, mappedBy = "audit", fetch=FetchType.LAZY)
+    private List<AuditChunkStatus> auditChunkStatuses;
 
     public enum Status {
         FAILED,
@@ -72,6 +76,15 @@ public class Audit {
 
     public void setDepositChunks(List<DepositChunk> chunks) {
         this.chunks = chunks;
+    }
+
+    public List<AuditChunkStatus> getAuditChunkStatuses() {
+        return auditChunkStatuses;
+    }
+
+    public void setAuditChunkStatuses(
+        List<AuditChunkStatus> auditChunkStatuses) {
+        this.auditChunkStatuses = auditChunkStatuses;
     }
 
     public String getNote() { return note; }

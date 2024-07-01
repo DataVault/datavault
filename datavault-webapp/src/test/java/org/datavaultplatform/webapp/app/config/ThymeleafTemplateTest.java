@@ -1,5 +1,6 @@
 package org.datavaultplatform.webapp.app.config;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.request.CreateDeposit;
@@ -10,6 +11,7 @@ import org.datavaultplatform.common.storage.impl.TivoliStorageManager;
 import org.datavaultplatform.webapp.model.DepositReviewModel;
 import org.datavaultplatform.webapp.model.VaultReviewHistoryModel;
 import org.datavaultplatform.webapp.model.VaultReviewModel;
+import org.datavaultplatform.webapp.services.PermissionsService;
 import org.datavaultplatform.webapp.test.ProfileStandalone;
 import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
@@ -20,19 +22,19 @@ import org.jsoup.select.Elements;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.stereotype.Controller;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
@@ -45,15 +47,16 @@ import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@Slf4j
 @SpringBootTest
 @ProfileStandalone
 @TestMethodOrder(MethodOrderer.MethodName.class)
 @AutoConfigureMockMvc
+@TestPropertySource(properties = "logging.level.org.thymeleaf.spring6.expression=TRACE")
 public class ThymeleafTemplateTest extends BaseThymeleafTest {
 
     private static final ThreadLocal<ModelMap> TL_MODEL_MAP = ThreadLocal.withInitial(ModelMap::new);
@@ -76,8 +79,6 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
     public static final  String ERROR_FIRST_LINE = "<!DOCTYPE html><!--error/error.html-->";
 
     private final Date now = new Date();
-
-    final Logger log = LoggerFactory.getLogger(getClass());
 
     enum ListState {
         NULL, EMPTY, NON_EMPTY
@@ -1182,7 +1183,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         user1.setFirstname("user1-first");
         user1.setLastname("user1-last");
         user1.setPassword("XXXX");
-        user1.setProperties(new HashMap<String,String>() {{
+        user1.setProperties(new HashMap<>() {{
             put("prop-1", "value-1");
             put("prop-2", "value-2");
         }});
@@ -1209,7 +1210,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         user1.setFirstname("user1-first");
         user1.setLastname("user1-last");
         user1.setPassword("XXXX");
-        user1.setProperties(new HashMap<String,String>() {{
+        user1.setProperties(new HashMap<>() {{
             put("prop-1", "value-1");
             put("prop-2", "value-2");
         }});
@@ -1237,7 +1238,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         user1.setLastname("user1-last");
         user1.setPassword("XXXX");
         user1.setEmail("user.one@example.com");
-        user1.setProperties(new HashMap<String,String>() {{
+        user1.setProperties(new HashMap<>() {{
             put("prop-A", "value-1");
             put("prop-B", "value-2");
         }});
@@ -1247,7 +1248,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         user2.setLastname("user2-last");
         user2.setPassword("XXXX");
         user2.setEmail("user.two@example.com");
-        user2.setProperties(new HashMap<String,String>() {{
+        user2.setProperties(new HashMap<>() {{
             put("prop-C", "value-3");
             put("prop-D", "value-4");
         }});
@@ -1758,7 +1759,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("sftpRootPath", "sftpRootPath4");
 
         FileStore fs1 = getFileStore("fs-id-1");
-        fs1.setProperties(new HashMap<String,String>() {{
+        fs1.setProperties(new HashMap<>() {{
             put("host", "host1");
             put("port", "port1");
             put("rootPath", "rootPath1");
@@ -1769,7 +1770,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         fs1.setUser(user);
 
         FileStore fs2 = getFileStore("fs-id-2");
-        fs2.setProperties(new HashMap<String,String>() {{
+        fs2.setProperties(new HashMap<>() {{
             put("host", "host2");
             put("port", "port2");
             put("rootPath", "rootPath2");
@@ -2436,7 +2437,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         user.setFirstname("user1-first");
         user.setLastname("user1-last");
         user.setPassword("XXXX");
-        user.setProperties(new HashMap<String,String>() {{
+        user.setProperties(new HashMap<>() {{
             put("prop-A", "value-1");
             put("prop-B", "value-2");
         }});
@@ -2449,7 +2450,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         user.setFirstname("user2-first");
         user.setLastname("user2-last");
         user.setPassword("XXXX");
-        user.setProperties(new HashMap<String,String>() {{
+        user.setProperties(new HashMap<>() {{
             put("prop-C", "value-3");
             put("prop-D", "value-4");
         }});
@@ -2566,12 +2567,12 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         vault.setContactPerson("contact-person-1");
 
         vault.setDatasetID("data-set-id-1");
-        ArrayList creators = new ArrayList();
+        ArrayList<String> creators = new ArrayList<>();
         creators.add("creator1");
         creators.add("creator2");
         vault.setDataCreators(creators);
 
-        ArrayList depositors = new ArrayList();
+        ArrayList<String> depositors = new ArrayList<>();
         depositors.add("Neil");
         depositors.add("Geddy");
         depositors.add("Alex");
@@ -2589,7 +2590,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         vault.setLoggedInAs("user-one");
 
         vault.setName("vault-name");
-        ArrayList ndms = new ArrayList();
+        ArrayList<String> ndms = new ArrayList<>();
         ndms.add("ndm1");
         ndms.add("ndm2");
         vault.setNominatedDataManagers(ndms);
@@ -2676,8 +2677,8 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
 
     }
     void checkOption(Element option, String value, boolean selected){
-        assertThat(option.tag().getName().equals("option"));
-        assertThat(option.val().equals(value));
+        assertThat(option.tag().getName()).isEqualTo("option");
+        assertThat(option.val()).isEqualTo(value);
         boolean isSelected = option.hasAttr("selected");
         assertThat(isSelected).isEqualTo(selected);
     }
@@ -2686,4 +2687,15 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         return now;
     }
 
+    @TestConfiguration
+    static class TestConfig {
+
+        @Bean
+        public PermissionsService permissionsService() {
+            PermissionsService mock = mock(PermissionsService.class);
+            when(mock.retrievesPaused()).thenReturn(false);
+            when(mock.depositsPaused()).thenReturn(false);
+            return mock;
+        }
+    }
 }

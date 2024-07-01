@@ -9,17 +9,14 @@ import org.datavaultplatform.common.event.InitStates;
 import org.datavaultplatform.common.event.UpdateProgress;
 import org.datavaultplatform.common.event.deposit.*;
 import org.datavaultplatform.common.io.Progress;
-import org.datavaultplatform.common.storage.ArchiveStore;
-import org.datavaultplatform.common.storage.Device;
-import org.datavaultplatform.common.storage.UserStore;
-import org.datavaultplatform.common.storage.Verify;
+import org.datavaultplatform.common.storage.*;
 import org.datavaultplatform.common.task.Context;
-import org.datavaultplatform.common.task.Task;
 import org.datavaultplatform.common.task.TaskExecutor;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.datavaultplatform.common.util.StorageClassUtils;
 import org.datavaultplatform.common.util.Utils;
 import org.datavaultplatform.worker.operations.*;
+import org.datavaultplatform.worker.retry.TwoSpeedRetry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +27,7 @@ import java.util.*;
 /**
  * A class that extends Task which is used to handle Deposits to the vault
  */
-public class Deposit extends Task {
+public class Deposit extends BaseTwoSpeedRetryTask {
 
     private static final Logger logger = LoggerFactory.getLogger(Deposit.class);
     private static final Set<String> RESTART_FROM_BEGINNING = new HashSet<>();
@@ -124,6 +121,7 @@ public class Deposit extends Task {
         }
         
         this.initStates();
+        this.setupUserFsTwoSpeedRetry(properties);
         
         eventSender.send(new Start(jobID, depositId)
             .withUserId(userID)
@@ -133,8 +131,8 @@ public class Deposit extends Task {
         userStores = this.setupUserFileStores(resolver);
         this.setupArchiveFileStores(resolver);
         DepositTransferHelper uploadHelper = this.initialTransferStep(context,lastEventClass);
-        Path bagDataPath = uploadHelper.getBagDataPath();
-        File bagDir = uploadHelper.getBagDir();
+        Path bagDataPath = uploadHelper.bagDataPath();
+        File bagDir = uploadHelper.bagDir();
 
         try {
             if (lastEventClass == null || RESTART_FROM_TRANSFER.contains(lastEventClass)) {
@@ -224,7 +222,11 @@ public class Deposit extends Task {
             // Ask the driver to copy files to our working directory
             logger.debug("CopyFromUserStorage filePath:" + filePath);
             logger.debug("CopyFromUserStorage outputFile:" + outputFile.getAbsolutePath());
-            ((Device)userStore).retrieve(filePath, outputFile, progress);
+            TwoSpeedRetry.DvRetryTemplate template = userFsTwoSpeedRetry.getRetryTemplate(String.format("fromUserFs - %s", filePath));
+            template.execute(retryContext -> {
+                ((Device)userStore).retrieve(filePath, outputFile, progress);
+                return null;
+            });
         } finally {
             // Stop the tracking thread
             tracker.stop();
@@ -474,19 +476,9 @@ public class Deposit extends Task {
     private void verifyTarFile(Path tempPath, File tarFile, String origTarHash) throws Exception {
 
         Utils.checkFileHash("tar", tarFile, origTarHash);
-        // Decompress to the temporary directory
-        //File bagDir = Tar.unTar(tarFile, tempPath);
-        
-        // Validate the bagit directory
-        //if (!Packager.validateBag(bagDir)) {
-        //    throw new Exception("Bag is invalid");
-        //} else {
-        //    logger.info("Bag is valid");
-        //}
         
         // Cleanup
         logger.info("Cleaning up ...");
-        //FileUtils.deleteDirectory(bagDir);
         tarFile.delete();
     }
     
@@ -521,14 +513,8 @@ public class Deposit extends Task {
 
                 try {
                     UserStore userStore = userStores.get(storageID);
-                    long fileSize = userStore.getSize(storagePath);
-                    //logger.info("FileSize = '" + fileSize + "'");
-                    //if (fileSize == 0) {
-                    //    String msg = "Deposit failed: file size is 0";
-                    //    logger.error(msg);
-                    //    eventSender.send(new Error(jobID, depositId, msg).withUserId(userID));
-                    //    throw new RuntimeException(new Exception(msg));
-                    //}
+                    TwoSpeedRetry.DvRetryTemplate template = userFsTwoSpeedRetry.getRetryTemplate(String.format("calcSizeFromFS - %s", filePath));
+                    long fileSize = template.execute( retryContext -> userStore.getSize(storagePath));
                     depositTotalSize += fileSize;
 
                 } catch (Exception e) {
@@ -539,8 +525,6 @@ public class Deposit extends Task {
                 }
 
             }
-
-//		depositTotalSize += this.calculateUserUploads(depositTotalSize, context);
 
             // Store the calculated deposit size
             eventSender.send(new ComputedSize(jobID, depositId, depositTotalSize)
@@ -553,26 +537,6 @@ public class Deposit extends Task {
             throw new RuntimeException(e);
         }
 	}
-
-	// TO REMOVE
-	// wpetit: I'm commenting this out as I don't think we want to keep it.
-    // It seems to be necessary when we still had the "Browse" button on the Deposit page
-    // But we removed the button and now is cause the Deposit size to be doubled
-//	private long calculateUserUploads(long depositSize, Context context) {
-//		// Add size of any user uploads
-//        try {
-//            for (String path : fileUploadPaths) {
-//                depositSize += getUserUploadsSize(context.getTempDir(), userID, path);
-//            }
-//        } catch (Exception e) {
-//            String msg = "Deposit failed: could not access user uploads";
-//            logger.error(msg, e);
-//            eventSender.send(new Error(jobID, depositId, msg).withUserId(userID));
-//            throw new RuntimeException(e);
-//        }
-//
-//        return depositSize;
-//	}
 	
 	private HashMap<String, UserStore> setupUserFileStores(StorageClassNameResolver resolver) {
 		userStores = new HashMap<>();
@@ -696,26 +660,14 @@ public class Deposit extends Task {
             logger.debug("Creating chunk checksum task:" + chunkNumber);
             executor.add(ct);
 
-//            chunksHash[i] = Verify.getDigest(chunk);
-//
-//            long chunkSize = chunk.length();
-//            logger.info("Chunk file " + i + ": " + chunkSize + " bytes");
-//            logger.info("Chunk file location: " + chunk.getAbsolutePath());
-//            logger.info("Checksum algorithm: " + tarHashAlgorithm);
-//            logger.info("Checksum: " + chunksHash[i]);
-//
-//            //if (i > (chunkFiles.length / 2)) {
-//            //    throw new Exception("Failed during chunking");
-//            //}
-//            chunksDigest.put(i+1, chunksHash[i]);
         }
 
       executor.execute( result -> {
-            int chunkNumber = result.getChunkNumber();
+            int chunkNumber = result.chunkNumber();
             int i = chunkNumber - 1;
-            chunksHash[i] = result.getChunkHash();
+            chunksHash[i] = result.chunkHash();
             chunksDigest.put(chunkNumber, chunksHash[i]);
-            File chunk = result.getChunk();
+            File chunk = result.chunk();
             long chunkSize = chunk.length();
             logger.info("Chunk file " + chunkNumber + ": " + chunkSize + " bytes");
             logger.info("Chunk file location: " + chunk.getAbsolutePath());
@@ -894,11 +846,11 @@ public class Deposit extends Task {
             Path bagPath = context.getTempDir().resolve(bagID);
             logger.debug("The is the bagPath " + bagPath);
             retVal = new DepositTransferHelper(bagPath.resolve("data"), this.createDir(bagPath));
-            logger.debug("The is the bagDataPath " + retVal.getBagDataPath().toString());
+            logger.debug("The is the bagDataPath " + retVal.bagDataPath().toString());
 
-            this.createDir(retVal.getBagDataPath());
+            this.createDir(retVal.bagDataPath());
 
-            this.copySelectedUserDataToBagDir(retVal.getBagDataPath());
+            this.copySelectedUserDataToBagDir(retVal.bagDataPath());
         } else {
             logger.debug("Last event is: " + lastEventClass + " skipping initial File copy");
             Path bagPath = context.getTempDir().resolve(bagID);
@@ -908,7 +860,7 @@ public class Deposit extends Task {
 
             // depending on how far the previous attempt got this dir
             // may have been deleted
-            this.createDir(retVal.getBagDataPath());
+            this.createDir(retVal.bagDataPath());
         }
 
         return retVal;

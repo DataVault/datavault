@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Field;
+import java.util.List;
 import java.util.Map;
 import lombok.SneakyThrows;
 import org.datavaultplatform.webapp.test.ProfileStandalone;
@@ -21,8 +22,7 @@ import org.springframework.security.web.access.expression.DefaultWebSecurityExpr
 public class SecurityConfigTest {
 
   @Autowired
-  @Qualifier("webSecurityExpressionHandler")
-  DefaultWebSecurityExpressionHandler expressionHandler;
+  List<DefaultWebSecurityExpressionHandler> expressionHandlers;
 
   @Autowired
   @Qualifier("permissionEvaluator")
@@ -32,16 +32,21 @@ public class SecurityConfigTest {
   void checkExpressionHandler(ApplicationContext ctx) {
     Map<String, AbstractSecurityExpressionHandler> handlers = ctx.getBeansOfType(
         AbstractSecurityExpressionHandler.class);
-    assertEquals(1, handlers.size());
+    assertEquals(2, handlers.size());
     assertTrue(handlers.containsKey("webSecurityExpressionHandler"));
+    assertTrue(handlers.containsKey("expressionHandler"));
   }
 
   @Test
   @SneakyThrows
   void testEvaluatorWiring() {
+
     Field f = AbstractSecurityExpressionHandler.class.getDeclaredField("permissionEvaluator");
     f.setAccessible(true);
-    PermissionEvaluator actualEvaluator = (PermissionEvaluator)f.get(expressionHandler);
-    assertEquals(permissionEvaluator, actualEvaluator);
+
+    for (var expressionHandler : expressionHandlers) {
+      PermissionEvaluator actualEvaluator = (PermissionEvaluator) f.get(expressionHandler);
+      assertEquals(permissionEvaluator, actualEvaluator);
+    }
   }
 }

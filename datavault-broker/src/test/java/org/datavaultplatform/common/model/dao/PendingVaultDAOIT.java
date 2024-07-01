@@ -9,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -61,6 +60,7 @@ public class PendingVaultDAOIT extends BaseDatabaseTest {
 
     dao.save(pendingVault1);
     assertNotNull(pendingVault1.getId());
+    UUIDUtils.assertIsUUID(pendingVault1.getId());
     assertEquals(1, count());
 
     dao.save(pendingVault2);
@@ -102,11 +102,11 @@ public class PendingVaultDAOIT extends BaseDatabaseTest {
 
     // The PendingVaults should be ordered by Ascending CreationTime
     assertEquals(
-        Arrays.asList(
+        List.of(
             pendingVault3.getId(),
             pendingVault1.getId(),
             pendingVault2.getId()),
-        items.stream().map(PendingVault::getId).collect(Collectors.toList()));
+        items.stream().map(PendingVault::getId).toList());
   }
 
   @Test
@@ -219,14 +219,14 @@ public class PendingVaultDAOIT extends BaseDatabaseTest {
     List<PendingVault> results2 = dao.search("allowed1", "pv-name-1", "creationTime", "asc",
         null, null, null);
     assertEquals(2, results2.size());
-    assertTrue(results2.stream().map(PendingVault::getId).collect(Collectors.toList()).contains(pendingVault1.getId()));
-    assertTrue(results2.stream().map(PendingVault::getId).collect(Collectors.toList()).contains(pendingVault3.getId()));
+    assertTrue(results2.stream().map(PendingVault::getId).toList().contains(pendingVault1.getId()));
+    assertTrue(results2.stream().map(PendingVault::getId).toList().contains(pendingVault3.getId()));
 
 
     List<PendingVault> results3 = dao.search("allowed2", "pv-name-1", "creationTime", "asc",
         null, null, null);
     assertEquals(1, results3.size());
-    assertTrue(results3.stream().map(PendingVault::getId).collect(Collectors.toList()).contains(pendingVault2.getId()));
+    assertTrue(results3.stream().map(PendingVault::getId).toList().contains(pendingVault2.getId()));
 
     List<Object[]> queryRes1 = template.query("select id,confirmed from `PendingVaults`",
         (rs, rowNum) -> new Object[] {
@@ -241,12 +241,12 @@ public class PendingVaultDAOIT extends BaseDatabaseTest {
     List<PendingVault> results4 = dao.search("allowed1", "pv-name-1", "creationTime", "asc",
         null, null, Boolean.TRUE.toString());
     assertEquals(1, results4.size());
-    assertTrue(results4.stream().map(PendingVault::getId).collect(Collectors.toList()).contains(pendingVault1.getId()));
+    assertTrue(results4.stream().map(PendingVault::getId).toList().contains(pendingVault1.getId()));
 
     List<PendingVault> results5 = dao.search("allowed1", "pv-name-1", "creationTime", "asc",
         null, null, Boolean.FALSE.toString());
     assertEquals(1, results5.size());
-    assertTrue(results5.stream().map(PendingVault::getId).collect(Collectors.toList()).contains(pendingVault3.getId()));
+    assertTrue(results5.stream().map(PendingVault::getId).toList().contains(pendingVault3.getId()));
 
     List<PendingVault> results6 = dao.search("allowed2", "pv-name-1", "creationTime", "asc",
         null, null, Boolean.TRUE.toString());
@@ -255,23 +255,23 @@ public class PendingVaultDAOIT extends BaseDatabaseTest {
     List<PendingVault> results7 = dao.search("allowed2", "pv-name-1", "creationTime", "asc",
         null, null, Boolean.FALSE.toString());
     assertEquals(1, results7.size());
-    assertTrue(results7.stream().map(PendingVault::getId).collect(Collectors.toList()).contains(pendingVault2.getId()));
+    assertTrue(results7.stream().map(PendingVault::getId).toList().contains(pendingVault2.getId()));
 
     List<String> results8 = dao.search("allowed1", "pv-name-1", "creationTime", "asc",
-        null, null, null).stream().map(PendingVault::getId).collect(Collectors.toList());
-    assertEquals(Arrays.asList(pendingVault1.getId(), pendingVault3.getId()), results8);
+        null, null, null).stream().map(PendingVault::getId).toList();
+    assertEquals(List.of(pendingVault1.getId(), pendingVault3.getId()), results8);
 
     List<String> results9 = dao.search("allowed1", "pv-name-1", "creationTime", "desc",
-        null, null, null).stream().map(PendingVault::getId).collect(Collectors.toList());
-    assertEquals(Arrays.asList(pendingVault3.getId(), pendingVault1.getId()), results9);
+        null, null, null).stream().map(PendingVault::getId).toList();
+    assertEquals(List.of(pendingVault3.getId(), pendingVault1.getId()), results9);
 
     List<String> results10 = dao.search("allowed1", "pv-name-1", "creationTime", "desc",
-        "1", "10", null).stream().map(PendingVault::getId).collect(Collectors.toList());
-    assertEquals(Arrays.asList(pendingVault1.getId()), results10);
+        "1", "10", null).stream().map(PendingVault::getId).toList();
+    assertEquals(List.of(pendingVault1.getId()), results10);
 
     List<String> results11 = dao.search("allowed1", "pv-name-1", "creationTime", "desc",
-        "0", "1", null).stream().map(PendingVault::getId).collect(Collectors.toList());
-    assertEquals(Arrays.asList(pendingVault3.getId()), results11);
+        "0", "1", null).stream().map(PendingVault::getId).toList();
+    assertEquals(List.of(pendingVault3.getId()), results11);
   }
 
   @Test
@@ -319,43 +319,43 @@ public class PendingVaultDAOIT extends BaseDatabaseTest {
     List<PendingVault> results2 = dao.list("allowed1", "creationTime", "asc",
         null, null);
     assertEquals(2, results2.size());
-    assertTrue(results2.stream().map(PendingVault::getId).collect(Collectors.toList()).contains(pendingVault1.getId()));
-    assertTrue(results2.stream().map(PendingVault::getId).collect(Collectors.toList()).contains(pendingVault3.getId()));
+    assertTrue(results2.stream().map(PendingVault::getId).toList().contains(pendingVault1.getId()));
+    assertTrue(results2.stream().map(PendingVault::getId).toList().contains(pendingVault3.getId()));
 
     List<PendingVault> results3 = dao.list("allowed2", "creationTime", "asc",
         null, null);
     assertEquals(1, results3.size());
-    assertTrue(results3.stream().map(PendingVault::getId).collect(Collectors.toList()).contains(pendingVault2.getId()));
+    assertTrue(results3.stream().map(PendingVault::getId).toList().contains(pendingVault2.getId()));
 
     List<PendingVault> results7 = dao.list("denied2", "creationTime", "asc",
         null, null);
     assertEquals(0, results7.size());
 
     List<String> results8 = dao.list("allowed1", "creationTime", "asc",
-        null, null).stream().map(PendingVault::getId).collect(Collectors.toList());
-    assertEquals(Arrays.asList(pendingVault1.getId(),pendingVault3.getId()), results8);
+        null, null).stream().map(PendingVault::getId).toList();
+    assertEquals(List.of(pendingVault1.getId(),pendingVault3.getId()), results8);
 
     List<String> results9 = dao.list("allowed1", "creationTime", "desc",
-        null, null).stream().map(PendingVault::getId).collect(Collectors.toList());
-    assertEquals(Arrays.asList(pendingVault3.getId(),pendingVault1.getId()), results9);
+        null, null).stream().map(PendingVault::getId).toList();
+    assertEquals(List.of(pendingVault3.getId(),pendingVault1.getId()), results9);
 
     List<String> results10 = dao.list("allowed1", "creationTime", "desc",
-        "1", "10").stream().map(PendingVault::getId).collect(Collectors.toList());
-    assertEquals(Arrays.asList(pendingVault1.getId()), results10);
+        "1", "10").stream().map(PendingVault::getId).toList();
+    assertEquals(List.of(pendingVault1.getId()), results10);
 
     List<String> results11 = dao.list("allowed1", "creationTime", "desc",
-        "0", "1").stream().map(PendingVault::getId).collect(Collectors.toList());
-    assertEquals(Arrays.asList(pendingVault3.getId()), results11);
+        "0", "1").stream().map(PendingVault::getId).toList();
+    assertEquals(List.of(pendingVault3.getId()), results11);
 
     //ordering by userid asc - for coverage really
     Set<String> results12 = dao.list("allowed1", "user", "asc",
         null, null).stream().map(PendingVault::getId).collect(Collectors.toSet());
-    assertEquals(new HashSet<>(Arrays.asList(pendingVault3.getId(),pendingVault1.getId())),results12);
+    assertEquals(Set.of(pendingVault3.getId(),pendingVault1.getId()),results12);
 
     //ordering by userid desc - for coverage really
     Set<String> results13 = dao.list("allowed1", "user", "desc",
         null, null).stream().map(PendingVault::getId).collect(Collectors.toSet());
-    assertEquals(new HashSet<>(Arrays.asList(pendingVault3.getId(),pendingVault1.getId())),results13);
+    assertEquals(Set.of(pendingVault3.getId(),pendingVault1.getId()),results13);
   }
 
 

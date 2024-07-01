@@ -6,7 +6,7 @@ import java.util.List;
 
 public class ProcessUtils {
 
-  public static ProcessBuilder exec(Class clazz, List<String> jvmArgs, List<String> args) {
+  public static ProcessBuilder exec(Class<?> clazz, List<String> jvmArgs, List<String> args) {
     String javaHome = System.getProperty("java.home");
     String javaBin = javaHome + File.separator + "bin" + File.separator + "java";
     String classpath = System.getProperty("java.class.path");

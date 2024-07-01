@@ -28,7 +28,7 @@ public class AdminUsersController {
     @RequestMapping(value = "/admin/users", method = RequestMethod.GET)
     public String getUsersListing(ModelMap model,
                                   @RequestParam(value = "query", required = false) String query) throws Exception {
-        if ((query == null) || ("".equals(query))) {
+        if ((query == null) || (query.isEmpty())) {
             model.addAttribute("users", restService.getUsers());
             model.addAttribute("query", "");
         } else {

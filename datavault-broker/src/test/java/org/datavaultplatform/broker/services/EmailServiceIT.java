@@ -18,7 +18,7 @@ import org.springframework.test.context.DynamicPropertySource;
 public class EmailServiceIT extends BaseEmailServiceTest {
 
 
-  private static final Map<String, Object> TEMPLATE_MODEL = new HashMap<String, Object>() {{
+  private static final Map<String, Object> TEMPLATE_MODEL = new HashMap<>() {{
     put("audit-id", "aud-id-001");
     put("timestamp", "timestamp-002");
     put("chunk-id", "chunk-id-003");
@@ -26,19 +26,20 @@ public class EmailServiceIT extends BaseEmailServiceTest {
     put("location", "location-005");
   }};
 
-  static final String EXPECTED_EMAIL_MSG_BODY = "<html>\n"
-      + "\t<body>\n"
-      + "\t\t\n"
-      + "\t\t<p>The attempted audit of the following chunk failed:</p>\n"
-      + "\t\t<ul>\n"
-      + "\t\t\t<li>Audit ID: aud-id-001</li>\n"
-      + "\t\t\t<li>Date of failed operation: timestamp-002</li>\n"
-      + "\t\t\t<li>Chunk ID: chunk-id-003</li>\n"
-      + "\t\t\t<li>Archive ID: archive-id-004</li>\n"
-      + "\t\t\t<li>location: location-005</li>\n"
-      + "\t\t</ul>\n"
-      + "\t</body>\n"
-      + "</html>";
+  static final String EXPECTED_EMAIL_MSG_BODY = """
+          <html>
+          \t<body>
+          \t\t
+          \t\t<p>The attempted audit of the following chunk failed:</p>
+          \t\t<ul>
+          \t\t\t<li>Audit ID: aud-id-001</li>
+          \t\t\t<li>Date of failed operation: timestamp-002</li>
+          \t\t\t<li>Chunk ID: chunk-id-003</li>
+          \t\t\t<li>Archive ID: archive-id-004</li>
+          \t\t\t<li>location: location-005</li>
+          \t\t</ul>
+          \t</body>
+          </html>""";
 
   @DynamicPropertySource
   static void setupProperties(DynamicPropertyRegistry registry) {
