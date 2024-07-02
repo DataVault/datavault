@@ -614,6 +614,7 @@ public class Deposit extends BaseTwoSpeedRetryTask {
 	                    logger.error("File does not exist.");
 	                    eventSender.send(new Error(jobID, depositId, "Deposit failed: file not found")
 	                        .withUserId(userID));
+                        throw new Exception("File does not exist.");
 	                }
 	            } catch (Exception e) {
 	                String msg = "Deposit failed: " + e.getMessage();
