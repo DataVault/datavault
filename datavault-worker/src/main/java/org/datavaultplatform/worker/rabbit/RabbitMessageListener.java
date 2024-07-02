@@ -32,7 +32,7 @@ public class RabbitMessageListener {
   }
 
   @SneakyThrows
-  @RabbitListener(queues = QueueConfig.WORKER_QUEUE_NAME)
+  @RabbitListener(id="rabbit-listener", queues = QueueConfig.WORKER_QUEUE_NAME)
   void onMessage(Message message, Channel channel,
       @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag) {
 
@@ -53,12 +53,8 @@ public class RabbitMessageListener {
         shutdownHandler.handleShutdown(info);
     } else {
       log.info("Processing Message [{}]", info);
-      boolean requeue = processor.processMessage(info);
-      if (requeue) {
-        channel.basicNack(deliveryTag, false, true);
-      } else {
-        channel.basicAck(deliveryTag, false);
-      }
+      channel.basicAck(deliveryTag, true);
+      processor.processMessage(info);
     }
   }
 
