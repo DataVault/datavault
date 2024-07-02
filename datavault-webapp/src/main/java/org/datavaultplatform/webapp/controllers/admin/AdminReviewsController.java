@@ -3,6 +3,7 @@ package org.datavaultplatform.webapp.controllers.admin;
 
 import org.datavaultplatform.common.model.*;
 
+import org.datavaultplatform.common.request.CreateRetentionPolicy;
 import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.common.response.ReviewInfo;
 import org.datavaultplatform.common.response.VaultInfo;
@@ -52,7 +53,7 @@ public class AdminReviewsController {
     }
 
     // Return a review page
-    @RequestMapping(value = "/admin/vaults/{vaultid}/reviews", method = RequestMethod.GET)
+    @GetMapping("/admin/vaults/{vaultid}/reviews")
     public String showReview(ModelMap model, @PathVariable("vaultid") String vaultID, @RequestParam(value = "error", required = false) String error) {
 
         if (error != null) {
@@ -90,8 +91,9 @@ public class AdminReviewsController {
 
         List<DepositReviewModel> depositReviewModels = new ArrayList<>();
         for (int i = 0; i < reviewInfo.getDepositIds().size(); i++) {
-            DepositInfo depositInfo = restService.getDeposit(reviewInfo.getDepositIds().get(i));
-            DepositReview depositReview = restService.getDepositReview(reviewInfo.getDepositReviewIds().get(i));
+            String reviewId = reviewInfo.getDepositIds().get(i);
+            DepositInfo depositInfo = restService.getDeposit(reviewId);
+            DepositReview depositReview = restService.getDepositReview(reviewId);
             DepositReviewModel drm = new DepositReviewModel();
 
             // Set DepositReview stuff
@@ -110,6 +112,7 @@ public class AdminReviewsController {
 
         vaultReviewModel.setDepositReviewModels(depositReviewModels);
 
+        model.addAttribute("createRetentionPolicy", new CreateRetentionPolicy());
         model.addAttribute("vaultReviewModel", vaultReviewModel);
 
         return "admin/reviews/create";
