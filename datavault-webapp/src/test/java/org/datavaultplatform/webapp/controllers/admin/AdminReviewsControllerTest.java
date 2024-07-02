@@ -12,7 +12,6 @@ import org.datavaultplatform.webapp.model.VaultReviewModel;
 import org.datavaultplatform.webapp.services.RestService;
 import org.datavaultplatform.webapp.test.AddTestProperties;
 import org.datavaultplatform.webapp.test.ProfileDatabase;
-import org.hibernate.validator.constraints.ModCheck;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -223,6 +222,7 @@ public class AdminReviewsControllerTest {
         when(restService.getRetentionPolicy(String.valueOf(TEST_RETENTION_POLICY_ID_2))).thenReturn(mCreateRetentionPolicy1);
     }
 
+
     @DisplayName("Test getVaultsForReview() and expect no error.")
     @Test
     @WithMockUser(roles = {"ADMIN_REVIEWS"})
@@ -231,7 +231,6 @@ public class AdminReviewsControllerTest {
         RequestBuilder requestBuilder = MockMvcRequestBuilders.get("/admin/reviews")
                 .contentType(MediaType.TEXT_HTML)
                 .accept(MediaType.TEXT_HTML);
-
         // Act
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andReturn();
         String html = mvcResult.getResponse().getContentAsString();
@@ -303,6 +302,7 @@ public class AdminReviewsControllerTest {
 
     }
 
+
     @DisplayName("Test showReview() with Review Date error.")
     @Test
     @WithMockUser(roles = {"ADMIN_VAULTS"})
@@ -342,6 +342,7 @@ public class AdminReviewsControllerTest {
     @Test
     @WithMockUser(roles = {"ADMIN_VAULTS"})
     void testProcessReview_ActionCancel() throws Exception {
+
         // Arrange
         mocksForShowAndProcessReviewTests();
 
@@ -377,9 +378,10 @@ public class AdminReviewsControllerTest {
 
     }
 
+
     @DisplayName("Test processReview() with action Submit with no retained deposits and no review date.")
     @Test
-    @WithMockUser(roles = {"ADMIN_VAULTS"})
+    @WithMockUser(roles = "ADMIN_VAULTS")
     void testProcessReview_Submit_WithNoReviewDate_AndNoRetainedDeposits() throws Exception {
         // Arrange
         mocksForShowAndProcessReviewTests();
@@ -401,7 +403,7 @@ public class AdminReviewsControllerTest {
 
     @DisplayName("Test processReview() with action Submit with no retained deposits and a review date not null.")
     @Test
-    @WithMockUser(roles = {"ADMIN_VAULTS"})
+    @WithMockUser(roles = "ADMIN_VAULTS")
     void testProcessReview_Submit_WithNoRetainedDeposits_AndReviewDateNotNull() throws Exception {
         // Arrange
         mocksForShowAndProcessReviewTests();
@@ -421,7 +423,7 @@ public class AdminReviewsControllerTest {
 
     @DisplayName("Test processReview() with action Submit with a retained deposit and a review date null.")
     @Test
-    @WithMockUser(roles = {"ADMIN_VAULTS"})
+    @WithMockUser(roles = "ADMIN_VAULTS")
     void testProcessReview_Submit_WithNoReviewDate_AndRetainedDeposits_ThenError() throws Exception {
         // Arrange
         mocksForShowAndProcessReviewTests();
