@@ -53,8 +53,12 @@ public class RabbitMessageListener {
         shutdownHandler.handleShutdown(info);
     } else {
       log.info("Processing Message [{}]", info);
-      channel.basicAck(deliveryTag, true);
-      processor.processMessage(info);
+      boolean requeue = processor.processMessage(info);
+      if (requeue) {
+        channel.basicNack(deliveryTag, false, true);
+      } else {
+        channel.basicAck(deliveryTag, false);
+      }
     }
   }
 

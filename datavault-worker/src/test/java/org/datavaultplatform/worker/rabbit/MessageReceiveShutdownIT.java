@@ -17,7 +17,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.springframework.amqp.rabbit.listener.MessageListenerContainer;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.DirtiesContext;
@@ -32,6 +31,7 @@ import org.springframework.test.annotation.DirtiesContext;
 class MessageReceiveShutdownIT extends BaseReceiveIT {
 
   private static final int MESSAGES_TO_SEND = 5;
+  private static final int MESSAGES_TO_PROCESS = 2;
 
   @MockBean
   MessageProcessor mProcessor;
@@ -49,39 +49,34 @@ class MessageReceiveShutdownIT extends BaseReceiveIT {
   void testSendAndRecvMessages() {
     this.shutdownLatch = new CountDownLatch(1);
 
-    MessageListenerContainer container = registry.getListenerContainer("rabbit-listener");
-    container.stop();
-
     String shutdownMessageId = null;
     for (long i = 0; i < MESSAGES_TO_SEND; i++) {
       if (i == 2) {
-        shutdownMessageId = sendShutdownTestMessage();
+        shutdownMessageId = sendShutdownTestMessage(NORMAL_PRIORITY);
       } else {
         sendNormalMessage(i);
       }
     }
     //okay is true only after we've recvd 1 shutdown message
 
-    container.start();
-    
     boolean okay = shutdownLatch.await(300, TimeUnit.SECONDS);
     if (!okay) {
       Assertions.fail("problem waiting for messageInfos");
     }
-    Assertions.assertEquals(0, messageInfos.size());
+    Assertions.assertEquals(MESSAGES_TO_PROCESS, messageInfos.size());
 
     // check that the shutdown message id is the one we expected
     Assertions.assertEquals(shutdownMessageId, argMessageInfo.getValue().getId());
 
-    verify(mProcessor, times(0)).processMessage(any(MessageInfo.class));
+    verify(mProcessor, times(MESSAGES_TO_PROCESS)).processMessage(any(MessageInfo.class));
     verify(mShutdownHandler, times(1)).handleShutdown(any(MessageInfo.class));
     verifyNoMoreInteractions(mProcessor, mShutdownHandler);
 
     // ensure we are passed any race conditions
     Thread.sleep(2000);
 
-    // check that there are still 5 unprocessed messages
-    Assertions.assertEquals(MESSAGES_TO_SEND -1,
+    // check that there are still 2 unprocessed messages
+    Assertions.assertEquals(2,
         admin.getQueueInfo(this.workerQueue.getActualName()).getMessageCount());
 
   }
