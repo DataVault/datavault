@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.message.BasicHeaderIterator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.amqp.core.AmqpAdmin;
@@ -52,9 +51,9 @@ public class BaseReceiveIT extends BaseRabbitTCTest {
     return props.getMessageId();
   }
 
-  protected String sendShutdownTestMessage() {
+  protected String sendShutdownTestMessage(int priority) {
     MessageProperties props = new MessageProperties();
-    props.setPriority(HI_PRIORITY);
+    props.setPriority(priority);
     props.setMessageId(UUID.randomUUID().toString());
     String msgBody = MessageInfo.SHUTDOWN;
     Message msg = new Message(msgBody.getBytes(StandardCharsets.UTF_8), props);
