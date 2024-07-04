@@ -3,7 +3,8 @@ package org.datavaultplatform.worker.rabbit;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.docker.DockerImage;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -16,10 +17,17 @@ public abstract class BaseRabbitTCTest {
   public static final int NORMAL_PRIORITY = 1;
 
   @Container
-  @ServiceConnection
   private static final RabbitMQContainer RABBIT = new RabbitMQContainer(DockerImage.RABBIT_IMAGE_NAME)
       .withExposedPorts(5672, 15672);
 
+  @DynamicPropertySource
+  static void registerProperties(DynamicPropertyRegistry registry) {
+    registry.add("spring.rabbitmq.host", RABBIT::getHost);
+    registry.add("spring.rabbitmq.port", RABBIT::getAmqpPort);
+    registry.add("spring.rabbitmq.username", RABBIT::getAdminUsername);
+    registry.add("spring.rabbitmq.password", RABBIT::getAdminPassword);
+  }
+  
   @PostConstruct
   void init() {
     log.info("RABBIT HTTP URL [ {} ]", RABBIT.getHttpUrl());

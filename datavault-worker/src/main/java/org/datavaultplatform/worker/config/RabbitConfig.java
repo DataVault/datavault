@@ -1,12 +1,11 @@
 package org.datavaultplatform.worker.config;
 
+import com.rabbitmq.client.ConnectionFactory;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.worker.queue.Receiver;
 import org.datavaultplatform.worker.rabbit.*;
 import org.springframework.amqp.core.AmqpAdmin;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -34,6 +33,18 @@ public class RabbitConfig {
   @Value("${spring.application.name}")
   String applicationName;
 
+  @Value("${spring.rabbitmq.host}")
+  String rabbitMQhost;
+  
+  @Value("${spring.rabbitmq.port}")
+  int rabbitMQport;
+  
+  @Value("${spring.rabbitmq.username}")
+  String rabbitMQusername;
+  
+  @Value("${spring.rabbitmq.password}")
+  String rabbitMQpassword;
+  
   public RabbitConfig(AmqpAdmin rabbitAdmin) {
     this.rabbitAdmin = rabbitAdmin;
   }
@@ -44,13 +55,14 @@ public class RabbitConfig {
   }
 
   @Bean
-  RabbitQueuePoller hiPriorityPoller(RabbitTemplate rabbitTemplate ){
-    return new RabbitQueuePoller(true, this.hiPriorityQueueName, rabbitTemplate, this.pollRabbitMQdelayMs);
-  }
-
-  @Bean
-  RabbitQueuePoller loPriorityPoller(RabbitTemplate rabbitTemplate ){
-    return new RabbitQueuePoller(false, this.loPriorityQueueName, rabbitTemplate, this.pollRabbitMQdelayMs);
+  public ConnectionFactory connectionFactory() {
+    ConnectionFactory result = new ConnectionFactory();
+    result.setUsername(this.rabbitMQusername);
+    result.setPort(this.rabbitMQport);
+    result.setUsername(this.rabbitMQusername);
+    result.setPassword(this.rabbitMQpassword);
+    result.setAutomaticRecoveryEnabled(false);
+    return result;
   }
   
   @Bean
@@ -60,10 +72,9 @@ public class RabbitConfig {
 
   @Bean
   public RabbitMessageSelector hiLoRabbitMessageSelector(
-          @Qualifier("hiPriorityPoller") RabbitQueuePoller hiPriorityPoller,
-          @Qualifier("loPriorityPoller") RabbitQueuePoller loPriorityPoller,
+          ConnectionFactory connectionFactory,
           TopLevelRabbitMessageProcessor messageProcessor) {
-    return new RabbitMessageSelector(hiPriorityPoller, loPriorityPoller, messageProcessor);
+    return new RabbitMessageSelector(this.hiPriorityQueueName, this.loPriorityQueueName, connectionFactory, messageProcessor);
   }
 
   @Bean

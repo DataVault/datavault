@@ -1,41 +1,106 @@
 package org.datavaultplatform.worker.rabbit;
 
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.GetResponse;
 import jakarta.annotation.PostConstruct;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessageProperties;
+import org.springframework.amqp.rabbit.support.DefaultMessagePropertiesConverter;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.event.EventListener;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 @Slf4j
-public class RabbitMessageSelector implements ApplicationContextAware {
+public class RabbitMessageSelector implements DisposableBean, ApplicationContextAware {
 
+    private final DefaultMessagePropertiesConverter converter = new DefaultMessagePropertiesConverter();
+
+    private final ConnectionFactory connectionFactory;
     private final RabbitMessageProcessor processor;
-    private final RabbitQueuePoller hiPriorityPoller;
-    private final RabbitQueuePoller loPriorityPoller;
-    private ApplicationContext ctx;
+    private final String hiPriorityQueueName;
+    private final String loPriorityQueueName;
+    private final AtomicBoolean ready = new AtomicBoolean(false);
 
-    public RabbitMessageSelector(RabbitQueuePoller hiPriorityPoller, RabbitQueuePoller loPriorityPoller, RabbitMessageProcessor processor) {
+    private ApplicationContext ctx;
+    private Connection connection;
+
+    public RabbitMessageSelector(String hiPriorityQueueName, String loPriorityQueueName, ConnectionFactory connectionFactory, RabbitMessageProcessor processor) {
+        this.hiPriorityQueueName = hiPriorityQueueName;
+        this.loPriorityQueueName = loPriorityQueueName;
+        this.connectionFactory = connectionFactory;
         this.processor = processor;
-        this.hiPriorityPoller = hiPriorityPoller;
-        this.loPriorityPoller = loPriorityPoller;
     }
     
     public static <T> Optional<T> getFirst(Supplier<Optional<T>> hi, Supplier<Optional<T>> lo) {
         return Stream.of(hi, lo).map(Supplier::get).flatMap(Optional::stream).findFirst();
     }
 
+    @SneakyThrows
     public synchronized void selectAndProcessNextMessage() {
+        if (!ready.get()) {
+            return;
+        }
+        this.connection = connectionFactory.newConnection();
+        try {
+            selectAndProcessNextMessageWithConnection();
+        } finally {
+            if (connection != null) {
+                connection.close();
+            }
+        }
+    }
+
+    private void selectAndProcessNextMessageWithConnection() {
+        Supplier<Optional<RabbitMessageInfo>> pollHiPriority = () -> pollRabbit(true, this::createChannel, hiPriorityQueueName);
+        Supplier<Optional<RabbitMessageInfo>> pollLoPriority = () -> pollRabbit(false, this::createChannel, loPriorityQueueName);
 
         // it only looks on loPriorityQueue is no messages on hiPriorityQueue
-        Optional<RabbitMessageInfo> selected = getFirst(hiPriorityPoller::poll, loPriorityPoller::poll);
+        Optional<RabbitMessageInfo> selected = getFirst(pollHiPriority, pollLoPriority);
 
-        selected.ifPresent(processor::onMessage);
+        // max 1 selected message - the processor is responsible for ack/nack the selected message
+        selected.ifPresent(messageinfo -> {
+            try {
+                // process the selected message - leaving the processor to ack/nack the message
+                processor.onMessage(messageinfo);
+                messageinfo.acknowledge();
+            } finally {
+                messageinfo.closeChannel();
+            }
+        });
     }
-    
+
+    private Optional<RabbitMessageInfo> pollRabbit(boolean isHiPriority, Supplier<Channel> channelSupplier, String queueName) {
+        try {
+            Channel channel = channelSupplier.get();
+            GetResponse pollResult = channel.basicGet(queueName, false);
+            if (pollResult == null) {
+                channel.close();
+                return Optional.empty();
+            } else {
+                MessageProperties messageProperties = converter.toMessageProperties(pollResult.getProps(), pollResult.getEnvelope(), StandardCharsets.UTF_8.name());
+                Message message = new Message(pollResult.getBody(), messageProperties);
+                long deliveryTag = pollResult.getEnvelope().getDeliveryTag();
+                RabbitMessageInfo rabbitMessageInfo = new RabbitMessageInfo(isHiPriority, message, queueName, channel, deliveryTag);
+                return Optional.of(rabbitMessageInfo);
+            }
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
     @PostConstruct
     public void init() {
         if (ctx == null) {
@@ -43,13 +108,42 @@ public class RabbitMessageSelector implements ApplicationContextAware {
             return;
         }
         String appName = ctx.getEnvironment().getProperty("spring.application.name","spring.application.name not set!");
-        log.info("Worker [{}] Restart Queue [{}]", appName, this.hiPriorityPoller.getQueueName());
-        log.info("Worker [{}] Worker  Queue [{}]", appName, this.loPriorityPoller.getQueueName());
+        log.info("Worker [{}] Restart Queue [{}]", appName, this.hiPriorityQueueName);
+        log.info("Worker [{}] Worker  Queue [{}]", appName, this.loPriorityQueueName);
+    }
+    
+    @SneakyThrows
+    protected Channel createChannel() {
+        Channel channel = connection.createChannel();
+        channel.basicQos(1);
+        long num = channel.getChannelNumber();
+        channel.addShutdownListener(cause -> log.info("The channel [{}] has been shutdown [{}]", num, cause.getMessage()));
+        return channel;
     }
 
+    @Override
+    public synchronized void destroy() throws Exception {
+        Connection temp = this.connection;
+        if (temp == null) {
+            return;
+        }
+        this.connection = null;
+        log.info("CLOSING RABBITMQ CONNECTION [{}]", temp);
+        temp.close();
+    }
+
+    @EventListener(ApplicationReadyEvent.class)
+    public synchronized void onReady(ApplicationReadyEvent event) {
+        log.info("ready took[{}]", event.getTimeTaken());
+        this.ready.set(true);
+    }
+
+    public boolean isReady() {
+        return this.ready.get();
+    }
 
     @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.ctx = applicationContext;
+    public void setApplicationContext(ApplicationContext ctx) throws BeansException {
+        this.ctx = ctx;
     }
 }

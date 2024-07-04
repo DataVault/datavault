@@ -1,6 +1,10 @@
 package org.datavaultplatform.worker.rabbit;
 
+import com.rabbitmq.client.Channel;
+import lombok.SneakyThrows;
 import org.springframework.amqp.core.Message;
+import org.springframework.amqp.support.AmqpHeaders;
+import org.springframework.messaging.handler.annotation.Header;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Comparator;
@@ -10,8 +14,12 @@ import java.util.Comparator;
  * @param hiPriority
  * @param message
  * @param queueName
+ * @param channel
+ * @param deliveryTag
  */
-public record RabbitMessageInfo(boolean hiPriority, Message message, String queueName) implements Comparable<RabbitMessageInfo> {
+public record RabbitMessageInfo(boolean hiPriority, Message message, String queueName, 
+                                Channel channel, @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag) 
+        implements Comparable<RabbitMessageInfo> {
 
     public static final String SHUTDOWN = "shutdown";
 
@@ -33,5 +41,14 @@ public record RabbitMessageInfo(boolean hiPriority, Message message, String queu
     boolean isShutdown() {
         return SHUTDOWN.equalsIgnoreCase(getMessageBody());
     }
+    
+    @SneakyThrows
+    public void closeChannel() {
+        this.channel.close();
+    }
 
+    @SneakyThrows
+    public void acknowledge() {
+        channel.basicAck(deliveryTag, false);
+    }
 }
