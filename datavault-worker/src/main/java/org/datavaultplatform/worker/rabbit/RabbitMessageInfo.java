@@ -44,11 +44,15 @@ public record RabbitMessageInfo(boolean hiPriority, Message message, String queu
     
     @SneakyThrows
     public void closeChannel() {
-        this.channel.close();
+        if (channel.isOpen()) {
+            this.channel.close();
+        }
     }
 
     @SneakyThrows
     public void acknowledge() {
-        channel.basicAck(deliveryTag, false);
+        if (channel.isOpen()) {
+            channel.basicAck(deliveryTag, false);
+        }
     }
 }

@@ -19,7 +19,7 @@ public abstract class BaseRabbitIT {
             .withExposedPorts(5672, 15672);
 
     @DynamicPropertySource
-    static void registerPgProperties(DynamicPropertyRegistry registry) {
+    static void registerProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.rabbitmq.host", RABBIT::getHost);
         registry.add("spring.rabbitmq.port", RABBIT::getAmqpPort);
         registry.add("spring.rabbitmq.username", RABBIT::getAdminUsername);
