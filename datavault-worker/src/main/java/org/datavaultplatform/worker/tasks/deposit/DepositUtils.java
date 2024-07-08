@@ -164,12 +164,24 @@ public abstract class DepositUtils {
 
     public static boolean directoriesExist(List<Path> directories) {
         Assert.isTrue(directories != null, "directories cannot be null");
-        return directories.stream().allMatch(getDirectoryPathChecks());
+        boolean result = true;
+        for (Path directory : directories) {
+            boolean temp = getDirectoryPathChecks().test(directory);
+            log.info("directory [{}] exists [{}]", directory, temp);
+            result &= temp;
+        }
+        return result;
     }
 
-    public static boolean filesExist(List<Path> files) {
-        Assert.isTrue(files != null, "files cannot be null");
-        return files.stream().allMatch(getFilePathChecks());
+    public static boolean filesExist(List<Path> filePaths) {
+        Assert.isTrue(filePaths != null, "filePaths cannot be null");
+        boolean result = true;
+        for (Path filePath : filePaths) {
+            boolean temp = getFilePathChecks().test(filePath);
+            log.info("file [{}] exists [{}]", filePath, temp);
+            result &= temp;
+        }
+        return result;
     }
 
     protected static Predicate<Path> getDirectoryPathChecks() {

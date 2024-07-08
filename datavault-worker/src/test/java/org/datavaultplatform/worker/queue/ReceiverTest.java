@@ -73,6 +73,8 @@ class ReceiverTest {
     
     String jsonMessageBody;
 
+    String testApplicationName = "worker-2";
+    
     @Mock
     Context mContext;
 
@@ -105,7 +107,8 @@ class ReceiverTest {
                 mStorageClassNameResolver,
                 oldRecompose,
                 recomposeDate,
-                mProcessedJobStore
+                mProcessedJobStore,
+                testApplicationName
         ));
 
         Mockito.lenient().when(mMessageInfo.message()).thenReturn(mMessage);
@@ -149,7 +152,6 @@ class ReceiverTest {
         verify(mMessage).getMessageProperties();
 
         verify(mTask).getJobID();
-        verify(mTask).getLastEvent();
         verify(mTask, times(1)).setIsRedeliver(true);
         verify(mTask, never()).performAction(any(Context.class));
 

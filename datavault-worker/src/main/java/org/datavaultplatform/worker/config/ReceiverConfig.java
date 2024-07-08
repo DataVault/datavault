@@ -63,6 +63,9 @@ public class ReceiverConfig {
   @Autowired
   EventSender eventSender;
 
+  @Value("${spring.application.name:datavault-worker}")
+  private String applicationName;
+  
   /*
       <bean id="receiver" class="org.datavaultplatform.worker.queue.Receiver">
         <property name="tempDir" value="${tempDir}"/>
@@ -94,7 +97,8 @@ public class ReceiverConfig {
         resolver,
         this.oldRecompose,
         this.recomposeDate,
-        processedJobStore
+        processedJobStore,
+        applicationName    
     );
     if(result.isEncryptionEnabled() && result.getEncryptionMode() == AESMode.GCM ) {
       Security.addProvider(new BouncyCastleProvider());

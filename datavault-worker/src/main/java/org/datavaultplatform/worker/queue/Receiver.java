@@ -57,6 +57,8 @@ public class Receiver implements RabbitMessageProcessor{
     
     private final ProcessedJobStore processedJobStore;
     
+    private final String applicationName;
+    
     public Receiver(
         String tempDir,
         String metaDir,
@@ -73,7 +75,8 @@ public class Receiver implements RabbitMessageProcessor{
         EventSender eventSender,
         StorageClassNameResolver storageClassNameResolver,
         boolean oldRecompose, String recomposeDate,
-        ProcessedJobStore processedJobStore) {
+        ProcessedJobStore processedJobStore,
+        String applicationName) {
         this.tempDir = tempDir;
         this.metaDir = metaDir;
         this.chunkingEnabled = chunkingEnabled;
@@ -89,6 +92,7 @@ public class Receiver implements RabbitMessageProcessor{
         this.oldRecompose = oldRecompose;
         this.recomposeDate = recomposeDate;
         this.processedJobStore = processedJobStore;
+        this.applicationName = applicationName;
     }
 
     @Override
@@ -142,10 +146,8 @@ public class Receiver implements RabbitMessageProcessor{
                 if (props.isRedelivered()) {
                     concreteTask.setIsRedeliver(true);
                 }
-
-                // Set up the worker temporary directory
-                Event lastEvent = concreteTask.getLastEvent();
-                Path tempDirPath = getTempDirPath(lastEvent);
+                
+                Path tempDirPath = getTempDirPath();
                 
                 Context context = getContext(tempDirPath);
 
@@ -167,16 +169,9 @@ public class Receiver implements RabbitMessageProcessor{
      }
     
 
-    private Path getTempDirPath(Event lastEvent) {
-        Path tempDirPath;
-        if (lastEvent != null) {
-            log.debug("Restart using old temp dir");
-            tempDirPath = Paths.get(tempDir,  lastEvent.getAgent());
-        } else {
-            log.debug("Normal using default temp dir");
-            tempDirPath = Paths.get(tempDir, WorkerInstance.getWorkerName());
-        }
-        log.debug("The temp dir: [{}]",tempDirPath);
+    private Path getTempDirPath() {
+        Path tempDirPath = Paths.get(tempDir, applicationName);
+        log.info("The temp dir: [{}]", tempDirPath);
         tempDirPath.toFile().mkdir();
         return tempDirPath;
     }

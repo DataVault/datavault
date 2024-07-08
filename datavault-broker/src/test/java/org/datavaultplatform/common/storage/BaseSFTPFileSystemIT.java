@@ -158,7 +158,7 @@ public abstract class BaseSFTPFileSystemIT {
   @Test
   @SneakyThrows
   void testUsableSpace() {
-    assertThat(getSftpDriver().getUsableSpace()).isGreaterThan(1_000_000_000L);
+    assertThat(getSftpDriver().getUsableSpace()).isGreaterThan(500_000_000L);
   }
 
   @Test

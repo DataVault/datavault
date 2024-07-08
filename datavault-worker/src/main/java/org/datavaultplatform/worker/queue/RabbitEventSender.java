@@ -25,16 +25,16 @@ public class RabbitEventSender implements EventSender {
     private final RabbitTemplate template;
     private final String eventQueueName;
 
-    private final String workerName;
+    private final String fullWorkerName;
 
     private final AtomicInteger sequence;
     private final ObjectMapper mapper;
     private final Clock clock;
 
-    public RabbitEventSender(RabbitTemplate template, String eventQueueName, String workerName, int sequenceStart, ObjectMapper mapper, Clock clock) {
+    public RabbitEventSender(RabbitTemplate template, String eventQueueName, String fullWorkerName, int sequenceStart, ObjectMapper mapper, Clock clock) {
         this.template = template;
         this.eventQueueName = eventQueueName;
-        this.workerName = workerName;
+        this.fullWorkerName = fullWorkerName;
         this.sequence = new AtomicInteger(sequenceStart);
         this.mapper = mapper;
         this.clock = clock;
@@ -59,7 +59,7 @@ public class RabbitEventSender implements EventSender {
 
         // Set common event properties
         event.setAgentType(Agent.AgentType.WORKER);
-        event.setAgent(WorkerInstance.getWorkerName());
+        event.setAgent(fullWorkerName);
         
         try {
             String jsonEvent = mapper.writeValueAsString(event);

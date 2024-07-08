@@ -13,7 +13,7 @@ public record DepositTransferHelper(Path bagPath, Path bagDataPath) {
         this(bagPath, bagPath.resolve("data"));
     }
     
-    public boolean directoriesExist(){ 
+    public boolean directoriesExist() { 
         return DepositUtils.directoriesExist(List.of(bagPath, bagDataPath));
     }
     
