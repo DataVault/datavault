@@ -6,6 +6,8 @@ import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.event.EventSender;
 import org.datavaultplatform.common.task.Context;
 import org.datavaultplatform.common.task.Task;
+import org.datavaultplatform.common.task.TaskStageEvent;
+import org.datavaultplatform.common.task.TaskStageEventListener;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.datavaultplatform.worker.rabbit.RabbitMessageInfo;
 import org.datavaultplatform.worker.tasks.Deposit;
@@ -23,6 +25,8 @@ import org.springframework.util.StreamUtils;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -78,9 +82,19 @@ class ReceiverTest {
     @Mock
     Context mContext;
 
+    @Mock
+    TaskStageEventListener mTaskStageEventListener;
+    List<TaskStageEvent> taskStageEvents;
+
+
     @SneakyThrows
     @BeforeEach
     void setup() {
+        taskStageEvents = new ArrayList<>();
+        lenient().doAnswer(invocation -> {
+            taskStageEvents.add(invocation.getArgument(0, TaskStageEvent.class));
+            return null;
+        }).when(mTaskStageEventListener).onTaskStageEvent(any(TaskStageEvent.class));
 
         Path basePath = Files.createTempDirectory("test");
         Path tempDirPath = basePath.resolve("tempDir");
@@ -108,7 +122,8 @@ class ReceiverTest {
                 oldRecompose,
                 recomposeDate,
                 mProcessedJobStore,
-                testApplicationName
+                testApplicationName,
+                mTaskStageEventListener
         ));
 
         Mockito.lenient().when(mMessageInfo.message()).thenReturn(mMessage);

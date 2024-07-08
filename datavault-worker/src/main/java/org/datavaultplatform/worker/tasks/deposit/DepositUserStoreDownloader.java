@@ -9,7 +9,7 @@ import org.datavaultplatform.common.event.deposit.TransferComplete;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.storage.UserStore;
-import org.datavaultplatform.common.task.Context;
+import org.datavaultplatform.common.task.*;
 import org.datavaultplatform.worker.operations.ProgressTracker;
 import org.datavaultplatform.worker.tasks.DepositTransferHelper;
 
@@ -29,10 +29,11 @@ public class DepositUserStoreDownloader extends DepositSupport {
     private final List<String> fileStorePaths;
     private final Map<String, UserStore> userStores;
     private final List<String> fileUploadPaths;
-
+    private final TaskStageEventListener taskStageEventListener;
     public DepositUserStoreDownloader(String userID, String jobID, String depositId, UserEventSender userEventSender, String bagID, Context context, Event lastEvent, Map<String, String> properties,
                                       List<String> fileStorePaths, Map<String,UserStore> userStores, List<String> fileUploadPaths) {
         super(userID, jobID, depositId, userEventSender, bagID, context, lastEvent, properties);
+        this.taskStageEventListener = context.getTaskStageEventListener();
         if (fileStorePaths == null) {
             String msg = "Deposit failed: null list of fileStorePaths";
             sendInvalidArgumentMessage(msg);
@@ -172,15 +173,23 @@ public class DepositUserStoreDownloader extends DepositSupport {
         log.debug("Setting bag data path to: {}", result.bagDataPath());
 
         if (eventHasNotBeenSeenBefore(TransferComplete.class) || !result.directoriesExist()) {
-            log.info("not skipping :2: download from user stores");
+            doStage(TaskStage.Deposit2Transfer.INSTANCE);
             result.createDirs();
             
             copySelectedUserDataToBagDataDir(result.bagDataPath());
         } else {
-            log.info("skipping :2: download from user stores");
+            skipStage(TaskStage.Deposit2Transfer.INSTANCE);
             log.debug("Last event is: {} skipping initial File copy", getLastEventClass());
         }
         return result;
     }
-
+    private void recordStage(TaskStage stage, boolean skipped){
+        context.getTaskStageEventListener().onTaskStageEvent(new TaskStageEvent(stage, skipped));
+    }
+    private void doStage(TaskStage.DepositTaskStage stage) {
+        recordStage(stage, false);
+    }
+    private void skipStage(TaskStage.DepositTaskStage stage) {
+        recordStage(stage, true);
+    }
 }

@@ -11,7 +11,7 @@ import org.datavaultplatform.common.model.ArchiveStore;
 import org.datavaultplatform.common.model.Job;
 import org.datavaultplatform.common.storage.impl.LocalFileSystem;
 import org.datavaultplatform.common.storage.impl.MultiLocalFileSystem;
-import org.datavaultplatform.common.task.Context;
+import org.datavaultplatform.common.task.*;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.datavaultplatform.common.util.StoredChunks;
 import org.datavaultplatform.worker.tasks.deposit.*;
@@ -21,8 +21,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullSource;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.stubbing.Answer;
 
 import java.io.File;
 import java.io.IOException;
@@ -69,8 +72,18 @@ public class DepositRestartTests {
 
     final Deposit deposit = Mockito.spy(new Deposit());
 
+    @Mock
+    TaskStageEventListener mTaskStageEventListener;
+
+    List<TaskStageEvent> taskStageEvents;
+
     @BeforeEach
     void setup() throws IOException {
+        taskStageEvents = new ArrayList<>();
+        lenient().doAnswer(invocation -> {
+            taskStageEvents.add(invocation.getArgument(0, TaskStageEvent.class));
+            return null;
+        }).when(mTaskStageEventListener).onTaskStageEvent(any(TaskStageEvent.class));
         Path baseDir = Files.createTempDirectory("deposit-restart-tmp");
         tempDir = baseDir.resolve("tempDir");
         metaDir = baseDir.resolve("metaDir");
@@ -118,6 +131,12 @@ public class DepositRestartTests {
     }
 
     Context getContext(boolean chunkingEnabled, boolean encryptionEnabled, boolean multipleValidationEnabled) {
+        ContextVaultInfo vaultInfo = new ContextVaultInfo(
+                VAULT_ADDRESS,
+                VAULT_TOKEN,
+                VAULT_KEY_PATH,
+                VAULT_KEY_NAME,
+                VAULT_SSL_PEM_PATH);
         return new Context(
                 tempDir,
                 metaDir,
@@ -126,16 +145,13 @@ public class DepositRestartTests {
                 CHUNKING_BYTE_SIZE,
                 encryptionEnabled,
                 AES_MODE,
-                VAULT_ADDRESS,
-                VAULT_TOKEN,
-                VAULT_KEY_PATH,
-                VAULT_KEY_NAME,
-                VAULT_SSL_PEM_PATH,
+                vaultInfo,
                 multipleValidationEnabled,
                 NUMBER_CHUNK_THREADS,
                 storageClassNameResolver,
                 false,
-                RECOMPOSE_DATE_STRING);
+                RECOMPOSE_DATE_STRING,
+                mTaskStageEventListener);
     }
 
     EventSender createEventSender() {

@@ -15,6 +15,7 @@ import org.datavaultplatform.common.event.deposit.TransferComplete;
 import org.datavaultplatform.common.storage.UserStore;
 import org.datavaultplatform.common.storage.impl.LocalFileSystem;
 import org.datavaultplatform.common.task.Context;
+import org.datavaultplatform.common.task.DefaultTaskStageEventListener;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -101,6 +102,7 @@ class DepositUserStoreDownloaderTest {
     @BeforeEach
     @SneakyThrows
     void setup() {
+        lenient().when(CONTEXT.getTaskStageEventListener()).thenReturn(new DefaultTaskStageEventListener());
         tempDir = Files.createTempDirectory("test");
         rootDir = Files.createTempDirectory("root");
 

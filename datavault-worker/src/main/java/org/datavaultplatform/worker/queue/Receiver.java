@@ -20,7 +20,9 @@ import org.datavaultplatform.common.io.DataVaultFileUtils;
 import org.datavaultplatform.common.model.Job;
 import org.datavaultplatform.common.task.Context;
 import org.datavaultplatform.common.task.Context.AESMode;
+import org.datavaultplatform.common.task.ContextVaultInfo;
 import org.datavaultplatform.common.task.Task;
+import org.datavaultplatform.common.task.TaskStageEventListener;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.datavaultplatform.worker.WorkerInstance;
 import org.datavaultplatform.worker.rabbit.RabbitMessageInfo;
@@ -59,24 +61,26 @@ public class Receiver implements RabbitMessageProcessor{
     
     private final String applicationName;
     
+    private final TaskStageEventListener taskStageEventListener;
+    
     public Receiver(
-        String tempDir,
-        String metaDir,
+            String tempDir,
+            String metaDir,
 
-        boolean chunkingEnabled,
-        String chunkingByteSize,
+            boolean chunkingEnabled,
+            String chunkingByteSize,
 
-        boolean encryptionEnabled,
-        String encryptionMode,
+            boolean encryptionEnabled,
+            String encryptionMode,
 
-        boolean multipleValidationEnabled,
-        int noChunkThreads,
+            boolean multipleValidationEnabled,
+            int noChunkThreads,
 
-        EventSender eventSender,
-        StorageClassNameResolver storageClassNameResolver,
-        boolean oldRecompose, String recomposeDate,
-        ProcessedJobStore processedJobStore,
-        String applicationName) {
+            EventSender eventSender,
+            StorageClassNameResolver storageClassNameResolver,
+            boolean oldRecompose, String recomposeDate,
+            ProcessedJobStore processedJobStore,
+            String applicationName, TaskStageEventListener taskStageEventListener) {
         this.tempDir = tempDir;
         this.metaDir = metaDir;
         this.chunkingEnabled = chunkingEnabled;
@@ -93,6 +97,7 @@ public class Receiver implements RabbitMessageProcessor{
         this.recomposeDate = recomposeDate;
         this.processedJobStore = processedJobStore;
         this.applicationName = applicationName;
+        this.taskStageEventListener = taskStageEventListener;
     }
 
     @Override
@@ -209,21 +214,25 @@ public class Receiver implements RabbitMessageProcessor{
 
         Path metaDirPath = Paths.get(metaDir);
 
-        String vaultAddress = null;
-        String vaultToken = null;
-        String vaultKeyName = null;
-        String vaultKeyPath = null;
-        String vaultSslPEMPath = null;
+        ContextVaultInfo vaultInfo;
+        {
+            String vaultAddress = null;
+            String vaultToken = null;
+            String vaultKeyName = null;
+            String vaultKeyPath = null;
+            String vaultSslPEMPath = null;
 
+            vaultInfo = new ContextVaultInfo(vaultAddress, vaultToken, vaultKeyPath, vaultKeyName, vaultSslPEMPath);
+        }
         return new Context(
                 tempDirPath, metaDirPath, this.eventSender,
                 this.chunkingEnabled, this.chunkingByteSize,
                 this.encryptionEnabled, this.encryptionMode,
-                vaultAddress, vaultToken,
-                vaultKeyPath, vaultKeyName, vaultSslPEMPath,
+                vaultInfo,
                 this.multipleValidationEnabled, this.noChunkThreads,
                 this.storageClassNameResolver,
                 this.oldRecompose,
-                this.recomposeDate);
+                this.recomposeDate,
+                this.taskStageEventListener);
     }
 }

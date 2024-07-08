@@ -21,26 +21,22 @@ public class Context {
     private final long chunkingByteSize;
     private final boolean encryptionEnabled;
     private final AESMode encryptionMode;
-    private final String vaultAddress;
-    private final String vaultToken;
-    private final String vaultKeyPath;
-    private final String vaultKeyName;
-    private final String vaultSslPEMPath;
+    private final ContextVaultInfo vaultInfo;
     private final boolean multipleValidationEnabled;
     private final int noChunkThreads;
     private final StorageClassNameResolver storageClassNameResolver;
     private final boolean oldRecompose;
 
     private final String recomposeDate;
+    private final TaskStageEventListener taskStageEventListener;
 
     public Context(Path tempDir, Path metaDir, EventSender eventSender,
                    boolean chunkingEnabled, Long chunkingByteSize,
                    boolean encryptionEnabled, AESMode encryptionMode, 
-                   String vaultAddress, String vaultToken,
-                   String vaultKeyPath, String vaultKeyName,
-                   String vaultSslPEMPath, boolean multipleValidationEnabled
-                    ,int noChunkThreads, StorageClassNameResolver storageClassNameResolver,
-                   boolean oldRecompose, String recomposeDate) {
+                   ContextVaultInfo vaultInfo, boolean multipleValidationEnabled,
+                   int noChunkThreads, StorageClassNameResolver storageClassNameResolver,
+                   boolean oldRecompose, String recomposeDate,
+                   TaskStageEventListener taskStageEventListener) {
         this.tempDir = tempDir;
         this.metaDir = metaDir;
         this.eventSender = eventSender;
@@ -48,16 +44,13 @@ public class Context {
         this.chunkingByteSize = chunkingByteSize;
         this.encryptionEnabled = encryptionEnabled;
         this.encryptionMode = encryptionMode;
-        this.vaultAddress = vaultAddress;
-        this.vaultToken = vaultToken;
-        this.vaultKeyPath = vaultKeyPath;
-        this.vaultKeyName = vaultKeyName;
-        this.vaultSslPEMPath = vaultSslPEMPath;
+        this.vaultInfo = vaultInfo;
         this.multipleValidationEnabled = multipleValidationEnabled;
         this.noChunkThreads = noChunkThreads;
         this.storageClassNameResolver = storageClassNameResolver;
         this.oldRecompose = oldRecompose;
         this.recomposeDate = recomposeDate;
+        this.taskStageEventListener = taskStageEventListener;
     }
 
     public int getNoChunkThreads() {

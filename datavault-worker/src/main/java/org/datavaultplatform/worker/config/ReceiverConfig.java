@@ -11,6 +11,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.datavaultplatform.common.event.EventSender;
 import org.datavaultplatform.common.task.Context.AESMode;
+import org.datavaultplatform.common.task.DefaultTaskStageEventListener;
+import org.datavaultplatform.common.task.TaskStageEvent;
+import org.datavaultplatform.common.task.TaskStageEventListener;
+import org.datavaultplatform.common.task.TaskType;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.datavaultplatform.worker.queue.ProcessedJobStore;
 import org.datavaultplatform.worker.queue.Receiver;
@@ -83,7 +87,7 @@ public class ReceiverConfig {
 
    */
   @Bean
-  public Receiver receiver(StorageClassNameResolver resolver, ProcessedJobStore processedJobStore) {
+  public Receiver receiver(StorageClassNameResolver resolver, ProcessedJobStore processedJobStore, TaskStageEventListener taskStageEventListener) {
     Receiver result = new Receiver(
         this.tempDir,
         this.metaDir,
@@ -98,12 +102,27 @@ public class ReceiverConfig {
         this.oldRecompose,
         this.recomposeDate,
         processedJobStore,
-        applicationName    
+        applicationName,
+        taskStageEventListener
     );
     if(result.isEncryptionEnabled() && result.getEncryptionMode() == AESMode.GCM ) {
       Security.addProvider(new BouncyCastleProvider());
     }
     return result;
+  }
+  
+  @Bean
+  TaskStageEventListener taskStageEventListener() {
+    return event -> {
+      TaskType type = event.stage().getType();
+      int order = event.stage().getOrder();
+      String label = event.stage().getLabel();
+      if (event.skipped()) {
+        log.info("{} skipping :{}: {}", type, order, label);
+      } else {
+        log.info("{} not skipping :{}: {}", type, order, label);
+      }
+    };
   }
 
   @Bean

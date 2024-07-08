@@ -10,6 +10,8 @@ import org.datavaultplatform.common.event.deposit.*;
 import org.datavaultplatform.common.storage.*;
 import org.datavaultplatform.common.task.Context;
 import org.datavaultplatform.common.task.Task;
+import org.datavaultplatform.common.task.TaskStage;
+import org.datavaultplatform.common.task.TaskStageEvent;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.datavaultplatform.common.util.StoredChunks;
 import org.datavaultplatform.worker.tasks.deposit.*;
@@ -123,24 +125,24 @@ public class Deposit extends Task {
     private void verifyArchive(PackageHelper packageHelper, Set<ArchiveStoreInfo> archiveStoreInfos) throws Exception {
         log.info("Verifying archive package ...");
         if (isLastEventIsBefore(ValidationComplete.class)) {
-            log.info("not skipping :5: verify archive");
+            doStage(TaskStage.Deposit5Verify.INSTANCE);
             DepositVerifier verifier = getDepositVerifier(archiveStoreInfos);
             verifier.verifyArchive(packageHelper);
         } else {
-            log.info("skipping :5: verify archive");
+            skipStage(TaskStage.Deposit5Verify.INSTANCE);
             log.debug("Last event is: {} skipping validation", getLastEventClass());
         }
     }
 
     private Set<ArchiveStoreInfo> uploadToStorage(PackageHelper packageHelper, StoredChunks previouslyStoredChunks, ArchiveStoreContext archiveStoreContext) throws Exception {
         if (isLastEventIsBefore(UploadComplete.class)) {
-            log.info("not skipping :4: archive upload");
+            doStage(TaskStage.Deposit4Archive.INSTANCE);
             // Copy the resulting tar file to the archive area
             log.info("Copying tar file(s) to archive ...");
             DepositArchiveStoresUploader uploader = getDepositArchiveStoresUploader(archiveStoreContext);
             uploader.uploadToStorage(packageHelper, previouslyStoredChunks);
         } else {
-            log.info("skipping :4: archive upload");
+            skipStage(TaskStage.Deposit4Archive.INSTANCE);
         }
         return archiveStoreContext.getArchiveStoreInfo();
     }
@@ -152,11 +154,11 @@ public class Deposit extends Task {
         PackageHelper result;
 
         if (isLastEventIsBefore(finalPackagingEventClass)) {
-            log.info("not skipping :3: packaging step");
+            doStage(TaskStage.Deposit3PackageEncrypt.INSTANCE);
             DepositPackager packager = getDepositPackager();
             result = packager.packageStep(bagDir);
         } else {
-            log.info("skipping :3: packaging step");
+            skipStage(TaskStage.Deposit3PackageEncrypt.INSTANCE);
             result = PackageHelper.constructFromDepositTask(bagID, context, this);
         }
         log.debug("Packaged Files {}", result.getPackagedFiles());
@@ -170,11 +172,11 @@ public class Deposit extends Task {
 
     protected void calculateTotalDepositSize(Map<String, UserStore> userStores) {
         if (isLastEventIsBefore(ComputedSize.class)) {
-            log.info("not skipping :1: calculate total deposit size");
+            doStage(TaskStage.Deposit1ComputeSize.INSTANCE);
             DepositSizeComputer computer = getDepositSizeComputer(userStores);
             computer.calculateTotalDepositSize();
         } else {
-            log.info("skipping :1: calculate total deposit size");
+            skipStage(TaskStage.Deposit1ComputeSize.INSTANCE);
         }
     }
 
@@ -230,5 +232,15 @@ public class Deposit extends Task {
         } else {
             return null;
         }
+    }
+
+    private void recordStage(TaskStage stage, boolean skipped) {
+        context.getTaskStageEventListener().onTaskStageEvent(new TaskStageEvent(stage, skipped));
+    }
+    private void doStage(TaskStage.DepositTaskStage stage) {
+        recordStage(stage, false);
+    }
+    private void skipStage(TaskStage.DepositTaskStage stage) {
+        recordStage(stage, true);
     }
 }
