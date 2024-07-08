@@ -135,7 +135,7 @@ public class PackageHelper implements Serializable {
 
             for (int chunkNumber = 1; chunkNumber <= numberOfChunks; chunkNumber++) {
 
-                ChunkHelper helper = result.getChunkHelper(numberOfChunks);
+                ChunkHelper helper = result.getChunkHelper(chunkNumber);
                 helper.setChunkFile(DepositUtils.getChunkTarFile(context, bagID, chunkNumber));
                 helper.setChunkHash(chunkFilesDigest.get(chunkNumber));
                 

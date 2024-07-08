@@ -123,19 +123,24 @@ public class Deposit extends Task {
     private void verifyArchive(PackageHelper packageHelper, Set<ArchiveStoreInfo> archiveStoreInfos) throws Exception {
         log.info("Verifying archive package ...");
         if (isLastEventIsBefore(ValidationComplete.class)) {
+            log.info("not skipping :5: verify archive");
             DepositVerifier verifier = getDepositVerifier(archiveStoreInfos);
             verifier.verifyArchive(packageHelper);
         } else {
-            log.debug("Last event is: " + getLastEventClass() + " skipping validation");
+            log.info("skipping :5: verify archive");
+            log.debug("Last event is: {} skipping validation", getLastEventClass());
         }
     }
 
     private Set<ArchiveStoreInfo> uploadToStorage(PackageHelper packageHelper, StoredChunks previouslyStoredChunks, ArchiveStoreContext archiveStoreContext) throws Exception {
         if (isLastEventIsBefore(UploadComplete.class)) {
+            log.info("not skipping :4: archive upload");
             // Copy the resulting tar file to the archive area
             log.info("Copying tar file(s) to archive ...");
             DepositArchiveStoresUploader uploader = getDepositArchiveStoresUploader(archiveStoreContext);
             uploader.uploadToStorage(packageHelper, previouslyStoredChunks);
+        } else {
+            log.info("skipping :4: archive upload");
         }
         return archiveStoreContext.getArchiveStoreInfo();
     }
@@ -147,9 +152,11 @@ public class Deposit extends Task {
         PackageHelper result;
 
         if (isLastEventIsBefore(finalPackagingEventClass)) {
+            log.info("not skipping :3: packaging step");
             DepositPackager packager = getDepositPackager();
             result = packager.packageStep(bagDir);
         } else {
+            log.info("skipping :3: packaging step");
             result = PackageHelper.constructFromDepositTask(bagID, context, this);
         }
         log.debug("Packaged Files {}", result.getPackagedFiles());
@@ -163,8 +170,11 @@ public class Deposit extends Task {
 
     protected void calculateTotalDepositSize(Map<String, UserStore> userStores) {
         if (isLastEventIsBefore(ComputedSize.class)) {
+            log.info("not skipping :1: calculate total deposit size");
             DepositSizeComputer computer = getDepositSizeComputer(userStores);
             computer.calculateTotalDepositSize();
+        } else {
+            log.info("skipping :1: calculate total deposit size");
         }
     }
 
@@ -188,13 +198,11 @@ public class Deposit extends Task {
 
     // below here - methods are protected to help testing using Mockito spies
     protected DepositSizeComputer getDepositSizeComputer(Map<String, UserStore> userStores) {
-        DepositSizeComputer computer = new DepositSizeComputer(userID, jobID, depositId, userEventSender, bagID, context, getLastEvent(), getProperties(), userStores, fileStorePaths);
-        return computer;
+        return new DepositSizeComputer(userID, jobID, depositId, userEventSender, bagID, context, getLastEvent(), getProperties(), userStores, fileStorePaths);
     }
 
     protected boolean isLastEventIsBefore(Class<? extends Event> eventClass) {
-        boolean result =  DepositEvents.INSTANCE.isLastEventBefore(getLastEvent(), eventClass);
-        return result;
+        return DepositEvents.INSTANCE.isLastEventBefore(getLastEvent(), eventClass);
     }
 
     protected DepositUserStoreDownloader getDepositUserStoreDownloader(Map<String, UserStore> userStores) {

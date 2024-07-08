@@ -16,6 +16,7 @@ public class TaskExecutor<T> {
   private final String errorLabel;
 
   private final List<Callable<T>> tasks = new ArrayList<>();
+  private final List<Callable<T>> origTasks = new ArrayList<>();
 
   private final AtomicBoolean executed = new AtomicBoolean(false);
 
@@ -29,10 +30,23 @@ public class TaskExecutor<T> {
     if (executed.get()) {
       throw new IllegalStateException("Already executed");
     }
-    if (tasks.contains(task)) {
+    if (origTasks.contains(task)) {
       throw new IllegalArgumentException("The task is already added");
     }
-    tasks.add(task);
+    origTasks.add(task);
+    tasks.add(wrap(task));
+  }
+  
+  private Callable<T> wrap(Callable<T> task) {
+    TaskInterrupter.Checker checker = TaskInterrupter.getInterrupterCheck();
+    return () -> {
+      TaskInterrupter.setInterrupterCheck(checker);
+      try {
+        return task.call();
+      } finally {
+        TaskInterrupter.setInterrupterCheck(null);
+      }
+    };
   }
 
   public synchronized void execute() throws Exception {
@@ -48,7 +62,7 @@ public class TaskExecutor<T> {
 
     List<Future<T>> futures = tasks.stream()
         .map(service::submit)
-        .collect(Collectors.toList());
+        .toList();
 
     service.shutdown();
 

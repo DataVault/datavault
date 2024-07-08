@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.Assert;
 
 import java.io.BufferedWriter;
@@ -44,6 +45,9 @@ public class ProcessedJobStore {
 
     @SneakyThrows
     protected synchronized void storeProcessedJob(String jobId) {
+        if(jobId == null){
+            return;
+        }
         if (this.isProcessedJob(jobId)) {
             return;
         }
@@ -67,7 +71,12 @@ public class ProcessedJobStore {
     }
 
     protected boolean isProcessedJob(String jobId) {
-        return this.getExistingJobs().stream().anyMatch(pj -> jobId.equals(pj.jobId));
+        if (StringUtils.isBlank(jobId)) {
+            log.warn("BLANK jobId[{}]", jobId);
+            return true;
+        } else {
+            return this.getExistingJobs().stream().anyMatch(pj -> jobId.equals(pj.jobId));
+        }
     }
 
     public synchronized long size() {

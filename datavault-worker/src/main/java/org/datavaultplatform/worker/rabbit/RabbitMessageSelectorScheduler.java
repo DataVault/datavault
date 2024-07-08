@@ -3,6 +3,7 @@ package org.datavaultplatform.worker.rabbit;
 import jakarta.annotation.PostConstruct;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.datavaultplatform.common.task.TaskInterrupter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -21,6 +22,8 @@ public class RabbitMessageSelectorScheduler {
     private final RabbitMessageSelector selector;
     private final long selectorMessageDelayMs;
 
+    private TaskInterrupter.Checker checker;
+    
     public RabbitMessageSelectorScheduler(@Value(SPEL_DELAY_MS) long selectorMessageDelayMs, RabbitMessageSelector selector){
         this.selector = selector;
         this.selectorMessageDelayMs = selectorMessageDelayMs;
@@ -29,11 +32,16 @@ public class RabbitMessageSelectorScheduler {
     @SuppressWarnings("DefaultAnnotationParam")
     @Scheduled(fixedDelayString = SPEL_DELAY_MS, timeUnit = TimeUnit.MILLISECONDS)
     @SneakyThrows
-    public void selectAndProcessNextMessage() {
+    public synchronized void selectAndProcessNextMessage() {
         if (!ready.get()) {
             return;
         }
-        selector.selectAndProcessNextMessage();
+        try {
+            TaskInterrupter.setInterrupterCheck(checker);
+            selector.selectAndProcessNextMessage();
+        } finally {
+            TaskInterrupter.setInterrupterCheck(null);
+        }
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -53,5 +61,9 @@ public class RabbitMessageSelectorScheduler {
     @PostConstruct
     void init() {
         log.info("Worker Scheduler : worker.next.message.selector.delay.ms[{}]", selectorMessageDelayMs);
+    }
+    
+    public synchronized void setChecker(TaskInterrupter.Checker checker) {
+        this.checker = checker;
     }
 }

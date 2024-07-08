@@ -148,7 +148,7 @@ public class DepositUserStoreDownloader extends DepositSupport {
         // Display progress bar
         sendEvent(new UpdateProgress(jobID, depositId, 0, expectedBytes, "Starting transfer ..."));
 
-        log.info("Size: " + expectedBytes + " bytes (" + FileUtils.byteCountToDisplaySize(expectedBytes) + ")");
+        log.info("Size: {} bytes ({})", expectedBytes, FileUtils.byteCountToDisplaySize(expectedBytes));
 
         //it would be nice to extract this.
         // Progress tracking (threaded)
@@ -156,8 +156,8 @@ public class DepositUserStoreDownloader extends DepositSupport {
         ProgressTracker tracker = new ProgressTracker(progress, jobID, depositId, expectedBytes, userEventSender);
         tracker.track(() -> {
             // Ask the driver to copy files to our working directory
-            log.debug("CopyFromUserStorage filePath:" + filePath);
-            log.debug("CopyFromUserStorage outputFile:" + outputFile.getAbsolutePath());
+            log.debug("CopyFromUserStorage filePath:{}", filePath);
+            log.debug("CopyFromUserStorage outputFile:{}", outputFile.getAbsolutePath());
             ((Device) userStore).retrieve(filePath, outputFile, progress);
         });
     }
@@ -168,16 +168,17 @@ public class DepositUserStoreDownloader extends DepositSupport {
         Path bagPath = context.getTempDir().resolve(bagID);
         final DepositTransferHelper result = new DepositTransferHelper(bagPath);
 
-        log.debug("Setting bag path to: " + result.bagPath());
-        log.debug("Setting bag data path to: " + result.bagDataPath());
+        log.debug("Setting bag path to: {}", result.bagPath());
+        log.debug("Setting bag data path to: {}", result.bagDataPath());
 
         if (eventHasNotBeenSeenBefore(TransferComplete.class) || !result.directoriesExist()) {
-
+            log.info("not skipping :2: download from user stores");
             result.createDirs();
             
             copySelectedUserDataToBagDataDir(result.bagDataPath());
         } else {
-            log.debug("Last event is: " + getLastEventClass() + " skipping initial File copy");
+            log.info("skipping :2: download from user stores");
+            log.debug("Last event is: {} skipping initial File copy", getLastEventClass());
         }
         return result;
     }

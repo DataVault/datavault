@@ -1,6 +1,6 @@
 package org.datavaultplatform.worker.tasks.deposit;
 
-import com.oracle.bmc.util.internal.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.PropNames;

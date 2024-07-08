@@ -117,7 +117,7 @@ public class RabbitMessageSelector implements DisposableBean, ApplicationContext
         Channel channel = connection.createChannel();
         channel.basicQos(1);
         long num = channel.getChannelNumber();
-        channel.addShutdownListener(cause -> log.info("The channel [{}] has been shutdown [{}]", num, cause.getMessage()));
+        channel.addShutdownListener(cause -> log.trace("The channel [{}] has been shutdown [{}]", num, cause.getMessage()));
         return channel;
     }
 

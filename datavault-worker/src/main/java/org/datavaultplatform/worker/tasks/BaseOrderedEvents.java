@@ -18,6 +18,7 @@ public abstract class BaseOrderedEvents {
     
     public boolean isLastEventBefore(Event lastEvent, Class<? extends Event> eventClass){
         if (lastEvent == null) {
+            log.warn("isLastEventBefore eventClass[{}] - The last event is null", eventClass);
             return true;
         }
 
@@ -30,11 +31,14 @@ public abstract class BaseOrderedEvents {
         log.info("lastEventClassName[{}]", lastEventClassName);
         int lastEventClassIndex = ordered.indexOf(lastEventClassName);
 
+        boolean result;
         if (lastEventClassIndex < 0) {
-            return true;
+            result = true;
         } else {
-            return lastEventClassIndex < eventIndex;
+            result = lastEventClassIndex < eventIndex;
         }
+        log.info("isLastEvent[{}] Before eventClass[{}] ? [{}]", lastEvent, eventClass, result);
+        return result;
     }
     
     /*
