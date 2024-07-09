@@ -18,6 +18,7 @@ import org.datavaultplatform.worker.operations.EncryptionTracker;
 import org.datavaultplatform.worker.operations.FileSplitter;
 import org.datavaultplatform.worker.operations.PackagerV2;
 import org.datavaultplatform.worker.tasks.*;
+import org.springframework.util.Assert;
 
 import java.io.File;
 import java.util.HashMap;
@@ -28,14 +29,14 @@ import static org.datavaultplatform.worker.tasks.deposit.DepositState.DepositSta
 @Slf4j
 public class DepositPackager extends DepositSupport {
 
-    private final PackagerV2 packagerV2 = new PackagerV2();
+    private static final PackagerV2 PACKAGER_V2 = new PackagerV2();
 
-    private final String tarHashAlgorithm = Verify.getAlgorithm();
+    private static final String TAR_HASH_ALGORITHM = Verify.getAlgorithm();
 
     public DepositPackager(String userID, String jobID, String depositId, UserEventSender userEventSender, String bagID, Context context, Event lastEvent, Map<String, String> properties) {
         super(userID, jobID, depositId, userEventSender, bagID, context, lastEvent, properties);
     }
-    
+
     public PackageHelper packageStep(File bagDir) throws Exception {
         final PackageHelper retVal = new PackageHelper();
         doPackageStep(bagDir, retVal);
@@ -52,8 +53,8 @@ public class DepositPackager extends DepositSupport {
         log.info("Creating tar file ...");
         File tarFile = DepositUtils.createTar(context, bagID, bagDir);
         packageHelper.setTarFile(tarFile);
-        log.info("Tar file: " + tarFile.length() + " bytes");
-        log.info("Tar file location: " + packageHelper.getTarFile().getAbsolutePath());
+        log.info("Tar file: {} bytes", tarFile.length());
+        log.info("Tar file location: {}", packageHelper.getTarFile().getAbsolutePath());
 
         sendEvent(new PackageComplete(jobID, depositId).withNextState(DepositState03StoringInArchive.getStateNumber()));
 
@@ -61,14 +62,14 @@ public class DepositPackager extends DepositSupport {
 
         packageHelper.setTarHash(Verify.getDigest(packageHelper.getTarFile()));
         packageHelper.setArchiveSize(packageHelper.getTarFile().length());
-        log.info("Checksum algorithm: " + tarHashAlgorithm);
-        log.info("Checksum: " + packageHelper.getTarHash());
-        sendEvent(new ComputedDigest(jobID, depositId, packageHelper.getTarHash(), tarHashAlgorithm));
-        
+        log.info("Checksum algorithm: {}", TAR_HASH_ALGORITHM);
+        log.info("Checksum: {}", packageHelper.getTarHash());
+        sendEvent(new ComputedDigest(jobID, depositId, packageHelper.getTarHash(), TAR_HASH_ALGORITHM));
+
         if (context.isChunkingEnabled()) {
             createChunks(packageHelper);
         } else {
-            log.debug("Last event is: " + getLastEventClass() + " skipping chunking");
+            log.debug("Last event is: {} skipping chunking", getLastEventClass());
         }
 
         // Encryption
@@ -82,7 +83,7 @@ public class DepositPackager extends DepositSupport {
                 encryptFullTar(packageHelper);
             }
         } else {
-            log.debug("Last event is: " + getLastEventClass() + " skipping enc checksum");
+            log.debug("Last event is: {} skipping enc checksum", getLastEventClass());
         }
 
         // at this point, we have finished all packaging so can delete the bag dir
@@ -91,18 +92,21 @@ public class DepositPackager extends DepositSupport {
     }
 
     private void createBag(File bagDir, String depositMetadata, String vaultMetadata, String externalMetadata) throws Exception {
-        log.debug("Creating bag in bag dir: " + bagDir.getCanonicalPath());
-        packagerV2.createBag(bagDir);
+        log.debug("Creating bag in bag dir: {}", bagDir.getCanonicalPath());
+        createBag(bagDir);
 
         // Add vault/deposit/type metadata to the bag
-        packagerV2.addMetadata(bagDir, depositMetadata, vaultMetadata, null, externalMetadata);
+        addMetadata(bagDir, depositMetadata, vaultMetadata, null, externalMetadata);
     }
 
+
     private void createChunks(PackageHelper packageHelper) throws Exception {
+        packageHelper.setChunked(true);
         log.info("Chunking tar file ...");
         File tarFile = packageHelper.getTarFile();
         File[] chunkFiles = FileSplitter.splitFile(tarFile, context.getChunkingByteSize());
-
+        Assert.isTrue(chunkFiles != null, "The chunkFiles array is null");
+        
         var chunkHelpers = packageHelper.getChunkHelpers();
         for (int i = 0; i < chunkFiles.length; i++) {
             int chunkNumber = i + 1;
@@ -111,13 +115,13 @@ public class DepositPackager extends DepositSupport {
             chunkHelpers.put(chunkNumber, chunkHelper);
         }
 
-        TaskExecutor<ChecksumHelper> executor = new TaskExecutor<>(getNumberOfChunkThreads(), "Chunk encryption failed.");
+        TaskExecutor<ChecksumHelper> executor = getTaskExecutor1(getNumberOfChunkThreads(), "Chunking failed.");
         for (int i = 0; i < chunkFiles.length; i++) {
             int chunkNumber = i + 1;
             File chunk = chunkFiles[i];
             ChecksumTracker ct = new ChecksumTracker(chunk, chunkNumber);
 
-            log.debug("Creating chunk checksum task:" + chunkNumber);
+            log.debug("Creating chunk checksum task:{}", chunkNumber);
             executor.add(ct);
 
         }
@@ -125,58 +129,84 @@ public class DepositPackager extends DepositSupport {
             int chunkNumber = result.chunkNumber();
             PackageHelper.ChunkHelper helper = chunkHelpers.get(chunkNumber);
             helper.setChunkHash(result.chunkHash());
-            log.info("Chunk file " + chunkNumber + ": " + helper.getChunkFile().length() + " bytes");
-            log.info("Chunk file location: " + helper.getChunkFile().getAbsolutePath());
-            log.info("Checksum algorithm: " + tarHashAlgorithm);
-            log.info("Checksum: " + helper.getChunkHash());
+            log.info("Chunk file {}: {} bytes", chunkNumber, helper.getChunkFile().length());
+            log.info("Chunk file location: {}", helper.getChunkFile().getAbsolutePath());
+            log.info("Checksum algorithm: {}", TAR_HASH_ALGORITHM);
+            log.info("Checksum: {}", helper.getChunkHash());
         });
 
         if (!context.isEncryptionEnabled()) {
             HashMap<Integer, String> chunksDigest = new HashMap<>();
             chunkHelpers.forEach((chunkNumber, chunkHelper) -> chunksDigest.put(chunkNumber, chunkHelper.getChunkHash()));
-            sendEvent(new ComputedChunks(jobID, depositId, chunksDigest, tarHashAlgorithm));
+            sendEvent(new ComputedChunks(jobID, depositId, chunksDigest, TAR_HASH_ALGORITHM));
         }
-        log.info(chunkFiles.length + " chunk files created.");
+        log.info("{} chunk files created.", chunkFiles.length);
     }
 
     private void encryptChunks(PackageHelper packageHelper) throws Exception {
 
-        TaskExecutor<EncryptionChunkHelper> executor = new TaskExecutor<>(getNumberOfChunkThreads(), "Chunk encryption failed.");
+        packageHelper.setEncrypted(true);
+        TaskExecutor<EncryptionChunkHelper> executor = getTaskExecutor2(getNumberOfChunkThreads(), "Chunk encryption failed.");
 
         Map<Integer, PackageHelper.ChunkHelper> chunkHelpers = packageHelper.getChunkHelpers();
         chunkHelpers.forEach((chunkNumber, chunkHelper) -> {
             EncryptionTracker et = new EncryptionTracker(chunkNumber, chunkHelper.getChunkFile(), context);
-            log.debug("Creating chunk encryption task:" + chunkNumber);
+            log.debug("Creating chunk encryption task:{}", chunkNumber);
             executor.add(et);
         });
 
         executor.execute((EncryptionChunkHelper result) -> {
             int chunkNumber = result.getChunkNumber();
             PackageHelper.ChunkHelper helper = packageHelper.getChunkHelpers().get(chunkNumber);
+            helper.setEncrypted(true);
             helper.setChunkEncHash(result.getEncTarHash());
             helper.setChunkIV(result.getIv());
         });
         log.info("{} chunk files encrypted.", chunkHelpers.size());
         sendEvent(new ComputedEncryption(jobID, depositId, packageHelper.getChunksIVs(), null,
                 context.getEncryptionMode().toString(), null, packageHelper.getEncChunkHashes(),
-                packageHelper.getChunkHashes(), tarHashAlgorithm));
+                packageHelper.getChunkHashes(), TAR_HASH_ALGORITHM));
     }
 
     private void encryptFullTar(PackageHelper packageHelper) throws Exception {
 
+        
         File tarFile = packageHelper.getTarFile();
         byte[] iv = Encryption.encryptFile(context, tarFile);
         String encTarHash = Verify.getDigest(tarFile);
 
-        log.info("Encrypted Tar file: " + tarFile.length() + " bytes");
-        log.info("Encrypted tar checksum: " + encTarHash);
+        log.info("Encrypted Tar file: {} bytes", tarFile.length());
+        log.info("Encrypted tar checksum: {}", encTarHash);
 
         sendEvent(new ComputedEncryption(jobID, depositId, null,
                 iv, context.getEncryptionMode().toString(),
                 encTarHash, null, null, null));
 
+        packageHelper.setEncrypted(true);
         packageHelper.setIv(iv);
         packageHelper.setEncTarHash(encTarHash);
+    }
+
+    // we can override this method using Mockito spy
+    protected TaskExecutor<ChecksumHelper> getTaskExecutor1(int numberOfChunkThreads, String label) {
+        return new TaskExecutor<>(numberOfChunkThreads, label);
+    }
+    protected TaskExecutor<EncryptionChunkHelper> getTaskExecutor2(int numberOfChunkThreads, String label) {
+        return new TaskExecutor<>(numberOfChunkThreads, label);
+    }
+
+    // we can override this method using Mockito spy
+    protected void createBag(File bagDir) throws Exception {
+        PACKAGER_V2.createBag(bagDir);
+    }
+
+    // we can override this method using Mockito spy
+    protected void addMetadata(File bagDir,
+                               String depositMetadata,
+                               String vaultMetadata,
+                               String fileTypeMetadata,
+                               String externalMetadata) throws Exception {
+        PACKAGER_V2.addMetadata(bagDir, depositMetadata, vaultMetadata, fileTypeMetadata, externalMetadata);
     }
 }
 
