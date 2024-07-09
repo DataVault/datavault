@@ -2,8 +2,15 @@ package org.datavaultplatform.common.task;
 
 import lombok.Getter;
 
+import java.util.Comparator;
+
 @Getter
-public sealed class TaskStage permits TaskStage.DepositTaskStage, TaskStage.RetrieveTaskStage {
+public sealed class TaskStage implements Comparable<TaskStage>
+        permits TaskStage.DepositTaskStage, TaskStage.RetrieveTaskStage {
+
+    public static final Comparator<TaskStage> COMPARATOR = Comparator
+            .comparing(TaskStage::getType)
+            .thenComparing(TaskStage::getOrder);
     
     private final TaskType type;
     private final int order;
@@ -14,7 +21,12 @@ public sealed class TaskStage permits TaskStage.DepositTaskStage, TaskStage.Retr
             this.order = order;
             this.label = this.getClass().getSimpleName();
     }
-    
+
+    @Override
+    public int compareTo(TaskStage other) {
+        return COMPARATOR.compare(this, other);
+    }
+
     public static sealed class DepositTaskStage extends TaskStage permits 
             Deposit1ComputeSize,
             Deposit2Transfer,

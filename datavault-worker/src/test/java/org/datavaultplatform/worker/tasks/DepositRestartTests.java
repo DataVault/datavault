@@ -14,6 +14,8 @@ import org.datavaultplatform.common.storage.impl.MultiLocalFileSystem;
 import org.datavaultplatform.common.task.*;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.datavaultplatform.common.util.StoredChunks;
+import org.datavaultplatform.common.util.TestUtils;
+import org.datavaultplatform.common.util.Utils;
 import org.datavaultplatform.worker.tasks.deposit.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,6 +33,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.*;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -195,6 +198,8 @@ public class DepositRestartTests {
         assertThat(event3).isInstanceOf(Error.class);
         Error error = (Error) event3;
         assertThat(error.getMessage()).isEqualTo("Deposit failed: oops");
+        
+        checkTaskStageEvents(this.taskStageEvents, TaskStage.Deposit1ComputeSize.INSTANCE);
     }
 
     @NullSource
@@ -232,6 +237,8 @@ public class DepositRestartTests {
         checkEventIsInitStates(events.get(0));
         checkEventIsStart(events.get(1));
         checkEventIsError(events.get(2), "Deposit failed: oops");
+
+        checkTaskStageEvents(this.taskStageEvents, TaskStage.Deposit1ComputeSize.INSTANCE);
     }
 
     @NullSource
@@ -252,7 +259,11 @@ public class DepositRestartTests {
         // if we are starting from TransferComplete - this step is skipped
         DepositUserStoreDownloader mDownloader = Mockito.mock(DepositUserStoreDownloader.class);
         lenient().doReturn(mDownloader).when(deposit).getDepositUserStoreDownloader(any(Map.class));
-        when(mDownloader.transferFromUserStoreToWorker()).thenReturn(bagDir);
+        when(mDownloader.transferFromUserStoreToWorker()).thenAnswer((Answer<File>) invocation -> {
+            taskStageEvents.add(new TaskStageEvent(TaskStage.Deposit2Transfer.INSTANCE, true));
+            return bagDir;
+        });
+
 
         // we are proving that this step gets called
         DepositPackager mPackager = Mockito.mock(DepositPackager.class);
@@ -278,6 +289,8 @@ public class DepositRestartTests {
         checkEventIsInitStates(events.get(0));
         checkEventIsStart(events.get(1));
         checkEventIsError(events.get(2), "Deposit failed: oops");
+        
+        checkTaskStageEvents(this.taskStageEvents, TaskStage.Deposit3PackageEncrypt.INSTANCE);
     }
 
     @SuppressWarnings("unchecked")
@@ -300,7 +313,10 @@ public class DepositRestartTests {
         // if we are starting from TransferComplete - this step is skipped
         DepositUserStoreDownloader mDownloader = Mockito.mock(DepositUserStoreDownloader.class);
         lenient().doReturn(mDownloader).when(deposit).getDepositUserStoreDownloader(any(Map.class));
-        lenient().when(mDownloader.transferFromUserStoreToWorker()).thenReturn(bagDir);
+        lenient().when(mDownloader.transferFromUserStoreToWorker()).thenAnswer((Answer<File>) invocation -> {
+            taskStageEvents.add(new TaskStageEvent(TaskStage.Deposit2Transfer.INSTANCE, true));
+            return bagDir;
+        });
 
         // if we are staring from ComputedEncryption - this step is skipped
         DepositPackager mPackager = Mockito.mock(DepositPackager.class);
@@ -335,6 +351,8 @@ public class DepositRestartTests {
         checkEventIsInitStates(events.get(0));
         checkEventIsStart(events.get(1));
         checkEventIsError(events.get(2),"Deposit failed: oops");
+        
+        checkTaskStageEvents(this.taskStageEvents, TaskStage.Deposit4Archive.INSTANCE);
     }
 
     @NullSource
@@ -356,7 +374,10 @@ public class DepositRestartTests {
         // if we are starting from TransferComplete - this step is skipped
         DepositUserStoreDownloader mDownloader = Mockito.mock(DepositUserStoreDownloader.class);
         lenient().doReturn(mDownloader).when(deposit).getDepositUserStoreDownloader(any(Map.class));
-        lenient().when(mDownloader.transferFromUserStoreToWorker()).thenReturn(bagDir);
+        lenient().when(mDownloader.transferFromUserStoreToWorker()).thenAnswer((Answer<File>) invocation -> {
+            taskStageEvents.add(new TaskStageEvent(TaskStage.Deposit2Transfer.INSTANCE, true));
+            return bagDir;
+        });
 
         // if we are staring from ComputedEncryption - this step is skipped
         DepositPackager mPackager = Mockito.mock(DepositPackager.class);
@@ -398,6 +419,27 @@ public class DepositRestartTests {
         checkEventIsInitStates(events.get(0));
         checkEventIsStart(events.get(1));
         checkEventIsError(events.get(2),"Deposit failed: oops");
+
+        checkTaskStageEvents(this.taskStageEvents, TaskStage.Deposit5Verify.INSTANCE);
+    }
+
+    private static TaskStageEvent checkTaskStageEvents(List<TaskStageEvent> taskStageEvents, TaskStage lastStage) {
+        assertThat(taskStageEvents).isEqualTo(TestUtils.sort(taskStageEvents));
+
+        List<Integer> actualStageNumbers = taskStageEvents.stream()
+                .map(TaskStageEvent::stage)
+                .map(TaskStage::getOrder)
+                .toList();
+        List<Integer> expectedStageNumbers = IntStream.rangeClosed(1, taskStageEvents.size()).boxed().toList();
+        assertThat(actualStageNumbers).isEqualTo(expectedStageNumbers);
+
+        List<TaskStageEvent> lastStageEvents = taskStageEvents.stream()
+                .dropWhile(evt -> !evt.stage().equals(lastStage))
+                .toList();
+
+        assertThat(lastStageEvents).hasSize(1);
+        TaskStageEvent lastStageEvent = lastStageEvents.get(0);
+        return lastStageEvent;
     }
 
     @NullSource
@@ -419,7 +461,10 @@ public class DepositRestartTests {
         // if we are starting from TransferComplete - this step is skipped
         DepositUserStoreDownloader mDownloader = Mockito.mock(DepositUserStoreDownloader.class);
         lenient().doReturn(mDownloader).when(deposit).getDepositUserStoreDownloader(any(Map.class));
-        lenient().when(mDownloader.transferFromUserStoreToWorker()).thenReturn(bagDir);
+        lenient().when(mDownloader.transferFromUserStoreToWorker()).thenAnswer((Answer<File>) invocation -> {
+            taskStageEvents.add(new TaskStageEvent(TaskStage.Deposit2Transfer.INSTANCE, true));
+            return bagDir;
+        });
 
         // if we are staring from ComputedEncryption - this step is skipped
         DepositPackager mPackager = Mockito.mock(DepositPackager.class);
@@ -459,6 +504,8 @@ public class DepositRestartTests {
         checkEventIsInitStates(events.get(0));
         checkEventIsStart(events.get(1));
         checkEventIsComplete(events.get(2));
+
+        checkTaskStageEvents(this.taskStageEvents, TaskStage.Deposit5Verify.INSTANCE);
     }
 
     private void checkEvents(int expectedSize) {
