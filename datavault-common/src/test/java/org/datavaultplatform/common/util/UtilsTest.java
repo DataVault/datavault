@@ -19,11 +19,16 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+@Slf4j
 public class UtilsTest {
 
   @Nested
@@ -151,4 +156,17 @@ public class UtilsTest {
       assertThat(Utils.fromCommaSeparatedString("4 , 3 , 2 , 1", Integer::parseInt)).isEqualTo(List.of(4, 3, 2, 1));
     }
   }
+
+  @Test
+  void testIsRunningWithinTest(){
+      Logger logback = ((Logger) org.slf4j.LoggerFactory.getLogger(Utils.class));
+      Level initLevel = logback.getLevel();
+      try {
+        logback.setLevel(Level.TRACE);
+
+        assertThat(Utils.isRunningWithinTest()).isTrue();
+      } finally {
+        logback.setLevel(initLevel);
+      }
+    }
 }

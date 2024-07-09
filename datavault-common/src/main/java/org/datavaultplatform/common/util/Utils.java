@@ -1,5 +1,7 @@
 package org.datavaultplatform.common.util;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.storage.Verify;
 import org.springframework.util.Assert;
@@ -77,5 +79,25 @@ public class Utils {
     }
     return result;
   }
-  
+
+  public static boolean isRunningWithinTest() {
+    try {
+      Class.forName("org.junit.jupiter.api.Test");
+      log.trace("running within a test!");
+      return true;
+    } catch (ClassNotFoundException ex) {
+      log.trace("NOT running within a test! : Unable to find org.junit.jupiter.api.Test", ex);
+      return false;
+    }
+  }
+  public static void main(String[] args) {
+    Logger logback = ((Logger) org.slf4j.LoggerFactory.getLogger(Utils.class));
+    Level initLevel = logback.getLevel();
+    try {
+      logback.setLevel(Level.TRACE);
+      Assert.isTrue(!isRunningWithinTest(), "As not a test - running within a test should NOT be true");
+    } finally {
+      logback.setLevel(initLevel);
+    }
+  }
 }
