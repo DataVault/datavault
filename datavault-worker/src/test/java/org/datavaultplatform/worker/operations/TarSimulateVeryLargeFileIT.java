@@ -14,7 +14,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.core.io.ClassPathResource;
 
 @Slf4j
-public class TarSimulateVeryLargeFileTest {
+public class TarSimulateVeryLargeFileIT {
 
   public static final long MEGABYTE = 1024 * 1024;
   public static final long GIGABYTE = 1024 * MEGABYTE;
