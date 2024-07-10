@@ -533,6 +533,10 @@
           <version>${failsafe.plugin.version}</version>
           <configuration>
             <skipITs>${skip.integration.tests}</skipITs>
+            <systemPropertyVariables>
+              <junit.jupiter.execution.timeout.default>300 s</junit.jupiter.execution.timeout.default>
+              <junit.jupiter.execution.timeout.mode>disabled_on_debug</junit.jupiter.execution.timeout.mode>
+            </systemPropertyVariables>
           </configuration>
         </plugin>
         <plugin>
@@ -542,6 +546,10 @@
           <configuration>
             <skipTests>${skip.unit.tests}</skipTests>
             <excludedGroups>slow,org.datavaultplatform.test.TSMTest</excludedGroups>
+            <systemPropertyVariables>
+              <junit.jupiter.execution.timeout.default>60 s</junit.jupiter.execution.timeout.default>
+              <junit.jupiter.execution.timeout.mode>disabled_on_debug</junit.jupiter.execution.timeout.mode>
+            </systemPropertyVariables>
           </configuration>
         </plugin>
         <plugin>
