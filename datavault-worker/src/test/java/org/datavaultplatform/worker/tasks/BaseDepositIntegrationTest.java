@@ -103,7 +103,7 @@ public abstract class BaseDepositIntegrationTest extends BaseRabbitTCTest {
         Set<Path> paths = new HashSet<>();
         try (TarArchiveInputStream tarIn = new TarArchiveInputStream(Files.newInputStream(tarFile.toPath()))) {
             TarArchiveEntry entry;
-            while ((entry = tarIn.getNextTarEntry()) != null) {
+            while ((entry = tarIn.getNextEntry()) != null) {
                 if (entry.isDirectory()) {
                     continue;
                 }

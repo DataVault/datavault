@@ -43,7 +43,7 @@ public abstract class BasePerformDepositThenRestartThenRetrieveIT extends BaseDe
     Set<Path> paths = new HashSet<>();
     try (TarArchiveInputStream tarIn = new TarArchiveInputStream(new FileInputStream(tarFile))) {
       TarArchiveEntry entry;
-      while ((entry = tarIn.getNextTarEntry()) != null) {
+      while ((entry = tarIn.getNextEntry()) != null) {
         if (entry.isDirectory()) {
           continue;
         }
