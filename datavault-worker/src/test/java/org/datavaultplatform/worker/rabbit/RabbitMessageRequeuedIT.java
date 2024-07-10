@@ -3,7 +3,7 @@ package org.datavaultplatform.worker.rabbit;
 import com.rabbitmq.client.Channel;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.awaitility.Awaitility;
+import org.datavaultplatform.common.util.TestUtils;
 import org.datavaultplatform.worker.app.DataVaultWorkerInstanceApp;
 import org.datavaultplatform.worker.queue.Receiver;
 import org.datavaultplatform.worker.test.AddTestProperties;
@@ -115,11 +115,11 @@ public class RabbitMessageRequeuedIT extends BaseRabbitIT {
     void testRabbitMessageSelector() {
         // msgId1 should be the only message Q'd - so should be recvd next
         String msgId1 = sendHiPriorityMessage("hiPriority1");
-        Awaitility.await().until(() -> recvdMessageId(msgId1));
+        TestUtils.waitUntil(() -> recvdMessageId(msgId1));
 
         // msgId2 should be the only message Q'd - so should be recvd next
         String msgId2 = sendHiPriorityMessage("loPriority2");
-        Awaitility.await().until(() -> recvdMessageId(msgId2));
+        TestUtils.waitUntil(() -> recvdMessageId(msgId2));
 
         var messageIdsInRecvdOrder = receivedMessages.stream()
                 .map(recvd -> recvd.message().getMessageProperties().getMessageId())
@@ -136,14 +136,14 @@ public class RabbitMessageRequeuedIT extends BaseRabbitIT {
 
         assertThat(getHiPriorityQueueCount()).isEqualTo(0);
         String msgId3 = sendHiPriorityMessage(REQUEUE);
-        Awaitility.await().until(() -> recvdMessageId(msgId3));
+        TestUtils.waitUntil(() -> recvdMessageId(msgId3));
         assertThat(receivedMessages.size()).isEqualTo(3);
 
-        Awaitility.await().until(() -> getHiPriorityQueueCount() == 0);
+        TestUtils.waitUntil(() -> getHiPriorityQueueCount() == 0);
         zeroMessageOnQueueLatch.countDown(); // now we release the latch, the connection is cut and the message should be re-queued with re-deliver
 
         // the message should have bounced back into the queue
-        Awaitility.await().until(() -> getHiPriorityQueueCount() == 1);
+        TestUtils.waitUntil(() -> getHiPriorityQueueCount() == 1);
         assertThat(getHiPriorityQueueCount()).isEqualTo(1);
 
         Message requeued = rabbitTemplate.receive(hiPriorityQueueName, 100);

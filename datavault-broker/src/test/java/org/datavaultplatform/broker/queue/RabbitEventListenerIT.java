@@ -5,9 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doNothing;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import org.awaitility.Awaitility;
+
+import org.datavaultplatform.common.util.TestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -58,9 +59,10 @@ public class RabbitEventListenerIT extends BaseRabbitTCTest {
     //send message direct to 'events queue' and check that we can receive it via Listener
     RabbitUtils.sendDirectToQueue(template, eventQueue.getActualName(), rand);
 
-    Awaitility.await().atMost(10, TimeUnit.SECONDS)
-        .pollInterval(200, TimeUnit.MILLISECONDS)
-        .until(() -> argEventMessage.getAllValues().isEmpty() == false);
+    TestUtils.waitUntil(
+            Duration.ofSeconds(10),
+            Duration.ofMillis(200),
+            () -> !argEventMessage.getAllValues().isEmpty());
 
     Message recvdMessage = argEventMessage.getValue();
     assertEquals(rand, new String(recvdMessage.getBody(), StandardCharsets.UTF_8));

@@ -1,7 +1,7 @@
 package org.datavaultplatform.broker.queue;
 
 import lombok.extern.slf4j.Slf4j;
-import org.awaitility.Awaitility;
+import org.datavaultplatform.common.util.TestUtils;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -109,7 +109,7 @@ class TaskTimerSupportTest {
     void testTimeout() {
         doNothing().when(mockAction).accept(any(String.class));
         timerSupport.startTimer("one", "test", mockAction);
-        Awaitility.await().atMost(1, TimeUnit.SECONDS).until(timerSupport::isEmpty);
+        TestUtils.waitUntil(Duration.ofSeconds(1), timerSupport::isEmpty);
         assertThat(timersStarted).isEqualTo(List.of("one"));
         assertThat(timersEnded).isEmpty();
         assertThat(timersTimedOut).isEqualTo(List.of("one"));
@@ -153,7 +153,7 @@ class TaskTimerSupportTest {
         timerSupport.startTimer("rte", "test", id -> {
             throw new RuntimeException("oops");
         });
-        Awaitility.await().atMost(10, TimeUnit.SECONDS).until(timerSupport::isEmpty);
+        TestUtils.waitUntil(Duration.ofSeconds(10), timerSupport::isEmpty);
 
         assertThat(timersStarted).isEqualTo(List.of("rte"));
         assertThat(timersEnded).isEmpty();
@@ -239,7 +239,7 @@ class TaskTimerSupportTest {
         TimeUnit.MILLISECONDS.sleep(SHORT_DELAY.toMillis());
         timerSupport.resetTimer("one");
 
-        Awaitility.await().atMost(10, TimeUnit.SECONDS).until(timedOut::get);
+        TestUtils.waitUntil(Duration.ofSeconds(10), timedOut::get);
 
         assertThat(timersStarted).isEqualTo(List.of("one"));
         assertThat(timersReset.stream().map(pair -> pair.before.info().id()).toList()).isEqualTo(List.of("one", "one"));
@@ -298,7 +298,7 @@ class TaskTimerSupportTest {
             ids.forEach(id -> timerSupport.startTimer(id, "test", DEFAULT_TIMEOUT_ACTION));
             assertThat(timersStarted.size()).isEqualTo(LIMIT);
 
-            Awaitility.await().atMost(15, TimeUnit.SECONDS).until(timerSupport::isEmpty);
+            TestUtils.waitUntil(Duration.ofSeconds(15), timerSupport::isEmpty);
 
             assertThat(timersTimedOut.size()).isEqualTo(LIMIT);
             ids.forEach(id -> assertThat(timersStarted.contains(id)).isTrue());
@@ -357,9 +357,9 @@ class TaskTimerSupportTest {
                 TimeUnit.MILLISECONDS.sleep(SHORT_DELAY.toMillis());
             }
 
-            Awaitility.await().atMost(20, TimeUnit.SECONDS).until(() -> counter.get() == LIMIT);
+            TestUtils.waitUntil(Duration.ofSeconds(20), () -> counter.get() == LIMIT);
             
-            Awaitility.await().atMost(1, TimeUnit.SECONDS).until(timerSupport::isEmpty);
+            TestUtils.waitUntil(Duration.ofSeconds(1), timerSupport::isEmpty);
 
             assertThat(timersStarted).hasSize(LIMIT);
 

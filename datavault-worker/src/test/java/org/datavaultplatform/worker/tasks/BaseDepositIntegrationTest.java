@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.io.FileUtils;
-import org.awaitility.Awaitility;
 import org.datavaultplatform.common.config.BaseQueueConfig;
 import org.datavaultplatform.common.crypto.Encryption;
 import org.datavaultplatform.common.event.Event;
@@ -16,6 +15,7 @@ import org.datavaultplatform.common.event.deposit.ComputedDigest;
 import org.datavaultplatform.common.event.deposit.ComputedEncryption;
 import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.common.task.Context.AESMode;
+import org.datavaultplatform.common.util.TestUtils;
 import org.datavaultplatform.worker.rabbit.BaseRabbitTCTest;
 import org.datavaultplatform.worker.utils.DepositEvents;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,7 +47,6 @@ import java.nio.file.StandardCopyOption;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -238,9 +237,10 @@ public abstract class BaseDepositIntegrationTest extends BaseRabbitTCTest {
 
 
     final void waitUntil(Callable<Boolean> test) {
-        Awaitility.await().atMost(60, TimeUnit.MINUTES)
-                .pollInterval(Duration.ofSeconds(15))
-                .until(test);
+        TestUtils.waitUntil(
+                Duration.ofMinutes(5),
+                Duration.ofSeconds(15),
+                test);
     }
 
     abstract Optional<Integer> getExpectedNumberChunksPerDeposit();

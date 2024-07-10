@@ -1,7 +1,7 @@
 package org.datavaultplatform.worker.rabbit;
 
 import lombok.extern.slf4j.Slf4j;
-import org.awaitility.Awaitility;
+import org.datavaultplatform.common.util.TestUtils;
 import org.datavaultplatform.worker.app.DataVaultWorkerInstanceApp;
 import org.datavaultplatform.worker.test.AddTestProperties;
 import org.junit.jupiter.api.BeforeEach;
@@ -72,19 +72,19 @@ public class RabbitMessageSelectorIT extends BaseRabbitIT {
     void testRabbitMessageSelector() {
         // msgId1 should be the only message Q'd - so should be recvd next
         String msgId1 = sendHiPriorityMessage("hiPriority1");
-        Awaitility.await().until(() -> recvdMessageId(msgId1));
+        TestUtils.waitUntil(() -> recvdMessageId(msgId1));
 
         // msgId2 should be the only message Q'd - so should be recvd next
         String msgId2 = sendHiPriorityMessage("loPriority2");
-        Awaitility.await().until(() -> recvdMessageId(msgId2));
+        TestUtils.waitUntil(() -> recvdMessageId(msgId2));
 
         // with both msgId4 and msgId3 Q'd - the hi priority message should be recvd first
         String msgId3 = sendLoPriorityMessage("loPriority3");
         String msgId4 = sendHiPriorityMessage("hiPriority4");
-        Awaitility.await().until(() -> recvdMessageId(msgId4));
+        TestUtils.waitUntil(() -> recvdMessageId(msgId4));
         assertThat(receivedMessages.size()).isEqualTo(3);
 
-        Awaitility.await().until(() -> recvdMessageId(msgId3));
+        TestUtils.waitUntil(() -> recvdMessageId(msgId3));
         assertThat(receivedMessages.size()).isEqualTo(4);
 
         // with 3 hi and another 3 lo priority messages Q'd - the hi priority should be recvd first
@@ -98,10 +98,10 @@ public class RabbitMessageSelectorIT extends BaseRabbitIT {
         String msgId9 = sendHiPriorityMessage("hiPriority9");
         String msgId10 = sendHiPriorityMessage("hiPriority10");
 
-        Awaitility.await().until(() -> recvdMessageId(msgId10));
+        TestUtils.waitUntil(() -> recvdMessageId(msgId10));
         assertThat(receivedMessages.size()).isEqualTo(7);
 
-        Awaitility.await().until(() -> recvdMessageId(msgId7));
+        TestUtils.waitUntil(() -> recvdMessageId(msgId7));
         assertThat(receivedMessages.size()).isEqualTo(10);
 
         var messageIdsInRecvdOrder = receivedMessages.stream()
