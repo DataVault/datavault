@@ -51,6 +51,9 @@
             </th:block>
             <br/>
 
+            <b>Retention Policy minimum retention period (years):</b> [[${createRetentionPolicy.minRetentionPeriod}]]
+            <br/>
+
             <b>Retention Policy expiry date:</b> [[${#dates.format(vault.policyExpiry,dateFormatISO)}]]<!--/* date */--><br/>
             (Date before which data should not be deleted, according to the funder retention policy, taking into account any extensions caused by retrievals for external users, if applicable. The expiry date is calculated by adding the minimum number of years to the grant end date. Data may be deleted sooner for overriding reason such as data protection, or if the funder counts the retention period as starting from the data creation date.)
             <br/>
