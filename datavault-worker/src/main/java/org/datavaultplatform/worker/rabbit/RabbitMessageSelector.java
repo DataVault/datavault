@@ -16,6 +16,8 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.event.EventListener;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
@@ -48,6 +50,7 @@ public class RabbitMessageSelector implements DisposableBean, ApplicationContext
         return Stream.of(hi, lo).map(Supplier::get).flatMap(Optional::stream).findFirst();
     }
 
+    @Retryable(retryFor = java.net.ConnectException.class, maxAttempts = 5, backoff = @Backoff(delay = 200))
     public synchronized void selectAndProcessNextMessage() throws Exception {
         if (!ready.get()) {
             return;
