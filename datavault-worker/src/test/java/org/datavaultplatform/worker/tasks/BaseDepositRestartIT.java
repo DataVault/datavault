@@ -15,8 +15,9 @@ import org.datavaultplatform.common.event.deposit.ComputedDigest;
 import org.datavaultplatform.common.event.deposit.ComputedEncryption;
 import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.common.task.Context.AESMode;
+import org.datavaultplatform.common.task.Task;
 import org.datavaultplatform.common.util.TestUtils;
-import org.datavaultplatform.worker.rabbit.BaseRabbitTCTest;
+import org.datavaultplatform.worker.rabbit.BaseRabbitIT;
 import org.datavaultplatform.worker.utils.DepositEvents;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.amqp.core.AmqpAdmin;
@@ -52,7 +53,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
-public abstract class BaseDepositIntegrationTest extends BaseRabbitTCTest {
+public abstract class BaseDepositRestartIT extends BaseRabbitIT {
 
     static final String SRC_PATH_1 = "src-path-a";
     static final String SRC_PATH_2 = "src-path-b";
@@ -132,12 +133,16 @@ public abstract class BaseDepositIntegrationTest extends BaseRabbitTCTest {
         registry.add("metaDir", () -> metaDirValue);
     }
 
+    @SneakyThrows
     @SuppressWarnings("UnusedReturnValue")
-    final String sendNormalMessage(String msgBody) {
+    final String sendNormalMessage(String msgBody, Event lastEvent) {
+        Task task = mapper.readValue(msgBody, Task.class);
+        task.setLastEvent(lastEvent);
+        String msgWithLastEvent = mapper.writeValueAsString(task);
         MessageProperties props = new MessageProperties();
         props.setMessageId(UUID.randomUUID().toString());
         props.setPriority(NORMAL_PRIORITY);
-        Message msg = new Message(msgBody.getBytes(StandardCharsets.UTF_8), props);
+        Message msg = new Message(msgWithLastEvent.getBytes(StandardCharsets.UTF_8), props);
         template.send(workerQueue.getActualName(), msg);
         return props.getMessageId();
     }
@@ -238,8 +243,8 @@ public abstract class BaseDepositIntegrationTest extends BaseRabbitTCTest {
 
     final void waitUntil(Callable<Boolean> test) {
         TestUtils.waitUntil(
-                Duration.ofMinutes(5),
-                Duration.ofSeconds(15),
+                Duration.ofSeconds(20),
+                Duration.ofSeconds(1),
                 test);
     }
 
@@ -368,9 +373,10 @@ public abstract class BaseDepositIntegrationTest extends BaseRabbitTCTest {
 
         String msgBody = new String(message.getBody(), StandardCharsets.UTF_8);
         synchronized (events) {
-            events.add(extractEvent(msgBody));
+            Event extracted = extractEvent(msgBody);
+            events.add(extracted);
 
-            log.info("Received message for broker [{}]", events.size());
+            log.info("Received message for broker [{}] #events[{}]", extracted.getClass().getSimpleName(), events.size());
         }
     }
 

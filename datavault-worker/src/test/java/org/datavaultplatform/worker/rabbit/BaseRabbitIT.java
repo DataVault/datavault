@@ -14,6 +14,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Testcontainers(disabledWithoutDocker = true)
 @Slf4j
 public abstract class BaseRabbitIT {
+
+    public static final int HI_PRIORITY = 2;
+    public static final int NORMAL_PRIORITY = 1;
+
     @Container
     private static final RabbitMQContainer RABBIT = new RabbitMQContainer(DockerImage.RABBIT_IMAGE_NAME)
             .withExposedPorts(5672, 15672);
@@ -29,6 +33,11 @@ public abstract class BaseRabbitIT {
     @PostConstruct
     void init() {
         assertThat(RABBIT.isCreated()).isTrue();
+        log.info("RABBIT HTTP URL [ {} ]", RABBIT.getHttpUrl());
+        log.info("rabbit username [{}]", RABBIT.getAdminUsername());
+        log.info("rabbit password [{}]", RABBIT.getAdminPassword());
+        log.info("rabbit host [{}]", RABBIT.getHost());
+        log.info("rabbit AMQP port [{}]", RABBIT.getAmqpPort());
     }
 
 }

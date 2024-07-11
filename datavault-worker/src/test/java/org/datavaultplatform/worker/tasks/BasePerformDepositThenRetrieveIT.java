@@ -32,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Slf4j
-public abstract class BasePerformDepositThenRetrieveIT extends BaseDepositIntegrationTest {
+public abstract class BasePerformDepositThenRetrieveIT extends BaseDepositIT {
   
   @Override
   void taskSpecificSetup() throws IOException {

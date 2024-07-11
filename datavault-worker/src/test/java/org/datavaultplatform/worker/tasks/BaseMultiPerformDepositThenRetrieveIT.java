@@ -18,7 +18,7 @@ import org.datavaultplatform.common.event.retrieve.RetrieveComplete;
 import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.common.task.Context.AESMode;
 import org.datavaultplatform.common.util.TestUtils;
-import org.datavaultplatform.worker.rabbit.BaseRabbitTCTest;
+import org.datavaultplatform.worker.rabbit.BaseRabbitIT;
 import org.datavaultplatform.worker.utils.DepositEvents;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -57,7 +57,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
 @Timeout(value = 60, unit = TimeUnit.SECONDS)
-public abstract class BaseMultiPerformDepositThenRetrieveIT extends BaseRabbitTCTest {
+public abstract class BaseMultiPerformDepositThenRetrieveIT extends BaseRabbitIT {
 
   static final String KEY_NAME_FOR_SSH = "key-name-for-ssh";
   static final String KEY_NAME_FOR_DATA = "key-name-for-data";

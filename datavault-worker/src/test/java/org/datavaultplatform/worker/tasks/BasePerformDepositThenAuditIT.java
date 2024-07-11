@@ -13,7 +13,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Slf4j
-public abstract class BasePerformDepositThenAuditIT extends BaseDepositIntegrationTest {
+public abstract class BasePerformDepositThenAuditIT extends BaseDepositIT {
 
   abstract void checkChunkingProps(boolean chunkingEnabled, String chunkingByteSize);
 

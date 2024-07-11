@@ -33,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Slf4j
-public abstract class BasePerformDepositThenRestartThenRetrieveIT extends BaseDepositRestartIntegrationTest {
+public abstract class BasePerformDepositThenRestartThenRetrieveIT extends BaseDepositRestartIT {
   
   @Autowired
   RabbitMessageSelectorScheduler scheduler;
