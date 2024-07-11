@@ -28,8 +28,6 @@ import org.springframework.context.annotation.Bean;
 @SpringBootTest(classes = {DataVaultWorkerInstanceApp.class, MessageReceiveShutdownIT.TestConfig.class})
 @Slf4j
 @AddTestProperties
-//@Testcontainers(disabledWithoutDocker = true)
-//@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 /*
  Checks that a shutdown message will stop the processing of further messages.
 */

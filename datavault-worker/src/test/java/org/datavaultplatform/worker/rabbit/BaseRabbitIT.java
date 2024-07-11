@@ -2,8 +2,8 @@ package org.datavaultplatform.worker.rabbit;
 
 import jakarta.annotation.PostConstruct;
 import org.datavaultplatform.common.docker.DockerImage;
+import org.datavaultplatform.common.util.UsesTestContainers;
 import org.datavaultplatform.worker.config.RabbitConfig;
-import org.datavaultplatform.worker.utils.UsesTestContainers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;

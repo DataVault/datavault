@@ -1,4 +1,4 @@
-package org.datavaultplatform.worker.utils;
+package org.datavaultplatform.common.util;
 
 import org.springframework.test.annotation.DirtiesContext;
 import org.testcontainers.junit.jupiter.Testcontainers;

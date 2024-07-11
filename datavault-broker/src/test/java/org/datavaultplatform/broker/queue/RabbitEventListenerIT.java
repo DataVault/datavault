@@ -23,7 +23,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 
-public class RabbitEventListenerIT extends BaseRabbitTCTest {
+public class RabbitEventListenerIT extends BaseRabbitTCIT {
 
   @SpyBean
   EventListener eventListener;

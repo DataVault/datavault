@@ -13,6 +13,7 @@ import org.apache.directory.api.ldap.model.cursor.CursorException;
 import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.datavaultplatform.common.docker.DockerImage;
 import org.datavaultplatform.common.services.LDAPService;
+import org.datavaultplatform.common.util.UsesTestContainers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -33,7 +34,8 @@ import org.testcontainers.junit.jupiter.Container;
  */
 
 @Slf4j
-public abstract class BaseLDAPServiceTest {
+@UsesTestContainers
+public abstract class BaseLDAPServiceIT {
 
   /*
   DataVault does NOT authenticate/bind to LDAP using the admin user - it uses 'uid=uun,ou=people,o=myu.ed'

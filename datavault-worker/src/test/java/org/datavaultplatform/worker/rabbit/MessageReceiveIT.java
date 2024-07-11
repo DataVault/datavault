@@ -29,8 +29,6 @@ import org.springframework.core.env.Environment;
 @SpringBootTest(classes = {DataVaultWorkerInstanceApp.class,MessageReceiveIT.TestConfig.class})
 @AddTestProperties
 @Slf4j
-//@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
-//@Testcontainers(disabledWithoutDocker = true)
 /*
  Checks that we can recv and process messages, 1 at a time, in the order they are sent.
 */

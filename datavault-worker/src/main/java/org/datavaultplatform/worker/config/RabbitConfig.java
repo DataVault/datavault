@@ -31,8 +31,8 @@ public class RabbitConfig {
   @Value("${queue.name}")
   private String loPriorityQueueName;
 
-  @Value("${worker.poll.rabbitmq.delay.ms:50}")
-  private long pollRabbitMQdelayMs;
+  @Value(RabbitMessageSelectorScheduler.SPEL_DELAY_MS)
+  private long workerNextMessageSelectorDelayMs;
 
   @Value("${spring.application.name}")
   String applicationName;
@@ -99,7 +99,7 @@ public class RabbitConfig {
   
   @Bean
   public RabbitMessageSelectorScheduler selectorScheduler(RabbitMessageSelector selector, ScheduledMonitor monitor) {
-    return new RabbitMessageSelectorScheduler(this.pollRabbitMQdelayMs, selector, monitor);
+    return new RabbitMessageSelectorScheduler(this.workerNextMessageSelectorDelayMs, selector, monitor);
   }
 
   @PostConstruct

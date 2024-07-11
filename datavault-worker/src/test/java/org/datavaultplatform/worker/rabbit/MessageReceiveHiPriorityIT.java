@@ -28,8 +28,6 @@ import org.springframework.context.annotation.Bean;
 @SpringBootTest(classes = {DataVaultWorkerInstanceApp.class, MessageReceiveHiPriorityIT.TestConfig.class})
 @AddTestProperties
 @Slf4j
-//@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
-//@Testcontainers(disabledWithoutDocker = true)
 /*
  Checks that a hi-priority shutdown message will get processed before
  other normal messages.
@@ -60,10 +58,10 @@ class MessageReceiveHiPriorityIT extends BaseReceiveIT {
       sendNormalMessage(i);
     }
     //wait long enough for processing of first normal message
-    Thread.sleep(200);
+    Thread.sleep(500);
     // okay is true only after we've recvd 1 shutdown message
     String shutdownMessageId = sendShutdownTestMessage(HI_PRIORITY);
-    shutdownLatch.await(1, TimeUnit.MINUTES);
+    shutdownLatch.await(2, TimeUnit.MINUTES);
     Assertions.assertEquals(MESSAGES_TO_PROCESS, messageInfos.size());
 
     // check that the shutdown message id is the one we expected

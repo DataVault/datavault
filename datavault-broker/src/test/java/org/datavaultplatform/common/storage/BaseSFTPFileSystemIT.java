@@ -36,6 +36,7 @@ import org.datavaultplatform.common.io.ProgressEventType;
 import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.common.storage.impl.SFTPFileSystemSSHD;
 import org.datavaultplatform.common.storage.impl.ssh.UtilitySSHD;
+import org.datavaultplatform.common.util.UsesTestContainers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -45,6 +46,7 @@ import org.slf4j.Logger;
 import org.testcontainers.containers.Container.ExecResult;
 import org.testcontainers.containers.GenericContainer;
 
+@UsesTestContainers
 public abstract class BaseSFTPFileSystemIT {
 
   static final int SFTP_SERVER_PORT = 2222;

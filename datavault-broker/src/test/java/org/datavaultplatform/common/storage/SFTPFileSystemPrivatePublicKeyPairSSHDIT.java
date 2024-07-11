@@ -6,7 +6,6 @@ import org.datavaultplatform.common.storage.impl.SFTPFileSystemSSHD;
 import org.slf4j.Logger;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 /*
   The actual sftp-server-container instance is test class specific.
@@ -15,7 +14,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
   The initialisation of the sftp-server-container is done in 1 of 2 base classes.
   The common sftp test methods are in the base class BaseSftpIT
  */
-@Testcontainers(disabledWithoutDocker = true)
 @Slf4j
 public class SFTPFileSystemPrivatePublicKeyPairSSHDIT extends BaseSFTPFileSystemPrivatePublicKeyPairIT {
 

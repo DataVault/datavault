@@ -3,14 +3,13 @@ package org.datavaultplatform.broker.queue;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.docker.DockerImage;
+import org.datavaultplatform.common.util.UsesTestContainers;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-
-@Testcontainers(disabledWithoutDocker = true)
 @Slf4j
-public abstract class BaseRabbitTCTest extends BaseRabbitTest {
+@UsesTestContainers
+public abstract class BaseRabbitTCIT extends BaseRabbitTest {
 
   @Container
   @ServiceConnection

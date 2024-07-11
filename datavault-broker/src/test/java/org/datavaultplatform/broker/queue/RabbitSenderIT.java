@@ -1,6 +1,5 @@
 package org.datavaultplatform.broker.queue;
 
-import static org.datavaultplatform.broker.config.QueueConfig.WORKER_QUEUE_NAME;
 import static org.datavaultplatform.common.config.BaseQueueConfig.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -19,7 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 
-public class RabbitSenderIT extends BaseRabbitTCTest {
+public class RabbitSenderIT extends BaseRabbitTCIT {
 
   @Autowired
   RabbitTemplate template;

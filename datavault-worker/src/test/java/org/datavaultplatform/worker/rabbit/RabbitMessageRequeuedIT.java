@@ -42,8 +42,6 @@ import static org.mockito.ArgumentMatchers.any;
 @TestPropertySource(properties = {
         "worker.next.message.selector.delay.ms=1000"
 })
-//@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
-//@Testcontainers(disabledWithoutDocker = true)
 public class RabbitMessageRequeuedIT extends BaseRabbitIT {
 
     static final String REQUEUE = "delayed-so-requeue";

@@ -19,6 +19,7 @@ import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.request.ValidateUser;
 import org.datavaultplatform.common.services.LDAPService;
 import org.datavaultplatform.common.util.DisabledInsideDocker;
+import org.datavaultplatform.common.util.UsesTestContainers;
 import org.datavaultplatform.webapp.authentication.shib.ShibAuthenticationListener;
 import org.datavaultplatform.webapp.authentication.shib.ShibGrantedAuthorityService;
 import org.datavaultplatform.webapp.services.RestService;
@@ -37,7 +38,6 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.authentication.event.AuthenticationSuccessEvent;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
@@ -47,7 +47,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import com.google.common.io.Files;
 import org.testcontainers.utility.MountableFile;
 
@@ -58,8 +57,7 @@ import org.testcontainers.utility.MountableFile;
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @ProfileShib
 @TestPropertySource(properties = {"tomcat.ajp.enabled=true"})
-@Testcontainers(disabledWithoutDocker = true)
-@DirtiesContext
+@UsesTestContainers
 @Slf4j
 class AjpConnectorIT {
 

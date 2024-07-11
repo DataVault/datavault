@@ -20,7 +20,7 @@ public class RabbitMessageSelectorScheduler {
     private final AtomicBoolean ready = new AtomicBoolean(false);
 
     private final RabbitMessageSelector selector;
-    private final long selectorMessageDelayMs;
+    private final long workerNextMessageSelectorDelayMs;
 
     private TaskInterrupter.Checker checker;
 
@@ -28,11 +28,11 @@ public class RabbitMessageSelectorScheduler {
     private final ScheduledMonitor monitor;
     
     public RabbitMessageSelectorScheduler(
-            @Value(SPEL_DELAY_MS) long selectorMessageDelayMs,
+            @Value(SPEL_DELAY_MS) long workerNextMessageSelectorDelayMs,
             RabbitMessageSelector selector,
             ScheduledMonitor monitor){
         this.selector = selector;
-        this.selectorMessageDelayMs = selectorMessageDelayMs;
+        this.workerNextMessageSelectorDelayMs = workerNextMessageSelectorDelayMs;
         this.monitor = monitor;
     }
     
@@ -40,7 +40,7 @@ public class RabbitMessageSelectorScheduler {
     @Scheduled(fixedDelayString = SPEL_DELAY_MS, timeUnit = TimeUnit.MILLISECONDS)
     @SneakyThrows
     public synchronized void selectAndProcessNextMessage() {
-        log.info("SelectorMessageDelayMs [{}]", selectorMessageDelayMs);
+        log.info("worker.next.message.selector.delay.ms[{}]", workerNextMessageSelectorDelayMs);
         monitor.monitor(this);
         if (!ready.get()) {
             return;
@@ -71,7 +71,7 @@ public class RabbitMessageSelectorScheduler {
     
     @PostConstruct
     void init() {
-        log.info("Worker Scheduler : worker.next.message.selector.delay.ms[{}]", selectorMessageDelayMs);
+        log.info("Worker Scheduler : worker.next.message.selector.delay.ms[{}]", workerNextMessageSelectorDelayMs);
     }
     
     public synchronized void setChecker(TaskInterrupter.Checker checker) {

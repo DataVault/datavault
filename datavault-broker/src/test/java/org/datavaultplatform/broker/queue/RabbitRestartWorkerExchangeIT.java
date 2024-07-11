@@ -17,7 +17,7 @@ import java.nio.charset.StandardCharsets;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @TestPropertySource(properties = "logging.level.org.springframework.amqp=DEBUG")
-public class RabbitRestartWorkerExchangeIT extends BaseRabbitTCTest {
+public class RabbitRestartWorkerExchangeIT extends BaseRabbitTCIT {
 
   @Autowired
   RabbitTemplate template;
