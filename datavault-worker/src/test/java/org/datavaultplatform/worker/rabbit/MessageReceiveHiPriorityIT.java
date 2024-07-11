@@ -7,6 +7,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.worker.app.DataVaultWorkerInstanceApp;
@@ -58,7 +60,7 @@ class MessageReceiveHiPriorityIT extends BaseReceiveIT {
     Thread.sleep(200);
     // okay is true only after we've recvd 1 shutdown message
     String shutdownMessageId = sendShutdownTestMessage(HI_PRIORITY);
-    shutdownLatch.await();
+    shutdownLatch.await(1, TimeUnit.MINUTES);
     Assertions.assertEquals(MESSAGES_TO_PROCESS, messageInfos.size());
 
     // check that the shutdown message id is the one we expected

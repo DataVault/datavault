@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -92,9 +93,9 @@ public class RabbitMessageRequeuedIT extends BaseRabbitIT {
                 if (REQUEUE.equals(msg)) {
                     log.info("GOT REQUEUE MESSAGE - cutting connections to rabbitmq");
                     log.info("Selector - [{}]", selector);
-                    zeroMessageOnQueueLatch.await(); // wait until the test has confirmed 0 message on queue
+                    zeroMessageOnQueueLatch.await(30, TimeUnit.SECONDS); // wait until the test has confirmed 0 message on queue
                     selector.destroy(); // this causes the rabbit connection to be terminated
-                    testEndedLatch.await(); //wait until test ended
+                    testEndedLatch.await(30, TimeUnit.SECONDS); //wait until test ended
                 }
             } catch (Exception ex) {
                 log.error("unexpected exception processing message", ex);
