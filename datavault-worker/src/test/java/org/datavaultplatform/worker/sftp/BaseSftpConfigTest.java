@@ -21,7 +21,7 @@ import org.springframework.test.context.TestPropertySource;
 @DirtiesContext
 @TestPropertySource(properties = "worker.rabbit.enabled=false")
 @AddTestProperties
-abstract class BaseSftpConfigTest {
+public abstract class BaseSftpConfigTest {
 
   @Autowired
   StorageClassNameResolver storageClassNameResolver;
