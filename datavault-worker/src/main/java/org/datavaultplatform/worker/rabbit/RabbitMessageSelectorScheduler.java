@@ -23,22 +23,33 @@ public class RabbitMessageSelectorScheduler {
     private final long selectorMessageDelayMs;
 
     private TaskInterrupter.Checker checker;
+
     
-    public RabbitMessageSelectorScheduler(@Value(SPEL_DELAY_MS) long selectorMessageDelayMs, RabbitMessageSelector selector){
+    private final ScheduledMonitor monitor;
+    
+    public RabbitMessageSelectorScheduler(
+            @Value(SPEL_DELAY_MS) long selectorMessageDelayMs,
+            RabbitMessageSelector selector,
+            ScheduledMonitor monitor){
         this.selector = selector;
         this.selectorMessageDelayMs = selectorMessageDelayMs;
+        this.monitor = monitor;
     }
     
     @SuppressWarnings("DefaultAnnotationParam")
     @Scheduled(fixedDelayString = SPEL_DELAY_MS, timeUnit = TimeUnit.MILLISECONDS)
     @SneakyThrows
     public synchronized void selectAndProcessNextMessage() {
+        log.info("SelectorMessageDelayMs [{}]", selectorMessageDelayMs);
+        monitor.monitor(this);
         if (!ready.get()) {
             return;
         }
         try {
             TaskInterrupter.setInterrupterCheck(checker);
             selector.selectAndProcessNextMessage();
+        } catch (Exception ex) {
+            monitor.error(this, ex);
         } finally {
             TaskInterrupter.setInterrupterCheck(null);
         }

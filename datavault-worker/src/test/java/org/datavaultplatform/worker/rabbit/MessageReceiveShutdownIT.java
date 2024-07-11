@@ -18,15 +18,18 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.context.annotation.Bean;
 
-@SpringBootTest(classes = DataVaultWorkerInstanceApp.class)
-@AddTestProperties
-@DirtiesContext
+@SpringBootTest(classes = {DataVaultWorkerInstanceApp.class, MessageReceiveShutdownIT.TestConfig.class})
 @Slf4j
+@AddTestProperties
+//@Testcontainers(disabledWithoutDocker = true)
+//@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 /*
  Checks that a shutdown message will stop the processing of further messages.
 */
@@ -34,7 +37,7 @@ class MessageReceiveShutdownIT extends BaseReceiveIT {
 
   private static final int MESSAGES_TO_SEND = 5;
   private static final int MESSAGES_TO_PROCESS = 2;
-
+  
   @MockBean
   Receiver mProcessor;
 
@@ -111,4 +114,11 @@ class MessageReceiveShutdownIT extends BaseReceiveIT {
     }).when(mShutdownHandler).handleShutdown(argMessageInfo.capture());
   }
 
+  @TestConfiguration
+  static class TestConfig {
+    @Bean
+    Logger monitorLogger() {
+      return log;
+    }
+  }
 }

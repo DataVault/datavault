@@ -18,16 +18,19 @@ import org.datavaultplatform.worker.test.AddTestProperties;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
-import org.springframework.test.annotation.DirtiesContext;
 
-@SpringBootTest(classes = DataVaultWorkerInstanceApp.class)
+@SpringBootTest(classes = {DataVaultWorkerInstanceApp.class,MessageReceiveIT.TestConfig.class})
 @AddTestProperties
-@DirtiesContext
 @Slf4j
+//@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
+//@Testcontainers(disabledWithoutDocker = true)
 /*
  Checks that we can recv and process messages, 1 at a time, in the order they are sent.
 */
@@ -85,4 +88,11 @@ class MessageReceiveIT extends BaseReceiveIT {
     }).when(mProcessor).onMessage(any(RabbitMessageInfo.class));
   }
 
+  @TestConfiguration
+  static class TestConfig {
+    @Bean
+    Logger monitorLogger() {
+      return log;
+    }
+  }
 }

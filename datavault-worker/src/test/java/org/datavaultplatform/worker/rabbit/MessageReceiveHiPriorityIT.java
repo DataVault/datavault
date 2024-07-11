@@ -19,14 +19,17 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.slf4j.Logger;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.context.annotation.Bean;
 
-@SpringBootTest(classes = DataVaultWorkerInstanceApp.class)
+@SpringBootTest(classes = {DataVaultWorkerInstanceApp.class, MessageReceiveHiPriorityIT.TestConfig.class})
 @AddTestProperties
-@DirtiesContext
 @Slf4j
+//@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
+//@Testcontainers(disabledWithoutDocker = true)
 /*
  Checks that a hi-priority shutdown message will get processed before
  other normal messages.
@@ -99,4 +102,11 @@ class MessageReceiveHiPriorityIT extends BaseReceiveIT {
     }).when(mShutdownHandler).handleShutdown(argMessageInfo.capture());
   }
 
+  @TestConfiguration
+  static class TestConfig {
+    @Bean
+    Logger monitorLogger() {
+      return log;
+    }
+  }
 }

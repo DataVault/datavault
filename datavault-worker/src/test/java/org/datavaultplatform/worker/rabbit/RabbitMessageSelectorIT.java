@@ -7,6 +7,7 @@ import org.datavaultplatform.worker.test.AddTestProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.slf4j.Logger;
 import org.springframework.amqp.core.AmqpAdmin;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageBuilder;
@@ -17,9 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.context.annotation.*;
 import org.springframework.test.context.TestPropertySource;
 
 import java.nio.charset.StandardCharsets;
@@ -33,15 +32,14 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIterable;
 
-@SpringBootTest(classes = DataVaultWorkerInstanceApp.class)
-@AddTestProperties
-@DirtiesContext
+@SpringBootTest(classes = {
+        DataVaultWorkerInstanceApp.class,
+        RabbitMessageSelectorIT.TestConfig.class})
 @Slf4j
+@AddTestProperties
 @TestPropertySource(properties = {
-        "spring.main.allow-bean-definition-overriding=true",
         "worker.next.message.selector.delay.ms=1000"
 })
-@Import(RabbitMessageSelectorIT.TestConfig.class)
 public class RabbitMessageSelectorIT extends BaseRabbitIT {
     
     @Autowired
@@ -171,6 +169,7 @@ public class RabbitMessageSelectorIT extends BaseRabbitIT {
 
     @TestConfiguration
     static class TestConfig {
+
         @Bean
         public Queue workerQueue() {
             return new Queue("datavault", true);
@@ -185,9 +184,13 @@ public class RabbitMessageSelectorIT extends BaseRabbitIT {
         public List<ReceivedMessage> receivedMessages() {
             return new CopyOnWriteArrayList<>();
         }
-        
+
+        @Bean
+        Logger monitorLogger() {
+            return log;
+        }
     }
 
-    record ReceivedMessage(String queueName, Message message, LocalDateTime timestamp) {
+    public record ReceivedMessage(String queueName, Message message, LocalDateTime timestamp) {
     }
 }

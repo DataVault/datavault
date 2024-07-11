@@ -5,13 +5,17 @@ import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.worker.queue.Receiver;
 import org.datavaultplatform.worker.rabbit.*;
+import org.slf4j.Logger;
 import org.springframework.amqp.core.AmqpAdmin;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
+
+import java.util.List;
 
 @Configuration
 @ConditionalOnExpression("${worker.rabbit.enabled:true}")
@@ -53,7 +57,7 @@ public class RabbitConfig {
   ShutdownHandler shutdownHandler(ConfigurableApplicationContext ctx) {
     return new ExitingShutdownHandler(applicationName, ctx);
   }
-
+  
   @Bean
   public ConnectionFactory connectionFactory() {
     ConnectionFactory result = new ConnectionFactory();
@@ -77,9 +81,25 @@ public class RabbitConfig {
     return new RabbitMessageSelector(this.hiPriorityQueueName, this.loPriorityQueueName, connectionFactory, messageProcessor);
   }
 
+  @Bean("monitorLogger")
+  public Logger monitorLogger() {
+    return log;
+  }
+  
+  @Bean("names")
+  List<String> names(){
+    return List.of("one","two","three");  
+  }
+
   @Bean
-  public RabbitMessageSelectorScheduler selectorScheduler(RabbitMessageSelector selector) {
-    return new RabbitMessageSelectorScheduler(this.pollRabbitMQdelayMs, selector);
+  ScheduledMonitor monitor(ApplicationContext ctx) {
+    Logger log = ctx.getBean(Logger.class);
+    return new ScheduledMonitor(log);
+  }
+  
+  @Bean
+  public RabbitMessageSelectorScheduler selectorScheduler(RabbitMessageSelector selector, ScheduledMonitor monitor) {
+    return new RabbitMessageSelectorScheduler(this.pollRabbitMQdelayMs, selector, monitor);
   }
 
   @PostConstruct

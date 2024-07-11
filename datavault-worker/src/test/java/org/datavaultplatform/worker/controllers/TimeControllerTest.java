@@ -38,6 +38,7 @@ public class TimeControllerTest {
     private final String EXPECTED_TIME_INFO = """
             {"time":"blah"}
             """;
+    
     @ParameterizedTest
     @ValueSource(strings = {"/time","/time/"})
     void testTimeInfo(String path) throws Exception {

@@ -48,8 +48,7 @@ public class RabbitMessageSelector implements DisposableBean, ApplicationContext
         return Stream.of(hi, lo).map(Supplier::get).flatMap(Optional::stream).findFirst();
     }
 
-    @SneakyThrows
-    public synchronized void selectAndProcessNextMessage() {
+    public synchronized void selectAndProcessNextMessage() throws Exception {
         if (!ready.get()) {
             return;
         }

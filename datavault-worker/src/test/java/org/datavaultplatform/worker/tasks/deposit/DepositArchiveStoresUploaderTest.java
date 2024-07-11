@@ -99,7 +99,6 @@ class DepositArchiveStoresUploaderTest {
         List<DeviceTracker> deviceTrackers = new ArrayList<>();
         doAnswer(invocation -> {
             DeviceTracker dt = (DeviceTracker) invocation.getArguments()[0];
-            System.out.printf("XXX ArchiveStoreId[%s]%n", dt.getArchiveStoreId());
             deviceTrackers.add(dt);
             return null;
         }).when(mTaskExecutor).add(any(Callable.class));

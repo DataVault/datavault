@@ -11,8 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.datavaultplatform.common.event.EventSender;
 import org.datavaultplatform.common.task.Context.AESMode;
-import org.datavaultplatform.common.task.DefaultTaskStageEventListener;
-import org.datavaultplatform.common.task.TaskStageEvent;
 import org.datavaultplatform.common.task.TaskStageEventListener;
 import org.datavaultplatform.common.task.TaskType;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
@@ -118,9 +116,9 @@ public class ReceiverConfig {
       int order = event.stage().getOrder();
       String label = event.stage().getLabel();
       if (event.skipped()) {
-        log.info("{} skipping :{}: {}", type, order, label);
+        log.info("{} skipping ::{}:: {}", type, order, label);
       } else {
-        log.info("{} not skipping :{}: {}", type, order, label);
+        log.info("{} not skipping ::{}:: {}", type, order, label);
       }
     };
   }

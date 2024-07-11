@@ -10,6 +10,7 @@ import org.datavaultplatform.worker.test.AddTestProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.slf4j.Logger;
 import org.springframework.amqp.core.AmqpAdmin;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageBuilder;
@@ -21,7 +22,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 
 import java.nio.charset.StandardCharsets;
@@ -36,14 +36,14 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 
-@SpringBootTest(classes = DataVaultWorkerInstanceApp.class)
+@SpringBootTest(classes = {DataVaultWorkerInstanceApp.class, RabbitMessageRequeuedIT.TestConfig.class})
+@Slf4j
 @AddTestProperties
 @TestPropertySource(properties = {
-        "spring.main.allow-bean-definition-overriding=true",
         "worker.next.message.selector.delay.ms=1000"
 })
-@Import(RabbitMessageRequeuedIT.TestConfig.class)
-@Slf4j
+//@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
+//@Testcontainers(disabledWithoutDocker = true)
 public class RabbitMessageRequeuedIT extends BaseRabbitIT {
 
     static final String REQUEUE = "delayed-so-requeue";
@@ -196,7 +196,7 @@ public class RabbitMessageRequeuedIT extends BaseRabbitIT {
     }
 
     @TestConfiguration
-    public static class TestConfig {
+    static class TestConfig {
         @Bean
         public Queue workerQueue(@Value("${queue.name}") String loPriorityQueueName) {
             return new Queue(loPriorityQueueName, true);
@@ -205,6 +205,11 @@ public class RabbitMessageRequeuedIT extends BaseRabbitIT {
         @Bean
         public Queue restartWorker1(@Value("${queue.worker.restart}") String hiPriorityQueueName) {
             return new Queue(hiPriorityQueueName, true);
+        }
+        
+        @Bean
+        public Logger monitorLogger() {
+            return log;
         }
     }
 }
