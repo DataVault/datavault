@@ -4,10 +4,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.datavaultplatform.common.PropNames;
-import org.datavaultplatform.common.event.Event;
-import org.datavaultplatform.common.event.EventSender;
-import org.datavaultplatform.common.event.InitStates;
-import org.datavaultplatform.common.event.UpdateProgress;
+import org.datavaultplatform.common.event.*;
 import org.datavaultplatform.common.event.retrieve.*;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.model.ArchiveStore;
@@ -16,8 +13,7 @@ import org.datavaultplatform.common.storage.SFTPFileSystemDriver;
 import org.datavaultplatform.common.storage.UserStore;
 import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.common.storage.impl.SftpUtils;
-import org.datavaultplatform.common.task.Context;
-import org.datavaultplatform.common.task.TaskExecutor;
+import org.datavaultplatform.common.task.*;
 import org.datavaultplatform.common.util.RetrievedChunks;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.datavaultplatform.common.util.Utils;
@@ -50,7 +46,6 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
     private String archiveDigestAlgorithm;
 
     private String bagID;
-    private String userID;
     private String depositId;
     private String depositCreationDate;
 
@@ -62,8 +57,10 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
     private String retrieveId;
     private String retrievePath;
 
-    private EventSender eventSender;
+    private UserEventSender userEventSender;
 
+    private TaskStageEventListener taskStageEventListener;
+    
     /* (non-Javadoc)
      * @see org.datavaultplatform.common.task.Task#performAction(org.datavaultplatform.common.task.Context)
      * 
@@ -103,8 +100,11 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
             }
 
             if (isLastEventBefore(UserStoreSpaceAvailableChecked.class)) {
+                doStage(TaskStage.Retrieve1checkUserStoreFreeSpace.INSTANCE);
                 checkUserStoreFreeSpaceAndPermissions(userStoreInfo);
                 sendEvent(new UserStoreSpaceAvailableChecked(jobID, depositId, retrieveId));
+            } else {
+                skipStage(TaskStage.Retrieve1checkUserStoreFreeSpace.INSTANCE);
             }
 
             // Retrieve the archived data
@@ -189,18 +189,20 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
             log.info("Recomposing tar file using DV5 method");
             FileSplitter.recomposeFile(chunks, tarFile);
         }
+        log.info("RECOMPOSED TAR FILE [{}]length[{}]", tarFile, tarFile.length());
     }
 
     protected void doRetrieveFromWorkerToUserFs(Context context, UserStoreInfo userStoreInfo, File tarFile, Progress progress) throws Exception {
-        Assert.isTrue(tarFile.exists(), "The tar file [%s] does not exist".formatted(tarFile.toString()));
-        logProgress(progress);
-        log.info("Validating data ...");
-        sendEvent(new UpdateProgress(jobID, depositId).withNextState(RetrieveState02ValidatingData.getStateNumber()));
-        Utils.checkFileHash("ret-tar", tarFile, archiveDigest); 
-        // Decompress to the temporary directory
-        File bagDir = Tar.unTar(tarFile, context.getTempDir());
-        try {
-            if (isLastEventBefore(UploadedToUserStore.class)) {
+        if (isLastEventBefore(UploadedToUserStore.class)) {
+            doStage(TaskStage.Retrieve3uploadedToUserStore.INSTANCE);
+            Assert.isTrue(tarFile.exists(), "The tar file [%s] does not exist".formatted(tarFile.toString()));
+            logProgress(progress);
+            log.info("Validating data ...");
+            sendEvent(new UpdateProgress(jobID, depositId).withNextState(RetrieveState02ValidatingData.getStateNumber()));
+            Utils.checkFileHash("ret-tar", tarFile, archiveDigest);
+            File bagDir = Tar.unTar(tarFile, context.getTempDir());
+            try {
+                // Decompress to the temporary directory
                 // Get the payload data directory
                 File payloadDir = bagDir.toPath().resolve(DATA).toFile();
 
@@ -215,14 +217,15 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
 
                 logProgress(progress);
                 sendEvent(new UploadedToUserStore(jobID, depositId, retrieveId));
+
+                log.info("Data retrieve complete: [{}]", retrievePath);
+                // only delete the tarFile AFTER we've sent the UploadedToUserStore message
+                FileUtils.delete(tarFile);
+            } finally {
+                FileUtils.deleteDirectory(bagDir);
             }
-            log.info("Data retrieve complete: [{}]", retrievePath);
-            // only delete the tarFile AFTER we've sent the UploadedToUserStore message
-            tarFile.delete();
-        } finally {
-            // Cleanup - keep the tar file in case of restarts
-            log.info("Cleaning up ...");
-            FileUtils.deleteDirectory(bagDir);
+        } else {
+            skipStage(TaskStage.Retrieve3uploadedToUserStore.INSTANCE);
         }
     }
 
@@ -315,7 +318,8 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
     protected void fromArchiveStoreToUserStore(Context context, File tarFile, ArchiveDeviceInfo archiveDeviceInfo, UserStoreInfo userStoreInfo, RetrievedChunks retrievedChunks) throws Exception {
         var progress = new Progress();
         trackProgress(progress, archiveSize, () -> {
-            if ( isLastEventBefore(ArchiveStoreRetrievedAll.class) || !isFinalTarValid(tarFile, archiveDigest)) {
+            if (isLastEventBefore(ArchiveStoreRetrievedAll.class) || !isFinalTarValid(tarFile, archiveDigest)) {
+                doStage(TaskStage.Retrieve2retrieveFromArchiveAndRecompose.INSTANCE);
                 if (context.isChunkingEnabled()) {
                     retrieveChunksAndRecompose(context, archiveDeviceInfo, progress, tarFile, retrievedChunks);
                 } else {
@@ -323,6 +327,8 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
                     RetrieveUtils.decryptAndCheckTarFile("no-chunk", context, getTarIV(), tarFile, encTarDigest, archiveDigest);
                 }
                 sendEvent(new ArchiveStoreRetrievedAll(jobID, depositId, retrieveId));
+            } else {
+                skipStage(TaskStage.Retrieve2retrieveFromArchiveAndRecompose.INSTANCE);
             }
 
             doRetrieveFromWorkerToUserFs(context, userStoreInfo, tarFile, progress);
@@ -351,7 +357,7 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
         log.info("Copied: [{}] directories, [{}] files, [{}] bytes", progress.getDirCount(), progress.getFileCount(), progress.getByteCount());
     }
     protected void sendEvent(Event event) {
-        eventSender.send(event.withUserId(userID).withRetrieveId(retrieveId));
+        userEventSender.send(event.withRetrieveId(retrieveId));
     }
     /*
     This method allows us to override the clock in tests.
@@ -360,7 +366,7 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
         return Clock.systemDefaultZone();
     }
     private void trackProgress(Progress progress, long expectedSizeBytes, Trackable trackable) throws Exception {
-        var tracker = new ProgressTracker(progress, jobID, depositId, retrieveId, expectedSizeBytes, eventSender);
+        var tracker = new ProgressTracker(progress, jobID, depositId, retrieveId, expectedSizeBytes, userEventSender);
         tracker.track(trackable);
     }
     private String store(UserStoreInfo userStoreInfo, File content, Progress progress) throws Exception {
@@ -380,7 +386,8 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
         return RetrieveUtils.getRuntimeException(ex);
     }
     protected void init(Context context) {
-        eventSender = context.getEventSender();
+        taskStageEventListener = context.getTaskStageEventListener();
+        String userID;
         {
             Map<String, String> properties = getProperties();
             depositId = properties.get(PropNames.DEPOSIT_ID);
@@ -400,6 +407,7 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
 
             setupUserFsTwoSpeedRetry(properties);
         }
+        userEventSender = new UserEventSender(context.getEventSender(), userID);
         Assert.isTrue(archiveFileStores.size() == 1, "There are [%s] archiveFileStores, should be 1".formatted(archiveFileStores.size()));
 
         log.info("bagID: [{}]", bagID);
@@ -429,4 +437,13 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
         return new RetrievedChunkFileChecker();
     }
 
+    private void recordStage(TaskStage stage, boolean skipped) {
+        taskStageEventListener.onTaskStageEvent(new TaskStageEvent(stage, skipped));
+    }
+    private void doStage(TaskStage.RetrieveTaskStage stage) {
+        recordStage(stage, false);
+    }
+    private void skipStage(TaskStage.RetrieveTaskStage stage) {
+        recordStage(stage, true);
+    }
 }

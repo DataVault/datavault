@@ -51,7 +51,7 @@ public class RabbitMessageSelectorScheduler {
         } catch (Exception ex) {
             monitor.error(this, ex);
         } finally {
-            TaskInterrupter.setInterrupterCheck(null);
+            TaskInterrupter.clear();
         }
     }
 

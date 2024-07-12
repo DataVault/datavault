@@ -12,6 +12,8 @@ import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.common.storage.impl.LocalFileSystem;
 import org.datavaultplatform.common.storage.impl.TivoliStorageManager;
 import org.datavaultplatform.common.task.Context;
+import org.datavaultplatform.common.task.TaskStageEvent;
+import org.datavaultplatform.common.task.TaskStageEventListener;
 import org.datavaultplatform.common.util.RetrievedChunks;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.datavaultplatform.common.util.Utils;
@@ -94,6 +96,11 @@ public class RetrieveRestartChunksTest {
     
     @Mock
     RetrievedChunkFileChecker mChunkFileChecker;
+    
+    @Mock
+    TaskStageEventListener mTaskStageEventListener;
+
+    List<TaskStageEvent> taskStageEvents;
 
     static Stream<Arguments> retrievedSingleChunkPreviouslySource() {
         return Stream.of(
@@ -153,6 +160,15 @@ public class RetrieveRestartChunksTest {
         tempArchiveStore.setRetrieveEnabled(true);
         tempArchiveStore.setProperties(new HashMap<>());
         tempArchiveStore.setLabel("TSM");
+
+        this.taskStageEvents = new ArrayList<>();
+        lenient().when(mContext.getTaskStageEventListener()).thenReturn(mTaskStageEventListener);
+
+        lenient().doAnswer(invocation -> {
+            TaskStageEvent taskStageEvent = invocation.getArgument(0, TaskStageEvent.class);
+            taskStageEvents.add(taskStageEvent);
+            return null;
+        }).when(mTaskStageEventListener).onTaskStageEvent(any(TaskStageEvent.class));
 
         archiveStore = Mockito.spy(tempArchiveStore);
     }

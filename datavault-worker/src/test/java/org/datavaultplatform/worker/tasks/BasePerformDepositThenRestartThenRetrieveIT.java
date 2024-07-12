@@ -3,8 +3,6 @@ package org.datavaultplatform.worker.tasks;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.event.deposit.*;
@@ -20,7 +18,6 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.util.Assert;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -38,21 +35,6 @@ public abstract class BasePerformDepositThenRestartThenRetrieveIT extends BaseDe
   @Autowired
   RabbitMessageSelectorScheduler scheduler;
   
-  @SneakyThrows
-  static Set<Path> getPathsWithinTarFile(File tarFile) {
-    Set<Path> paths = new HashSet<>();
-    try (TarArchiveInputStream tarIn = new TarArchiveInputStream(new FileInputStream(tarFile))) {
-      TarArchiveEntry entry;
-      while ((entry = tarIn.getNextEntry()) != null) {
-        if (entry.isDirectory()) {
-          continue;
-        }
-        paths.add(Paths.get(entry.getName()));
-      }
-    }
-    return paths;
-  }
-
   @DynamicPropertySource
   @SneakyThrows
   static void setupProperties(DynamicPropertyRegistry registry) {
@@ -84,7 +66,6 @@ public abstract class BasePerformDepositThenRestartThenRetrieveIT extends BaseDe
     assertThat(retrieveDir).isDirectory();
     log.info("retrieve base dir [{}]", retrieveBaseDir);
     log.info("retrieve dir [{}]", retrieveDir);
-
   }
 
   abstract void checkChunkingProps(boolean chunkingEnabled, String chunkingByteSize);

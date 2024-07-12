@@ -13,6 +13,8 @@ import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.storage.impl.LocalFileSystem;
 import org.datavaultplatform.common.storage.impl.SFTPFileSystemSSHD;
 import org.datavaultplatform.common.task.Context;
+import org.datavaultplatform.common.task.TaskStageEvent;
+import org.datavaultplatform.common.task.TaskStageEventListener;
 import org.datavaultplatform.common.util.RetrievedChunks;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.datavaultplatform.common.util.StorageClassUtils;
@@ -99,12 +101,25 @@ public class RetrieveTest {
     
     @Captor
     ArgumentCaptor<RetrievedChunks> argRetrievedChunks;
+    
+    @Mock
+    TaskStageEventListener mTaskStageEventListener;
+    
+    List<TaskStageEvent> taskStageEvents;
 
     @BeforeEach
     void setup() {
         RetryTestUtils.setLoggingLevelInfo(log);
         this.storageModel = new ArchiveStore();
         this.storageModel.setStorageClass("ARCHIVE_STORE_STORAGE_CLASS_NAME");
+        this.taskStageEvents = new ArrayList<>();
+        lenient().when(mContext.getTaskStageEventListener()).thenReturn(mTaskStageEventListener);
+        
+        lenient().doAnswer(invocation -> {
+            TaskStageEvent taskStageEvent = invocation.getArgument(0, TaskStageEvent.class);
+            taskStageEvents.add(taskStageEvent);
+            return null;
+        }).when(mTaskStageEventListener).onTaskStageEvent(any(TaskStageEvent.class));
     }
     
     @Nested

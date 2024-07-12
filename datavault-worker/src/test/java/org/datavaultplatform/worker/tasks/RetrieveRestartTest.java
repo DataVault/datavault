@@ -16,10 +16,11 @@ import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.common.storage.impl.LocalFileSystem;
 import org.datavaultplatform.common.storage.impl.TivoliStorageManager;
 import org.datavaultplatform.common.task.Context;
+import org.datavaultplatform.common.task.TaskStageEvent;
+import org.datavaultplatform.common.task.TaskStageEventListener;
 import org.datavaultplatform.common.util.RetrievedChunks;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.datavaultplatform.common.util.Utils;
-import org.datavaultplatform.worker.tasks.deposit.ArchiveStoreInfo;
 import org.datavaultplatform.worker.tasks.retrieve.ArchiveDeviceInfo;
 import org.datavaultplatform.worker.tasks.retrieve.UserStoreInfo;
 import org.junit.jupiter.api.*;
@@ -75,7 +76,12 @@ public class RetrieveRestartTest {
 
     List<Event> sentEvents;
 
-    ClassPathResource testBagIdTar = new ClassPathResource("retrieve/test-bag-id.tar");
+    final ClassPathResource testBagIdTar = new ClassPathResource("retrieve/test-bag-id.tar");
+
+    @Mock
+    TaskStageEventListener mTaskStageEventListener;
+
+    List<TaskStageEvent> taskStageEvents;
 
     private static Stream<Arguments> lastEventIsBeforeUserStoreSpaceAvailableCheckedArgs() {
         return Stream.of(
@@ -132,7 +138,14 @@ public class RetrieveRestartTest {
         archiveStore.setProperties(new HashMap<>());
         archiveStore.setLabel("TSM");
 
+        this.taskStageEvents = new ArrayList<>();
+        lenient().when(mContext.getTaskStageEventListener()).thenReturn(mTaskStageEventListener);
 
+        lenient().doAnswer(invocation -> {
+            TaskStageEvent taskStageEvent = invocation.getArgument(0, TaskStageEvent.class);
+            taskStageEvents.add(taskStageEvent);
+            return null;
+        }).when(mTaskStageEventListener).onTaskStageEvent(any(TaskStageEvent.class));
     }
     
     Retrieve getRetrieve(Event lastEvent) {
@@ -402,14 +415,13 @@ public class RetrieveRestartTest {
             verify(retrieve, never()).copyFilesToUserFs(any(Progress.class),any(File.class),any(UserStoreInfo.class), any(Long.class));
         }
 
-        var eventClasses = sentEvents.stream().map(evt -> evt.eventClass).toList();
+        var eventClasses = sentEvents.stream()
+                .filter(e -> !(e instanceof UpdateProgress))
+                .map(evt -> evt.eventClass).toList();
         assertThat(eventClasses).isEqualTo(List.of(
                 //TODO : might need to check the InitStates and RetrieveStart are not sent again ?
                 "org.datavaultplatform.common.event.InitStates",
                 "org.datavaultplatform.common.event.retrieve.RetrieveStart",
-                
-                "org.datavaultplatform.common.event.UpdateProgress",
-                "org.datavaultplatform.common.event.UpdateProgress",
                 "org.datavaultplatform.common.event.retrieve.RetrieveComplete"
         ));
     }
