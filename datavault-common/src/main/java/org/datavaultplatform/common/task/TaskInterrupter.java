@@ -11,13 +11,7 @@ import java.util.function.Predicate;
 @Slf4j
 public abstract class TaskInterrupter {
 
-    private static final ThreadLocal<Checker> TL = ThreadLocal.withInitial(() -> new Checker(event -> false, "default"));
-
-    public static synchronized void setInterrupterCheck(Predicate<Event> predicate, String label) {
-        Checker checker = new Checker(predicate, label);
-        TL.set(checker);
-        log.info("label[{}]", checker.label);
-    }
+    private static final ThreadLocal<Checker> TL = ThreadLocal.withInitial(() -> null);
 
     public static synchronized void checkForInterrupt(Event event) {
         // extra checks to ensure that we can't interrupt a task in production
@@ -33,7 +27,7 @@ public abstract class TaskInterrupter {
         if (checker.doInterruptAfterEvent(event)) {
             String msg = "TaskInterrupter label[%s] - interrupt after event[%s]".formatted(checker.label, event);
             log.info(msg);
-            throw new RuntimeException(msg);
+            throw new TaskInterruptedException(msg);
         } else {
             log.info("no interrupt after event[{}]", event);
         }
@@ -54,5 +48,8 @@ public abstract class TaskInterrupter {
 
     public static void setInterrupterCheck(Checker checker) {
         TL.set(checker);
+    }
+    public static void clear() {
+        TL.remove();
     }
 }

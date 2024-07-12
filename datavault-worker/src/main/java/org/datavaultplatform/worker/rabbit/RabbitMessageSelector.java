@@ -72,11 +72,12 @@ public class RabbitMessageSelector implements DisposableBean, ApplicationContext
         // it only looks on loPriorityQueue is no messages on hiPriorityQueue
         Optional<RabbitMessageInfo> selected = getFirst(pollHiPriority, pollLoPriority);
 
-        // max 1 selected message - the processor is responsible for ack/nack the selected message
+        // max 1 selected message
         selected.ifPresent(messageinfo -> {
             try {
-                // process the selected message - leaving the processor to ack/nack the message
+                // process the selected message
                 processor.onMessage(messageinfo);
+                // ack the selected message
                 messageinfo.acknowledge();
             } finally {
                 messageinfo.closeChannel();
@@ -126,10 +127,10 @@ public class RabbitMessageSelector implements DisposableBean, ApplicationContext
     @Override
     public synchronized void destroy() throws Exception {
         Connection temp = this.connection;
+        this.connection = null;
         if (temp == null) {
             return;
         }
-        this.connection = null;
         log.info("CLOSING RABBITMQ CONNECTION [{}]", temp);
         temp.close();
     }
