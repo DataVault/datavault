@@ -60,6 +60,7 @@ public class RabbitConfig {
   
   @Bean
   public ConnectionFactory connectionFactory() {
+    log.warn("RRR CREATING RABBIT CONNECTION FACTORY for [{}/{}]",this.rabbitMQhost, this.rabbitMQport );
     ConnectionFactory result = new ConnectionFactory();
     result.setUsername(this.rabbitMQusername);
     result.setPort(this.rabbitMQport);

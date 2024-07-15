@@ -7,6 +7,7 @@ import com.rabbitmq.client.GetResponse;
 import jakarta.annotation.PostConstruct;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.datavaultplatform.worker.utils.SocketUtils;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.support.DefaultMessagePropertiesConverter;
@@ -16,8 +17,6 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.event.EventListener;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
@@ -49,12 +48,13 @@ public class RabbitMessageSelector implements DisposableBean, ApplicationContext
     public static <T> Optional<T> getFirst(Supplier<Optional<T>> hi, Supplier<Optional<T>> lo) {
         return Stream.of(hi, lo).map(Supplier::get).flatMap(Optional::stream).findFirst();
     }
-
-    @Retryable(retryFor = java.net.ConnectException.class, maxAttempts = 5, backoff = @Backoff(delay = 200))
+    
     public synchronized void selectAndProcessNextMessage() throws Exception {
         if (!ready.get()) {
             return;
         }
+        SocketUtils.isServerListening(connectionFactory.getHost(), connectionFactory.getPort());
+        log.info("Waiting for RabbitMQ connection [{}/{}]", connectionFactory.getHost(), connectionFactory.getPort());
         this.connection = connectionFactory.newConnection();
         try {
             selectAndProcessNextMessageWithConnection();

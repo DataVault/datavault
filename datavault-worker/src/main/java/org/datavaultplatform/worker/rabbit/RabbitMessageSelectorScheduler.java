@@ -37,7 +37,7 @@ public class RabbitMessageSelectorScheduler {
     }
     
     @SuppressWarnings("DefaultAnnotationParam")
-    @Scheduled(fixedDelayString = SPEL_DELAY_MS, timeUnit = TimeUnit.MILLISECONDS)
+    @Scheduled(fixedDelayString = SPEL_DELAY_MS, timeUnit = TimeUnit.MILLISECONDS, initialDelayString = SPEL_DELAY_MS)
     @SneakyThrows
     public synchronized void selectAndProcessNextMessage() {
         log.info("worker.next.message.selector.delay.ms[{}]", workerNextMessageSelectorDelayMs);

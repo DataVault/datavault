@@ -24,8 +24,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest(classes = {DataVaultWorkerInstanceApp.class, MessageReceiveHiPriorityIT.TestConfig.class})
+@TestPropertySource(properties = {"worker.next.message.selector.delay.ms=200"})
 @AddTestProperties
 @Slf4j
 /*
@@ -33,7 +35,7 @@ import org.springframework.context.annotation.Bean;
  other normal messages.
 */
 class MessageReceiveHiPriorityIT extends BaseReceiveIT {
-
+  
   private static final int LO_MESSAGES_TO_SEND = 100;
   private static final int MESSAGES_TO_PROCESS = 1;
 
@@ -85,9 +87,11 @@ class MessageReceiveHiPriorityIT extends BaseReceiveIT {
       RabbitMessageInfo info = invocation.getArgument(0);
       log.info("processing normal message [{}]", info.getMessageBody());
       
-      // by sleeping, we ensure the hi-priority message has time to get to head of the queue
-      Thread.sleep(1000);
-      messageInfos.add(info);
+      synchronized (messageInfos) {
+        // by sleeping, we ensure the hi-priority message has time to get to head of the queue
+        Thread.sleep(1000);
+        messageInfos.add(info);
+      }
       return false;
     }).when(mProcessor).onMessage(any(RabbitMessageInfo.class));
 

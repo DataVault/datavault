@@ -25,8 +25,10 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
+import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest(classes = {DataVaultWorkerInstanceApp.class,MessageReceiveIT.TestConfig.class})
+@TestPropertySource(properties = {"worker.next.message.selector.delay.ms=200"})
 @AddTestProperties
 @Slf4j
 /*

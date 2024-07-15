@@ -26,6 +26,8 @@ import org.datavaultplatform.webapp.services.RestService;
 import org.datavaultplatform.webapp.test.ProfileShib;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -59,6 +61,7 @@ import org.testcontainers.utility.MountableFile;
 @TestPropertySource(properties = {"tomcat.ajp.enabled=true"})
 @UsesTestContainers
 @Slf4j
+@EnabledOnOs(OS.MAC)
 class AjpConnectorIT {
 
   @MockBean
