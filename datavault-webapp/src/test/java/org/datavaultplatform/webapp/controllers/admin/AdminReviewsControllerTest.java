@@ -1,5 +1,6 @@
 package org.datavaultplatform.webapp.controllers.admin;
 
+import lombok.SneakyThrows;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.request.CreateRetentionPolicy;
 import org.datavaultplatform.common.response.DepositInfo;
@@ -33,14 +34,14 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.ui.ModelMap;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 
@@ -51,88 +52,57 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 @AddTestProperties
 public class AdminReviewsControllerTest {
 
-    public static final String TEST_VAULT_REVIEW_ID = "test-vault-review-id";
-    private static final String TEST_GROUP_ID = "test-group-id";
-    private static final String TEST_VAULT_ID_1 = "vaultinfo-id-1";
-    private static final String TEST_VAULT_ID_2 = "vaultinfo-id-2";
-    private static final String TEST_VAULT_NAME_1 = "vaultinfo-name-1";
-    private static final String TEST_VAULT_NAME_2 = "vaultinfo-name-2";
-    private static final String TEST_DEPOSIT_ID_1 = "test-deposit-id-1";
-    private static final String TEST_DEPOSIT_ID_2 = "test-deposit-id-2";
-    private static final String TEST_DEPOSIT_REVIEW_1_ID = "test-deposit-review-1-id";
-    private static final String TEST_DEPOSIT_REVIEW_1_COMMENT = "test-deposit-review-1-comment";
-    private static final String TEST_DEPOSIT_REVIEW_2_ID = "test-deposit-review-2-id";
-    private static final String TEST_DEPOSIT_REVIEW_2_COMMENT = "test-deposit-review-2-comment";
-    private static final String TEST_DEPOSIT_1_NAME = "test-deposit-1-name";
-    private static final String TEST_DEPOSIT_2_NAME = "test-deposit-2-name";
-    private static final int TEST_RETENTION_POLICY_ID_1 = 123456;
-    private static final int TEST_RETENTION_POLICY_ID_2 = 98765;
+    static final String TEST_VAULT_REVIEW_ID = "test-vault-review-id";
+    static final String TEST_GROUP_ID = "test-group-id";
+    static final String TEST_VAULT_ID_1 = "vaultinfo-id-1";
+    static final String TEST_VAULT_ID_2 = "vaultinfo-id-2";
+    static final String TEST_VAULT_NAME_1 = "vaultinfo-name-1";
+    static final String TEST_VAULT_NAME_2 = "vaultinfo-name-2";
+    static final String TEST_DEPOSIT_ID_1 = "test-deposit-id-1";
+    static final String TEST_DEPOSIT_ID_2 = "test-deposit-id-2";
+    static final String TEST_DEPOSIT_REVIEW_1_ID = "test-deposit-review-1-id";
+    static final String TEST_DEPOSIT_REVIEW_1_COMMENT = "test-deposit-review-1-comment";
+    static final String TEST_DEPOSIT_REVIEW_2_ID = "test-deposit-review-2-id";
+    static final String TEST_DEPOSIT_REVIEW_2_COMMENT = "test-deposit-review-2-comment";
+    static final String TEST_DEPOSIT_1_NAME = "test-deposit-1-name";
+    static final String TEST_DEPOSIT_2_NAME = "test-deposit-2-name";
+    static final int TEST_RETENTION_POLICY_ID_1 = 123456;
+    static final int TEST_RETENTION_POLICY_ID_2 = 98765;
 
-    private static final String REVIEW_DATE_NOTIFICATION_MESSAGE = "If some deposits are to be retained then a new Review Date must be entered";
+    static final String REVIEW_DATE_NOTIFICATION_MESSAGE = "If some deposits are to be retained then a new Review Date must be entered";
 
     @Autowired
-    private MockMvc mockMvc;
+    MockMvc mockMvc;
 
     @MockBean
-    private RestService restService;
+    RestService mRestService;
 
     @Mock
-    private VaultsData vaultsData;
-
-
-    @Mock
-    private VaultInfo mVaultInfo1;
+    VaultsData mVaultsData;
 
     @Mock
-    private VaultInfo mVaultInfo2;
+    VaultInfo mVaultInfo1;
 
     @Mock
-    private RoleAssignment mRoleAssignment1;
+    VaultInfo mVaultInfo2;
 
     @Mock
-    private RoleAssignment mRoleAssignment2;
+    RoleAssignment mRoleAssignment1;
 
     @Mock
-    private RoleModel mRoleModel1;
+    RoleAssignment mRoleAssignment2;
 
     @Mock
-    private RoleModel mRoleModel2;
+    RoleModel mRoleModel1;
 
     @Mock
-    private CreateRetentionPolicy mCreateRetentionPolicy1;
+    RoleModel mRoleModel2;
 
     @Mock
-    private CreateRetentionPolicy mCreateRetentionPolicy2;
+    CreateRetentionPolicy mCreateRetentionPolicy1;
 
     @Mock
-    private ReviewInfo reviewInfo1;
-
-    @Mock
-    private ReviewInfo reviewInfo2;
-
-    @Mock
-    private VaultReview currentReview1;
-
-    @Mock
-    private VaultReview currentReview2;
-
-    @Mock
-    private VaultReviewModel vaultReviewModel1;
-
-    @Mock
-    private VaultReviewModel vaultReviewModel2;
-
-    @Mock
-    private DepositInfo depositInfo1;
-
-    @Mock
-    private DepositInfo depositInfo2;
-
-    @Mock
-    private DepositReview depositReview1;
-
-    @Mock
-    private DepositReview depositReview2;
+    CreateRetentionPolicy mCreateRetentionPolicy2;
 
     @Mock
     Group mGroup;
@@ -172,12 +142,15 @@ public class AdminReviewsControllerTest {
     
     @Mock
     Date mDate1;
+    
     @Mock
     Date mDate2;
-    private List<RoleAssignment>  roleAssignments = new ArrayList<>();
+    
+    List<RoleAssignment>  roleAssignments = new ArrayList<>();
 
-    private List<VaultInfo> vaultsInfo = new ArrayList<>();
-
+    List<VaultInfo> vaultsInfo = new ArrayList<>();
+    
+    ObjectMapper mapper = new ObjectMapper();
     
     @BeforeEach
     void setup() {
@@ -185,41 +158,42 @@ public class AdminReviewsControllerTest {
         vaultsInfo.add(mVaultInfo1);
         vaultsInfo.add(mVaultInfo2);
 
-        when(vaultsData.getData()).thenReturn(vaultsInfo);
+        when(mVaultsData.getData()).thenReturn(vaultsInfo);
 
-        Mockito.lenient().when(mVaultInfo1.getID()).thenReturn(TEST_VAULT_ID_1);
-        Mockito.lenient().when(mVaultInfo1.getName()).thenReturn(TEST_VAULT_NAME_1);
+        lenient().when(mVaultInfo1.getID()).thenReturn(TEST_VAULT_ID_1);
+        lenient().when(mVaultInfo1.getName()).thenReturn(TEST_VAULT_NAME_1);
 
-        Mockito.lenient().when(mVaultInfo2.getID()).thenReturn(TEST_VAULT_ID_2);
-        Mockito.lenient().when(mVaultInfo2.getName()).thenReturn(TEST_VAULT_NAME_2);
+        lenient().when(mVaultInfo2.getID()).thenReturn(TEST_VAULT_ID_2);
+        lenient().when(mVaultInfo2.getName()).thenReturn(TEST_VAULT_NAME_2);
 
         // RoleAssignments
         roleAssignments.add(mRoleAssignment1);
         roleAssignments.add(mRoleAssignment2);
 
-        Mockito.lenient().when(mRoleModel1.getName()).thenReturn("Nominated Data Manager");
-        Mockito.lenient().when(mRoleModel1.getName()).thenReturn("Data Owner");
+        lenient().when(mRoleModel1.getName()).thenReturn("Nominated Data Manager");
+        lenient().when(mRoleModel1.getName()).thenReturn("Data Owner");
 
-        Mockito.lenient().when(mRoleAssignment1.getRole()).thenReturn(mRoleModel1);
-        Mockito.lenient().when(mRoleAssignment2.getRole()).thenReturn(mRoleModel2);
+        lenient().when(mRoleAssignment1.getRole()).thenReturn(mRoleModel1);
+        lenient().when(mRoleAssignment2.getRole()).thenReturn(mRoleModel2);
 
-        Mockito.lenient().when(mCreateRetentionPolicy1.getID()).thenReturn(TEST_RETENTION_POLICY_ID_1);
-        Mockito.lenient().when(mCreateRetentionPolicy2.getID()).thenReturn(TEST_RETENTION_POLICY_ID_2);
+        lenient().when(mCreateRetentionPolicy1.getID()).thenReturn(TEST_RETENTION_POLICY_ID_1);
+        lenient().when(mCreateRetentionPolicy2.getID()).thenReturn(TEST_RETENTION_POLICY_ID_2);
 
-        Mockito.lenient().when(mCreateRetentionPolicy1.getMinRetentionPeriod()).thenReturn(10);
-        Mockito.lenient().when(mCreateRetentionPolicy2.getMinRetentionPeriod()).thenReturn(5);
+        lenient().when(mCreateRetentionPolicy1.getMinRetentionPeriod()).thenReturn(10);
+        lenient().when(mCreateRetentionPolicy2.getMinRetentionPeriod()).thenReturn(5);
 
         // RestService
-        when(restService.getVaultsForReview()).thenReturn(vaultsData);
+        lenient().when(mRestService.getVaultsForReview()).thenReturn(mVaultsData);
 
-        when(restService.getVault(TEST_VAULT_ID_1)).thenReturn(mVaultInfo1);
-        when(restService.getVault(TEST_VAULT_ID_2)).thenReturn(mVaultInfo2);
+        lenient().when(mRestService.getVault(TEST_VAULT_ID_1)).thenReturn(mVaultInfo1);
+        lenient().when(mRestService.getVault(TEST_VAULT_ID_2)).thenReturn(mVaultInfo2);
 
-        when(restService.getRoleAssignmentsForVault(TEST_VAULT_ID_1)).thenReturn(roleAssignments);
-        when(restService.getRoleAssignmentsForVault(TEST_VAULT_ID_2)).thenReturn(roleAssignments);
+        lenient().when(mRestService.getRoleAssignmentsForVault(TEST_VAULT_ID_1)).thenReturn(roleAssignments);
+        lenient().when(mRestService.getRoleAssignmentsForVault(TEST_VAULT_ID_2)).thenReturn(roleAssignments);
 
-        when(restService.getRetentionPolicy(String.valueOf(TEST_RETENTION_POLICY_ID_1))).thenReturn(mCreateRetentionPolicy1);
-        when(restService.getRetentionPolicy(String.valueOf(TEST_RETENTION_POLICY_ID_2))).thenReturn(mCreateRetentionPolicy1);
+        lenient().when(mRestService.getRetentionPolicy(String.valueOf(TEST_RETENTION_POLICY_ID_1))).thenReturn(mCreateRetentionPolicy1);
+        lenient().when(mRestService.getRetentionPolicy(String.valueOf(TEST_RETENTION_POLICY_ID_2))).thenReturn(mCreateRetentionPolicy1);
+        mapper = new ObjectMapper();
     }
 
 
@@ -229,7 +203,6 @@ public class AdminReviewsControllerTest {
     void testGetVaultsForReview() throws Exception {
         // Act
         RequestBuilder requestBuilder = MockMvcRequestBuilders.get("/admin/reviews")
-                .contentType(MediaType.TEXT_HTML)
                 .accept(MediaType.TEXT_HTML);
         // Act
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andReturn();
@@ -250,6 +223,8 @@ public class AdminReviewsControllerTest {
         Element elem2 = elems2.get(0);
         assertThat(elem2.text()).isEqualTo("vaultinfo-name-2");
 
+        verify(mRestService).getVaultsForReview();
+        Mockito.verifyNoMoreInteractions(mRestService);
     }
 
     @DisplayName("Test showReview() with no Review Date errors.")
@@ -260,7 +235,6 @@ public class AdminReviewsControllerTest {
         mocksForShowAndProcessReviewTests();
         
         RequestBuilder requestBuilder = MockMvcRequestBuilders.get("/admin/vaults/"+TEST_VAULT_ID_1+"/reviews")
-                .contentType(MediaType.TEXT_HTML)
                 .accept(MediaType.TEXT_HTML);
         // Act
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andReturn();
@@ -300,6 +274,21 @@ public class AdminReviewsControllerTest {
         Elements elems1 = doc.selectXpath("//div[@role='alert']");
         assertThat(elems1.size()).isEqualTo(0);
 
+        verify(mRestService).getVault(TEST_VAULT_ID_1);
+        verify(mRestService).getRoleAssignmentsForVault(TEST_VAULT_ID_1);
+        verify(mRestService).getRetentionPolicy(null);//FIX
+        verify(mRestService).getGroup(TEST_GROUP_ID);
+        verify(mRestService).getCurrentReview(TEST_VAULT_ID_1);
+        verify(mRestService).getVaultReview(TEST_VAULT_REVIEW_ID);
+        verify(mRestService).getDeposit(TEST_DEPOSIT_ID_1);
+
+        verify(mRestService).getDeposit(TEST_DEPOSIT_ID_1);
+        verify(mRestService).getDepositReview(TEST_DEPOSIT_ID_1);
+
+        verify(mRestService).getDeposit(TEST_DEPOSIT_ID_2);
+        verify(mRestService).getDepositReview(TEST_DEPOSIT_ID_2);
+
+        Mockito.verifyNoMoreInteractions(mRestService);
     }
 
 
@@ -312,7 +301,6 @@ public class AdminReviewsControllerTest {
 
         RequestBuilder requestBuilder = MockMvcRequestBuilders.get("/admin/vaults/"+TEST_VAULT_ID_1+"/reviews")
                 .queryParam("error", "reviewdate")
-                .contentType(MediaType.TEXT_HTML)
                 .accept(MediaType.TEXT_HTML);
         // Act
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andReturn();
@@ -334,10 +322,23 @@ public class AdminReviewsControllerTest {
         Element elem1 = elems1.get(0);
         assertThat(elem1.text()).isEqualTo(REVIEW_DATE_NOTIFICATION_MESSAGE);
 
+        verify(mRestService).getVault(TEST_VAULT_ID_1);
+        verify(mRestService).getRoleAssignmentsForVault(TEST_VAULT_ID_1);
+        verify(mRestService).getRetentionPolicy(null); //should fix this
+
+        verify(mRestService).getGroup(TEST_GROUP_ID); //should fix this
+        verify(mRestService).getCurrentReview(TEST_VAULT_ID_1);
+        verify(mRestService).getVaultReview(TEST_VAULT_REVIEW_ID);
+
+        verify(mRestService).getDeposit(TEST_DEPOSIT_ID_1);
+        verify(mRestService).getDepositReview(TEST_DEPOSIT_ID_1);
+
+        verify(mRestService).getDeposit(TEST_DEPOSIT_ID_2);
+        verify(mRestService).getDepositReview(TEST_DEPOSIT_ID_2);
+
+        Mockito.verifyNoMoreInteractions(mRestService);
     }
 
-    // In tests below we add the ModelAttribute vaultReviewModel to the RequestBuilder by using flashAttr.
-    // Reference: https://www.baeldung.com/spring-web-flash-attributes
     @DisplayName("Test processReview() with action Cancel.")
     @Test
     @WithMockUser(roles = {"ADMIN_VAULTS"})
@@ -348,14 +349,14 @@ public class AdminReviewsControllerTest {
 
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post("/admin/vaults/"+TEST_VAULT_ID_1+"/reviews/" + TEST_VAULT_REVIEW_ID)
                 .queryParam("action", "Cancel")
-                .flashAttr("vaultReviewModel", mVaultReviewModel)
-                .contentType(MediaType.TEXT_HTML)
-                .accept(MediaType.TEXT_HTML)
+                .content(toJson(mVaultReviewModel))
+                .contentType(MediaType.APPLICATION_JSON)
                 .with(csrf());
         // Act
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andReturn();
         //Assert
         assertThat(mvcResult.getModelAndView().getViewName()).isEqualTo("redirect:/admin/reviews");
+        Mockito.verifyNoMoreInteractions(mRestService);
     }
 
     @DisplayName("Test processReview() with action Save.")
@@ -367,15 +368,20 @@ public class AdminReviewsControllerTest {
 
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post("/admin/vaults/"+TEST_VAULT_ID_1+"/reviews/" + TEST_VAULT_REVIEW_ID)
                 .queryParam("action", "Save")
-                .flashAttr("vaultReviewModel", mVaultReviewModel)
-                .contentType(MediaType.TEXT_HTML)
-                .accept(MediaType.TEXT_HTML)
+                .content(toJson(mVaultReviewModel))
+                .contentType(MediaType.APPLICATION_JSON)
                 .with(csrf());
         // Act
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andReturn();
         //Assert
         assertThat(mvcResult.getModelAndView().getViewName()).isEqualTo("redirect:/admin/reviews");
 
+        verify(mRestService).getVaultReview(TEST_VAULT_REVIEW_ID);
+
+        verify(mRestService).editVaultReview(mVaultReview);
+        verify(mRestService, times(2)).getDepositReview(null); //FIX THIS
+        verify(mRestService, times(2)).editDepositReview(any(DepositReview.class));
+        verifyNoMoreInteractions(mRestService);
     }
 
 
@@ -390,15 +396,20 @@ public class AdminReviewsControllerTest {
 
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post("/admin/vaults/"+TEST_VAULT_ID_1+"/reviews/" + TEST_VAULT_REVIEW_ID)
                 .queryParam("action", "Submit")
-                .flashAttr("vaultReviewModel", mVaultReviewModel)
-                .contentType(MediaType.TEXT_HTML)
-                .accept(MediaType.TEXT_HTML)
+                .content(toJson(mVaultReviewModel))
+                .contentType(MediaType.APPLICATION_JSON)
                 .with(csrf());
         // Act
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andReturn();
         //Assert
         assertThat(mvcResult.getModelAndView().getViewName()).isEqualTo("redirect:/admin/reviews");
 
+        verify(mRestService).getVaultReview(TEST_VAULT_REVIEW_ID);
+        verify(mRestService).getVault(TEST_VAULT_ID_1);
+        verify(mRestService, times(2)).editDepositReview(any(DepositReview.class));//USE CAPTORS
+        verify(mRestService).editVaultReview(any(VaultReview.class));//USE CAPTORS
+        verify(mRestService, times(2)).getDepositReview(null);//FIX
+        Mockito.verifyNoMoreInteractions(mRestService);
     }
 
     @DisplayName("Test processReview() with action Submit with no retained deposits and a review date not null.")
@@ -410,15 +421,21 @@ public class AdminReviewsControllerTest {
 
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post("/admin/vaults/"+TEST_VAULT_ID_1+"/reviews/" + TEST_VAULT_REVIEW_ID)
                 .queryParam("action", "Submit")
-                .flashAttr("vaultReviewModel", mVaultReviewModel)
-                .contentType(MediaType.TEXT_HTML)
-                .accept(MediaType.TEXT_HTML)
+                .content(toJson(mVaultReviewModel))
+                .contentType(MediaType.APPLICATION_JSON)
                 .with(csrf());
         // Act
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andReturn();
         //Assert
         assertThat(mvcResult.getModelAndView().getViewName()).isEqualTo("redirect:/admin/reviews");
 
+        verify(mRestService).getVaultReview(TEST_VAULT_REVIEW_ID);
+        verify(mRestService).getVault(TEST_VAULT_ID_1);
+        verify(mRestService).updateVaultReviewDate(eq(TEST_VAULT_ID_1), any(Date.class)); //could use clock
+        verify(mRestService).editVaultReview(any(VaultReview.class)); //could use captor here
+        verify(mRestService, times(2)).getDepositReview(null);//FIX THIS
+        verify(mRestService, times(2)).editDepositReview(any(DepositReview.class)); //could use captor here
+        Mockito.verifyNoMoreInteractions(mRestService);
     }
 
     @DisplayName("Test processReview() with action Submit with a retained deposit and a review date null.")
@@ -434,9 +451,8 @@ public class AdminReviewsControllerTest {
 
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post("/admin/vaults/"+TEST_VAULT_ID_1+"/reviews/" + TEST_VAULT_REVIEW_ID)
                 .queryParam("action", "Submit")
-                .flashAttr("vaultReviewModel", mVaultReviewModel)
-                .contentType(MediaType.TEXT_HTML)
-                .accept(MediaType.TEXT_HTML)
+                .content(toJson(mVaultReviewModel))
+                .contentType(MediaType.APPLICATION_JSON)
                 .with(csrf());
         // Act
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andReturn();
@@ -447,24 +463,25 @@ public class AdminReviewsControllerTest {
 
         // Error key in modelMap
         assertThat((String) modelMap.get("error")).isEqualTo("reviewdate");
+        Mockito.verifyNoMoreInteractions(mRestService);
     }
 
 
     private void mocksForShowAndProcessReviewTests() {
         // Arrange
-        when(restService.getVault(Mockito.any(String.class))).thenReturn(mVaultInfo1);
+        when(mRestService.getVault(Mockito.any(String.class))).thenReturn(mVaultInfo1);
 
         when(mVaultInfo1.getGroupID()).thenReturn(TEST_GROUP_ID);
 
-        when(restService.getGroup(TEST_GROUP_ID)).thenReturn(mGroup);
-        when(restService.getCurrentReview(TEST_VAULT_ID_1)).thenReturn(mReviewInfo);
+        when(mRestService.getGroup(TEST_GROUP_ID)).thenReturn(mGroup);
+        when(mRestService.getCurrentReview(TEST_VAULT_ID_1)).thenReturn(mReviewInfo);
         when(mReviewInfo.getVaultReviewId()).thenReturn(TEST_VAULT_REVIEW_ID);
-        when(restService.getVaultReview(TEST_VAULT_REVIEW_ID)).thenReturn(mVaultReview);
+        when(mRestService.getVaultReview(TEST_VAULT_REVIEW_ID)).thenReturn(mVaultReview);
         when(mReviewInfo.getDepositIds()).thenReturn(List.of(TEST_DEPOSIT_ID_1, TEST_DEPOSIT_ID_2));
-        when(restService.getDepositReview(TEST_DEPOSIT_ID_1)).thenReturn(mDepositReview1);
-        when(restService.getDepositReview(TEST_DEPOSIT_ID_2)).thenReturn(mDepositReview2);
-        when(restService.getDeposit(TEST_DEPOSIT_ID_1)).thenReturn(mDepositInfo1);
-        when(restService.getDeposit(TEST_DEPOSIT_ID_2)).thenReturn(mDepositInfo2);
+        when(mRestService.getDepositReview(TEST_DEPOSIT_ID_1)).thenReturn(mDepositReview1);
+        when(mRestService.getDepositReview(TEST_DEPOSIT_ID_2)).thenReturn(mDepositReview2);
+        when(mRestService.getDeposit(TEST_DEPOSIT_ID_1)).thenReturn(mDepositInfo1);
+        when(mRestService.getDeposit(TEST_DEPOSIT_ID_2)).thenReturn(mDepositInfo2);
 
         when(mDepositReview1.getId()).thenReturn(TEST_DEPOSIT_REVIEW_1_ID);
         when(mDepositReview1.getComment()).thenReturn(TEST_DEPOSIT_REVIEW_1_COMMENT);
@@ -484,8 +501,8 @@ public class AdminReviewsControllerTest {
         List<DepositReviewModel> drm = new ArrayList<>();
         drm.add(mDepositReviewModel1);
         drm.add(mDepositReviewModel2);
-        when(restService.getDepositReview(mDepositReviewModel1.getDepositReviewId())).thenReturn(mOriginalDepositReview1);
-        when(restService.getDepositReview(mDepositReviewModel2.getDepositReviewId())).thenReturn(mOriginalDepositReview2);
+        when(mRestService.getDepositReview(mDepositReviewModel1.getDepositReviewId())).thenReturn(mOriginalDepositReview1);
+        when(mRestService.getDepositReview(mDepositReviewModel2.getDepositReviewId())).thenReturn(mOriginalDepositReview2);
         // Default no retained delete status deposits, we override this in some tests
         when(mDepositReviewModel1.getDeleteStatus()).thenReturn(DepositReviewDeleteStatus.ONEXPIRY);
         when(mDepositReviewModel2.getDeleteStatus()).thenReturn(DepositReviewDeleteStatus.ONREVIEW);
@@ -493,4 +510,10 @@ public class AdminReviewsControllerTest {
         // Default ReviewDate set, this overriden in some tests
         when(mVaultReviewModel.getNewReviewDate()).thenReturn(new Date());
     }
+
+    @SneakyThrows
+    String toJson(Object value) {
+        return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(value);
+    }
+
 }
