@@ -95,6 +95,7 @@ public abstract class BaseRabbitIT {
         ConnectionFactory result = new ConnectionFactory();
         result.setUsername(this.rabbitMQusername);
         result.setPort(this.rabbitMQport);
+        result.setHost(this.rabbitMQhost);
         result.setUsername(this.rabbitMQusername);
         result.setPassword(this.rabbitMQpassword);
         result.setAutomaticRecoveryEnabled(false);
