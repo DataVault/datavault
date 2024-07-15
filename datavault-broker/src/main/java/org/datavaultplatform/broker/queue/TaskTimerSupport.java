@@ -12,6 +12,7 @@ import org.springframework.util.Assert;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
@@ -38,6 +39,7 @@ public class TaskTimerSupport implements AutoCloseable {
         this.clock = clock;
         this.timeoutMs = timeoutMs;
         this.enabled = enabled;
+        log.info("timeoutMs[{}], enabled[{}]", timeoutMs, enabled);
         this.executor = Executors.newScheduledThreadPool(numberOfThreads);
     }
 
@@ -83,7 +85,9 @@ public class TaskTimerSupport implements AutoCloseable {
                 }
             };
         } else {
-            result = () -> log.warn("noop timeout cancelled for label[{}]id[{}]", label, id);
+            // we schedule the timeout but with a noop action instead of the real action.
+            result = () -> log.warn("noop timeout action cancelled for label[{}]id[{}]", label, id);
+            log.warn("scheduled noop timeout action for [{}] as timeouts are disabled", label);
         }
         return result;
     }
@@ -126,10 +130,19 @@ public class TaskTimerSupport implements AutoCloseable {
         String id = coreData.id;
         String label = coreData.label;
 
-        Runnable timeoutAction = () -> {
-            coreData.timeoutAction.accept(id);
-            listenTimeOut(label, id);
-            removeTask(id);
+        Runnable timeoutAction = new Runnable() {
+
+            @Override
+            public void run() {
+                coreData.timeoutAction.accept(id);
+                listenTimeOut(label, id);
+                removeTask(id);
+            }
+            
+            @Override
+            public String toString() {
+                return "timeout task label[{}}]id[{}]".formatted(label, id);
+            }
         };
         Runnable cancelTimeoutAction = getCancelTimeoutAction(executor, enabled, label, id, timeoutMs, timeoutAction);
         return new TaskState(coreData, getNow(), cancelTimeoutAction, resetCount);
@@ -148,7 +161,10 @@ public class TaskTimerSupport implements AutoCloseable {
 
     @Override
     public synchronized void close() {
-        executor.shutdownNow();
+        List<String> stillRunning = executor.shutdownNow().stream().map(Runnable::toString).toList();
+        if (!stillRunning.isEmpty()) {
+            log.warn("These tasks did not start : {}", stillRunning);
+        }
     }
 
     public synchronized boolean isEmpty() {
