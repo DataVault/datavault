@@ -65,7 +65,8 @@ public class ActuatorTest extends BaseDatabaseTest {
   }
 
   @ParameterizedTest
-  @ValueSource(strings = {"/actuator/info", "/actuator/health", "/actuator/metrics", "/actuator/memoryinfo"})
+  @ValueSource(strings = {"/actuator/info", "/actuator/health",
+          "/actuator/metrics", "/actuator/memoryinfo", "/actuator/mappings"})
   @SneakyThrows
   void testActuatorPublicAccess(String url) {
     checkPublic(url);

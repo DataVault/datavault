@@ -49,15 +49,19 @@ public class SecurityActuatorConfig {
   @Order(1)
   public SecurityFilterChain actuatorSecurityFilterChain(HttpSecurity http,
                                                          @Qualifier("actuatorAuthenticationProvider") AuthenticationProvider authenticationProvider) throws Exception {
-    http.securityMatcher("/actuator/**")
+    http.securityMatcher("/actuator/**","/v3/**","/swagger-ui/**")
             .authenticationProvider( authenticationProvider )
             .csrf(AbstractHttpConfigurer::disable)
             .httpBasic(Customizer.withDefaults())
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests( authz -> {
-                authz.requestMatchers("/actuator/info",
+                authz.requestMatchers(
+                        "/v3/**",
+                        "/swagger-ui/**",
+                        "/actuator/info",
                         "/actuator/health",
                         "/actuator/metrics",
+                        "/actuator/mappings",
                         "/actuator/memoryinfo").permitAll();
                 authz.anyRequest().fullyAuthenticated();
             });
