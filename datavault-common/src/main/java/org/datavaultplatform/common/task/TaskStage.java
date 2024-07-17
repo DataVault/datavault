@@ -2,7 +2,7 @@ package org.datavaultplatform.common.task;
 
 import lombok.Getter;
 
-import java.util.Comparator;
+import java.util.*;
 
 @Getter
 public sealed class TaskStage implements Comparable<TaskStage>
@@ -32,7 +32,8 @@ public sealed class TaskStage implements Comparable<TaskStage>
             Deposit2Transfer,
             Deposit3PackageEncrypt,
             Deposit4Archive,
-            Deposit5Verify {
+            Deposit5Verify,
+            Deposit6Final {
         public DepositTaskStage(int order) {
             super(TaskType.Deposit, order);
         }
@@ -67,26 +68,37 @@ public sealed class TaskStage implements Comparable<TaskStage>
         }
         public static final Deposit5Verify INSTANCE = new Deposit5Verify();
     }
+    public static final class Deposit6Final extends DepositTaskStage {
+        private Deposit6Final() {
+            super(6);
+        }
+        public static final Deposit6Final INSTANCE = new Deposit6Final();
+    }
     
     public static sealed class RetrieveTaskStage extends TaskStage permits
-            Retrieve1checkUserStoreFreeSpace,
-            Retrieve2retrieveFromArchiveAndRecompose,
-            Retrieve3uploadedToUserStore
+            Retrieve1CheckUserStoreFreeSpace,
+            Retrieve2RetrieveFromArchiveAndRecompose,
+            Retrieve3UploadedToUserStore,
+            Retrieve4Final
     {
         public RetrieveTaskStage(int order) {
             super(TaskType.Retrieve, order);
         }
     }
-    public static final class Retrieve1checkUserStoreFreeSpace extends RetrieveTaskStage {
-        private Retrieve1checkUserStoreFreeSpace() { super(1); }
-        public static final Retrieve1checkUserStoreFreeSpace INSTANCE = new Retrieve1checkUserStoreFreeSpace();
+    public static final class Retrieve1CheckUserStoreFreeSpace extends RetrieveTaskStage {
+        private Retrieve1CheckUserStoreFreeSpace() { super(1); }
+        public static final Retrieve1CheckUserStoreFreeSpace INSTANCE = new Retrieve1CheckUserStoreFreeSpace();
     }
-    public static final class Retrieve2retrieveFromArchiveAndRecompose extends RetrieveTaskStage {
-        private Retrieve2retrieveFromArchiveAndRecompose() { super(2); }
-        public static final Retrieve2retrieveFromArchiveAndRecompose INSTANCE = new Retrieve2retrieveFromArchiveAndRecompose();
+    public static final class Retrieve2RetrieveFromArchiveAndRecompose extends RetrieveTaskStage {
+        private Retrieve2RetrieveFromArchiveAndRecompose() { super(2); }
+        public static final Retrieve2RetrieveFromArchiveAndRecompose INSTANCE = new Retrieve2RetrieveFromArchiveAndRecompose();
     }
-    public static final class Retrieve3uploadedToUserStore extends RetrieveTaskStage {
-        private Retrieve3uploadedToUserStore() { super(3); }
-        public static final Retrieve3uploadedToUserStore INSTANCE = new Retrieve3uploadedToUserStore();
+    public static final class Retrieve3UploadedToUserStore extends RetrieveTaskStage {
+        private Retrieve3UploadedToUserStore() { super(3); }
+        public static final Retrieve3UploadedToUserStore INSTANCE = new Retrieve3UploadedToUserStore();
+    }
+    public static final class Retrieve4Final extends RetrieveTaskStage {
+        private Retrieve4Final() { super(4); }
+        public static final Retrieve4Final INSTANCE = new Retrieve4Final();
     }
 }

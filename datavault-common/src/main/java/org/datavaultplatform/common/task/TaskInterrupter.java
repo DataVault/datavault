@@ -3,7 +3,6 @@ package org.datavaultplatform.common.task;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.datavaultplatform.common.event.Event;
-import org.datavaultplatform.common.util.Utils;
 import org.springframework.util.Assert;
 
 import java.util.function.Predicate;
@@ -14,11 +13,6 @@ public abstract class TaskInterrupter {
     private static final ThreadLocal<Checker> TL = ThreadLocal.withInitial(() -> null);
 
     public static synchronized void checkForInterrupt(Event event) {
-        // extra checks to ensure that we can't interrupt a task in production
-        if (!Utils.isRunningWithinTest()) {
-            log.trace("no interrupt outside tests");
-            return;
-        }
         Checker checker = TL.get();
         if (checker == null) {
             log.trace("no checker - no interrupt after event[{}]", event);
@@ -47,7 +41,12 @@ public abstract class TaskInterrupter {
     }
 
     public static void setInterrupterCheck(Checker checker) {
-        TL.set(checker);
+        if(checker != null){
+            log.warn("non-null interrupter checker [{}]", checker.label);
+            TL.set(checker);
+        } else {
+            TL.remove();
+        }
     }
     public static void clear() {
         TL.remove();

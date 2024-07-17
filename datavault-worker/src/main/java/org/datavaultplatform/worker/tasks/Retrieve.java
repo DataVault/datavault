@@ -100,11 +100,11 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
             }
 
             if (isLastEventBefore(UserStoreSpaceAvailableChecked.class)) {
-                doStage(TaskStage.Retrieve1checkUserStoreFreeSpace.INSTANCE);
+                doStage(TaskStage.Retrieve1CheckUserStoreFreeSpace.INSTANCE);
                 checkUserStoreFreeSpaceAndPermissions(userStoreInfo);
                 sendEvent(new UserStoreSpaceAvailableChecked(jobID, depositId, retrieveId));
             } else {
-                skipStage(TaskStage.Retrieve1checkUserStoreFreeSpace.INSTANCE);
+                skipStage(TaskStage.Retrieve1CheckUserStoreFreeSpace.INSTANCE);
             }
 
             // Retrieve the archived data
@@ -194,7 +194,7 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
 
     protected void doRetrieveFromWorkerToUserFs(Context context, UserStoreInfo userStoreInfo, File tarFile, Progress progress) throws Exception {
         if (isLastEventBefore(UploadedToUserStore.class)) {
-            doStage(TaskStage.Retrieve3uploadedToUserStore.INSTANCE);
+            doStage(TaskStage.Retrieve3UploadedToUserStore.INSTANCE);
             Assert.isTrue(tarFile.exists(), "The tar file [%s] does not exist".formatted(tarFile.toString()));
             logProgress(progress);
             log.info("Validating data ...");
@@ -225,7 +225,7 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
                 FileUtils.deleteDirectory(bagDir);
             }
         } else {
-            skipStage(TaskStage.Retrieve3uploadedToUserStore.INSTANCE);
+            skipStage(TaskStage.Retrieve3UploadedToUserStore.INSTANCE);
         }
     }
 
@@ -319,7 +319,7 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
         var progress = new Progress();
         trackProgress(progress, archiveSize, () -> {
             if (isLastEventBefore(ArchiveStoreRetrievedAll.class) || !isFinalTarValid(tarFile, archiveDigest)) {
-                doStage(TaskStage.Retrieve2retrieveFromArchiveAndRecompose.INSTANCE);
+                doStage(TaskStage.Retrieve2RetrieveFromArchiveAndRecompose.INSTANCE);
                 if (context.isChunkingEnabled()) {
                     retrieveChunksAndRecompose(context, archiveDeviceInfo, progress, tarFile, retrievedChunks);
                 } else {
@@ -328,7 +328,7 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
                 }
                 sendEvent(new ArchiveStoreRetrievedAll(jobID, depositId, retrieveId));
             } else {
-                skipStage(TaskStage.Retrieve2retrieveFromArchiveAndRecompose.INSTANCE);
+                skipStage(TaskStage.Retrieve2RetrieveFromArchiveAndRecompose.INSTANCE);
             }
 
             doRetrieveFromWorkerToUserFs(context, userStoreInfo, tarFile, progress);
