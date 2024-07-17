@@ -5,7 +5,10 @@ import org.datavaultplatform.common.event.deposit.CompleteCopyUpload;
 import org.datavaultplatform.worker.app.DataVaultWorkerInstanceApp;
 import org.datavaultplatform.worker.test.AddTestProperties;
 import org.junit.jupiter.api.Timeout;
+import org.slf4j.Logger;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 
@@ -17,7 +20,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-@SpringBootTest(classes = DataVaultWorkerInstanceApp.class)
+@SpringBootTest(classes = {
+        DataVaultWorkerInstanceApp.class,
+        PerformMultiDepositDirsThenRetrieveNoChunksIT.TestConfig.class
+})
 @AddTestProperties
 @DirtiesContext
 @TestPropertySource(properties = {"chunking.enabled=false","chunking.size=0"})
@@ -40,5 +46,12 @@ public class PerformMultiDepositDirsThenRetrieveNoChunksIT extends BaseMultiPerf
   protected void checkDepositEvents() {
     List<CompleteCopyUpload> storedChunksEvents = getCopyUploadCompleteEvents();
     assertThat(storedChunksEvents.size()).isEqualTo(1);
+  }
+  @TestConfiguration
+  static class TestConfig {
+    @Bean
+    Logger monitorLogger() {
+      return log;
+    }
   }
 }
