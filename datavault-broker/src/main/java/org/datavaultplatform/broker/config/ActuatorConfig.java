@@ -3,6 +3,9 @@ package org.datavaultplatform.broker.config;
 import java.time.Clock;
 import java.util.List;
 import java.util.function.Function;
+
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
 import org.datavaultplatform.broker.actuator.CurrentTimeEndpoint;
 import org.datavaultplatform.broker.actuator.LocalFileStoreEndpoint;
 import org.datavaultplatform.broker.actuator.MemoryInfoEndpoint;
@@ -54,4 +57,10 @@ public class ActuatorConfig {
     return new LocalFileStoreEndpoint(archiveStoreService);
   }
 
+  @Bean
+  public OpenAPI openAPI() {
+    return new OpenAPI().info(new Info().title("DataVault Broker")
+            .description("broker application")
+            .version("v0.0.1"));
+  }
 }
