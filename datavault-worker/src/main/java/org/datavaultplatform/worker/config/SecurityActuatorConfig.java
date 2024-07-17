@@ -61,6 +61,7 @@ public class SecurityActuatorConfig {
                   "/actuator/health",
                       "/actuator/memoryinfo",
                       "/actuator/metrics",
+                      "/actuator/mappings",
                   "/actuator/info").permitAll();
               authz.anyRequest().authenticated();
             });

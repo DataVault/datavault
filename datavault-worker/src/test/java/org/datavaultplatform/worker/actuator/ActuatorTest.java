@@ -56,7 +56,7 @@ public class ActuatorTest {
   RabbitMessageSelectorScheduler scheduler;
   
   @ParameterizedTest
-  @ValueSource(strings = {"/actuator/info", "/actuator/health", "/actuator/metrics", "/actuator/memoryinfo"})
+  @ValueSource(strings = {"/actuator/info", "/actuator/health", "/actuator/metrics", "/actuator/memoryinfo", "/actuator/mappings"})
   @SneakyThrows
   void testActuatorPublicAccess(String path) {
     checkPublic(path);
