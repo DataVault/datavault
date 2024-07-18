@@ -274,8 +274,8 @@ public class DepositsController {
         }
 
         StorageIdAndRetrievePath storageIdAndRetrievePath = StorageIdAndRetrievePath.fromFullPath(retrieve.getRetrievePath());
-        String storageID = storageIdAndRetrievePath.storageID;
-        String retrievePath = storageIdAndRetrievePath.retrievePath;
+        String storageID = storageIdAndRetrievePath.storageID();
+        String retrievePath = storageIdAndRetrievePath.retrievePath();
         
         // Fetch the ArchiveStore that is flagged for retrieval. We store it in a list as the Task parameters require a list.
         ArchiveStore archiveStore = archiveStoreService.getForRetrieval();
@@ -522,16 +522,9 @@ public class DepositsController {
         if (paths != null) {
             for (String path : paths) {
 
-                String storageID, storagePath;
-                if (!path.contains("/")) {
-                    // A request to archive the whole share/device
-                    storageID = path;
-                    storagePath = "/";
-                } else {
-                    // A request to archive a sub-directory
-                    storageID = path.substring(0, path.indexOf("/"));
-                    storagePath = path.replaceFirst(storageID + "/", "");
-                }
+                StorageIdAndRetrievePath rec = StorageIdAndRetrievePath.fromFullPath(path);
+                String storageID = rec.storageID();
+                String storagePath = rec.retrievePath();
 
                 if (!userFileStoreClasses.containsKey(storageID)) {
                     try {
@@ -676,24 +669,6 @@ public class DepositsController {
         sender.send(jsonDeposit, isRestart);
 
         return job;
-    }
-    record StorageIdAndRetrievePath(String storageID, String retrievePath) {
-
-        public static StorageIdAndRetrievePath fromFullPath(String fullPath){
-            String storageID;
-            String retrievePath;
-            if (!fullPath.contains("/")) {
-                // A request to retrieve the whole share/device
-                storageID = fullPath;
-                retrievePath = "/";
-                
-            } else {
-                // A request to retrieve a sub-directory
-                storageID = fullPath.substring(0, fullPath.indexOf("/"));
-                retrievePath = fullPath.replaceFirst(storageID + "/", "");
-            }
-            return new StorageIdAndRetrievePath(storageID, retrievePath);
-        }
     }
     private User getUser(String userID) throws Exception {
         User user = usersService.getUser(userID);
