@@ -20,10 +20,10 @@ public abstract class DockerImage {
   // https://hub.docker.com/r/linuxserver/openssh-server/tags
   public static final String OPEN_SSH_8pt6_IMAGE_NAME = "linuxserver/openssh-server:version-8.6_p1-r3";
 
-  //8.8 is when they removed sha-1 signature of ssh-rsa keys - causing problems with JSch
+  //8.8 is when they removed sha-1 signature of ssh-rsa keys - causing problems with 'OLD' (jcraft) JSch 0.1.55 Sftp Driver
   public static final String OPEN_SSH_8pt8_IMAGE_NAME = "linuxserver/openssh-server:version-8.8_p1-r1";
 
-  public static final String OPEN_SSH_9pt0_IMAGE_NAME = "linuxserver/openssh-server:version-9.0_p1-r2";
+  public static final String OPEN_SSH_9pt7_IMAGE_NAME = "linuxserver/openssh-server:version-9.7_p1-r4";
 
   public static final String OPEN_SSH_IMAGE_NAME = OPEN_SSH_8pt8_IMAGE_NAME;
   public static final DockerImageName OPEN_SSH_IMAGE = parse(OPEN_SSH_IMAGE_NAME);
