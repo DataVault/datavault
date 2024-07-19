@@ -253,6 +253,7 @@ public class DepositsController {
                                    @PathVariable("depositId") String depositId,
                                    @PathVariable("retrieveId") String retrieveId) throws Exception {
         User user = getUser(userID);
+        //User user = adminService.ensureAdminUser(userID);
         Deposit deposit = getUserDeposit(user, depositId);
         Retrieve retrieve = getRetrieve(retrieveId);   
         boolean retrieveMatchesDeposit = retrieve.getDeposit().equals(deposit);
@@ -269,8 +270,6 @@ public class DepositsController {
         if (lastEvent == null) {
             retrieve.setUser(user);
             checkForInProgressJob(deposit.getJobs());
-        } else {
-            Assert.isTrue(retrieve.getUser().equals(user),"The user does not match the retrieve user");
         }
 
         StorageIdAndRetrievePath storageIdAndRetrievePath = StorageIdAndRetrievePath.fromFullPath(retrieve.getRetrievePath());
