@@ -300,11 +300,11 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
     assertEquals(3, items4.size());
     assertEquals(List.of("name3","name34","name345"),items4.stream().map(Deposit::getName).toList());
 
-    List<Deposit> items5 = dao.list("name3","allowed2","name","asc",1,Integer.MAX_VALUE);
+    List<Deposit> items5 = dao.list("name3","allowed2","name","asc",1, 100);
     assertEquals(2, items5.size());
     assertEquals(List.of("name34","name345"),items5.stream().map(Deposit::getName).toList());
 
-    List<Deposit> items6 = dao.list("name3","allowed2","name","desc",1,Integer.MAX_VALUE);
+    List<Deposit> items6 = dao.list("name3","allowed2","name","desc",1, 100);
     assertEquals(2, items6.size());
     assertEquals(List.of("name34","name345"),items5.stream().map(Deposit::getName).toList());
 

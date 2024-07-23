@@ -9,10 +9,13 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
+import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.event.deposit.CompleteCopyUpload;
 import org.datavaultplatform.worker.app.DataVaultWorkerInstanceApp;
 import org.datavaultplatform.worker.test.AddTestProperties;
+import org.junit.jupiter.api.AfterEach;
 import org.slf4j.Logger;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -54,5 +57,12 @@ public class PerformDepositThenRetrieveMultiChunkIT extends BasePerformDepositTh
     Logger monitorLogger() {
       return log;
     }
+  }
+  
+  @AfterEach
+  void tearDown() throws JsonProcessingException {
+    System.out.println("FIN");
+    String allJson = mapper.writeValueAsString(events);
+    System.out.println(allJson);
   }
 }

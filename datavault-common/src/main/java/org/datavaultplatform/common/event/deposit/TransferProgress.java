@@ -1,14 +1,15 @@
 package org.datavaultplatform.common.event.deposit;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import jakarta.persistence.Transient;
 import org.datavaultplatform.common.event.Event;
 
 public class TransferProgress extends Event {
     
-    public long bytes;
+    private long bytes;
     
     @Transient
-    public long bytesPerSec;
+    private long bytesPerSec;
 
     public TransferProgress() {
         this.eventClass = TransferProgress.class.getCanonicalName();
@@ -21,9 +22,10 @@ public class TransferProgress extends Event {
         this.bytesPerSec = bytesPerSec;
         this.persistent = false;
         this.depositId = depositId;
-        this.jobId = jobId;
+        this.setJobId(jobId);
     }
     
+    @JsonGetter
     public long getBytes() {
         return bytes;
     }
@@ -32,6 +34,7 @@ public class TransferProgress extends Event {
         this.bytes = bytes;
     }
 
+    @JsonGetter
     public long getBytesPerSec() {
         return bytesPerSec;
     }

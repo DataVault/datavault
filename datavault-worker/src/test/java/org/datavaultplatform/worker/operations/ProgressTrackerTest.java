@@ -55,11 +55,11 @@ class ProgressTrackerTest {
         assertThat(events.size()).isEqualTo(5);
         for (int i = 0; i < events.size(); i++) {
             UpdateProgress pe = (UpdateProgress) events.get(i);
-            assertThat(pe.jobId).isEqualTo(JOB_ID);
-            assertThat(pe.depositId).isEqualTo(DEPOSIT_ID);
-            assertThat(pe.progress).isEqualTo(100 * (i + 1));
-            assertThat(pe.progressMax).isEqualTo(2112);
-            assertThat(pe.message).isEqualTo("Job progress update");
+            assertThat(pe.getJobId()).isEqualTo(JOB_ID);
+            assertThat(pe.getDepositId()).isEqualTo(DEPOSIT_ID);
+            assertThat(pe.getProgress()).isEqualTo(100 * (i + 1));
+            assertThat(pe.getProgressMax()).isEqualTo(2112);
+            assertThat(pe.getMessage()).isEqualTo("Job progress update");
         }
         log.info("FIN");
     }

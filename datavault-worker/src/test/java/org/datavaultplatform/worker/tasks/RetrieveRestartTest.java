@@ -229,7 +229,7 @@ public class RetrieveRestartTest {
             verify(retrieve).doRetrieveFromWorkerToUserFs(mContext, actualUserStoreInfo2, actualTarFile2, actualProgress2);
         }
 
-        var eventClasses = sentEvents.stream().map(evt -> evt.eventClass).toList();
+        var eventClasses = sentEvents.stream().map(evt -> evt.getEventClass()).toList();
         assertThat(eventClasses).isEqualTo(List.of(
                 "org.datavaultplatform.common.event.InitStates",
                 "org.datavaultplatform.common.event.retrieve.RetrieveStart",
@@ -281,7 +281,7 @@ public class RetrieveRestartTest {
             verify(retrieve).doRetrieveFromWorkerToUserFs(mContext, actualUserStoreInfo2, actualTarFile2, actualProgress2);
         }
 
-        var eventClasses = sentEvents.stream().map(evt -> evt.eventClass).toList();
+        var eventClasses = sentEvents.stream().map(evt -> evt.getEventClass()).toList();
         assertThat(eventClasses).isEqualTo(List.of(
                 //TODO : might need to check the InitStates and RetrieveStart are not sent again ?
                 "org.datavaultplatform.common.event.InitStates",
@@ -324,7 +324,7 @@ public class RetrieveRestartTest {
             verify(retrieve).doRetrieveFromWorkerToUserFs(mContext, actualUserStoreInfo2, actualTarFile2, actualProgress2);
         }
 
-        var eventClasses = sentEvents.stream().map(evt -> evt.eventClass).toList();
+        var eventClasses = sentEvents.stream().map(evt -> evt.getEventClass()).toList();
         assertThat(eventClasses).isEqualTo(List.of(
                 //TODO : might need to check the InitStates and RetrieveStart are not sent again ?
                 "org.datavaultplatform.common.event.InitStates",
@@ -373,7 +373,7 @@ public class RetrieveRestartTest {
             verify(retrieve).doRetrieveFromWorkerToUserFs(mContext, actualUserStoreInfo2, actualTarFile2, actualProgress2);
         }
 
-        var eventClasses = sentEvents.stream().map(evt -> evt.eventClass).toList();
+        var eventClasses = sentEvents.stream().map(evt -> evt.getEventClass()).toList();
         assertThat(eventClasses).isEqualTo(List.of(
                 //TODO : might need to check the InitStates and RetrieveStart are not sent again ?
                 "org.datavaultplatform.common.event.InitStates",
@@ -417,7 +417,7 @@ public class RetrieveRestartTest {
 
         var eventClasses = sentEvents.stream()
                 .filter(e -> !(e instanceof UpdateProgress))
-                .map(evt -> evt.eventClass).toList();
+                .map(evt -> evt.getEventClass()).toList();
         assertThat(eventClasses).isEqualTo(List.of(
                 //TODO : might need to check the InitStates and RetrieveStart are not sent again ?
                 "org.datavaultplatform.common.event.InitStates",

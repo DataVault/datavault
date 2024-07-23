@@ -19,6 +19,7 @@
                     <th>Timestamp</th>
                     <th>Retrieve path</th>
                     <th>Retrieve note</th>
+                    <th>Actions</th>
                 </tr>
                 </thead>
 
@@ -29,6 +30,14 @@
                         <td>[[${#dates.format(retrieve.timestamp,globalDateTimeFormat)}]]<!--/* datetime */--></td>
                         <td>[[${retrieve.retrievePath}]]</td>
                         <td>[[${retrieve.note}]]</td>
+                        <td>
+                        <th:block th:if="${retrieve.status.name() == 'FAILED'}">
+                            <a class="restart-deposit-btn btn btn-default btn-sm"
+                               th:href="@{|/vaults/__${retrieve.deposit.vault.getID()}__/deposits/__${retrieve.deposit.getID()}__/retrieves/__${retrieve.getID()}__/restart|}">
+                                Restart
+                            </a>
+                        </th:block>
+                        </td>
                     </tr>
                 </tbody>
             </table>

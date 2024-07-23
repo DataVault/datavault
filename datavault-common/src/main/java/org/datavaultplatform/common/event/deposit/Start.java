@@ -12,6 +12,6 @@ public class Start extends Event {
         super("Deposit started");
         this.eventClass = Start.class.getCanonicalName();
         this.depositId = depositId;
-        this.jobId = jobId;
+        this.setJobId(jobId);
     }
 }

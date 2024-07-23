@@ -10,14 +10,40 @@ import org.datavaultplatform.common.event.retrieve.*;
 import org.datavaultplatform.common.event.roles.*;
 import org.datavaultplatform.common.event.vault.*;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class EventTest {
 
+    ObjectMapper mapper;
+
+    public static Stream<Arguments> jsonPropertiesTestProvider() {
+        List<Class<? extends Event>> all = new ArrayList<>();
+        all.addAll(EVENTS_01_AUDIT);
+        all.addAll(EVENTS_02_CLIENT);
+        all.addAll(EVENTS_03_DELETE);
+        all.addAll(EVENTS_04_DEPOSIT);
+        all.addAll(EVENTS_05_RETRIEVE);
+        all.addAll(EVENTS_O6_ROLES);
+        all.addAll(EVENTS_07_VAULT);
+        all.addAll(EVENTS_08_GENERAL);
+        
+        return all.stream().map(Arguments::of);
+    }
+
+    @BeforeEach
+    void setup() {
+        mapper = new ObjectMapper();
+    }
+    
     public static final List<Class<? extends Event>> EVENTS_01_AUDIT = List.of(
             AuditComplete.class,
             AuditError.class,
@@ -100,12 +126,6 @@ public class EventTest {
     @Nested
     @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
     class ToJsonAndBackTests {
-        ObjectMapper mapper;
-
-        @BeforeEach
-        void setup() {
-            mapper = new ObjectMapper();
-        }
 
         @Test
         @Order(1)
@@ -162,5 +182,65 @@ public class EventTest {
             Event fromJson = mapper.readValue(json, Event.class);
             assertThat(fromJson).isInstanceOf(eventClass);
         }
+    }
+    
+    @ParameterizedTest
+    @MethodSource("jsonPropertiesTestProvider")
+    @SneakyThrows
+    void jsonPropertiesTest(Class<? extends Event> eventClass) {
+        Event event = eventClass.getConstructor().newInstance();
+
+        event.setArchiveId("test-archive-id");
+        event.setAssigneeId("test-assignee-id");
+        event.setAuditId("test-audit-id");
+
+        event.setChunkId("test-chunk-id");
+        event.setDepositId("test-deposit-id");
+        event.setJobId("test-job-id");
+
+        event.setRoleId("test-role-id");
+        event.setSchoolId("test-school-id");
+        event.setUserId("test-user-id");
+
+        event.setVaultId("test-vault-id");
+        event.setNextState(2112);
+        event.setPersistent(true);
+        
+        String json = mapper.writeValueAsString(event);
+        System.out.println(json);
+
+        Event event2 = mapper.readValue(json, eventClass);
+        assertThat(event2).isInstanceOf(eventClass);
+
+        assertThat(event2.getArchiveId()).isEqualTo(event.getArchiveId());
+        assertThat(event2.getAssigneeId()).isEqualTo(event.getAssigneeId());
+        assertThat(event2.getAuditId()).isEqualTo(event.getAuditId());
+
+        assertThat(event2.getChunkId()).isEqualTo(event.getChunkId());
+        assertThat(event2.getDepositId()).isEqualTo(event.getDepositId());
+        assertThat(event2.getJobId()).isEqualTo(event.getJobId());
+
+        assertThat(event2.getRoleId()).isEqualTo(event.getRoleId());
+        assertThat(event2.getSchoolId()).isEqualTo(event.getSchoolId());
+        assertThat(event2.getUserId()).isEqualTo(event.getUserId());
+
+        assertThat(event2.getVaultId()).isEqualTo(event.getVaultId());
+        assertThat(event2.getNextState()).isEqualTo(event.getNextState());
+        assertThat(event2.getPersistent()).isEqualTo(event.getPersistent());
+    }
+    
+    @Test
+    @SneakyThrows
+    void testInitStates(){
+        InitStates initStates1 = new InitStates();
+        ArrayList<String> states = new ArrayList<>();
+        states.addAll(List.of("s1","s2","s3"));
+        initStates1.setStates(states);
+        
+        String json = mapper.writeValueAsString(initStates1);
+        Event event = mapper.readValue(json, Event.class);
+        assertThat(event instanceof InitStates).isTrue();
+        InitStates initStates2 = (InitStates) event;
+        assertThat(initStates2.getStates()).isEqualTo(initStates1.getStates());
     }
 }

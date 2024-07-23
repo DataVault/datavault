@@ -134,107 +134,107 @@ public class Event {
     // Event properties
     @Lob
     @Column(name = "message", columnDefinition = "LONGTEXT", length = 4000)
-    public String message;
-    public String retrieveId;
-    public String eventClass;
+    protected String message;
+    protected String retrieveId;
+    protected String eventClass;
     
     @Transient
-    public Integer nextState = null;
+    protected Integer nextState = null;
     
     // Serialise date in ISO 8601 format
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern= DateTimeUtils.ISO_DATE_TIME_FORMAT)
     @Temporal(TemporalType.TIMESTAMP)
-    private Date timestamp;
-    public int sequence;
+    protected Date timestamp;
+    protected int sequence;
 
     // By default events are persisted
     @Transient
-    public Boolean persistent = true;
+    protected Boolean persistent = true;
     
     // Related deposit
     @JsonIgnore
     @ManyToOne
-    private Deposit deposit;
+    protected Deposit deposit;
     @Transient
-    public String depositId;
+    protected String depositId;
     
     // Related vault
     @JsonIgnore
     @ManyToOne
-    private Vault vault;
+    protected Vault vault;
     @Transient
-    public String vaultId;
+    protected String vaultId;
     
     // Related job
     @JsonIgnore
     @ManyToOne
-    private Job job;
+    protected Job job;
     @Transient
-    public String jobId;
+    protected String jobId;
     
     // Related user
     @JsonIgnore
     @ManyToOne
-    private User user;
+    protected User user;
     @Transient
-    public String userId;
+    protected String userId;
     
     // Event agent
-    private String agent;
+    protected String agent;
     
     // Web request properties
-    public String remoteAddress;
-    public String userAgent;
+    protected String remoteAddress;
+    protected String userAgent;
     
     @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "VARCHAR(255)")
-    private Agent.AgentType agentType;
+    protected Agent.AgentType agentType;
 
     // For Audit
 
     // Related audit
     @JsonIgnore
     @ManyToOne
-    private Audit audit;
+    protected Audit audit;
     @Transient
-    public String auditId;
+    protected String auditId;
 
     // Related archive
     @JsonIgnore
     @ManyToOne
-    private Archive archive;
+    protected Archive archive;
     @Transient
-    public String archiveId;
+    protected String archiveId;
 
-    private String location;
+    protected String location;
 
     // Related deposit chunk
     @JsonIgnore
     @ManyToOne
-    private DepositChunk chunk;
+    protected DepositChunk chunk;
     @Transient
-    public String chunkId;
+    protected String chunkId;
 
     // Related Role assignee
     @JsonIgnore
     @ManyToOne
-    private User assignee;
+    protected User assignee;
     @Transient
-    public String assigneeId;
+    protected String assigneeId;
 
     // Related Role school target
     @JsonIgnore
     @ManyToOne
-    private Group school;
+    protected Group school;
     @Transient
-    public String schoolId;
+    protected String schoolId;
 
     // Related Role target
     @JsonIgnore
     @ManyToOne
-    private RoleModel role;
+    protected RoleModel role;
     @Transient
-    public String roleId;
+    protected String roleId;
 
     @Getter
     @Setter
@@ -298,6 +298,7 @@ public class Event {
         this.message = message;
     }
 
+    @JsonGetter
     public String getJobId() {
         return jobId;
     }
@@ -306,6 +307,7 @@ public class Event {
         this.jobId = jobId;
     }
 
+    @JsonGetter
     public String getDepositId() {
         return depositId;
     }
@@ -314,6 +316,7 @@ public class Event {
         this.depositId = depositId;
     }
 
+    @JsonGetter
     public String getVaultId() {
         return vaultId;
     }
@@ -322,14 +325,17 @@ public class Event {
         this.vaultId = vaultId;
     }
     
+    @JsonGetter
     public String getUserId() {
         return userId;
     }
 
+    @JsonSetter
     public void setUserId(String userId) {
         this.userId = userId;
     }
 
+    @JsonGetter
     public String getAgent() {
         return agent;
     }
@@ -338,6 +344,7 @@ public class Event {
         this.agent = agent;
     }
 
+    @JsonGetter
     public Agent.AgentType getAgentType() {
         return agentType;
     }
@@ -346,6 +353,7 @@ public class Event {
         this.agentType = agentType;
     }
 
+    @JsonGetter
     public String getRemoteAddress() {
         return remoteAddress;
     }
@@ -354,6 +362,7 @@ public class Event {
         this.remoteAddress = remoteAddress;
     }
 
+    @JsonGetter
     public String getUserAgent() {
         return userAgent;
     }
@@ -362,6 +371,7 @@ public class Event {
         this.userAgent = userAgent;
     }
     
+    @JsonGetter
     public String getRetrieveId() {
         return retrieveId;
     }
@@ -369,7 +379,9 @@ public class Event {
     public void setRetrieveId(String retrieveId) {
         this.retrieveId = retrieveId;
     }
+    
 
+    @JsonGetter
     public Boolean getPersistent() {
         return persistent;
     }
@@ -378,6 +390,7 @@ public class Event {
         this.persistent = persistent;
     }
 
+    @JsonGetter
     public int getSequence() {
         return sequence;
     }
@@ -386,6 +399,7 @@ public class Event {
         this.sequence = sequence;
     }
 
+    @JsonGetter
     public Date getTimestamp() {
         return timestamp;
     }
@@ -393,7 +407,7 @@ public class Event {
     public void setTimestamp(Date timestamp) {
         this.timestamp = timestamp;
     }
-
+    
     public Job getJob() {
         return job;
     }
@@ -425,7 +439,57 @@ public class Event {
     public void setUser(User user) {
         this.user = user;
     }
-    
+
+    @JsonGetter
+    public Integer getNextState() {
+        return nextState;
+    }
+
+    public void setNextState(Integer nextState) {
+        this.nextState = nextState;
+    }
+
+    public Audit getAudit() {
+        return audit;
+    }
+
+    public void setAudit(Audit audit) {
+        this.audit = audit;
+    }
+
+    public Archive getArchive() {
+        return archive;
+    }
+
+    public void setArchive(Archive archive) {
+        this.archive = archive;
+    }
+
+    public DepositChunk getChunk() {
+        return chunk;
+    }
+
+    public void setChunk(DepositChunk chunk) {
+        this.chunk = chunk;
+    }
+
+    @JsonGetter
+    public Integer getChunkNumber() {
+        return chunkNumber;
+    }
+
+    public void setChunkNumber(Integer chunkNumber) {
+        this.chunkNumber = chunkNumber;
+    }
+
+    public String getArchiveStoreId() {
+        return archiveStoreId;
+    }
+
+    public void setArchiveStoreId(String archiveStoreId) {
+        this.archiveStoreId = archiveStoreId;
+    }
+
     public Event withNextState(Integer state) {
         this.nextState = state;
         return this;
@@ -455,14 +519,17 @@ public class Event {
                 userAgent);
     }
 
+    @JsonGetter
     public String getAuditId() { return auditId; }
 
     public void setAuditId(String auditId) { this.auditId = auditId; }
 
+    @JsonGetter
     public String getChunkId() { return chunkId; }
 
     public void setChunkId(String chunkId) { this.chunkId = chunkId; }
 
+    @JsonGetter
     public String getArchiveId() { return archiveId; }
 
     public void setArchiveId(String archiveId) { this.archiveId = archiveId; }
@@ -471,6 +538,7 @@ public class Event {
 
     public void setLocation(String location) { this.location = location; }
 
+    @JsonGetter
     public String getAssigneeId() {
         return assigneeId;
     }
@@ -479,6 +547,7 @@ public class Event {
         this.assigneeId = assigneeId;
     }
 
+    @JsonGetter
     public String getSchoolId() {
         return schoolId;
     }
@@ -487,6 +556,7 @@ public class Event {
         this.schoolId = schoolId;
     }
 
+    @JsonGetter
     public String getRoleId() {
         return roleId;
     }

@@ -13,6 +13,6 @@ public class DeleteStart extends Event {
         super("Deposit delete started");
         this.eventClass = DeleteStart.class.getCanonicalName();
         this.depositId = depositId;
-        this.jobId = jobId;
+        this.setJobId(jobId);
     }
 }

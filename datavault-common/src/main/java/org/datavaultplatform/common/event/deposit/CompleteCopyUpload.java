@@ -23,7 +23,7 @@ public class CompleteCopyUpload extends Event {
 		
 		this.eventClass = CompleteCopyUpload.class.getCanonicalName();
 		this.depositId = depositId;
-		this.jobId = jobId;
+		this.setJobId(jobId);
 		this.setChunkNumber(chunkNumber);
 		this.setArchiveStoreId(archiveStoreId);
 		this.archiveId = archiveId;

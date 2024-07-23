@@ -412,20 +412,20 @@ class DepositUserStoreDownloaderTest {
         List<Event> nonProgressEvents = argEvent.getAllValues().stream().filter(e -> !(e instanceof UpdateProgress)).toList();
         assertThat(nonProgressEvents).hasSize(1);
         TransferComplete tc = (TransferComplete) nonProgressEvents.get(0);
-        assertThat(tc.depositId).isEqualTo(DEPOSIT_ID);
-        assertThat(tc.jobId).isEqualTo(JOB_ID);
-        assertThat(tc.eventClass).isEqualTo(TransferComplete.class.getName());
-        assertThat(tc.message).isEqualTo("File transfer completed");
+        assertThat(tc.getDepositId()).isEqualTo(DEPOSIT_ID);
+        assertThat(tc.getJobId()).isEqualTo(JOB_ID);
+        assertThat(tc.getEventClass()).isEqualTo(TransferComplete.class.getName());
+        assertThat(tc.getMessage()).isEqualTo("File transfer completed");
     }
     
     private void checkErrorEvent(String msg) {
         List<Event> nonProgressEvents = argEvent.getAllValues().stream().filter(e -> !(e instanceof UpdateProgress)).toList();
         assertThat(nonProgressEvents).hasSize(1);
         Error error = (Error) nonProgressEvents.get(0);
-        assertThat(error.depositId).isEqualTo(DEPOSIT_ID);
-        assertThat(error.jobId).isEqualTo(JOB_ID);
-        assertThat(error.eventClass).isEqualTo(Error.class.getName());
-        assertThat(error.message).isEqualTo(msg);
+        assertThat(error.getDepositId()).isEqualTo(DEPOSIT_ID);
+        assertThat(error.getJobId()).isEqualTo(JOB_ID);
+        assertThat(error.getEventClass()).isEqualTo(Error.class.getName());
+        assertThat(error.getMessage()).isEqualTo(msg);
     }
 
     private void checkBagDataDirectoryCreated(File downloadResult, Path bagIdPath, Path bagIdDataPath) {
@@ -528,7 +528,7 @@ class DepositUserStoreDownloaderTest {
             Files.createDirectories(bagIdDataPath);
 
             Event lastEvent = new TransferComplete();
-            lastEvent.eventClass = TransferComplete.class.getName();
+            lastEvent.setEventClass(TransferComplete.class.getName());
 
             var downloader = Mockito.spy(new DepositUserStoreDownloader(USER_ID, JOB_ID, DEPOSIT_ID, SENDER, BAG_ID, CONTEXT, lastEvent, PROPS,
                     fileStorePaths, userStores, null));
@@ -549,7 +549,7 @@ class DepositUserStoreDownloaderTest {
             assertThat(Files.exists(bagIdDataPath)).isFalse();
 
             Event lastEvent = new TransferComplete();
-            lastEvent.eventClass = TransferComplete.class.getName();
+            lastEvent.setEventClass(TransferComplete.class.getName());
 
             var downloader = Mockito.spy(new DepositUserStoreDownloader(USER_ID, JOB_ID, DEPOSIT_ID, SENDER, BAG_ID, CONTEXT, lastEvent, PROPS,
                     fileStorePaths, userStores, null));

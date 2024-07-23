@@ -55,7 +55,7 @@ public class ComputedEncryption extends Event implements ChunksDigestEvent {
         this.setAesMode(aesMode);
         this.encChunkDigests = digests;
         this.depositId = depositId;
-        this.jobId = jobId;
+        this.setJobId(jobId);
         this.chunksDigest = chunksDigest;
         this.digestAlgorithm = digestAlgorithm;
     }
