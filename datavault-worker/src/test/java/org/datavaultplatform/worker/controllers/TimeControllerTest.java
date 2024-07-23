@@ -13,12 +13,13 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest(classes = DataVaultWorkerInstanceApp.class)
 @AddTestProperties
@@ -39,15 +40,14 @@ public class TimeControllerTest {
     @Autowired
     MockMvc mvc;
 
-    private final String EXPECTED_TIME_INFO = """
-            {"time":"blah"}
-            """;
-    
     @ParameterizedTest
     @ValueSource(strings = {"/time","/time/"})
     void testTimeInfo(String path) throws Exception {
-        mvc.perform(get(path)).andDo(print()).andExpect(status().isOk());
-
+        mvc.perform(get(path)).
+                andDo(print()).
+                andExpect(status().isOk()).
+                andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)).
+                andExpect(jsonPath("$.time").value("2022-03-29T14:15:16.101"));
     }
 
     @MockBean

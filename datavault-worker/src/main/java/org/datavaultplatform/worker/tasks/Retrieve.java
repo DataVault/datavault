@@ -333,7 +333,12 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
 
             doRetrieveFromWorkerToUserFs(context, userStoreInfo, tarFile, progress);
         });
-        sendEvent(new RetrieveComplete(jobID, depositId, retrieveId).withNextState(RetrieveState04DataRetrieveComplete.getStateNumber()));
+        if (isLastEventBefore(RetrieveComplete.class)) {
+            doStage(TaskStage.Retrieve4Final.INSTANCE);
+            sendEvent(new RetrieveComplete(jobID, depositId, retrieveId).withNextState(RetrieveState04DataRetrieveComplete.getStateNumber()));
+        } else {
+            skipStage(TaskStage.Retrieve4Final.INSTANCE);
+        }
     }
 
     protected void copyFilesToUserFs(Progress progress, File payloadDir, UserStoreInfo userStoreInfo, long bagDirSize) throws Exception {

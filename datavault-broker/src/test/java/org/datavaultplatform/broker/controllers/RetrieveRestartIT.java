@@ -342,6 +342,8 @@ class RetrieveRestartIT extends BaseDatabaseTest {
         String retrieveRestartMessageJson = toPrettyJson(toString(retrieveRestartMessage));
         log.info("restart retrieve message {}", retrieveRestartMessageJson);
         
+        //assertThat(retrieveMessageJson).isEqualTo(retrieveRestartMessageJson);
+        
         // the original retrieve and the restart retrive are different
         JSONAssert.assertNotEquals(retrieveMessageJson, retrieveRestartMessageJson, false);
         

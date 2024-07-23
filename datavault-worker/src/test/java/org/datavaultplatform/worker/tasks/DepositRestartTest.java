@@ -41,7 +41,7 @@ import static org.mockito.Mockito.*;
 
 @SuppressWarnings("unchecked")
 @ExtendWith(MockitoExtension.class)
-public class DepositRestartTests {
+public class DepositRestartTest {
 
     public static final String TEST_BAG_ID = "test-bag-id";
     public static final String TEST_DEPOSIT_ID = "test-deposit-id";
@@ -503,7 +503,7 @@ public class DepositRestartTests {
         checkEventIsStart(events.get(1));
         checkEventIsComplete(events.get(2));
 
-        checkTaskStageEvents(this.taskStageEvents, TaskStage.Deposit5Verify.INSTANCE);
+        checkTaskStageEvents(this.taskStageEvents, TaskStage.Deposit6Final.INSTANCE);
     }
 
     private void checkEvents(int expectedSize) {
@@ -543,7 +543,7 @@ public class DepositRestartTests {
     @SneakyThrows
     private static Stream<Arguments> priorEvents(Class<? extends Event> event) {
         return DepositEvents.INSTANCE.getEventsBefore(event).stream()
-                .map(DepositRestartTests::eventFromClassName)
+                .map(DepositRestartTest::eventFromClassName)
                 .map(Arguments::of);
     }
 

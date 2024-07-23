@@ -81,14 +81,19 @@ public class Deposit extends Task {
 
             verifyArchive(packageHelper, archiveStoreInfos);
 
-            log.info("Deposit ID [{}] complete", depositId);
+            if (isLastEventIsBefore(Complete.class)) {
+                doStage(TaskStage.Deposit6Final.INSTANCE);
+                log.info("Deposit ID [{}] complete", depositId);
 
-            HashMap<String, String> archiveIds = getArchiveIds(archiveStoreInfos);
+                HashMap<String, String> archiveIds = getArchiveIds(archiveStoreInfos);
 
-            log.debug("The jobID: [{}]", jobID);
-            log.debug("The depositId: [{}]", depositId);
-            log.debug("The archiveIds: {}", archiveIds);
-            sendEvent(new Complete(jobID, depositId, archiveIds, packageHelper.getArchiveSize()).withNextState(DepositState05Complete.getStateNumber()));
+                log.debug("The jobID: [{}]", jobID);
+                log.debug("The depositId: [{}]", depositId);
+                log.debug("The archiveIds: {}", archiveIds);
+                sendEvent(new Complete(jobID, depositId, archiveIds, packageHelper.getArchiveSize()).withNextState(DepositState05Complete.getStateNumber()));
+            } else {
+                skipStage(TaskStage.Deposit6Final.INSTANCE);
+            }
         } catch (Exception ex) {
             String msg = "Deposit failed: " + ex.getMessage();
             log.error(msg, ex);
