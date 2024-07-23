@@ -14,6 +14,6 @@ public class StartCopyUpload extends Event {
 		super("Chunk " + optChunkNumber + " upload started - (" + type + ")");
 		this.eventClass = StartCopyUpload.class.getCanonicalName();
 		this.depositId = depositId;
-		this.jobId = jobId;
+		this.setJobId(jobId);
 	}
 }

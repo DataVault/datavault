@@ -7,13 +7,13 @@ import jakarta.persistence.Transient;
 public class UpdateProgress extends Event {
     
     @Transient
-    public long progress;
+    protected long progress;
     
     @Transient
-    public long progressMax;
+    protected long progressMax;
     
     @Transient
-    public String progressMessage;
+    protected String progressMessage;
     
     public UpdateProgress() {
     }
@@ -30,7 +30,7 @@ public class UpdateProgress extends Event {
         
         // Optional?
         this.depositId = depositId;
-        this.jobId = jobId;
+        this.setJobId(jobId);
     }
     
     public long getProgress() {

@@ -125,9 +125,9 @@ class DepositSizeComputerTest {
             Event actualEvent = argEvent.getValue();
             assertThat(actualEvent).isInstanceOf(ComputedSize.class);
             ComputedSize cs = (ComputedSize) actualEvent;
-            assertThat(cs.bytes).isEqualTo(expectedSize);
-            assertThat(cs.depositId).isEqualTo("depositId");
-            assertThat(cs.jobId).isEqualTo("jobId");
+            assertThat(cs.getBytes()).isEqualTo(expectedSize);
+            assertThat(cs.getDepositId()).isEqualTo("depositId");
+            assertThat(cs.getJobId()).isEqualTo("jobId");
             verify(mUserEventSender).send(actualEvent);
             verifyNoMoreInteractions(mUserEventSender);
         }
@@ -142,9 +142,9 @@ class DepositSizeComputerTest {
             Event actualEvent = argEvent.getValue();
             assertThat(actualEvent).isInstanceOf(Error.class);
             Error err = (Error) actualEvent;
-            assertThat(err.message).isEqualTo("Deposit failed: could not access user filesystem");
-            assertThat(err.depositId).isEqualTo("depositId");
-            assertThat(err.jobId).isEqualTo("jobId");
+            assertThat(err.getMessage()).isEqualTo("Deposit failed: could not access user filesystem");
+            assertThat(err.getDepositId()).isEqualTo("depositId");
+            assertThat(err.getJobId()).isEqualTo("jobId");
             verify(mUserEventSender).send(actualEvent);
             verifyNoMoreInteractions(mUserEventSender);
 

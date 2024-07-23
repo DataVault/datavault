@@ -723,19 +723,19 @@ public class EventDAOIT extends BaseDatabaseTest {
         assertThat(fromDb.getMessage()).isNotNull();
 
         if (fromDb instanceof RetrieveError) {
-          assertThat(fromDb.message).isEqualTo("message00");
+          assertThat(fromDb.getMessage()).isEqualTo("message00");
         } else if (fromDb instanceof RetrieveStart) {
-          assertThat(fromDb.message).isEqualTo(RetrieveStart.MESSAGE);
+          assertThat(fromDb.getMessage()).isEqualTo(RetrieveStart.MESSAGE);
         } else if (fromDb instanceof UserStoreSpaceAvailableChecked) {
-          assertThat(fromDb.message).isEqualTo(UserStoreSpaceAvailableChecked.MESSAGE);
+          assertThat(fromDb.getMessage()).isEqualTo(UserStoreSpaceAvailableChecked.MESSAGE);
         } else if (fromDb instanceof ArchiveStoreRetrievedChunk) {
-          assertThat(fromDb.message).isEqualTo(ArchiveStoreRetrievedChunk.MESSAGE);
+          assertThat(fromDb.getMessage()).isEqualTo(ArchiveStoreRetrievedChunk.MESSAGE);
         } else if (fromDb instanceof ArchiveStoreRetrievedAll) {
-          assertThat(fromDb.message).isEqualTo(ArchiveStoreRetrievedAll.MESSAGE);
+          assertThat(fromDb.getMessage()).isEqualTo(ArchiveStoreRetrievedAll.MESSAGE);
         } else if (fromDb instanceof UploadedToUserStore) {
-          assertThat(fromDb.message).isEqualTo(UploadedToUserStore.MESSAGE);
+          assertThat(fromDb.getMessage()).isEqualTo(UploadedToUserStore.MESSAGE);
         } else if (fromDb instanceof RetrieveComplete) {
-          assertThat(fromDb.message).isEqualTo(RetrieveComplete.MESSAGE);
+          assertThat(fromDb.getMessage()).isEqualTo(RetrieveComplete.MESSAGE);
         } else {
           throw new IllegalStateException("unexpected event " + fromDb.getClass().getName());
         }

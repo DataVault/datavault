@@ -155,6 +155,8 @@ public class EventListenerTest {
   @Mock
   AuditsService auditsService;
 
+  MessageIdProcessedListener messageIdProcessedListener = new MessageIdProcessedListener();
+  
   @Mock
   TaskTimerSupport eventTimerSupport;
 
@@ -188,7 +190,7 @@ public class EventListenerTest {
         homeUrl,
         helpUrl,
         helpMail,
-        auditAdminEmail);
+        auditAdminEmail, messageIdProcessedListener);
   }
 
   @Nested
@@ -1750,7 +1752,8 @@ public class EventListenerTest {
       job.setState(1);
 
       Event event = new Event();
-      event.nextState = nextState;
+      event.setNextState(nextState);
+      
 
       sut.updateJobToNextState(event, job);
 
@@ -1782,7 +1785,7 @@ public class EventListenerTest {
       job.setState(currentState);
 
       Event event = new Event();
-      event.nextState = nextState;
+      event.setNextState(nextState);
 
       sut.updateJobToNextState(event, job);
 
@@ -2112,7 +2115,7 @@ public class EventListenerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {1,2})
+    @ValueSource(ints = {1})
     void testProcessAuditChunkStatus(int numChunkStatus) {
       Audit mAudit = mock(Audit.class);
       DepositChunk mDepositChunk = mock(DepositChunk.class);

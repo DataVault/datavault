@@ -165,6 +165,7 @@ public class EventListener implements MessageListener {
   @Getter
   private final String helpMail;
   private final String auditAdminEmail;
+  private final MessageIdProcessedListener messageIdProcessedListener;
 
   // preDeleteStatus is an instance variable - NOT thread safe
   // it should at least be in a map keyed by job id ????
@@ -189,7 +190,8 @@ public class EventListener implements MessageListener {
       @Value("${home.page}") String homeUrl,
       @Value("${help.page}") String helpUrl,
       @Value("${help.mail}") String helpMail,
-      @Value("${audit.adminEmail}") String auditAdminEmail) {
+      @Value("${audit.adminEmail}") String auditAdminEmail,
+      MessageIdProcessedListener messageIdProcessedListener) {
     this.clock = clock;
     this.jobsService = jobsService;
     this.vaultsService = vaultsService;
@@ -206,6 +208,7 @@ public class EventListener implements MessageListener {
     this.helpMail = helpMail;
     this.auditAdminEmail = auditAdminEmail;
     this.eventTimerSupport = eventTimerSupport;
+    this.messageIdProcessedListener = messageIdProcessedListener;
 
     Assert.isTrue(StringUtils.isNotBlank(this.homeUrl), () -> "homeUrl is blank");
     Assert.isTrue(StringUtils.isNotBlank(this.helpMail), () -> "helpMail is blank");
@@ -226,6 +229,14 @@ public class EventListener implements MessageListener {
       onMessageInternal(messageBody);
     } catch (Exception ex) {
       log.error("unexpected exception processing message [{}]", messageBody, ex);
+    } finally {
+      if (msg != null) {
+        var props = msg.getMessageProperties();
+        if (props != null) {
+          var messageId = props.getMessageId();
+          messageIdProcessedListener.processedMessageId(messageId);
+        }
+      }
     }
   }
 
@@ -233,13 +244,16 @@ public class EventListener implements MessageListener {
 
     // Decode the event
     Event event = getConcreteEvent(messageBody);
+    if (event.getTimestamp() == null) {
+      event.setTimestamp(new Date(clock.millis()));
+    }
 
     // Get the related deposit
     Deposit deposit = null;
     String depositId = event.getDepositId();
 
     if (depositId != null) {
-      deposit = getDeposit(event.getDepositId());
+      deposit = getDeposit(depositId);
       event.setDeposit(deposit);
     }
 
@@ -374,7 +388,7 @@ public class EventListener implements MessageListener {
   void updateJobToNextState(Event event, Job job) {
     Assert.isTrue(event != null, () -> "The event cannot be null");
     Assert.isTrue(job != null, () -> "The job cannot be null");
-    Integer nextState = event.nextState;
+    Integer nextState = event.getNextState();
     if (nextState == null) {
       log.warn("No Event Next State for JobId[{}]", job.getID());
       return;
@@ -1014,7 +1028,9 @@ public class EventListener implements MessageListener {
 
     if (auditChunkStatus.size() != 1) {
       // TODO: Make sure it never happen
-      log.error("Unexpected number of running audit chunks (should be 1) it is : {}", auditChunkStatus.size());
+      String msg = "Unexpected number of running audit chunks (should be 1) it is : [%s]".formatted(auditChunkStatus.size());
+      log.error(msg);
+      throw new RuntimeException(msg);
     }
     AuditChunkStatus auditInfo = auditChunkStatus.get(0);
     auditInfo.setCompleteTime(new Date(clock.millis()));

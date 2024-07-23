@@ -50,22 +50,7 @@ public abstract class BasePerformDepositThenRetrieveIT extends BaseDepositIT {
     log.info("retrieve dir [{}]", retrieveDir);
 
   }
-
-  @SneakyThrows
-  static Set<Path> getPathsWithinTarFile(File tarFile) {
-    Set<Path> paths = new HashSet<>();
-    try (TarArchiveInputStream tarIn = new TarArchiveInputStream(new FileInputStream(tarFile))) {
-      TarArchiveEntry entry;
-      while ((entry = tarIn.getNextEntry()) != null) {
-        if (entry.isDirectory()) {
-          continue;
-        }
-        paths.add(Paths.get(entry.getName()));
-      }
-    }
-    return paths;
-  }
-
+  
   @DynamicPropertySource
   @SneakyThrows
   static void setupProperties(DynamicPropertyRegistry registry) {

@@ -391,24 +391,29 @@ public class DepositsControllerTest {
         @Test
         void testRetrieveDepositRestart1() throws Exception {
             assertThat(mDeposit).isEqualTo(mDeposit);
+            when(mDeposit.getNonRestartJobId()).thenReturn(NEW_JOB_ID);
+            lenient().when(mDeposit.getID()).thenReturn("deposit-id");
             when(mUsersService.getUser(TEST_USER_ID)).thenReturn(mUser);
             when(mRetrieve.getDeposit()).thenReturn(mDeposit);
             when(mDepositsService.getUserDeposit(mUser, TEST_DEPOSIT_ID)).thenReturn(mDeposit);
             when(mRetrievesService.getRetrieve(TEST_RETRIEVE_ID)).thenReturn(mRetrieve);
             when(mDepositsService.getLastNotFailedRetrieveEvent(TEST_DEPOSIT_ID, TEST_RETRIEVE_ID)).thenReturn(null);
-            doReturn(true).when(controller).runRetrieveDeposit(mUser, mDeposit, mRetrieve, null);
-            
-            boolean result = controller.retrieveDepositRestart(TEST_USER_ID,TEST_DEPOSIT_ID,TEST_RETRIEVE_ID);
-            assertThat(result).isTrue();
-            
-            verify(controller).runRetrieveDeposit(mUser, mDeposit, mRetrieve, null);
-            verify(mRetrieve, times(2)).getDeposit();
+
+            IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
+                controller.retrieveDepositRestart(TEST_USER_ID,TEST_DEPOSIT_ID,TEST_RETRIEVE_ID);
+            });
+            assertThat(ex).hasMessage("There is no last event - so can't restart retrieve");
+
             verify(mDeposit).getID();
-            verify(mDepositsService).getLastNotFailedRetrieveEvent(TEST_DEPOSIT_ID, TEST_RETRIEVE_ID);
+            verify(mDeposit).getNonRestartJobId();
+            verify(controller).retrieveDepositRestart(TEST_USER_ID, TEST_DEPOSIT_ID, TEST_RETRIEVE_ID);
+            verify(controller, never()).runRetrieveDeposit(mUser, mDeposit, mRetrieve, null);
         }
+        
         @SuppressWarnings("EqualsWithItself")
         @Test
         void testRetrieveDepositRestart2() throws Exception {
+            when(mDeposit.getNonRestartJobId()).thenReturn(NEW_JOB_ID);
             assertThat(mDeposit).isEqualTo(mDeposit);
             when(mUsersService.getUser(TEST_USER_ID)).thenReturn(mUser);
             when(mRetrieve.getDeposit()).thenReturn(mDeposit);
@@ -421,6 +426,7 @@ public class DepositsControllerTest {
             assertThat(result).isTrue();
             verify(controller).runRetrieveDeposit(mUser, mDeposit, mRetrieve, mLastEvent);
             
+            verify(mDeposit).getNonRestartJobId();
             verify(mRetrieve, times(2)).getDeposit();
             verify(mDeposit).getID();
             verify(mDepositsService).getLastNotFailedRetrieveEvent(TEST_DEPOSIT_ID, TEST_RETRIEVE_ID);
@@ -482,9 +488,11 @@ public class DepositsControllerTest {
         void testRetrieveDepositRestartWhenRetrieveNotFound() throws Exception {
             when(mUsersService.getUser(TEST_USER_ID)).thenReturn(mUser);
             when(mDepositsService.getUserDeposit(mUser, TEST_DEPOSIT_ID)).thenReturn(mDeposit);
+            when(mDeposit.getNonRestartJobId()).thenReturn(NEW_JOB_ID);
             Exception ex = assertThrows(Exception.class, () -> controller.retrieveDepositRestart(TEST_USER_ID, TEST_DEPOSIT_ID, TEST_RETRIEVE_ID));
             assertThat(ex).hasMessage("Retrieve 'test-retrieve-id' does not exist");
-            
+
+            verify(mDeposit).getNonRestartJobId();
             verify(mUsersService).getUser(TEST_USER_ID);
             verify(mDepositsService).getUserDeposit(mUser, TEST_DEPOSIT_ID);
             verify(mRetrievesService).getRetrieve(TEST_RETRIEVE_ID);
@@ -513,21 +521,27 @@ public class DepositsControllerTest {
         }
         
         void checkRunDeposit(Event lastEvent, String expectedJson) throws Exception {
-
-            if (lastEvent == null) {
-                doNothing().when(mDeposit).setNonRestartJobId(NEW_JOB_ID);
-            }
-            doReturn(NEW_JOB_ID).when(mDeposit).getNonRestartJobId();
+            when(mDeposit.getID()).thenReturn("test-deposit-id");
+            when(mDeposit.getBagId()).thenReturn("test-bag-id");
+            lenient().doReturn(NEW_JOB_ID).when(mDeposit).getNonRestartJobId();
+            lenient().when(mRetrieve.getID()).thenReturn(TEST_RETRIEVE_ID);
+            when(mDepositsService.getDepositForRetrieves("test-deposit-id")).thenReturn(mDeposit);
+            when(mDepositsService.getChunksRetrieved(TEST_DEPOSIT_ID, TEST_RETRIEVE_ID)).thenReturn(null);
             
-            when(mArchive.getArchiveStore()).thenReturn(archiveStore);
-            when(mArchive.getArchiveId()).thenReturn(TEST_ARCHIVE_ID);
-
+            if (lastEvent == null) {
+                doNothing().when(mDeposit).setNonRestartJobId(any(String.class));
+                when(mDeposit.getJobs()).thenReturn(List.of(mJob));
+            } else {
+                doReturn(NEW_JOB_ID).when(mDeposit).getNonRestartJobId();
+            }
+            
             when(mArchiveStoreService.getForRetrieval()).thenReturn(archiveStore);
 
-            if(lastEvent == null) {
-                when(mDeposit.getJobs()).thenReturn(List.of(mJob));
-            }
+            when(mArchive.getArchiveStore()).thenReturn(archiveStore);
+            when(mArchive.getArchiveId()).thenReturn(TEST_ARCHIVE_ID);
+ 
             when(mDeposit.getArchives()).thenReturn(List.of(mArchive));
+            
             when(mDeposit.getArchiveSize()).thenReturn(123_456_789L);
             when(mDeposit.getDepositChunks()).thenReturn(List.of(dc1,dc2,dc3));
             when(mDeposit.getNumOfChunks()).thenReturn(3);
@@ -571,9 +585,8 @@ public class DepositsControllerTest {
             System.out.println(argRetrieveJson.getValue());
             JSONAssert.assertEquals(expectedJson, argRetrieveJson.getValue(), false);
 
-            verify(mArchive).getArchiveStore();
-            verify(mArchive).getArchiveId();
-
+            verify(mDepositsService).getDepositForRetrieves("test-deposit-id");
+            
             verify(mArchiveStoreService).getForRetrieval();
 
             verify(mFilesService).validPath(TEST_RETRIEVE_PATH, fileStore);
@@ -583,16 +596,22 @@ public class DepositsControllerTest {
             verify(mJobsService).addJob(any(Deposit.class),any(Job.class));
 
             if(lastEvent == null) {
+                verify(mDepositsService).updateDeposit(mDeposit);
                 verify(mDeposit).getJobs();
+                verify(mDeposit).setNonRestartJobId(any(String.class));
             }
-            verify(mDeposit).getArchives();
+            verify(mDeposit, atLeast(1)).getArchives();
+            verify(mArchive, atLeast(1)).getArchiveStore();
+            verify(mArchive).getArchiveId();
+            verify(mDeposit).getNonRestartJobId();
             verify(mDeposit).getArchiveSize();
             verify(mDeposit, times(3)).getDepositChunks();
             verify(mDeposit).getNumOfChunks();
             verify(mDeposit).getArchiveDigestAlgorithm();
+            verify(mDeposit).getNonRestartJobId();
             verify(mDeposit).getArchiveDigest();
             verify(mDeposit).getEncArchiveDigest();
-            verify(mDeposit, times(2)).getID();
+            verify(mDeposit, times(3)).getID();
             verify(mDeposit).getBagId();
 
             verify(mDepositsService).getChunksRetrieved(TEST_DEPOSIT_ID, TEST_RETRIEVE_ID);

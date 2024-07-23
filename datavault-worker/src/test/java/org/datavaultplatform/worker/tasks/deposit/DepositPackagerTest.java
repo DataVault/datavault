@@ -244,18 +244,18 @@ class DepositPackagerTest {
 
             assertThat(eventsSent.size()).isEqualTo(3);
             PackageComplete event1 = (PackageComplete) eventsSent.get(0);
-            assertThat(event1.depositId).isEqualTo(TEST_DEPOSIT_ID);
-            assertThat(event1.jobId).isEqualTo(TEST_JOB_ID);
+            assertThat(event1.getDepositId()).isEqualTo(TEST_DEPOSIT_ID);
+            assertThat(event1.getJobId()).isEqualTo(TEST_JOB_ID);
 
             ComputedDigest event2 = (ComputedDigest) eventsSent.get(1);
-            assertThat(event2.depositId).isEqualTo(TEST_DEPOSIT_ID);
-            assertThat(event2.jobId).isEqualTo(TEST_JOB_ID);
+            assertThat(event2.getDepositId()).isEqualTo(TEST_DEPOSIT_ID);
+            assertThat(event2.getJobId()).isEqualTo(TEST_JOB_ID);
             assertThat(event2.getDigest()).isEqualTo("TEST-DIGEST");
             assertThat(event2.getDigestAlgorithm()).isEqualTo("SHA-1");
 
             ComputedEncryption event3 = (ComputedEncryption) eventsSent.get(2);
-            assertThat(event3.depositId).isEqualTo(TEST_DEPOSIT_ID);
-            assertThat(event3.jobId).isEqualTo(TEST_JOB_ID);
+            assertThat(event3.getDepositId()).isEqualTo(TEST_DEPOSIT_ID);
+            assertThat(event3.getJobId()).isEqualTo(TEST_JOB_ID);
 
             assertThat(event3.getChunkIVs()).isEqualTo(result.getChunksIVs());
             assertThat(event3.getEncChunkDigests()).isEqualTo(result.getEncChunkHashes());
@@ -343,18 +343,18 @@ class DepositPackagerTest {
 
             assertThat(eventsSent.size()).isEqualTo(3);
             PackageComplete event1 = (PackageComplete) eventsSent.get(0);
-            assertThat(event1.depositId).isEqualTo(TEST_DEPOSIT_ID);
-            assertThat(event1.jobId).isEqualTo(TEST_JOB_ID);
+            assertThat(event1.getDepositId()).isEqualTo(TEST_DEPOSIT_ID);
+            assertThat(event1.getJobId()).isEqualTo(TEST_JOB_ID);
 
             ComputedDigest event2 = (ComputedDigest) eventsSent.get(1);
-            assertThat(event2.depositId).isEqualTo(TEST_DEPOSIT_ID);
-            assertThat(event2.jobId).isEqualTo(TEST_JOB_ID);
+            assertThat(event2.getDepositId()).isEqualTo(TEST_DEPOSIT_ID);
+            assertThat(event2.getJobId()).isEqualTo(TEST_JOB_ID);
             assertThat(event2.getDigest()).isEqualTo("TEST-DIGEST");
             assertThat(event2.getDigestAlgorithm()).isEqualTo("SHA-1");
 
             ComputedEncryption event3 = (ComputedEncryption) eventsSent.get(2);
-            assertThat(event3.depositId).isEqualTo(TEST_DEPOSIT_ID);
-            assertThat(event3.jobId).isEqualTo(TEST_JOB_ID);
+            assertThat(event3.getDepositId()).isEqualTo(TEST_DEPOSIT_ID);
+            assertThat(event3.getJobId()).isEqualTo(TEST_JOB_ID);
 
             assertThat(event3.getChunkIVs()).isNull();
             assertThat(event3.getEncChunkDigests()).isNull();
@@ -449,18 +449,18 @@ class DepositPackagerTest {
 
             assertThat(eventsSent.size()).isEqualTo(3);
             PackageComplete event1 = (PackageComplete) eventsSent.get(0);
-            assertThat(event1.depositId).isEqualTo(TEST_DEPOSIT_ID);
-            assertThat(event1.jobId).isEqualTo(TEST_JOB_ID);
+            assertThat(event1.getDepositId()).isEqualTo(TEST_DEPOSIT_ID);
+            assertThat(event1.getJobId()).isEqualTo(TEST_JOB_ID);
 
             ComputedDigest event2 = (ComputedDigest) eventsSent.get(1);
-            assertThat(event2.depositId).isEqualTo(TEST_DEPOSIT_ID);
-            assertThat(event2.jobId).isEqualTo(TEST_JOB_ID);
+            assertThat(event2.getDepositId()).isEqualTo(TEST_DEPOSIT_ID);
+            assertThat(event2.getJobId()).isEqualTo(TEST_JOB_ID);
             assertThat(event2.getDigest()).isEqualTo("TEST-DIGEST");
             assertThat(event2.getDigestAlgorithm()).isEqualTo("SHA-1");
 
             ComputedChunks event3 = (ComputedChunks) eventsSent.get(2);
-            assertThat(event3.depositId).isEqualTo(TEST_DEPOSIT_ID);
-            assertThat(event3.jobId).isEqualTo(TEST_JOB_ID);
+            assertThat(event3.getDepositId()).isEqualTo(TEST_DEPOSIT_ID);
+            assertThat(event3.getJobId()).isEqualTo(TEST_JOB_ID);
 
             assertThat(event3.getChunksDigest()).isEqualTo(result.getChunkHashes());
 
@@ -530,12 +530,12 @@ class DepositPackagerTest {
 
             assertThat(eventsSent.size()).isEqualTo(2);
             PackageComplete event1 = (PackageComplete) eventsSent.get(0);
-            assertThat(event1.depositId).isEqualTo(TEST_DEPOSIT_ID);
-            assertThat(event1.jobId).isEqualTo(TEST_JOB_ID);
+            assertThat(event1.getDepositId()).isEqualTo(TEST_DEPOSIT_ID);
+            assertThat(event1.getJobId()).isEqualTo(TEST_JOB_ID);
 
             ComputedDigest event2 = (ComputedDigest) eventsSent.get(1);
-            assertThat(event2.depositId).isEqualTo(TEST_DEPOSIT_ID);
-            assertThat(event2.jobId).isEqualTo(TEST_JOB_ID);
+            assertThat(event2.getDepositId()).isEqualTo(TEST_DEPOSIT_ID);
+            assertThat(event2.getJobId()).isEqualTo(TEST_JOB_ID);
             assertThat(event2.getDigest()).isEqualTo("TEST-DIGEST");
             assertThat(event2.getDigestAlgorithm()).isEqualTo("SHA-1");
 

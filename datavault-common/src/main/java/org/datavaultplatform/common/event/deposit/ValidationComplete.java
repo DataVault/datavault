@@ -12,6 +12,6 @@ public class ValidationComplete extends Event {
         super("Validation completed");
         this.eventClass = ValidationComplete.class.getCanonicalName();
         this.depositId = depositId;
-        this.jobId = jobId;
+        this.setJobId(jobId);
     }
 }

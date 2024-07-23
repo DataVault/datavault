@@ -110,6 +110,16 @@ public class DepositsService {
     public Deposit getDeposit(String depositID) {
         return depositDAO.findById(depositID).orElse(null);
     }
+
+    public Deposit getDepositForRetrieves(String depositID) {
+        Deposit deposit =  getDeposit(depositID);
+        if (deposit != null) {
+            deposit.getJobs().forEach(job -> job.getID());
+            deposit.getDepositChunks().forEach(dc -> dc.getID());
+            deposit.getArchives().forEach(arc -> arc.getId());
+        }
+        return deposit;
+    }
     
     public int count(String userId) { return depositDAO.count(userId, null); }
 
@@ -292,6 +302,26 @@ public class DepositsService {
         return eventDAO.findLatestRetrieveEvent(depositId, retrieveId)
                 .map(Event::refreshIdFields)
                 .orElse(null);
+    }
+
+    public String getDepositArchive(String depositId, ArchiveStore archiveStore) throws Exception {
+        Deposit deposit = getDeposit(depositId);
+        String archiveID = null;
+        if (deposit.getArchives() != null) {
+            for (Archive archive : deposit.getArchives()) {
+                if( archive != null && 
+                    archive.getArchiveStore() != null && 
+                    archive.getArchiveStore().getID().equals(archiveStore.getID())) {
+                    archiveID = archive.getArchiveId();
+                }
+            }
+        }
+
+        // Worth checking that we found a matching Archive for the ArchiveStore.
+        if (archiveID == null) {
+            throw new Exception("No valid archive for retrieval");
+        }
+        return archiveID;
     }
 }
 

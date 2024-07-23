@@ -10,7 +10,7 @@ public abstract class BaseRetrieveEvent extends Event {
 
     public BaseRetrieveEvent(String jobId, String depositId, String retrieveId) {
         this();
-        this.jobId = jobId;
+        this.setJobId(jobId);
         this.depositId = depositId;
         this.retrieveId = retrieveId;
     }

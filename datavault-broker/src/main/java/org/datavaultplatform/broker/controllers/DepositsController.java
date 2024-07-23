@@ -255,14 +255,19 @@ public class DepositsController {
         User user = getUser(userID);
         //User user = adminService.ensureAdminUser(userID);
         Deposit deposit = getUserDeposit(user, depositId);
-        Retrieve retrieve = getRetrieve(retrieveId);   
+        Assert.isTrue(deposit.getNonRestartJobId() != null, "The non restart job id should not be null");
+        Retrieve retrieve = getRetrieve(retrieveId);
         boolean retrieveMatchesDeposit = retrieve.getDeposit().equals(deposit);
         Assert.isTrue(retrieveMatchesDeposit, "The depositId[%s] does not match retrieve's depositId[%s]".formatted(depositId, retrieve.getDeposit().getID()));
         Event lastEvent = depositsService.getLastNotFailedRetrieveEvent(depositId, retrieveId);
+        Assert.isTrue(lastEvent != null, "There is no last event - so can't restart retrieve");
         return runRetrieveDeposit(user, deposit, retrieve, lastEvent);
     }
 
     protected boolean runRetrieveDeposit(User user, Deposit deposit, Retrieve retrieve, Event lastEvent) throws Exception {
+        
+        deposit = depositsService.getDepositForRetrieves(deposit.getID());
+        
         Assert.isTrue(user != null, "The user cannot be null");
         Assert.isTrue(deposit != null, "The deposit cannot be null");
         Assert.isTrue(retrieve != null, "The retrieve cannot be null");
@@ -278,6 +283,7 @@ public class DepositsController {
         
         // Fetch the ArchiveStore that is flagged for retrieval. We store it in a list as the Task parameters require a list.
         ArchiveStore archiveStore = archiveStoreService.getForRetrieval();
+        Assert.isTrue(archiveStore != null, "NO ARCHIVE STORES CONFIGURED FOR RETRIEVAL");
         List<ArchiveStore> archiveStores = List.of(archiveStore);
         addArchiveSpecificOptions(archiveStores);
 
@@ -299,8 +305,9 @@ public class DepositsController {
 
         if (!isRestart) {
             deposit.setNonRestartJobId(job.getID());
+            depositsService.updateDeposit(deposit);
             // Add the retrieve object
-            retrievesService.addRetrieve(retrieve, deposit, retrievePath);
+            retrievesService.addRetrieve(retrieve, deposit, retrieve.getRetrievePath());
         }
 
         // Ask the worker to process the data retrieve
@@ -353,9 +360,13 @@ public class DepositsController {
 
     protected String getDepositArchive(Deposit deposit, ArchiveStore archiveStore) throws Exception {
         String archiveID = null;
-        for (Archive archive : deposit.getArchives()) {
-            if (archive.getArchiveStore().getID().equals(archiveStore.getID())) {
-                archiveID = archive.getArchiveId();
+        if (deposit.getArchives() != null) {
+            for (Archive archive : deposit.getArchives()) {
+                if( archive != null &&
+                        archive.getArchiveStore() != null &&
+                        archive.getArchiveStore().getID().equals(archiveStore.getID())) {
+                    archiveID = archive.getArchiveId();
+                }
             }
         }
 
@@ -367,6 +378,9 @@ public class DepositsController {
     }
 
     protected void checkForInProgressJob(List<Job> jobs) {
+        if (jobs == null) {
+            return;
+        }
         for (Job job : jobs) {
             if (!job.isError() && job.getState() != job.getStates().size() - 1) {
                 // There's an in-progress job for this deposit

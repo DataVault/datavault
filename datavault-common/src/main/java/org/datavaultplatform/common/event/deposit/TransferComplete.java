@@ -12,6 +12,6 @@ public class TransferComplete extends Event {
         super("File transfer completed");
         this.eventClass = TransferComplete.class.getCanonicalName();
         this.depositId = depositId;
-        this.jobId = jobId;
+        this.setJobId(jobId);
     }
 }

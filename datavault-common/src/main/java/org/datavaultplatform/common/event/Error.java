@@ -17,14 +17,14 @@ public class Error extends Event {
 
         // Optional?
         this.depositId = depositId;
-        this.jobId = jobId;
+        setJobId(jobId);
     }
 
     public Error(String jobId, String sourceId, String message, Type type) {
         super(message);
         this.eventClass = Error.class.getCanonicalName();
 
-        this.jobId = jobId;
+        setJobId(jobId);
         switch (type){
             case DEPOSIT:
                 this.depositId = sourceId;
