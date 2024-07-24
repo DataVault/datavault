@@ -393,9 +393,11 @@ public class DepositsControllerTest {
             assertThat(mDeposit).isEqualTo(mDeposit);
             when(mDeposit.getNonRestartJobId()).thenReturn(NEW_JOB_ID);
             lenient().when(mDeposit.getID()).thenReturn("deposit-id");
-            when(mUsersService.getUser(TEST_USER_ID)).thenReturn(mUser);
+            //when(mUsersService.getUser(TEST_USER_ID)).thenReturn(mUser);
+            when(mAdminService.ensureAdminUser(TEST_USER_ID)).thenReturn(mUser);
             when(mRetrieve.getDeposit()).thenReturn(mDeposit);
             when(mDepositsService.getUserDeposit(mUser, TEST_DEPOSIT_ID)).thenReturn(mDeposit);
+            when(mRetrieve.getUser()).thenReturn(mUser);
             when(mRetrievesService.getRetrieve(TEST_RETRIEVE_ID)).thenReturn(mRetrieve);
             when(mDepositsService.getLastNotFailedRetrieveEvent(TEST_DEPOSIT_ID, TEST_RETRIEVE_ID)).thenReturn(null);
 
@@ -415,9 +417,11 @@ public class DepositsControllerTest {
         void testRetrieveDepositRestart2() throws Exception {
             when(mDeposit.getNonRestartJobId()).thenReturn(NEW_JOB_ID);
             assertThat(mDeposit).isEqualTo(mDeposit);
-            when(mUsersService.getUser(TEST_USER_ID)).thenReturn(mUser);
+            //when(mUsersService.getUser(TEST_USER_ID)).thenReturn(mUser);
+            when(mAdminService.ensureAdminUser(TEST_USER_ID)).thenReturn(mUser);
             when(mRetrieve.getDeposit()).thenReturn(mDeposit);
             when(mDepositsService.getUserDeposit(mUser, TEST_DEPOSIT_ID)).thenReturn(mDeposit);
+            when(mRetrieve.getUser()).thenReturn(mUser);
             when(mRetrievesService.getRetrieve(TEST_RETRIEVE_ID)).thenReturn(mRetrieve);
             when(mDepositsService.getLastNotFailedRetrieveEvent(TEST_DEPOSIT_ID, TEST_RETRIEVE_ID)).thenReturn(mLastEvent);
             doReturn(true).when(controller).runRetrieveDeposit(mUser, mDeposit, mRetrieve, mLastEvent);
@@ -486,14 +490,15 @@ public class DepositsControllerTest {
         
         @Test
         void testRetrieveDepositRestartWhenRetrieveNotFound() throws Exception {
-            when(mUsersService.getUser(TEST_USER_ID)).thenReturn(mUser);
+            when(mAdminService.ensureAdminUser(TEST_USER_ID)).thenReturn(mUser);
             when(mDepositsService.getUserDeposit(mUser, TEST_DEPOSIT_ID)).thenReturn(mDeposit);
+            //when(mRetrieve.getUser()).thenReturn(mUser);
             when(mDeposit.getNonRestartJobId()).thenReturn(NEW_JOB_ID);
             Exception ex = assertThrows(Exception.class, () -> controller.retrieveDepositRestart(TEST_USER_ID, TEST_DEPOSIT_ID, TEST_RETRIEVE_ID));
             assertThat(ex).hasMessage("Retrieve 'test-retrieve-id' does not exist");
 
             verify(mDeposit).getNonRestartJobId();
-            verify(mUsersService).getUser(TEST_USER_ID);
+            verify(mAdminService).ensureAdminUser(TEST_USER_ID);
             verify(mDepositsService).getUserDeposit(mUser, TEST_DEPOSIT_ID);
             verify(mRetrievesService).getRetrieve(TEST_RETRIEVE_ID);
         }

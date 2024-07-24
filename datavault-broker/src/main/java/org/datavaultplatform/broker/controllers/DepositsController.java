@@ -252,11 +252,11 @@ public class DepositsController {
     public boolean retrieveDepositRestart(@RequestHeader(HEADER_USER_ID) String userID,
                                    @PathVariable("depositId") String depositId,
                                    @PathVariable("retrieveId") String retrieveId) throws Exception {
-        User user = getUser(userID);
-        //User user = adminService.ensureAdminUser(userID);
+        User user = adminService.ensureAdminUser(userID);
         Deposit deposit = getUserDeposit(user, depositId);
         Assert.isTrue(deposit.getNonRestartJobId() != null, "The non restart job id should not be null");
         Retrieve retrieve = getRetrieve(retrieveId);
+        user = retrieve.getUser();
         boolean retrieveMatchesDeposit = retrieve.getDeposit().equals(deposit);
         Assert.isTrue(retrieveMatchesDeposit, "The depositId[%s] does not match retrieve's depositId[%s]".formatted(depositId, retrieve.getDeposit().getID()));
         Event lastEvent = depositsService.getLastNotFailedRetrieveEvent(depositId, retrieveId);
