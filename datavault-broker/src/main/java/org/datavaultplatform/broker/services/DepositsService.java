@@ -110,26 +110,6 @@ public class DepositsService {
     public Deposit getDeposit(String depositID) {
         return depositDAO.findById(depositID).orElse(null);
     }
-
-    public Deposit getDepositForRetrieves(String depositID) {
-        Deposit deposit = getDeposit(depositID);
-        if (deposit == null) {
-            return deposit;
-        }
-        List<Job> jobs = deposit.getJobs();
-        if (jobs != null) {
-            jobs.forEach(Job::getID);
-        }
-        List<DepositChunk> chunks = deposit.getDepositChunks();
-        if (chunks != null) {
-            chunks.forEach(DepositChunk::getID);
-        }
-        List<Archive> archives = deposit.getArchives();
-        if (archives != null) {
-            archives.forEach(Archive::getId);
-        }
-        return deposit;
-    }
     
     public int count(String userId) { return depositDAO.count(userId, null); }
 

@@ -530,7 +530,7 @@ public class DepositsControllerTest {
             when(mDeposit.getBagId()).thenReturn("test-bag-id");
             lenient().doReturn(NEW_JOB_ID).when(mDeposit).getNonRestartJobId();
             lenient().when(mRetrieve.getID()).thenReturn(TEST_RETRIEVE_ID);
-            when(mDepositsService.getDepositForRetrieves("test-deposit-id")).thenReturn(mDeposit);
+            when(mDepositsService.getDeposit("test-deposit-id")).thenReturn(mDeposit);
             when(mDepositsService.getChunksRetrieved(TEST_DEPOSIT_ID, TEST_RETRIEVE_ID)).thenReturn(null);
             
             if (lastEvent == null) {
@@ -590,7 +590,7 @@ public class DepositsControllerTest {
             System.out.println(argRetrieveJson.getValue());
             JSONAssert.assertEquals(expectedJson, argRetrieveJson.getValue(), false);
 
-            verify(mDepositsService).getDepositForRetrieves("test-deposit-id");
+            verify(mDepositsService).getDeposit("test-deposit-id");
             
             verify(mArchiveStoreService).getForRetrieval();
 

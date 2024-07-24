@@ -245,13 +245,13 @@ class RetrieveRestartIT extends BaseDatabaseTest {
         
         String depositID = depositInfo.getID();
         
-        Deposit deposit = depositsService.getDepositForRetrieves(depositID);
+        Deposit deposit = depositsService.getDeposit(depositID);
         String bagId = deposit.getBagId();
         assertThat(bagId).isNotBlank();
 
         archivesService.addArchive(deposit, archiveStore, "AS1");
         
-        Deposit deposit2 = depositsService.getDepositForRetrieves(depositID);
+        Deposit deposit2 = depositsService.getDeposit(depositID);
 
         // SEND DEPOSITS EVENTS AND PROCESS THEM
         sendDepositEventsFromBroker(deposit.getID());

@@ -266,7 +266,7 @@ public class DepositsController {
 
     protected boolean runRetrieveDeposit(User user, Deposit deposit, Retrieve retrieve, Event lastEvent) throws Exception {
         
-        deposit = depositsService.getDepositForRetrieves(deposit.getID());
+        deposit = depositsService.getDeposit(deposit.getID());
         
         Assert.isTrue(user != null, "The user cannot be null");
         Assert.isTrue(deposit != null, "The deposit cannot be null");
