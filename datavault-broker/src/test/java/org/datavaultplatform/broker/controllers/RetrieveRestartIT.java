@@ -70,7 +70,9 @@ import static org.mockito.ArgumentMatchers.any;
         "broker.ldap.enabled=false",
         "broker.initialise.enabled=false",
         "broker.email.enabled=false",
-        "broker.database.enabled=true"})
+        "broker.database.enabled=true",
+        "spring.jpa.properties.hibernate.enable_lazy_load_no_trans=true"
+})
 
 class RetrieveRestartIT extends BaseDatabaseTest {
 

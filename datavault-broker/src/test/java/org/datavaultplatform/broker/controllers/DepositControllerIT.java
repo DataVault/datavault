@@ -17,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -98,6 +99,9 @@ class DepositControllerIT extends BaseDatabaseTest {
 
     RetrieveStart retrieveStart;
     
+    @MockBean
+    RolesAndPermissionsService rolesAndPermissionsService;
+    
     @BeforeEach
     void setup() {
         
@@ -107,6 +111,7 @@ class DepositControllerIT extends BaseDatabaseTest {
         vault.setName("test-vault-name");
         vault.setReviewDate(new Date());
         vaultDAO.save(vault);
+        vaultDAO.flush();
         
         user1 = new User();
         user1.setFirstname("first");
@@ -114,6 +119,7 @@ class DepositControllerIT extends BaseDatabaseTest {
         user1.setID("user-1-id");
         user1.setEmail("test@test.com");
         userDAO.save(user1);
+        userDAO.flush();
         
         deposit1 = new Deposit();
         deposit1.setHasPersonalData(false);
@@ -121,6 +127,7 @@ class DepositControllerIT extends BaseDatabaseTest {
         deposit1.setVault(vault);
         deposit1.setNonRestartJobId(NON_RESTART_JOB_ID);
         depositDAO.save(deposit1);
+        depositDAO.flush();
         
         retrieveJob = new Job(Job.TASK_CLASS_RETRIEVE);
         jobsService.addJob(deposit1, retrieveJob);
@@ -138,7 +145,9 @@ class DepositControllerIT extends BaseDatabaseTest {
         retrieve1.setDeposit(deposit1);
         retrieve1.setNote("retrieve-one");
         retrieve1.setHasExternalRecipients(false);
+        retrieve1.setUser(user1);
         retrieveDAO.save(retrieve1);
+        retrieveDAO.flush();
         
         controllerSpy = spy(controller);
 
@@ -160,6 +169,8 @@ class DepositControllerIT extends BaseDatabaseTest {
         
         Event lastEvent = depositsService.getLastNotFailedRetrieveEvent(deposit1.getID(), retrieve1.getID());
         assertThat(lastEvent).isNotNull();
+
+        Mockito.when(rolesAndPermissionsService.isAdminUser(user1.getID())).thenReturn(true);
     }
     
     @Test

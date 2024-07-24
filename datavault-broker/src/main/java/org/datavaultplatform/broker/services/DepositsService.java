@@ -112,11 +112,21 @@ public class DepositsService {
     }
 
     public Deposit getDepositForRetrieves(String depositID) {
-        Deposit deposit =  getDeposit(depositID);
-        if (deposit != null) {
-            deposit.getJobs().forEach(job -> job.getID());
-            deposit.getDepositChunks().forEach(dc -> dc.getID());
-            deposit.getArchives().forEach(arc -> arc.getId());
+        Deposit deposit = getDeposit(depositID);
+        if (deposit == null) {
+            return deposit;
+        }
+        List<Job> jobs = deposit.getJobs();
+        if (jobs != null) {
+            jobs.forEach(Job::getID);
+        }
+        List<DepositChunk> chunks = deposit.getDepositChunks();
+        if (chunks != null) {
+            chunks.forEach(DepositChunk::getID);
+        }
+        List<Archive> archives = deposit.getArchives();
+        if (archives != null) {
+            archives.forEach(Archive::getId);
         }
         return deposit;
     }
