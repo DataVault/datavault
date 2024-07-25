@@ -172,7 +172,14 @@ public class DepositUserStoreDownloader extends DepositSupport {
         log.debug("Setting bag path to: {}", result.bagPath());
         log.debug("Setting bag data path to: {}", result.bagDataPath());
 
-        if (eventHasNotBeenSeenBefore(TransferComplete.class) || !result.directoriesExist()) {
+        boolean eventHasNotBeenSeenBefore = eventHasNotBeenSeenBefore(TransferComplete.class);
+        boolean directoriesDoNotExist = !result.directoriesExist();
+        boolean performDeposit2TransferStage = eventHasNotBeenSeenBefore || directoriesDoNotExist;
+        log.info("lastEvent                    ??[{}]", lastEvent == null ? null : lastEvent.getClass().getSimpleName());
+        log.info("eventHasNotBeenSeenBefore    ??[{}]", eventHasNotBeenSeenBefore);
+        log.info("directoriesDoNotExist        ??[{}]", directoriesDoNotExist);
+        log.info("performDeposit2TransferStage ??[{}]", performDeposit2TransferStage);
+        if (performDeposit2TransferStage) {
             doStage(TaskStage.Deposit2Transfer.INSTANCE);
             result.createDirs();
             

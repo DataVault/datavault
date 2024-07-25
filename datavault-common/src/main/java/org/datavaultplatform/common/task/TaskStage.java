@@ -37,6 +37,11 @@ public sealed class TaskStage implements Comparable<TaskStage>
         public DepositTaskStage(int order) {
             super(TaskType.Deposit, order);
         }
+
+        @Override
+        public final String toString() {
+            return this.getClass().getSimpleName();
+        }
     }
     public static final class Deposit1ComputeSize extends DepositTaskStage {
         private Deposit1ComputeSize() {

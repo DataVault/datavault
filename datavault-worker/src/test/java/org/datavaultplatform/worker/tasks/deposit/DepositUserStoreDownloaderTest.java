@@ -11,6 +11,7 @@ import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.event.Error;
 import org.datavaultplatform.common.event.UpdateProgress;
 import org.datavaultplatform.common.event.UserEventSender;
+import org.datavaultplatform.common.event.deposit.ComputedSize;
 import org.datavaultplatform.common.event.deposit.TransferComplete;
 import org.datavaultplatform.common.storage.UserStore;
 import org.datavaultplatform.common.storage.impl.LocalFileSystem;
@@ -517,8 +518,6 @@ class DepositUserStoreDownloaderTest {
         @SneakyThrows
         void testAlreadyCopiedAndBagIdDoesExist() {
 
-            ArgumentCaptor<Path> argBagIdDataPath = ArgumentCaptor.forClass(Path.class);
-
             Path bagIdPath = tempDir.resolve(BAG_ID);
             assertThat(Files.exists(bagIdPath)).isFalse();
             Path bagIdDataPath = bagIdPath.resolve(DATA);
@@ -562,16 +561,23 @@ class DepositUserStoreDownloaderTest {
             verify(downloader).copySelectedUserDataToBagDataDir(any(Path.class));
         }
 
-        @Test
+
+        public static Stream<Arguments> bagDirectoryDoesNotExistSource() {
+            return Stream.of(new ComputedSize(), new TransferComplete()).map(Arguments::of);
+        }
+
         @SneakyThrows
-        void testNotCopied() {
+        @ParameterizedTest
+        @MethodSource("bagDirectoryDoesNotExistSource")
+        void testBagDirectoryDoesNotExist(Event lastEvent) {
 
             Path bagIdPath = tempDir.resolve(BAG_ID);
+            FileUtils.deleteDirectory(bagIdPath.toFile());
+            
             assertThat(Files.exists(bagIdPath)).isFalse();
             Path bagIdDataPath = bagIdPath.resolve(DATA);
             assertThat(Files.exists(bagIdDataPath)).isFalse();
 
-            Event lastEvent = null;
             var downloader = Mockito.spy(new DepositUserStoreDownloader(USER_ID, JOB_ID, DEPOSIT_ID, SENDER, BAG_ID, CONTEXT, lastEvent, PROPS,
                     fileStorePaths, userStores, null));
 
