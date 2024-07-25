@@ -10,6 +10,7 @@ import org.datavaultplatform.common.event.deposit.ComputedChunks;
 import org.datavaultplatform.common.event.deposit.ComputedDigest;
 import org.datavaultplatform.common.event.deposit.ComputedEncryption;
 import org.datavaultplatform.common.event.deposit.PackageComplete;
+import org.datavaultplatform.common.event.deposit.PackageChunkEncryptComplete;
 import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.common.task.Context;
 import org.datavaultplatform.common.task.TaskExecutor;
@@ -86,9 +87,7 @@ public class DepositPackager extends DepositSupport {
             log.debug("Last event is: {} skipping enc checksum", getLastEventClass());
         }
 
-        // at this point, we have finished all packaging so can delete the bag dir
-        log.info("We have successfully created the Tar, so lets delete the Bag to save space");
-        FileUtils.deleteDirectory(bagDir);
+        sendEvent(new PackageChunkEncryptComplete(jobID, depositId));
     }
 
     private void createBag(File bagDir, String depositMetadata, String vaultMetadata, String externalMetadata) throws Exception {

@@ -19,6 +19,7 @@ public class DepositEvents extends BaseOrderedEvents {
             ComputedDigest.class,
             ComputedChunks.class,
             ComputedEncryption.class,
+            PackageChunkEncryptComplete.class,
 
             StartCopyUpload.class,
             CompleteCopyUpload.class,

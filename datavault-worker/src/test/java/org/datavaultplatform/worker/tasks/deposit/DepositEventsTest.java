@@ -4,7 +4,10 @@ import lombok.SneakyThrows;
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.event.Error;
 import org.datavaultplatform.common.event.UpdateProgress;
+import org.datavaultplatform.common.event.deposit.PackageChunkEncryptComplete;
+import org.datavaultplatform.common.event.deposit.TransferComplete;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -94,5 +97,11 @@ class DepositEventsTest {
     @SneakyThrows
     private static Class<? extends Event> getEventClass(int idx) {
         return Class.forName(DepositEvents.EVENT_ORDER.get(idx)).asSubclass(Event.class);
+    }
+    
+    @Test
+    void testTransferCompleteIsBeforePackageEncryptComplete() {
+        boolean hasBeenSeenBefore = !DepositEvents.INSTANCE.isLastEventBefore(new PackageChunkEncryptComplete(), TransferComplete.class);
+        assertThat(hasBeenSeenBefore).isTrue();
     }
 }

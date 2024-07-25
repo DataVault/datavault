@@ -51,6 +51,7 @@ import org.datavaultplatform.common.response.EventInfo;
         @JsonSubTypes.Type(value = TransferProgress.class,      name = "org.datavaultplatform.common.event.deposit.TransferProgress"),
         @JsonSubTypes.Type(value = ComputedDigest.class,        name = "org.datavaultplatform.common.event.deposit.ComputedDigest"),
         @JsonSubTypes.Type(value = CompleteTarValidation.class, name = "org.datavaultplatform.common.event.deposit.CompleteTarValidation"),
+        @JsonSubTypes.Type(value = PackageChunkEncryptComplete.class,   name = "org.datavaultplatform.common.event.deposit.PackageChunkEncryptComplete"),
 
         @JsonSubTypes.Type(value = StartChunkValidation.class,    name = "org.datavaultplatform.common.event.deposit.StartChunkValidation"),
         @JsonSubTypes.Type(value = CompleteChunkValidation.class, name = "org.datavaultplatform.common.event.deposit.CompleteChunkValidation"),

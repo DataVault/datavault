@@ -2,6 +2,7 @@ package org.datavaultplatform.worker.tasks;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.event.*;
@@ -91,6 +92,9 @@ public class Deposit extends Task {
                 log.debug("The depositId: [{}]", depositId);
                 log.debug("The archiveIds: {}", archiveIds);
                 sendEvent(new Complete(jobID, depositId, archiveIds, packageHelper.getArchiveSize()).withNextState(DepositState05Complete.getStateNumber()));
+
+                // at this point, we have finished everything, so can delete the bag dir
+                deleteBagDir(bagDir);
             } else {
                 skipStage(TaskStage.Deposit6Final.INSTANCE);
             }
@@ -100,6 +104,15 @@ public class Deposit extends Task {
             sendError(msg);
             throw new RuntimeException(msg, ex);
         }
+    }
+
+    @SneakyThrows
+    private void deleteBagDir(File bagDir) { 
+        if (bagDir == null) {
+            return;
+        }
+        log.info("We have successfully created the Tar, so lets delete the Bag to save space");
+        FileUtils.deleteDirectory(bagDir);
     }
 
     protected static HashMap<String, String> getArchiveIds(Set<ArchiveStoreInfo> archiveStoreInfos) {
@@ -154,11 +167,10 @@ public class Deposit extends Task {
 
     protected PackageHelper packageStep(File bagDir) throws Exception {
         log.info("LAST EVENT CLASS [{}]", getLastEventClass());
-        Class<? extends Event> finalPackagingEventClass = DepositUtils.getFinalPackageEvent(context.isChunkingEnabled(), context.isEncryptionEnabled());
 
         PackageHelper result;
 
-        if (isLastEventIsBefore(finalPackagingEventClass)) {
+        if (isLastEventIsBefore(PackageChunkEncryptComplete.class)) {
             doStage(TaskStage.Deposit3PackageEncrypt.INSTANCE);
             DepositPackager packager = getDepositPackager();
             result = packager.packageStep(bagDir);

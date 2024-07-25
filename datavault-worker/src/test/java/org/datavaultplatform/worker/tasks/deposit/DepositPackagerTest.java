@@ -242,7 +242,7 @@ class DepositPackagerTest {
             assertThat(result.getIv()).isNull();
             assertThat(result.getEncTarHash()).isNull();
 
-            assertThat(eventsSent.size()).isEqualTo(3);
+            assertThat(eventsSent.size()).isEqualTo(4);
             PackageComplete event1 = (PackageComplete) eventsSent.get(0);
             assertThat(event1.getDepositId()).isEqualTo(TEST_DEPOSIT_ID);
             assertThat(event1.getJobId()).isEqualTo(TEST_JOB_ID);
@@ -261,7 +261,7 @@ class DepositPackagerTest {
             assertThat(event3.getEncChunkDigests()).isEqualTo(result.getEncChunkHashes());
             assertThat(event3.getChunksDigest()).isEqualTo(result.getChunkHashes());
             
-            Mockito.verify(mUserEventSender, times(3)).send(any(Event.class));
+            Mockito.verify(mUserEventSender, times(4)).send(any(Event.class));
             assertThat(argLabel.getAllValues()).isEqualTo(List.of("Chunking failed.", "Chunk encryption failed."));
 
             verify(mTaskExecutor1, times(2)).add(any(Callable.class));
@@ -341,7 +341,7 @@ class DepositPackagerTest {
             assertThat(result.getIv()).isEqualTo("WHOLE-TAR-IV".getBytes(StandardCharsets.UTF_8));
             assertThat(result.getEncTarHash()).isEqualTo("ENC-TEST-DIGEST");
 
-            assertThat(eventsSent.size()).isEqualTo(3);
+            assertThat(eventsSent.size()).isEqualTo(4);
             PackageComplete event1 = (PackageComplete) eventsSent.get(0);
             assertThat(event1.getDepositId()).isEqualTo(TEST_DEPOSIT_ID);
             assertThat(event1.getJobId()).isEqualTo(TEST_JOB_ID);
@@ -364,7 +364,7 @@ class DepositPackagerTest {
             assertThat(result.getChunkHashes().isEmpty()).isTrue();
             assertThat(result.getEncChunkHashes().isEmpty()).isTrue();
 
-            Mockito.verify(mUserEventSender, times(3)).send(any(Event.class));
+            Mockito.verify(mUserEventSender, times(4)).send(any(Event.class));
             assertThat(argLabel.getAllValues()).isEqualTo(Collections.emptyList());
             verify(mTaskExecutor1, times(0)).add(any(Callable.class));
             verify(mTaskExecutor2, times(0)).add(any(Callable.class));
@@ -447,7 +447,7 @@ class DepositPackagerTest {
             assertThat(result.getIv()).isNull();
             assertThat(result.getEncTarHash()).isNull();
 
-            assertThat(eventsSent.size()).isEqualTo(3);
+            assertThat(eventsSent.size()).isEqualTo(4);
             PackageComplete event1 = (PackageComplete) eventsSent.get(0);
             assertThat(event1.getDepositId()).isEqualTo(TEST_DEPOSIT_ID);
             assertThat(event1.getJobId()).isEqualTo(TEST_JOB_ID);
@@ -464,7 +464,7 @@ class DepositPackagerTest {
 
             assertThat(event3.getChunksDigest()).isEqualTo(result.getChunkHashes());
 
-            Mockito.verify(mUserEventSender, times(3)).send(any(Event.class));
+            Mockito.verify(mUserEventSender, times(4)).send(any(Event.class));
             assertThat(argLabel.getAllValues()).isEqualTo(List.of("Chunking failed."));
             verify(mTaskExecutor1, times(2)).add(any(Callable.class));
             verify(mTaskExecutor2, times(0)).add(any(Callable.class));
@@ -501,7 +501,7 @@ class DepositPackagerTest {
     void testNotEncryptedAndNoChunks() {
         try (MockedStatic<Tar> mockedTar = mockStatic(Tar.class);
              MockedStatic<Verify> mockedVerify = mockStatic(Verify.class);
-             MockedStatic<FileSplitter> mockedFileSplitter = mockStatic(FileSplitter.class)) {
+             ) {
 
             mockedTar.when(() -> {
                 Tar.createTar(eq(testBagDir), argTarFile1.capture());
@@ -528,7 +528,7 @@ class DepositPackagerTest {
             assertThat(result.getIv()).isNull();
             assertThat(result.getEncTarHash()).isNull();
 
-            assertThat(eventsSent.size()).isEqualTo(2);
+            assertThat(eventsSent.size()).isEqualTo(3);
             PackageComplete event1 = (PackageComplete) eventsSent.get(0);
             assertThat(event1.getDepositId()).isEqualTo(TEST_DEPOSIT_ID);
             assertThat(event1.getJobId()).isEqualTo(TEST_JOB_ID);
@@ -539,7 +539,7 @@ class DepositPackagerTest {
             assertThat(event2.getDigest()).isEqualTo("TEST-DIGEST");
             assertThat(event2.getDigestAlgorithm()).isEqualTo("SHA-1");
 
-            Mockito.verify(mUserEventSender, times(2)).send(any(Event.class));
+            Mockito.verify(mUserEventSender, times(3)).send(any(Event.class));
             assertThat(argLabel.getAllValues()).isEqualTo(Collections.emptyList());
             verify(mTaskExecutor1, never()).add(any(Callable.class));
             verify(mTaskExecutor2, never()).add(any(Callable.class));

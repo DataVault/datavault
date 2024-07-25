@@ -48,6 +48,7 @@ import java.nio.file.StandardCopyOption;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -67,7 +68,7 @@ public abstract class BaseDepositRestartIT extends BaseRabbitIT {
     static final String KEY_STORE_PASSWORD = "testPassword";
 
     final Resource depositMessage = new ClassPathResource("sampleMessages/sampleDepositMessage.json");
-    final List<Event> events = new ArrayList<>();
+    final List<Event> events = new CopyOnWriteArrayList<>();
     @Autowired
     protected AmqpAdmin rabbitAdmin;
     @Autowired

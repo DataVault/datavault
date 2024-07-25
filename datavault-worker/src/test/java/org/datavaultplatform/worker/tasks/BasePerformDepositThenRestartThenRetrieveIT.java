@@ -9,10 +9,15 @@ import org.datavaultplatform.common.event.deposit.*;
 import org.datavaultplatform.common.event.retrieve.RetrieveComplete;
 import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.common.task.TaskInterrupter;
+import org.datavaultplatform.common.task.TaskStageEvent;
+import org.datavaultplatform.common.task.TaskStageEventListener;
 import org.datavaultplatform.worker.rabbit.RabbitMessageSelectorScheduler;
 import org.datavaultplatform.worker.utils.DepositEvents;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.util.Assert;
@@ -28,13 +33,29 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.datavaultplatform.worker.tasks.retrieve.RetrieveUtils.DATA_VAULT_HIDDEN_FILE_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 
 @Slf4j
 public abstract class BasePerformDepositThenRestartThenRetrieveIT extends BaseDepositRestartIT {
   
   @Autowired
   RabbitMessageSelectorScheduler scheduler;
-  
+
+  @MockBean
+  TaskStageEventListener taskStageEventListener;
+
+  List<TaskStageEvent> taskStageEvents;
+
+  @BeforeEach
+  void setupTaskStageEvents() {
+    taskStageEvents = new ArrayList<>();
+
+    Mockito.doAnswer(invocation -> {
+      taskStageEvents.add(invocation.getArgument(0, TaskStageEvent.class));
+      return null;
+    }).when(taskStageEventListener).onTaskStageEvent(any(TaskStageEvent.class));
+  }
+
   @DynamicPropertySource
   @SneakyThrows
   static void setupProperties(DynamicPropertyRegistry registry) {
@@ -82,9 +103,12 @@ public abstract class BasePerformDepositThenRestartThenRetrieveIT extends BaseDe
     for(Class<? extends Event> interruptAtEventClass : List.of(
             ComputedSize.class,
             TransferComplete.class,
-            ComputedEncryption.class,
+            PackageChunkEncryptComplete.class,
             UploadComplete.class,
+            ValidationComplete.class,
             Complete.class)) {
+      
+      taskStageEvents.clear();
 
       deposit = new ObjectMapper().readValue(sampleDepositMessage, Deposit.class);
       modifyDepositWithEvents(deposit, events);
@@ -102,7 +126,21 @@ public abstract class BasePerformDepositThenRestartThenRetrieveIT extends BaseDe
       nextLastEvent = reversed.stream().filter(e -> e.getClass().equals(interruptAtEventClass)).findFirst().get();
       Assert.isTrue(nextLastEvent != null, "Cannot find next last event when interruptAtEventClass[%s]".formatted(interruptAtEventClass));
       assertThat(nextLastEvent.getClass().getSimpleName()).isEqualTo(interruptAtEventClass.getSimpleName());
+
+      String lastEventClass = lastEvent == null ? null : lastEvent.getClass().getSimpleName();
+      
+      for (int i = 0; i < taskStageEvents.size() - 1; i++) {
+        TaskStageEvent nonFinalStage = taskStageEvents.get(i);
+        assertThat(nonFinalStage.skipped())
+                .withFailMessage("Non Final Stage[%s] was not skipped, lastEventClass[%s]", nonFinalStage.stage().getLabel(), lastEventClass)
+                .isTrue();
+      }
+      TaskStageEvent finalStage = taskStageEvents.get(taskStageEvents.size() - 1);
+      assertThat(finalStage.skipped())
+              .withFailMessage("Final Stage[%s] was skipped, lastEventClass[%s]", finalStage.stage().getLabel(), lastEventClass)
+              .isFalse();
     }
+    
     DepositEvents depositEvents = new DepositEvents(deposit, this.events);
     checkDepositEvents();
     

@@ -553,12 +553,12 @@ class DepositUserStoreDownloaderTest {
             var downloader = Mockito.spy(new DepositUserStoreDownloader(USER_ID, JOB_ID, DEPOSIT_ID, SENDER, BAG_ID, CONTEXT, lastEvent, PROPS,
                     fileStorePaths, userStores, null));
 
-            doNothing().when(downloader).copySelectedUserDataToBagDataDir(bagIdDataPath);
+            lenient().doNothing().when(downloader).copySelectedUserDataToBagDataDir(bagIdDataPath);
 
             File downloadResult = downloader.transferFromUserStoreToWorker();
             assertThat(downloadResult).isEqualTo(bagIdPath.toFile());
 
-            verify(downloader).copySelectedUserDataToBagDataDir(any(Path.class));
+            verify(downloader, never()).copySelectedUserDataToBagDataDir(any(Path.class));
         }
 
 
@@ -581,12 +581,17 @@ class DepositUserStoreDownloaderTest {
             var downloader = Mockito.spy(new DepositUserStoreDownloader(USER_ID, JOB_ID, DEPOSIT_ID, SENDER, BAG_ID, CONTEXT, lastEvent, PROPS,
                     fileStorePaths, userStores, null));
 
-            doNothing().when(downloader).copySelectedUserDataToBagDataDir(bagIdDataPath);
+            lenient().doNothing().when(downloader).copySelectedUserDataToBagDataDir(bagIdDataPath);
 
             File downloadResult = downloader.transferFromUserStoreToWorker();
             assertThat(downloadResult).isEqualTo(bagIdPath.toFile());
 
-            verify(downloader).copySelectedUserDataToBagDataDir(any(Path.class));
+            boolean shouldCopy = DepositEvents.INSTANCE.isLastEventBefore(lastEvent, TransferComplete.class);
+            if (shouldCopy) {
+                verify(downloader, times(1)).copySelectedUserDataToBagDataDir(any(Path.class));
+            } else {
+                verify(downloader, never()).copySelectedUserDataToBagDataDir(any(Path.class));
+            }
         }
     }
 }
