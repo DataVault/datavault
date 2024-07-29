@@ -1,6 +1,18 @@
 <!--layout/header.html-->
 <!-- nav is ([[${nav}]]) -->
-<div class="datavault-header">
+<div class="datavault-header" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+    <div id="dv-user-info" style="display:none">
+        <div id="loggedin" sec:authorize="isFullyAuthenticated()">
+            <p>Authenticated as [<span id="dv-user-name" sec:authentication="name"></span>]</p>
+            <p>Granted Authorities : [<span th:text="${#lists.size(#authentication.authorities)}">-1</span>]</p>
+            <p th:each="user_role, iter: ${#authentication.authorities}">
+                Granted Authority : [<span>[[${iter.count}]]/[[${iter.size}]]</span>] : <span class="dv-user-role" th:text="${user_role.authority}">DUMMY_ROLE_NAME</span>
+            </p>
+        </div>
+        <div id="notloggedin" sec:authorize="!isFullyAuthenticated()">
+            NOT LOGGED IN
+        </div>
+    </div>
     <nav class="navbar navbar-default">
       <div class="container-fluid">
         <div class="navbar-header"></div>
