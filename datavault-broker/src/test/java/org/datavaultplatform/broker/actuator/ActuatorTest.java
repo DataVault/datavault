@@ -73,7 +73,7 @@ public class ActuatorTest extends BaseDatabaseTest {
   }
 
   @ParameterizedTest
-  @ValueSource(strings={"/actuator", "/actuator/", "/actuator/env", "/users"})
+  @ValueSource(strings={"/actuator", "/actuator/", "/actuator/env", "/users", "/actuator/loggers"})
   @SneakyThrows
   void testActuatorUnauthorized(String url) {
     checkUnauthorized(url);

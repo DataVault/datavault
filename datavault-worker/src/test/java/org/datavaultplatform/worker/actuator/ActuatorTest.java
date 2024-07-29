@@ -63,7 +63,7 @@ public class ActuatorTest {
   }
 
   @ParameterizedTest
-  @ValueSource(strings={"/actuator", "/actuator/", "/actuator/env"})
+  @ValueSource(strings={"/actuator", "/actuator/", "/actuator/env", "/actuator/loggers"})
   @SneakyThrows
   void testActuatorUnauthorized(String path) {
     checkUnauthorized(path);
