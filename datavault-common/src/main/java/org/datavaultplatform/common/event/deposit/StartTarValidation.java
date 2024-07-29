@@ -12,6 +12,6 @@ public class StartTarValidation extends Event {
         super("Tar validation started");
         this.eventClass = StartTarValidation.class.getCanonicalName();
         this.depositId = depositId;
-        this.jobId = jobId;
+        this.setJobId(jobId);
     }
 }

@@ -1,12 +1,13 @@
 package org.datavaultplatform.common.event.deposit;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import jakarta.persistence.Entity;
 import org.datavaultplatform.common.event.Event;
 
 @Entity
 public class ComputedSize extends Event {
     
-    public long bytes;
+    private long bytes;
 
     public ComputedSize() {
     }
@@ -15,9 +16,10 @@ public class ComputedSize extends Event {
         this.eventClass = ComputedSize.class.getCanonicalName();
         this.bytes = bytes;
         this.depositId = depositId;
-        this.jobId = jobId;
+        this.setJobId(jobId);
     }
     
+    @JsonGetter
     public long getBytes() {
         return bytes;
     }

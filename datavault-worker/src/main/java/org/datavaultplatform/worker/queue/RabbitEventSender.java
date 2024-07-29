@@ -3,6 +3,8 @@ package org.datavaultplatform.worker.queue;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Clock;
+import java.util.Date;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import lombok.extern.slf4j.Slf4j;
@@ -23,17 +25,19 @@ public class RabbitEventSender implements EventSender {
     private final RabbitTemplate template;
     private final String eventQueueName;
 
-    private final String workerName;
+    private final String fullWorkerName;
 
     private final AtomicInteger sequence;
     private final ObjectMapper mapper;
+    private final Clock clock;
 
-    public RabbitEventSender(RabbitTemplate template, String eventQueueName, String workerName, int sequenceStart, ObjectMapper mapper) {
+    public RabbitEventSender(RabbitTemplate template, String eventQueueName, String fullWorkerName, int sequenceStart, ObjectMapper mapper, Clock clock) {
         this.template = template;
         this.eventQueueName = eventQueueName;
-        this.workerName = workerName;
+        this.fullWorkerName = fullWorkerName;
         this.sequence = new AtomicInteger(sequenceStart);
         this.mapper = mapper;
+        this.clock = clock;
     }
 
     /* (non-Javadoc)
@@ -47,12 +51,15 @@ public class RabbitEventSender implements EventSender {
     @Override
     public void send(Event event) {
 
+        // by using a clock, we make this class easier to test.
+        event.setTimestamp(new Date(clock.instant().toEpochMilli()));
+        
         // Add sequence for event ordering (where timestamp is equal)
-        event.setSequence(sequence.getAndIncrement());
+        event.setSequence(sequence.incrementAndGet());
 
         // Set common event properties
         event.setAgentType(Agent.AgentType.WORKER);
-        event.setAgent(WorkerInstance.getWorkerName());
+        event.setAgent(fullWorkerName);
         
         try {
             String jsonEvent = mapper.writeValueAsString(event);

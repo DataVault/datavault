@@ -41,5 +41,9 @@ public class EventService {
     public List<Event> findVaultEvents(Vault vault) {
         return eventDAO.findVaultEvents(vault);
     }
+
+    public Event findById(String id) {
+        return eventDAO.findById(id).orElse(null);
+    }
 }
 

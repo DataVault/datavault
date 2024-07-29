@@ -14,7 +14,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 public class StorageClassNameResolverTest {
 
-  abstract static class BaseTest {
+  static abstract class BaseTest {
 
     @ParameterizedTest
     @NullSource

@@ -1,15 +1,11 @@
 package org.datavaultplatform.worker.tasks;
 
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.datavaultplatform.common.PropNames;
-import org.datavaultplatform.common.crypto.Encryption;
-import org.datavaultplatform.common.event.EventSender;
-import org.datavaultplatform.common.event.InitStates;
-import org.datavaultplatform.common.event.UpdateProgress;
-import org.datavaultplatform.common.event.retrieve.RetrieveComplete;
-import org.datavaultplatform.common.event.retrieve.RetrieveError;
-import org.datavaultplatform.common.event.retrieve.RetrieveStart;
+import org.datavaultplatform.common.event.*;
+import org.datavaultplatform.common.event.retrieve.*;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.model.ArchiveStore;
 import org.datavaultplatform.common.storage.Device;
@@ -17,49 +13,54 @@ import org.datavaultplatform.common.storage.SFTPFileSystemDriver;
 import org.datavaultplatform.common.storage.UserStore;
 import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.common.storage.impl.SftpUtils;
-import org.datavaultplatform.common.task.Context;
-import org.datavaultplatform.common.task.TaskExecutor;
+import org.datavaultplatform.common.task.*;
+import org.datavaultplatform.common.util.RetrievedChunks;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
-import org.datavaultplatform.common.util.StorageClassUtils;
 import org.datavaultplatform.common.util.Utils;
 import org.datavaultplatform.worker.operations.*;
 import org.datavaultplatform.worker.retry.TwoSpeedRetry;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.datavaultplatform.worker.tasks.retrieve.*;
 import org.springframework.util.Assert;
 
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.Clock;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.function.Consumer;
 
-import org.springframework.retry.RetryCallback;
+import static org.datavaultplatform.worker.operations.FileSplitter.CHUNK_SEPARATOR;
+import static org.datavaultplatform.worker.tasks.retrieve.RetrieveState.*;
+import static org.datavaultplatform.worker.tasks.retrieve.RetrieveUtils.DATA_VAULT_HIDDEN_FILE_NAME;
 
 /**
  * A class that extends Task which is used to handle Retrievals from the vault
  */
+@SuppressWarnings({"ResultOfMethodCallIgnored", "CodeBlock2Expr"})
+@Slf4j
 public class Retrieve extends BaseTwoSpeedRetryTask {
-    public static final String DATA_VAULT_HIDDEN_FILE_NAME = ".datavault";
-    private static final String DV_TEMP_DIR_PREFIX = "dvTempDir";
-    private static final Logger logger = LoggerFactory.getLogger(Retrieve.class);
-    private String archiveId = null;
-    private String archiveDigestAlgorithm = null;
-    private String archiveDigest = null;
-    private String userID = null;
-    private int numOfChunks = 0;
-    private Map<Integer, String> chunksDigest = null;
-    private Map<Integer, String> encChunksDigest = null;
-    private String encTarDigest = null;
-    private String retrievePath = null;
-    private String retrieveId = null;
-    private String depositId = null;
-    private String depositCreationDate = null;
-    private long archiveSize = 0;
-    private EventSender eventSender = null;
+    public static final String STARTING_TXFR = "Starting transfer ...";
+    public static final String DATA = "data";
 
+    private String archiveId;
+    private long   archiveSize;
+    private String archiveDigest;
+    private String archiveDigestAlgorithm;
+
+    private String bagID;
+    private String depositId;
+    private String depositCreationDate;
+
+    private int numOfChunks;
+    private Map<Integer, String> chunksDigest;
+    private Map<Integer, String> encChunksDigest;
+    private String encTarDigest;
+
+    private String retrieveId;
+    private String retrievePath;
+
+    private UserEventSender userEventSender;
+
+    private TaskStageEventListener taskStageEventListener;
+    
     /* (non-Javadoc)
      * @see org.datavaultplatform.common.task.Task#performAction(org.datavaultplatform.common.task.Context)
      * 
@@ -73,433 +74,381 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
      */
     @Override
     public void performAction(Context context) {
-        
-        this.eventSender = context.getEventSender();
-        logger.info("Retrieve job - performAction()");
-        Map<String, String> properties = getProperties();
-        this.depositId = properties.get(PropNames.DEPOSIT_ID);
-        this.depositCreationDate = properties.get(PropNames.DEPOSIT_CREATION_DATE);
-        this.retrieveId = properties.get(PropNames.RETRIEVE_ID);
-        String bagID = properties.get(PropNames.BAG_ID);
-        this.retrievePath = properties.get(PropNames.RETRIEVE_PATH);
-        this.archiveId = properties.get(PropNames.ARCHIVE_ID);
-        this.userID = properties.get(PropNames.USER_ID);
-        this.archiveDigest = properties.get(PropNames.ARCHIVE_DIGEST);
-        this.archiveDigestAlgorithm = properties.get(PropNames.ARCHIVE_DIGEST_ALGORITHM);
-        this.numOfChunks = Integer.parseInt(properties.get(PropNames.NUM_OF_CHUNKS));
-        this.archiveSize = Long.parseLong(properties.get(PropNames.ARCHIVE_SIZE));
-        this.chunksDigest = this.getChunkFilesDigest();
-        this.encChunksDigest = this.getEncChunksDigest();
-        this.encTarDigest = this.getEncTarDigest();
+        log.info("Retrieve job - performAction()");
 
-        setupUserFsTwoSpeedRetry(properties);
+        init(context);
 
-        if (this.isRedeliver()) {
+        if (isRedeliver()) {
             sendError("Retrieve stopped: the message had been redelivered, please investigate");
             return;
         }
-        
-        this.initStates();
 
-        eventSender.send(new RetrieveStart(this.jobID, this.depositId, this.retrieveId)
-            .withUserId(this.userID)
-            .withNextState(0));
-
-        logger.info("bagID: " + bagID);
-        logger.info("retrievePath: " + this.retrievePath);
+        sendEvent(new InitStates(jobID, depositId, RetrieveState.getRetrieveStates()));
+        sendEvent(new RetrieveStart(jobID, depositId, retrieveId).withNextState(RetrieveState00ComputingFreeSpace.getStateNumber()));
 
         StorageClassNameResolver resolver = context.getStorageClassNameResolver();
-        Device userFs = this.setupUserFileStores(resolver);
-        Device archiveFs = this.setupArchiveFileStores(resolver);
+        Device userFs = setupUserFileStores(resolver);
+        Device archiveFs = setupArchiveFileStores(resolver);
+
         String timestampDirName = SftpUtils.getTimestampedDirectoryName(getClock());
-        
+        var userStoreInfo = new UserStoreInfo(userFs, timestampDirName);
+
         try {
-        	this.checkUserStoreFreeSpaceAndPermissions(userFs, timestampDirName);
+            // Verify integrity with deposit checksum
+            if (!Verify.getAlgorithm().equals(archiveDigestAlgorithm)) {
+                throw new Exception("Unsupported checksum algorithm: [%s]".formatted(archiveDigestAlgorithm));
+            }
+
+            if (isLastEventBefore(UserStoreSpaceAvailableChecked.class)) {
+                doStage(TaskStage.Retrieve1CheckUserStoreFreeSpace.INSTANCE);
+                checkUserStoreFreeSpaceAndPermissions(userStoreInfo);
+                sendEvent(new UserStoreSpaceAvailableChecked(jobID, depositId, retrieveId));
+            } else {
+                skipStage(TaskStage.Retrieve1CheckUserStoreFreeSpace.INSTANCE);
+            }
 
             // Retrieve the archived data
-            String tarFileName = bagID + ".tar";
+            String tarFileName = RetrieveUtils.getTarFileName(bagID);
             
             // Copy the tar file from the archive to the temporary area
-            Path tarPath = context.getTempDir().resolve(tarFileName);
-            File tarFile = tarPath.toFile();
+            File tarFile = context.getTempDir().resolve(tarFileName).toFile();
             
-            eventSender.send(new UpdateProgress(this.jobID, this.depositId, 0, this.archiveSize, "Starting transfer ...")
-                .withUserId(this.userID)
-                .withNextState(1));
-            
-            if (archiveFs.hasMultipleCopies()) {
-            	this.multipleCopies(context, tarFileName, tarFile, archiveFs, userFs, timestampDirName);
-            } else {
-            	this.singleCopy(context, tarFileName, tarFile, archiveFs, userFs, timestampDirName);
-            }
-            
+            sendEvent(getUpdateProgress(archiveSize).withNextState(RetrieveState01RetrievingFromArchive.getStateNumber()));
+
+            var archiveDeviceInfo = ArchiveDeviceInfo.fromArchiveFs(archiveFs);
+            var retrievedChunks = getRetrievedChunks();
+            fromArchiveStoreToUserStore(context, tarFile, archiveDeviceInfo, userStoreInfo, retrievedChunks);
+
         } catch (Exception e) {
-            String msg = "Data retrieve failed: " + e.getMessage();
-            logger.error(msg, e);
-            sendError(msg);
-            throw getRuntimeException(e);
+            throw getRuntimeException(e, "Data retrieve failed: " + e.getMessage());
         }
     }
 
-    private RuntimeException getRuntimeException(Exception ex) {
-        if (ex instanceof RuntimeException) {
-            return (RuntimeException) ex;
-        } else {
-            return new RuntimeException(ex);
-        }
-    }
+    protected void retrieveChunksAndRecompose(Context context, ArchiveDeviceInfo archiveDeviceInfo, Progress progress,
+                                            File tarFile, RetrievedChunks retrievedChunks) throws Exception {
 
-    /*
-        This method allows us to override the clock in tests.
-     */
-    protected Clock getClock() {
-        return Clock.systemDefaultZone();
-    }
-    
-    private void recomposeSingle(String tarFileName, Context context, Device archiveFs, Progress progress, File tarFile) throws Exception {
-        recompose(tarFileName, context, archiveFs, progress, tarFile, false, null);
-    }
+        File[] chunks = retrieveFiles(context, archiveDeviceInfo, progress, tarFile, retrievedChunks);
 
-    private void recomposeMulti(String tarFileName, Context context, Device archiveFs, Progress progress, File tarFile, List<String> locations) throws Exception {
-        recompose(tarFileName, context, archiveFs, progress, tarFile, true, locations);
-    }
-
-
-    private void recompose(String tarFileName, Context context, Device archiveFs, Progress progress,
-                           File tarFile, boolean multiCopy, List<String> locations) throws Exception {
-
-        File[] chunks = new File[this.numOfChunks];
-        logger.info("Retrieving " + this.numOfChunks + " chunk(s)");
-
-        int noOfThreads = context.getNoChunkThreads();
-        logger.debug("Number of threads: " + noOfThreads);
-
-        TaskExecutor<File> executor = new TaskExecutor<>(noOfThreads, "Chunk download failed.");
-        for( int chunkNum = 1; chunkNum <= this.numOfChunks; chunkNum++) {
-            Path chunkPath = context.getTempDir().resolve(tarFileName+FileSplitter.CHUNK_SEPARATOR+chunkNum);
-            File chunkFile = chunkPath.toFile();
-            logger.debug("Creating chunk download task:" + chunkNum);
-            ChunkRetrieveTracker crt = new ChunkRetrieveTracker(
-                    this.archiveId, archiveFs,
-                    context, chunkNum, this.getChunksIVs(), locations, multiCopy,
-                    progress, this.chunksDigest, this.encChunksDigest, chunkFile
-            );
-            executor.add(crt);
-            chunks[chunkNum-1] = chunkFile;
-        }
-
-        executor.execute(result -> {});
-
-        logger.info("Recomposing tar file from chunk(s)");
-        this.doRecomposeUsingCorrectVersion(context, chunks, tarFile);
+        log.info("Recomposing tar file from [{}] chunk(s)", numOfChunks);
+        doRecomposeUsingCorrectVersion(context, chunks, tarFile);
 
         // On the assumption that we have the tarfile now, delete the chunks
-        logger.info("Deleting the chunks now we have the recomposed tarfile");
-        for (File chunk : chunks) {
-            chunk.delete();
-        }
+        log.info("Deleting the chunks now we have the recomposed tarfile");
+        Arrays.stream(chunks).filter(Objects::nonNull).forEach(File::delete);
     }
 
-    private void doRecomposeUsingCorrectVersion(Context context, File[] chunks, File tarFile) throws Exception {
+    private File[] retrieveFiles(Context context, ArchiveDeviceInfo archiveDeviceInfo, Progress progress, File tarFile, RetrievedChunks retrievedChunks) throws Exception {
+        File[] chunks = new File[numOfChunks];
+        log.info("Retrieving [{}] chunk(s)", numOfChunks);
+        
+        Consumer<Integer> chunkRetrievedEventSender = chunkNumber -> {
+            sendEvent(new ArchiveStoreRetrievedChunk(jobID, depositId, retrieveId, chunkNumber));            
+        };
+        
+        TaskExecutor<File> executor = getTaskExecutor(context);
+        for (int chunkNum = 1; chunkNum <= numOfChunks; chunkNum++) {
+            log.debug("Creating chunk download task: [{}]", chunkNum);
+            RetrieveChunkInfo chunkInfo = getChunkInfo(context, tarFile, chunkNum);
+            chunks[chunkNum - 1] = chunkInfo.chunkFile();
+
+            if (retrievedChunks.isRetrieved(chunkNum) && chunkInfo.isRetrieveValid()) {
+                log.info("chunkNum[{}] retrieved already - skipping...", chunkNum);
+            } else {
+                ChunkRetrieveTracker crt = new ChunkRetrieveTracker(
+                        archiveId, archiveDeviceInfo,
+                        context, progress, chunkInfo, chunkRetrievedEventSender, getChunkFileChecker()
+                );
+                executor.add(crt);
+            }
+        }
+
+        executor.execute();
+        return chunks;
+    }
+    
+    private TaskExecutor<File> getTaskExecutor(Context context) {
+        int noOfThreads = context.getNoChunkThreads();
+        log.debug("Number of threads: [{}]", noOfThreads);
+        return new TaskExecutor<>(noOfThreads, "Chunk download failed.");
+    }
+
+    protected void doRecomposeUsingCorrectVersion(Context context, File[] chunks, File tarFile) throws Exception {
         // if we have a recompose date, oldRecompose is false and the deposit was created before the date set oldRecompose to true
         // set oldRecompose to true
         // if oldRecompose is false
-        Boolean oldRecompose = context.isOldRecompose();
+        boolean oldRecompose = context.isOldRecompose();
 
-        if (! oldRecompose) {
-            LocalDate recomposeDate = null;
-            LocalDate depositDate = null;
-            if (this.depositCreationDate != null) {
-                depositDate = LocalDate.parse(this.depositCreationDate, DateTimeFormatter.BASIC_ISO_DATE);
-                logger.info("DepositDate is:" + depositDate);
-            }
-            if (context.getRecomposeDate() != null) {
-                recomposeDate = LocalDate.parse(context.getRecomposeDate(), DateTimeFormatter.BASIC_ISO_DATE);
-                logger.info("RecomposeDate is:" + recomposeDate);
-            }
-            // if deposit creation date is before the recomposeDate
-            if ( depositDate.isBefore(recomposeDate)) {
-                // set oldRecompose to true
-                oldRecompose = true;
-            }
-
+        if (!oldRecompose) {
+            oldRecompose = RetrieveUtils.getOldRecompose(depositCreationDate, context.getRecomposeDate());
         }
 
         if (oldRecompose) {
-            logger.info("Recomposing tar file using DV4 method");
+            log.info("Recomposing tar file using DV4 method");
             FileSplitter.recomposeFileDV4(chunks, tarFile);
         } else {
-            logger.info("Recomposing tar file using DV5 method");
+            log.info("Recomposing tar file using DV5 method");
             FileSplitter.recomposeFile(chunks, tarFile);
+        }
+        log.info("RECOMPOSED TAR FILE [{}]length[{}]", tarFile, tarFile.length());
+    }
+
+    protected void doRetrieveFromWorkerToUserFs(Context context, UserStoreInfo userStoreInfo, File tarFile, Progress progress) throws Exception {
+        if (isLastEventBefore(UploadedToUserStore.class)) {
+            doStage(TaskStage.Retrieve3UploadedToUserStore.INSTANCE);
+            Assert.isTrue(tarFile.exists(), "The tar file [%s] does not exist".formatted(tarFile.toString()));
+            logProgress(progress);
+            log.info("Validating data ...");
+            sendEvent(new UpdateProgress(jobID, depositId).withNextState(RetrieveState02ValidatingData.getStateNumber()));
+            Utils.checkFileHash("ret-tar", tarFile, archiveDigest);
+            File bagDir = Tar.unTar(tarFile, context.getTempDir());
+            try {
+                // Decompress to the temporary directory
+                // Get the payload data directory
+                File payloadDir = bagDir.toPath().resolve(DATA).toFile();
+
+                long bagDirSize = FileUtils.sizeOfDirectory(bagDir);
+
+                // Copy the extracted files to the target retrieve area
+                log.info("Copying to user directory ...");
+                sendEvent(getUpdateProgress(bagDirSize).withNextState(RetrieveState03TransferrinfFiles.getStateNumber()));
+
+                // COPY FILES FROM WORKER BACK TO USER FS
+                copyFilesToUserFs(progress, payloadDir, userStoreInfo, bagDirSize);
+
+                logProgress(progress);
+                sendEvent(new UploadedToUserStore(jobID, depositId, retrieveId));
+
+                log.info("Data retrieve complete: [{}]", retrievePath);
+                // only delete the tarFile AFTER we've sent the UploadedToUserStore message
+                FileUtils.delete(tarFile);
+            } finally {
+                FileUtils.deleteDirectory(bagDir);
+            }
+        } else {
+            skipStage(TaskStage.Retrieve3UploadedToUserStore.INSTANCE);
         }
     }
 
-    private void doRetrieveFromWorkerToUserFs(Context context, Device userFs, File tarFile, Progress progress,
-                            String timeStampDirName) throws Exception{
-        logger.info("Copied: " + progress.getDirCount() + " directories, " + progress.getFileCount() + " files, "
-                + progress.getByteCount() + " bytes");
-        
-        logger.info("Validating data ...");
-        eventSender.send(new UpdateProgress(this.jobID, this.depositId).withNextState(2)
-            .withUserId(this.userID));
-        Utils.checkFileHash("ret-tar", tarFile, archiveDigest);
-        // Decompress to the temporary directory
-        File bagDir = Tar.unTar(tarFile, context.getTempDir());
-        long bagDirSize = FileUtils.sizeOfDirectory(bagDir);
-
-        // Get the payload data directory
-        File payloadDir = bagDir.toPath().resolve("data").toFile();
-
-        // Copy the extracted files to the target retrieve area
-        logger.info("Copying to user directory ...");
-        eventSender.send(new UpdateProgress(this.jobID, this.depositId, 0, bagDirSize, "Starting transfer ...")
-            .withUserId(this.userID)
-            .withNextState(3));
-        
-        // COPY FILES FROM WORKER BACK TO USER FS
-        copyFilesToUserFs(progress, payloadDir, userFs, bagDirSize, timeStampDirName);
-
-        logger.info("Copied: " + progress.getDirCount() + " directories, " + progress.getFileCount() + " files, " + progress.getByteCount() + " bytes");
-        
-        // Cleanup
-        logger.info("Cleaning up ...");
-        FileUtils.deleteDirectory(bagDir);
-        tarFile.delete();
-
-
-
-        logger.info("Data retrieve complete: " + this.retrievePath);
-        eventSender.send(new RetrieveComplete(this.jobID, this.depositId, this.retrieveId).withNextState(4)
-            .withUserId(this.userID));
-    }
-    
-    private void initStates() {
-    	ArrayList<String> states = new ArrayList<>();
-        states.add("Computing free space");    // 0
-        states.add("Retrieving from archive"); // 1
-        states.add("Validating data");         // 2
-        states.add("Transferring files");      // 3
-        states.add("Data retrieve complete");  // 4
-        eventSender.send(new InitStates(this.jobID, this.depositId, states)
-            .withUserId(userID));		
-	}
-    
     private Device setupUserFileStores(StorageClassNameResolver resolver) {
         Device userFs = null;
+        List<String> storageIDs = new ArrayList<>(userFileStoreClasses.keySet());
+        for (int i = 0; i < storageIDs.size(); i++) {
 
-        for (String storageID : userFileStoreClasses.keySet()) {
-            
+            String storageID = storageIDs.get(i);
             String storageClass = userFileStoreClasses.get(storageID);
             Map<String, String> storageProperties = userFileStoreProperties.get(storageID);
-            
+
             // Connect to the first user storage device (we only expect one for a retrieval)
             try {
-                userFs = StorageClassUtils.createStorage(storageClass, storageProperties, Device.class, resolver);
-                logger.info("Connected to user store: " + storageID + ", class: " + storageClass);
+                userFs = RetrieveUtils.createDevice(storageClass, storageProperties, resolver);
+                log.info("Connected to user store: [{}], class: [{}]", storageID, storageClass);
                 break;
             } catch (Exception e) {
                 String msg = "Retrieve failed: could not access user filesystem";
-                logger.error(msg, e);
+                log.error(msg, e);
                 sendError(msg);
-                throw getRuntimeException(e);
+                boolean lastStorageID = i == (storageIDs.size() - 1);
+                if (lastStorageID) {
+                    throw RetrieveUtils.getRuntimeException(e);
+                }
             }
         }
-        
         return userFs;
     }
     
     private Device setupArchiveFileStores(StorageClassNameResolver resolver) {
     	// We get passed a list because it is a parameter common to deposits and retrieves, but for retrieve there should only be one.
         ArchiveStore archiveFileStore = archiveFileStores.get(0);
-
-        // Connect to the archive storage
         try {
-            Device archiveFs = StorageClassUtils.createStorage(
-                archiveFileStore.getStorageClass(),
-                archiveFileStore.getProperties(),
-                Device.class,
-                resolver);
-            return archiveFs;
+            return RetrieveUtils.createDevice(archiveFileStore.getStorageClass(), archiveFileStore.getProperties(), resolver);
         } catch (Exception e) {
-            String msg = "Retrieve failed: could not access archive filesystem";
-            logger.error(msg, e);
-            sendError(msg);
-            throw getRuntimeException(e);
+            throw getRuntimeException(e, "Retrieve failed: could not access archive filesystem");
         }
     }
     
-    private void checkUserStoreFreeSpaceAndPermissions(Device userFs, String timeStampDirName) throws Exception {
-    	UserStore userStore = ((UserStore)userFs);
+    protected void checkUserStoreFreeSpaceAndPermissions(UserStoreInfo userStoreInfo) throws Exception {
+        var userFs = userStoreInfo.userFs();
+   	    UserStore userStore = ((UserStore) userFs);
         if (!userStore.exists(retrievePath) || !userStore.isDirectory(retrievePath)) {
             // Target path must exist and be a directory
             String msg = String.format("Target directory not found or is not a directory ! [%s]", retrievePath);
-            logger.error(msg);
+            log.error(msg);
             sendError(msg);
             throw new RuntimeException(msg);
         }
-        
+
         // Check that there's enough free space ...
         final long freespace;
         try {
-            TwoSpeedRetry.DvRetryTemplate template = userFsTwoSpeedRetry.getRetryTemplate(String.format("calcSizeToFS - %s", retrievePath));
+            var template = userFsTwoSpeedRetry.getRetryTemplate(String.format("calcSizeToFS - %s", retrievePath));
             freespace = template.execute(retryContext -> userFs.getUsableSpace());
 
         } catch (Exception e) {
             String msg = "Unable to determine free space";
-            logger.error(msg, e);
+            log.error(msg, e);
             sendError(msg);
             throw e;
         }
-        logger.info("Free space: " + freespace + " bytes (" +  FileUtils.byteCountToDisplaySize(freespace) + ")");
+        log.info("Free space: {} bytes ({})", freespace, FileUtils.byteCountToDisplaySize(freespace));
         if (freespace < archiveSize) {
             String msg = "Not enough free space to retrieve data!";
-            logger.error(msg);
+            log.error(msg);
             sendError(msg);
             throw new RuntimeException(msg);
         }
 
         try {
-            File createTempDataVaultHiddenFile = createTempDataVaultHiddenFile();
-            // copy ".datavault" file to test we can actually write
-            if (userFs instanceof SFTPFileSystemDriver) {
-                ((SFTPFileSystemDriver) userFs).store(this.retrievePath, createTempDataVaultHiddenFile, new Progress(), timeStampDirName);
-            } else {
-                userFs.store(this.retrievePath, createTempDataVaultHiddenFile, new Progress());
-            }
+            File createTempDataVaultHiddenFile = RetrieveUtils.createTempDataVaultHiddenFile();
+            store(userStoreInfo, createTempDataVaultHiddenFile, new Progress());
         } catch (Exception e) {
-            String msg = "Unable to perform test write of file[" + DATA_VAULT_HIDDEN_FILE_NAME  + "] to user space";
-            logger.error(msg, e);
-            sendError(msg);
-            throw e;
+            throw getRuntimeException(e, "Unable to perform test write of file[" + DATA_VAULT_HIDDEN_FILE_NAME  + "] to user space");
         }
     }
     
-    @SneakyThrows
-    public static File createTempDataVaultHiddenFile() {
-        File tempDir = Files.createTempDirectory(DV_TEMP_DIR_PREFIX).toFile();
-        File tempDataVaultHiddenFile = new File(tempDir, DATA_VAULT_HIDDEN_FILE_NAME);
-        tempDataVaultHiddenFile.createNewFile();
-        Assert.isTrue(tempDataVaultHiddenFile.exists(),"temp data hidden file does not exist");
-        Assert.isTrue(tempDataVaultHiddenFile.isFile(),"temp data hidden file is not a file");
-        Assert.isTrue(tempDataVaultHiddenFile.canRead(), "temp data hidden file is not readable");
-        Assert.isTrue(tempDataVaultHiddenFile.length() == 0, "temp data hidden file is not empty");
-        return tempDataVaultHiddenFile;
+    protected boolean isFinalTarValid(File tarFile, String archiveDigest) {
+        try {
+            log.info("tarFile[{}] archiveDigest[{}]", tarFile, archiveDigest);
+            Utils.checkFileHash("single-verified-tar", tarFile, archiveDigest);
+            return true;
+        } catch (Exception ex) {
+            return false;
+        }
     }
     
-    protected void multipleCopies(Context context, String tarFileName, File tarFile, Device archiveFs, Device userFs,
-                                String timeStampDirName) throws Exception {
-        logger.info("Device has multiple copies");
-        Progress progress = new Progress();
-        ProgressTracker tracker = new ProgressTracker(progress, this.jobID, this.depositId, this.archiveSize, this.eventSender);
-        Thread trackerThread = new Thread(tracker);
-        trackerThread.start();
-        try {
-            List<String> locations = archiveFs.getLocations();
-            if (context.isChunkingEnabled()) {
-                recomposeMulti(tarFileName, context, archiveFs, progress, tarFile, locations);
-            } else {
-                // Ask the driver to copy files to the temp directory
-                archiveFs.retrieve(this.archiveId, tarFile, progress, locations);
-
-                if (this.getTarIV() != null) {
-                    // Decrypt tar file
-                    Utils.checkFileHash("ret-single-tar", tarFile, this.encTarDigest);
-                    Encryption.decryptFile(context, tarFile, this.getTarIV());
+    protected void fromArchiveStoreToUserStore(Context context, File tarFile, ArchiveDeviceInfo archiveDeviceInfo, UserStoreInfo userStoreInfo, RetrievedChunks retrievedChunks) throws Exception {
+        var progress = new Progress();
+        trackProgress(progress, archiveSize, () -> {
+            if (isLastEventBefore(ArchiveStoreRetrievedAll.class) || !isFinalTarValid(tarFile, archiveDigest)) {
+                doStage(TaskStage.Retrieve2RetrieveFromArchiveAndRecompose.INSTANCE);
+                if (context.isChunkingEnabled()) {
+                    retrieveChunksAndRecompose(context, archiveDeviceInfo, progress, tarFile, retrievedChunks);
+                } else {
+                    archiveDeviceInfo.retrieve(archiveId, tarFile, progress);
+                    RetrieveUtils.decryptAndCheckTarFile("no-chunk", context, getTarIV(), tarFile, encTarDigest, archiveDigest);
                 }
+                sendEvent(new ArchiveStoreRetrievedAll(jobID, depositId, retrieveId));
+            } else {
+                skipStage(TaskStage.Retrieve2RetrieveFromArchiveAndRecompose.INSTANCE);
             }
 
-            logger.info("Attempting retrieve on archive from " + locations);
-            this.doRetrieveFromWorkerToUserFs(context, userFs, tarFile, progress, timeStampDirName);
-            logger.info("Completed retrieve on archive from " + locations);
-        } finally {
-            // Stop the tracking thread
-            tracker.stop();
-            trackerThread.join();
+            doRetrieveFromWorkerToUserFs(context, userStoreInfo, tarFile, progress);
+        });
+        if (isLastEventBefore(RetrieveComplete.class)) {
+            doStage(TaskStage.Retrieve4Final.INSTANCE);
+            sendEvent(new RetrieveComplete(jobID, depositId, retrieveId).withNextState(RetrieveState04DataRetrieveComplete.getStateNumber()));
+        } else {
+            skipStage(TaskStage.Retrieve4Final.INSTANCE);
         }
     }
-    
-    protected void singleCopy(Context context, String tarFileName, File tarFile, Device archiveFs,
-                            Device userFs, String timeStampDirName) throws Exception {
-    	logger.info("Single copy device");
-        // Progress tracking (threaded)
-        Progress progress = new Progress();
-        ProgressTracker tracker = new ProgressTracker(progress, this.jobID, this.depositId, this.archiveSize, this.eventSender);
-        Thread trackerThread = new Thread(tracker);
-        trackerThread.start();
-        
 
-        // Verify integrity with deposit checksum
-        String systemAlgorithm = Verify.getAlgorithm();
-        if (!systemAlgorithm.equals(this.archiveDigestAlgorithm)) {
-            throw new Exception("Unsupported checksum algorithm: " + this.archiveDigestAlgorithm);
-        }
-
-        try {
-            // Ask the driver to copy files to the temp directory
-            if (context.isChunkingEnabled()) {
-                // TODO can bypass this if there is only one chunk.
-                recomposeSingle(tarFileName, context, archiveFs, progress, tarFile);
-            } else {
-                archiveFs.retrieve(this.archiveId, tarFile, progress);
-
-                if (this.getTarIV() != null) {
-                    // Decrypt tar file
-                    Utils.checkFileHash("ret-single-tar", tarFile, this.encTarDigest);
-
-                    Encryption.decryptFile(context, tarFile, this.getTarIV());
-                }
-            }
-        } finally {
-            // Stop the tracking thread
-            tracker.stop();
-            trackerThread.join();
-        }
-
-        this.doRetrieveFromWorkerToUserFs(context, userFs, tarFile, progress, timeStampDirName);
-    }
-
-    protected static void throwChecksumError(
-        String actualCheckSum, String expectedCheckSum,
-        File problemFile, String context) throws Exception {
-        String msg = String.join(":",
-            "Checksum failed",
-            context,
-            "(actual)" + actualCheckSum + " != (expected)" + expectedCheckSum,
-            problemFile.getCanonicalPath()
-        );
-        logger.error(msg);
-        throw new Exception(msg);
-    }
-
-    protected void copyFilesToUserFs(Progress progress, File payloadDir, Device userFs, long bagDirSize, String timeStampDirName) throws Exception {
-        ProgressTracker tracker = new ProgressTracker(progress, this.jobID, this.depositId, bagDirSize, this.eventSender);
-        Thread trackerThread = new Thread(tracker);
-        trackerThread.start();
-
-        try {
-            Path basePath = payloadDir.toPath();
+    protected void copyFilesToUserFs(Progress progress, File payloadDir, UserStoreInfo userStoreInfo, long bagDirSize) throws Exception {
+        trackProgress(progress, bagDirSize, () -> {
             File[] contents = payloadDir.listFiles();
+            if (contents == null) {
+                return;
+            }
             Arrays.sort(contents);
             for (File content : contents) {
-                String taskDesc = basePath.relativize(content.toPath()).toString();
+                String taskDesc = payloadDir.toPath().relativize(content.toPath()).toString();
                 TwoSpeedRetry.DvRetryTemplate template = userFsTwoSpeedRetry.getRetryTemplate(String.format("toUserFs - %s", taskDesc));
-                template.execute((RetryCallback<Object, Exception>) retryContext -> {
-                    if (userFs instanceof SFTPFileSystemDriver) {
-                        return ((SFTPFileSystemDriver) userFs).store(retrievePath, content, progress, timeStampDirName);
-                    } else {
-                        return userFs.store(retrievePath, content, progress);
-                    }
-                });
+                template.execute(retryContext -> store(userStoreInfo, content, progress));
             }
-        } finally {
-            // Stop the tracking thread
-            tracker.stop();
-            trackerThread.join();
+        });
+    }
+    private void sendError(String msg) {
+        sendEvent(new RetrieveError(jobID, depositId, retrieveId, msg));
+    }
+    private void logProgress(Progress progress) {
+        log.info("Copied: [{}] directories, [{}] files, [{}] bytes", progress.getDirCount(), progress.getFileCount(), progress.getByteCount());
+    }
+    protected void sendEvent(Event event) {
+        userEventSender.send(event.withRetrieveId(retrieveId));
+    }
+    /*
+    This method allows us to override the clock in tests.
+     */
+    protected Clock getClock() {
+        return Clock.systemDefaultZone();
+    }
+    private void trackProgress(Progress progress, long expectedSizeBytes, Trackable trackable) throws Exception {
+        var tracker = new ProgressTracker(progress, jobID, depositId, retrieveId, expectedSizeBytes, userEventSender);
+        tracker.track(trackable);
+    }
+    private String store(UserStoreInfo userStoreInfo, File content, Progress progress) throws Exception {
+        Device userFs = userStoreInfo.userFs();
+        if (userFs instanceof SFTPFileSystemDriver sftpDriver) {
+            return sftpDriver.store(retrievePath, content, progress, userStoreInfo.timeStampDirName());
+        } else {
+            return userFs.store(retrievePath, content, progress);
         }
     }
+    private UpdateProgress getUpdateProgress(long totalSize){
+        return new UpdateProgress(jobID, depositId, 0, totalSize, STARTING_TXFR);
+    }
+    private RuntimeException getRuntimeException(Exception ex, String msg) {
+        log.error(msg, ex);
+        sendError(msg);
+        return RetrieveUtils.getRuntimeException(ex);
+    }
+    protected void init(Context context) {
+        taskStageEventListener = context.getTaskStageEventListener();
+        String userID;
+        {
+            Map<String, String> properties = getProperties();
+            depositId = properties.get(PropNames.DEPOSIT_ID);
+            depositCreationDate = properties.get(PropNames.DEPOSIT_CREATION_DATE);
+            retrieveId = properties.get(PropNames.RETRIEVE_ID);
+            bagID = properties.get(PropNames.BAG_ID);
+            retrievePath = properties.get(PropNames.RETRIEVE_PATH);
+            archiveId = properties.get(PropNames.ARCHIVE_ID);
+            userID = properties.get(PropNames.USER_ID);
+            archiveDigest = properties.get(PropNames.ARCHIVE_DIGEST);
+            archiveDigestAlgorithm = properties.get(PropNames.ARCHIVE_DIGEST_ALGORITHM);
+            numOfChunks = Integer.parseInt(properties.get(PropNames.NUM_OF_CHUNKS));
+            archiveSize = Long.parseLong(properties.get(PropNames.ARCHIVE_SIZE));
+            chunksDigest = getChunkFilesDigest();
+            encChunksDigest = getEncChunksDigest();
+            encTarDigest = getEncTarDigest();
 
-    private void sendError(String msg) {
-        eventSender.send(new RetrieveError(jobID, depositId, retrieveId, msg)
-                .withUserId(this.userID));
+            setupUserFsTwoSpeedRetry(properties);
+        }
+        userEventSender = new UserEventSender(context.getEventSender(), userID);
+        Assert.isTrue(archiveFileStores.size() == 1, "There are [%s] archiveFileStores, should be 1".formatted(archiveFileStores.size()));
+
+        log.info("bagID: [{}]", bagID);
+        log.info("retrievePath: [{}]", retrievePath);
+    }
+
+    protected RetrieveChunkInfo getChunkInfo(Context context, File tarFile, int chunkNum) {
+        String tarFileName = tarFile.getName();
+        File chunkFile = context.getTempDir().resolve(tarFileName + CHUNK_SEPARATOR + chunkNum).toFile();
+        byte[] iv = getChunksIVs().get(chunkNum);
+        String encChunkDigest = encChunksDigest.get(chunkNum);
+        String chunkDigest = chunksDigest.get(chunkNum);
+        return new RetrieveChunkInfo(chunkNum, chunkFile, encChunkDigest, iv, chunkDigest);
+    }
+    
+    protected boolean isLastEventBefore(Class<? extends Event> eventClass) {
+        return RetrieveEvents.INSTANCE.isLastEventBefore(getLastEvent(), eventClass);
+    }
+
+    @SneakyThrows
+    private RetrievedChunks getRetrievedChunks() {
+        String retrievedChunksJson = getProperties().get(PropNames.DEPOSIT_CHUNKS_RETRIEVED);
+        return RetrievedChunks.fromJson(retrievedChunksJson);
+    }
+
+    protected RetrievedChunkFileChecker getChunkFileChecker() {
+        return new RetrievedChunkFileChecker();
+    }
+
+    private void recordStage(TaskStage stage, boolean skipped) {
+        taskStageEventListener.onTaskStageEvent(new TaskStageEvent(stage, skipped));
+    }
+    private void doStage(TaskStage.RetrieveTaskStage stage) {
+        recordStage(stage, false);
+    }
+    private void skipStage(TaskStage.RetrieveTaskStage stage) {
+        recordStage(stage, true);
     }
 }

@@ -6,6 +6,7 @@ import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import java.util.UUID;
 import org.datavaultplatform.common.docker.DockerImage;
+import org.datavaultplatform.common.util.UsesTestContainers;
 import org.datavaultplatform.webapp.config.MailConfig.MessageCreator;
 import org.datavaultplatform.webapp.test.ProfileStandalone;
 import org.junit.jupiter.api.Test;
@@ -22,7 +23,6 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.web.client.RestTemplate;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 /*
  Uses docker image mailhog/mailhog to test emails have been sent correctly.
@@ -31,7 +31,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  */
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ProfileStandalone
-@Testcontainers(disabledWithoutDocker = true)
+@UsesTestContainers
 public class MailIT {
 
 

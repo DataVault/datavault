@@ -18,7 +18,7 @@ import org.hibernate.Hibernate;
     @NamedAttributeNode(User_.FILE_STORES)
 })
 @JsonPropertyOrder({"id", "firstname","lastname", "password", "email", "properties" })
-public class User {
+public class User implements Identified {
     // User Identifier (not a UUID)
     public static final String EG_USER = "eg.User.1";
     @Id

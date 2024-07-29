@@ -1,13 +1,20 @@
 package org.datavaultplatform.worker.config;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.security.Security;
+import java.time.Clock;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.datavaultplatform.common.event.EventSender;
 import org.datavaultplatform.common.task.Context.AESMode;
+import org.datavaultplatform.common.task.TaskStageEventListener;
+import org.datavaultplatform.common.task.TaskType;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
+import org.datavaultplatform.worker.queue.ProcessedJobStore;
 import org.datavaultplatform.worker.queue.Receiver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -52,9 +59,15 @@ public class ReceiverConfig {
   @Value("${recomposeDate:20230309}")
   private String recomposeDate;
 
+  @Value("${processed.job.store.path:/tmp/processedJobStore.json}")
+  private Path processedJobStorePath;
+
   @Autowired
   EventSender eventSender;
 
+  @Value("${spring.application.name:datavault-worker}")
+  private String applicationName;
+  
   /*
       <bean id="receiver" class="org.datavaultplatform.worker.queue.Receiver">
         <property name="tempDir" value="${tempDir}"/>
@@ -72,7 +85,7 @@ public class ReceiverConfig {
 
    */
   @Bean
-  public Receiver receiver(StorageClassNameResolver resolver) {
+  public Receiver receiver(StorageClassNameResolver resolver, ProcessedJobStore processedJobStore, TaskStageEventListener taskStageEventListener) {
     Receiver result = new Receiver(
         this.tempDir,
         this.metaDir,
@@ -85,14 +98,36 @@ public class ReceiverConfig {
         this.eventSender,
         resolver,
         this.oldRecompose,
-        this.recomposeDate
+        this.recomposeDate,
+        processedJobStore,
+        applicationName,
+        taskStageEventListener
     );
     if(result.isEncryptionEnabled() && result.getEncryptionMode() == AESMode.GCM ) {
       Security.addProvider(new BouncyCastleProvider());
     }
     return result;
   }
+  
+  @Bean
+  TaskStageEventListener taskStageEventListener() {
+    return event -> {
+      TaskType type = event.stage().getType();
+      int order = event.stage().getOrder();
+      String label = event.stage().getLabel();
+      if (event.skipped()) {
+        log.info("{} skipping ::{}:: {}", type, order, label);
+      } else {
+        log.info("{} not skipping ::{}:: {}", type, order, label);
+      }
+    };
+  }
 
+  @Bean
+  ProcessedJobStore processedJobStore(ObjectMapper mapper, @Autowired Clock clock) {
+    return new ProcessedJobStore(mapper, clock, processedJobStorePath);
+  }
+  
   @PostConstruct
   void init() {
     checkFileExistsAndIsDirectory("tempDir", tempDir);

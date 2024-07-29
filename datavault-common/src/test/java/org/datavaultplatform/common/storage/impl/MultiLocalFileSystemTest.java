@@ -9,10 +9,7 @@ import org.datavaultplatform.common.io.Progress;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.io.TempDir;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -103,11 +100,13 @@ class MultiLocalFileSystemTest {
             assertThat(usableSpace1).isGreaterThan(0);
 
             File temp = new File(multiBaseDir1, "thousandByteFile");
-            try (FileOutputStream boas = new FileOutputStream(temp)) {
-                for (int i = 0; i < 1_000; i++) {
+            try (BufferedOutputStream boas = new BufferedOutputStream(new FileOutputStream(temp))) {
+                for (int i = 0; i < 1000; i++) {
                     boas.write(1);
                 }
+                boas.flush();
             }
+            assertThat(temp.length()).isEqualTo(1000);
             long usableSpace2 = multi.getUsableSpace();
             assertThat(usableSpace2).isLessThan(usableSpace1);
         }

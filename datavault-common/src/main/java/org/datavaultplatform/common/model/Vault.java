@@ -46,7 +46,7 @@ import org.hibernate.annotations.UuidGenerator;
         @NamedAttributeNode(Vault_.RETENTION_POLICY),
         @NamedAttributeNode(Vault_.DEPOSITS),
 })
-public class Vault {
+public class Vault implements Identified {
 
     public static final String EG_VAULT = "eg.Vault.1";
     private static final long ZERO = 0L;

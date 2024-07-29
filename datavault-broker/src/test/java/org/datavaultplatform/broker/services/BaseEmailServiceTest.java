@@ -12,6 +12,7 @@ import org.datavaultplatform.broker.app.DataVaultBrokerApp;
 import org.datavaultplatform.broker.test.AddTestProperties;
 import org.datavaultplatform.broker.test.TestUtils;
 import org.datavaultplatform.common.docker.DockerImage;
+import org.datavaultplatform.common.util.UsesTestContainers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,7 +26,6 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.client.RestTemplate;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 /*
  Uses docker image mailhog/mailhob to test emails have been sent correctly.
@@ -33,7 +33,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  See https://hub.docker.com/r/mailhog/mailhog
  */
 @SpringBootTest(classes = DataVaultBrokerApp.class)
-@Testcontainers(disabledWithoutDocker = true)
+@UsesTestContainers
 @TestPropertySource(properties = {
     "broker.email.enabled=true",
     "broker.controllers.enabled=false",

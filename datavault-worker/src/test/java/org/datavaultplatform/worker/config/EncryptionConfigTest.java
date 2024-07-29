@@ -14,6 +14,7 @@ import org.datavaultplatform.common.config.BaseExternalPropertyFileConfigTest;
 import org.datavaultplatform.common.crypto.Encryption;
 import org.datavaultplatform.common.event.RecordingEventSender;
 import org.datavaultplatform.worker.app.DataVaultWorkerInstanceApp;
+import org.datavaultplatform.worker.rabbit.RabbitMessageSelectorScheduler;
 import org.datavaultplatform.worker.test.AddTestProperties;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +49,9 @@ public class EncryptionConfigTest extends BaseExternalPropertyFileConfigTest {
   //we have to mock this because it depends on Rabbit which we've not configured
   RecordingEventSender mEventSender;
 
+  @MockBean
+  RabbitMessageSelectorScheduler scheduler;
+  
   @Test
   void checkCommonProperties() {
     assertEquals(123, Encryption.getEncBufferSize());

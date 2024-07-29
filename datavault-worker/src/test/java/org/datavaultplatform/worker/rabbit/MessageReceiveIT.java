@@ -13,19 +13,23 @@ import java.util.concurrent.TimeUnit;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.worker.app.DataVaultWorkerInstanceApp;
+import org.datavaultplatform.worker.queue.Receiver;
 import org.datavaultplatform.worker.test.AddTestProperties;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.TestPropertySource;
 
-@SpringBootTest(classes = DataVaultWorkerInstanceApp.class)
+@SpringBootTest(classes = {DataVaultWorkerInstanceApp.class,MessageReceiveIT.TestConfig.class})
+@TestPropertySource(properties = {"worker.next.message.selector.delay.ms=200"})
 @AddTestProperties
-@DirtiesContext
 @Slf4j
 /*
  Checks that we can recv and process messages, 1 at a time, in the order they are sent.
@@ -36,7 +40,7 @@ class MessageReceiveIT extends BaseReceiveIT {
   private static final int MESSAGES_TO_RECV = MESSAGES_TO_SEND;
 
   @MockBean
-  MessageProcessor mProcessor;
+  Receiver mProcessor;
 
   @MockBean
   ShutdownHandler mShutdownHandler;
@@ -64,12 +68,12 @@ class MessageReceiveIT extends BaseReceiveIT {
       log.info("[{}]{}", i, messageInfos.get(i));
     }
 
-    verify(mProcessor, times(MESSAGES_TO_RECV)).processMessage(any(MessageInfo.class));
+    verify(mProcessor, times(MESSAGES_TO_RECV)).onMessage(any(RabbitMessageInfo.class));
     verifyNoMoreInteractions(mProcessor, mShutdownHandler);
 
     int i = 0;
     for (String messageId : messageIds) {
-      Assertions.assertEquals(messageId, this.messageInfos.get(i++).getId());
+      Assertions.assertEquals(messageId, this.messageInfos.get(i++).message().getMessageProperties().getMessageId());
     }
   }
 
@@ -77,11 +81,18 @@ class MessageReceiveIT extends BaseReceiveIT {
   void setupMocks() {
     doAnswer(invocation -> {
       Assertions.assertEquals(1, invocation.getArguments().length);
-      MessageInfo info = invocation.getArgument(0);
+      RabbitMessageInfo info = invocation.getArgument(0);
       messageInfos.add(info);
       this.latch.countDown();
       return false;
-    }).when(mProcessor).processMessage(any(MessageInfo.class));
+    }).when(mProcessor).onMessage(any(RabbitMessageInfo.class));
   }
 
+  @TestConfiguration
+  static class TestConfig {
+    @Bean
+    Logger monitorLogger() {
+      return log;
+    }
+  }
 }

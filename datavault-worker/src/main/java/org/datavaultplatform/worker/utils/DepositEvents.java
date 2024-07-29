@@ -21,6 +21,7 @@ import org.datavaultplatform.common.event.deposit.ComputedDigest;
 import org.datavaultplatform.common.event.deposit.ComputedEncryption;
 import org.datavaultplatform.common.event.deposit.UploadComplete;
 import org.datavaultplatform.common.model.ArchiveStore;
+import org.datavaultplatform.common.model.Job;
 import org.datavaultplatform.common.storage.StorageConstants;
 import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.worker.tasks.Audit;
@@ -48,7 +49,8 @@ public class DepositEvents {
     TaskInfo info = getTaskInfo(retrieveBaseDir, retrievePath);
 
     Retrieve retrieve = new Retrieve();
-    retrieve.setTaskClass("org.datavaultplatform.worker.tasks.Retrieve");
+    retrieve.setJobID(UUID.randomUUID().toString());
+    retrieve.setTaskClass(Job.TASK_CLASS_RETRIEVE);
     Map<String, String> topLevelProps = new HashMap<>();
     topLevelProps.put(PropNames.ARCHIVE_DIGEST_ALGORITHM, Verify.SHA_1_ALGORITHM);
     topLevelProps.put(PropNames.BAG_ID, info.bagitId);

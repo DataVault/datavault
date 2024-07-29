@@ -13,10 +13,16 @@ import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.storage.impl.LocalFileSystem;
 import org.datavaultplatform.common.storage.impl.SFTPFileSystemSSHD;
 import org.datavaultplatform.common.task.Context;
+import org.datavaultplatform.common.task.TaskStageEvent;
+import org.datavaultplatform.common.task.TaskStageEventListener;
+import org.datavaultplatform.common.util.RetrievedChunks;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.datavaultplatform.common.util.StorageClassUtils;
 import org.datavaultplatform.worker.retry.DvRetryException;
 import org.datavaultplatform.worker.retry.TwoSpeedRetry;
+import org.datavaultplatform.worker.tasks.retrieve.ArchiveDeviceInfo;
+import org.datavaultplatform.worker.tasks.retrieve.RetrieveUtils;
+import org.datavaultplatform.worker.tasks.retrieve.UserStoreInfo;
 import org.datavaultplatform.worker.test.TestClockConfig;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,6 +44,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.datavaultplatform.common.storage.Verify.SHA_1_ALGORITHM;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 @Slf4j
@@ -81,38 +88,40 @@ public class RetrieveTest {
     ArgumentCaptor<Context> argContext;
 
     @Captor
-    ArgumentCaptor<String> argTarFileName;
-
-    @Captor
     ArgumentCaptor<File> argTarFile;
 
     @Captor
-    ArgumentCaptor<Device> argArchiveFs;
+    ArgumentCaptor<ArchiveDeviceInfo> argArchiveDeviceInfo;
 
     @Captor
-    ArgumentCaptor<Device> argUserStoreFs;
+    ArgumentCaptor<UserStoreInfo> argUserStoreInfo;
     
     @Captor
     ArgumentCaptor<File> argDataVaultHiddenFile;
-
+    
+    @Captor
+    ArgumentCaptor<RetrievedChunks> argRetrievedChunks;
+    
+    @Mock
+    TaskStageEventListener mTaskStageEventListener;
+    
+    List<TaskStageEvent> taskStageEvents;
 
     @BeforeEach
     void setup() {
         RetryTestUtils.setLoggingLevelInfo(log);
         this.storageModel = new ArchiveStore();
         this.storageModel.setStorageClass("ARCHIVE_STORE_STORAGE_CLASS_NAME");
+        this.taskStageEvents = new ArrayList<>();
+        lenient().when(mContext.getTaskStageEventListener()).thenReturn(mTaskStageEventListener);
+        
+        lenient().doAnswer(invocation -> {
+            TaskStageEvent taskStageEvent = invocation.getArgument(0, TaskStageEvent.class);
+            taskStageEvents.add(taskStageEvent);
+            return null;
+        }).when(mTaskStageEventListener).onTaskStageEvent(any(TaskStageEvent.class));
     }
-
-    @Test
-    @SneakyThrows
-    void testThrowCheckSumError() {
-        File mFile = mock(File.class);
-        when(mFile.getCanonicalPath()).thenReturn("/tmp/some/file.1.tar");
-        Exception ex = assertThrows(Exception.class, () -> Retrieve.throwChecksumError("<actualCS>", "<expectedCS>",
-                mFile, "test"));
-        assertEquals("Checksum failed:test:(actual)<actualCS> != (expected)<expectedCS>:/tmp/some/file.1.tar", ex.getMessage());
-    }
-
+    
     @Nested
     class SftpUserStoreTests {
 
@@ -193,7 +202,7 @@ public class RetrieveTest {
         properties.put(PropNames.ARCHIVE_ID, "archive-id");
         properties.put(PropNames.USER_ID, "user-id");
         properties.put(PropNames.ARCHIVE_DIGEST, "archive-digest");
-        properties.put(PropNames.ARCHIVE_DIGEST_ALGORITHM, "archive-digest-algorithm");
+        properties.put(PropNames.ARCHIVE_DIGEST_ALGORITHM, SHA_1_ALGORITHM);
         properties.put(PropNames.NUM_OF_CHUNKS, "1");
         properties.put(PropNames.ARCHIVE_SIZE, "2112");
         properties.put(PropNames.USER_FS_RETRY_MAX_ATTEMPTS, "10");
@@ -219,23 +228,13 @@ public class RetrieveTest {
 
         // override the clock with a fixed clock for testing
         lenient().when(retrieve.getClock()).thenReturn(TestClockConfig.TEST_CLOCK);
-        if (singleCopy) {
-            lenient().doNothing().when(retrieve).singleCopy(
-                    argContext.capture(),
-                    argTarFileName.capture(),
-                    argTarFile.capture(),
-                    argArchiveFs.capture(),
-                    argUserStoreFs.capture(),
-                    argTimestampDirName2.capture());
-        } else {
-            lenient().doNothing().when(retrieve).multipleCopies(
-                    argContext.capture(),
-                    argTarFileName.capture(),
-                    argTarFile.capture(),
-                    argArchiveFs.capture(),
-                    argUserStoreFs.capture(),
-                    argTimestampDirName2.capture());
-        }
+
+        lenient().doNothing().when(retrieve).fromArchiveStoreToUserStore(
+                argContext.capture(),
+                argTarFile.capture(),
+                argArchiveDeviceInfo.capture(),
+                argUserStoreInfo.capture(),
+                argRetrievedChunks.capture());
 
         try (MockedStatic<StorageClassUtils> storageClassUtilsStatic = Mockito.mockStatic(StorageClassUtils.class)) {
 
@@ -300,44 +299,38 @@ public class RetrieveTest {
                 Context actualContext = argContext.getValue();
                 assertThat(actualContext).isEqualTo(mContext);
 
-                String actualTarFileName = argTarFileName.getValue();
-                assertThat(actualTarFileName).isEqualTo("bag-id.tar");
-
                 File actualTarFile = argTarFile.getValue();
                 assertThat(actualTarFile).isEqualTo(new File("/tmp/dir/bag-id.tar"));
 
-                Device actualArchiveFs = argArchiveFs.getValue();
+                ArchiveDeviceInfo actualArchiveDeviceInfo = argArchiveDeviceInfo.getValue();
+                Device actualArchiveFs = actualArchiveDeviceInfo.archiveFs();         
+                //Device actualArchiveFs = argArchiveFs.getValue();
                 assertThat(actualArchiveFs).isEqualTo(mArchiveFS);
 
-                Device actualUserStoreFs = argUserStoreFs.getValue();
+                Device actualUserStoreFs = argUserStoreInfo.getValue().userFs();
 
                 if (useSftpUserStore) {
                     assertThat(actualUserStoreFs).isEqualTo(mSftpUserStore);
 
                     String actualTimestampDir1 = argTimestampDirName1.getValue();
-                    String actualTimestampDir2 = argTimestampDirName2.getValue();
+                    String actualTimestampDir2 = argUserStoreInfo.getValue().timeStampDirName();
 
                     assertThat(actualTimestampDir1).isEqualTo(actualTimestampDir2);
                     assertThat(actualTimestampDir1).isEqualTo(TEST_TIMESTAMP_DIR_NAME);
                     
-                    assertThat(argDataVaultHiddenFile.getValue().getName()).isEqualTo(Retrieve.DATA_VAULT_HIDDEN_FILE_NAME);
+                    assertThat(argDataVaultHiddenFile.getValue().getName()).isEqualTo(RetrieveUtils.DATA_VAULT_HIDDEN_FILE_NAME);
                 } else {
                     assertThat(actualUserStoreFs).isEqualTo(mNonSftpUserStore);
 
                 }
-
-                if (singleCopy) {
-                    verify(retrieve).singleCopy(actualContext, actualTarFileName, actualTarFile, actualArchiveFs, actualUserStoreFs, TEST_TIMESTAMP_DIR_NAME);
-                } else {
-                    verify(retrieve).multipleCopies(actualContext, actualTarFileName, actualTarFile, actualArchiveFs, actualUserStoreFs, TEST_TIMESTAMP_DIR_NAME);
-                }
-
-                checkErrorMessages("Job states: 5", "Deposit retrieve started", "Job progress update");
+                
+                verify(retrieve).fromArchiveStoreToUserStore(actualContext, actualTarFile, actualArchiveDeviceInfo, new UserStoreInfo(actualUserStoreFs, TEST_TIMESTAMP_DIR_NAME),  new RetrievedChunks());
+                checkEventMessages("Job states: 5", "Deposit retrieve started", "User Store Space Available Checked", "Job progress update");
             } else {
-                verify(retrieve, never()).singleCopy(any(), any(), any(), any(), any(), any());
-                verify(retrieve, never()).multipleCopies(any(), any(), any(), any(), any(), any());
+                verify(retrieve, never()).fromArchiveStoreToUserStore(
+                        any(Context.class), any(File.class), any(ArchiveDeviceInfo.class), any(UserStoreInfo.class), any(RetrievedChunks.class));
 
-                checkErrorMessages(
+                checkEventMessages(
                         "Job states: 5",
                         "Deposit retrieve started",
                         "Unable to perform test write of file[.datavault] to user space",
@@ -365,7 +358,7 @@ public class RetrieveTest {
                 assertThat(ex).hasMessage("problem creating UserStore");
             }
 
-            checkErrorMessages("Job states: 5",
+            checkEventMessages("Job states: 5",
                     "Deposit retrieve started",
                     "Retrieve failed: could not access user filesystem");
         }
@@ -393,7 +386,7 @@ public class RetrieveTest {
                 assertThat(ex).hasMessage("problem creating ArchiveStore");
             }
 
-            checkErrorMessages("Job states: 5",
+            checkEventMessages("Job states: 5",
                     "Deposit retrieve started",
                     "Retrieve failed: could not access archive filesystem");
         }
@@ -404,7 +397,7 @@ public class RetrieveTest {
         Retrieve retrieve = getRetrieveForTest(true);
         retrieve.setIsRedeliver(true);
         retrieve.performAction(mContext);
-        checkErrorMessages("Retrieve stopped: the message had been redelivered, please investigate");
+        checkEventMessages("Retrieve stopped: the message had been redelivered, please investigate");
     }
 
     @Test
@@ -434,7 +427,7 @@ public class RetrieveTest {
                 assertThat(ex).hasMessage("Not enough free space to retrieve data!");
             }
 
-            checkErrorMessages("Job states: 5",
+            checkEventMessages("Job states: 5",
                     "Deposit retrieve started",
                     "Not enough free space to retrieve data!",
                     "Data retrieve failed: Not enough free space to retrieve data!");
@@ -468,7 +461,7 @@ public class RetrieveTest {
                 assertThat(ex).hasMessage("org.datavaultplatform.worker.retry.DvRetryException: task[calcSizeToFS - retrieve-path]failed after[10] attempts");
             }
 
-            checkErrorMessages("Job states: 5",
+            checkEventMessages("Job states: 5",
                     "Deposit retrieve started",
                     "Unable to determine free space",
                     "Data retrieve failed: task[calcSizeToFS - retrieve-path]failed after[10] attempts");
@@ -476,7 +469,7 @@ public class RetrieveTest {
     }
 
 
-    private void checkErrorMessages(String... expectedMessages) {
+    private void checkEventMessages(String... expectedMessages) {
         String[] actualMessages = argEvent.getAllValues().stream().map(Event::getMessage).toArray(String[]::new);
         assertThat(actualMessages).isEqualTo(expectedMessages);
     }
@@ -533,7 +526,7 @@ public class RetrieveTest {
                     assertThat(ex).hasMessage("Target directory not found or is not a directory ! [retrieve-path]");
                 }
 
-                checkErrorMessages("Job states: 5",
+                checkEventMessages("Job states: 5",
                         "Deposit retrieve started",
                         "Target directory not found or is not a directory ! [retrieve-path]",
                         "Data retrieve failed: Target directory not found or is not a directory ! [retrieve-path]"
@@ -671,9 +664,10 @@ public class RetrieveTest {
             properties.put(PropNames.USER_FS_RETRY_MAX_ATTEMPTS, String.valueOf(MAX_ATTEMPTS));
             properties.put(PropNames.USER_FS_RETRY_DELAY_MS_1, "10");
             properties.put(PropNames.USER_FS_RETRY_DELAY_MS_2, "20");
-            Retrieve ret = new Retrieve();
+            Retrieve ret = spy(new Retrieve());
+            lenient().doNothing().when(ret).sendEvent(argEvent.capture());
+            
             ret.setupUserFsTwoSpeedRetry(properties);
-
             Map<File, Integer> attemptCountsPerFile = new HashMap<>();
             doAnswer(invocation -> {
                 assertThat(invocation.getArguments()).hasSize(3);
@@ -696,7 +690,7 @@ public class RetrieveTest {
 
             }).when(mUserFs).store(any(), any(), any());
 
-            ret.copyFilesToUserFs(progress, payloadDir, mUserFs, 123_3456L, TEST_TIMESTAMP_DIR_NAME);
+            ret.copyFilesToUserFs(progress, payloadDir, new UserStoreInfo(mUserFs,TEST_TIMESTAMP_DIR_NAME), 123_3456L);
         }
     }
 }

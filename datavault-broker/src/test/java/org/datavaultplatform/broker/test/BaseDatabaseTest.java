@@ -3,6 +3,8 @@ package org.datavaultplatform.broker.test;
 import java.util.Arrays;
 import java.util.List;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.datavaultplatform.common.docker.DockerImage;
 import org.datavaultplatform.common.model.Permission;
 import org.datavaultplatform.common.model.PermissionModel;
@@ -14,18 +16,16 @@ import org.datavaultplatform.common.model.dao.PermissionDAO;
 import org.datavaultplatform.common.model.dao.RoleAssignmentDAO;
 import org.datavaultplatform.common.model.dao.RoleDAO;
 import org.datavaultplatform.common.model.dao.UserDAO;
+import org.datavaultplatform.common.util.UsesTestContainers;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.context.ApplicationContext;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.testcontainers.containers.MariaDBContainer;
 import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
-@DirtiesContext
-@Testcontainers(disabledWithoutDocker = true)
+@UsesTestContainers
 public abstract class BaseDatabaseTest {
-
-
+  
   @Autowired
   UserDAO userDAO;
 
@@ -38,6 +38,12 @@ public abstract class BaseDatabaseTest {
   @Autowired
   PermissionDAO permissionDAO;
 
+  @PersistenceContext
+  protected EntityManager em;
+  
+  @Autowired
+  ApplicationContext ctx;
+  
   @Container
   @ServiceConnection
   // This container is once per class - not once per method. Methods can 'dirty' the database.
@@ -94,5 +100,4 @@ public abstract class BaseDatabaseTest {
     }
     return user;
   }
-
 }

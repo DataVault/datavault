@@ -129,6 +129,17 @@ public class DepositsController {
     }
 
 
+    // Process the completed 'restart retrieve' page
+    @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositId}/retrieves/{retrieveId}/restart", method = RequestMethod.GET)
+    public String restartRetrieve(ModelMap model,
+                                 @PathVariable("vaultid") String vaultID, @PathVariable("depositId") String depositID,
+                                 @PathVariable("retrieveId") String retrieveID) throws Exception {
+
+        restService.restartRetrieve(depositID, retrieveID);
+
+        String depositUrl = "/vaults/" + vaultID + "/deposits/" + depositID + "/";
+        return "redirect:" + depositUrl;
+    }
 
     // Process the completed 'restart deposit' page
     @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositId}/restart", method = RequestMethod.GET)

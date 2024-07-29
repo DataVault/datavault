@@ -1005,6 +1005,25 @@ INSERT INTO `paused_retrieve_state`  VALUES ('203', '2003-07-22 12:12:12.123456'
 INSERT INTO `paused_retrieve_state`  VALUES ('204', '2004-07-22 12:12:12.123456', false);
 
 --
+-- 5.0.1
+--
+ALTER TABLE BillingInfo add column paymentDetails TEXT;
+ALTER TABLE PendingVaults add column sliceQueryChoice TEXT;
+ALTER TABLE PendingVaults add column fundingQueryChoice TEXT;
+ALTER TABLE PendingVaults add column feewaiverQueryChoice TEXT;
+ALTER TABLE PendingVaults add column paymentDetails TEXT;
+
+--
+-- 5.0.3 Deposit/Restart improvements
+--
+
+alter table `Deposits` ROW_FORMAT=DYNAMIC;
+alter table `Deposits` ADD `non_restart_job_id` VARCHAR(256) DEFAULT NULL;
+
+alter table `Events` ROW_FORMAT=DYNAMIC;
+alter table `Events` ADD `chunkNumber` INT NULL, ADD `archive_store_id` varchar(256) NULL;
+
+--
 -- Dumping data for table `hibernate_sequence`
 --
 

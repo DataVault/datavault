@@ -1,157 +1,133 @@
 package org.datavaultplatform.worker.operations;
 
-import lombok.SneakyThrows;
-import org.datavaultplatform.common.crypto.Encryption;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.task.Context;
-import org.datavaultplatform.common.util.Utils;
+import org.datavaultplatform.worker.tasks.RetrievedChunkFileChecker;
+import org.datavaultplatform.worker.tasks.retrieve.ArchiveDeviceInfo;
+import org.datavaultplatform.worker.tasks.retrieve.RetrieveChunkInfo;
+import org.datavaultplatform.worker.tasks.retrieve.RetrieveUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.stubbing.Answer;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.function.Consumer;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class ChunkRetrieveTrackerTest {
+public class ChunkRetrieveTrackerTest {
 
-    private static final byte[] TEST_BYTE_ARRAY = new byte[0];
-    private static final int TEST_CHUNK_NUMBER = 5;
-    private static final String LABEL_RET_CHUNK = "ret-chunk";
-    private static final String LABEL_ENC_RET_CHUNK = "ret-enc-chunk";
-    private static final String TEST_LOCATION = "test-location";
-    private static final String TEST_ARCHIVE_ID = "test-archive-id";
-    private static final String TEST_ARCHIVE_ID_WITH_CHUNK = "test-archive-id.5";
-
-    public static final String TEST_CHUNKS_DIGEST = "TEST-CHUNKS-DIGEST";
-    public static final String TEST_ENC_CHUNKS_DIGEST = "TEST-ENC-CHUNKS-DIGEST";
+    public static final int TEST_CHUNK_NUMBER=2112;
+    public static final String TEST_CHUNK_DIGEST="test-chunk-digest";
+    public static final String TEST_ENC_CHUNK_DIGEST="test-enc-chunk-digest";
+    
+    String archiveId = "TEST-ARCHIVE-ID";
+    
+    @Mock
+    ArchiveDeviceInfo mArchiveDeviceInfo;
+    
+    @Mock
+    Context mContext;
+    
+    @Mock
+    Device mDevice;
+    
+    @Mock
+    File mChunkFile;
 
     @Mock
-    private Device mDevice;
+    RetrieveChunkInfo mChunkInfo;
+
+    RetrievedChunkFileChecker chunkFileChecker = new RetrievedChunkFileChecker();
 
     @Mock
-    private Context mContext;
+    Consumer<Integer> mChunkEventSender;
 
-    File chunkFile;
+    byte[] testIV = new byte[0];
+    
+    Progress progress = new Progress();
+
+    List<String> locations = new ArrayList<>();
 
     @BeforeEach
-    @SneakyThrows
     void setup() {
-        chunkFile = File.createTempFile("chunkFile", ".tar.5");
+        when(mArchiveDeviceInfo.archiveFs()).thenReturn(mDevice);
+
+        when(mChunkInfo.chunkNumber()).thenReturn(TEST_CHUNK_NUMBER);
+        when(mChunkInfo.chunkFile()).thenReturn(mChunkFile);
+        when(mChunkInfo.chunkDigest()).thenReturn(TEST_CHUNK_DIGEST);
+        when(mChunkInfo.encChunkDigest()).thenReturn(TEST_ENC_CHUNK_DIGEST);
+        when(mChunkInfo.iv()).thenReturn(testIV);
+        when(mArchiveDeviceInfo.locations()).thenReturn(locations);
+
     }
-
+    
     @Captor
-    ArgumentCaptor<String> argArchiveId;
-
-    @Captor
-    ArgumentCaptor<File> argChunkFile;
-
-    @Captor
-    ArgumentCaptor<Progress> argProgress;
-
-    @Captor
-    ArgumentCaptor<List<String>> argLocations;
-
+    ArgumentCaptor<String> argChunkArchiveId;
+    
     @Test
-    void testRetrieveSingleCopyNotEncrypted() {
-        checkRetrieve(false, false);
-    }
+    void testMultiCopy() throws Exception {
+        
+        try (MockedStatic<RetrieveUtils> mockUtils = Mockito.mockStatic(RetrieveUtils.class)) {
+            
+            when(mArchiveDeviceInfo.multiCopy()).thenReturn(true);
 
+            doNothing().when(mDevice).retrieve(argChunkArchiveId.capture(), eq(mChunkFile), eq(progress), eq(locations));
+            
+            doNothing().when(mChunkEventSender).accept(TEST_CHUNK_NUMBER);
+
+            ChunkRetrieveTracker tracker = new ChunkRetrieveTracker(archiveId, mArchiveDeviceInfo, mContext, progress, mChunkInfo, mChunkEventSender, chunkFileChecker);
+
+            File result = tracker.call();
+            assertThat(result).isEqualTo(mChunkFile);
+
+            String actualChunkArchiveId = argChunkArchiveId.getValue();
+            assertThat(actualChunkArchiveId).isEqualTo(archiveId+"."+TEST_CHUNK_NUMBER);
+
+            verify(mDevice).retrieve(actualChunkArchiveId, mChunkFile, progress, locations);
+            verify(mChunkEventSender).accept(TEST_CHUNK_NUMBER);
+
+            mockUtils.verify(() -> RetrieveUtils.decryptAndCheckTarFile("chunk-2112", mContext, testIV, mChunkFile, TEST_ENC_CHUNK_DIGEST, TEST_CHUNK_DIGEST ));
+
+            mockUtils.verifyNoMoreInteractions();
+            verifyNoMoreInteractions(mDevice,mChunkInfo,mChunkFile,mArchiveDeviceInfo, mContext);
+        }
+    }
     @Test
-    void testRetrieveSingleCopyEncrypted() {
-        checkRetrieve(false, true);
-    }
+    void testSingleCopy() throws Exception {
 
-    @Test
-    void testRetrieveMultiCopyNotEncrypted() {
-        checkRetrieve(true, false);
-    }
+        try (MockedStatic<RetrieveUtils> mockUtils = Mockito.mockStatic(RetrieveUtils.class)) {
 
-    @Test
-    void testRetrieveMultiCopyEncrypted() {
-        checkRetrieve(true, true);
-    }
+            when(mArchiveDeviceInfo.multiCopy()).thenReturn(false);
 
-    @Captor
-    ArgumentCaptor<String> argHashLabel;
-    @Captor
-    ArgumentCaptor<File> argHashFile;
-    @Captor
-    ArgumentCaptor<String> argHashExpected;
+            doNothing().when(mDevice).retrieve(argChunkArchiveId.capture(), eq(mChunkFile), eq(progress));
 
-    @SneakyThrows
-    void checkRetrieve(boolean isMulti, boolean isEncrypted) {
-        try (MockedStatic<Utils> mockUtils = Mockito.mockStatic(Utils.class)) {
-            try (MockedStatic<Encryption> mockEncryption = Mockito.mockStatic(Encryption.class)) {
-                mockUtils.when(() ->
-                        Utils.checkFileHash(argHashLabel.capture(), argHashFile.capture(), argHashExpected.capture())
-                ).thenAnswer((Answer<String>) invocation -> {
-                    String label = invocation.getArgument(0);
-                    if (LABEL_RET_CHUNK.equals(label)) {
-                        return TEST_CHUNKS_DIGEST;
-                    } else {
-                        return TEST_ENC_CHUNKS_DIGEST;
-                    }
-                });
-                Map<Integer, byte[]> ivs = new HashMap<>();
+            doNothing().when(mChunkEventSender).accept(TEST_CHUNK_NUMBER);
+            
+            ChunkRetrieveTracker tracker = new ChunkRetrieveTracker(archiveId, mArchiveDeviceInfo, mContext, progress, mChunkInfo, mChunkEventSender, chunkFileChecker);
 
-                Progress progress = new Progress();
-                Map<Integer, String> chunksDigest = new HashMap<>();
-                chunksDigest.put(TEST_CHUNK_NUMBER, TEST_CHUNKS_DIGEST);
-                Map<Integer, String> encChunksDigest = new HashMap<>();
-                if (isEncrypted) {
-                    ivs.put(TEST_CHUNK_NUMBER, TEST_BYTE_ARRAY);
-                    encChunksDigest.put(TEST_CHUNK_NUMBER, TEST_ENC_CHUNKS_DIGEST);
-                }
-                if (isMulti) {
-                    Mockito.doNothing().when(mDevice).retrieve(argArchiveId.capture(), argChunkFile.capture(), argProgress.capture(), argLocations.capture());
-                } else {
-                    Mockito.doNothing().when(mDevice).retrieve(argArchiveId.capture(), argChunkFile.capture(), argProgress.capture());
-                }
+            File result = tracker.call();
+            assertThat(result).isEqualTo(mChunkFile);
 
-                ChunkRetrieveTracker retriever = new ChunkRetrieveTracker(
-                        TEST_ARCHIVE_ID, mDevice, mContext, TEST_CHUNK_NUMBER,
-                        ivs, Arrays.asList(TEST_LOCATION), isMulti, progress, chunksDigest, encChunksDigest,
-                        chunkFile);
-                File result = retriever.call();
-                assertThat(result).isEqualTo(chunkFile);
+            String actualChunkArchiveId = argChunkArchiveId.getValue();
+            assertThat(actualChunkArchiveId).isEqualTo(archiveId+"."+TEST_CHUNK_NUMBER);
 
-                if (isMulti) {
-                    assertThat(argArchiveId.getValue()).isEqualTo(TEST_ARCHIVE_ID_WITH_CHUNK);
-                    assertThat(argChunkFile.getValue()).isEqualTo(chunkFile);
-                    assertThat(argProgress.getValue()).isEqualTo(progress);
-                    assertThat(argLocations.getValue()).isEqualTo(Arrays.asList(TEST_LOCATION));
+            verify(mDevice).retrieve(actualChunkArchiveId, mChunkFile, progress);
+            verify(mChunkEventSender).accept(TEST_CHUNK_NUMBER);
 
-                    Mockito.verify(mDevice).retrieve(TEST_ARCHIVE_ID_WITH_CHUNK, chunkFile, progress, Arrays.asList(TEST_LOCATION));
-                } else {
-                    assertThat(argArchiveId.getValue()).isEqualTo(TEST_ARCHIVE_ID_WITH_CHUNK);
-                    assertThat(argChunkFile.getValue()).isEqualTo(chunkFile);
-                    assertThat(argProgress.getValue()).isEqualTo(progress);
-                    Mockito.verify(mDevice).retrieve(TEST_ARCHIVE_ID_WITH_CHUNK, chunkFile, progress);
-                }
-                InOrder inOrderUtils = Mockito.inOrder(Utils.class);
+            mockUtils.verify(() -> RetrieveUtils.decryptAndCheckTarFile("chunk-2112", mContext, testIV, mChunkFile, TEST_ENC_CHUNK_DIGEST, TEST_CHUNK_DIGEST ));
 
-                if (isEncrypted) {
-                    inOrderUtils.verify(mockUtils, () ->
-                            Utils.checkFileHash(LABEL_ENC_RET_CHUNK, chunkFile, TEST_ENC_CHUNKS_DIGEST));
-
-                    mockEncryption.verify(() -> Encryption.decryptFile(mContext, chunkFile, TEST_BYTE_ARRAY));
-                }
-
-                inOrderUtils.verify(mockUtils, () ->
-                        Utils.checkFileHash(LABEL_RET_CHUNK, chunkFile, TEST_CHUNKS_DIGEST));
-
-                Mockito.verifyNoMoreInteractions(mDevice);
-            }
+            mockUtils.verifyNoMoreInteractions();
+            verifyNoMoreInteractions(mDevice,mChunkInfo,mChunkFile,mArchiveDeviceInfo,mContext);
         }
     }
 }

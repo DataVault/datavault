@@ -1,0 +1,22 @@
+{
+  "priority": 1,
+  "request": {
+    "urlPath": "/retrieve/retrieve456/restart",
+    "method": "POST",
+    "headers": {
+      "X-UserID": {
+        "matches": "user1"
+      },
+      "X-Client-Key": {
+        "matches": "XXXX"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": true
+  }
+}

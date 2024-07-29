@@ -1,5 +1,6 @@
 package org.datavaultplatform.webapp.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.datavaultplatform.common.dto.PausedDepositStateDTO;
 import org.datavaultplatform.common.dto.PausedRetrieveStateDTO;
@@ -28,7 +29,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
+
 
 import java.io.Serializable;
 

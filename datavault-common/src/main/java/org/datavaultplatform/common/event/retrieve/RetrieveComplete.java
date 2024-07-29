@@ -1,16 +1,15 @@
 package org.datavaultplatform.common.event.retrieve;
 
-import org.datavaultplatform.common.event.Event;
-
 import jakarta.persistence.Entity;
 
 @Entity
-public class RetrieveComplete extends Event {
+public class RetrieveComplete extends BaseRetrieveEvent {
+    public static final String MESSAGE = "Deposit retrieve completed";
 
     public RetrieveComplete() {
     }
+
     public RetrieveComplete(String jobId, String depositId, String retrieveId) {
-        super(jobId, depositId, retrieveId, "Deposit retrieve completed");
-        this.eventClass = RetrieveComplete.class.getCanonicalName();
+        super(jobId, depositId, retrieveId, MESSAGE);
     }
 }

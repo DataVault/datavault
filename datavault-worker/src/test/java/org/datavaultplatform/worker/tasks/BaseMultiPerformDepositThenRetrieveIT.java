@@ -7,17 +7,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.io.FileUtils;
-import org.awaitility.Awaitility;
 import org.datavaultplatform.common.config.BaseQueueConfig;
 import org.datavaultplatform.common.crypto.Encryption;
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.event.deposit.Complete;
+import org.datavaultplatform.common.event.deposit.CompleteCopyUpload;
 import org.datavaultplatform.common.event.deposit.ComputedDigest;
 import org.datavaultplatform.common.event.deposit.ComputedEncryption;
 import org.datavaultplatform.common.event.retrieve.RetrieveComplete;
 import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.common.task.Context.AESMode;
-import org.datavaultplatform.worker.rabbit.BaseRabbitTCTest;
+import org.datavaultplatform.common.util.TestUtils;
+import org.datavaultplatform.worker.rabbit.BaseRabbitIT;
 import org.datavaultplatform.worker.utils.DepositEvents;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -56,7 +57,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
 @Timeout(value = 60, unit = TimeUnit.SECONDS)
-public abstract class BaseMultiPerformDepositThenRetrieveIT extends BaseRabbitTCTest {
+public abstract class BaseMultiPerformDepositThenRetrieveIT extends BaseRabbitIT {
 
   static final String KEY_NAME_FOR_SSH = "key-name-for-ssh";
   static final String KEY_NAME_FOR_DATA = "key-name-for-data";
@@ -99,7 +100,7 @@ public abstract class BaseMultiPerformDepositThenRetrieveIT extends BaseRabbitTC
     Set<Path> paths = new HashSet<>();
     try (TarArchiveInputStream tarIn = new TarArchiveInputStream(new FileInputStream(tarFile))) {
       TarArchiveEntry entry;
-      while ((entry = tarIn.getNextTarEntry()) != null) {
+      while ((entry = tarIn.getNextEntry()) != null) {
         if (entry.isDirectory()) {
           continue;
         }
@@ -233,15 +234,18 @@ public abstract class BaseMultiPerformDepositThenRetrieveIT extends BaseRabbitTC
     // delete files from the first location, the retrieve should work using the second location !
     Arrays.stream(destDir1.listFiles()).forEach(File::delete);
 
+    checkDepositEvents();
+
     buildAndSendRetrieveMessage(depositEvents);
     checkRetrieve();
 
   }
 
   void waitUntil(Callable<Boolean> test) {
-    Awaitility.await().atMost(1, TimeUnit.MINUTES)
-        .pollInterval(Duration.ofSeconds(15))
-        .until(test);
+    TestUtils.waitUntil(
+            Duration.ofMinutes(1),
+            Duration.ofSeconds(15),
+            test);
   }
 
   @SneakyThrows
@@ -377,12 +381,22 @@ public abstract class BaseMultiPerformDepositThenRetrieveIT extends BaseRabbitTC
   private Event extractEvent(String message) {
     Event event = mapper.readValue(message, Event.class);
     String eventClassName = event.getEventClass();
-    Class<? extends Event> eventClass = (Class<? extends Event>) Class.forName(eventClassName);
+    Class<? extends Event> eventClass = Class.forName(eventClassName).asSubclass(Event.class);
     return mapper.readValue(message, eventClass);
   }
 
   @SneakyThrows
   private String getSha1Hash(File file) {
     return Verify.getDigest(file);
+  }
+
+  public List<CompleteCopyUpload> getCopyUploadCompleteEvents(){
+    return events.stream()
+            .filter(e -> e.getClass().equals(CompleteCopyUpload.class))
+            .map(CompleteCopyUpload.class::cast)
+            .toList();
+  }
+
+  protected void checkDepositEvents() {
   }
 }

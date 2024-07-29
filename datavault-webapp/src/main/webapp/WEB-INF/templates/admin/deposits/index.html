@@ -124,7 +124,7 @@
                         <td>[[${deposit.vaultReviewDate}]]</td>
                         <td th:with="removeDepositSecurityExpression=|hasPermission('${deposit.getGroupID()}', 'GROUP', 'DELETE_SCHOOL_VAULT_DEPOSITS')|">
                             <th:block th:if="${#authorization.expression(removeDepositSecurityExpression)}">
-                            <th:block th:if="${deposit.status != 'DELETED'}">
+                            <th:block th:if="${deposit.status.name() != 'DELETED'}">
                                 <a class="btn btn-xs btn-danger pull-left" href="#" th:data-vault="${deposit.getVaultID()}" th:data-deposit="${deposit.getID()}" data-toggle="modal" data-target="#confirm-removal">
                                     <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Remove
                                 </a>
@@ -132,7 +132,7 @@
                             </th:block>
                             </th:block>
 
-                            <th:block th:if="${deposit.status == 'FAILED'}">
+                            <th:block th:if="${deposit.status.name() == 'FAILED'}">
                                 <a class="restart-deposit-btn btn btn-default btn-sm"
                                    th:href="@{|/vaults/__${deposit.vaultID}__/deposits/__${deposit.getID()}__/restart|}">
                                     Restart

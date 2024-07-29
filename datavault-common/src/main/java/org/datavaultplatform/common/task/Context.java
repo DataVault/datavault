@@ -1,11 +1,13 @@
 package org.datavaultplatform.common.task;
 
+import lombok.Getter;
 import org.datavaultplatform.common.event.EventSender;
 import java.nio.file.Path;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
 
 // Some common properties needed for all jobs
 
+@Getter
 public class Context {
 
     public static final int DEFAULT_NUMBER_OF_THREADS = 25;
@@ -19,26 +21,22 @@ public class Context {
     private final long chunkingByteSize;
     private final boolean encryptionEnabled;
     private final AESMode encryptionMode;
-    private final String vaultAddress;
-    private final String vaultToken;
-    private final String vaultKeyPath;
-    private final String vaultKeyName;
-    private final String vaultSslPEMPath;
+    private final ContextVaultInfo vaultInfo;
     private final boolean multipleValidationEnabled;
     private final int noChunkThreads;
-    private final StorageClassNameResolver classNameResolver;
+    private final StorageClassNameResolver storageClassNameResolver;
     private final boolean oldRecompose;
 
     private final String recomposeDate;
+    private final TaskStageEventListener taskStageEventListener;
 
     public Context(Path tempDir, Path metaDir, EventSender eventSender,
-                   Boolean chunkingEnabled, Long chunkingByteSize,
-                   Boolean encryptionEnabled, AESMode encryptionMode, 
-                   String vaultAddress, String vaultToken,
-                   String vaultKeyPath, String vaultKeyName,
-                   String vaultSslPEMPath, Boolean multipleValidationEnabled
-                    ,int noChunkThreads, StorageClassNameResolver classNameResolver,
-                   Boolean oldRecompose, String recomposeDate) {
+                   boolean chunkingEnabled, Long chunkingByteSize,
+                   boolean encryptionEnabled, AESMode encryptionMode, 
+                   ContextVaultInfo vaultInfo, boolean multipleValidationEnabled,
+                   int noChunkThreads, StorageClassNameResolver storageClassNameResolver,
+                   boolean oldRecompose, String recomposeDate,
+                   TaskStageEventListener taskStageEventListener) {
         this.tempDir = tempDir;
         this.metaDir = metaDir;
         this.eventSender = eventSender;
@@ -46,66 +44,13 @@ public class Context {
         this.chunkingByteSize = chunkingByteSize;
         this.encryptionEnabled = encryptionEnabled;
         this.encryptionMode = encryptionMode;
-        this.vaultAddress = vaultAddress;
-        this.vaultToken = vaultToken;
-        this.vaultKeyPath = vaultKeyPath;
-        this.vaultKeyName = vaultKeyName;
-        this.vaultSslPEMPath = vaultSslPEMPath;
+        this.vaultInfo = vaultInfo;
         this.multipleValidationEnabled = multipleValidationEnabled;
         this.noChunkThreads = noChunkThreads;
-        this.classNameResolver = classNameResolver;
+        this.storageClassNameResolver = storageClassNameResolver;
         this.oldRecompose = oldRecompose;
         this.recomposeDate = recomposeDate;
-    }
-
-    public Path getTempDir() {
-        return tempDir;
-    }
-
-    public Path getMetaDir() {
-        return metaDir;
-    }
-
-    public EventSender getEventSender() {
-        return eventSender;
-    }
-
-    public Boolean isChunkingEnabled() {
-        return chunkingEnabled;
-    }
-
-    public Long getChunkingByteSize() {
-        return chunkingByteSize;
-    }
-
-    public Boolean isEncryptionEnabled() {
-        return encryptionEnabled;
-    }
-
-    public AESMode getEncryptionMode() { return encryptionMode; }
-    
-    public String getVaultAddress() {
-        return vaultAddress;
-    }
-
-    public String getVaultToken() {
-        return vaultToken;
-    }
-
-    public String getVaultKeyPath() {
-        return vaultKeyPath;
-    }
-
-    public String getVaultKeyName() {
-        return vaultKeyName;
-    }
-
-    public String getVaultSslPEMPath() {
-        return vaultSslPEMPath;
-    }
-
-    public Boolean isMultipleValidationEnabled() {
-        return multipleValidationEnabled;
+        this.taskStageEventListener = taskStageEventListener;
     }
 
     public int getNoChunkThreads() {
@@ -114,15 +59,5 @@ public class Context {
         } else {
             return noChunkThreads;
         }
-    }
-
-    public StorageClassNameResolver getStorageClassNameResolver(){ return this.classNameResolver; }
-
-    public Boolean isOldRecompose() {
-        return oldRecompose;
-    }
-
-    public String getRecomposeDate() {
-        return recomposeDate;
     }
 }

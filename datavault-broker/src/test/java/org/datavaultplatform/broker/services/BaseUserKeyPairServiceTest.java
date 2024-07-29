@@ -6,15 +6,15 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.util.stream.Stream;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.datavaultplatform.common.util.UsesTestContainers;
 import org.springframework.core.io.Resource;
 import org.springframework.util.StreamUtils;
 import org.testcontainers.containers.Container;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.images.builder.Transferable;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 @Slf4j
-@Testcontainers(disabledWithoutDocker = true)
+@UsesTestContainers
 public abstract class BaseUserKeyPairServiceTest {
   
   public static final String NO = "no";
