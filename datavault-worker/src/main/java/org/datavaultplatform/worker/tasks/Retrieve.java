@@ -134,7 +134,11 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
 
         // On the assumption that we have the tarfile now, delete the chunks
         log.info("Deleting the chunks now we have the recomposed tarfile");
-        Arrays.stream(chunks).filter(Objects::nonNull).forEach(File::delete);
+        Arrays.stream(chunks)
+                .filter(Objects::nonNull)
+                .filter(File::exists)
+                .filter(File::isFile)
+                .forEach(File::delete);
     }
 
     private File[] retrieveFiles(Context context, ArchiveDeviceInfo archiveDeviceInfo, Progress progress, File tarFile, RetrievedChunks retrievedChunks) throws Exception {
@@ -306,19 +310,23 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
     }
     
     protected boolean isFinalTarValid(File tarFile, String archiveDigest) {
+        boolean result;
         try {
             log.info("tarFile[{}] archiveDigest[{}]", tarFile, archiveDigest);
             Utils.checkFileHash("single-verified-tar", tarFile, archiveDigest);
-            return true;
+            result = true;
         } catch (Exception ex) {
-            return false;
+            result = false;
         }
+        log.info("tar[{}] valid?[{}]", tarFile, result);
+        return result;
     }
     
     protected void fromArchiveStoreToUserStore(Context context, File tarFile, ArchiveDeviceInfo archiveDeviceInfo, UserStoreInfo userStoreInfo, RetrievedChunks retrievedChunks) throws Exception {
         var progress = new Progress();
         trackProgress(progress, archiveSize, () -> {
-            if (isLastEventBefore(ArchiveStoreRetrievedAll.class) || !isFinalTarValid(tarFile, archiveDigest)) {
+            if (isLastEventBefore(ArchiveStoreRetrievedAll.class) || 
+                    (isLastEventBefore(UploadedToUserStore.class) && !isFinalTarValid(tarFile, archiveDigest))) {
                 doStage(TaskStage.Retrieve2RetrieveFromArchiveAndRecompose.INSTANCE);
                 if (context.isChunkingEnabled()) {
                     retrieveChunksAndRecompose(context, archiveDeviceInfo, progress, tarFile, retrievedChunks);
@@ -340,7 +348,7 @@ public class Retrieve extends BaseTwoSpeedRetryTask {
             skipStage(TaskStage.Retrieve4Final.INSTANCE);
         }
     }
-
+    
     protected void copyFilesToUserFs(Progress progress, File payloadDir, UserStoreInfo userStoreInfo, long bagDirSize) throws Exception {
         trackProgress(progress, bagDirSize, () -> {
             File[] contents = payloadDir.listFiles();

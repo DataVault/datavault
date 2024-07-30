@@ -184,20 +184,26 @@ public abstract class BasePerformDepositThenRetrieveThenRestartIT extends BaseDe
 
       assertThat(this.taskStageEvents).isNotEmpty();
 
-      if(interruptAtEventClass == RetrieveComplete.class){
-        assertThat(this.taskStageEvents.stream().allMatch(TaskStageEvent::skipped));
-      } else {
-        int shouldHaveSkipped = taskStageEvents.size() - 1;
-        assertThat(this.taskStageEvents.stream().limit(shouldHaveSkipped).allMatch(TaskStageEvent::skipped));
-        TaskStageEvent lastTaskStageEvent = taskStageEvents.get(taskStageEvents.size() - 1);
-        assertThat(lastTaskStageEvent.skipped()).isFalse();
-      }
 
       List<Event> reversed = new ArrayList<>(events);
       Collections.reverse(reversed);
       nextLastEvent = reversed.stream().filter(e -> e.getClass().equals(interruptAtEventClass)).findFirst().get();
       Assert.isTrue(nextLastEvent != null, "Cannot find next last event when interruptAtEventClass[%s]".formatted(interruptAtEventClass));
       assertThat(nextLastEvent.getClass().getSimpleName()).isEqualTo(interruptAtEventClass.getSimpleName());
+
+      String lastEventClass = lastEvent == null ? null : lastEvent.getClass().getSimpleName();
+
+      for (int i = 0; i < taskStageEvents.size() - 1; i++) {
+        TaskStageEvent nonFinalStage = taskStageEvents.get(i);
+        assertThat(nonFinalStage.skipped())
+                .withFailMessage("Non Final Stage[%s] was not skipped, lastEventClass[%s]", nonFinalStage.stage().getLabel(), lastEventClass)
+                .isTrue();
+      }
+      TaskStageEvent finalStage = taskStageEvents.get(taskStageEvents.size() - 1);
+      assertThat(finalStage.skipped())
+              .withFailMessage("Final Stage[%s] was skipped, lastEventClass[%s]", finalStage.stage().getLabel(), lastEventClass)
+              .isFalse();
+
     }
   }
 }
