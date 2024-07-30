@@ -39,6 +39,9 @@
     
     <!-- dependency versions -->
 
+    <!-- https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-java -->
+    <selenium.version>4.23.0</selenium.version>
+
     <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-bom -->
     <aws.java.sdk.bom.version>1.12.728</aws.java.sdk.bom.version>
 
@@ -604,6 +607,12 @@
         <dependency>
           <groupId>org.testng</groupId>
           <artifactId>testng</artifactId>
+          <scope>test</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.seleniumhq.selenium</groupId>
+          <artifactId>selenium-java</artifactId>
+          <version>${selenium.version}</version>
           <scope>test</scope>
         </dependency>
       </dependencies>
