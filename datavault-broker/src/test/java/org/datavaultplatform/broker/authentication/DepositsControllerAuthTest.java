@@ -129,6 +129,17 @@ public class DepositsControllerAuthTest extends BaseControllerAuthTest {
   }
 
   @Test
+  void testPostRestartRetrieve() throws Exception {
+    when(controller.retrieveDepositRestart(USER_ID_1, "deposit-id-1","retrieve-id-1")).thenReturn(true);
+
+    checkWorksWhenAuthenticatedFailsOtherwise(
+            post("/deposits/{depositId}/retrieve/{retrieveId}/restart", "deposit-id-1","retrieve-id-1"),
+            true);
+
+    verify(controller).retrieveDepositRestart(USER_ID_1, "deposit-id-1","retrieve-id-1");
+  }
+
+  @Test
   void testPostDepositRetrieve() throws Exception {
     when(controller.retrieveDeposit(argUserId.capture(), argDepositId.capture(),
         argRetrieve.capture())).thenReturn(false);

@@ -16,7 +16,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 @AutoConfigureMockMvc
 @Import(TestClockConfig.class)
 @ProfileStandalone
-abstract class BaseServletEncodingTest {
+public abstract class BaseServletEncodingTest {
 
   @Autowired
   MockMvc mvc;

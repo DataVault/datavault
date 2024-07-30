@@ -134,10 +134,10 @@ public class TarNestedTest extends BaseNestedTarTest {
   private List<TarArchiveEntry> getEntries(File tarFile){
     List<TarArchiveEntry> entries = new ArrayList<>();
     try (TarArchiveInputStream tarIn = new TarArchiveInputStream(new FileInputStream(tarFile))) {
-      TarArchiveEntry entry = tarIn.getNextTarEntry();
+      TarArchiveEntry entry = tarIn.getNextEntry();
       while (entry != null) {
         entries.add(entry);
-        entry = tarIn.getNextTarEntry();
+        entry = tarIn.getNextEntry();
       }
     }
     return entries;

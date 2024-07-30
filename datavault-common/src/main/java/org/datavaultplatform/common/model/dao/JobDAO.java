@@ -18,4 +18,6 @@ public interface JobDAO extends BaseDAO<Job> {
   @Override
   @EntityGraph(Job.EG_JOB)
   List<Job> findAll();
+  
+  List<Job> findByDepositIdOrderByTimestampDesc(String depositId);
 }

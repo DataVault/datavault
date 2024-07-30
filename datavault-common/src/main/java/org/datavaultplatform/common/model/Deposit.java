@@ -31,7 +31,7 @@ import org.jsondoc.core.annotation.ApiObjectField;
         @NamedAttributeNode(Vault_.DATASET)
     })
 )
-public class Deposit {
+public class Deposit implements Identified {
 
     public static final String EG_DEPOSIT = "eg.Deposit.1";
     // Deposit Identifier
@@ -167,6 +167,9 @@ public class Deposit {
     
     @ManyToOne
     private User user;
+    
+    @Column(name = "non_restart_job_id", columnDefinition = "VARCHAR(256) NULL")
+    private String nonRestartJobId;
     
     public Deposit() {}
     public Deposit(String name, String description, Boolean hasPersonalData) {
@@ -347,23 +350,12 @@ public class Deposit {
         this.user = user;
     }
 
-    @JsonIgnore
-    public Event getLastEvent(){
-        Event lastEvent = events
-                .stream()
-                .max(Comparator.comparing(Event::getSequence))
-                .orElse(null);
-        return lastEvent;
+    public String getNonRestartJobId() {
+        return nonRestartJobId;
     }
 
-    @JsonIgnore
-    public Event getLastNotFailedEvent(){
-        Event lastEvent = events
-                .stream()
-                .filter(event-> !"org.datavaultplatform.common.event.Error".equals(event.getEventClass()))
-                .max(Comparator.comparing(Event::getSequence))
-                .orElse(null);
-        return lastEvent;
+    public void setNonRestartJobId(String nonRestartJobId) {
+        this.nonRestartJobId = nonRestartJobId;
     }
     
     public DepositInfo convertToResponse() {

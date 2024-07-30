@@ -12,6 +12,6 @@ public class PackageComplete extends Event {
         super("Packaging completed");
         this.eventClass = PackageComplete.class.getCanonicalName();
         this.depositId = depositId;
-        this.jobId = jobId;
+        this.setJobId(jobId);
     }
 }

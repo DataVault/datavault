@@ -16,7 +16,7 @@ public class UploadComplete extends Event {
     @Lob
     @Convert(converter = HashMapConverter.StringString.class)
     @Column(name="archiveIds", columnDefinition="TINYBLOB")
-    HashMap<String, String> archiveIds = new HashMap<>();
+    private HashMap<String, String> archiveIds = new HashMap<>();
 
     public UploadComplete() {
     }
@@ -25,7 +25,7 @@ public class UploadComplete extends Event {
         super("Upload completed");
         this.eventClass = UploadComplete.class.getCanonicalName();
         this.depositId = depositId;
-        this.jobId = jobId;
+        this.setJobId(jobId);
         this.archiveIds = archiveIds;
     }
 

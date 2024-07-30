@@ -58,7 +58,10 @@ public class SecurityConfig {
 
   @Bean
   WebSecurityCustomizer webSecurityCustomizer() {
-    return web -> web.debug(securityDebug);
+    return web -> {
+      web.debug(securityDebug);
+      web.ignoring().requestMatchers("/retrieve/**");
+    };
   }
 
   @Bean

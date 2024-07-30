@@ -1,6 +1,8 @@
 package org.datavaultplatform.common.event.deposit;
 
 import java.util.HashMap;
+
+import com.fasterxml.jackson.annotation.JsonGetter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Convert;
@@ -17,8 +19,7 @@ public class Complete extends Event {
     @Column(name = "archiveIds", columnDefinition="TINYBLOB")
     private HashMap<String, String> archiveIds = new HashMap<>();
 
-    //public String archiveId;
-    public long archiveSize;
+    private long archiveSize;
 
     public Complete() {}
     public Complete(String jobId, String depositId, HashMap<String, String> archiveIds, long archiveSize) {
@@ -29,9 +30,10 @@ public class Complete extends Event {
         this.archiveIds = archiveIds;
         this.archiveSize = archiveSize;
         this.depositId = depositId;
-        this.jobId = jobId;
+        this.setJobId(jobId);
     }
 
+    @JsonGetter
     public HashMap<String, String> getArchiveIds() {
         return archiveIds;
     }
@@ -40,6 +42,7 @@ public class Complete extends Event {
         this.archiveIds = archiveIds;
     }
 
+    @JsonGetter
     public long getArchiveSize() {
         return archiveSize;
     }

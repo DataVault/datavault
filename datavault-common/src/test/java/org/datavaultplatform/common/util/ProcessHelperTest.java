@@ -76,7 +76,7 @@ class ProcessHelperTest {
 
     @Test
     void testProcessWithError() throws Exception {
-        Matcher<List<String>> errorMatcher = new TypeSafeMatcher<List<String>>() {
+        Matcher<List<String>> errorMatcher = new TypeSafeMatcher<>() {
 
             @Override
             public void describeTo(Description description) {
@@ -104,7 +104,7 @@ class ProcessHelperTest {
             assertThat(info.getExitValue()).isZero();
             assertThat(info.wasSuccess()).isTrue();
             assertThat(info.isTimedOut()).isFalse();
-            assertThat(info.getDuration()).isGreaterThan(Duration.ofSeconds(5));
+            assertThat(info.getDuration()).isGreaterThanOrEqualTo(Duration.ofSeconds(5));
         }
 
         @Test

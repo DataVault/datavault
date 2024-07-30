@@ -1,15 +1,15 @@
 package org.datavaultplatform.webapp.test;
 
-import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.web.context.HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY;
 
 import java.net.URI;
 import java.nio.file.Paths;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.StringTokenizer;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
@@ -112,12 +112,13 @@ public abstract class TestUtils {
   }
 
   public static void waitForSessionRegistryToHaveAnEntry(SessionRegistry sessionRegistry) {
-    //We have to wait for session to be added to sessionRegistry
+    // We have to wait for session to be added to sessionRegistry
     Callable<Boolean> ready = () -> sessionRegistry.getAllPrincipals().isEmpty() == false;
 
-    await().atMost(5, TimeUnit.SECONDS)
-        .pollInterval(100, TimeUnit.MILLISECONDS)
-        .until(ready);
+    org.datavaultplatform.common.util.TestUtils.waitUntil(
+            Duration.ofSeconds(5),
+            Duration.ofMillis(100),
+            ready);
   }
 
   public static String stripPrefix(String prefix, String value){

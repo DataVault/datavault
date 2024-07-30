@@ -1,5 +1,6 @@
 package org.datavaultplatform.broker.controllers;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -120,7 +121,7 @@ public class GenerateRetrieveMessageTest extends BaseGenerateMessageTest {
     when(usersService.getUser("user123")).thenReturn(mockUser);
     when(depositDao.findById("deposit-id-123")).thenReturn(Optional.of(deposit));
 
-    when(sender.send(argMessage.capture())).thenReturn("message-id");
+    when(sender.send(argMessage.capture(), any(Boolean.class))).thenReturn("message-id");
 
     dc.retrieveDeposit("user123", "deposit-id-123", retrieve);
 

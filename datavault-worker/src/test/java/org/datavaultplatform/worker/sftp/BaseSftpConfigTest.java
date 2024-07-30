@@ -8,6 +8,7 @@ import org.datavaultplatform.common.storage.SFTPFileSystemDriver;
 import org.datavaultplatform.common.storage.StorageConstants;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.datavaultplatform.worker.app.DataVaultWorkerInstanceApp;
+import org.datavaultplatform.worker.rabbit.RabbitMessageSelectorScheduler;
 import org.datavaultplatform.worker.test.AddTestProperties;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,7 @@ import org.springframework.test.context.TestPropertySource;
 @DirtiesContext
 @TestPropertySource(properties = "worker.rabbit.enabled=false")
 @AddTestProperties
-abstract class BaseSftpConfigTest {
+public abstract class BaseSftpConfigTest {
 
   @Autowired
   StorageClassNameResolver storageClassNameResolver;
@@ -29,6 +30,9 @@ abstract class BaseSftpConfigTest {
   @MockBean
   //we have to mock this because it depends on Rabbit which we've not configured
   RecordingEventSender mEventSender;
+  
+  @MockBean
+  RabbitMessageSelectorScheduler scheduler;
 
   @Test
   void testSftpDriverIsAsConfigured() {

@@ -186,8 +186,12 @@
                 <include>**/ProcessUtils*</include>
                 <include>**/DockerImage*</include>
                 <include>**/Base*Test*</include>
+                <include>**/Base*IT*</include>
                 <include>**/*.ldif</include>
                 <include>**/SshRsaKeyUtils*</include>
+                <include>**/EventTest*</include>
+                <include>**/TestUtils*</include>
+                <include>**/UsesTestContainers*</include>
               </includes>
             </configuration>
           </execution>

@@ -13,6 +13,6 @@ public class TransferVaultOwnership extends Event {
     }
     public TransferVaultOwnership(TransferVault transfer, Vault vault, String userId){
         super("Transfer of ownership to "+transfer.getUserId()+" by "+userId );
-        this.eventClass = CreateRoleAssignment.class.getCanonicalName();
+        this.eventClass = TransferVaultOwnership.class.getCanonicalName();
     }
 }

@@ -1,16 +1,23 @@
 package org.datavaultplatform.common.model.dao;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
+
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.app.DataVaultBrokerApp;
 import org.datavaultplatform.broker.test.AddTestProperties;
 import org.datavaultplatform.broker.test.BaseReuseDatabaseTest;
 import org.datavaultplatform.common.model.Archive;
+import org.datavaultplatform.common.model.ArchiveStore;
+import org.datavaultplatform.common.model.Deposit;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -29,6 +36,12 @@ public class ArchiveDAOIT extends BaseReuseDatabaseTest {
 
   @Autowired
   ArchiveDAO dao;
+
+  @Autowired
+  ArchiveStoreDAO archiveStoreDAO;
+
+  @Autowired
+  DepositDAO depositDAO;
 
   @Test
   void testWriteThenRead() {
@@ -112,5 +125,60 @@ public class ArchiveDAOIT extends BaseReuseDatabaseTest {
 
   long count() {
     return dao.count();
+  }
+
+  @Nested
+  class FindLatestTests {
+
+    Deposit getDeposit1() {
+      Deposit deposit = new Deposit();
+      deposit.setHasPersonalData(false);
+      deposit.setName("test-deposit-1");
+      return deposit;
+    }
+
+    ArchiveStore getArchiveStore1() {
+      ArchiveStore result = new ArchiveStore();
+      result.setLabel("archive-store-1");
+      return result;
+    }
+
+    @Test
+    void testNullDepositAndArchiveId() {
+      Optional<Archive> optArchive = dao.findLatestByDepositIdAndArchiveStoreId(null, null);
+      assertThat(optArchive).isNotPresent();
+    }
+
+    @Test
+    void testArchiveStoreFound() {
+      Deposit deposit1 = getDeposit1();
+      depositDAO.save(deposit1);
+
+      ArchiveStore as1 = getArchiveStore1();
+      archiveStoreDAO.save(as1);
+
+      Date base = new Date();
+      Date later = new Date(base.getTime() + 100);
+
+      //this is the latest archive
+      Archive archive1 = getArchive1();
+      archive1.setDeposit(deposit1);
+      archive1.setArchiveStore(as1);
+      archive1.setCreationTime(later);
+
+      //this is NOT the latest archive
+      Archive archive2 = getArchive2();
+      archive2.setDeposit(deposit1);
+      archive2.setArchiveStore(as1);
+      archive2.setCreationTime(base);
+
+      dao.save(archive1);
+      dao.save(archive2);
+
+      assertThat(dao.count()).isEqualTo(2);
+
+      Optional<Archive> result = dao.findLatestByDepositIdAndArchiveStoreId(deposit1.getID(), as1.getID());
+      assertThat(result).contains(archive1);
+    }
   }
 }

@@ -2,10 +2,14 @@ package org.datavaultplatform.broker.services;
 
 import java.util.*;
 
+import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.model.dao.AuditChunkStatusDAO;
 import org.datavaultplatform.common.model.dao.DepositChunkDAO;
 import org.datavaultplatform.common.model.dao.DepositDAO;
+import org.datavaultplatform.common.model.dao.EventDAO;
+import org.datavaultplatform.common.util.RetrievedChunks;
+import org.datavaultplatform.common.util.StoredChunks;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +34,7 @@ public class DepositsService {
     private final DepositDAO depositDAO;
     private final DepositChunkDAO depositChunkDAO;
     private final AuditChunkStatusDAO auditChunkStatusDAO;
+    private final EventDAO eventDAO;
 
     /*
         <property name="depositDAO" ref="depositDAO" />
@@ -48,6 +53,7 @@ public class DepositsService {
         DepositDAO depositDAO,
         DepositChunkDAO depositChunkDAO,
         AuditChunkStatusDAO auditChunkStatusDAO,
+        EventDAO eventDAO,
         @Value("${audit.period.minutes:0}") int auditPeriodMinutes,
         @Value("${audit.period.hours:0}") int auditPeriodHours,
         @Value("${audit.period.days:0}") int auditPeriodDays,
@@ -58,6 +64,7 @@ public class DepositsService {
         this.depositDAO = depositDAO;
         this.depositChunkDAO = depositChunkDAO;
         this.auditChunkStatusDAO = auditChunkStatusDAO;
+        this.eventDAO = eventDAO;
         this.auditPeriodMinutes = auditPeriodMinutes;
         this.auditPeriodHours = auditPeriodHours;
         this.auditPeriodDays = auditPeriodDays;
@@ -152,14 +159,14 @@ public class DepositsService {
         int maxChunkAuditPerDeposit = getAuditMaxChunksPerDeposits();
         int maxChunkPerAudit = getAuditMaxTotalChunks();
 
-        logger.debug("MINUTE: "+getAuditPeriodMinutes());
-        logger.debug("HOUR: "+getAuditPeriodHours());
-        logger.debug("DAY_OF_YEAR: "+getAuditPeriodDays());
-        logger.debug("MONTH: "+getAuditPeriodMonths());
-        logger.debug("YEAR: "+getAuditPeriodYears());
+        logger.debug("MINUTE: {}", getAuditPeriodMinutes());
+        logger.debug("HOUR: {}", getAuditPeriodHours());
+        logger.debug("DAY_OF_YEAR: {}", getAuditPeriodDays());
+        logger.debug("MONTH: {}", getAuditPeriodMonths());
+        logger.debug("YEAR: {}", getAuditPeriodYears());
 
-        logger.debug("Max per Deposit: "+maxChunkAuditPerDeposit);
-        logger.debug("Total Max: "+maxChunkPerAudit);
+        logger.debug("Max per Deposit: {}", maxChunkAuditPerDeposit);
+        logger.debug("Total Max: {}", maxChunkPerAudit);
 
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.MINUTE, -getAuditPeriodMinutes()); // to get previous days
@@ -169,18 +176,18 @@ public class DepositsService {
         cal.add(Calendar.YEAR, -getAuditPeriodYears()); // to get previous years
         Date olderThanDate = cal.getTime();
 
-        logger.debug("older than date: "+olderThanDate);
+        logger.debug("older than date: {}", olderThanDate);
 
         List<Deposit> deposits = depositDAO.getDepositsWaitingForAudit(olderThanDate);
         List<DepositChunk> chunksToAudit = new ArrayList<>();
 
         int totalCount = 0;
         for(Deposit deposit : deposits){
-            logger.debug("Total Count: "+totalCount);
-            logger.debug("check deposit: "+deposit.getID());
+            logger.debug("Total Count: {}", totalCount);
+            logger.debug("check deposit: {}", deposit.getID());
             List<DepositChunk> depositChunks = deposit.getDepositChunks();
 
-            logger.debug("Number of chunks in deposit: " + depositChunks.size());
+            logger.debug("Number of chunks in deposit: {}", depositChunks.size());
 
             depositChunks.sort((DepositChunk c1, DepositChunk c2) -> {
                 if (auditChunkStatusDAO.getLastChunkAuditTime(c1) == null) {
@@ -195,7 +202,7 @@ public class DepositsService {
 
             int count = 0;
             for(DepositChunk chunk : depositChunks){
-                logger.debug("Chunk in deposit count: "+count);
+                logger.debug("Chunk in deposit count: {}", count);
                 if(totalCount >= maxChunkPerAudit) {
                     logger.debug("maxChunkPerAudit reached");
                     return chunksToAudit;
@@ -204,7 +211,7 @@ public class DepositsService {
                     break; // get out of loop
                 }
 
-                logger.debug("check chunk: "+chunk.getID());
+                logger.debug("check chunk: {}", chunk.getID());
 
                 AuditChunkStatus lastAuditChunkInfo = auditChunkStatusDAO.getLastChunkAuditTime(chunk);
 
@@ -215,7 +222,7 @@ public class DepositsService {
                 }else if( lastAuditChunkInfo.getTimestamp().before(olderThanDate) && (
                                 lastAuditChunkInfo.getStatus().equals(AuditChunkStatus.Status.COMPLETE) ||
                                         lastAuditChunkInfo.getStatus().equals(AuditChunkStatus.Status.FIXED) ) ){
-                    logger.debug("add chunk, last audit: "+lastAuditChunkInfo.getTimestamp());
+                    logger.debug("add chunk, last audit: {}", lastAuditChunkInfo.getTimestamp());
                     chunksToAudit.add(chunk);
                     count++; totalCount++;
                 }else{
@@ -266,6 +273,45 @@ public class DepositsService {
 
     public void updateDepositChunk(DepositChunk chunk) {
         depositChunkDAO.update(chunk);
+    }
+
+    public StoredChunks getChunksStored(String depositId) {
+        return eventDAO.findDepositChunksStored(depositId);
+    }
+
+    public RetrievedChunks getChunksRetrieved(String depositId, String retrieveId) {
+        return eventDAO.findDepositChunksRetrieved(depositId, retrieveId);
+    }
+
+    public Event getLastNotFailedDepositEvent(String depositId) {
+        return eventDAO.findLatestDepositEvent(depositId)
+                .map(Event::refreshIdFields)
+                .orElse(null);
+    }
+    public Event getLastNotFailedRetrieveEvent(String depositId, String retrieveId) {
+        return eventDAO.findLatestRetrieveEvent(depositId, retrieveId)
+                .map(Event::refreshIdFields)
+                .orElse(null);
+    }
+
+    public String getDepositArchive(String depositId, ArchiveStore archiveStore) throws Exception {
+        Deposit deposit = getDeposit(depositId);
+        String archiveID = null;
+        if (deposit.getArchives() != null) {
+            for (Archive archive : deposit.getArchives()) {
+                if( archive != null && 
+                    archive.getArchiveStore() != null && 
+                    archive.getArchiveStore().getID().equals(archiveStore.getID())) {
+                    archiveID = archive.getArchiveId();
+                }
+            }
+        }
+
+        // Worth checking that we found a matching Archive for the ArchiveStore.
+        if (archiveID == null) {
+            throw new Exception("No valid archive for retrieval");
+        }
+        return archiveID;
     }
 }
 

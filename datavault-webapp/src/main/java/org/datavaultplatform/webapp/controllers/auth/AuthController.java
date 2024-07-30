@@ -52,7 +52,7 @@ public class AuthController {
             model.put("error", "You have been logged out for security reasons. Please log back in to continue");
         }
         
-        return "/auth/login";
+        return "auth/login";
     }
 
     @RequestMapping(value = "/logout", method = RequestMethod.GET)
@@ -65,7 +65,7 @@ public class AuthController {
     @RequestMapping(value = "/denied", method = RequestMethod.GET)
     public String getDeniedPage() {
 
-        return "/auth/denied";
+        return "auth/denied";
     }
 
     @RequestMapping(value = "/confirmation", method = RequestMethod.GET)
@@ -73,6 +73,6 @@ public class AuthController {
 
         model.put("logout", "");
 
-        return "/auth/confirmation";
+        return "auth/confirmation";
     }
 }

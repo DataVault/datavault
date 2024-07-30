@@ -12,6 +12,6 @@ public class StartChunkValidation extends Event {
         super("Chunk " + chunkNum + " validation started - (" + type + ")");
         this.eventClass = StartChunkValidation.class.getCanonicalName();
         this.depositId = depositId;
-        this.jobId = jobId;
+        this.setJobId(jobId);
     }
 }

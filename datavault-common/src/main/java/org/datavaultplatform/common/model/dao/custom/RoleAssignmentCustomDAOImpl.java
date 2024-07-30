@@ -55,7 +55,8 @@ public class RoleAssignmentCustomDAOImpl extends BaseCustomDAOImpl implements
               SELECT DISTINCT role.permissions
               FROM org.datavaultplatform.common.model.RoleAssignment ra
               INNER JOIN ra.role as role
-              WHERE ra.userId = :userId""");
+              WHERE ra.userId = :userId
+            """);
       query.setParameter("userId", userId);
 
       return ((List<PermissionModel>) query.getResultList())

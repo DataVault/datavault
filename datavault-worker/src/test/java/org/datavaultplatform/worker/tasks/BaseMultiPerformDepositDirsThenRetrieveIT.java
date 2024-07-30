@@ -18,7 +18,7 @@ import org.datavaultplatform.common.event.deposit.ComputedEncryption;
 import org.datavaultplatform.common.event.retrieve.RetrieveComplete;
 import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.common.task.Context.AESMode;
-import org.datavaultplatform.worker.rabbit.BaseRabbitTCTest;
+import org.datavaultplatform.worker.rabbit.BaseRabbitIT;
 import org.datavaultplatform.worker.utils.DepositEvents;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,7 +43,6 @@ import javax.crypto.SecretKey;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -58,7 +57,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
 @Timeout(value = 60, unit = TimeUnit.SECONDS)
-public abstract class BaseMultiPerformDepositDirsThenRetrieveIT extends BaseRabbitTCTest {
+public abstract class BaseMultiPerformDepositDirsThenRetrieveIT extends BaseRabbitIT {
 
   static final String SRC_DIR_1 = "src-dir-1";
   static final String SRC_DIR_2 = "src-dir-2";

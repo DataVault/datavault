@@ -10,11 +10,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.event.deposit.CompleteCopyUpload;
 import org.datavaultplatform.worker.app.DataVaultWorkerInstanceApp;
 import org.datavaultplatform.worker.test.AddTestProperties;
+import org.slf4j.Logger;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 
-@SpringBootTest(classes = DataVaultWorkerInstanceApp.class)
+@SpringBootTest(classes = {
+        DataVaultWorkerInstanceApp.class,
+        PerformMultiDepositDirsThenRetrieveSingleChunkIT.TestConfig.class
+})
 @AddTestProperties
 @DirtiesContext
 @TestPropertySource(properties = "chunking.size=160MB")
@@ -36,5 +42,12 @@ public class PerformMultiDepositDirsThenRetrieveSingleChunkIT extends BaseMultiP
   protected void checkDepositEvents() {
     List<CompleteCopyUpload> storedChunksEvents = getCopyUploadCompleteEvents();
     assertThat(storedChunksEvents.size()).isEqualTo(1);
+  }
+  @TestConfiguration
+  static class TestConfig {
+    @Bean
+    Logger monitorLogger() {
+      return log;
+    }
   }
 }

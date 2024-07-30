@@ -1,11 +1,16 @@
 package org.datavaultplatform.common.util;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.storage.Verify;
 import org.springframework.util.Assert;
 
 import java.io.File;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class Utils {
@@ -49,6 +54,50 @@ public class Utils {
           computedHash.toUpperCase(),
           expectedHash.toUpperCase());
       throw new Exception(msg);
+    }
+  }
+  
+  public static <T> String toCommaSeparatedString(Collection<?> collection) {
+    if (collection == null || collection.isEmpty()) {
+      return "";
+    }
+    return collection.stream()
+            .filter(Objects::nonNull)
+            .map(Object::toString)
+            .collect(Collectors.joining(","));
+  }
+  
+  public static <T> List<T> fromCommaSeparatedString(String value, Function<String,T> parser) {
+    Assert.isTrue(parser != null, "The parser cannot be null");
+    if(value == null || value.isEmpty()) {
+      return Collections.emptyList();
+    }
+    String[] tokens = value.split("\\s*,\\s*");
+    List<T> result = new ArrayList<>();
+    for(String token: tokens){
+      result.add(parser.apply(token));
+    }
+    return result;
+  }
+
+  public static boolean isRunningWithinTest() {
+    try {
+      Class.forName("org.junit.jupiter.api.Test");
+      log.trace("running within a test!");
+      return true;
+    } catch (ClassNotFoundException ex) {
+      log.trace("NOT running within a test! : Unable to find org.junit.jupiter.api.Test", ex);
+      return false;
+    }
+  }
+  public static void main(String[] args) {
+    Logger logback = ((Logger) org.slf4j.LoggerFactory.getLogger(Utils.class));
+    Level initLevel = logback.getLevel();
+    try {
+      logback.setLevel(Level.TRACE);
+      Assert.isTrue(!isRunningWithinTest(), "As not a test - running within a test should NOT be true");
+    } finally {
+      logback.setLevel(initLevel);
     }
   }
 }

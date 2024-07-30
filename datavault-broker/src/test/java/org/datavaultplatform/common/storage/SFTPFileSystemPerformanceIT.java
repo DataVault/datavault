@@ -23,6 +23,7 @@ import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.storage.impl.SFTPConnection;
 import org.datavaultplatform.common.storage.impl.SFTPFileSystemJSch;
 import org.datavaultplatform.common.storage.impl.SFTPFileSystemSSHD;
+import org.datavaultplatform.common.util.UsesTestContainers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
@@ -30,7 +31,6 @@ import org.springframework.data.util.Pair;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * This test checks the relative performance of
@@ -42,7 +42,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * </p>
  */
 @Slf4j
-@Testcontainers(disabledWithoutDocker = true)
+@UsesTestContainers
 public class SFTPFileSystemPerformanceIT {
 
   static final String TEST_PASSWORD = "testPassword";

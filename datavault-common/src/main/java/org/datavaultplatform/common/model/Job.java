@@ -38,8 +38,11 @@ import org.hibernate.annotations.UuidGenerator;
         @NamedAttributeNode(Deposit_.VAULT)
     })
 )
-public class Job {
+public class Job implements Identified {
 
+    public static final String TASK_CLASS_RETRIEVE = "org.datavaultplatform.worker.tasks.Retrieve";
+    public static final String TASK_CLASS_DEPOSIT  = "org.datavaultplatform.worker.tasks.Deposit";
+    
     public static final String EG_JOB = "eg.Job.1";
 
     // Job Identifier
@@ -189,5 +192,13 @@ public class Job {
     @Override
     public int hashCode() {
         return getClass().hashCode();
+    }
+    
+    public boolean isDepositJob() {
+        return TASK_CLASS_DEPOSIT.equals(this.taskClass);
+    }
+    
+    public boolean isRetrieveJob() {
+        return TASK_CLASS_RETRIEVE.equals(this.taskClass);
     }
 }
