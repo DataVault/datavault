@@ -111,10 +111,10 @@ public interface EventDAO extends BaseDAO<Event>, EventCustomDAO {
     @Query("""
               SELECT   e
               FROM     Event e
-              WHERE    ((e.eventClass IS NULL) 
-                OR (e.eventClass <> 'org.datavaultplatform.common.event.retrieve.RetrieveError')
-                OR (e.eventClass <> 'org.datavaultplatform.common.event.Error')
-              )
+              WHERE    ((e.eventClass IS NULL)
+                OR (    e.eventClass <> 'org.datavaultplatform.common.event.retrieve.RetrieveError'
+                    AND e.eventClass <> 'org.datavaultplatform.common.event.Error'
+              ))
               AND      e.deposit.id = :depositId
               AND      e.job.taskClass = :jobTaskClass
               AND      e.retrieveId = :retrieveId
@@ -132,7 +132,10 @@ public interface EventDAO extends BaseDAO<Event>, EventCustomDAO {
     @Query("""
               SELECT   e
               FROM     Event e
-              WHERE    ((e.eventClass IS NULL) OR (e.eventClass <> 'org.datavaultplatform.common.event.Error'))
+              WHERE    ((e.eventClass IS NULL)
+                OR (    e.eventClass <> 'org.datavaultplatform.common.event.retrieve.RetrieveError'
+                    AND e.eventClass <> 'org.datavaultplatform.common.event.Error'
+              ))
               AND      e.deposit.id = :depositId
               AND      e.job.taskClass = :jobTaskClass
               AND      e.retrieveId = :retrieveId

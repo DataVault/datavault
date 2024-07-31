@@ -41,8 +41,11 @@ import org.datavaultplatform.common.event.retrieve.*;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.storage.Verify;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.amqp.rabbit.listener.RabbitListenerEndpointRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
@@ -558,17 +561,22 @@ public class EventListenerIT extends BaseDatabaseTest {
       checkLastNotFailedRetrievedEvent(event, depositId, retrieveId);
     }
 
-    private void checkLastNotFailedRetrievedEvent(Event event, String depositId, String retrieveId) {
-      assertThat(event.getID()).isNotNull();
+    private void checkLastNotFailedRetrievedEvent(Event expectedLastEvent, String depositId, String retrieveId) {
+      if (expectedLastEvent != null) {
+        assertThat(expectedLastEvent.getID()).isNotNull();
 
-      Event storedEvent = eventService.findById(event.getID());
-      storedEvent.refreshIdFields();
-      assertThat(storedEvent.getDepositId()).isEqualTo(depositId);
-      assertThat(storedEvent.getUserId()).isEqualTo(userId);
-      assertThat(storedEvent.getRetrieveId()).isEqualTo(retrieveId);
-
+        Event storedEvent = eventService.findById(expectedLastEvent.getID());
+        storedEvent.refreshIdFields();
+        assertThat(storedEvent.getDepositId()).isEqualTo(depositId);
+        assertThat(storedEvent.getUserId()).isEqualTo(userId);
+        assertThat(storedEvent.getRetrieveId()).isEqualTo(retrieveId);
+      }
       Event found = depositsService.getLastNotFailedRetrieveEvent(depositId, retrieveId);
-      assertThat(found.getID()).isEqualTo(event.getID());
+      if (expectedLastEvent != null) {
+        assertThat(found.getID()).isEqualTo(expectedLastEvent.getID());
+      } else {
+        assertThat(found).isNull();
+      }
     }
 
     @Test
@@ -721,12 +729,18 @@ public class EventListenerIT extends BaseDatabaseTest {
       checkLastNotFailedRetrievedEvent(event, depositId, retrieveId);
     }
 
-    @Test
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "org.datavaultplatform.common.event.retrieve.RetrieveError",
+            "org.datavaultplatform.common.event.Error"
+    })
     @SneakyThrows
-    void testRetrieveError() {
+    void testRetrieveError(String eventClass) {
+      Class clazz = Class.forName(eventClass);
+      assertThat(Event.class.isAssignableFrom(clazz));
       String message = "{"
               + "      \"message\": \"CUSTOM ERROR MESSAGE\","
-              + "      \"eventClass\": \"org.datavaultplatform.common.event.retrieve.RetrieveError\","
+              + "      \"eventClass\": \"" + eventClass + "\","
               + "      \"nextState\": null,"
               + "      \"timestamp\": \"2022-09-16T15:12:40.150Z\","
               + "      \"sequence\": 35,"
@@ -741,13 +755,20 @@ public class EventListenerIT extends BaseDatabaseTest {
               + "    }";
       long before = eventService.count();
       Event event = eventListener.onMessageInternal(message);
-      assertEquals(RetrieveError.class, event.getClass());
+      assertEquals(clazz, event.getClass());
       assertEquals("CUSTOM ERROR MESSAGE", event.getMessage());
 
       long after = eventService.count();
       assertThat(after).isEqualTo(before + 1);
+      
+      // double check that the event has been saved correctly
+      Event foundEvent = eventService.findById(event.getID());
+      assertThat(foundEvent).isEqualTo(event);
+      assertThat(foundEvent.getRetrieveId()).isEqualTo(retrieveId);
+      assertThat(foundEvent.getDeposit().getID()).isEqualTo(depositId);
+      assertThat(foundEvent.getJob().getID()).isEqualTo(jobRetrieveId);
 
-      checkLastNotFailedRetrievedEvent(event, depositId, retrieveId);
+      checkLastNotFailedRetrievedEvent(null, depositId, retrieveId);
     }
 
     @Test
