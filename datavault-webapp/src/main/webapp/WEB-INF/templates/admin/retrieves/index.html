@@ -25,7 +25,7 @@
 
                 <tbody>
                     <tr th:each="retrieve: ${retrieves}" class="tr">
-                        <td>[[${retrieve.getDeposit().getID()}]]</td>
+                        <td><a th:href="@{|/vaults/__${retrieve.deposit.vault.getID()}__/deposits/__${retrieve.deposit.getID()}__|}">[[${retrieve.getDeposit().getID()}]]</a></td>
                         <td>[[${retrieve.status}]]</td>
                         <td>[[${#dates.format(retrieve.timestamp,globalDateTimeFormat)}]]<!--/* datetime */--></td>
                         <td>[[${retrieve.retrievePath}]]</td>
