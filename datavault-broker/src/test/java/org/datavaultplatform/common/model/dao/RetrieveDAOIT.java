@@ -225,8 +225,8 @@ public class RetrieveDAOIT extends BaseReuseDatabaseTest {
 
     assertEquals(3, count());
 
-    assertEquals(0, dao.count("denied"));
-    assertEquals(3, dao.count("allowed"));
+    assertEquals(0, dao.count("denied", null));
+    assertEquals(3, dao.count("allowed", null));
   }
   @Test
   void testListByUser() {
@@ -271,12 +271,12 @@ public class RetrieveDAOIT extends BaseReuseDatabaseTest {
 
     assertEquals(3, count());
 
-    assertEquals(0, dao.list("denied").size());
+    assertEquals(0, dao.list("","denied","name","asc", 0, Integer.MAX_VALUE).size());
 
     //the returned Retrieves should be sorted by ascending timestamp
     assertEquals(
         List.of(ret2.getID(), ret3.getID(), ret1.getID())
-        , dao.list("allowed").stream().map(Retrieve::getID).toList());
+        , dao.list("","allowed","","asc",0,Integer.MAX_VALUE).stream().map(Retrieve::getID).toList());
   }
 
   @Test
@@ -323,7 +323,7 @@ public class RetrieveDAOIT extends BaseReuseDatabaseTest {
 
     assertEquals(3, count());
 
-    assertEquals(0, dao.list("denied").size());
+    assertEquals(0, dao.list("name1","denied1","name","asc", 0, Integer.MAX_VALUE).size());
 
     // can't be COMPLETE or NOT_STARTED
     assertEquals(1

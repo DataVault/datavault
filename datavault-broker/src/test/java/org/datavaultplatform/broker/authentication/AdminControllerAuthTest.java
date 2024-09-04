@@ -117,15 +117,20 @@ public class AdminControllerAuthTest extends BaseControllerAuthTest {
   @Test
   void testGetRetrievesAll() {
 
-    when(controller.getRetrievesAll(USER_ID_1)).thenReturn(List.of(AuthTestData.RETRIEVE_1,
+    when(controller.getRetrievesAll(USER_ID_1,"", "timestamp", "desc", 0, 2)).thenReturn(List.of(AuthTestData.RETRIEVE_1,
         AuthTestData.RETRIEVE_2));
 
     checkWorksWhenAuthenticatedFailsOtherwise(
-        get("/admin/retrieves"),
+        get("/admin/retrieves")
+            .queryParam("query", "")
+            .queryParam("sort", "timestamp")
+            .queryParam("order", "desc")
+            .queryParam("offset", "0")
+            .queryParam("maxResult", "2"),
         List.of(AuthTestData.RETRIEVE_1, AuthTestData.RETRIEVE_2),
         Permission.CAN_VIEW_RETRIEVES);
 
-    verify(controller).getRetrievesAll(USER_ID_1);
+    verify(controller).getRetrievesAll(USER_ID_1, "", "timestamp", "desc", 0, 2);
     checkHasSecurityAdminRetrievesRole();
   }
 

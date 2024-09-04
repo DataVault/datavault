@@ -108,6 +108,15 @@ public class AdminController {
                                           required = false) String query) {
         return depositsService.getTotalDepositsCount(userID, query);
     }
+
+    @GetMapping(value = "/admin/retrieves/count")
+    public Integer getRetrievesCount(@RequestHeader(HEADER_USER_ID) String userID,
+                                    @RequestParam(value = "query", required = false)
+                                    @ApiQueryParam(name = "query",
+                                            description = "Retrieve query field",
+                                            required = false) String query) {
+        return retrievesService.getTotalRetrievesCount(userID, query);
+    }
   
     public ExternalMetadataService getExternalMetadataService() {
         return externalMetadataService;
@@ -212,13 +221,35 @@ public class AdminController {
         return data;
     }
 
-
-
     @GetMapping("/admin/retrieves")
-    public List<Retrieve> getRetrievesAll(@RequestHeader(HEADER_USER_ID) String userID) {
+    public List<Retrieve> getRetrievesAll(@RequestHeader(HEADER_USER_ID) String userID,
+                                            @RequestParam(value = "query", required = false)
+                                            @ApiQueryParam(name = "query",
+                                                    description = "Retrieve query field",
+                                                    required = false) String query,
+                                            @RequestParam(value = "sort", required = false)
+                                            @ApiQueryParam(name = "sort",
+                                                    description = "Retrieve sort field",
+                                                    allowedvalues = {"timestamp"},
+                                                    defaultvalue = "timestamp", required = false) String sort,
+                                            @RequestParam(value = "order", required = false)
+                                            @ApiQueryParam(name = "order",
+                                                    description = "Retrieve sort order",
+                                                    allowedvalues = {"asc", "desc"},
+                                                    defaultvalue = "desc", required = false) String order,
+                                            @RequestParam(value = "offset", required = false)
+                                            @ApiQueryParam(name = "offset",
+                                                    description = "Retrieve row id",
+                                                    defaultvalue = "0", required = false) int offset,
+                                            @RequestParam(value = "maxResult", required = false)
+                                            @ApiQueryParam(name = "maxResult",
+                                                    description = "Number of records",
+                                                    required = false) int maxResult) {
+        List<Retrieve> retrieves = retrievesService.getRetrieves(query, userID, sort, order, offset, maxResult);
 
-        return retrievesService.getRetrieves(userID);
+        return retrieves;
     }
+
 
     @ApiMethod(
             path = "/admin/vaults",

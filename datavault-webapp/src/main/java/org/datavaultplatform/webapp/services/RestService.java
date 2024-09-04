@@ -325,8 +325,8 @@ public class RestService implements NotifyLogoutService, NotifyLoginService, Eva
         return response.getBody();
     }
 
-    public Retrieve[] getRetrievesListingAll() {
-        ResponseEntity<Retrieve[]> response = get(brokerURL + "/admin/retrieves", Retrieve[].class);
+    public Retrieve[] getRetrievesListingAll(String query, String sort, String order, int offset, int maxResult) {
+        ResponseEntity<Retrieve[]> response = get(brokerURL + "/admin/retrieves?query=" + query + "&sort=" + sort + "&order=" + order + "&offset=" + offset + "&maxResult=" + maxResult, Retrieve[].class);
         return response.getBody();
     }
 
@@ -388,6 +388,11 @@ public class RestService implements NotifyLogoutService, NotifyLoginService, Eva
 
     public Integer getTotalDepositsCount(String query) {
         ResponseEntity<Integer> response = get(brokerURL + "/admin/deposits/count?query=" + query, Integer.class);
+        return response.getBody();
+    }
+
+    public Integer getTotalRetrievesCount(String query) {
+        ResponseEntity<Integer> response = get(brokerURL + "/admin/retrieves/count?query=" + query, Integer.class);
         return response.getBody();
     }
 
@@ -914,5 +919,4 @@ public class RestService implements NotifyLogoutService, NotifyLoginService, Eva
             throw new RuntimeException(msg);
         }
     }
-
 }

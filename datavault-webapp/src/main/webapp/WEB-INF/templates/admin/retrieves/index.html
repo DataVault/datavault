@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/defaultlayout(nav='admin')}">
 <head><title>Admin - Retrievals</title></head>
-<th:block layout:fragment="content">
+<th:block layout:fragment="content" th:with="queryPARAM=${#uris.escapeQueryParam(query)}">
     <div class="container">
 
     <ol class="breadcrumb">
@@ -42,6 +42,24 @@
                 </tbody>
             </table>
         </div>
+
+        <div align="center">
+            <p class="text-info">Showing [[${offset}]] - <th:block th:text="${totalRecords < (offset + recordPerPage) ? totalRecords : (offset + recordPerPage)}" /> retrieve of [[${totalRecords}]]</p>
+        </div>
+        <div align="center">
+            <nav aria-label="...">
+                <ul class="pagination pagination-lg" id="paginationButton">
+                    <th:block th:each="page: ${#numbers.sequence(1,totalPages)}">
+                        <li th:id="${page}"
+                            th:class="${page == activePageId ? 'page-item active' : 'page-item'}"
+                        >
+                            <a class="page-link"
+                               th:href="@{|/admin/retrieves?sort=${sort}&order=${order}&pageId=${page}&query=__${queryPARAM}__|}" tabindex="-1">[[${page}]]</a>
+                        </li>
+                    </th:block>
+                </ul>
+            </nav>
+        </div><!--align-center-2-->
     </th:block>
 
 </div>

@@ -20,8 +20,9 @@ public class RetrievesService {
         this.retrieveDAO = retrieveDAO;
     }
 
-    public List<Retrieve> getRetrieves(String userId) {
-        return retrieveDAO.list(userId);
+    public List<Retrieve> getRetrieves(String query, String userId, String sort, String order, int offset, int maxResult) {
+        //return retrieveDAO.list(userId);
+        return retrieveDAO.list(query, userId, sort, order, offset, maxResult);
     }
     
     public void addRetrieve(Retrieve retrieve, Deposit deposit, String retrievePath) {
@@ -36,6 +37,10 @@ public class RetrievesService {
         
         retrieveDAO.save(retrieve);
     }
+
+    public int getTotalRetrievesCount(String userID, String query) {
+        return retrieveDAO.count(userID, query);
+    }
     
     public void updateRetrieve(Retrieve retrieve) {
         retrieveDAO.update(retrieve);
@@ -45,7 +50,7 @@ public class RetrievesService {
         return retrieveDAO.findById(retrieveID).orElse(null);
     }
 
-    public int count(String userId) { return retrieveDAO.count(userId); }
+    public int count(String userId) { return retrieveDAO.count(userId, null); }
 
     public int queueCount(String userId) { return retrieveDAO.queueCount(userId); }
 
