@@ -43,6 +43,11 @@ public class Deposit extends Task {
 
         this.context = context;
 
+        if (isRedeliver()) {
+            sendError("Retrieve stopped: the message had been redelivered, please investigate");
+            return;
+        }
+
         var properties = getProperties();
         depositId = properties.get(PropNames.DEPOSIT_ID);
         bagID = properties.get(PropNames.BAG_ID);
@@ -75,12 +80,24 @@ public class Deposit extends Task {
             // PACKAGE DOWNLOAD INTO ENCRYPTED CHUNKS
             PackageHelper packageHelper = packageStep(bagDir);
 
+            //if (true) {
+            //    throw new Exception("Forced to fail after packaging");
+            //}
+
             StoredChunks previouslyStoredChunks = getStoredChunks();
 
             // returns archive ids for verification
             Set<ArchiveStoreInfo> archiveStoreInfos = uploadToStorage(packageHelper, previouslyStoredChunks, archiveStoreContext);
 
+            //if (true) {
+            //    throw new Exception("Forced to fail after upload");
+            //}
+
             verifyArchive(packageHelper, archiveStoreInfos);
+
+            //if (true) {
+            //    throw new Exception("Forced to fail after verification");
+            //}
 
             if (isLastEventIsBefore(Complete.class)) {
                 doStage(TaskStage.Deposit6Final.INSTANCE);
