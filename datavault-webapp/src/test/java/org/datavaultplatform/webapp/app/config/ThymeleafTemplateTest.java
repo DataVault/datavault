@@ -920,18 +920,26 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
 
         Retrieve ret1 = getRetrieve("ret-id-1");
         ret1.setStatus(Retrieve.Status.IN_PROGRESS);
-        ret1.setDeposit(getDeposit("deposit-id-1"));
+        Deposit dep1 = getDeposit("deposit-id-1");
+        dep1.setVault(getDepositVault("vault-id-1"));
+        ret1.setDeposit(dep1);
         ret1.setTimestamp(now);
         ret1.setNote("note-1");
         ret1.setRetrievePath("/a/b/c");
 
         Retrieve ret2 = getRetrieve("ret-id-2");
         ret2.setStatus(Retrieve.Status.COMPLETE);
-        ret2.setDeposit(getDeposit("deposit-id-2"));
+        Deposit dep2 = getDeposit("deposit-id-2");
+        dep2.setVault(getDepositVault("vault-id-2"));
+        ret2.setDeposit(dep2);
         ret2.setTimestamp(now);
         ret2.setNote("note-2");
         ret2.setRetrievePath("/d/e/f");
 
+        modelMap.put("offset", 0);
+        modelMap.put("totalRecords", 2);
+        modelMap.put("recordPerPage", 10);
+        modelMap.put("totalPages", 1);
         modelMap.put("retrieves", Arrays.asList(ret1, ret2));
 
         String html = getHtml("admin/retrieves/index", modelMap);
@@ -2334,6 +2342,17 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         result.setTimestamp(new Date());
         result.setStatus(Retrieve.Status.COMPLETE);
         result.setDeposit(getDeposit("ret-"+id));
+        return result;
+    }
+
+    private Vault getDepositVault(String id) {
+        Vault result = new Vault() {
+            @Override
+            public String getID() {
+                return id;
+            }
+        };
+
         return result;
     }
 

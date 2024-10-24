@@ -20,4 +20,6 @@ public interface RetrieveDAO extends BaseDAO<Retrieve>, RetrieveCustomDAO {
   @EntityGraph(Retrieve.EG_RETRIEVE)
   List<Retrieve> findAll();
 
+  int count(String userId, String query);
+
 }
