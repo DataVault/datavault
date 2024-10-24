@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
@@ -57,10 +58,10 @@ public class ProfileStandaloneTest {
 
   @Test
   void testControllerBeans(ApplicationContext ctx) {
-    Set<String> names = Set.of(ctx.getBeanNamesForAnnotation(Controller.class));
+    Set<String> names = new TreeSet<>(Set.of(ctx.getBeanNamesForAnnotation(Controller.class)));
     Set<String> restNames = Set.of(ctx.getBeanNamesForAnnotation(RestController.class));
     assertTrue(names.containsAll(restNames));
-    assertEquals(Set.of("protectedTimeController", "timeController", "errorPageController", "simulateErrorController", "authController", "errorController", "fileUploadController", "helloController", "faviconController"), names);
+    assertEquals(new TreeSet<>(Set.of("protectedTimeController", "timeController", "errorPageController", "simulateErrorController", "authController", "errorController", "fileUploadController", "helloController", "faviconController","swaggerConfigResource","swaggerWelcome","openApiResource")), names);
   }
 
   @TestConfiguration

@@ -2,6 +2,7 @@ package org.datavaultplatform.common.event.deposit;
 
 import java.util.HashMap;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
@@ -15,9 +16,9 @@ public class ComputedChunks extends Event implements ChunksDigestEvent {
     @Lob
     @Convert(converter = HashMapConverter.IntegerString.class)
     @Column(name="chunksDigest", columnDefinition="LONGBLOB")
-    public HashMap<Integer, String> chunksDigest = new HashMap<>();
+    private HashMap<Integer, String> chunksDigest = new HashMap<>();
 
-    public String digestAlgorithm;
+    private String digestAlgorithm;
     
     public ComputedChunks() {
     }
@@ -31,9 +32,10 @@ public class ComputedChunks extends Event implements ChunksDigestEvent {
         this.chunksDigest = chunksDigest;
         this.digestAlgorithm = digestAlgorithm;
         this.depositId = depositId;
-        this.jobId = jobId;
+        this.setJobId(jobId);
     }
     
+    @JsonGetter
     public HashMap<Integer, String> getChunksDigest() {
         return chunksDigest;
     }
@@ -42,6 +44,7 @@ public class ComputedChunks extends Event implements ChunksDigestEvent {
         this.chunksDigest = chunksDigest;
     }
     
+    @JsonGetter
     public String getDigestAlgorithm() {
         return digestAlgorithm;
     }

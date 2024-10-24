@@ -32,6 +32,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.env.Environment;
+import org.springframework.util.Assert;
 
 @SpringBootApplication
 @ComponentScan("org.datavaultplatform.worker.controllers")
@@ -147,12 +148,18 @@ public class DataVaultWorkerInstanceApp implements CommandLineRunner {
   @EventListener
   public void onEvent(ApplicationReadyEvent readyEvent) {
     log.info("Worker [{}] ready [{}]", applicationName, readyEvent);
-    registry.getListenerContainers().forEach(container -> {
-      if (!container.isRunning()) {
-        log.info("application ready - starting listener container [{}]", container);
-        container.start();
-      }
-    });
+    checkRabbitListenerContainers();
     log.info("{}", MemoryStats.getCurrent().toPretty());
+  }
+
+  /**
+   * Rabbit Listener Containers support @RabbitListener annotation which is no longer used.
+   * Leaving this in to help with double check of rabbit config/setup.
+   */
+  private void checkRabbitListenerContainers() {
+    var listenerContainerCount = registry.getListenerContainers().size();
+    log.info("Number of Rabbit Listener Containers [{}]", listenerContainerCount);
+    String msg = "The number of 'listener containers' (supporting @RabbitListener) : expected[0] actual[%s]".formatted(listenerContainerCount);
+    Assert.isTrue(listenerContainerCount == 0, msg);
   }
 }

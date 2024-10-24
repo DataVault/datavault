@@ -85,13 +85,13 @@ public class LoginUsingShibAltTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings={"info", "health", "customtime"})
+    @ValueSource(strings={"info", "health", "customtime", "mappings"})
     void testPublicActuatorEndpoints(String endpoint){
       assertEquals(HttpStatus.OK, actuatorEndpoint(endpoint).getStatusCode());
     }
 
     @ParameterizedTest
-    @ValueSource(strings={"mappings", "beans", "logging"})
+    @ValueSource(strings={"beans", "logging"})
     void testNonPublicActuatorEndpoints(String endpoint){
       assertEquals(HttpStatus.UNAUTHORIZED, actuatorEndpoint(endpoint).getStatusCode());
     }

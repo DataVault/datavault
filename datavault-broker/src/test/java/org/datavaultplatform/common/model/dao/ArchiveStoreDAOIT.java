@@ -1,5 +1,6 @@
 package org.datavaultplatform.common.model.dao;
 
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -36,6 +37,13 @@ public class ArchiveStoreDAOIT extends BaseDatabaseTest {
   @Autowired
   JdbcTemplate template;
 
+  @Test
+  void testWhenNoArchiveStores(){
+    assertThat(dao.count()).isEqualTo(0);
+    ArchiveStore result = dao.findForRetrieval();
+    assertThat(result).isNull();
+  }
+  
   @Test
   void testWriteThenRead() {
     ArchiveStore archiveStore1 = getArchiveStore1();

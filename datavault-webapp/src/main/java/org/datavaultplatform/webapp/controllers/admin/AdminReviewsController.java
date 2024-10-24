@@ -3,6 +3,7 @@ package org.datavaultplatform.webapp.controllers.admin;
 
 import org.datavaultplatform.common.model.*;
 
+import org.datavaultplatform.common.request.CreateRetentionPolicy;
 import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.common.response.ReviewInfo;
 import org.datavaultplatform.common.response.VaultInfo;
@@ -39,8 +40,7 @@ public class AdminReviewsController {
         this.restService = restService;
     }
 
-
-    @RequestMapping(value = "/admin/reviews", method = RequestMethod.GET)
+    @GetMapping("/admin/reviews")
     public String getVaultsForReview(ModelMap model) {
 
         VaultsData vaultsData = restService.getVaultsForReview();
@@ -52,8 +52,10 @@ public class AdminReviewsController {
     }
 
     // Return a review page
-    @RequestMapping(value = "/admin/vaults/{vaultid}/reviews", method = RequestMethod.GET)
-    public String showReview(ModelMap model, @PathVariable("vaultid") String vaultID, @RequestParam(value = "error", required = false) String error) {
+    @GetMapping("/admin/vaults/{vaultid}/reviews")
+    public String showReview(ModelMap model, 
+                             @PathVariable("vaultid") String vaultID, 
+                             @RequestParam(value = "error", required = false) String error) {
 
         if (error != null) {
             if (error.equals("reviewdate")) {
@@ -90,8 +92,9 @@ public class AdminReviewsController {
 
         List<DepositReviewModel> depositReviewModels = new ArrayList<>();
         for (int i = 0; i < reviewInfo.getDepositIds().size(); i++) {
-            DepositInfo depositInfo = restService.getDeposit(reviewInfo.getDepositIds().get(i));
-            DepositReview depositReview = restService.getDepositReview(reviewInfo.getDepositReviewIds().get(i));
+            String reviewId = reviewInfo.getDepositIds().get(i);
+            DepositInfo depositInfo = restService.getDeposit(reviewId);
+            DepositReview depositReview = restService.getDepositReview(reviewId);
             DepositReviewModel drm = new DepositReviewModel();
 
             // Set DepositReview stuff
@@ -110,6 +113,7 @@ public class AdminReviewsController {
 
         vaultReviewModel.setDepositReviewModels(depositReviewModels);
 
+        model.addAttribute("createRetentionPolicy", new CreateRetentionPolicy());
         model.addAttribute("vaultReviewModel", vaultReviewModel);
 
         return "admin/reviews/create";
@@ -117,8 +121,12 @@ public class AdminReviewsController {
 
 
     // Process the completed review page
-    @RequestMapping(value = "/admin/vaults/{vaultid}/reviews/{reviewid}", method = RequestMethod.POST)
-    public String processReview(@ModelAttribute VaultReviewModel vaultReviewModel, ModelMap model, RedirectAttributes redirectAttributes, @PathVariable("vaultid") String vaultID, @PathVariable("reviewid") String reviewID, @RequestParam String action) {
+    @PostMapping("/admin/vaults/{vaultid}/reviews/{reviewid}")
+    public String processReview(@RequestBody VaultReviewModel vaultReviewModel,
+                                @PathVariable("vaultid") String vaultID,
+                                @PathVariable("reviewid") String reviewID,
+                                @RequestParam String action,
+                                RedirectAttributes redirectAttributes ) {
 
         // Note - The ModelAttributes made available here are not the same objects as those passed to the View,
         // they only contain the values entered on screen. With that in mind, fetch the original objects again and

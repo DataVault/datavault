@@ -7,35 +7,44 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import lombok.Getter;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.event.EventSender;
 import org.datavaultplatform.common.event.RecordingEventSender;
 import org.datavaultplatform.common.io.DataVaultFileUtils;
+import org.datavaultplatform.common.model.Job;
 import org.datavaultplatform.common.task.Context;
 import org.datavaultplatform.common.task.Context.AESMode;
+import org.datavaultplatform.common.task.ContextVaultInfo;
 import org.datavaultplatform.common.task.Task;
+import org.datavaultplatform.common.task.TaskStageEventListener;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.datavaultplatform.worker.WorkerInstance;
-import org.datavaultplatform.worker.rabbit.MessageInfo;
-import org.datavaultplatform.worker.rabbit.MessageProcessor;
+import org.datavaultplatform.worker.rabbit.RabbitMessageInfo;
+import org.datavaultplatform.worker.rabbit.RabbitMessageProcessor;
 import org.datavaultplatform.worker.tasks.Deposit;
 import org.datavaultplatform.worker.utils.DepositEvents;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.amqp.core.MessageProperties;
+import org.springframework.util.Assert;
 
 /**
  * A class to review messages from the message queue then process them.
  */
-public class Receiver implements MessageProcessor {
-
-    private static final Logger logger = LoggerFactory.getLogger(Receiver.class);
+@Slf4j
+public class Receiver implements RabbitMessageProcessor{
 
     private final String tempDir;
     private final String metaDir;
     private final boolean chunkingEnabled;
     private final long chunkingByteSize;
+    @Getter
     private final boolean encryptionEnabled;
+    @Getter
     private final AESMode  encryptionMode;
     private final boolean multipleValidationEnabled;
     private final int noChunkThreads;
@@ -47,23 +56,31 @@ public class Receiver implements MessageProcessor {
     private final boolean oldRecompose;
 
     private final String recomposeDate;
-
+    
+    private final ProcessedJobStore processedJobStore;
+    
+    private final String applicationName;
+    
+    private final TaskStageEventListener taskStageEventListener;
+    
     public Receiver(
-        String tempDir,
-        String metaDir,
+            String tempDir,
+            String metaDir,
 
-        boolean chunkingEnabled,
-        String chunkingByteSize,
+            boolean chunkingEnabled,
+            String chunkingByteSize,
 
-        boolean encryptionEnabled,
-        String encryptionMode,
+            boolean encryptionEnabled,
+            String encryptionMode,
 
-        boolean multipleValidationEnabled,
-        int noChunkThreads,
+            boolean multipleValidationEnabled,
+            int noChunkThreads,
 
-        EventSender eventSender,
-        StorageClassNameResolver storageClassNameResolver,
-        boolean oldRecompose, String recomposeDate) {
+            EventSender eventSender,
+            StorageClassNameResolver storageClassNameResolver,
+            boolean oldRecompose, String recomposeDate,
+            ProcessedJobStore processedJobStore,
+            String applicationName, TaskStageEventListener taskStageEventListener) {
         this.tempDir = tempDir;
         this.metaDir = metaDir;
         this.chunkingEnabled = chunkingEnabled;
@@ -78,117 +95,144 @@ public class Receiver implements MessageProcessor {
         this.storageClassNameResolver = storageClassNameResolver;
         this.oldRecompose = oldRecompose;
         this.recomposeDate = recomposeDate;
+        this.processedJobStore = processedJobStore;
+        this.applicationName = applicationName;
+        this.taskStageEventListener = taskStageEventListener;
     }
 
     @Override
-    public boolean processMessage(MessageInfo messageInfo) {
+    public void onMessage(RabbitMessageInfo rabbitMessageInfo) {
         try {
-            if (eventSender instanceof RecordingEventSender) {
-                ((RecordingEventSender) eventSender).clear();
+            if (eventSender instanceof RecordingEventSender res) {
+                res.clear();
             }
-            return processMessageInternal(messageInfo);
+            processMessageInternal(rabbitMessageInfo);
         } finally {
             if (eventSender instanceof RecordingEventSender res) {
                 List<Event> events = res.getEvents();
 
-                generateRetrieveMessageForDeposit(messageInfo, events, new File("/tmp/retrieve"),
+                generateRetrieveMessageForDeposit(rabbitMessageInfo, events, new File("/tmp/retrieve"),
                     "retDir");
 
-                if (logger.isTraceEnabled()) {
-                    logger.trace("events send by worker: {}", events);
+                if (log.isTraceEnabled()) {
+                    log.trace("events send by worker: {}", events);
                 }
             }
         }
     }
 
-    private void generateRetrieveMessageForDeposit(MessageInfo messageInfo, List<Event> events, File retrieveBaseDir, String retrievePath ) {
+    private void generateRetrieveMessageForDeposit(RabbitMessageInfo messageInfo, List<Event> events, File retrieveBaseDir, String retrievePath ) {
         try {
-            String message = messageInfo.getValue();
+            String message = messageInfo.getMessageBody();
             Task task = new ObjectMapper().readValue(message, Task.class);
-            if (!"org.datavaultplatform.worker.tasks.Deposit".equals(task.getTaskClass())) {
+            if (!Job.TASK_CLASS_DEPOSIT.equals(task.getTaskClass())) {
                 return;
             }
             Deposit deposit = new ObjectMapper().readValue(message, Deposit.class);
             DepositEvents de = new DepositEvents(deposit, events);
             String retrieveMessage = de.generateRetrieveMessage(retrieveBaseDir, retrievePath);
-            logger.info("retrieveMessageForDeposit {}", retrieveMessage);
+            log.info("retrieveMessageForDeposit {}", retrieveMessage);
         } catch(Exception ex) {
-            logger.warn("Failed to generate retrieveMessageForDeposit", ex);
+            log.warn("Failed to generate retrieveMessageForDeposit", ex);
         }
     }
 
-    private boolean processMessageInternal(MessageInfo messageInfo) {
+    private void processMessageInternal(RabbitMessageInfo messageInfo) {
             long start = System.currentTimeMillis();
-            String message = messageInfo.getValue();
-
+            String message = messageInfo.getMessageBody();
+            MessageProperties props = messageInfo.message().getMessageProperties();
             // Decode and begin the job ...
-            Path tempDirPath;
             try {
-                ObjectMapper mapper = new ObjectMapper();
+                logMessageAsFormattedJson(props.getMessageId(), message);
+ 
+                Task concreteTask = getConcreteTask(message);
 
-                String json = mapper.writerWithDefaultPrettyPrinter()
-                    .writeValueAsString(mapper.readTree(message));
-                logger.info("messageId[{}] json[{}]", messageInfo.getId(), json);
-
-                Task commonTask = mapper.readValue(message, Task.class);
-                
-                Class<?> clazz = Class.forName(commonTask.getTaskClass());
-                Task concreteTask = (Task) mapper.readValue(message, clazz);
-
-                // Is the message a redelivery?
-                if (messageInfo.getIsRedeliver()) {
+                // Is the message a redelivery ?
+                if (props.isRedelivered()) {
                     concreteTask.setIsRedeliver(true);
                 }
-
-                // Set up the worker temporary directory
-                Event lastEvent = concreteTask.getLastEvent();
-                if (lastEvent != null) {
-                    logger.debug("Restart using old temp dir");
-                    tempDirPath = Paths.get(tempDir,  lastEvent.getAgent());
-                } else {
-                    logger.debug("Normal using default temp dir");
-                    tempDirPath = Paths.get(tempDir, WorkerInstance.getWorkerName());
-                }
-                logger.debug("The temp dir:" + tempDirPath);
-                tempDirPath.toFile().mkdir();
                 
-                Path metaDirPath = Paths.get(metaDir);
+                Path tempDirPath = getTempDirPath();
+                
+                Context context = getContext(tempDirPath);
 
-                String vaultAddress = null;
-                String vaultToken = null;
-                String vaultKeyName = null;
-                String vaultKeyPath = null;
-                String vaultSslPEMPath = null;
-
-                Context context = new Context(
-                        tempDirPath, metaDirPath, eventSender,
-                        chunkingEnabled, chunkingByteSize,
-                        encryptionEnabled, encryptionMode, 
-                        vaultAddress, vaultToken, 
-                        vaultKeyPath, vaultKeyName, vaultSslPEMPath,
-                        this.multipleValidationEnabled, this.noChunkThreads,
-                        this.storageClassNameResolver,
-                        this.oldRecompose,
-                        this.recomposeDate);
+                if (isRestartTaskForOtherWorker(concreteTask)) {
+                    return;
+                }
+                processedJobStore.storeProcessedJob(concreteTask.getJobID());
                 concreteTask.performAction(context);
 
                 // Clean up the temporary directory (if success if failure we need it for retries)
                 FileUtils.deleteDirectory(tempDirPath.toFile());
             } catch (Exception ex) {
-                logger.error("Error processing message[{}]", messageInfo, ex);
+                log.error("Error processing message[{}]", messageInfo, ex);
             } finally {
                 long diff = System.currentTimeMillis() - start;
-                logger.info("Finished Processing message[{}]. Took [{}]secs",
+                log.info("Finished Processing message[{}]. Took [{}]secs",
                     messageInfo, TimeUnit.MILLISECONDS.toSeconds(diff));
             }
+     }
+    
 
+    private Path getTempDirPath() {
+        Path tempDirPath = Paths.get(tempDir, applicationName);
+        log.info("The temp dir: [{}]", tempDirPath);
+        tempDirPath.toFile().mkdir();
+        return tempDirPath;
+    }
+
+    private boolean isRestartTaskForOtherWorker(Task commonTask) {
+        Assert.isTrue(commonTask != null, "The commonTask cannot be null");
+        Assert.isTrue(StringUtils.isNotBlank(commonTask.getJobID()), "The commonTask.JobID cannot be null");
+
+        boolean isRestart = commonTask.getLastEvent() != null;
+        if (isRestart) {
+            String nonRestartJobId = commonTask.getProperties().get(PropNames.NON_RESTART_JOB_ID);
+            return !processedJobStore.isProcessedJob(nonRestartJobId);
+        } else {
             return false;
         }
-
-    public boolean isEncryptionEnabled() {
-        return encryptionEnabled;
     }
-    public AESMode getEncryptionMode() {
-        return this.encryptionMode;
+    
+    @SneakyThrows
+    protected Task getConcreteTask(String message) {
+        ObjectMapper mapper = new ObjectMapper();
+        Task commonTask = mapper.readValue(message, Task.class);
+
+        Class<? extends Task> clazz = Class.forName(commonTask.getTaskClass()).asSubclass(Task.class);
+        return mapper.readValue(message, clazz);
+    }
+
+    @SneakyThrows
+    private void logMessageAsFormattedJson(String messageId, String message) {
+        ObjectMapper mapper = new ObjectMapper();
+        String json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(mapper.readTree(message));
+        log.info("messageId[{}] json[{}]", messageId, json);
+    }
+
+    protected Context getContext(Path tempDirPath) {
+
+        Path metaDirPath = Paths.get(metaDir);
+
+        ContextVaultInfo vaultInfo;
+        {
+            String vaultAddress = null;
+            String vaultToken = null;
+            String vaultKeyName = null;
+            String vaultKeyPath = null;
+            String vaultSslPEMPath = null;
+
+            vaultInfo = new ContextVaultInfo(vaultAddress, vaultToken, vaultKeyPath, vaultKeyName, vaultSslPEMPath);
+        }
+        return new Context(
+                tempDirPath, metaDirPath, this.eventSender,
+                this.chunkingEnabled, this.chunkingByteSize,
+                this.encryptionEnabled, this.encryptionMode,
+                vaultInfo,
+                this.multipleValidationEnabled, this.noChunkThreads,
+                this.storageClassNameResolver,
+                this.oldRecompose,
+                this.recomposeDate,
+                this.taskStageEventListener);
     }
 }

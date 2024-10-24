@@ -35,7 +35,7 @@ public class Delete extends Task {
     private int numOfChunks = 0;
     
     private String depositId = null;
-  private long archiveSize = 0;
+    private long archiveSize = 0;
     private EventSender eventSender = null;
     // Maps the model ArchiveStore ID to the storage equivalent
     private final HashMap<String, ArchiveStore> archiveStores = new HashMap<>();
@@ -59,8 +59,8 @@ public class Delete extends Task {
         }
         
         this.initStates();
-        
-        logger.info("bagID: " + bagID);
+
+        logger.info("bagID: {}", bagID);
         
         //userStores = this.setupUserFileStores();
         this.setupArchiveFileStores(context.getStorageClassNameResolver());
@@ -77,7 +77,7 @@ public class Delete extends Task {
             for (String archiveStoreId : archiveStores.keySet() ) {
                 ArchiveStore archiveStore = archiveStores.get(archiveStoreId);
                 this.archiveId = properties.get(archiveStoreId);
-                logger.info("archiveId: " + this.archiveId);
+                logger.info("archiveId: {}", this.archiveId);
                 Device archiveFs = ((Device)archiveStore);
                 if(archiveFs.hasMultipleCopies()) {
                 	deleteMultipleCopiesFromArchiveStorage(context, archiveFs, tarFileName, tarFile);
@@ -129,61 +129,45 @@ public class Delete extends Task {
 
         Progress progress = new Progress();
         ProgressTracker tracker = new ProgressTracker(progress, this.jobID, this.depositId, this.archiveSize, this.eventSender);
-        Thread trackerThread = new Thread(tracker);
-        trackerThread.start();
-        logger.info("deleteMultipleCopiesFromArchiveStorage for deposit : {}",this.depositId);
-    	 List<String> locations = archiveFs.getLocations();
-    	 for(String location : locations) {
-    		 logger.info("Delete from location : {}",location);
-    		 try {
-    			 if (context.isChunkingEnabled()) {
-    				 for( int chunkNum = 1; chunkNum <= this.numOfChunks; chunkNum++) {
-    					Path chunkPath = context.getTempDir().resolve(tarFileName+FileSplitter.CHUNK_SEPARATOR+chunkNum);
-			            File chunkFile = chunkPath.toFile();
-			            String chunkArchiveId = this.archiveId+FileSplitter.CHUNK_SEPARATOR+chunkNum;
-			            archiveFs.delete(chunkArchiveId,chunkFile, progress,location);
-			            logger.info("---------deleteMultipleCopiesFromArchiveStorage ------chunkArchiveId Deleted---- {} ",chunkArchiveId);
-    				 }
-    			 } else {
-    				 archiveFs.delete(this.archiveId,tarFile, progress,location);
-    				 logger.info("---------deleteMultipleCopiesFromArchiveStorage ------archiveId Deleted---- {} ",this.archiveId);
-    			 }
-    			 
-    		 } finally {
-                 // Stop the tracking thread
-                 tracker.stop();
-                 trackerThread.join();
-             }
-    	 }
-            
+        tracker.track(() -> {
+            logger.info("deleteMultipleCopiesFromArchiveStorage for deposit : {}", this.depositId);
+            List<String> locations = archiveFs.getLocations();
+            for (String location : locations) {
+                logger.info("Delete from location : {}", location);
+                if (context.isChunkingEnabled()) {
+                    for (int chunkNum = 1; chunkNum <= this.numOfChunks; chunkNum++) {
+                        Path chunkPath = context.getTempDir().resolve(tarFileName + FileSplitter.CHUNK_SEPARATOR + chunkNum);
+                        File chunkFile = chunkPath.toFile();
+                        String chunkArchiveId = this.archiveId + FileSplitter.CHUNK_SEPARATOR + chunkNum;
+                        archiveFs.delete(chunkArchiveId, chunkFile, progress, location);
+                        logger.info("---------deleteMultipleCopiesFromArchiveStorage ------chunkArchiveId Deleted---- {} ", chunkArchiveId);
+                    }
+                } else {
+                    archiveFs.delete(this.archiveId, tarFile, progress, location);
+                    logger.info("---------deleteMultipleCopiesFromArchiveStorage ------archiveId Deleted---- {} ", this.archiveId);
+                }
+            }
+        });
     }
     
     private void deleteFromArchiveStorage(Context context, Device archiveFs, String tarFileName, File tarFile) throws Exception {
-            Progress progress = new Progress();
-            ProgressTracker tracker = new ProgressTracker(progress, this.jobID, this.depositId, this.archiveSize, this.eventSender);
-            Thread trackerThread = new Thread(tracker);
-            trackerThread.start();
+        Progress progress = new Progress();
+        ProgressTracker tracker = new ProgressTracker(progress, this.jobID, this.depositId, this.archiveSize, this.eventSender);
+        tracker.track(() -> {
 
-            logger.info("deleteFromArchiveStorage for deposit : {}",this.depositId);
-            try {
-            	if (context.isChunkingEnabled()) {
-            		for( int chunkNum = 1; chunkNum <= this.numOfChunks; chunkNum++) {
-            			Path chunkPath = context.getTempDir().resolve(tarFileName+FileSplitter.CHUNK_SEPARATOR+chunkNum);
-			            File chunkFile = chunkPath.toFile();
-			            String chunkArchiveId = this.archiveId+FileSplitter.CHUNK_SEPARATOR+chunkNum;
-			            archiveFs.delete(chunkArchiveId,chunkFile, progress);
-			            logger.info("---------deleteFromArchiveStorage ------chunkArchiveId Deleted---- {} ",chunkArchiveId);
-            		}
-            	} else {
-            		archiveFs.delete(this.archiveId,tarFile, progress);
-		            logger.info("---------deleteFromArchiveStorage ------archiveId Deleted---- {} ",this.archiveId);
-            	}
-            		
-            } finally {
-                // Stop the tracking thread
-                tracker.stop();
-                trackerThread.join();
+            logger.info("deleteFromArchiveStorage for deposit : {}", this.depositId);
+            if (context.isChunkingEnabled()) {
+                for (int chunkNum = 1; chunkNum <= this.numOfChunks; chunkNum++) {
+                    Path chunkPath = context.getTempDir().resolve(tarFileName + FileSplitter.CHUNK_SEPARATOR + chunkNum);
+                    File chunkFile = chunkPath.toFile();
+                    String chunkArchiveId = this.archiveId + FileSplitter.CHUNK_SEPARATOR + chunkNum;
+                    archiveFs.delete(chunkArchiveId, chunkFile, progress);
+                    logger.info("---------deleteFromArchiveStorage ------chunkArchiveId Deleted---- {} ", chunkArchiveId);
+                }
+            } else {
+                archiveFs.delete(this.archiveId, tarFile, progress);
+                logger.info("---------deleteFromArchiveStorage ------archiveId Deleted---- {} ", this.archiveId);
             }
-            
-        } 
+        });
+    }
 }

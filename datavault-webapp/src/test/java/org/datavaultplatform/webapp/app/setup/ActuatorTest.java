@@ -44,8 +44,8 @@ import org.springframework.test.web.servlet.ResultActions;
 @TestPropertySource(properties = "management.endpoints.web.exposure.include=*")
 public class ActuatorTest {
 
-  private static final List<String> PUBLIC_ENDPOINTS = List.of("info","health","customtime", "metrics", "memoryinfo");
-  private static final List<String> PRIVATE_ENDPOINTS = List.of("env","loggers","mappings","beans");
+  private static final List<String> PUBLIC_ENDPOINTS = List.of("info","health","customtime", "metrics", "memoryinfo","mappings");
+  private static final List<String> PRIVATE_ENDPOINTS = List.of("env","loggers","beans");
 
   @Autowired
   ObjectMapper mapper;

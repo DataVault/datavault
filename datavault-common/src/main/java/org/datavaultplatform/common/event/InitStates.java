@@ -1,5 +1,6 @@
 package org.datavaultplatform.common.event;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import jakarta.persistence.Entity;
 import java.util.ArrayList;
 import jakarta.persistence.Transient;
@@ -8,7 +9,7 @@ import jakarta.persistence.Transient;
 public class InitStates extends Event {
 
     @Transient
-    private ArrayList<String> states;
+    protected ArrayList<String> states;
     
     public InitStates() {
     }
@@ -20,9 +21,10 @@ public class InitStates extends Event {
         
         // Optional?
         this.depositId = depositId;
-        this.jobId = jobId;
+        this.setJobId(jobId);
     }
 
+    @JsonGetter
     public ArrayList<String> getStates() {
         return states;
     }

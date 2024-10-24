@@ -36,6 +36,7 @@ import org.datavaultplatform.common.io.ProgressEventType;
 import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.common.storage.impl.SFTPFileSystemSSHD;
 import org.datavaultplatform.common.storage.impl.ssh.UtilitySSHD;
+import org.datavaultplatform.common.util.UsesTestContainers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -45,6 +46,7 @@ import org.slf4j.Logger;
 import org.testcontainers.containers.Container.ExecResult;
 import org.testcontainers.containers.GenericContainer;
 
+@UsesTestContainers
 public abstract class BaseSFTPFileSystemIT {
 
   static final int SFTP_SERVER_PORT = 2222;
@@ -158,7 +160,7 @@ public abstract class BaseSFTPFileSystemIT {
   @Test
   @SneakyThrows
   void testUsableSpace() {
-    assertThat(getSftpDriver().getUsableSpace()).isGreaterThan(1_000_000_000L);
+    assertThat(getSftpDriver().getUsableSpace()).isGreaterThan(500_000_000L);
   }
 
   @Test

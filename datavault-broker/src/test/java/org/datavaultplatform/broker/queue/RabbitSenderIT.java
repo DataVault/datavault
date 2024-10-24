@@ -1,9 +1,10 @@
 package org.datavaultplatform.broker.queue;
 
-import static org.datavaultplatform.broker.config.QueueConfig.WORKER_QUEUE_NAME;
+import static org.datavaultplatform.common.config.BaseQueueConfig.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,7 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 
-public class RabbitSenderIT extends BaseRabbitTCTest {
+public class RabbitSenderIT extends BaseRabbitTCIT {
 
   @Autowired
   RabbitTemplate template;
@@ -32,25 +33,79 @@ public class RabbitSenderIT extends BaseRabbitTCTest {
   @Qualifier("workerQueue")
   Queue dataVaultQueue;
 
+  @Value(RESTART_EXCHANGE_NAME)
+  String restartExchangeName;
+  
   @Value(WORKER_QUEUE_NAME)
   String expectedQueueName;
 
+  @Value(RESTART_WORKER_ONE_QUEUE_NAME)
+  String expectedRestartWorker1QueueName;
+
+  @Value(RESTART_WORKER_TWO_QUEUE_NAME)
+  String expectedRestartWorker2QueueName;
+  
+  @Value(RESTART_WORKER_THREE_QUEUE_NAME)
+  String expectedRestartWorker3QueueName;
+
+  @Autowired
+  @Qualifier("restartWorker1Queue")
+  Queue restartWorker1Queue;
+
+  @Autowired
+  @Qualifier("restartWorker2Queue")
+  Queue restartWorker2Queue;
+
+  @Autowired
+  @Qualifier("restartWorker3Queue")
+  Queue restartWorker3Queue;
+
   @BeforeEach
-  void checkSendQueueIsEmptyBeforeTest() {
-    QueueInformation info = admin.getQueueInfo(expectedQueueName);
-    assertEquals(0, info.getMessageCount());
+  void checkQueuesAreEmptyBeforeTest() {
+    List.of(expectedQueueName, expectedRestartWorker1QueueName, expectedRestartWorker2QueueName, expectedRestartWorker3QueueName).forEach(
+            queueName -> {
+              QueueInformation info = admin.getQueueInfo(queueName);
+              assertEquals(0, info.getMessageCount());
+            }
+    );
   }
 
   @Test
-  void testSendToWorker() {
+  void testSendToWorker1() {
     assertEquals(expectedQueueName, dataVaultQueue.getActualName());
+
     String rand = UUID.randomUUID().toString();
     String messageId = sender.send(rand);
-    Message message = template.receive(dataVaultQueue.getActualName(), 2500);
-    assertEquals(rand, new String(message.getBody(), StandardCharsets.UTF_8));
-    assertEquals(messageId, message.getMessageProperties().getMessageId());
+    checkQueueForMessage(dataVaultQueue, "", expectedQueueName, rand, messageId);
+  }
+
+  @Test
+  void testSendToWorker2() {
+    assertEquals(expectedQueueName, dataVaultQueue.getActualName());
+
+    String rand = UUID.randomUUID().toString();
+    String messageId = sender.send(rand,false);
+    checkQueueForMessage(dataVaultQueue, "", expectedQueueName, rand, messageId);
+  }
+
+  void checkQueueForMessage(Queue queue, String expectedExchange, String expectedRoutingKey, String expectedMessageBody, String expectedMessageId){
+    Message message = template.receive(queue.getActualName(), 2500);
+    assertEquals(expectedMessageBody, new String(message.getBody(), StandardCharsets.UTF_8));
     MessageProperties props = message.getMessageProperties();
-    assertEquals(expectedQueueName, props.getReceivedRoutingKey());
+    assertEquals(expectedMessageId, props.getMessageId());
+    assertEquals(expectedExchange, props.getReceivedExchange());
+    assertEquals(expectedRoutingKey, props.getReceivedRoutingKey());
+  }
+
+  @Test
+  void testSendToRestartExchange() {
+
+    String rand = UUID.randomUUID().toString();
+    String messageId = sender.send(rand,true);
+
+    checkQueueForMessage(restartWorker1Queue, restartExchangeName,"", rand, messageId);
+    checkQueueForMessage(restartWorker2Queue, restartExchangeName, "", rand, messageId);
+    checkQueueForMessage(restartWorker3Queue, restartExchangeName, "", rand, messageId);
   }
 
 

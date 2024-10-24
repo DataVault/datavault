@@ -17,7 +17,7 @@ public class ComputedDigest extends Event {
         this.digest = digest;
         this.digestAlgorithm = digestAlgorithm;
         this.depositId = depositId;
-        this.jobId = jobId;
+        this.setJobId(jobId);
     }
 
     public String getDigest() {

@@ -12,6 +12,6 @@ public class CompleteChunkValidation extends Event {
         super("Chunk " + chunkNum + " validation finished - (" + type + ")");
         this.eventClass = CompleteChunkValidation.class.getCanonicalName();
         this.depositId = depositId;
-        this.jobId = jobId;
+        this.setJobId(jobId);
     }
 }

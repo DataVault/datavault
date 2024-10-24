@@ -82,7 +82,7 @@ public class GenerateDepositMessageTest extends BaseGenerateMessageTest {
 
     User mockUser = mock(User.class);
     when(mockUser.getID()).thenReturn("used-id-one");
-    when(sender.send(argMessage.capture())).thenReturn("MESSAGE_ID");
+    when(sender.send(argMessage.capture(), any(Boolean.class))).thenReturn("MESSAGE_ID");
 
     Vault mockVault = mock(Vault.class);
     VaultInfo mockVaultInfo = mock(VaultInfo.class);
@@ -169,7 +169,9 @@ public class GenerateDepositMessageTest extends BaseGenerateMessageTest {
         + "    \"userId\" : \"used-id-one\","
         + "    \"userFsRetryMaxAttempts\": \"10\","
         + "    \"userFsRetryDelayMs1\": \"60\","
-        + "    \"userFsRetryDelayMs2\": \"300\""
+        + "    \"userFsRetryDelayMs2\": \"300\","
+        + "    \"nonRestartJobId\": null,"
+        + "    \"depositChunksStored\": \"null\"" 
         + "  },"
         + "  \"fileStorePaths\" : [ \"FILE-STORE-SRC-ID/src-path-1\" ],"
         + "  \"fileUploadPaths\" : [ \"src-file-upload-handle\" ],"

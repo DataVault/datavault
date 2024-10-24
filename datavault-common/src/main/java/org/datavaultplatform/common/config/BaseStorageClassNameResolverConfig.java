@@ -10,7 +10,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 
 @Slf4j
-public class BaseStorageClassNameResolverConfig implements ApplicationListener<ApplicationReadyEvent> {
+public abstract class BaseStorageClassNameResolverConfig implements ApplicationListener<ApplicationReadyEvent> {
 
   @Value("${sftp.driver.use.apache.sshd:false}")
   private boolean sftpDriverUseApacheSSHD;

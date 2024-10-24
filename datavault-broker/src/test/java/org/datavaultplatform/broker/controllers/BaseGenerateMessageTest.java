@@ -9,21 +9,12 @@ import java.util.concurrent.TimeUnit;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.queue.Sender;
-import org.datavaultplatform.broker.services.AdminService;
-import org.datavaultplatform.broker.services.ArchiveStoreService;
-import org.datavaultplatform.broker.services.ArchivesService;
-import org.datavaultplatform.broker.services.DepositsService;
-import org.datavaultplatform.broker.services.ExternalMetadataService;
-import org.datavaultplatform.broker.services.FilesService;
-import org.datavaultplatform.broker.services.JobsService;
-import org.datavaultplatform.broker.services.MetadataService;
-import org.datavaultplatform.broker.services.RetrievesService;
-import org.datavaultplatform.broker.services.UsersService;
-import org.datavaultplatform.broker.services.VaultsService;
+import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.common.model.ArchiveStore;
 import org.datavaultplatform.common.model.dao.AuditChunkStatusDAO;
 import org.datavaultplatform.common.model.dao.DepositChunkDAO;
 import org.datavaultplatform.common.model.dao.DepositDAO;
+import org.datavaultplatform.common.model.dao.EventDAO;
 import org.datavaultplatform.common.storage.impl.LocalFileSystem;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.junit.jupiter.api.AfterEach;
@@ -81,6 +72,8 @@ public abstract class BaseGenerateMessageTest {
   @Mock
   AdminService adminService;
   @Mock
+  EventDAO eventDAO;
+  @Mock
   Sender sender;
   @TempDir
   File baseDir;
@@ -106,7 +99,7 @@ public abstract class BaseGenerateMessageTest {
 
   protected DepositsController getDepositController() {
     DepositsService depositsService = new DepositsService(depositDao, depositChunkDao,
-        auditChunkStatusDAO, 0, 0, 0, 0, 0, 0, 0);
+        auditChunkStatusDAO, eventDAO,0, 0, 0, 0, 0, 0, 0);
     DepositsController dc = new DepositsController(vaultsService,
         depositsService,
         retrievesService,

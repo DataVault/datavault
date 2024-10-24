@@ -6,9 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
+import java.time.Duration;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +19,7 @@ import org.datavaultplatform.common.model.ArchiveStore;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.storage.impl.LocalFileSystem;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
+import org.datavaultplatform.common.util.TestUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -31,7 +32,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
-import org.awaitility.Awaitility;
 
 @SpringBootTest(classes = DataVaultBrokerApp.class)
 @TestPropertySource("classpath:datavault-test.properties")
@@ -68,7 +68,7 @@ public class InitialiseDatabaseLocalFileSystemIT extends BaseDatabaseTest {
   void testArchiveStoresInitialiseWithLocalFileSystem() {
     log.info("spring localFsDirectory {}", localFsDirectory);
     long start = System.currentTimeMillis();
-    Awaitility.await().atMost(60, TimeUnit.SECONDS).until(() -> initEvent != null);
+    TestUtils.waitUntil(Duration.ofSeconds(60), () -> initEvent != null);
     long diff = System.currentTimeMillis() - start;
     log.info("time to init {}ms", diff);
     assertEquals(3, initEvent.getAdded().size());

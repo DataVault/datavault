@@ -51,7 +51,7 @@ public class SecurityActuatorConfig {
 
   @Bean
   SecurityFilterChain springFilterChain(HttpSecurity http) throws Exception {
-    http.securityMatcher("/actuator/**")
+    http.securityMatcher("/actuator/**","/task/interrupt","/task/interrupt/*")
             .userDetailsService(userDetailsService())
             .httpBasic(Customizer.withDefaults())
             .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -61,9 +61,11 @@ public class SecurityActuatorConfig {
                   "/actuator/health",
                       "/actuator/memoryinfo",
                       "/actuator/metrics",
+                      "/actuator/mappings",
                   "/actuator/info").permitAll();
               authz.anyRequest().authenticated();
             });
+    http.csrf(csrf -> csrf.disable());
     return http.build();
   }
 

@@ -12,6 +12,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.event.RecordingEventSender;
 import org.datavaultplatform.worker.app.DataVaultWorkerInstanceApp;
+import org.datavaultplatform.worker.rabbit.RabbitMessageSelectorScheduler;
 import org.datavaultplatform.worker.test.AddTestProperties;
 import org.datavaultplatform.worker.test.TestClockConfig;
 import org.junit.jupiter.api.Assertions;
@@ -51,15 +52,18 @@ public class ActuatorTest {
   @MockBean
   RecordingEventSender eventSender;
 
+  @MockBean
+  RabbitMessageSelectorScheduler scheduler;
+  
   @ParameterizedTest
-  @ValueSource(strings = {"/actuator/info", "/actuator/health", "/actuator/metrics", "/actuator/memoryinfo"})
+  @ValueSource(strings = {"/actuator/info", "/actuator/health", "/actuator/metrics", "/actuator/memoryinfo", "/actuator/mappings"})
   @SneakyThrows
   void testActuatorPublicAccess(String path) {
     checkPublic(path);
   }
 
   @ParameterizedTest
-  @ValueSource(strings={"/actuator", "/actuator/", "/actuator/env"})
+  @ValueSource(strings={"/actuator", "/actuator/", "/actuator/env", "/actuator/loggers"})
   @SneakyThrows
   void testActuatorUnauthorized(String path) {
     checkUnauthorized(path);
@@ -77,6 +81,7 @@ public class ActuatorTest {
     mvc.perform(get(url)).andDo(print()).andExpect(status().isUnauthorized());
   }
 
+  @SuppressWarnings("SameParameterValue")
   @SneakyThrows
   void checkAuthorized(String url, String username, String password) {
     mvc.perform(get(url).with(httpBasic(username, password))).andDo(print())

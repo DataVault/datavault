@@ -12,7 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.io.TempDir;
 
 @Slf4j
-abstract public class BaseTempKeyStoreTest {
+public abstract class BaseTempKeyStoreTest {
 
   static final String KEY_NAME_FOR_SSH = "key-name-for-ssh";
   static final String KEY_NAME_FOR_DATA = "key-name-for-data";

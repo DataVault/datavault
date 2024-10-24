@@ -65,14 +65,15 @@ public class ActuatorTest extends BaseDatabaseTest {
   }
 
   @ParameterizedTest
-  @ValueSource(strings = {"/actuator/info", "/actuator/health", "/actuator/metrics", "/actuator/memoryinfo"})
+  @ValueSource(strings = {"/actuator/info", "/actuator/health",
+          "/actuator/metrics", "/actuator/memoryinfo", "/actuator/mappings"})
   @SneakyThrows
   void testActuatorPublicAccess(String url) {
     checkPublic(url);
   }
 
   @ParameterizedTest
-  @ValueSource(strings={"/actuator", "/actuator/", "/actuator/env", "/users"})
+  @ValueSource(strings={"/actuator", "/actuator/", "/actuator/env", "/users", "/actuator/loggers"})
   @SneakyThrows
   void testActuatorUnauthorized(String url) {
     checkUnauthorized(url);

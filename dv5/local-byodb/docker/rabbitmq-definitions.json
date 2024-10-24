@@ -1,0 +1,137 @@
+{
+    "rabbit_version": "3.13.2",
+    "rabbitmq_version": "3.13.2",
+    "product_name": "RabbitMQ",
+    "product_version": "3.13.2",
+    "users": [
+        {
+            "name": "datavault",
+            "password_hash": "QHzhxMSBWKcsfa1zvAuxtvJaO1SfnAxcllYZtaXbUC/VosuJ",
+            "hashing_algorithm": "rabbit_password_hashing_sha256",
+            "tags": [
+                "monitoring"
+            ],
+            "limits": {}
+        },
+        {
+            "name": "rabbit",
+            "password_hash": "ZEXnxW839DcOxg1Ov+A3P/w9MZBaeulpkjPBMWPAGfGg4XYd",
+            "hashing_algorithm": "rabbit_password_hashing_sha256",
+            "tags": [
+                "administrator"
+            ],
+            "limits": {}
+        }
+    ],
+    "vhosts": [
+        {
+            "name": "/"
+        }
+    ],
+    "permissions": [
+        {
+            "user": "rabbit",
+            "vhost": "/",
+            "configure": ".*",
+            "write": ".*",
+            "read": ".*"
+        },
+        {
+            "user": "datavault",
+            "vhost": "/",
+            "configure": "",
+            "write": ".*",
+            "read": ".*"
+        }
+    ],
+    "topic_permissions": [],
+    "parameters": [],
+    "global_parameters": [
+    ],
+    "policies": [],
+    "queues": [
+        {
+            "name": "restart-worker-2",
+            "vhost": "/",
+            "durable": true,
+            "auto_delete": false,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "restart-worker-1",
+            "vhost": "/",
+            "durable": true,
+            "auto_delete": false,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "datavault",
+            "vhost": "/",
+            "durable": true,
+            "auto_delete": false,
+            "arguments": {
+                "x-queue-type": "classic",
+                "x-max-priority" : 2
+            }
+        },
+        {
+            "name": "datavault-event",
+            "vhost": "/",
+            "durable": true,
+            "auto_delete": false,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "restart-worker-3",
+            "vhost": "/",
+            "durable": true,
+            "auto_delete": false,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        }
+    ],
+    "exchanges": [
+        {
+            "name": "restart-worker",
+            "vhost": "/",
+            "type": "fanout",
+            "durable": true,
+            "auto_delete": false,
+            "internal": false,
+            "arguments": {}
+        }
+    ],
+    "bindings": [
+        {
+            "source": "restart-worker",
+            "vhost": "/",
+            "destination": "restart-worker-1",
+            "destination_type": "queue",
+            "routing_key": "",
+            "arguments": {}
+        },
+        {
+            "source": "restart-worker",
+            "vhost": "/",
+            "destination": "restart-worker-2",
+            "destination_type": "queue",
+            "routing_key": "",
+            "arguments": {}
+        },
+        {
+            "source": "restart-worker",
+            "vhost": "/",
+            "destination": "restart-worker-3",
+            "destination_type": "queue",
+            "routing_key": "",
+            "arguments": {}
+        }
+    ]
+}

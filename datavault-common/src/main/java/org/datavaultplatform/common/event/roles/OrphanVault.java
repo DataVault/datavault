@@ -12,6 +12,6 @@ public class OrphanVault extends Event {
     }
     public OrphanVault(Vault vault, String userId){
         super("Vault made orphan by "+userId);
-        this.eventClass = CreateRoleAssignment.class.getCanonicalName();
+        this.eventClass = OrphanVault.class.getCanonicalName();
     }
 }

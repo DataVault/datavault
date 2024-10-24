@@ -1,5 +1,6 @@
 package org.datavaultplatform.broker.queue;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -11,12 +12,7 @@ import java.util.List;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.app.DataVaultBrokerApp;
-import org.datavaultplatform.broker.services.DepositsService;
-import org.datavaultplatform.broker.services.EmailService;
-import org.datavaultplatform.broker.services.GroupsService;
-import org.datavaultplatform.broker.services.JobsService;
-import org.datavaultplatform.broker.services.UsersService;
-import org.datavaultplatform.broker.services.VaultsService;
+import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.broker.test.AddTestProperties;
 import org.datavaultplatform.broker.test.BaseDatabaseTest;
 import org.datavaultplatform.common.event.Event;
@@ -41,22 +37,15 @@ import org.datavaultplatform.common.event.deposit.StartCopyUpload;
 import org.datavaultplatform.common.event.deposit.TransferComplete;
 import org.datavaultplatform.common.event.deposit.UploadComplete;
 import org.datavaultplatform.common.event.deposit.ValidationComplete;
-import org.datavaultplatform.common.event.retrieve.RetrieveComplete;
-import org.datavaultplatform.common.event.retrieve.RetrieveStart;
-import org.datavaultplatform.common.model.Deposit;
-import org.datavaultplatform.common.model.DepositChunk;
-import org.datavaultplatform.common.model.Group;
-import org.datavaultplatform.common.model.Job;
-import org.datavaultplatform.common.model.User;
-import org.datavaultplatform.common.model.Vault;
+import org.datavaultplatform.common.event.retrieve.*;
+import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.storage.Verify;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.amqp.rabbit.listener.RabbitListenerEndpointRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
@@ -73,7 +62,7 @@ import org.springframework.transaction.annotation.Transactional;
     "broker.scheduled.enabled=false",
     "broker.email.enabled=false"
 })
-@Import({EventListener.class})
+@Import({EventListener.class, TaskTimerSupport.class})
 @Slf4j
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public class EventListenerIT extends BaseDatabaseTest {
@@ -83,6 +72,9 @@ public class EventListenerIT extends BaseDatabaseTest {
 
   @MockBean
   Sender sender;
+
+  @MockBean
+  MessageIdProcessedListener messageIdProcessedListener;
 
   @Autowired
   UsersService usersService;
@@ -102,20 +94,38 @@ public class EventListenerIT extends BaseDatabaseTest {
   @Autowired
   EventListener eventListener;
 
+  @Autowired
+  RetrievesService retrievesService;
+
+  @Autowired
+  AuditsService auditsService;
+
   @MockBean
   RabbitListenerEndpointRegistry registry;
   private final String userId = "user123";
   private String bagId = "bag123";
   private String vaultId;
-  private String jobId;
+  private String jobDepositId;
+  private String jobRetrieveId;
+  private String jobGenericId;
   private String depositId;
+  private String retrieveId;
+  private String auditId;
+  private String depositChunkId1;
+  private String depositChunkId2;
 
-  Job job;
+  Job jobDeposit;
+  Job jobRetrieve;
+  Job jobGeneric;
+  
   Vault vault;
   Deposit deposit;
   User user;
+  Audit audit;
 
   Group group;
+    @Autowired
+    private EventService eventService;
 
   @BeforeEach
   void setup(){
@@ -140,6 +150,35 @@ public class EventListenerIT extends BaseDatabaseTest {
     vaultsService.addVault(vault);
     this.vaultId = vault.getID();
 
+    DepositChunk depositChunk1 = new DepositChunk();
+    depositChunk1.setDeposit(deposit);
+    depositChunk1.setChunkNum(1);
+    
+    DepositChunk depositChunk2 = new DepositChunk();
+    depositChunk2.setDeposit(deposit);
+    depositChunk2.setChunkNum(2);
+
+    depositsService.updateDepositChunk(depositChunk1);
+    depositsService.updateDepositChunk(depositChunk2);
+    
+    audit = new Audit();
+    audit.setTimestamp(new Date());
+    audit.setStatus(Audit.Status.IN_PROGRESS);
+    auditsService.addAudit(audit, List.of(depositChunk1, depositChunk2));
+    auditId = audit.getID();
+    assertThat(auditId).isNotNull();
+    
+    AuditChunkStatus chunkStatus1 = auditsService.addAuditStatus(audit, depositChunk1,"archive-id-one","location-one");
+    assertThat(chunkStatus1.getID()).isNotNull();
+
+    AuditChunkStatus chunkStatus2 = auditsService.addAuditStatus(audit, depositChunk2,"archive-id-two","location-two");
+    assertThat(chunkStatus2.getID()).isNotNull();
+    
+    depositChunkId1 = depositChunk1.getID();
+    depositChunkId2 = depositChunk2.getID();
+    assertThat(depositChunkId1).isNotNull();
+    assertThat(depositChunkId2).isNotNull();
+    
     deposit = new Deposit();
     deposit.setName("test-deposit");
     deposit.setHasPersonalData(false);
@@ -149,10 +188,24 @@ public class EventListenerIT extends BaseDatabaseTest {
     this.bagId = deposit.getBagId();
     this.depositId = deposit.getID();
 
-    job = new Job();
-    jobsService.addJob(deposit, job);
-    this.jobId = job.getID();
+    jobDeposit = new Job(Job.TASK_CLASS_DEPOSIT);
+    jobRetrieve = new Job(Job.TASK_CLASS_RETRIEVE);
+    jobGeneric = new Job();
+    jobsService.addJob(deposit, jobGeneric);
+    jobsService.addJob(deposit, jobDeposit);
+    jobsService.addJob(deposit, jobRetrieve);
+    this.jobGenericId = jobGeneric.getID();
+    this.jobDepositId = jobDeposit.getID();
+    this.jobRetrieveId = jobRetrieve.getID();
 
+    Retrieve retrieve = new Retrieve();
+    retrieve.setHasExternalRecipients(false);
+    retrieve.setTimestamp(new Date());
+    retrieve.setDeposit(deposit);
+
+    retrievesService.addRetrieve(retrieve, deposit, "/path");
+    this.retrieveId = retrieve.getID();
+    assertThat(retrieve.getID()).isNotNull();
   }
 
   @Test
@@ -177,7 +230,7 @@ public class EventListenerIT extends BaseDatabaseTest {
         + "      \"persistent\": false,"
         + "      \"depositId\": \"" + depositId + "\","
         + "      \"vaultId\"  : \"" + vaultId + "\","
-        + "      \"jobId\"    : \"" + jobId + "\","
+        + "      \"jobId\"    : \"" + jobGenericId + "\","
         + "      \"userId\"   : \"" + userId + "\","
         + "      \"agent\": \"datavault-worker-1\","
         + "      \"agentType\": \"WORKER\","
@@ -194,7 +247,7 @@ public class EventListenerIT extends BaseDatabaseTest {
     Event event = eventListener.onMessageInternal(message);
     assertEquals(InitStates.class, event.getClass());
 
-    Job job = jobsService.getJob(jobId);
+    Job job = jobsService.getJob(jobGenericId);
     assertEquals(List.of(
              "Calculating size",
              "Transferring",
@@ -216,7 +269,7 @@ public class EventListenerIT extends BaseDatabaseTest {
         + "      \"persistent\": false,"
         + "      \"depositId\": \"" + depositId + "\","
         + "      \"vaultId\"  : \"" + vaultId + "\","
-        + "      \"jobId\"    : \"" + jobId + "\","
+        + "      \"jobId\"    : \"" + jobGenericId + "\","
         + "      \"userId\"   : \"" + userId + "\","
         + "      \"agentType\": \"WORKER\""
         + "    }";
@@ -235,7 +288,7 @@ public class EventListenerIT extends BaseDatabaseTest {
         + "      \"persistent\": false,"
         + "      \"depositId\": \"" + depositId + "\","
         + "      \"vaultId\"  : \"" + vaultId + "\","
-        + "      \"jobId\"    : \"" + jobId + "\","
+        + "      \"jobId\"    : \"" + jobGenericId + "\","
         + "      \"userId\"   : \"" + userId + "\","
         + "      \"agent\": \"datavault-worker-1\","
         + "      \"agentType\": \"WORKER\","
@@ -261,7 +314,7 @@ public class EventListenerIT extends BaseDatabaseTest {
         + "      \"persistent\": false,"
         + "      \"depositId\": \"" + depositId + "\","
         + "      \"vaultId\"  : \"" + vaultId + "\","
-        + "      \"jobId\"    : \"" + jobId + "\","
+        + "      \"jobId\"    : \"" + jobGenericId + "\","
         + "      \"userId\"   : \"" + userId + "\","
         + "      \"agent\": \"datavault-worker-1\","
         + "      \"agentType\": \"WORKER\","
@@ -285,17 +338,17 @@ public class EventListenerIT extends BaseDatabaseTest {
         + "      \"persistent\": true,"
         + "      \"depositId\": \"" + depositId + "\","
         + "      \"vaultId\"  : \"" + vaultId + "\","
-        + "      \"jobId\"    : \"" + jobId + "\","
+        + "      \"jobId\"    : \"" + jobDepositId + "\","
         + "      \"userId\"   : \"" + userId + "\","
         + "      \"agent\": \"datavault-worker-1\","
         + "      \"agentType\": \"WORKER\""
         + "    }";
 
-    assertNull(job.getState());
+    assertNull(jobDeposit.getState());
     Event event = eventListener.onMessageInternal(message);
     assertEquals(Start.class, event.getClass());
 
-    job = jobsService.getJob(jobId);
+    Job job = jobsService.getJob(jobDepositId);
     assertEquals(0, job.getState());
   }
 
@@ -312,7 +365,7 @@ public class EventListenerIT extends BaseDatabaseTest {
         + "      \"persistent\": true,"
         + "      \"depositId\": \"" + depositId + "\","
         + "      \"vaultId\"  : \"" + vaultId   + "\","
-        + "      \"jobId\"    : \"" + jobId     + "\","
+        + "      \"jobId\"    : \"" + jobDepositId     + "\","
         + "      \"userId\"   : \"" + userId    + "\","
         + "      \"agent\": \"datavault-worker-1\","
         + "      \"agentType\": \"WORKER\","
@@ -331,7 +384,7 @@ public class EventListenerIT extends BaseDatabaseTest {
         + "      \"persistent\": true,"
         + "      \"depositId\": \"" + depositId + "\","
         + "      \"vaultId\"  : \"" + vaultId   + "\","
-        + "      \"jobId\"    : \"" + jobId     + "\","
+        + "      \"jobId\"    : \"" + jobDepositId     + "\","
         + "      \"userId\"   : \"" + userId    + "\""
         + "    }";
 
@@ -352,7 +405,7 @@ public class EventListenerIT extends BaseDatabaseTest {
         + "      \"persistent\": true,"
         + "      \"depositId\": \"" + depositId + "\","
         + "      \"vaultId\"  : \"" + vaultId + "\","
-        + "      \"jobId\"    : \"" + jobId + "\","
+        + "      \"jobId\"    : \"" + jobDepositId + "\","
         + "      \"userId\"   : \"" + userId + "\","
         + "      \"agent\": \"datavault-worker-1\","
         + "      \"agentType\": \"WORKER\","
@@ -397,7 +450,7 @@ public class EventListenerIT extends BaseDatabaseTest {
         + "      \"persistent\": true,"
         + "      \"depositId\": \"" + depositId + "\","
         + "      \"vaultId\"  : \"" + vaultId + "\","
-        + "      \"jobId\"    : \"" + jobId + "\","
+        + "      \"jobId\"    : \"" + jobDepositId + "\","
         + "      \"userId\"   : \"" + userId + "\","
         + "      \"agent\": \"datavault-worker-1\","
         + "      \"agentType\": \"WORKER\","
@@ -423,7 +476,7 @@ public class EventListenerIT extends BaseDatabaseTest {
         + "      \"persistent\": true,"
         + "      \"depositId\": \"" + depositId + "\","
         + "      \"vaultId\"  : \"" + vaultId + "\","
-        + "      \"jobId\"    : \"" + jobId + "\","
+        + "      \"jobId\"    : \"" + jobDepositId + "\","
         + "      \"userId\"   : \"" + userId + "\","
         + "      \"agent\": \"datavault-worker-1\","
         + "      \"agentType\": \"WORKER\","
@@ -446,7 +499,7 @@ public class EventListenerIT extends BaseDatabaseTest {
         + "      \"persistent\": true,"
         + "      \"depositId\": \"" + depositId + "\","
         + "      \"vaultId\"  : \"" + vaultId + "\","
-        + "      \"jobId\"    : \"" + jobId + "\","
+        + "      \"jobId\"    : \"" + jobDepositId + "\","
         + "      \"userId\"   : \"" + userId + "\","
         + "      \"agent\": \"datavault-worker-1\","
         + "      \"agentType\": \"WORKER\","
@@ -470,7 +523,7 @@ public class EventListenerIT extends BaseDatabaseTest {
         + "      \"persistent\": true,"
         + "      \"depositId\": \"" + depositId + "\","
         + "      \"vaultId\"  : \"" + vaultId + "\","
-        + "      \"jobId\"    : \"" + jobId + "\","
+        + "      \"jobId\"    : \"" + jobGenericId + "\","
         + "      \"userId\"   : \"" + userId + "\","
         + "      \"agent\": \"datavault-worker-1\","
         + "      \"agentType\": \"WORKER\""
@@ -479,49 +532,276 @@ public class EventListenerIT extends BaseDatabaseTest {
     assertEquals(org.datavaultplatform.common.event.Error.class, event.getClass());
   }
 
-  @Disabled
-  @Test
-  @SneakyThrows
-  void test11RetrieveStart(){
-    String message = "{"
-        + "      \"message\": \"XXXXXXXXXX\","
-        + "      \"retrieveId\": \"ABCDEF\","
-        + "      \"eventClass\": \"org.datavaultplatform.common.event.retrieve.RetrieveStart\","
-        + "      \"timestamp\": \"2022-09-16T15:12:40.063Z\","
-        + "      \"sequence\": 33,"
-        + "      \"persistent\": true,"
-        + "      \"depositId\": \"" + depositId + "\","
-        + "      \"vaultId\"  : \"" + vaultId + "\","
-        + "      \"jobId\"    : \"" + jobId + "\","
-        + "      \"userId\"   : \"" + userId + "\","
-        + "      \"agent\": \"datavault-worker-1\","
-        + "      \"agentType\": \"WORKER\""
-        + "}";
-    Event event = eventListener.onMessageInternal(message);
-    assertEquals(RetrieveStart.class, event.getClass());
+  @Nested
+  class RetrieveEvents {
+    
+    @Test
+    @SneakyThrows
+    void test11RetrieveStart() {
+      String message = "{"
+              + "      \"message\": \"XXXXXXXXXX\","
+              + "      \"eventClass\": \"org.datavaultplatform.common.event.retrieve.RetrieveStart\","
+              + "      \"timestamp\": \"2022-09-16T15:12:40.063Z\","
+              + "      \"sequence\": 33,"
+              + "      \"persistent\": true,"
+              + "      \"retrieveId\": \"" + retrieveId + "\","
+              + "      \"depositId\": \"" + depositId + "\","
+              + "      \"vaultId\"  : \"" + vaultId + "\","
+              + "      \"jobId\"    : \"" + jobRetrieveId + "\","
+              + "      \"userId\"   : \"" + userId + "\","
+              + "      \"agent\": \"datavault-worker-1\","
+              + "      \"agentType\": \"WORKER\""
+              + "}";
+
+      long before = eventService.count();
+      Event event = eventListener.onMessageInternal(message);
+      assertEquals(RetrieveStart.class, event.getClass());
+      long after = eventService.count();
+      assertThat(after).isEqualTo(before + 1);
+      checkLastNotFailedRetrievedEvent(event, depositId, retrieveId);
+    }
+
+    private void checkLastNotFailedRetrievedEvent(Event expectedLastEvent, String depositId, String retrieveId) {
+      if (expectedLastEvent != null) {
+        assertThat(expectedLastEvent.getID()).isNotNull();
+
+        Event storedEvent = eventService.findById(expectedLastEvent.getID());
+        storedEvent.refreshIdFields();
+        assertThat(storedEvent.getDepositId()).isEqualTo(depositId);
+        assertThat(storedEvent.getUserId()).isEqualTo(userId);
+        assertThat(storedEvent.getRetrieveId()).isEqualTo(retrieveId);
+      }
+      Event found = depositsService.getLastNotFailedRetrieveEvent(depositId, retrieveId);
+      if (expectedLastEvent != null) {
+        assertThat(found.getID()).isEqualTo(expectedLastEvent.getID());
+      } else {
+        assertThat(found).isNull();
+      }
+    }
+
+    @Test
+    @SneakyThrows
+    void test12RetrieveComplete() {
+      String message = "{"
+              + "      \"message\": \"XXXXXXXXXX\","
+              + "      \"eventClass\": \"org.datavaultplatform.common.event.retrieve.RetrieveComplete\","
+              + "      \"timestamp\": \"2022-09-16T15:12:40.063Z\","
+              + "      \"sequence\": 33,"
+              + "      \"persistent\": true,"
+              + "      \"retrieveId\": \"" + retrieveId + "\","
+              + "      \"depositId\": \"" + depositId + "\","
+              + "      \"vaultId\"  : \"" + vaultId + "\","
+              + "      \"jobId\"    : \"" + jobRetrieveId + "\","
+              + "      \"userId\"   : \"" + userId + "\","
+              + "      \"agent\": \"datavault-worker-1\","
+              + "      \"agentType\": \"WORKER\""
+              + "}";
+
+      long before = eventService.count();
+      Event event = eventListener.onMessageInternal(message);
+      assertEquals(RetrieveComplete.class, event.getClass());
+      long after = eventService.count();
+      assertThat(after).isEqualTo(before + 1);
+
+      checkLastNotFailedRetrievedEvent(event, depositId, retrieveId);
+
+    }
+
+    @Test
+    @SneakyThrows
+    void test26archiveStoreRetrievedAll() {
+      String message = "{"
+              + "      \"message\": \"Archive Store Retrieved All\","
+              + "      \"eventClass\": \"org.datavaultplatform.common.event.retrieve.ArchiveStoreRetrievedAll\","
+              + "      \"nextState\": null,"
+              + "      \"timestamp\": \"2022-09-16T15:12:40.150Z\","
+              + "      \"sequence\": 35,"
+              + "      \"persistent\": true,"
+              + "      \"depositId\":  \"" + depositId + "\","
+              + "      \"retrieveId\": \"" + retrieveId + "\","
+              + "      \"vaultId\"  :  \"" + vaultId + "\","
+              + "      \"jobId\"    :  \"" + jobRetrieveId + "\","
+              + "      \"userId\"   :  \"" + userId + "\","
+              + "      \"agent\": \"datavault-worker-1\","
+              + "      \"agentType\": \"WORKER\""
+              + "    }";
+
+
+      long before = eventService.count();
+      Event event = eventListener.onMessageInternal(message);
+      assertEquals(ArchiveStoreRetrievedAll.class, event.getClass());
+      assertEquals(ArchiveStoreRetrievedAll.MESSAGE, event.getMessage());
+
+      long after = eventService.count();
+      assertThat(after).isEqualTo(before + 1);
+
+      checkLastNotFailedRetrievedEvent(event, depositId, retrieveId);
+    }
+
+    @Test
+    @SneakyThrows
+    void test27archiveStoreRetrievedChunk() {
+      String message = "{"
+              + "      \"message\": \"Archive Store Retrieved Chunk\","
+              + "      \"eventClass\": \"org.datavaultplatform.common.event.retrieve.ArchiveStoreRetrievedChunk\","
+              + "      \"nextState\": null,"
+              + "      \"timestamp\": \"2022-09-16T15:12:40.150Z\","
+              + "      \"sequence\": 35,"
+              + "      \"persistent\": true,"
+              + "      \"retrieveId\":  \"" + retrieveId + "\","
+              + "      \"depositId\":  \"" + depositId + "\","
+              + "      \"chunkNumber\": 2112,"
+              + "      \"vaultId\"  : \"" + vaultId + "\","
+              + "      \"jobId\"    : \"" + jobRetrieveId + "\","
+              + "      \"userId\"   : \"" + userId + "\","
+              + "      \"agent\": \"datavault-worker-1\","
+              + "      \"agentType\": \"WORKER\""
+              + "    }";
+      long before = eventService.count();
+
+      Event event = eventListener.onMessageInternal(message);
+      assertEquals(ArchiveStoreRetrievedChunk.class, event.getClass());
+      assertEquals(2112, event.getChunkNumber());
+      assertEquals(ArchiveStoreRetrievedChunk.MESSAGE, event.getMessage());
+
+      long after = eventService.count();
+      assertThat(after).isEqualTo(before + 1);
+
+      checkLastNotFailedRetrievedEvent(event, depositId, retrieveId);
+    }
+
+
+    @Test
+    @SneakyThrows
+    void test28userStoreSpaceAvailableChecked() {
+      String message = "{"
+              + "      \"message\": \"User Store Space Available Checked\","
+              + "      \"eventClass\": \"org.datavaultplatform.common.event.retrieve.UserStoreSpaceAvailableChecked\","
+              + "      \"nextState\": null,"
+              + "      \"timestamp\": \"2022-09-16T15:12:40.150Z\","
+              + "      \"sequence\": 35,"
+              + "      \"persistent\": true,"
+              + "      \"retrieveId\": \"" + retrieveId + "\","
+              + "      \"depositId\":  \"" + depositId + "\","
+              + "      \"vaultId\"  : \"" + vaultId + "\","
+              + "      \"jobId\"    : \"" + jobRetrieveId + "\","
+              + "      \"userId\"   : \"" + userId + "\","
+              + "      \"agent\": \"datavault-worker-1\","
+              + "      \"agentType\": \"WORKER\""
+              + "    }";
+      long before = eventService.count();
+      Event event = eventListener.onMessageInternal(message);
+      assertEquals(UserStoreSpaceAvailableChecked.class, event.getClass());
+      assertEquals(UserStoreSpaceAvailableChecked.MESSAGE, event.getMessage());
+
+      long after = eventService.count();
+      assertThat(after).isEqualTo(before + 1);
+
+      checkLastNotFailedRetrievedEvent(event, depositId, retrieveId);
+    }
+
+    @Test
+    @SneakyThrows
+    void test29UserStoreSpaceAvailableChecked() {
+      String message = "{"
+              + "      \"message\": \"User Store Space Available Checked\","
+              + "      \"eventClass\": \"org.datavaultplatform.common.event.retrieve.UserStoreSpaceAvailableChecked\","
+              + "      \"nextState\": null,"
+              + "      \"timestamp\": \"2022-09-16T15:12:40.150Z\","
+              + "      \"sequence\": 35,"
+              + "      \"persistent\": true,"
+              + "      \"retrieveId\": \"" + retrieveId + "\","
+              + "      \"depositId\":  \"" + depositId + "\","
+              + "      \"vaultId\"  :  \"" + vaultId + "\","
+              + "      \"jobId\"    :  \"" + jobRetrieveId + "\","
+              + "      \"userId\"   :  \"" + userId + "\","
+              + "      \"agent\": \"datavault-worker-1\","
+              + "      \"agentType\": \"WORKER\""
+              + "    }";
+      long before = eventService.count();
+      Event event = eventListener.onMessageInternal(message);
+      assertEquals(UserStoreSpaceAvailableChecked.class, event.getClass());
+      assertEquals(UserStoreSpaceAvailableChecked.MESSAGE, event.getMessage());
+
+      long after = eventService.count();
+      assertThat(after).isEqualTo(before + 1);
+
+      checkLastNotFailedRetrievedEvent(event, depositId, retrieveId);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "org.datavaultplatform.common.event.retrieve.RetrieveError",
+            "org.datavaultplatform.common.event.Error"
+    })
+    @SneakyThrows
+    void testRetrieveError(String eventClass) {
+      Class clazz = Class.forName(eventClass);
+      assertThat(Event.class.isAssignableFrom(clazz));
+      String message = "{"
+              + "      \"message\": \"CUSTOM ERROR MESSAGE\","
+              + "      \"eventClass\": \"" + eventClass + "\","
+              + "      \"nextState\": null,"
+              + "      \"timestamp\": \"2022-09-16T15:12:40.150Z\","
+              + "      \"sequence\": 35,"
+              + "      \"persistent\": true,"
+              + "      \"retrieveId\": \"" + retrieveId + "\","
+              + "      \"depositId\":  \"" + depositId + "\","
+              + "      \"vaultId\"  :  \"" + vaultId + "\","
+              + "      \"jobId\"    :  \"" + jobRetrieveId + "\","
+              + "      \"userId\"   :  \"" + userId + "\","
+              + "      \"agent\": \"datavault-worker-1\","
+              + "      \"agentType\": \"WORKER\""
+              + "    }";
+      long before = eventService.count();
+      Event event = eventListener.onMessageInternal(message);
+      assertEquals(clazz, event.getClass());
+      assertEquals("CUSTOM ERROR MESSAGE", event.getMessage());
+
+      long after = eventService.count();
+      assertThat(after).isEqualTo(before + 1);
+      
+      // double check that the event has been saved correctly
+      Event foundEvent = eventService.findById(event.getID());
+      assertThat(foundEvent).isEqualTo(event);
+      assertThat(foundEvent.getRetrieveId()).isEqualTo(retrieveId);
+      assertThat(foundEvent.getDeposit().getID()).isEqualTo(depositId);
+      assertThat(foundEvent.getJob().getID()).isEqualTo(jobRetrieveId);
+
+      checkLastNotFailedRetrievedEvent(null, depositId, retrieveId);
+    }
+
+    @Test
+    @SneakyThrows
+    void test28UploadedToUserStore() {
+      String message = "{"
+              + "      \"message\": \"uploaded to user store\","
+              + "      \"eventClass\": \"org.datavaultplatform.common.event.retrieve.UploadedToUserStore\","
+              + "      \"nextState\": null,"
+              + "      \"timestamp\": \"2022-09-16T15:12:40.150Z\","
+              + "      \"sequence\": 35,"
+              + "      \"persistent\": true,"
+              + "      \"retrieveId\": \"" + retrieveId + "\","
+              + "      \"depositId\":  \"" + depositId + "\","
+              + "      \"vaultId\"  :  \"" + vaultId + "\","
+              + "      \"jobId\"    :  \"" + jobRetrieveId + "\","
+              + "      \"userId\"   :  \"" + userId + "\","
+              + "      \"agent\": \"datavault-worker-1\","
+              + "      \"agentType\": \"WORKER\""
+              + "    }";
+      long before = eventService.count();
+      Event event = eventListener.onMessageInternal(message);
+      assertEquals(UploadedToUserStore.class, event.getClass());
+      assertEquals("uploaded to user store", event.getMessage());
+
+      long after = eventService.count();
+      assertThat(after).isEqualTo(before + 1);
+
+      checkLastNotFailedRetrievedEvent(event, depositId, retrieveId);
+
+    }
   }
 
-  @Disabled
-  @Test
-  @SneakyThrows
-  void test12RetrieveComplete(){
-    String message = "{"
-        + "      \"message\": \"XXXXXXXXXX\","
-        + "      \"retrieveId\": \"ABCDEF\","
-        + "      \"eventClass\": \"org.datavaultplatform.common.event.retrieve.RetrieveComplete\","
-        + "      \"timestamp\": \"2022-09-16T15:12:40.063Z\","
-        + "      \"sequence\": 33,"
-        + "      \"persistent\": true,"
-        + "      \"depositId\": \"" + depositId + "\","
-        + "      \"vaultId\"  : \"" + vaultId + "\","
-        + "      \"jobId\"    : \"" + jobId + "\","
-        + "      \"userId\"   : \"" + userId + "\","
-        + "      \"agent\": \"datavault-worker-1\","
-        + "      \"agentType\": \"WORKER\""
-        + "}";
-    Event event = eventListener.onMessageInternal(message);
-    assertEquals(RetrieveComplete.class, event.getClass());
-  }
 
   @Test
   @SneakyThrows
@@ -535,7 +815,7 @@ public class EventListenerIT extends BaseDatabaseTest {
         + "      \"persistent\": true,"
         + "      \"depositId\": \"" + depositId + "\","
         + "      \"vaultId\"  : \"" + vaultId + "\","
-        + "      \"jobId\"    : \"" + jobId + "\","
+        + "      \"jobId\"    : \"" + jobGenericId + "\","
         + "      \"userId\"   : \"" + userId + "\","
         + "      \"agent\": \"datavault-worker-1\","
         + "      \"agentType\": \"WORKER\""
@@ -556,7 +836,7 @@ public class EventListenerIT extends BaseDatabaseTest {
         + "      \"persistent\": true,"
         + "      \"depositId\": \"" + depositId + "\","
         + "      \"vaultId\"  : \"" + vaultId + "\","
-        + "      \"jobId\"    : \"" + jobId + "\","
+        + "      \"jobId\"    : \"" + jobGenericId + "\","
         + "      \"userId\"   : \"" + userId + "\","
         + "      \"agent\": \"datavault-worker-1\","
         + "      \"agentType\": \"WORKER\""
@@ -565,20 +845,19 @@ public class EventListenerIT extends BaseDatabaseTest {
     assertEquals(DeleteComplete.class, event.getClass());
   }
 
-  @Disabled
   @Test
   @SneakyThrows
   void test15AuditStart(){
     String message = "{"
         + "      \"message\": \"XXXXXXXXXX\","
-        + "      \"auditId\": \"ABCDEF\","
         + "      \"eventClass\": \"org.datavaultplatform.common.event.audit.AuditStart\","
         + "      \"timestamp\": \"2022-09-16T15:12:40.063Z\","
         + "      \"sequence\": 33,"
         + "      \"persistent\": true,"
+        + "      \"auditId\"  : \"" + auditId + "\","
         + "      \"depositId\": \"" + depositId + "\","
         + "      \"vaultId\"  : \"" + vaultId + "\","
-        + "      \"jobId\"    : \"" + jobId + "\","
+        + "      \"jobId\"    : \"" + jobGenericId + "\","
         + "      \"userId\"   : \"" + userId + "\","
         + "      \"agent\": \"datavault-worker-1\","
         + "      \"agentType\": \"WORKER\""
@@ -587,21 +866,20 @@ public class EventListenerIT extends BaseDatabaseTest {
     assertEquals(AuditStart.class, event.getClass());
   }
 
-  @Disabled
   @Test
   @SneakyThrows
   void test16ChunkAuditStarted(){
     String message = "{"
         + "      \"message\": \"XXXXXXXXXX\","
-        + "      \"auditId\": \"AUDIT-ID\","
-        + "      \"chunkId\": \"CHUNK-ID\","
         + "      \"eventClass\": \"org.datavaultplatform.common.event.audit.ChunkAuditStarted\","
         + "      \"timestamp\": \"2022-09-16T15:12:40.063Z\","
         + "      \"sequence\": 33,"
         + "      \"persistent\": true,"
+        + "      \"chunkId\": \"" + depositChunkId1 + "\","
+        + "      \"auditId\": \"" + auditId + "\","
         + "      \"depositId\": \"" + depositId + "\","
         + "      \"vaultId\"  : \"" + vaultId + "\","
-        + "      \"jobId\"    : \"" + jobId + "\","
+        + "      \"jobId\"    : \"" + jobGenericId + "\","
         + "      \"userId\"   : \"" + userId + "\","
         + "      \"agent\": \"datavault-worker-1\","
         + "      \"agentType\": \"WORKER\""
@@ -612,19 +890,20 @@ public class EventListenerIT extends BaseDatabaseTest {
 
   @Test
   @SneakyThrows
-  @Disabled
   void test17ChunkAuditComplete() {
     String message = "{"
         + "      \"message\": \"XXXXXXXXXX\","
-        + "      \"auditId\": \"AUDIT-ID\","
-        + "      \"chunkId\": \"CHUNK-ID\","
         + "      \"eventClass\": \"org.datavaultplatform.common.event.audit.ChunkAuditComplete\","
         + "      \"timestamp\": \"2022-09-16T15:12:40.063Z\","
         + "      \"sequence\": 33,"
         + "      \"persistent\": true,"
+        + "      \"archiveId\": \"archive-id-one\", "
+        + "      \"location\":  \"location-one\", "
+        + "      \"chunkId\": \"" + depositChunkId1 + "\","
+        + "      \"auditId\": \"" + auditId + "\","
         + "      \"depositId\": \"" + depositId + "\","
         + "      \"vaultId\"  : \"" + vaultId + "\","
-        + "      \"jobId\"    : \"" + jobId + "\","
+        + "      \"jobId\"    : \"" + jobGenericId + "\","
         + "      \"userId\"   : \"" + userId + "\","
         + "      \"agent\": \"datavault-worker-1\","
         + "      \"agentType\": \"WORKER\""
@@ -635,18 +914,17 @@ public class EventListenerIT extends BaseDatabaseTest {
 
   @Test
   @SneakyThrows
-  @Disabled
   void test18AuditComplete() {
     String message = "{"
         + "      \"message\": \"XXXXXXXXXX\","
-        + "      \"auditId\": \"ABCDEF\","
         + "      \"eventClass\": \"org.datavaultplatform.common.event.audit.AuditComplete\","
         + "      \"timestamp\": \"2022-09-16T15:12:40.063Z\","
         + "      \"sequence\": 33,"
         + "      \"persistent\": true,"
+        + "      \"auditId\":   \"" + auditId   + "\","
         + "      \"depositId\": \"" + depositId + "\","
         + "      \"vaultId\"  : \"" + vaultId + "\","
-        + "      \"jobId\"    : \"" + jobId + "\","
+        + "      \"jobId\"    : \"" + jobGenericId + "\","
         + "      \"userId\"   : \"" + userId + "\","
         + "      \"agent\": \"datavault-worker-1\","
         + "      \"agentType\": \"WORKER\""
@@ -657,22 +935,25 @@ public class EventListenerIT extends BaseDatabaseTest {
 
   @Test
   @SneakyThrows
-  @Disabled
   void test19AuditError() {
     String message = "{"
         + "      \"message\": \"XXXXXXXXXX\","
-        + "      \"auditId\": \"ABCDEF\","
         + "      \"eventClass\": \"org.datavaultplatform.common.event.audit.AuditError\","
         + "      \"timestamp\": \"2022-09-16T15:12:40.063Z\","
         + "      \"sequence\": 33,"
         + "      \"persistent\": true,"
+        + "      \"archiveId\": \"archive-id-one\", "
+        + "      \"location\":  \"location-one\", "
+        + "      \"chunkId\": \"" + depositChunkId1 + "\","
+        + "      \"auditId\": \"" + auditId + "\","
         + "      \"depositId\": \"" + depositId + "\","
         + "      \"vaultId\"  : \"" + vaultId + "\","
-        + "      \"jobId\"    : \"" + jobId + "\","
+        + "      \"jobId\"    : \"" + jobGenericId + "\","
         + "      \"userId\"   : \"" + userId + "\","
         + "      \"agent\": \"datavault-worker-1\","
         + "      \"agentType\": \"WORKER\""
         + "}";
+
     Event event = eventListener.onMessageInternal(message);
     assertEquals(AuditError.class, event.getClass());
   }
@@ -689,7 +970,7 @@ public class EventListenerIT extends BaseDatabaseTest {
         + "      \"persistent\": true,"
         + "      \"depositId\": \"" + depositId + "\","
         + "      \"vaultId\"  : \"" + vaultId + "\","
-        + "      \"jobId\"    : \"" + jobId + "\","
+        + "      \"jobId\"    : \"" + jobDepositId + "\","
         + "      \"userId\"   : \"" + userId + "\","
         + "      \"agent\": \"datavault-worker-1\","
         + "      \"agentType\": \"WORKER\""
@@ -710,7 +991,7 @@ public class EventListenerIT extends BaseDatabaseTest {
         + "      \"persistent\": true,"
         + "      \"depositId\": \"" + depositId + "\","
         + "      \"vaultId\"  : \"" + vaultId + "\","
-        + "      \"jobId\"    : \"" + jobId + "\","
+        + "      \"jobId\"    : \"" + jobDepositId + "\","
         + "      \"userId\"   : \"" + userId + "\","
         + "      \"agent\": \"datavault-worker-1\","
         + "      \"agentType\": \"WORKER\""
@@ -732,7 +1013,7 @@ public class EventListenerIT extends BaseDatabaseTest {
         + "      \"persistent\": true,"
         + "      \"depositId\": \"" + depositId + "\","
         + "      \"vaultId\"  : \"" + vaultId + "\","
-        + "      \"jobId\"    : \"" + jobId + "\","
+        + "      \"jobId\"    : \"" + jobDepositId+ "\","
         + "      \"userId\"   : \"" + userId + "\","
         + "      \"agent\": \"datavault-worker-1\","
         + "      \"agentType\": \"WORKER\""
@@ -755,7 +1036,7 @@ public class EventListenerIT extends BaseDatabaseTest {
         + "      \"persistent\": true,"
         + "      \"depositId\": \"" + depositId + "\","
         + "      \"vaultId\"  : \"" + vaultId + "\","
-        + "      \"jobId\"    : \"" + jobId + "\","
+        + "      \"jobId\"    : \"" + jobDepositId + "\","
         + "      \"userId\"   : \"" + userId + "\","
         + "      \"agent\": \"datavault-worker-1\","
         + "      \"agentType\": \"WORKER\""
@@ -776,7 +1057,7 @@ public class EventListenerIT extends BaseDatabaseTest {
         + "      \"persistent\": true,"
         + "      \"depositId\": \"" + depositId + "\","
         + "      \"vaultId\"  : \"" + vaultId + "\","
-        + "      \"jobId\"    : \"" + jobId + "\","
+        + "      \"jobId\"    : \"" + jobDepositId + "\","
         + "      \"userId\"   : \"" + userId + "\","
         + "      \"agent\": \"datavault-worker-1\","
         + "      \"agentType\": \"WORKER\""

@@ -17,6 +17,8 @@ public interface PropNames {
   String CHUNK_NUM = "chunkNum";
   String DEPOSIT_CHUNK = "depositChunk";
   String DEPOSIT_ID = "depositId";
+  String DEPOSIT_CHUNKS_STORED = "depositChunksStored";
+  String DEPOSIT_CHUNKS_RETRIEVED = "depositChunksRetrieved";
   /**
    * DepositCreationDate: Date Value in Basic ISO Format e.g. '20240131'
    * <p/>TODO - change to '2024-01-31'
@@ -54,4 +56,5 @@ public interface PropNames {
   String USER_FS_RETRY_MAX_ATTEMPTS = "userFsRetryMaxAttempts";
   String USER_FS_RETRY_DELAY_MS_1 = "userFsRetryDelayMs1";
   String USER_FS_RETRY_DELAY_MS_2 = "userFsRetryDelayMs2";
+  String NON_RESTART_JOB_ID = "nonRestartJobId";
 }

@@ -2,6 +2,8 @@ package org.datavaultplatform.worker;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.env.Environment;
+import org.springframework.util.Assert;
 
 /**
  * A Worker class which listens to the message queue and process messages as they arrive.
@@ -12,8 +14,15 @@ public class WorkerInstance {
      * Get the workers name
      * @return the name as a string
      */
-    public static String getWorkerName() {
+    public static String getWorkerNameOLD() {
         return java.lang.management.ManagementFactory.getRuntimeMXBean().getName();
+    }
+    
+    public static String getWorkerName(Environment env) {
+        Assert.isTrue(env != null, "The env cannot be null");
+        String workerName = env.getProperty("spring.application.name","datavault-worker");
+        long pid = ProcessHandle.current().pid();
+        return pid + "@" + workerName;
     }
     
     /**
