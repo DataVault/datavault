@@ -49,7 +49,7 @@ class TivoliStorageManagerTest {
         TivoliStorageManager tsm = new TivoliStorageManager("test123", props);
         assertThat(tsm.name).isEqualTo("test123");
         assertThat(tsm.isReverse()).isEqualTo(TivoliStorageManager.DEFAULT_REVERSE);
-        assertThat(tsm.getRetryTimeMinutes()).isEqualTo(TivoliStorageManager.DEFAULT_RETRY_TIME);
+        assertThat(tsm.getRetryTimeSeconds()).isEqualTo(TivoliStorageManager.DEFAULT_RETRY_TIME);
         assertThat(tsm.getMaxRetries()).isEqualTo(TivoliStorageManager.DEFAULT_MAX_RETRIES);
         assertThat(tsm.getTsmServerNodeOpt1()).isEqualTo(TivoliStorageManager.DEFAULT_TSM_SERVER_NODE1_OPT);
         assertThat(tsm.getTsmServerNodeOpt2()).isEqualTo(TivoliStorageManager.DEFAULT_TSM_SERVER_NODE2_OPT);
@@ -67,7 +67,7 @@ class TivoliStorageManagerTest {
         TivoliStorageManager tsm = new TivoliStorageManager("test123", props);
         assertThat(tsm.name).isEqualTo("test123");
         assertThat(tsm.isReverse()).isEqualTo(true);
-        assertThat(tsm.getRetryTimeMinutes()).isEqualTo(321);
+        assertThat(tsm.getRetryTimeSeconds()).isEqualTo(321);
         assertThat(tsm.getMaxRetries()).isEqualTo(123);
         assertThat(tsm.getTsmServerNodeOpt1()).isEqualTo("/testOptionsDir/" + TivoliStorageManager.DSM_OPT_1);
         assertThat(tsm.getTsmServerNodeOpt2()).isEqualTo("/testOptionsDir/" + TivoliStorageManager.DSM_OPT_2);
@@ -86,7 +86,7 @@ class TivoliStorageManagerTest {
         TivoliStorageManager tsm = new TivoliStorageManager("test123", props);
         assertThat(tsm.name).isEqualTo("test123");
         assertThat(tsm.isReverse()).isEqualTo(false);
-        assertThat(tsm.getRetryTimeMinutes()).isEqualTo(321);
+        assertThat(tsm.getRetryTimeSeconds()).isEqualTo(321);
         assertThat(tsm.getMaxRetries()).isEqualTo(123);
         assertThat(tsm.getTsmServerNodeOpt1()).isEqualTo("/testOptionsDir/" + TivoliStorageManager.DSM_OPT_1);
         assertThat(tsm.getTsmServerNodeOpt2()).isEqualTo("/testOptionsDir/" + TivoliStorageManager.DSM_OPT_2);
