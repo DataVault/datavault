@@ -16,6 +16,8 @@ public interface DepositReviewDAO extends BaseDAO<DepositReview>, DepositReviewC
   @EntityGraph(DepositReview.EG_DEPOSIT_REVIEW)
   Optional<DepositReview> findById(String id);
 
+  Optional<DepositReview> findByDepositId(String depositId);
+
   @Override
   @EntityGraph(DepositReview.EG_DEPOSIT_REVIEW)
   List<DepositReview> findAll();
