@@ -92,9 +92,9 @@ public class AdminReviewsController {
 
         List<DepositReviewModel> depositReviewModels = new ArrayList<>();
         for (int i = 0; i < reviewInfo.getDepositIds().size(); i++) {
-            String reviewId = reviewInfo.getDepositIds().get(i);
-            DepositInfo depositInfo = restService.getDeposit(reviewId);
-            DepositReview depositReview = restService.getDepositReview(reviewId);
+            String depositId = reviewInfo.getDepositIds().get(i);
+            DepositInfo depositInfo = restService.getDeposit(depositId);
+            DepositReview depositReview = restService.getDepositReview(depositId);
             DepositReviewModel drm = new DepositReviewModel();
 
             // Set DepositReview stuff

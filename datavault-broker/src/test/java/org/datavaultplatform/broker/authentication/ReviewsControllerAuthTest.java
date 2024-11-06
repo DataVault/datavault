@@ -18,14 +18,14 @@ public class ReviewsControllerAuthTest extends BaseControllerAuthTest {
   @Test
   void testGetDepositReview() {
 
-    when(controller.getDepositReview(USER_ID_1, "deposit-review-123")).thenReturn(
+    when(controller.getDepositReview(USER_ID_1, "deposit-123")).thenReturn(
         AuthTestData.DEPOSIT_REVIEW_1);
 
     checkWorksWhenAuthenticatedFailsOtherwise(
-        get("/vaultreviews/depositreviews/{depositReviewId}", "deposit-review-123"),
+        get("/vaultreviews/depositreviews/{depositId}", "deposit-123"),
         AuthTestData.DEPOSIT_REVIEW_1);
 
-    verify(controller).getDepositReview(USER_ID_1, "deposit-review-123");
+    verify(controller).getDepositReview(USER_ID_1, "deposit-123");
   }
 
   @Test
