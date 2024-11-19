@@ -120,13 +120,15 @@ public class AdminReviewsController {
     }
 
 
+
     // Process the completed review page
-    @PostMapping("/admin/vaults/{vaultid}/reviews/{reviewid}")
-    public String processReview(@RequestBody VaultReviewModel vaultReviewModel,
+    @RequestMapping(value = "/admin/vaults/{vaultid}/reviews/{reviewid}", method = RequestMethod.POST)
+    public String processReview(@ModelAttribute VaultReviewModel vaultReviewModel,
+                                ModelMap model,
+                                RedirectAttributes redirectAttributes,
                                 @PathVariable("vaultid") String vaultID,
                                 @PathVariable("reviewid") String reviewID,
-                                @RequestParam String action,
-                                RedirectAttributes redirectAttributes ) {
+                                @RequestParam String action) {
 
         // Note - The ModelAttributes made available here are not the same objects as those passed to the View,
         // they only contain the values entered on screen. With that in mind, fetch the original objects again and
@@ -175,7 +177,7 @@ public class AdminReviewsController {
 
         if (vaultReviewModel.getDepositReviewModels() != null) {
             for (DepositReviewModel drm : vaultReviewModel.getDepositReviewModels()) {
-                DepositReview originalDepositReview = restService.getDepositReview(drm.getDepositReviewId());
+                DepositReview originalDepositReview = restService.getDepositReview(drm.getDepositId());
                 originalDepositReview.setDeleteStatus(drm.getDeleteStatus());
                 originalDepositReview.setComment(drm.getComment());
 

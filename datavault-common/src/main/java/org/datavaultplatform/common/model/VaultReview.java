@@ -74,7 +74,9 @@ public class VaultReview {
     @Column(name = "comment", nullable = true, columnDefinition = "TEXT")
     private String comment;
 
+    public VaultReview() {
 
+    }
 
     public String getId() {
         return id;
