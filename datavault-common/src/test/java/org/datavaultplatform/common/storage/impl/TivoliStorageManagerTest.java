@@ -308,8 +308,10 @@ class TivoliStorageManagerTest {
             props.put(PropNames.OPTIONS_DIR, "/tmp/opt");
             tsm = Mockito.spy(new TivoliStorageManager("testTSM", props));
         }
-        
-        @Test
+
+        // Removed as TSM deletes can never succeed for TSM since the move to write once tapes
+        // resulted in us not deleting them
+        /*@Test
         void testDeleteSucceeds() throws Exception {
             
             File fileToDelete = Files.createTempFile("test",".txt").toFile();
@@ -331,9 +333,11 @@ class TivoliStorageManagerTest {
 
             //Check that the local file has not been deleted. We are trying to delete file on TSM ONLY
             assertThat(fileToDelete).exists();
-        }
-        
-        @Test
+        }*/
+
+        // Removed as TSM deletes can never fail for TSM since the move to write once tapes
+        // resulted in us not deleting them
+        /*@Test
         void testDeleteFails() throws Exception {
 
             File fileToDelete = Files.createTempFile("test",".txt").toFile();
@@ -361,7 +365,7 @@ class TivoliStorageManagerTest {
 
             //Check that the local file has not been deleted. We are trying to delete file on TSM ONLY
             assertThat(fileToDelete).exists();
-        }
+        }*/
 
     }
 

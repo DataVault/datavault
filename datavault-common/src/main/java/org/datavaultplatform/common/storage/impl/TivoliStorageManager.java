@@ -208,16 +208,16 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
     public void delete(String depositId, File working, Progress progress, String optFilePath) throws Exception {
 		Path depositDirectoryPath = getDepositDirectoryPath(depositId);
 		Path tsmFilePath = depositDirectoryPath.resolve(working.getName());
-		log.info("Delete [{}]",tsmFilePath);
-		ProcessHelper.ProcessInfo info = getProcessInfo("tsmDelete", 
-				"dsmc", "delete", "archive", tsmFilePath.toString(), "-noprompt", "-optfile=" + optFilePath);
-		if (info.wasFailure()) {
-			String errMessage = String.format("Delete of [%s] failed.", tsmFilePath);
-			logProcessOutput(info, errMessage);
-			throw new Exception(errMessage);
-		} else {
-			log.info("Delete of [{}] was Successful.", tsmFilePath);
-		}
+		log.info("TSM Delete [{}] skipping",tsmFilePath);
+		//ProcessHelper.ProcessInfo info = getProcessInfo("tsmDelete",
+		//		"dsmc", "delete", "archive", tsmFilePath.toString(), "-noprompt", "-optfile=" + optFilePath);
+		//if (info.wasFailure()) {
+		//	String errMessage = String.format("Delete of [%s] failed.", tsmFilePath);
+		//	logProcessOutput(info, errMessage);
+		//	throw new Exception(errMessage);
+		//} else {
+		//	log.info("Delete of [{}] was Successful.", tsmFilePath);
+		//}
     }
 	
 	/*
