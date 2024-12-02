@@ -11,10 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.queue.Sender;
 import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.common.model.ArchiveStore;
-import org.datavaultplatform.common.model.dao.AuditChunkStatusDAO;
-import org.datavaultplatform.common.model.dao.DepositChunkDAO;
-import org.datavaultplatform.common.model.dao.DepositDAO;
-import org.datavaultplatform.common.model.dao.EventDAO;
+import org.datavaultplatform.common.model.dao.*;
 import org.datavaultplatform.common.storage.impl.LocalFileSystem;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.junit.jupiter.api.AfterEach;
@@ -52,6 +49,8 @@ public abstract class BaseGenerateMessageTest {
   DepositDAO depositDao;
   @Mock
   DepositChunkDAO depositChunkDao;
+  @Mock
+  DepositPathDAO depositPathDao;
   @Mock
   AuditChunkStatusDAO auditChunkStatusDAO;
   @Mock
@@ -98,7 +97,7 @@ public abstract class BaseGenerateMessageTest {
   }
 
   protected DepositsController getDepositController() {
-    DepositsService depositsService = new DepositsService(depositDao, depositChunkDao,
+    DepositsService depositsService = new DepositsService(depositDao, depositChunkDao, depositPathDao,
         auditChunkStatusDAO, eventDAO,0, 0, 0, 0, 0, 0, 0);
     DepositsController dc = new DepositsController(vaultsService,
         depositsService,
