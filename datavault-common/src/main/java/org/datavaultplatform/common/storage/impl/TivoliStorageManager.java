@@ -208,16 +208,26 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
     public void delete(String depositId, File working, Progress progress, String optFilePath) throws Exception {
 		Path depositDirectoryPath = getDepositDirectoryPath(depositId);
 		Path tsmFilePath = depositDirectoryPath.resolve(working.getName());
-		log.info("TSM Delete [{}] skipping",tsmFilePath);
-		//ProcessHelper.ProcessInfo info = getProcessInfo("tsmDelete",
-		//		"dsmc", "delete", "archive", tsmFilePath.toString(), "-noprompt", "-optfile=" + optFilePath);
-		//if (info.wasFailure()) {
-		//	String errMessage = String.format("Delete of [%s] failed.", tsmFilePath);
-		//	logProcessOutput(info, errMessage);
-		//	throw new Exception(errMessage);
-		//} else {
-		//	log.info("Delete of [{}] was Successful.", tsmFilePath);
-		//}
+		log.info("TSM Delete [{}] ",tsmFilePath);
+
+		boolean deleted = false;
+		for (int r = 0; r < maxRetries && !deleted; r++) {
+			ProcessHelper.ProcessInfo info = getProcessInfo("tsmDelete",
+					"dsmc", "delete", "archive", tsmFilePath.toString(), "-noprompt", "-optfile=" + optFilePath);
+			String attemptCtx = String.format("attempt[%s/%s]", r+1, maxRetries);
+			if (info.wasFailure()) {
+				boolean lastAttempt = r == (maxRetries -1);
+				String errMessage = String.format("Delete of [%s] failed using location[%s] %s", tsmFilePath, optFilePath, attemptCtx);
+				logProcessOutput(info, errMessage);
+				if (lastAttempt) {
+					throw new Exception(errMessage);
+				}
+				log.info("{} Retrying in {} mins", errMessage, retryTimeSeconds);
+				TimeUnit.SECONDS.sleep(retryTimeSeconds);
+			} else {
+				log.info("Delete of [{}] was Successful.", tsmFilePath);
+			}
+		}
     }
 	
 	/*
