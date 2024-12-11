@@ -5,12 +5,7 @@ import static org.datavaultplatform.broker.config.QueueConfig.BROKER_QUEUE_NAME;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -747,6 +742,10 @@ public class EventListener implements MessageListener {
   void process14DeleteComplete(DeleteComplete event, Deposit deposit) {
     long depositSizeBeforeDelete = deposit.getSize();
     deposit.setStatus(Deposit.Status.DELETED);
+    deposit.setDepositPaths(Collections.emptyList());
+    depositsService.deleteDepositPaths(deposit.getID());
+    deposit.setDepositChunks(Collections.emptyList());
+    depositsService.deleteDepositChunks(deposit.getID());
     deposit.setSize(0);
     depositsService.updateDeposit(deposit);
 

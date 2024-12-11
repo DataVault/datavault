@@ -306,12 +306,12 @@ class TivoliStorageManagerTest {
             Map<String, String> props = new HashMap<>();
             props.put(PropNames.TEMP_DIR, tsmTemp.toString());
             props.put(PropNames.OPTIONS_DIR, "/tmp/opt");
+            props.put(PropNames.TSM_MAX_RETRIES, "5");
+            props.put(PropNames.TSM_RETRY_TIME, "1");
             tsm = Mockito.spy(new TivoliStorageManager("testTSM", props));
         }
 
-        // Removed as TSM deletes can never succeed for TSM since the move to write once tapes
-        // resulted in us not deleting them
-        /*@Test
+        @Test
         void testDeleteSucceeds() throws Exception {
             
             File fileToDelete = Files.createTempFile("test",".txt").toFile();
@@ -333,11 +333,9 @@ class TivoliStorageManagerTest {
 
             //Check that the local file has not been deleted. We are trying to delete file on TSM ONLY
             assertThat(fileToDelete).exists();
-        }*/
+        }
 
-        // Removed as TSM deletes can never fail for TSM since the move to write once tapes
-        // resulted in us not deleting them
-        /*@Test
+        @Test
         void testDeleteFails() throws Exception {
 
             File fileToDelete = Files.createTempFile("test",".txt").toFile();
@@ -356,7 +354,7 @@ class TivoliStorageManagerTest {
                 tsm.delete("testDepositId", fileToDelete, progress, "specificLocation");
             });
             String expectedTsmFile = tsmTemp.resolve("testDepositId").resolve(fileToDelete.getName()).toString();
-            String expectedErrorMessage = String.format("Delete of [%s] failed.",expectedTsmFile);
+            String expectedErrorMessage = String.format("Delete of [%s] failed using location[specificLocation] attempt[5/5]",expectedTsmFile);
             assertThat(ex).hasMessage(expectedErrorMessage);
 
             assertThat(argDesc.getValue()).isEqualTo("tsmDelete");
@@ -365,7 +363,7 @@ class TivoliStorageManagerTest {
 
             //Check that the local file has not been deleted. We are trying to delete file on TSM ONLY
             assertThat(fileToDelete).exists();
-        }*/
+        }
 
     }
 

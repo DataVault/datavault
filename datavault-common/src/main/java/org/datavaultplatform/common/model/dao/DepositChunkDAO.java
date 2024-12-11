@@ -18,4 +18,7 @@ public interface DepositChunkDAO extends BaseDAO<DepositChunk>, DepositChunkCust
   @Override
   @EntityGraph(DepositChunk.EG_DEPOSIT_CHUNK)
   List<DepositChunk> findAll();
+
+  @EntityGraph(DepositChunk.EG_DEPOSIT_CHUNK)
+  void deleteAllByDepositId(String string);
 }
