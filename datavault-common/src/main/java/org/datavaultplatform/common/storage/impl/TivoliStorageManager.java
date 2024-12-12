@@ -226,6 +226,8 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 				TimeUnit.SECONDS.sleep(retryTimeSeconds);
 			} else {
 				log.info("Delete of [{}] was Successful.", tsmFilePath);
+				deleted = true;
+
 			}
 		}
     }
