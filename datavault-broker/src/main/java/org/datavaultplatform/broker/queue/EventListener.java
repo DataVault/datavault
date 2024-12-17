@@ -742,10 +742,10 @@ public class EventListener implements MessageListener {
   void process14DeleteComplete(DeleteComplete event, Deposit deposit) {
     long depositSizeBeforeDelete = deposit.getSize();
     deposit.setStatus(Deposit.Status.DELETED);
-    deposit.setDepositPaths(Collections.emptyList());
-    depositsService.deleteDepositPaths(deposit.getID());
-    deposit.setDepositChunks(Collections.emptyList());
-    depositsService.deleteDepositChunks(deposit.getID());
+    //deposit.setDepositPaths(Collections.emptyList());
+    //depositsService.deleteDepositPaths(deposit.getID());
+    //deposit.setDepositChunks(Collections.emptyList());
+    //depositsService.deleteDepositChunks(deposit.getID());
     deposit.setSize(0);
     depositsService.updateDeposit(deposit);
 
