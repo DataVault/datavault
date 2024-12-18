@@ -350,12 +350,8 @@ class TivoliStorageManagerTest {
             Mockito.doReturn(mProcessInfo).when(tsm).getProcessInfo(argDesc.capture(), argCommands.capture());
 
             Progress progress = new Progress();
-            Exception ex = assertThrows(Exception.class, () -> {
-                tsm.delete("testDepositId", fileToDelete, progress, "specificLocation");
-            });
+            tsm.delete("testDepositId", fileToDelete, progress, "specificLocation");
             String expectedTsmFile = tsmTemp.resolve("testDepositId").resolve(fileToDelete.getName()).toString();
-            String expectedErrorMessage = String.format("Delete of [%s] failed using location[specificLocation] attempt[5/5]",expectedTsmFile);
-            assertThat(ex).hasMessage(expectedErrorMessage);
 
             assertThat(argDesc.getValue()).isEqualTo("tsmDelete");
 

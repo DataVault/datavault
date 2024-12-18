@@ -220,7 +220,11 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 				String errMessage = String.format("Delete of [%s] failed using location[%s] %s", tsmFilePath, optFilePath, attemptCtx);
 				logProcessOutput(info, errMessage);
 				if (lastAttempt) {
-					throw new Exception(errMessage);
+					// just exit as there may be reasons why data is not on tape
+					// we will have tried x number of times so can probably rule out
+					// TSM connection issue being the reason for failing
+					log.info("Delete of [{}] was skipped after multiple attempts.", tsmFilePath);
+					return;
 				}
 				log.info("{} Retrying in {} mins", errMessage, retryTimeSeconds);
 				TimeUnit.SECONDS.sleep(retryTimeSeconds);
