@@ -85,9 +85,11 @@ public class Delete extends Task {
                 	deleteFromArchiveStorage(context, archiveFs, tarFileName, tarFile);
                 }
             }
-            
+
+            logger.info("Sending delete complete event");
             eventSender.send(new DeleteComplete(this.jobID, this.depositId).withNextState(1)
                     .withUserId(this.userID));
+            logger.info("Sent delete complete event");
             
         } catch (Exception e) {
             String msg = "Deposit delete failed: " + e.getMessage();

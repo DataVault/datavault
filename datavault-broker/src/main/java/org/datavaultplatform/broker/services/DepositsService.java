@@ -4,10 +4,7 @@ import java.util.*;
 
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.model.*;
-import org.datavaultplatform.common.model.dao.AuditChunkStatusDAO;
-import org.datavaultplatform.common.model.dao.DepositChunkDAO;
-import org.datavaultplatform.common.model.dao.DepositDAO;
-import org.datavaultplatform.common.model.dao.EventDAO;
+import org.datavaultplatform.common.model.dao.*;
 import org.datavaultplatform.common.util.RetrievedChunks;
 import org.datavaultplatform.common.util.StoredChunks;
 import org.slf4j.Logger;
@@ -33,6 +30,7 @@ public class DepositsService {
 
     private final DepositDAO depositDAO;
     private final DepositChunkDAO depositChunkDAO;
+    private final DepositPathDAO depositPathDAO;
     private final AuditChunkStatusDAO auditChunkStatusDAO;
     private final EventDAO eventDAO;
 
@@ -52,6 +50,7 @@ public class DepositsService {
     public DepositsService(
         DepositDAO depositDAO,
         DepositChunkDAO depositChunkDAO,
+        DepositPathDAO depositPathDAO,
         AuditChunkStatusDAO auditChunkStatusDAO,
         EventDAO eventDAO,
         @Value("${audit.period.minutes:0}") int auditPeriodMinutes,
@@ -63,6 +62,7 @@ public class DepositsService {
         @Value("${audit.maxTotalChunks:2000}") int auditMaxTotalChunks){
         this.depositDAO = depositDAO;
         this.depositChunkDAO = depositChunkDAO;
+        this.depositPathDAO = depositPathDAO;
         this.auditChunkStatusDAO = auditChunkStatusDAO;
         this.eventDAO = eventDAO;
         this.auditPeriodMinutes = auditPeriodMinutes;
@@ -312,6 +312,14 @@ public class DepositsService {
             throw new Exception("No valid archive for retrieval");
         }
         return archiveID;
+    }
+
+    public void deleteDepositChunks(String depositId) {
+        depositChunkDAO.deleteAllByDepositId(depositId);
+    }
+
+    public void deleteDepositPaths(String depositId) {
+        depositPathDAO.deleteAllByDepositId(depositId);
     }
 }
 

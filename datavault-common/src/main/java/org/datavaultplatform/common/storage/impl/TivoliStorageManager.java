@@ -33,7 +33,7 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 @Getter
 public class TivoliStorageManager extends Device implements ArchiveStore {
 
-	public static final int DEFAULT_RETRY_TIME = 30;
+	public static final int DEFAULT_RETRY_TIME = 60;
 	public static final int DEFAULT_MAX_RETRIES = 48;
 	public static final String DSM_OPT_1 = "dsm1.opt";
 	public static final String DSM_OPT_2 = "dsm2.opt";
@@ -48,7 +48,7 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 	
     private final int maxRetries;
 	private final boolean reverse;
-	private final int retryTimeMinutes;
+	private final int retryTimeSeconds;
 	private final String tempPathPrefix;
 	private final String tsmServerNodeOpt1;
 	private final String tsmServerNodeOpt2;
@@ -61,9 +61,9 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 		Assert.notNull(config, "The config map cannot be null");
 		log.info("Config Size [{}]", config.size());
 		config.forEach((key, value) -> log.info("Config value for [{}] is [{}]", key, value));
-		this.retryTimeMinutes = lookup(PropNames.TSM_RETRY_TIME, Integer::parseInt, DEFAULT_RETRY_TIME);
-		if (this.retryTimeMinutes < 0) {
-			throw new IllegalArgumentException(String.format("The config property of %s[%s] cannot be less than 0", PropNames.TSM_RETRY_TIME, retryTimeMinutes));
+		this.retryTimeSeconds = lookup(PropNames.TSM_RETRY_TIME, Integer::parseInt, DEFAULT_RETRY_TIME);
+		if (this.retryTimeSeconds < 0) {
+			throw new IllegalArgumentException(String.format("The config property of %s[%s] cannot be less than 0", PropNames.TSM_RETRY_TIME, retryTimeSeconds));
 		}
 		this.maxRetries = lookup(PropNames.TSM_MAX_RETRIES, Integer::parseInt, DEFAULT_MAX_RETRIES);
 		if (this.maxRetries < 1) {
@@ -140,8 +140,8 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 	            if (lastAttempt) {
 					throw new Exception(errMsg);
 				}
-	            log.info("{} Retrying in {} mins", errMsg, retryTimeMinutes);
-	            TimeUnit.MINUTES.sleep(retryTimeMinutes);
+	            log.info("{} Retrying in {} mins", errMsg, retryTimeSeconds);
+	            TimeUnit.SECONDS.sleep(retryTimeSeconds);
 	        } else {
 		        if (Files.exists(retrieveToPath)) {
 					
@@ -183,8 +183,8 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 
 		TaskExecutor<String> executor = new TaskExecutor<>(2, "storeOnTSM");
 		
-		TSMTracker loc1 = getTSMTracker(tsmServerNodeOpt1, tsmFilePath.toFile(), progress, depositId, maxRetries, retryTimeMinutes);
-		TSMTracker loc2 = getTSMTracker(tsmServerNodeOpt2, tsmFilePath.toFile(), progress, depositId, maxRetries, retryTimeMinutes);
+		TSMTracker loc1 = getTSMTracker(tsmServerNodeOpt1, tsmFilePath.toFile(), progress, depositId, maxRetries, retryTimeSeconds);
+		TSMTracker loc2 = getTSMTracker(tsmServerNodeOpt2, tsmFilePath.toFile(), progress, depositId, maxRetries, retryTimeSeconds);
 
 		executor.add(loc1);
 		executor.add(loc2);
@@ -208,15 +208,31 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
     public void delete(String depositId, File working, Progress progress, String optFilePath) throws Exception {
 		Path depositDirectoryPath = getDepositDirectoryPath(depositId);
 		Path tsmFilePath = depositDirectoryPath.resolve(working.getName());
-		log.info("Delete [{}]",tsmFilePath);
-		ProcessHelper.ProcessInfo info = getProcessInfo("tsmDelete", 
-				"dsmc", "delete", "archive", tsmFilePath.toString(), "-noprompt", "-optfile=" + optFilePath);
-		if (info.wasFailure()) {
-			String errMessage = String.format("Delete of [%s] failed.", tsmFilePath);
-			logProcessOutput(info, errMessage);
-			throw new Exception(errMessage);
-		} else {
-			log.info("Delete of [{}] was Successful.", tsmFilePath);
+		log.info("TSM Delete [{}] ",tsmFilePath);
+
+		boolean deleted = false;
+		for (int r = 0; r < maxRetries && !deleted; r++) {
+			ProcessHelper.ProcessInfo info = getProcessInfo("tsmDelete",
+					"dsmc", "delete", "archive", tsmFilePath.toString(), "-noprompt", "-optfile=" + optFilePath);
+			String attemptCtx = String.format("attempt[%s/%s]", r+1, maxRetries);
+			if (info.wasFailure()) {
+				boolean lastAttempt = r == (maxRetries -1);
+				String errMessage = String.format("Delete of [%s] failed using location[%s] %s", tsmFilePath, optFilePath, attemptCtx);
+				logProcessOutput(info, errMessage);
+				if (lastAttempt) {
+					// just exit as there may be reasons why data is not on tape
+					// we will have tried x number of times so can probably rule out
+					// TSM connection issue being the reason for failing
+					log.info("Delete of [{}] was skipped after multiple attempts.", tsmFilePath);
+					return;
+				}
+				log.info("{} Retrying in {} mins", errMessage, retryTimeSeconds);
+				TimeUnit.SECONDS.sleep(retryTimeSeconds);
+			} else {
+				log.info("Delete of [{}] was Successful.", tsmFilePath);
+				deleted = true;
+
+			}
 		}
     }
 	
@@ -272,7 +288,7 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 		return new ToStringBuilder(this).
 				append("name", name).
 				append("maxRetries", maxRetries).
-				append("retryTimeMinutes", retryTimeMinutes).
+				append("retryTimeMinutes", retryTimeSeconds).
 				append("tempPathPrefix", tempPathPrefix).
 				append("tsmServerNodeOpt1", tsmServerNodeOpt1).
 				append("tsmServerNodeOpt2", tsmServerNodeOpt2).

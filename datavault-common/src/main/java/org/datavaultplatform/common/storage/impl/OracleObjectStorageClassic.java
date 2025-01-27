@@ -37,7 +37,7 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 	private ObjectStorage client = null;
 	private static final String CONFIG_FILE_PATH = System.getProperty("user.home") + "/.oci/config";
 	private static final String PROFILE = "DEFAULT";
-	private static final int defaultRetryTime = 30;
+	private static final int defaultRetryTime = 60;
 	private static final int defaultMaxRetries = 48; // 24 hours if retry time is 30 minutes
 	private static int retryTime = OracleObjectStorageClassic.defaultRetryTime;
 	private static int maxRetries = OracleObjectStorageClassic.defaultMaxRetries;
@@ -137,7 +137,7 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 						break;
 					}
 					attemptCount++;
-					TimeUnit.MINUTES.sleep(OracleObjectStorageClassic.retryTime);
+					TimeUnit.SECONDS.sleep(OracleObjectStorageClassic.retryTime);
 				}
 				// once restored get it
 				GetObjectResponse getObjectResponse = client.getObject(getObjectRequest);
@@ -149,7 +149,7 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 				if (r == (OracleObjectStorageClassic.maxRetries - 1)) {
 					throw e;
 				}
-				TimeUnit.MINUTES.sleep(OracleObjectStorageClassic.retryTime);
+				TimeUnit.SECONDS.sleep(OracleObjectStorageClassic.retryTime);
 			}
 		}
 
@@ -174,7 +174,7 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 				if (r == (OracleObjectStorageClassic.maxRetries - 1)) {
 					throw e;
 				}
-				TimeUnit.MINUTES.sleep(OracleObjectStorageClassic.retryTime);
+				TimeUnit.SECONDS.sleep(OracleObjectStorageClassic.retryTime);
 			}
 		}
 		

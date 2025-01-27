@@ -109,6 +109,10 @@
                                     <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
                                     Complete
                                 </div>
+                                <div th:case="DELETED" class="text-success">
+                                    <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                                    Deleted
+                                </div>
                                 <div th:case="FAILED" class="text-danger">
                                     <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
                                     Failed

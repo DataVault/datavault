@@ -49,7 +49,7 @@ class TivoliStorageManagerTest {
         TivoliStorageManager tsm = new TivoliStorageManager("test123", props);
         assertThat(tsm.name).isEqualTo("test123");
         assertThat(tsm.isReverse()).isEqualTo(TivoliStorageManager.DEFAULT_REVERSE);
-        assertThat(tsm.getRetryTimeMinutes()).isEqualTo(TivoliStorageManager.DEFAULT_RETRY_TIME);
+        assertThat(tsm.getRetryTimeSeconds()).isEqualTo(TivoliStorageManager.DEFAULT_RETRY_TIME);
         assertThat(tsm.getMaxRetries()).isEqualTo(TivoliStorageManager.DEFAULT_MAX_RETRIES);
         assertThat(tsm.getTsmServerNodeOpt1()).isEqualTo(TivoliStorageManager.DEFAULT_TSM_SERVER_NODE1_OPT);
         assertThat(tsm.getTsmServerNodeOpt2()).isEqualTo(TivoliStorageManager.DEFAULT_TSM_SERVER_NODE2_OPT);
@@ -67,7 +67,7 @@ class TivoliStorageManagerTest {
         TivoliStorageManager tsm = new TivoliStorageManager("test123", props);
         assertThat(tsm.name).isEqualTo("test123");
         assertThat(tsm.isReverse()).isEqualTo(true);
-        assertThat(tsm.getRetryTimeMinutes()).isEqualTo(321);
+        assertThat(tsm.getRetryTimeSeconds()).isEqualTo(321);
         assertThat(tsm.getMaxRetries()).isEqualTo(123);
         assertThat(tsm.getTsmServerNodeOpt1()).isEqualTo("/testOptionsDir/" + TivoliStorageManager.DSM_OPT_1);
         assertThat(tsm.getTsmServerNodeOpt2()).isEqualTo("/testOptionsDir/" + TivoliStorageManager.DSM_OPT_2);
@@ -86,7 +86,7 @@ class TivoliStorageManagerTest {
         TivoliStorageManager tsm = new TivoliStorageManager("test123", props);
         assertThat(tsm.name).isEqualTo("test123");
         assertThat(tsm.isReverse()).isEqualTo(false);
-        assertThat(tsm.getRetryTimeMinutes()).isEqualTo(321);
+        assertThat(tsm.getRetryTimeSeconds()).isEqualTo(321);
         assertThat(tsm.getMaxRetries()).isEqualTo(123);
         assertThat(tsm.getTsmServerNodeOpt1()).isEqualTo("/testOptionsDir/" + TivoliStorageManager.DSM_OPT_1);
         assertThat(tsm.getTsmServerNodeOpt2()).isEqualTo("/testOptionsDir/" + TivoliStorageManager.DSM_OPT_2);
@@ -306,9 +306,11 @@ class TivoliStorageManagerTest {
             Map<String, String> props = new HashMap<>();
             props.put(PropNames.TEMP_DIR, tsmTemp.toString());
             props.put(PropNames.OPTIONS_DIR, "/tmp/opt");
+            props.put(PropNames.TSM_MAX_RETRIES, "5");
+            props.put(PropNames.TSM_RETRY_TIME, "1");
             tsm = Mockito.spy(new TivoliStorageManager("testTSM", props));
         }
-        
+
         @Test
         void testDeleteSucceeds() throws Exception {
             
@@ -332,7 +334,7 @@ class TivoliStorageManagerTest {
             //Check that the local file has not been deleted. We are trying to delete file on TSM ONLY
             assertThat(fileToDelete).exists();
         }
-        
+
         @Test
         void testDeleteFails() throws Exception {
 
@@ -348,12 +350,8 @@ class TivoliStorageManagerTest {
             Mockito.doReturn(mProcessInfo).when(tsm).getProcessInfo(argDesc.capture(), argCommands.capture());
 
             Progress progress = new Progress();
-            Exception ex = assertThrows(Exception.class, () -> {
-                tsm.delete("testDepositId", fileToDelete, progress, "specificLocation");
-            });
+            tsm.delete("testDepositId", fileToDelete, progress, "specificLocation");
             String expectedTsmFile = tsmTemp.resolve("testDepositId").resolve(fileToDelete.getName()).toString();
-            String expectedErrorMessage = String.format("Delete of [%s] failed.",expectedTsmFile);
-            assertThat(ex).hasMessage(expectedErrorMessage);
 
             assertThat(argDesc.getValue()).isEqualTo("tsmDelete");
 

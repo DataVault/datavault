@@ -19,15 +19,15 @@ public class TSMTracker implements Callable<String> {
     private final Progress progress;
     private final String description;
     private final int maxRetries;
-    private final int retryTimeMins;
+    private final int retryTimeSecs;
 
-    public TSMTracker(String location, File working, Progress progress, String description, int maxRetries, int retryTimeMins) {
+    public TSMTracker(String location, File working, Progress progress, String description, int maxRetries, int retryTimeSecs) {
         this.location = location;
         this.working = working;
         this.progress = progress;
         this.description = description;
         this.maxRetries = maxRetries;
-        this.retryTimeMins = retryTimeMins;
+        this.retryTimeSecs = retryTimeSecs;
     }
 
     @Override
@@ -57,8 +57,8 @@ public class TSMTracker implements Callable<String> {
                 if (lastAttempt) {
                     throw new Exception(errMsg);
                 }
-                log.info("{}  Retrying in [{}] mins", errMsg, retryTimeMins);
-                TimeUnit.MINUTES.sleep(retryTimeMins);
+                log.info("{}  Retrying in [{}] mins", errMsg, retryTimeSecs);
+                TimeUnit.SECONDS.sleep(retryTimeSecs);
             }
         }
         return description;

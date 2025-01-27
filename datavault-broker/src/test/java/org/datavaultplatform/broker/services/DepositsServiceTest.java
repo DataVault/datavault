@@ -1,10 +1,7 @@
 package org.datavaultplatform.broker.services;
 
 import org.datavaultplatform.common.event.Event;
-import org.datavaultplatform.common.model.dao.AuditChunkStatusDAO;
-import org.datavaultplatform.common.model.dao.DepositChunkDAO;
-import org.datavaultplatform.common.model.dao.DepositDAO;
-import org.datavaultplatform.common.model.dao.EventDAO;
+import org.datavaultplatform.common.model.dao.*;
 import org.datavaultplatform.common.util.RetrievedChunks;
 import org.datavaultplatform.common.util.StoredChunks;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,6 +28,10 @@ class DepositsServiceTest {
     EventDAO mEventDAO;
     @Mock
     DepositChunkDAO mDepositChunkDAO;
+
+    @Mock
+    DepositPathDAO mDepositPathDAO;
+
     @Mock
     AuditChunkStatusDAO mAuditChunkStatusDAO;
 
@@ -49,6 +50,7 @@ class DepositsServiceTest {
         depositsService = new DepositsService(
                 mDepositDAO,
                 mDepositChunkDAO,
+                mDepositPathDAO,
                 mAuditChunkStatusDAO,
                 mEventDAO,
                 auditPeriodMinutes,

@@ -129,7 +129,7 @@ public class ReviewsController {
     }
 
     @ApiMethod(
-            path = "/vaultreviews/depositreviews/{depositReviewId}",
+            path = "/vaultreviews/depositreviews/{depositId}",
             verb = ApiVerb.GET,
             description = "Gets a particular Deposit Review",
             produces = { MediaType.APPLICATION_JSON_VALUE },
@@ -138,11 +138,11 @@ public class ReviewsController {
     @ApiHeaders(headers={
             @ApiHeader(name=HEADER_USER_ID, description="DataVault Broker User ID")
     })
-    @GetMapping("/vaultreviews/depositreviews/{depositReviewId}")
+    @GetMapping("/vaultreviews/depositreviews/{depositId}")
     public DepositReview getDepositReview(@RequestHeader(HEADER_USER_ID) String userID,
-                                                 @PathVariable("depositReviewId") String depositReviewId) {
+                                                 @PathVariable("depositId") String depositId) {
 
-        DepositReview depositReview = depositsReviewService.getDepositReview(depositReviewId);
+        DepositReview depositReview = depositsReviewService.getDepositReview(depositId);
         return depositReview;
 
     }
