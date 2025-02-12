@@ -272,6 +272,7 @@ public class VaultsController {
                 depositReviewModels.add(drm);
             }
 
+            depositReviewModels.sort(Comparator.comparing(DepositReviewModel::getCreationTime));
             vaultReviewModel.setDepositReviewModels(depositReviewModels);
 
             vaultReviewModels.add(vaultReviewModel);
