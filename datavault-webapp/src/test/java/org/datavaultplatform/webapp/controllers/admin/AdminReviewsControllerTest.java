@@ -283,10 +283,10 @@ public class AdminReviewsControllerTest {
         verify(mRestService).getDeposit(TEST_DEPOSIT_ID_1);
 
         verify(mRestService).getDeposit(TEST_DEPOSIT_ID_1);
-        verify(mRestService).getDepositReview(TEST_DEPOSIT_ID_1);
+        verify(mRestService).getDepositReview(TEST_DEPOSIT_REVIEW_1_ID);
 
         verify(mRestService).getDeposit(TEST_DEPOSIT_ID_2);
-        verify(mRestService).getDepositReview(TEST_DEPOSIT_ID_2);
+        verify(mRestService).getDepositReview(TEST_DEPOSIT_REVIEW_2_ID);
 
         Mockito.verifyNoMoreInteractions(mRestService);
     }
@@ -331,10 +331,10 @@ public class AdminReviewsControllerTest {
         verify(mRestService).getVaultReview(TEST_VAULT_REVIEW_ID);
 
         verify(mRestService).getDeposit(TEST_DEPOSIT_ID_1);
-        verify(mRestService).getDepositReview(TEST_DEPOSIT_ID_1);
+        verify(mRestService).getDepositReview(TEST_DEPOSIT_REVIEW_1_ID);
 
         verify(mRestService).getDeposit(TEST_DEPOSIT_ID_2);
-        verify(mRestService).getDepositReview(TEST_DEPOSIT_ID_2);
+        verify(mRestService).getDepositReview(TEST_DEPOSIT_REVIEW_2_ID);
 
         Mockito.verifyNoMoreInteractions(mRestService);
     }
@@ -478,8 +478,9 @@ public class AdminReviewsControllerTest {
         when(mReviewInfo.getVaultReviewId()).thenReturn(TEST_VAULT_REVIEW_ID);
         when(mRestService.getVaultReview(TEST_VAULT_REVIEW_ID)).thenReturn(mVaultReview);
         when(mReviewInfo.getDepositIds()).thenReturn(List.of(TEST_DEPOSIT_ID_1, TEST_DEPOSIT_ID_2));
-        when(mRestService.getDepositReview(TEST_DEPOSIT_ID_1)).thenReturn(mDepositReview1);
-        when(mRestService.getDepositReview(TEST_DEPOSIT_ID_2)).thenReturn(mDepositReview2);
+        when(mReviewInfo.getDepositReviewIds()).thenReturn(List.of(TEST_DEPOSIT_REVIEW_1_ID, TEST_DEPOSIT_REVIEW_2_ID));
+        when(mRestService.getDepositReview(TEST_DEPOSIT_REVIEW_1_ID)).thenReturn(mDepositReview1);
+        when(mRestService.getDepositReview(TEST_DEPOSIT_REVIEW_2_ID)).thenReturn(mDepositReview2);
         when(mRestService.getDeposit(TEST_DEPOSIT_ID_1)).thenReturn(mDepositInfo1);
         when(mRestService.getDeposit(TEST_DEPOSIT_ID_2)).thenReturn(mDepositInfo2);
 
