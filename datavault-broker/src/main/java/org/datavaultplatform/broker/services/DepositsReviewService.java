@@ -53,8 +53,8 @@ public class DepositsReviewService {
         return depositReviewDAO.list();
     }
 
-    public DepositReview getDepositReview(String depositID) {
-        return depositReviewDAO.findByDepositId(depositID).orElse(null);
+    public DepositReview getDepositReview(String depositReviewID) {
+        return depositReviewDAO.findById(depositReviewID).orElse(null);
     }
 
     public List<DepositReview> search(String query) {

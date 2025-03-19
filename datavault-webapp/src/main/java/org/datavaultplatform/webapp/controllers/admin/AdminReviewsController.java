@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -91,10 +92,11 @@ public class AdminReviewsController {
         VaultReviewModel vaultReviewModel = new VaultReviewModel(currentReview);
 
         List<DepositReviewModel> depositReviewModels = new ArrayList<>();
-        for (int i = 0; i < reviewInfo.getDepositIds().size(); i++) {
+        for (int i = 0; i < reviewInfo.getDepositReviewIds().size(); i++) {
+            String depositReviewId = reviewInfo.getDepositReviewIds().get(i);
             String depositId = reviewInfo.getDepositIds().get(i);
             DepositInfo depositInfo = restService.getDeposit(depositId);
-            DepositReview depositReview = restService.getDepositReview(depositId);
+            DepositReview depositReview = restService.getDepositReview(depositReviewId);
             DepositReviewModel drm = new DepositReviewModel();
 
             // Set DepositReview stuff
@@ -108,6 +110,7 @@ public class AdminReviewsController {
             drm.setStatusName(depositInfo.getStatus().name());
             drm.setCreationTime(depositInfo.getCreationTime());
 
+            depositReviewModels.sort(Comparator.comparing(DepositReviewModel::getCreationTime));
             depositReviewModels.add(drm);
         }
 

@@ -255,7 +255,7 @@ public class VaultsController {
             List<DepositReviewModel> depositReviewModels = new ArrayList<>();
             for (int i = 0; i < reviewInfo.getDepositIds().size(); i++) {
                 DepositInfo depositInfo = restService.getDeposit(reviewInfo.getDepositIds().get(i));
-                DepositReview depositReview = restService.getDepositReview(reviewInfo.getDepositIds().get(i));
+                DepositReview depositReview = restService.getDepositReview(reviewInfo.getDepositReviewIds().get(i));
                 DepositReviewModel drm = new DepositReviewModel();
 
                 // Set DepositReview stuff
@@ -272,6 +272,7 @@ public class VaultsController {
                 depositReviewModels.add(drm);
             }
 
+            depositReviewModels.sort(Comparator.comparing(DepositReviewModel::getCreationTime));
             vaultReviewModel.setDepositReviewModels(depositReviewModels);
 
             vaultReviewModels.add(vaultReviewModel);
