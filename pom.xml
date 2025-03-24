@@ -14,7 +14,7 @@
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
     <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot -->
-    <version>3.3.2</version>
+    <version>3.4.3</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
 
@@ -34,6 +34,34 @@
     <skip.git.commit>false</skip.git.commit>
     <skip.unit.tests>false</skip.unit.tests>
     <skip.integration.tests>false</skip.integration.tests>
+
+    <!-- https://mvnrepository.com/artifact/org.testng/testng -->
+    <testng.version>7.11.0</testng.version>
+
+    <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on -->
+    <bouncy.castle.version>1.80</bouncy.castle.version>
+
+    <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-text -->
+    <commons.text.version>1.13.0</commons.text.version>
+
+    <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
+    <commons.io.version>2.18.0</commons.io.version>
+
+    <!-- https://mvnrepository.com/artifact/org.thymeleaf.extras/thymeleaf-extras-springsecurity6 -->
+    <thymeleaf.extras.version>3.1.3.RELEASE</thymeleaf.extras.version>
+
+    <!-- https://mvnrepository.com/artifact/nz.net.ultraq.thymeleaf/thymeleaf-layout-dialect -->
+    <thymeleaf.layout.version>3.4.0</thymeleaf.layout.version>
+
+    <!-- https://mvnrepository.com/artifact/org.apache.directory.api/api-all -->
+    <apache.directory.api.version>2.1.7</apache.directory.api.version>
+
+    <!-- https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-starter-webmvc-ui -->
+    <springdoc.openapi.version>2.8.4</springdoc.openapi.version>
+
+    <!-- https://mvnrepository.com/artifact/org.apache.velocity/velocity-engine-core -->
+    <velocity.version>2.4.1</velocity.version>
+    <!-- above here, updated 21mar2025 -->
 
     <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-surefire-plugin -->
     <surefire.plugin.version>3.3.1</surefire.plugin.version>
@@ -75,48 +103,30 @@
 
     <!-- https://mvnrepository.com/artifact/io.github.git-commit-id/git-commit-id-maven-plugin -->
     <git.commit.id.maven.plugin.version>9.0.1</git.commit.id.maven.plugin.version>
-    
+
     <!-- https://mvnrepository.com/artifact/org.apache.sshd/sshd-sftp -->
     <sshd.sftp.version>2.13.1</sshd.sftp.version>
-    
+
     <!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
     <jsoup.version>1.18.1</jsoup.version>
 
-    <!-- https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-starter-webmvc-ui -->
-    <springdoc.openapi.version>2.6.0</springdoc.openapi.version>
-
     <!-- above here, updated 18jul2024 -->
-    
+
     <!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
     <mockito.version>5.12.0</mockito.version>
 
     <!-- above here, updated 23may2024 -->
-    
+
     <!-- https://mvnrepository.com/artifact/org.hibernate.orm/hibernate-core -->
     <hibernate.version>6.5.2.Final</hibernate.version>
 
     <!-- above here, updated 06may2024 -->
-
-
-    <!-- https://mvnrepository.com/artifact/org.testng/testng -->
-    <testng.version>7.10.2</testng.version>
 
     <!-- DON'T CHANGE! - had problems with this - we have no integration test for Oracle Device/Archive -->
     <!-- https://mvnrepository.com/artifact/com.oracle.oci.sdk/oci-java-sdk-bom -->
     <oci.java.sdk.bom.version>3.31.1</oci.java.sdk.bom.version>
 
     <!-- above here, updated 30apr2024 -->
-
-    <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on -->
-    <bouncy.castle.version>1.78.1</bouncy.castle.version>
-
-    <!-- above here, updated 26apr2024 -->
-
-    <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-text -->
-    <commons.text.version>1.12.0</commons.text.version>
-
-    <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
-    <commons.io.version>2.16.1</commons.io.version>
 
     <!-- https://mvnrepository.com/artifact/it.burning/cron-expression-descriptor -->
     <cron.expr.desc.version>1.2.10</cron.expr.desc.version>
@@ -126,15 +136,7 @@
     <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-exec -->
     <commons.exec.version>1.4.0</commons.exec.version>
 
-    <!-- https://mvnrepository.com/artifact/org.thymeleaf.extras/thymeleaf-extras-springsecurity6 -->
-    <thymeleaf.extras.version>3.1.2.RELEASE</thymeleaf.extras.version>
-
-    <!-- https://mvnrepository.com/artifact/nz.net.ultraq.thymeleaf/thymeleaf-layout-dialect -->
-    <thymeleaf.layout.version>3.3.0</thymeleaf.layout.version>
     <!-- above here, updated 22Mar2024 -->
-
-    <!-- https://mvnrepository.com/artifact/org.apache.directory.api/api-all -->
-    <apache.directory.api.version>2.1.6</apache.directory.api.version>
 
     <!-- https://mvnrepository.com/artifact/com.jayway.jsonpath/json-path -->
     <json-path.version>2.9.0</json-path.version>
@@ -158,9 +160,6 @@
 
     <!-- https://mvnrepository.com/artifact/gov.loc/bagit -->
     <bagit.version>5.2.0</bagit.version>
-
-    <!-- https://mvnrepository.com/artifact/org.apache.velocity/velocity-engine-core -->
-    <velocity.version>2.3</velocity.version>
 
     <!-- https://mvnrepository.com/artifact/oro/oro -->
     <oro.version>2.0.8</oro.version>

@@ -62,7 +62,7 @@ public class OpenApiBrokerTest extends BaseDatabaseTest {
                         get("http://localhost:8080/v3/api-docs"))
                 .andExpect(content().contentTypeCompatibleWith("application/json"))
                 .andExpect(status().is2xxSuccessful())
-                .andExpect(jsonPath("$.openapi").value("3.0.1"))
+                .andExpect(jsonPath("$.openapi").value("3.1.0"))
                 .andExpect(jsonPath("$.info.title").value("DataVault Broker"))
                 .andExpect(jsonPath("$.info.description").value("broker application"))
                 .andExpect(jsonPath("$.info.version").value("v0.0.1"))

@@ -46,7 +46,7 @@ public class HelloControllerTest {
     Element jsElem = doc.selectFirst("script");
     String jsUrl = jsElem.attr("src");
     log.info("js url {}", jsUrl);
-    checkLink(jsUrl,"application/javascript;charset=UTF-8");
+    checkLink(jsUrl,"text/javascript;charset=UTF-8");
   }
 
   MvcResult checkLink(String url, String contentType) throws Exception {
