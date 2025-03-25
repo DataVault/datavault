@@ -35,6 +35,27 @@
     <skip.unit.tests>false</skip.unit.tests>
     <skip.integration.tests>false</skip.integration.tests>
 
+    <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core -->
+    <jackson.version>2.18.3</jackson.version>
+    
+    <!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-contract-stub-runner -->
+    <spring.cloud.version>4.2.1</spring.cloud.version>
+
+    <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-collections4 -->
+    <commons.collections4.version>4.5.0-M3</commons.collections4.version>
+
+    <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
+    <commons.compress.version>1.27.1</commons.compress.version>
+
+    <!-- https://mvnrepository.com/artifact/org.apache.sshd/sshd-sftp -->
+    <sshd.sftp.version>2.15.0</sshd.sftp.version>
+
+    <!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
+    <jsoup.version>1.19.1</jsoup.version>
+
+    <!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
+    <mockito.version>5.16.1</mockito.version>
+
     <!-- https://mvnrepository.com/artifact/org.testng/testng -->
     <testng.version>7.11.0</testng.version>
 
@@ -86,36 +107,13 @@
     <!-- https://mvnrepository.com/artifact/org.testcontainers/testcontainers -->
     <testcontainers.version>1.20.0</testcontainers.version>
 
-    <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core -->
-    <jackson.version>2.17.2</jackson.version>
-
     <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
     <guava.version>33.2.1-jre</guava.version>
-
-    <!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-contract-stub-runner -->
-    <spring.cloud.version>4.1.4</spring.cloud.version>
-
-    <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-collections4 -->
-    <commons.collections4.version>4.5.0-M2</commons.collections4.version>
-
-    <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
-    <commons.compress.version>1.26.2</commons.compress.version>
 
     <!-- https://mvnrepository.com/artifact/io.github.git-commit-id/git-commit-id-maven-plugin -->
     <git.commit.id.maven.plugin.version>9.0.1</git.commit.id.maven.plugin.version>
 
-    <!-- https://mvnrepository.com/artifact/org.apache.sshd/sshd-sftp -->
-    <sshd.sftp.version>2.13.1</sshd.sftp.version>
-
-    <!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
-    <jsoup.version>1.18.1</jsoup.version>
-
     <!-- above here, updated 18jul2024 -->
-
-    <!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
-    <mockito.version>5.12.0</mockito.version>
-
-    <!-- above here, updated 23may2024 -->
 
     <!-- https://mvnrepository.com/artifact/org.hibernate.orm/hibernate-core -->
     <hibernate.version>6.5.2.Final</hibernate.version>
