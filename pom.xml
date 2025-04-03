@@ -163,11 +163,11 @@
     <oro.version>2.0.8</oro.version>
 
     <!-- https://mvnrepository.com/artifact/net.i2p.crypto/eddsa -->
-    <eddsa.version>0.3.0</eddsa.version>
+    <!-- <eddsa.version>0.3.0</eddsa.version> -->
 
     <!-- https://mvnrepository.com/artifact/org.apache.tika/tika-core -->
     <!-- DON'T CHANGE -->
-    <tika.version>2.4.1</tika.version>
+    <tika.version>2.9.3</tika.version>
   </properties>
 
   <dependencyManagement>
@@ -368,11 +368,11 @@
         <artifactId>sshd-sftp</artifactId>
         <version>${sshd.sftp.version}</version>
       </dependency>
-      <dependency>
+      <!-- <dependency>
         <groupId>net.i2p.crypto</groupId>
         <artifactId>eddsa</artifactId>
         <version>${eddsa.version}</version>
-      </dependency>
+      </dependency>-->
       <dependency>
         <groupId>it.burning</groupId>
         <artifactId>cron-expression-descriptor</artifactId>
