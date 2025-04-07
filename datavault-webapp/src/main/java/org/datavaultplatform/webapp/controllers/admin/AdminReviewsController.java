@@ -180,7 +180,7 @@ public class AdminReviewsController {
 
         if (vaultReviewModel.getDepositReviewModels() != null) {
             for (DepositReviewModel drm : vaultReviewModel.getDepositReviewModels()) {
-                DepositReview originalDepositReview = restService.getDepositReview(drm.getDepositId());
+                DepositReview originalDepositReview = restService.getDepositReview(drm.getDepositReviewId());
                 originalDepositReview.setDeleteStatus(drm.getDeleteStatus());
                 originalDepositReview.setComment(drm.getComment());
 
