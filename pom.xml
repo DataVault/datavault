@@ -14,7 +14,7 @@
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
     <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot -->
-    <version>3.4.3</version>
+    <version>3.4.4</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
 
@@ -34,6 +34,23 @@
     <skip.git.commit>false</skip.git.commit>
     <skip.unit.tests>false</skip.unit.tests>
     <skip.integration.tests>false</skip.integration.tests>
+
+    <!-- https://mvnrepository.com/artifact/org.jacoco/jacoco-maven-plugin -->
+    <jacoco.plugin.version>0.8.13</jacoco.plugin.version>
+
+    <!-- I've changed as I was able to test on my local deploy.  I could see the uploaded file in the
+    Oracle gui -->
+    <!-- DON'T CHANGE! - had problems with this - we have no integration test for Oracle Device/Archive -->
+    <!-- https://mvnrepository.com/artifact/com.oracle.oci.sdk/oci-java-sdk-bom -->
+    <oci.java.sdk.bom.version>3.62.0</oci.java.sdk.bom.version>
+
+    <!-- https://mvnrepository.com/artifact/net.i2p.crypto/eddsa -->
+    <!-- <eddsa.version>0.3.0</eddsa.version> -->
+
+    <!-- https://mvnrepository.com/artifact/org.apache.tika/tika-core -->
+    <!-- DON'T CHANGE not sure why this was marked don't change all tests pass and nothing bad seen
+    (so far) when I deploy locally -->
+    <tika.version>2.9.3</tika.version>
 
     <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-surefire-plugin -->
     <surefire.plugin.version>3.5.2</surefire.plugin.version>
@@ -100,15 +117,12 @@
 
     <!-- https://mvnrepository.com/artifact/org.apache.velocity/velocity-engine-core -->
     <velocity.version>2.4.1</velocity.version>
-    <!-- above here, updated 21mar2025 -->
-
-    <!-- https://mvnrepository.com/artifact/org.jacoco/jacoco-maven-plugin -->
-    <jacoco.plugin.version>0.8.12</jacoco.plugin.version>
+    <!-- above here, updated 03April2025 -->
     
     <!-- dependency versions -->
 
     <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
-    <guava.version>33.2.1-jre</guava.version>
+    <guava.version>33.3.1-jre</guava.version>
 
     <!-- https://mvnrepository.com/artifact/io.github.git-commit-id/git-commit-id-maven-plugin -->
     <git.commit.id.maven.plugin.version>9.0.1</git.commit.id.maven.plugin.version>
@@ -116,15 +130,9 @@
     <!-- above here, updated 18jul2024 -->
 
     <!-- https://mvnrepository.com/artifact/org.hibernate.orm/hibernate-core -->
-    <hibernate.version>6.5.2.Final</hibernate.version>
+    <hibernate.version>6.5.3.Final</hibernate.version>
 
     <!-- above here, updated 06may2024 -->
-
-    <!-- DON'T CHANGE! - had problems with this - we have no integration test for Oracle Device/Archive -->
-    <!-- https://mvnrepository.com/artifact/com.oracle.oci.sdk/oci-java-sdk-bom -->
-    <oci.java.sdk.bom.version>3.31.1</oci.java.sdk.bom.version>
-
-    <!-- above here, updated 30apr2024 -->
 
     <!-- https://mvnrepository.com/artifact/it.burning/cron-expression-descriptor -->
     <cron.expr.desc.version>1.2.10</cron.expr.desc.version>
@@ -160,14 +168,7 @@
     <bagit.version>5.2.0</bagit.version>
 
     <!-- https://mvnrepository.com/artifact/oro/oro -->
-    <oro.version>2.0.8</oro.version>
-
-    <!-- https://mvnrepository.com/artifact/net.i2p.crypto/eddsa -->
-    <!-- <eddsa.version>0.3.0</eddsa.version> -->
-
-    <!-- https://mvnrepository.com/artifact/org.apache.tika/tika-core -->
-    <!-- DON'T CHANGE -->
-    <tika.version>2.9.3</tika.version>
+    <!-- <oro.version>2.0.8</oro.version> -->
   </properties>
 
   <dependencyManagement>
@@ -345,17 +346,17 @@
         <scope>test</scope>
       </dependency>
 
-      <dependency>
+     <dependency>
         <groupId>org.apache.velocity</groupId>
         <artifactId>velocity-engine-core</artifactId>
         <version>${velocity.version}</version>
       </dependency>
 
-      <dependency>
+      <!--<dependency>
         <groupId>oro</groupId>
         <artifactId>oro</artifactId>
         <version>${oro.version}</version>
-      </dependency>
+      </dependency> -->
 
       <dependency>
         <groupId>org.apache.commons</groupId>
