@@ -5,8 +5,8 @@ import org.datavaultplatform.common.docker.DockerImage;
 import org.testcontainers.utility.DockerImageName;
 
 /**
- * This test that we CANNOT use an 'ssh-rsa' KeyPair get make an SSH/SFTP connection
- * to a server running OpenSSH 8.8
+ * This test that we CAN use an 'ssh-rsa' KeyPair get make an SSH/SFTP connection
+ * to a server running OpenSSH 8.8 when we use NEW (non-jcraft) JSCH !!!
  */
 @Slf4j
 public class UserKeyPairServiceOpenSSH8pt8IT extends BaseUserKeyPairServiceOpenSSHTest {
@@ -19,7 +19,7 @@ public class UserKeyPairServiceOpenSSH8pt8IT extends BaseUserKeyPairServiceOpenS
 
   @Override
   public boolean isSuccessExpected() {
-    return false;
+    return true;
   }
 
 }

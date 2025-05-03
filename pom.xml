@@ -138,8 +138,8 @@
     <!-- https://mvnrepository.com/artifact/net.sf.supercsv/super-csv -->
     <super.csv.version>2.4.0</super.csv.version>
 
-    <!-- https://mvnrepository.com/artifact/com.jcraft/jsch -->
-    <jcraft.jsch.version>0.1.55</jcraft.jsch.version>
+    <!-- https://mvnrepository.com/artifact/com.github.mwiede/jsch -->
+    <jsch.version>0.2.18</jsch.version>
 
     <!-- https://mvnrepository.com/artifact/gov.loc/bagit -->
     <bagit.version>5.2.0</bagit.version>
@@ -284,9 +284,9 @@
         <version>${apache.directory.api.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.jcraft</groupId>
+        <groupId>com.github.mwiede</groupId>
         <artifactId>jsch</artifactId>
-        <version>${jcraft.jsch.version}</version>
+        <version>${jsch.version}</version>
       </dependency>
       <dependency>
         <groupId>net.sf.supercsv</groupId>
