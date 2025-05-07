@@ -130,14 +130,14 @@ pipeline {
         }
     }
     post {
-        always {
-            jacoco(
-                execPattern: '**/*.exec',
-                classPattern: '*/target/classes',
-                sourcePattern: '*/src/main/java',
-                exclusionPattern: '*/src/test*'
-            )
-        }
+        //always {
+        //    jacoco(
+        //        execPattern: '**/*.exec',
+        //        classPattern: '*/target/classes',
+        //        sourcePattern: '*/src/main/java',
+        //        exclusionPattern: '*/src/test*'
+        //    )
+        //}
         success {
             echo "BUILD SUCCESS : Recording Artifacts.."
             sh 'mkdir -p artifacts'
