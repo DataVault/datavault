@@ -149,22 +149,36 @@ pipeline {
         //}
         success {
             script {
-                try {
-                    echo "BUILD SUCCESS : Recording Artifacts.."
-                    sh 'mkdir -p artifacts'
-                    echo "BUILD SUCCESS : Made dir"
-                    sh 'mv datavault-webapp/target/datavault-webapp.jar artifacts/datavault-webapp.jar'
-                    echo "BUILD SUCCESS : Moved webapp.jar"
-                    sh 'mv datavault-worker/target/datavault-worker.jar artifacts/datavault-worker.jar'
-                    echo "BUILD SUCCESS : Moved worker.jar"
-                    sh 'mv datavault-broker/target/datavault-broker.jar artifacts/datavault-broker.jar'
-                    echo "BUILD SUCCESS : Moved broker.jar"
-                    archiveArtifacts artifacts: 'artifacts/datavault-webapp.jar, artifacts/datavault-worker.jar, artifacts/datavault-broker.jar', fingerprint: true
-                    echo "BUILD SUCCESS : Ran archiveArtifacts"
-                } catch (e) {
-                    echo "Artifact post-step failed: ${e}"
-                    currentBuild.result = 'UNSTABLE'
+              try {
+                echo "BUILD SUCCESS : Recording Artifacts.."
+                sh 'mkdir -p artifacts'
+
+                def artifactsToArchive = []
+
+                def jarPaths = [
+                  [src: 'datavault-webapp/target/datavault-webapp.jar', dest: 'artifacts/datavault-webapp.jar'],
+                  [src: 'datavault-worker/target/datavault-worker.jar', dest: 'artifacts/datavault-worker.jar'],
+                  [src: 'datavault-broker/target/datavault-broker.jar', dest: 'artifacts/datavault-broker.jar']
+                ]
+
+                for (file in jarPaths) {
+                  if (fileExists(file.src)) {
+                    sh "mv ${file.src} ${file.dest}"
+                    artifactsToArchive << file.dest
+                  } else {
+                    echo "WARNING: ${file.src} not found — skipping."
+                  }
                 }
+
+                if (artifactsToArchive) {
+                  archiveArtifacts artifacts: artifactsToArchive.join(', '), fingerprint: true
+                } else {
+                  echo "No artifacts found to archive."
+                }
+              } catch (e) {
+                echo "Artifact post-step failed: ${e}"
+                currentBuild.result = 'UNSTABLE'
+              }
             }
         }
     }
