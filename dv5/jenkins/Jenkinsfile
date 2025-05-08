@@ -138,13 +138,34 @@ pipeline {
         //        exclusionPattern: '*/src/test*'
         //    )
         //}
+        //always {
+        //    recordCoverage(
+        //        tools: [jacoco()],
+        //        sourceFileResolver: sourceFiles('STORE_LAST_BUILD'),
+        //        filters: [
+        //            exclude: ['**/src/test/**']
+        //        ]
+        //    )
+        //}
         success {
-            echo "BUILD SUCCESS : Recording Artifacts.."
-            sh 'mkdir -p artifacts'
-            sh 'mv datavault-webapp/target/datavault-webapp.jar artifacts/datavault-webapp.jar'
-            sh 'mv datavault-worker/target/datavault-worker.jar artifacts/datavault-worker.jar'
-            sh 'mv datavault-broker/target/datavault-broker.jar artifacts/datavault-broker.jar'
-            archiveArtifacts artifacts: 'artifacts/datavault-webapp.jar, artifacts/datavault-worker.jar, artifacts/datavault-broker.jar', fingerprint: true
+            script {
+                try {
+                    echo "BUILD SUCCESS : Recording Artifacts.."
+                    sh 'mkdir -p artifacts'
+                    echo "BUILD SUCCESS : Made dir"
+                    sh 'mv datavault-webapp/target/datavault-webapp.jar artifacts/datavault-webapp.jar'
+                    echo "BUILD SUCCESS : Moved webapp.jar"
+                    sh 'mv datavault-worker/target/datavault-worker.jar artifacts/datavault-worker.jar'
+                    echo "BUILD SUCCESS : Moved worker.jar"
+                    sh 'mv datavault-broker/target/datavault-broker.jar artifacts/datavault-broker.jar'
+                    echo "BUILD SUCCESS : Moved broker.jar"
+                    archiveArtifacts artifacts: 'artifacts/datavault-webapp.jar, artifacts/datavault-worker.jar, artifacts/datavault-broker.jar', fingerprint: true
+                    echo "BUILD SUCCESS : Ran archiveArtifacts"
+                } catch (e) {
+                    echo "Artifact post-step failed: ${e}"
+                    currentBuild.result = 'UNSTABLE'
+                }
+            }
         }
     }
 }
