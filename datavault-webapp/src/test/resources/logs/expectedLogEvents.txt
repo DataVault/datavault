@@ -1,7 +1,7 @@
 [DEBUG] REQ:START
 [DEBUG] REQ:uri     [http://www.example.com:1234/resource]
 [DEBUG] REQ:method  [GET]
-[DEBUG] REQ:headers [Accept:"text/plain, application/json, application/cbor, application/*+json, */*", Content-Length:"0"]
+[DEBUG] REQ:headers [Accept:"text/plain, application/json, application/cbor, application/yaml, application/*+json, */*", Content-Length:"0"]
 [DEBUG] REQ:body    []
 [DEBUG] REQ:END
 [DEBUG] RES:START

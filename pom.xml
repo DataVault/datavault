@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+  <modelVersion>4.0.0</modelVersion><!-- see https://maven.apache.org/pom.html -->
   <packaging>pom</packaging>
   <modules>
     <module>datavault-common</module>
@@ -13,7 +13,8 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.3.0</version>
+    <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot -->
+    <version>3.4.4</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
 
@@ -33,96 +34,115 @@
     <skip.git.commit>false</skip.git.commit>
     <skip.unit.tests>false</skip.unit.tests>
     <skip.integration.tests>false</skip.integration.tests>
-    <surefire.plugin.version>3.2.5</surefire.plugin.version>
-    <failsafe.plugin.version>3.2.5</failsafe.plugin.version>
-    <jacoco.plugin.version>0.8.12</jacoco.plugin.version>
+
+    <!-- https://mvnrepository.com/artifact/org.jacoco/jacoco-maven-plugin -->
+    <jacoco.plugin.version>0.8.13</jacoco.plugin.version>
+
+    <!-- I've changed as I was able to test on my local deploy.  I could see the uploaded file in the
+    Oracle gui -->
+    <!-- DON'T CHANGE! - had problems with this - we have no integration test for Oracle Device/Archive -->
+    <!-- https://mvnrepository.com/artifact/com.oracle.oci.sdk/oci-java-sdk-bom -->
+    <oci.java.sdk.bom.version>3.62.0</oci.java.sdk.bom.version>
+
+    <!-- https://mvnrepository.com/artifact/net.i2p.crypto/eddsa -->
+    <!-- <eddsa.version>0.3.0</eddsa.version> -->
+
+    <!-- https://mvnrepository.com/artifact/org.apache.tika/tika-core -->
+    <!-- DON'T CHANGE not sure why this was marked don't change all tests pass and nothing bad seen
+    (so far) when I deploy locally -->
+    <tika.version>2.9.3</tika.version>
+
+    <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-surefire-plugin -->
+    <surefire.plugin.version>3.5.2</surefire.plugin.version>
+
+    <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-failsafe-plugin -->
+    <failsafe.plugin.version>3.5.2</failsafe.plugin.version>
+
+    <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-bom -->
+    <aws.java.sdk.bom.version>1.12.782</aws.java.sdk.bom.version>
+
+    <!-- https://mvnrepository.com/artifact/org.springframework.retry/spring-retry -->
+    <spring.retry.version>2.0.11</spring.retry.version>
+
+    <!-- https://mvnrepository.com/artifact/org.owasp/dependency-check-maven -->
+    <owasp.dependency.check.version>12.1.0</owasp.dependency.check.version>
+
+    <!-- https://mvnrepository.com/artifact/org.testcontainers/testcontainers -->
+    <testcontainers.version>1.20.6</testcontainers.version>
+
+    <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core -->
+    <jackson.version>2.18.3</jackson.version>
+
+    <!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-contract-stub-runner -->
+    <spring.cloud.version>4.2.1</spring.cloud.version>
+
+    <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-collections4 -->
+    <commons.collections4.version>4.5.0-M3</commons.collections4.version>
+
+    <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
+    <commons.compress.version>1.27.1</commons.compress.version>
+
+    <!-- https://mvnrepository.com/artifact/org.apache.sshd/sshd-sftp -->
+    <sshd.sftp.version>2.15.0</sshd.sftp.version>
+
+    <!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
+    <jsoup.version>1.19.1</jsoup.version>
+
+    <!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
+    <mockito.version>5.16.1</mockito.version>
+
+    <!-- https://mvnrepository.com/artifact/org.testng/testng -->
+    <testng.version>7.11.0</testng.version>
+
+    <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on -->
+    <bouncy.castle.version>1.80</bouncy.castle.version>
+
+    <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-text -->
+    <commons.text.version>1.13.0</commons.text.version>
+
+    <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
+    <commons.io.version>2.18.0</commons.io.version>
+
+    <!-- https://mvnrepository.com/artifact/org.thymeleaf.extras/thymeleaf-extras-springsecurity6 -->
+    <thymeleaf.extras.version>3.1.3.RELEASE</thymeleaf.extras.version>
+
+    <!-- https://mvnrepository.com/artifact/nz.net.ultraq.thymeleaf/thymeleaf-layout-dialect -->
+    <thymeleaf.layout.version>3.4.0</thymeleaf.layout.version>
+
+    <!-- https://mvnrepository.com/artifact/org.apache.directory.api/api-all -->
+    <apache.directory.api.version>2.1.7</apache.directory.api.version>
+
+    <!-- https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-starter-webmvc-ui -->
+    <springdoc.openapi.version>2.8.4</springdoc.openapi.version>
+
+    <!-- https://mvnrepository.com/artifact/org.apache.velocity/velocity-engine-core -->
+    <velocity.version>2.4.1</velocity.version>
+    <!-- above here, updated 03April2025 -->
     
     <!-- dependency versions -->
 
-    <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-bom -->
-    <aws.java.sdk.bom.version>1.12.728</aws.java.sdk.bom.version>
-
-    <!-- https://mvnrepository.com/artifact/org.springframework.retry/spring-retry -->
-    <spring.retry.version>2.0.6</spring.retry.version>
-
-    <!-- https://mvnrepository.com/artifact/org.owasp/dependency-check-maven -->
-    <owasp.dependency.check.version>9.2.0</owasp.dependency.check.version>
-
-    <!-- https://mvnrepository.com/artifact/org.testcontainers/testcontainers -->
-    <testcontainers.version>1.19.8</testcontainers.version>
-
-    <!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
-    <mockito.version>5.12.0</mockito.version>
-
-    <!-- above here, updated 23may2024 -->
-    
-    <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core -->
-    <jackson.version>2.17.1</jackson.version>
-
     <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
-    <guava.version>33.2.0-jre</guava.version>
+    <guava.version>33.3.1-jre</guava.version>
+
+    <!-- https://mvnrepository.com/artifact/io.github.git-commit-id/git-commit-id-maven-plugin -->
+    <git.commit.id.maven.plugin.version>9.0.1</git.commit.id.maven.plugin.version>
+
+    <!-- above here, updated 18jul2024 -->
 
     <!-- https://mvnrepository.com/artifact/org.hibernate.orm/hibernate-core -->
-    <hibernate.version>6.5.2.Final</hibernate.version>
+    <hibernate.version>6.5.3.Final</hibernate.version>
 
     <!-- above here, updated 06may2024 -->
-
-
-    <!-- https://mvnrepository.com/artifact/org.testng/testng -->
-    <testng.version>7.10.2</testng.version>
-
-    <!-- don't change - had problems with this - we have no integration test for Oracle Device/Archive -->
-    <!-- https://mvnrepository.com/artifact/com.oracle.oci.sdk/oci-java-sdk-bom -->
-    <oci.java.sdk.bom.version>3.31.1</oci.java.sdk.bom.version>
-
-    <!-- above here, updated 30apr2024 -->
-
-    <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on -->
-    <bouncy.castle.version>1.78.1</bouncy.castle.version>
-
-    <!-- above here, updated 26apr2024 -->
-
-    <!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-contract-stub-runner -->
-    <spring.cloud.version>4.1.2</spring.cloud.version>
-
-    <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-text -->
-    <commons.text.version>1.12.0</commons.text.version>
-
-    <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
-    <commons.io.version>2.16.1</commons.io.version>
 
     <!-- https://mvnrepository.com/artifact/it.burning/cron-expression-descriptor -->
     <cron.expr.desc.version>1.2.10</cron.expr.desc.version>
 
-    <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-collections4 -->
-    <commons.collections4.version>4.5.0-M1</commons.collections4.version>
-
     <!-- above here, updated 19Apr2024 -->
-
-    <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
-    <commons.compress.version>1.26.1</commons.compress.version>
 
     <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-exec -->
     <commons.exec.version>1.4.0</commons.exec.version>
 
-    <!-- https://mvnrepository.com/artifact/org.thymeleaf.extras/thymeleaf-extras-springsecurity6 -->
-    <thymeleaf.extras.version>3.1.2.RELEASE</thymeleaf.extras.version>
-
-    <!-- https://mvnrepository.com/artifact/nz.net.ultraq.thymeleaf/thymeleaf-layout-dialect -->
-    <thymeleaf.layout.version>3.3.0</thymeleaf.layout.version>
     <!-- above here, updated 22Mar2024 -->
-
-    <!-- https://mvnrepository.com/artifact/io.github.git-commit-id/git-commit-id-maven-plugin -->
-    <git.commit.id.maven.plugin.version>8.0.2</git.commit.id.maven.plugin.version>
-
-    <!-- https://mvnrepository.com/artifact/org.apache.sshd/sshd-sftp -->
-    <sshd.sftp.version>2.12.1</sshd.sftp.version>
-
-    <!-- https://mvnrepository.com/artifact/org.apache.directory.api/api-all -->
-    <apache.directory.api.version>2.1.6</apache.directory.api.version>
-
-    <!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
-    <jsoup.version>1.17.2</jsoup.version>
 
     <!-- https://mvnrepository.com/artifact/com.jayway.jsonpath/json-path -->
     <json-path.version>2.9.0</json-path.version>
@@ -139,22 +159,16 @@
     <super.csv.version>2.4.0</super.csv.version>
 
     <!-- https://mvnrepository.com/artifact/com.jcraft/jsch -->
+    <!-- TODO - we should switch to actively maintained, drop-in replacement
+         if our tests pass with this library but sftp fails to datastore - I suspect datastore needs updating         
+         https://mvnrepository.com/artifact/com.github.mwiede/jsch/0.2.18 -->
     <jcraft.jsch.version>0.1.55</jcraft.jsch.version>
 
     <!-- https://mvnrepository.com/artifact/gov.loc/bagit -->
     <bagit.version>5.2.0</bagit.version>
 
-    <!-- https://mvnrepository.com/artifact/org.apache.velocity/velocity-engine-core -->
-    <velocity.version>2.3</velocity.version>
-
     <!-- https://mvnrepository.com/artifact/oro/oro -->
-    <oro.version>2.0.8</oro.version>
-
-    <!-- https://mvnrepository.com/artifact/net.i2p.crypto/eddsa -->
-    <eddsa.version>0.3.0</eddsa.version>
-
-    <!-- https://mvnrepository.com/artifact/org.apache.tika/tika-core -->
-    <tika.version>2.4.1</tika.version><!-- don't change -->
+    <!-- <oro.version>2.0.8</oro.version> -->
   </properties>
 
   <dependencyManagement>
@@ -332,17 +346,17 @@
         <scope>test</scope>
       </dependency>
 
-      <dependency>
+     <dependency>
         <groupId>org.apache.velocity</groupId>
         <artifactId>velocity-engine-core</artifactId>
         <version>${velocity.version}</version>
       </dependency>
 
-      <dependency>
+      <!--<dependency>
         <groupId>oro</groupId>
         <artifactId>oro</artifactId>
         <version>${oro.version}</version>
-      </dependency>
+      </dependency> -->
 
       <dependency>
         <groupId>org.apache.commons</groupId>
@@ -355,11 +369,11 @@
         <artifactId>sshd-sftp</artifactId>
         <version>${sshd.sftp.version}</version>
       </dependency>
-      <dependency>
+      <!-- <dependency>
         <groupId>net.i2p.crypto</groupId>
         <artifactId>eddsa</artifactId>
         <version>${eddsa.version}</version>
-      </dependency>
+      </dependency>-->
       <dependency>
         <groupId>it.burning</groupId>
         <artifactId>cron-expression-descriptor</artifactId>
@@ -478,7 +492,7 @@
     <dependency>
       <groupId>org.springdoc</groupId>
       <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-      <version>2.6.0</version>
+      <version>${springdoc.openapi.version}</version>
     </dependency>
   </dependencies>
 
