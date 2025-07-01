@@ -20,7 +20,7 @@ import org.springframework.test.web.servlet.MvcResult;
 @ProfileStandalone
 public class StaticAssetsTest {
 
-  private static final MediaType JAVASCRIPT = MediaType.parseMediaType("application/javascript");
+  private static final MediaType JAVASCRIPT = MediaType.parseMediaType("text/javascript");
   private static final MediaType CSS = MediaType.parseMediaType("text/css");
   private static final MediaType ICON = MediaType.parseMediaType("image/x-icon");
 

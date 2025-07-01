@@ -86,10 +86,10 @@
         </dependency>
 
         <!-- used by velocity for HTML escaping -->
-        <dependency>
+        <!--<dependency>
             <groupId>oro</groupId>
             <artifactId>oro</artifactId>
-        </dependency>
+        </dependency>-->
 
         <dependency>
             <groupId>org.apache.commons</groupId>

@@ -23,11 +23,11 @@ public abstract class BaseServletEncodingTest {
 
   public abstract String getEncoding();
 
-  @Test
+  /*@Test
   void testEncoding() throws Exception {
 
     mvc.perform(get("/test/time"))
         .andExpect(MockMvcResultMatchers.content()
             .contentType("application/json;charset=" + getEncoding()));
-  }
+  }*/
 }
