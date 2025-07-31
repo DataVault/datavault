@@ -34,3 +34,8 @@ a {
 .text-muted {
 	color: #000;
 }
+
+.nav-link.active {
+	color: #d50032 !important;
+	background-color: #fff !important;
+}
