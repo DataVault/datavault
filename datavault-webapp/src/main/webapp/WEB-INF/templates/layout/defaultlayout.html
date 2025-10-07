@@ -10,13 +10,16 @@
 <div id="datavault-container">
     <div id="datavault-header">
         <div th:replace="~{layout/header.html}"></div>
-    </div><!--layout-datavault-header-->
+    </div>
     <div id="datavault-body">
         <div layout:fragment="content">NESTED CONTENT GOES HERE</div>
-    </div><!--layout-datavault--body-->
+    </div>
     <div id="datavault-footer">
         <div th:replace="~{layout/footer.html}"></div>
-    </div><!--layout-datavault-footer-->
-</div><!--layout-datavault-container-->
+    </div>
+</div>
+
+<div layout:fragment="modals"></div>
+
 </body>
 </html>
