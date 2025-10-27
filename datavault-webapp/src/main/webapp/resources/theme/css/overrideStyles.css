@@ -149,3 +149,90 @@ a {
 .modal {
 	z-index: 1055 !important;
 }
+
+/* === UNIVERSAL MODAL HEIGHT FIX === */
+.modal-dialog {
+    margin: 2rem auto !important;
+    max-width: 90%;
+}
+
+.modal-content {
+    display: flex !important;
+    flex-direction: column !important;
+    height: auto !important;
+    max-height: 90vh !important;
+    overflow: hidden !important; /* only this wrapper hides scrollbars */
+    background-color: #fff !important;
+}
+
+.modal-body {
+    flex: 1 1 auto !important;
+    overflow-y: auto !important;
+    padding: 1rem 1.5rem !important;
+}
+
+.modal-header,
+.modal-footer {
+    flex-shrink: 0 !important;
+    background-color: #f8f9fa !important;
+    border: none !important;
+}
+
+/* optional: prevent body from touching screen top */
+.modal.show {
+    padding-top: 5vh !important;
+}
+
+/* -----------------------------
+   Fix for "Key Registration" modal
+   Keeps header visible and properly aligned
+   ----------------------------- */
+#copy-ssh-public-key .modal-dialog {
+    transform: none !important;        /* disable Bootstrap's vertical centering */
+    margin: 8vh auto !important;       /* manual vertical spacing */
+    max-width: 90% !important;
+    width: auto !important;
+}
+
+#copy-ssh-public-key .modal-content {
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: visible !important;
+    padding-top: 1rem !important;      /* ensures header fits fully */
+    background-color: #fff !important;
+    position: relative !important;
+    z-index: 1060 !important;
+    max-height: 80vh !important;
+}
+
+#copy-ssh-public-key .modal-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important; /* keep title left, close button right */
+    position: relative !important;
+    z-index: 1062 !important;
+    padding: 0.75rem 1rem !important;
+    margin: 0 !important;
+    background-color: #fff !important;
+    border-bottom: 1px solid #e5e5e5 !important;
+}
+
+#copy-ssh-public-key .modal-title {
+    font-weight: 600 !important;
+    color: #000 !important;
+    margin: 0 !important;
+}
+
+#copy-ssh-public-key .modal-body {
+    flex: 1 1 auto !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+    height: calc(80vh - 56px - 56px) !important; /* leave space for header/footer */
+}
+
+#copy-ssh-public-key iframe {
+    width: 100% !important;
+    height: 100% !important;
+    border: none !important;
+    display: block !important;
+}
