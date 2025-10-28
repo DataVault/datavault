@@ -93,6 +93,7 @@
     </style>
 
     <!-- ========================== ADD FILESTORE LOCAL MODAL ========================== -->
+    <!--
     <div class="modal fade" id="add-filestoreLocal" tabindex="-1" aria-labelledby="addFilestoreLocalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -118,7 +119,7 @@
             </div>
         </div>
     </div>
-
+    -->
     <!-- ========================== MAIN CONTENT ========================== -->
     <div class="container">
         <ol class="breadcrumb">
@@ -314,7 +315,7 @@
     </script>
 
     <!-- Optional Bootstrap 5 bridge for old jQuery modal calls -->
-    <script>
+    <script th:inline="javascript" type="text/javascript">
         if (typeof $ !== 'undefined' && typeof bootstrap !== 'undefined') {
             $.fn.modal = function (action) {
                 return this.each(function () {

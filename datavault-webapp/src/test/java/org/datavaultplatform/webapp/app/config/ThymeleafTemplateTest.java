@@ -1794,7 +1794,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         String html = getHtml("filestores/index", modelMap);
         Document doc = getDocument(html);
 
-        displayFormFields(doc, "add-filestoreSFTP-form");
+        //displayFormFields(doc, "add-filestoreSFTP-form");
 
         //check title
         checkTitle(doc, "Filestores");
