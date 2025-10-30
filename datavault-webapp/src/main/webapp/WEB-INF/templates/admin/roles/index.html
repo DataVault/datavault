@@ -62,7 +62,7 @@
             <div class="modal-content">
                 <form id="create-role" class="form" role="form" th:action="@{/admin/roles/save}" method="post">
                     <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i></button>
                         <h4 id="modal_title" class="modal-title">Add new role</h4>
                     </div>
                     <div class="modal-body">
@@ -103,7 +103,7 @@
                     <input type="hidden" id="submitAction" name="action" value="submit"/>
                     <input type="hidden" th:name="${_csrf?.parameterName ?: ''}" th:value="${_csrf?.token ?: ''}" />
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-default btn-cancel" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> Cancel</button>
+                        <button type="button" class="btn btn-default btn-cancel" data-bs-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> Cancel</button>
                         <button type="submit" class="btn btn-primary"><span class="fa fa-floppy-o"></span> Save</button>
                     </div>
 
@@ -117,7 +117,7 @@
             <div class="modal-content">
                 <form id="delete-form" class="form form-horizontal" role="form" th:action="@{/admin/roles/delete}" method="post">
                     <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i></button>
                         <h4 id="modal_title" class="modal-title">Delete role</h4>
                     </div>
                     <div class="modal-body">
@@ -131,7 +131,7 @@
                     <input type="hidden" id="submitAction" name="action" value="submit"/>
                     <input type="hidden" th:name="${_csrf?.parameterName ?: ''}" th:value="${_csrf?.token ?: ''}" />
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-default btn-cancel" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> Cancel</button>
+                        <button type="button" class="btn btn-default btn-cancel" data-bs-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> Cancel</button>
                         <button type="submit" class="btn btn-danger btn-delete"><i class="fa fa-trash"></i> Delete</button>
                     </div>
                 </form>
@@ -200,7 +200,7 @@
                                 <a href="#" class="btn btn-default editRoleButton" role="button" th:value="${role.getIdAsString()}" th:title="|Edit the ${role.name} role.|">
                                     <i class="fa fa-pencil"></i>
                                 </a>
-                                <a href="#" class="btn btn-default btn-delete" data-toggle="modal" data-target="#delete-dialog"
+                                <a href="#" class="btn btn-default btn-delete" data-bs-toggle="modal" data-bs-target="#delete-dialog"
                                    th:data-role-id="${role.getIdAsString()}" th:data-role-name="${role.name}" role="button" th:title="|Delete the ${role.name} role.|">
                                     <i class="fa fa-trash-o"></i>
                                 </a>

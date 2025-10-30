@@ -15,7 +15,7 @@
                       th:action="@{|/admin/vaults/${vault.ID}/user|}"
                       method="post">
                     <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"><i
                                     class="fa fa-times" aria-hidden="true"></i></button>
                         <h4 class="modal-title" id="add-new-user-title">Add new user</h4>
                     </div>
@@ -39,7 +39,7 @@
                     <input type="hidden" id="submitAction" name="action" value="submit"/>
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-default" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-primary btn-ok">Add</button>
                     </div>
                 </form>
@@ -56,7 +56,7 @@
                       th:action="@{|/admin/vaults/${vault.ID}/user/update|}"
                       method="post">
                     <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i
+                        <button type="button" class="close" data-bs-dismiss="modal" aria-hidden="true"><i
                                     class="fa fa-times" aria-hidden="true"></i></button>
                         <h4 class="modal-title" id="update-existing-title">Update user</h4>
                     </div>
@@ -82,7 +82,7 @@
                     <input type="hidden" id="submitAction" name="action" value="submit"/>
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-default" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-primary btn-ok">Add</button>
                     </div>
                 </form>
@@ -98,7 +98,7 @@
                       th:action="@{|/admin/vaults/${vault.ID}/user/delete|}"
                       method="post">
                     <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"><i
                                     class="fa fa-times" aria-hidden="true"></i></button>
                         <h4 class="modal-title" id="delete-title">Remove user</h4>
                     </div>
@@ -111,7 +111,7 @@
                     <input type="hidden" id="submitAction" name="action" value="submit"/>
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
+                        <button type="button" class="btn btn-default" data-bs-dismiss="modal">No</button>
                         <button type="submit" class="btn btn-primary btn-ok">Yes</button>
                     </div>
                 </form>
@@ -131,7 +131,7 @@
         <h1 id="role-assignments-title">[[${vault.name}]]</h1>
 
         <div id="add-new">
-            <a href="#" data-toggle="modal" data-target="#add-new-dialog">+ Add new user to vault</a>
+            <a href="#" data-bs-toggle="modal" data-bs-target="#add-new-dialog">+ Add new user to vault</a>
         </div>
 
         <div class="col-md-8" id="role-assignments">
@@ -159,13 +159,13 @@
                             <td>[[${assignment.user.firstname}]] [[${assignment.user.lastname}]]</td>
                             <td class="role-column">[[${assignment.role.name}]]</td>
                             <td class="action-column">
-                                <a href="#" class="btn btn-default" data-toggle="modal"
-                                   data-target="#update-existing-dialog" th:data-assignment-id="${assignment.id}"
+                                <a href="#" class="btn btn-default" data-bs-toggle="modal"
+                                   data-bs-target="#update-existing-dialog" th:data-assignment-id="${assignment.id}"
                                    th:data-user-name="|${assignment.user.firstname} ${assignment.user.lastname}|"
                                    th:title="|Edit role assignment for user ${assignment.user.firstname} ${assignment.user.lastname}.|"><i
                                             class="fa fa-pencil"></i></a>
-                                <a href="#" class="btn btn-default btn-delete" data-toggle="modal"
-                                   data-target="#delete-dialog" th:data-assignment-id="${assignment.id}"
+                                <a href="#" class="btn btn-default btn-delete" data-bs-toggle="modal"
+                                   data-bs-target="#delete-dialog" th:data-assignment-id="${assignment.id}"
                                    th:data-user-name="|${assignment.user.firstname} ${assignment.user.lastname}|"
                                    th:title="|Remove role assignment for user ${assignment.user.firstname} ${assignment.user.lastname}.|"><i
                                             class="fa fa-trash"></i></a>

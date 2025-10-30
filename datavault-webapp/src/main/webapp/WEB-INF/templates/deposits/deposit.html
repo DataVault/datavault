@@ -42,7 +42,7 @@
             </div>
 
             <div id="job-info" class="alert alert-info" role="alert" style="display:none;">
-                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert">&times;</button>
                 <span id="job-info-msq"></span>
             </div>
             <th:block th:with="canRetrieveDataExpression=|hasPermission('${vault.ID}', 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') or hasPermission('${vault.groupID}', 'GROUP', 'CAN_RETRIEVE_DATA')|">
@@ -135,8 +135,8 @@
             </table>
             
             <ul class="nav nav-tabs">
-                <li class="active"><a data-toggle="tab" href="#events">Events <span class="badge">[[${events == null ? 0 : #lists.size(events)}]]</span></a></li>
-                <li><a data-toggle="tab" href="#retrievals">Retrievals <span class="badge">[[${retrieves == null ? 0 : #lists.size(retrieves)}]]</span></a></li>
+                <li class="active"><a data-bs-toggle="tab" href="#events">Events <span class="badge">[[${events == null ? 0 : #lists.size(events)}]]</span></a></li>
+                <li><a data-bs-toggle="tab" href="#retrievals">Retrievals <span class="badge">[[${retrieves == null ? 0 : #lists.size(retrieves)}]]</span></a></li>
             </ul>
             
             <div id="deposit-tab-content" class="tab-content">
