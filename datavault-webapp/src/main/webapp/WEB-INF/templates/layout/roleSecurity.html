@@ -202,17 +202,17 @@
             });
         });
 
-        $('[data-target="#add-new-dialog"]').click(function () {
+        $('[data-bs-target="#add-new-dialog"]').click(function () {
             $('#create-error').addClass('hidden').text('');
         });
-        $('[data-target="#update-existing-dialog"]').click(function () {
+        $('[data-bs-target="#update-existing-dialog"]').click(function () {
             var assignmentId = $(this).data('assignment-id');
             var userName = $(this).data('user-name');
             $('#role-update-assignment-id').val(assignmentId);
             $('#role-update-user-name').val(userName);
             $('#update-error').addClass('hidden').text('');
         });
-        $('[data-target="#delete-dialog"]').click(function () {
+        $('[data-bs-target="#delete-dialog"]').click(function () {
             var assignmentId = $(this).data('assignment-id');
             var userName = $(this).data('user-name');
             $('#delete-role-assignment-id').val(assignmentId);

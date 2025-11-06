@@ -77,8 +77,8 @@
                                 <div class="form-group form-inline row">
                                     <label class="control-label col-xs-3" for="edit_type">Type</label>
                                     <select class="form-control col-xs-9" name="type" id="edit_type">
-                                        <option data-target="#drp-vault" value="VAULT">Vault role</option>
-                                        <option data-target="#drp-school" value="SCHOOL">School role</option>
+                                        <option data-bs-target="#drp-vault" value="VAULT">Vault role</option>
+                                        <option data-bs-target="#drp-school" value="SCHOOL">School role</option>
                                     </select>
                                 </div>
                                 <div class="form-group form-inline row">
@@ -223,7 +223,7 @@
             EditByRoleId(roleid);
         });
 
-        $('[data-target="#delete-dialog"]').click(function() {
+        $('[data-bs-target="#delete-dialog"]').click(function() {
             var roleId = $(this).data('role-id');
             var roleName = $(this).data('role-name');
             $('#delete-role-id').val(roleId);

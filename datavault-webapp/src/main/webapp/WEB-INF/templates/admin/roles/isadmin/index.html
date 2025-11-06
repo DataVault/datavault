@@ -139,7 +139,7 @@
     </div>
 
     <script th:inline="javascript" type="text/javascript">
-        $('[data-target="#delete-dialog"]').click(function () {
+        $('[data-bs-target="#delete-dialog"]').click(function () {
             var roleName = $(this).data('role-name');
             var userId = $(this).data('user-id');
             var userName = $(this).data('user-name');
@@ -170,7 +170,7 @@
             });
         });
 
-        $('[data-target="#add-new-dialog"]').click(function () {
+        $('[data-bs-target="#add-new-dialog"]').click(function () {
             $('#create-error').addClass('hidden').text('');
             $('#add-superadmin-uun').val('');
         });

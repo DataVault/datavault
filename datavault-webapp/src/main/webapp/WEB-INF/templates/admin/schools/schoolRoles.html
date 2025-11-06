@@ -231,12 +231,12 @@
         var canManageSchoolRoleAssignments = /*[[${canManageSchoolRoleAssignments}]]*/ 'replaced-by-tl';
         if(canManageSchoolRoleAssignments){
 
-        $('[data-target="#add-new-dialog"]').click(function() {
+        $('[data-bs-target="#add-new-dialog"]').click(function() {
             $('#create-error').addClass('hidden').text('');
             $('#new-user-name').val('');
             $('#new-user-role').val('');
         });
-        $('[data-target="#update-existing-dialog"]').click(function() {
+        $('[data-bs-target="#update-existing-dialog"]').click(function() {
             var assignmentId = $(this).data('assignment-id');
             //assignmentId = assignmentId.replace(/\,/g,'');
             assignmentId = parseInt(assignmentId,10);
@@ -247,7 +247,7 @@
             $('#role-update-user-name').text(userName);
             $('#update-error').addClass('hidden').text('');
         });
-        $('[data-target="#delete-dialog"]').click(function() {
+        $('[data-bs-target="#delete-dialog"]').click(function() {
             var assignmentId = $(this).data('assignment-id');
             //assignmentId = assignmentId.replace(/\,/g,'');
             assignmentId = parseInt(assignmentId,10);

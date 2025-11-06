@@ -21,7 +21,7 @@ public class AddDepositPage extends Page {
     }
 
     public AddDepositPage clickDataStorage() throws InterruptedException {
-        focusAndClick(driver.findElement(By.xpath("//button[@data-target='#add-from-storage']")));
+        focusAndClick(driver.findElement(By.xpath("//button[@data-bs-target='#add-from-storage']")));
         Thread.sleep(1000);
         return this;
     }
