@@ -145,3 +145,8 @@
 .extra-depositor {
     margin-top: 2px;
 }
+
+#vault-creation-form .dropdown-menu,
+#pendingvault-edit-form .dropdown-menu {
+    height: 30rem !important;
+}
