@@ -141,10 +141,12 @@
 
     <div class="container">
 
-        <ol class="breadcrumb">
-            <li><a th:href="@{/admin}"><b>Administration</b></a></li>
-            <li class="active"><b>Roles</b></li>
-        </ol>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">a th:href="@{/admin}"><b>Administration</b></a></li>
+                <li class="breadcrumb-item active" aria-current="page"><b>Roles</b></li>
+            </ol>
+        </nav>
 
         <h1>Users & Roles</h1>
 

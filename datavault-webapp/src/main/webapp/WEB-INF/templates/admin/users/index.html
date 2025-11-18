@@ -5,10 +5,12 @@
 <th:block layout:fragment="content" th:with="queryPARAM=${#uris.escapeQueryParam(query)}">
 <div class="container">
 
-    <ol class="breadcrumb">
-        <li><a th:href="@{/admin/}"><b>Administration</b></a></li>
-        <li class="active"><b>Users</b></li>
-    </ol>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/admin/}"><b>Administration</b></a></li>
+            <li class="breadcrumb-item active" aria-current="page"><b>Users</b></li>
+        </ol>
+    </nav>
 
     <form id="search-users" class="form" role="form" action="" method="get">
         <div class="input-group">

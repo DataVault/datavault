@@ -96,10 +96,12 @@
         </div>
     </div>
     
-    <ol class="breadcrumb">
-        <li><a th:href="@{/}"><b>Home</b></a></li>
-        <li class="active"><b>Vault:</b> [[${vault.name}]]</li>
-    </ol>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/}"><b>Home</b></a></li>
+            <li class="breadcrumb-item active" aria-current="page"><b>Vault:</b> [[${vault.name}]]</li>
+        </ol>
+    </nav>
 
     <div class="panel panel-uoe-low">
         <div class="associated-image">

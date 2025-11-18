@@ -4,10 +4,12 @@
 <head><title>Help</title></head>
 <th:block layout:fragment="content">
 <div class="container" >
-    <ol class="breadcrumb">
-        <li><a th:href="@{/}"><b>Home</b></a></li>
-        <li class="active"><b>Help</b></li>
-    </ol>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/}"><b>Home</b></a></li>
+            <li class="breadcrumb-item active" aria-current="page"><b>Help</b></li>
+        </ol>
+    </nav>
 
     <div class="panel panel-uoe-low">
         <div class="associated-image">
@@ -39,7 +41,7 @@
             <ul>
                 <li>You have data that needs to be protected from accidental change or deletion</li>
                 <li>Your funder requires you to keep data safe for a set time period</li>
-                <li>You are not able to share your data openly, but want to keep a copy that can be requested</a>
+                <li>You are not able to share your data openly, but want to keep a copy that can be requested</li>
             </ul>
             <div class="bs-callout bs-callout-danger">
                 <h4>DataVault vs. Backup</h4>

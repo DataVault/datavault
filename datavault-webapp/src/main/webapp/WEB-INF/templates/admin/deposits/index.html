@@ -25,10 +25,12 @@
 
     <div class="container">
 
-        <ol class="breadcrumb">
-            <li><a th:href="@{/admin/}"><b>Administration</b></a></li>
-            <li class="active"><b>Deposits</b></li>
-        </ol>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/admin/}"><b>Administration</b></a></li>
+                <li class="breadcrumb-item active" aria-current="page"><b>Deposits</b></li>
+            </ol>
+        </nav>
 
         <form id="search-vaults" class="form" role="form" action="" method="get">
             <div class="input-group">

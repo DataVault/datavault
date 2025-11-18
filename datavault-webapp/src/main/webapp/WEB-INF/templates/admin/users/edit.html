@@ -6,9 +6,11 @@
 <th:block layout:fragment="content">
 <div class="container">
 
-    <ol class="breadcrumb">
-        <li class="active"><b>Edit profile</b></li>
-    </ol>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item active" aria-current="page"><b>Edit profile</b></li>
+        </ol>
+    </nav>
 
     <form id="edit-user" th:object="${user}" class="form" role="form" action="" method="post">
 

@@ -5,11 +5,13 @@
 <head><title>Admin - Pending Vault Summary</title></head>
 <th:block layout:fragment="content">
 				<div class="container">
-					<ol class="breadcrumb">
-						<li><a th:href="@{/admin/}"><b>Administration</b></a></li>
-						<li><a th:href="@{/admin/pendingVaults}"><b>Pending Vaults</b></a></li>
-						<li class="active"><b>Pending Vault Summary</b></li>
-					</ol>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a th:href="@{/admin/}"><b>Administration</b></a></li>
+                            <li class="breadcrumb-item"><a th:href="@{/admin/pendingVaults}"><b>Pending Vaults</b></a></li>
+                            <li class="breadcrumb-item active" aria-current="page"><b>Pending Vault Summary</b></li>
+                        </ol>
+                    </nav>
 					<div class="container whitebackground">
 						<h1>Pending Vault Summary</h1>
 						<div class="row">

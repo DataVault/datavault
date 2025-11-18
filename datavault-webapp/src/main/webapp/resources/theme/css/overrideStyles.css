@@ -245,3 +245,94 @@ a {
     border-bottom: none !important;
     box-shadow: none !important;
 }
+
+/* === Bootstrap 3 Panel Compatibility Layer for Bootstrap 5 === */
+
+/* Panel container */
+.panel {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+}
+
+/* Optional “low” or “highlight” color variants */
+.panel-uoe-low {
+    border-color: #1e73be; /* your UoE blue */
+}
+
+/* Panel heading */
+.panel-heading {
+    padding: 10px 15px;
+    border-bottom: 1px solid #ddd;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    background-color: #f5f5f5;
+    font-weight: 600;
+}
+
+/* Panel body */
+.panel-body {
+    padding: 15px;
+}
+
+/* Panel footer */
+.panel-footer {
+    padding: 10px 15px;
+    background-color: #f5f5f5;
+    border-top: 1px solid #ddd;
+    border-bottom-right-radius: 3px;
+    border-bottom-left-radius: 3px;
+}
+
+/* Remove unwanted space between consecutive panels */
+.panel + .panel {
+    margin-top: 10px;
+}
+
+/* Restore spacing inside panels within containers */
+.container .panel {
+    margin-top: 15px;
+}
+
+/* If using whitebackground, ensure clean edge and consistent padding */
+.panel-body.whitebackground {
+    background-color: #fff;
+    padding: 20px 30px;
+    margin-top: 0;
+}
+
+/* Tighten top gaps caused by Bootstrap 5’s spacing reset */
+.panel:first-child {
+    margin-top: 0;
+}
+
+/* Restore a '>' divider for breadcrumbs (force it after Edgel theme overrides) */
+nav[aria-label="breadcrumb"] .breadcrumb {
+    /* keep the breadcrumb display/layout from Edgel but ensure the divider works */
+    --bs-breadcrumb-divider: ">" !important;
+}
+
+/* Bulletproof: explicitly inject '>' for cases where theme overrides the variable */
+nav[aria-label="breadcrumb"] .breadcrumb-item + .breadcrumb-item::before {
+    content: ">" !important;             /* explicit fallback */
+    display: inline-block !important;
+    padding: 0 0.5rem !important;        /* spacing around divider */
+    color: #707070 !important;           /* tweak color to match previous look */
+    font-weight: 400 !important;
+    vertical-align: middle !important;
+}
+
+/* Keep the active item styling similar to old BS3 look */
+nav[aria-label="breadcrumb"] .breadcrumb-item.active {
+    color: #000 !important;
+    font-weight: 600 !important;
+}
+
+/* If Edgel adds strange background/padding, provide a safe neutral baseline */
+nav[aria-label="breadcrumb"] .breadcrumb {
+    background: transparent !important;
+    padding: 0.5rem 0 !important;
+    margin-bottom: 1rem !important;
+}

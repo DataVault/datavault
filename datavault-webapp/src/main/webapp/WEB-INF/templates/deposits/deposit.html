@@ -5,11 +5,13 @@
 <th:block layout:fragment="content">
 <div class="container">
 
+    <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
-        <li><a th:href="@{/}"><b>Home</b></a></li>
-        <li><a th:href="@{|/vaults/${vault.getID()}/|}"><b>Vault:</b> [[${vault.name}]]</a></li>
-        <li class="active"><b>Deposit:</b> [[${deposit.name}]]</li>
+        <li class="breadcrumb-item"><a th:href="@{/}"><b>Home</b></a></li>
+        <li class="breadcrumb-item"><a th:href="@{|/vaults/${vault.getID()}/|}"><b>Vault:</b> [[${vault.name}]]</a></li>
+        <li class="breadcrumb-item active" aria-current="page"><b>Deposit:</b> [[${deposit.name}]]</li>
     </ol>
+    </nav>
 
     <div class="panel panel-uoe-low">
         <div class="associated-image">

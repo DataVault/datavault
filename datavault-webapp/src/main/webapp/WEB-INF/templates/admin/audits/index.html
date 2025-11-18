@@ -26,10 +26,12 @@
 
     <div class="container">
 
-        <ol class="breadcrumb">
-            <li><a th:href="@{/admin/}"><b>Administration</b></a></li>
-            <li class="active"><b>Audits</b></li>
-        </ol>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/admin/}"><b>Administration</b></a></li>
+                <li class="breadcrumb-item active" aria-current="page"><b>Audits</b></li>
+            </ol>
+        </nav>
 
         <button id="audit" class="btn btn-primary"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span> Run Audit</button>
 

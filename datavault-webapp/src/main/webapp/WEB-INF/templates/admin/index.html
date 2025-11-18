@@ -36,10 +36,12 @@
 
 <div class="container">
 
-    <ol class="breadcrumb">
-        <li><a th:href="@{/}"><b>Home</b></a></li>
-        <li class="active"><b>Administration</b></li>
-    </ol>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/}"><b>Home</b></a></li>
+            <li class="breadcrumb-item active" aria-current="page"><b>Administration</b></li>
+        </ol>
+    </nav>
 
     <th:block th:if="${canViewVaultsSize != null && canViewVaultsSize}">
         <div class="col-xs-6 col-md-4">

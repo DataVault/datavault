@@ -94,11 +94,14 @@
     </div>
 
     <div class="container">
-        <ol class="breadcrumb">
-            <li><a th:href="@{/admin}"><b>Administration</b></a></li>
-            <li><a th:href="@{/admin/roles}"><b>Roles</b></a></li>
-            <li class="active"><b>IS Admin Management</b></li>
-        </ol>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/admin}"><b>Administration</b></a></li>
+                <li class="breadcrumb-item"><a th:href="@{/admin/roles}"><b>Roles</b></a></li>
+                <li class="breadcrumb-item active" aria-current="page"><b>IS Admin Management</b></li>
+            </ol>
+        </nav>
+
         <h1>IS Admin Management</h1>
         <div id="add-new">
             <a href="#" data-bs-toggle="modal" data-bs-target="#add-new-dialog">+Add New User</a>

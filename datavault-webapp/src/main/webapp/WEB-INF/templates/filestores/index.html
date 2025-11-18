@@ -7,10 +7,12 @@
 <th:block layout:fragment="content">
     <!-- ========================== MAIN CONTENT ========================== -->
     <div class="container">
-        <ol class="breadcrumb">
-            <li><a th:href="@{/}"><b>Home</b></a></li>
-            <li class="active"><b>File Locations</b></li>
-        </ol>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/}"><b>Home</b></a></li>
+                <li class="breadcrumb-item active" aria-current="page"><b>File Locations</b></li>
+            </ol>
+        </nav>
 
         <div class="panel panel-uoe-low">
             <div class="associated-image">
@@ -45,7 +47,7 @@
                                        th:data-filestore="${filestoreLocal.ID}"
                                        data-bs-toggle="modal"
                                        data-bs-target="#confirm-removal">
-                                        <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Remove
+                                        <i class="bi bi-x"></i> Remove
                                     </a>
                                 </td>
                             </tr>
@@ -58,7 +60,7 @@
 
                         <form>
                             <a class="btn btn-default" href="#" data-bs-toggle="modal" data-bs-target="#add-filestoreLocal">
-                                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Filestore
+                                <i class="bi bi-plus" aria-hidden="true"></i> Add Filestore
                             </a>
                         </form>
                     </div>
@@ -91,25 +93,25 @@
                                     <button class="btn btn-sm btn-default pull-right" th:onclick="|copyToClipboard('#filestore-sftp-${status.index}')|">Copy</button>
                                 </td>
                                 <td>
-                                    <a class="btn btn-xs btn-danger pull-right" href="#"
+                                    <a class="btn btn-xs btn-danger float-end" href="#"
                                        th:data-filestore="${filestoreSFTP.ID}"
                                        data-bs-toggle="modal"
                                        data-bs-target="#confirm-removal">
-                                        <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Remove
+                                        <i class="bi bi-x" aria-hidden="true"></i> Remove
                                     </a>
                                 </td>
                             </tr>
                             </tbody>
                         </table>
                         <a class="btn btn-default" href="#" data-bs-toggle="modal" data-bs-target="#add-filestoreSFTP">
-                            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> File store
+                            <i class="bi bi-plus" aria-hidden="true"></i> File store
                         </a>
                     </div>
 
                     <div th:if="${!filestoresSFTPnotEmpty}">
                         <p>There are currently no SFTP Filestores configured</p>
                         <a class="btn btn-default" href="#" data-bs-toggle="modal" data-bs-target="#add-filestoreSFTP">
-                            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> File store
+                            <i class="bi bi-plus" aria-hidden="true"></i> File store
                         </a>
                     </div>
 
@@ -123,7 +125,7 @@
                             <li>Close the dialog</li>
                         </ol>
                         <a class="btn btn-default" href="https://registration.ecdf.ed.ac.uk/storage/public_keys/add" target="_blank" rel="noopener noreferrer">
-                            <span class="glyphicon glyphicon-modal-window" aria-hidden="true"></span>
+                            <i class="bi bi-window" aria-hidden="true"></i>
                             Open key registration
                         </a>
                         <br/><br/>

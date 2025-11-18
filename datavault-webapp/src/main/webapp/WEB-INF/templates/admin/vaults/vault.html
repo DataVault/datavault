@@ -6,11 +6,13 @@
 <th:block layout:fragment="content">
 <div class="container">
 
-    <ol class="breadcrumb">
-        <li><a th:href="@{/admin/}"><b>Administration</b></a></li>
-        <li><a th:href="@{/admin/vaults}"><b>Vaults</b></a></li>
-        <li class="active"><b>Vault:</b> [[${vault.name}]]</li>
-    </ol>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/admin/}"><b>Administration</b></a></li>
+            <li class="breadcrumb-item"><a th:href="@{/admin/vaults}"><b>Vaults</b></a></li>
+            <li class="breadcrumb-item active" aria-current="page"><b>Vault:</b> [[${vault.name}]]</li>
+        </ol>
+    </nav>
 
     <form th:action="@{|/admin/vaults/${vault.getID()}/checkretentionpolicy|}" method="post">
 

@@ -5,15 +5,13 @@
 <head><title>Admin - Billing Details (NA)</title></head>
 <th:block layout:fragment="content">
             <div class="container">
-                <ol class="breadcrumb">
-                    <li><a
-                            th:href="@{/admin/}"><b>Administration</b></a></li>
-                    <li><a
-                            th:href="@{/admin/billing}"><b>Billing</b></a></li>
-                    <li class="active"><b>BillingDetails:</b>
-                        [[${billingDetails.vaultName}]]
-                    </li>
-                </ol>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a th:href="@{/}"><a th:href="@{/admin/}"><b>Administration</b></a></li>
+                        <li class="breadcrumb-item"><a th:href="@{/admin/billing}"><b>Billing</b></a></li>
+                        <li class="breadcrumb-item active" aria-current="page"><b>BillingDetails:</b>[[${billingDetails.vaultName}]]</li>
+                    </ol>
+                </nav>
                 <div class="panel panel-uoe-low">
                     <div class="panel-body">
                         <h2>Billing Details (NA): <small>
