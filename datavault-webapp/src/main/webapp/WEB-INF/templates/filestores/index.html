@@ -5,6 +5,88 @@
     <title>Filestores</title>
 </head>
 <th:block layout:fragment="content">
+    <!-- ========================== CONFIRM REMOVAL MODAL ========================== -->
+    <div class="modal fade" id="confirm-removal" tabindex="-1" aria-labelledby="confirmRemovalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="confirmRemovalLabel">Confirm removal of filestore</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to remove <b class="remove-filestore"></b>?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger btn-ok" id="remove">Remove</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================== ADD FILESTORE SFTP MODAL ========================== -->
+    <div class="modal fade" id="add-filestoreSFTP" tabindex="-1" aria-labelledby="addFileStoreSFTPLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="addFileStoreSFTPLabel">Add filestore</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <p>
+                        Overwrite the default values as follows:
+                    </p>
+                    <ul>
+                        <li>
+                            Hostname: <code>COLLEGE.datastore.ed.ac.uk</code> where COLLEGE
+                            (either chss, cmvm, csce or sg) relates to the area you wish to connect to.
+                        </li>
+                        <li>
+                            Path: Overwrite the content of this field to add in the path to the DataStore area you wish to use (and folder / sub-directory if applicable); this might be a group shared area or your personal homespace.
+                            If you are unsure of the path, you should be able to view it in
+                            <a href="https://registration.ecdf.ed.ac.uk/storage/" target="_blank">ECDF Storage Manager</a>
+                            or ask your local or School IT support or see our
+                            <a href="https://www.ed.ac.uk/information-services/research-support/research-data-service/after/datavault/how-to-deposit-datavault/file-locations"
+                               target="_blank">advice on File Locations</a> for further help and examples.
+                        </li>
+                    </ul>
+                    <p>Leave the port number as <code>22222</code>.</p>
+
+                    <form id="add-filestoreSFTP-form">
+                        <div class="form-filestore">
+                            <div class="form-group">
+                                <label for="hostname">
+                                    Hostname<br />
+                                    <small>e.g. cmvm.datastore.ed.ac.uk, chss.datastore.ed.ac.uk, csce.datastore.ed.ac.uk</small>
+                                </label>
+                                <input type="text" class="form-control" id="hostname" name="hostname" th:value="${sftpHost}" />
+                            </div>
+
+                            <div class="form-group">
+                                <label for="port">Port</label>
+                                <input type="text" class="form-control" id="port" name="port" th:value="${sftpPort}" />
+                            </div>
+
+                            <div class="form-group">
+                                <label for="path">
+                                    Path<br />
+                                    <small>e.g. /chss/datastore/eca/groups/one-group, /csce/datastore/ph/groups/gelato-group,
+                                        /cmvm/datastore/edmed/users/person7</small>
+                                </label>
+                                <input type="text" class="form-control" id="path" name="path" th:value="${sftpRootPath}" />
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button form="add-filestoreSFTP-form" type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- ========================== MAIN CONTENT ========================== -->
     <div class="container">
         <nav aria-label="breadcrumb">
@@ -217,88 +299,8 @@
 </th:block>
 <!-- Modal -->
 <th:block layout:fragment="modals">
-    <!-- ========================== CONFIRM REMOVAL MODAL ========================== -->
-    <div class="modal fade" id="confirm-removal" tabindex="-1" aria-labelledby="confirmRemovalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="confirmRemovalLabel">Confirm removal of filestore</h4>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Are you sure you want to remove <b class="remove-filestore"></b>?</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-danger btn-ok" id="remove">Remove</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ========================== ADD FILESTORE SFTP MODAL ========================== -->
-    <div class="modal fade" id="add-filestoreSFTP" tabindex="-1" aria-labelledby="addFileStoreSFTPLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="addFileStoreSFTPLabel">Add filestore</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-
-                <div class="modal-body">
-                    <p>
-                        Overwrite the default values as follows:
-                    </p>
-                    <ul>
-                        <li>
-                            Hostname: <code>COLLEGE.datastore.ed.ac.uk</code> where COLLEGE
-                            (either chss, cmvm, csce or sg) relates to the area you wish to connect to.
-                        </li>
-                        <li>
-                            Path: Overwrite the content of this field to add in the path to the DataStore area you wish to use (and folder / sub-directory if applicable); this might be a group shared area or your personal homespace.
-                            If you are unsure of the path, you should be able to view it in
-                            <a href="https://registration.ecdf.ed.ac.uk/storage/" target="_blank">ECDF Storage Manager</a>
-                            or ask your local or School IT support or see our
-                            <a href="https://www.ed.ac.uk/information-services/research-support/research-data-service/after/datavault/how-to-deposit-datavault/file-locations"
-                               target="_blank">advice on File Locations</a> for further help and examples.
-                        </li>
-                    </ul>
-                    <p>Leave the port number as <code>22222</code>.</p>
-
-                    <form id="add-filestoreSFTP-form">
-                        <div class="form-filestore">
-                            <div class="form-group">
-                                <label for="hostname">
-                                    Hostname<br />
-                                    <small>e.g. cmvm.datastore.ed.ac.uk, chss.datastore.ed.ac.uk, csce.datastore.ed.ac.uk</small>
-                                </label>
-                                <input type="text" class="form-control" id="hostname" name="hostname" th:value="${sftpHost}" />
-                            </div>
-
-                            <div class="form-group">
-                                <label for="port">Port</label>
-                                <input type="text" class="form-control" id="port" name="port" th:value="${sftpPort}" />
-                            </div>
-
-                            <div class="form-group">
-                                <label for="path">
-                                    Path<br />
-                                    <small>e.g. /chss/datastore/eca/groups/one-group, /csce/datastore/ph/groups/gelato-group,
-                                        /cmvm/datastore/edmed/users/person7</small>
-                                </label>
-                                <input type="text" class="form-control" id="path" name="path" th:value="${sftpRootPath}" />
-                            </div>
-                        </div>
-                    </form>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button form="add-filestoreSFTP-form" type="submit" class="btn btn-primary">Submit</button>
-                </div>
-            </div>
-        </div>
-    </div>
+<!-- this was a suggested solution by chatG.  It didn't get used in the end
+we should probably remove here and from the layout at some point -->
 </th:block>
 
 <script type="text/javascript">
