@@ -136,14 +136,34 @@
                 </tbody>
             </table>
             
-            <ul class="nav nav-tabs">
+            <!-- <ul class="nav nav-tabs">
                 <li class="active"><a data-bs-toggle="tab" href="#events">Events <span class="badge">[[${events == null ? 0 : #lists.size(events)}]]</span></a></li>
                 <li><a data-bs-toggle="tab" href="#retrievals">Retrievals <span class="badge">[[${retrieves == null ? 0 : #lists.size(retrieves)}]]</span></a></li>
+            </ul> -->
+            <ul class="nav nav-tabs" id="depositTabs" role="tablist">
+                 <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="events-tab"
+                        data-bs-toggle="tab" data-bs-target="#events"
+                        type="button" role="tab" aria-controls="events" aria-selected="true">
+                        Events <span class="badge bg-light text-dark">[[${events == null ? 0 : #lists.size(events)}]]</span>
+                    </button>
+                 </li>
+
+                 <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="retrievals-tab"
+                        data-bs-toggle="tab" data-bs-target="#retrievals"
+                        type="button" role="tab" aria-controls="retrievals" aria-selected="false">
+                        Retrievals <span class="badge bg-light text-dark">[[${retrieves == null ? 0 : #lists.size(retrieves)}]]</span>
+                    </button>
+                </li>
             </ul>
+
+
             
             <div id="deposit-tab-content" class="tab-content">
     
-                <div class="tab-pane active" id="events">
+                <!-- <div class="tab-pane active" id="events">-->
+                <div class="tab-pane fade show active" id="events" role="tabpanel" aria-labelledby="events-tab">
                     <div class="scrollable">
                         <div class="table-responsive">
                             <table class="table table-bordered">
@@ -168,7 +188,8 @@
                     </div>
                 </div>
     
-                <div class="tab-pane" id="retrievals">
+                <!-- <div class="tab-pane" id="retrievals"> -->
+                <div class="tab-pane fade" id="retrievals" role="tabpanel" aria-labelledby="retrievals-tab">
                     <div class="scrollable">
                         <div class="table-responsive">
                             <table class="table table-bordered">
