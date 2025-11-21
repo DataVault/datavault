@@ -6,7 +6,30 @@
 
     #role-assignments {
         margin-top: 2em;
-        padding: 0 2em 0 0;
+        padding-left: 15px;
+    }
+
+    /* Fix responsive table bleed */
+    #role-assignments .table-responsive {
+        margin: 0 !important;
+        background: #fff;
+    }
+
+    /* Optional: add a ruler */
+    .table-rule {
+        margin-top: 0;
+        margin-bottom: 10px;
+        border-top: 2px solid #ccc; /* nice subtle rule */
+    }
+
+    /* separator between header and body */
+    .header-separator {
+        border-top: 2px solid #ccc;
+        margin: 0;
+    }
+    .table-separator td {
+        padding: 0 !important;
+        background: #fff !important;
     }
 
     #role-filter-toggle {
@@ -30,7 +53,6 @@
     }
 
     .role-definitions {
-        margin-top: 2em;
         border-left: 1px solid;
         padding: 0 1em;
     }
@@ -302,6 +324,7 @@
 </div>
 </th:block><!-- assignVaultRolesSecurityExpression -->
 
+<div class="row">
 <div class="col-md-8" id="role-assignments">
     <div class="table-responsive">
         <table class="table table-striped">
@@ -324,6 +347,7 @@
             </tr>
             </thead>
             <tbody>
+            <tr class="table-separator"><td colspan="99"><div class="header-separator"></div></td></tr>
             <th:block th:if="${dataOwner != null}">
                 <tr>
                     <td>[[${dataOwner.userId}]]</td>
@@ -334,8 +358,7 @@
                         <a href="#" class="btn btn-default" data-bs-toggle="modal"
                            data-bs-target="#orphan-dialog"
                            data-user-name="${dataOwner.userId}"
-                           title="Transfer ownership of this vault."><i
-                                    class="glyphicon glyphicon-transfer"></i></a>
+                           title="Transfer ownership of this vault."><i class="bi bi-arrow-left-right"></i></a>
                         </th:block><!-- transferOwnershipSecurityExpression -->
                     </td>
                     </th:block><!-- showActionsColumnSecurityExpression -->
@@ -382,17 +405,19 @@
         </table>
     </div>
 </div>
-
 <div id="role-definitions" class="col-md-4">
     <div class="role-definitions">
-        <h3 class="role-definition-title">Role Definitions</h3>
-        <th:block th:each="role: ${roles}">
+         <h3 class="role-definition-title">Role Definitions</h3>
+         <th:block th:each="role: ${roles}">
             <div class="definition">
                 <b>[[${role.name}]]:</b> [[${role.description}]]
             </div>
-        </th:block>
+         </th:block>
     </div>
 </div>
+</div>
+
+
 
 <script th:inline="javascript" type="text/javascript">
     $('#role-filter-toggle').click(function () {
