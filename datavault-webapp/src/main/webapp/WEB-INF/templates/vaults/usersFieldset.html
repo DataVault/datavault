@@ -33,10 +33,9 @@
 
         <!-- Start: NDMs -->
         <div class="form-group">
-            <label class="col-sm-4 control-label">Nominated Data Managers: 
-                <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-bs-toggle="tooltip"
-                      title="Nominated Data Manager: Acting on behalf of the Data Owner, may view the vault, edit metadata fields, deposit data and retrieve any deposit in the vault. Can assign other users to the Depositor role.">
-                </span> 
+            <label class="col-sm-4 control-label">Nominated Data Managers:
+                <i class="bi bi-info-circle" aria-hidden="true" data-bs-toggle="tooltip"
+                   title="Nominated Data Manager: Acting on behalf of the Data Owner, may view the vault, edit metadata fields, deposit data and retrieve any deposit in the vault. Can assign other users to the Depositor role."></i>
             </label>
         </div>
 
@@ -93,10 +92,9 @@
         
        <!-- Start: Depositors -->
         <div class="form-group">
-          <label class="col-sm-4 control-label">Depositors: 
-              <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-bs-toggle="tooltip"
-                    title="Depositor: Acting on behalf of the Data Owner, may view the vault, deposit data and retrieve any deposit in the vault.">
-              </span>
+          <label class="col-sm-4 control-label">Depositors:
+              <i class="bi bi-info-circle" aria-hidden="true" data-bs-toggle="tooltip"
+                 title="Depositor: Acting on behalf of the Data Owner, may view the vault, deposit data and retrieve any deposit in the vault."></i>
           </label>
         </div>
 
@@ -147,9 +145,8 @@
         <!-- END: Depositors hidden -->
         <!-- END: Depositors -->
 
-        <h4>Pure Information<span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-bs-toggle="tooltip"
-                                  title="We will create a Pure record, publicly visible on the Research Explorer, describing this Vault. Please add here the names you wish to be included on that record.">
-        </span></h4>
+        <h4>Pure Information<i class="bi bi-info-circle" aria-hidden="true" data-bs-toggle="tooltip"
+                  title="We will create a Pure record, publicly visible on the Research Explorer, describing this Vault. Please add here the names you wish to be included on that record."></i></h4>
 
 
         <div id="contact-form-group" class="form-group">
@@ -216,7 +213,7 @@
     </div>
     <button type="button" name="previous" class="previous action-button-previous btn btn-default" >&laquo; Previous</button>
     <button th:if="${!vault.confirmed}" type="submit" name="save" value="Save" class="save action-button-previous btn btn-default" >
-        <span class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span> Save
+        <i class="bi bi-save" aria-hidden="true"></i> Save
     </button>
     <button type="button" id="user-fields-next" name="next" class="next action-button btn btn-primary">Next Step &raquo;</button>
     <script type="application/javascript">

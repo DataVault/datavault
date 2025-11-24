@@ -71,17 +71,15 @@
 
                             <div class="form-group">
                                 <label class="control-label">Deposit Name</label>
-                                <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-bs-toggle="tooltip"
-                                      title="The deposit name should  help reviewers understand whether this subset of the data needs to be kept longer than other parts of the vault.&nbsp;Maximum 400 characters.">
-                            </span>
+                                <i class="bi bi-info-circle" aria-hidden="true" data-bs-toggle="tooltip"
+                                   title="The deposit name should  help reviewers understand whether this subset of the data needs to be kept longer than other parts of the vault.&nbsp;Maximum 400 characters."></i>
                                 <input type="text" class="form-control" th:field="*{name}" />
                             </div>
 
                             <div class="form-group">
                                 <label class="control-label">Deposit Description</label>
-                                <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-bs-toggle="tooltip"
-                                      title="This description should contain information to assist the vault Owner and any other colleagues who will be part of the review process when the vault retention period expires, in deciding whether the data should be retained or deleted. Maximum 6,000 characters.">
-                            </span>
+                                <i class="bi bi-info-circle" aria-hidden="true" data-bs-toggle="tooltip"
+                                   title="This description should contain information to assist the vault Owner and any other colleagues who will be part of the review process when the vault retention period expires, in deciding whether the data should be retained or deleted. Maximum 6,000 characters."></i>
                                 <input type="text" class="form-control" th:field="*{description}" />
                             </div>
                         </div>
@@ -90,9 +88,8 @@
                     <label>
                         <strong>Select the files to include in this deposit</strong>
                     </label>
-                    <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-bs-toggle="tooltip"
-                          title="If you don't see the filestore you wish to use here, please click on 'File Locations' to add it.">
-                </span>
+                    <i class="bi bi-info-circle" aria-hidden="true" data-bs-toggle="tooltip"
+                       title="If you don't see the filestore you wish to use here, please click on 'File Locations' to add it."></i>
                     <br/>
                     <small>Click on the button marked 'Data Storage (SFTP)' to: connect to the location(s) you specified on the File Locations page, and browse to the files you want to upload.</small>
                     <br/><br/>
@@ -252,8 +249,8 @@
 
                         <div class="form-group">
                             <label for="personal-data-statement">Personal Data Statement</label>
-                            <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-bs-toggle="tooltip"
-                                  title="Maximum 6,000 characters."></span>
+                            <i class="bi bi-info-circle" aria-hidden="true" data-bs-toggle="tooltip"
+                               title="Maximum 6,000 characters."></i>
                             <textarea class="form-control" th:field="*{personalDataStatement}" rows="3"></textarea>
                         </div>
 

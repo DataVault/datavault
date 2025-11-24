@@ -21,7 +21,7 @@
         <div class="input-group">
             <input type="text" class="form-control" th:value="${queryPARAM}" name="query" placeholder="Search for...">
             <div class="input-group-btn">
-                <button class="btn btn-primary" type="submit"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Search</button>
+                <button class="btn btn-primary" type="submit"><i class="bi bi-search" aria-hidden="true"></i> Search</button>
             </div>
         </div>
     </form>
@@ -30,7 +30,7 @@
         <form id="search-vaults" class="form" role="form" th:action="@{/admin/vaults/csv}" method="get">
             <div class="input-group" align="right">
                 <input type="text" class="form-control hidden" th:value="${queryPARAM}" name="query" placeholder="Search for...">
-                <button class="btn btn-primary" type="submit"><span class="glyphicon glyphicon-export" aria-hidden="true"></span> Download CSV File</button>
+                <button class="btn btn-primary" type="submit"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> Download CSV File</button>
             </div>
         </form>
 </div>

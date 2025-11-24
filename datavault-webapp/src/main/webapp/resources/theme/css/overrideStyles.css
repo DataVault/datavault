@@ -369,3 +369,12 @@ nav[aria-label="breadcrumb"] .breadcrumb {
     padding: 0.5rem 0 !important;
     margin-bottom: 1rem !important;
 }
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}

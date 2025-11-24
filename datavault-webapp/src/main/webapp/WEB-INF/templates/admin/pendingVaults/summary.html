@@ -281,13 +281,13 @@
 										<a name="return-confirmed-pending-vaults" class="btn btn-default"
 											th:href="@{/admin/pendingVaults/confirmed}">Cancel</a>
 										<a name="delete-pending-vault" class="btn btn-danger"
-											th:href="@{|/admin/pendingVaults/${pendingVault.getID()}|}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Delete Pending Vault</a>
+											th:href="@{|/admin/pendingVaults/${pendingVault.getID()}|}"><i class="bi bi-x" aria-hidden="true"></i> Delete Pending Vault</a>
 										<!-- Note: start=2 added to ensure we go the Billing page of Edit Pending Vault -->
 										<a name="edit-pending-vault" class="btn btn-primary" style="margin-bottom: 0;"
 											th:href="@{|/admin/pendingVaults/edit/${pendingVault.getID()}?start=2|}">Edit Pending Vault Metadata</a>
 										<th:block th:if="${pendingVault.confirmed}">
 											<button id="create-vault-btn" type="submit" value="submit" class="btn btn-success">
-												<span class="glyphicon glyphicon-folder-close"></span>
+                                                <i class="bi bi-folder" aria-hidden="true"></i>
 												Create Vault
 											</button>
 										</th:block>

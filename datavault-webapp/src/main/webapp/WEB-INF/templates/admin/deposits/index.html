@@ -38,7 +38,7 @@
                 <input type="hidden" class="form-control" name="sort" th:value="${sort}">
                 <input type="hidden" class="form-control" name="order" th:value="${order}">
                 <div class="input-group-btn">
-                    <button class="btn btn-primary" type="submit"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Search</button>
+                    <button class="btn btn-primary" type="submit"><i class="bi bi-search" aria-hidden="true"></i> Search</button>
                 </div>
             </div>
         </form>
@@ -49,7 +49,7 @@
                     <input type="text" class="form-control hidden" th:value="${queryPARAM}" name="query" placeholder="Search for...">
                     <input type="text" class="form-control hidden" th:value="${sort}" name="sort" placeholder="Search for...">
                     <input type="text" class="form-control hidden" th:value="${order}" name="order" placeholder="Search for...">
-                    <button class="btn btn-primary" type="submit"><span class="glyphicon glyphicon-export" aria-hidden="true"></span> Download CSV File</button>
+                    <button class="btn btn-primary" type="submit"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> Download CSV File</button>
                 </div>
             </form>
         </div>
@@ -128,7 +128,7 @@
                             <th:block th:if="${#authorization.expression(removeDepositSecurityExpression)}">
                             <th:block th:if="${deposit.status.name() != 'DELETED'}">
                                 <a class="btn btn-xs btn-danger pull-left" href="#" th:data-vault="${deposit.getVaultID()}" th:data-deposit="${deposit.getID()}" data-bs-toggle="modal" data-bs-target="#confirm-removal">
-                                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Remove
+                                    <i class="bi bi-x" aria-hidden="true"></i> Remove
                                 </a>
                                 <br>
                             </th:block>

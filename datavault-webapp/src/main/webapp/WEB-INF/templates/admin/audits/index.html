@@ -33,7 +33,7 @@
             </ol>
         </nav>
 
-        <button id="audit" class="btn btn-primary"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span> Run Audit</button>
+        <button id="audit" class="btn btn-primary"><i class="bi bi-eye" aria-hidden="true"></i> Run Audit</button>
 
         <th:block th:if="${audits != null}">
             <div class="table-responsive">
@@ -54,7 +54,7 @@
                                 <a th:if="${audit.auditChunks != null}"
                                    class="btn btn-link" data-bs-toggle="collapse" th:href="|#collapse${audit.getId()}|"
                                    aria-expanded="false" th:aria-controls="|collapse${audit.getId()}|">
-                                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                                    <i class="bi bi-plus" aria-hidden="true"></i>
                                 </a>
                                 [[${audit.getId()}]]
                             </td>

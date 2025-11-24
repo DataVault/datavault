@@ -64,5 +64,11 @@
         const contextPath = /*[(|'@{/}'|)]*/ 'replaced-by-tl';
         const springContextPath = contextPath.replace(/\/+$/, ''); //remove trailing slash
         ErrorHandler.initialiseSpringContextPath(springContextPath);
+
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        [...tooltipTriggerList].forEach(el => new bootstrap.Tooltip(el));
+        const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
+        [...popoverTriggerList].forEach(el => new bootstrap.Popover(el));
+
     </script>
 </th:block>

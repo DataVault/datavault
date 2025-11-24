@@ -38,7 +38,7 @@
             </div>
     
             <div id = "job-error" class="alert alert-danger" role="alert" style="display:none;">
-                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <i class="bi bi-exclamation-circle-fill" aria-hidden="true"></i>
                 <span class="sr-only">Error</span>
                 <span id="error-label">Error details</span>
             </div>
@@ -108,22 +108,22 @@
                             <div id="deposit-status" class="job-status">
                               <th:block th:switch="${deposit.status.name()}">
                                 <div th:case="COMPLETE" class="text-success">
-                                    <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                                    <i class="bi bi-check" aria-hidden="true"></i>
                                     Complete
                                 </div>
                                 <div th:case="DELETED" class="text-success">
-                                    <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                                    <i class="bi bi-check" aria-hidden="true"></i>
                                     Deleted
                                 </div>
                                 <div th:case="FAILED" class="text-danger">
-                                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                                    <i class="bi bi-x" aria-hidden="true"></i>
                                     Failed
                                 </div>
                                 <th:block th:case="NOT_STARTED">
                                 Queued
                                 </th:block>
                                 <th:block th:case="IN_PROGRESS">
-                                <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
+                                <i class="bi bi-arrow-repeat spin"></i>
                                 In progress
                                 </th:block>
                                 <th:block th:case="*">
@@ -210,18 +210,18 @@
                                         <td>
                                             <div th:switch="${retrieve.status.name()}" class="job-status" >
                                                 <div th:case="COMPLETE" class="text-success">
-                                                    <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                                                    <i class="bi bi-check" aria-hidden="true"></i>
                                                     Complete
                                                 </div>
                                                 <div th:case="FAILED" class="text-danger">
-                                                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                                                    <i class="bi bi-x" aria-hidden="true"></i>
                                                     Failed
                                                 </div>
                                                 <th:block th:case="NOT_STARTED">
                                                     Queued
                                                 </th:block>
                                                 <th:block th:case="IN_PROGRESS">
-                                                    <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
+                                                    <i class="bi bi-arrow-repeat spin"></i>
                                                     In progress
                                                 </th:block>
                                                 <th:block th:case="*">
@@ -327,7 +327,7 @@
                 displayJob(job)
                 
                 if (depositStatus == "NOT_STARTED" && depositInProgress == false) {
-                    $("#deposit-status").html("<span class=\"glyphicon glyphicon-refresh glyphicon-refresh-animate\"></span>&nbspIn progress")
+                    $("#deposit-status").html("<i class=\"bi bi-arrow-repeat spin\"></i>&nbspIn progress")
                     $("#job-info-msq").html("<strong>Your deposit is in progress.</strong>  You will receive an email notification when the deposit is complete. You may close your browser, and the deposit will continue regardless.")
                     $("#job-info").show()
                     depositInProgress = true
@@ -380,7 +380,8 @@
     ol.progtrckr li.progtrckr-done:before {
       background-color: #046B99;
     }
-    
+    /**
+    Moved to the overrideStyles.css and upgraded to BS5 version, renamed to .spin
     .glyphicon-refresh-animate {
         -animation: spin 2.8s infinite linear;
         -webkit-animation: spinWebkit 2.8s infinite linear;
@@ -398,7 +399,7 @@
     @keyframes spin {
         from { transform: scale(1) rotate(0deg);}
         to { transform: scale(1) rotate(360deg);}
-    }
+    }*/
 </style>
 </th:block>
 </html>

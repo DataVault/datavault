@@ -14,7 +14,7 @@
     <div class="row">
         <div class="col-md-12">
             <a class="btn btn-primary pull-right" th:href="@{/admin/retentionpolicies/add}">
-                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Retention Policy
+                <i class="bi bi-plus" aria-hidden="true"></i> Add Retention Policy
             </a>
         </div>
     </div>
@@ -41,7 +41,7 @@
                             <td>
                                 [[${policy.description ?: ''}]]
                             </td>
-                            <td><a class="update-btn btn btn-default btn-sm" th:href="@{|/admin/retentionpolicies/edit/${policy.getID()}|}"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Edit Retention Policy </a></td>
+                            <td><a class="update-btn btn btn-default btn-sm" th:href="@{|/admin/retentionpolicies/edit/${policy.getID()}|}"><i class="bi bi-plus" aria-hidden="true"></i> Edit Retention Policy </a></td>
                             <td><button class="delete-btn btn btn-danger btn-sm" th:data-policyid="${policy.getID()}">Delete Policy</button></td>
                         </tr>
                     </th:block>

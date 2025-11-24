@@ -17,7 +17,7 @@
                         <p><small>You must record a dataset in <a th:href="${link}" target="_blank">[[${system}]]</a> to record details of your vault.</small></p>
                     </div>
                     <div th:if="${datasetsExist}" class="col-md-2 text-success">
-                            <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>&nbsp;Complete
+                        <i class="bi bi-check" aria-hidden="true"></i>&nbsp;Complete
                      </div>
                      <div th:unless="${datasetsExist}" class="col-md-2">
                      </div>
@@ -34,7 +34,7 @@
                         <a th:href="@{/filestores}">define your storage options</a>.</small></p>
                     </div>
                     <div th:if="${filestoresExist}" class="col-md-2 text-success">
-                        <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>&nbsp;Complete
+                        <i class="bi bi-check" aria-hidden="true"></i>&nbsp;Complete
                      </div>
                      <div th:unless="${filestoresExist}"class="col-md-2">
                      </div>

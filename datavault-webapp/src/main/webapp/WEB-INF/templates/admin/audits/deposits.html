@@ -34,7 +34,7 @@
         <div class="row">
             <div class="cold-md-12">
                 <button id="audit" class="btn btn-primary pull-right">
-                    <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span> Run Audit
+                    <i class="bi bi-eye" aria-hidden="true"></i> Run Audit
                 </button>
             </div>
         </div>
@@ -96,8 +96,8 @@
                                 <tbody>
                                     <tr th:each="chunkInfo: ${deposit['chunks_info']}" class="tr">
                                         <td th:with="hasLastAuditChunk=${chunkInfo['last_audit_chunk'] != null}">
-                                            <span th:if="${hasLastAuditChunk}"  class="glyphicon glyphicon-ok" aria-hidden="true"></span>
-                                            <span th:if="${!hasLastAuditChunk}" class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                                            <i th:if="${hasLastAuditChunk}" class="bi bi-check" aria-hidden="true"></i>
+                                            <i th:if="${!hasLastAuditChunk}" class="bi bi-x" aria-hidden="true"></i>
                                         </td>
                                         <td>
                                             [[${chunkInfo['deposit_chunk'].getChunkNum()}]]
