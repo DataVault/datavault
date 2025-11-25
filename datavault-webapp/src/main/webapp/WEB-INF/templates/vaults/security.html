@@ -126,8 +126,7 @@
                   th:action="@{|/vaults/${vault.ID}/data-owner/update|}"
                   method="post" >
                 <div class="modal-header">
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"><i
-                                class="fa fa-times" aria-hidden="true"></i></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
                     <h4 class="modal-title" id="orphan-user-title">Transfer Ownership</h4>
                 </div>
                 <div class="modal-body">
@@ -196,7 +195,7 @@
                 <input type="hidden" id="submitAction" name="action" value="submit"/>
                 <input type="hidden" th:name="${_csrf?.parameterName ?: ''}" th:value="${_csrf?.token ?: ''}" />
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default btn-cancel" data-bs-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> Cancel</button>
+                    <button type="button" class="btn btn-default btn-cancel" data-bs-dismiss="modal"> Cancel</button>
                     <button type="submit" class="btn btn-primary"><span class="fa fa-floppy-o"></span> Save</button>
                 </div>
             </form>
@@ -216,8 +215,7 @@
                   th:action="@{|/security/roles/vault/${vault.ID}/user|}"
                   method="post">
                 <div class="modal-header">
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"><i
-                                class="fa fa-times" aria-hidden="true"></i></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
                     <h4 class="modal-title" id="add-new-user-title">Add New User</h4>
                 </div>
                 <div class="modal-body">
@@ -241,7 +239,7 @@
                 <input type="hidden" id="submitAction" name="action" value="submit"/>
                 <input type="hidden" th:name="${_csrf?.parameterName ?: ''}" th:value="${_csrf?.token ?: ''}" />
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default btn-cancel" data-bs-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> Cancel</button>
+                    <button type="button" class="btn btn-default btn-cancel" data-bs-dismiss="modal"> Cancel</button>
                     <button type="submit" class="btn btn-primary"><span class="fa fa-floppy-o"></span> Save</button>
                 </div>
             </form>
@@ -258,8 +256,7 @@
                   th:action="@{|/security/roles/vault/${vault.ID}/user/update|}"
                   method="post">
                 <div class="modal-header">
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"><i
-                                class="fa fa-times" aria-hidden="true"></i></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
                     <h4 class="modal-title" id="update-existing-title">Edit User's Role</h4>
                 </div>
                 <div class="modal-body">
@@ -281,7 +278,7 @@
                 <input type="hidden" id="submitAction" name="action" value="submit"/>
                 <input type="hidden" th:name="${_csrf?.parameterName ?: ''}" th:value="${_csrf?.token ?: ''}" />
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default btn-cancel" data-bs-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> Cancel</button>
+                    <button type="button" class="btn btn-default btn-cancel" data-bs-dismiss="modal"> Cancel</button>
                     <button type="submit" class="btn btn-primary"><span class="fa fa-floppy-o"></span> Save</button>
                 </div>
             </form>
@@ -297,8 +294,7 @@
                   th:action="@{|/security/roles/vault/${vault.ID}/user/delete|}"
                   method="post">
                 <div class="modal-header">
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"><i
-                                class="fa fa-times" aria-hidden="true"></i></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
                     <h4 class="modal-title" id="delete-title">Delete User</h4>
                 </div>
                 <div id="delete-dialog-error" class="alert alert-danger hidden error"></div>
@@ -310,7 +306,7 @@
                 <input type="hidden" th:name="${_csrf?.parameterName ?: ''}" th:value="${_csrf?.token ?: ''}" />
 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default btn-cancel" data-bs-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> Cancel</button>
+                    <button type="button" class="btn btn-default btn-cancel" data-bs-dismiss="modal"> Cancel</button>
                     <button type="submit" class="btn btn-danger btn-delete"><i class="fa fa-trash"></i> Delete</button>
                 </div>
             </form>
