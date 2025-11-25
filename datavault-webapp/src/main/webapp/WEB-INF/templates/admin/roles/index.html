@@ -19,9 +19,11 @@
             text-align: center;
         }
         .btn-delete {
-            color: #b94a48;
-            background-color: #f2dede;
+            background-color: #f2dede !important;
+            border-color: #ebccd1 !important;
+            color: #b94a48 !important;
         }
+
         .btn-cancel {
             background-color: #ededed;
         }
@@ -62,7 +64,7 @@
             <div class="modal-content">
                 <form id="create-role" class="form" role="form" th:action="@{/admin/roles/save}" method="post">
                     <div class="modal-header">
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
                         <h4 id="modal_title" class="modal-title">Add new role</h4>
                     </div>
                     <div class="modal-body">
@@ -117,7 +119,7 @@
             <div class="modal-content">
                 <form id="delete-form" class="form form-horizontal" role="form" th:action="@{/admin/roles/delete}" method="post">
                     <div class="modal-header">
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
                         <h4 id="modal_title" class="modal-title">Delete role</h4>
                     </div>
                     <div class="modal-body">
@@ -185,10 +187,10 @@
                             <td>[[${role.getAssignedUserCount()}]]</td>
                             <td>[[${role.getStatus()}]]</td>
                             <td class="action-column">
-                                <a href="#" class="btn btn-default" disabled="disabled" role="button" th:title="|Cannot edit the ${role.name} role.|">
+                                <a href="#" class="btn btn-default disabled" role="button" tabindex="-1" aria-disabled="true" th:title="|Cannot edit the ${role.name} role.|">
                                     <i class="fa fa-pencil"></i>
                                 </a>
-                                <a href="#" class="btn btn-default btn-delete" disabled="disabled" role="button" th:title="|Cannot delete the ${role.name} role.|">
+                                <a href="#" class="btn btn-default disabled" role="button" tabindex="-1" aria-disabled="true" th:title="|Cannot delete the ${role.name} role.|">
                                     <i class="fa fa-trash"></i>
                                 </a>
                             </td>
@@ -202,7 +204,7 @@
                                 <a href="#" class="btn btn-default editRoleButton" role="button" th:value="${role.getIdAsString()}" th:title="|Edit the ${role.name} role.|">
                                     <i class="fa fa-pencil"></i>
                                 </a>
-                                <a href="#" class="btn btn-default btn-delete" data-bs-toggle="modal" data-bs-target="#delete-dialog"
+                                <a href="#" class="btn btn-delete" data-bs-toggle="modal" data-bs-target="#delete-dialog"
                                    th:data-role-id="${role.getIdAsString()}" th:data-role-name="${role.name}" role="button" th:title="|Delete the ${role.name} role.|">
                                     <i class="fa fa-trash-o"></i>
                                 </a>
