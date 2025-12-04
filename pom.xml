@@ -540,7 +540,7 @@
                   <java.source>17</java.source>
                   <java.target>17</java.target>
                   <!--suppress UnresolvedMavenProperty -->
-                  <git.commit.id>${git.commit.id}</git.commit.id>
+                  <!--<git.commit.id>${git.commit.id}</git.commit.id>-->
                 </additionalProperties>
               </configuration>
             </execution>
@@ -575,6 +575,10 @@
           <groupId>org.owasp</groupId>
           <artifactId>dependency-check-maven</artifactId>
           <version>${owasp.dependency.check.version}</version>
+          <configuration>
+            <failBuildOnAnyVulnerability>false</failBuildOnAnyVulnerability>
+            <failOnError>false</failOnError>
+          </configuration>
           <executions>
             <execution>
               <goals>

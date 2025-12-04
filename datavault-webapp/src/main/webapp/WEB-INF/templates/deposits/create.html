@@ -259,8 +259,8 @@
                     <div class="alert alert-info" role="alert">
                         <p>Your deposit will be confirmed by email. Do not edit any files that have been included until the deposit is complete.</p>
                     </div>
-
-                    <div class="btn-toolbar pull-right">
+                    
+                    <div class="d-flex justify-content-end mt-3 gap-2">
                         <a class="btn btn-lg btn-link" th:href="@{|/vaults/${vault.getID()}|}">Cancel</a>
                         <!--/* UsesDepositsPaused */-->
                         <th:block th:with="notAffectedByDepositsPaused=|hasRole('IS_ADMIN') or (!@permissionsService.depositsPaused())|">
