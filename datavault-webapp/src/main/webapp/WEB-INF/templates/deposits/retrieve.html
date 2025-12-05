@@ -5,12 +5,14 @@
 <th:block layout:fragment="content">
 <div class="container">
 
+    <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
-        <li><a th:href="@{/}"><b>Home</b></a></li>
-        <li><a th:href="@{|/vaults/${vault.getID()}/|}"><b>Vault:</b> [[${vault.name}]]</a></li>
-        <li><a th:href="@{|/vaults/${vault.getID()}/deposits/${deposit.getID()}|}"><b>Deposit:</b> [[${deposit.name}]]</a></li>
-        <li class="active">Retrieve data</li>
+        <li class="breadcrumb-item"><a th:href="@{/}"><b>Home</b></a></li>
+        <li class="breadcrumb-item"><a th:href="@{|/vaults/${vault.getID()}/|}"><b>Vault:</b> [[${vault.name}]]</a></li>
+        <li class="breadcrumb-item"><a th:href="@{|/vaults/${vault.getID()}/deposits/${deposit.getID()}|}"><b>Deposit:</b> [[${deposit.name}]]</a></li>
+        <li class="breadcrumb-item active">Retrieve data</li>
     </ol>
+    </nav>
     
     <div class="row">
         <div class="col-md-12">
@@ -39,7 +41,7 @@
                                    title="'External' means they are neither a member of staff nor a student currently at the university. We must record this information to for compliance with funder requirements, with respect to how long a deposit is kept"></i>
                             </span>
                             <br/>
-                            <div class="radio-inline">
+                            <div class="form-check form-check-inline">
                                 <label>
                                     <input type="radio" name="hasExternalRecipients" value="true"
                                            th:field="*{hasExternalRecipients}"
@@ -47,7 +49,7 @@
                                     Yes
                                 </label>
                             </div>
-                            <div class="radio-inline">
+                            <div class="form-check form-check-inline">
                                 <label>
                                     <input type="radio" name="hasExternalRecipients" value="false"
                                            th:field="*{hasExternalRecipients}"

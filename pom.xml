@@ -50,7 +50,7 @@
     <!-- https://mvnrepository.com/artifact/org.apache.tika/tika-core -->
     <!-- DON'T CHANGE not sure why this was marked don't change all tests pass and nothing bad seen
     (so far) when I deploy locally -->
-    <tika.version>2.9.3</tika.version>
+    <tika.version>3.2.2</tika.version>
 
     <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-surefire-plugin -->
     <surefire.plugin.version>3.5.2</surefire.plugin.version>
