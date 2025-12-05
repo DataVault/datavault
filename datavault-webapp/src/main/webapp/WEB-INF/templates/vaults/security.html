@@ -52,6 +52,11 @@
         margin: 0 2px;
     }
 
+    .action-column.d-flex .btn {
+        float: none !important;
+        margin: 0 !important;
+    }
+
     .role-definitions {
         border-left: 1px solid;
         padding: 0 1em;
@@ -381,14 +386,14 @@
                     <td>[[${assignment.userId}]]</td>
                     <td class="role-column">[[${assignment.role.name}]]</td>
                     <th:block th:if="${#authorization.expression(showActionsColumnSecurityExpression)}">
-                    <td class="action-column">
+                    <td class="action-column d-flex gap-2 pe-2">
                         <th:block th:if="${#authorization.expression(assignVaultRolesSecurityExpression)}">
-                        <a href="#" class="btn btn-default" data-bs-toggle="modal"
+                        <a href="#" class="btn btn-outline-secondary" data-bs-toggle="modal"
                            data-bs-target="#update-existing-dialog" th:data-assignment-id="${assignment.id}"
                            th:data-user-name="${assignment.userId}"
                            th:data-user-role="${assignment.role.id}"
                            th:title="|Edit role for ${assignment.userId}.|"><i class="fa fa-pencil"></i></a>
-                        <a href="#" class="btn btn-default btn-delete" data-bs-toggle="modal"
+                        <a href="#" class="btn btn-outline-danger btn-delete me-1" data-bs-toggle="modal"
                            data-bs-target="#delete-dialog" th:data-assignment-id="${assignment.id}"
                            th:data-user-name="${assignment.userId}"
                            th:title="|Delete role for ${assignment.userId}.|"><i class="fa fa-trash"></i></a>
