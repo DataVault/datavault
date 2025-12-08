@@ -54,7 +54,7 @@
             </a>
             <div class="row">
                 <div class="col-md-12">
-                    <select id="policyInfo" name="policyInfo" data-width="auto" class="form-control retentionPolicy-select selectpicker show-tick">
+                    <select id="policyInfo" name="policyInfo" data-width="auto" class="form-control retentionPolicy-select">
                         <option selected disabled data-hidden="true">Please choose a retention policy</option>
                         <!--START-RP-->
                         <th:block th:each="retentionPolicy: ${policies}">
@@ -87,7 +87,7 @@
                title="The School to which the vault belongs. In the absence of the vault Owner, School officers may be consulted on the management of the vault."></i>
             <div class="row">
                 <div class="col-md-12">
-                    <select id="groupID" name="groupID" data-width="auto" class="form-control group-select selectpicker show-tick">
+                    <select id="groupID" name="groupID" data-width="auto" class="form-control group-select">
                         <option selected disabled data-hidden="true">Please choose a School</option>
                         <th:block th:each="group: ${groups}">
                             <option th:if="${group.enabled}"
