@@ -112,37 +112,35 @@
         
         
        <!-- Start: Depositors -->
-        <div class="form-group">
-          <label class="col-sm-4 control-label">Depositors:
-              <i class="bi bi-info-circle" aria-hidden="true" data-bs-toggle="tooltip"
-                 title="Depositor: Acting on behalf of the Data Owner, may view the vault, deposit data and retrieve any deposit in the vault."></i>
-          </label>
-        </div>
+       <div class="row mb-3">
+           <label class="col-sm-4 col-form-label">Depositors:
+               <i class="bi bi-info-circle" aria-hidden="true" data-bs-toggle="tooltip"
+                  title="Depositor: Acting on behalf of the Data Owner, may view the vault, deposit data and retrieve any deposit in the vault."></i>
+           </label>
+           <div class="col-sm-6 d-flex gap-2">
+               <th:block th:if="${! #lists.isEmpty(vault?.depositors)}">
+               <th:block th:each="depositor, depositorStatus: ${vault.depositors}">
+               <th:block th:with="depositorIndex=${depositorStatus.index}">
+                        <input th:field="*{depositors[__${depositorIndex}__]}" class="autocomplete uun-required unique-uun-required" type="text" />
+                        <!-- Add  remove button for inputs apart from first for which we add an add button. -->
 
-        <th:block th:if="${! #lists.isEmpty(vault?.depositors)}">
-        <th:block th:each="depositor, depositorStatus: ${vault.depositors}">
-        <th:block th:with="depositorIndex=${depositorStatus.index}">
-           <div class="extra-depositor form-group col-sm-offset-4">
-              <input th:field="*{depositors[__${depositorIndex}__]}" class="autocomplete uun-required unique-uun-required" type="text" />
-              <!-- Add  remove button for inputs apart from first for which we add an add button. -->
+                        <button th:if="${depositorIndex == 0}" type="button" id="add-depositor-btn" class="btn btn-default btn-sm">Add a depositor</button>
+                        <button th:if="${depositorIndex != 0}" type="button" class="remove-depositor-btn btn btn-danger btn-xs">Remove</button>
 
-              <button th:if="${depositorIndex == 0}" type="button" id="add-depositor-btn" class="btn btn-default btn-sm">Add a depositor</button>
-              <button th:if="${depositorIndex != 0}" type="button" class="remove-depositor-btn btn btn-danger btn-xs">Remove</button>
+                        <span class="uun-required-error-span"></span>
+               </th:block>
+               </th:block>
+               </th:block>
+               <th:block th:if="${#lists.isEmpty(vault?.depositors)}">
+                       <input name="depositors[0]" class="autocomplete uun-required unique-uun-required" type="text" />
+                       <button type="button" id="add-depositor-btn" class="btn btn-default btn-sm">Add a depositor</button>
+                       <span class="uun-required-error-span"></span>
+               </th:block>
 
-              <span class="uun-required-error-span"></span>
-            </div>
-        </th:block>
-        </th:block>
-        </th:block>
-        <th:block th:if="${#lists.isEmpty(vault?.depositors)}">
-          <div class="extra-depositor form-group col-sm-offset-4">
-              <input name="depositors[0]" class="autocomplete uun-required unique-uun-required" type="text" />
-              <button type="button" id="add-depositor-btn" class="btn btn-default btn-sm">Add a depositor</button>
-              <span class="uun-required-error-span"></span>
-          </div>
-        </th:block>
-           
-        <div id="extra-depositor-list"></div>
+           </div>
+
+           <div id="extra-depositor-list"></div>
+       </div>
           
         <!-- START: depositors hidden -->
         <div id="hidden-empty-depositors" class="collapse col-sm-offset-4" th:with="existing=${#lists.isEmpty(vault?.depositors) ? 0 : #lists.size(vault.depositors)}">
