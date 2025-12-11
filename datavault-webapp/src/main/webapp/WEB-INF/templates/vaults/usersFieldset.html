@@ -54,41 +54,40 @@
         </div>
 
         <!-- Start: NDMs -->
-        <div class="form-group">
-            <label class="col-sm-4 control-label">Nominated Data Managers:
+        <div class="row mb-3">
+            <label class="col-sm-4 col-form-label">Nominated Data Managers:
                 <i class="bi bi-info-circle" aria-hidden="true" data-bs-toggle="tooltip"
                    title="Nominated Data Manager: Acting on behalf of the Data Owner, may view the vault, edit metadata fields, deposit data and retrieve any deposit in the vault. Can assign other users to the Depositor role."></i>
             </label>
+            <div class="col-sm-6 d-flex gap-2">
+                <th:block th:if="${!#lists.isEmpty(vault?.nominatedDataManagers)}">
+                <th:block th:each="ndm, ndmStatus: ${vault?.nominatedDataManagers}">
+                <th:block th:with="ndmIndex=${ndmStatus.index}">
+                    <input th:field="*{nominatedDataManagers[__${ndmIndex}__]}"
+                           class="autocomplete uun-required unique-uun-required" type="text"
+                    />
+                    <!-- Add  remove button for inputs apart from first for which we add an add button. -->
+
+                    <button th:if="${ndmIndex == 0}" type="button" id="add-ndm-btn" class="btn btn-default btn-sm">Add a NDM</button>
+                    <button th:if="${ndmIndex != 0}" type="button" class="remove-ndm-btn btn btn-danger btn-xs">Remove</button>
+                    <span class="uun-required-error-span"></span>
+                </th:block>
+                </th:block>
+                </th:block>
+
+
+                <th:block th:if="${#lists.isEmpty(vault?.nominatedDataManagers)}">
+                    <input class="autocomplete uun-required unique-uun-required" type="text"
+                           name="nominatedDataManagers[0]"
+                    />
+                    <button type="button" id="add-ndm-btn" class="btn btn-default btn-sm">Add a NDM</button>
+                    <span class="uun-required-error-span"></span>
+               </th:block>
+
+            </div>
+            <div id="extra-ndm-list" class="col-sm-6 d-flex flex-column gap-2"></div>
         </div>
 
-        <th:block th:if="${!#lists.isEmpty(vault?.nominatedDataManagers)}">
-        <th:block th:each="ndm, ndmStatus: ${vault?.nominatedDataManagers}">
-        <th:block th:with="ndmIndex=${ndmStatus.index}">
-            <div class="extra-ndm form-group col-sm-offset-4">
-              <input th:field="*{nominatedDataManagers[__${ndmIndex}__]}"
-                     class="autocomplete uun-required unique-uun-required" type="text"
-              />
-              <!-- Add  remove button for inputs apart from first for which we add an add button. -->
-
-              <button th:if="${ndmIndex == 0}" type="button" id="add-ndm-btn" class="btn btn-default btn-sm">Add a NDM</button>
-              <button th:if="${ndmIndex != 0}" type="button" class="remove-ndm-btn btn btn-danger btn-xs">Remove</button>
-              <span class="uun-required-error-span"></span>
-            </div>
-        </th:block>
-        </th:block>
-        </th:block>
-        <th:block th:if="${#lists.isEmpty(vault?.nominatedDataManagers)}">
-           <div class="extra-ndm form-group col-sm-offset-4">
-              <input class="autocomplete uun-required unique-uun-required" type="text"
-                name="nominatedDataManagers[0]"
-              />
-               <button type="button" id="add-ndm-btn" class="btn btn-default btn-sm">Add a NDM</button>
-               <span class="uun-required-error-span"></span>
-            </div>
-        </th:block>
-           
-        <div id="extra-ndm-list"></div>
-          
         <!-- START: NDMs hidden userFieldset.html -->
         <div id="hidden-empty-ndms" class="collapse col-sm-offset-4" th:with="existing=${#lists.isEmpty(vault?.nominatedDataManagers) ? 0 : #lists.size(vault.nominatedDataManagers)}">
             <th:block th:with="start=${existing == 0 ? 1      : existing}">
