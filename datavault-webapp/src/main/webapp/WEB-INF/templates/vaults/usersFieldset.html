@@ -4,27 +4,49 @@
         <div id="autocomplete-error" class="alert alert-danger hidden error" role="alert"></div>
         <h4>Vault Access</h4>
 
-        <div class="form-group" required>
-            <label class="control-label">Are you the owner of the vault:</label>
-            <div class="radio-inline">
-                <label>
-                    <input type="radio" id="isOwnerTrue" value="true" th:field="*{isOwner}"> Yes
-                </label>
-            </div>
-            <div class="radio-inline">
-                <label>
-                    <input type="radio" id="isOwnerFalse" value="false" th:field="*{isOwner}"> No
-                </label>
+        <!-- Are you the owner -->
+        <div class="row mb-3">
+            <label class="col-sm-4 col-form-label">Are you the owner of the vault:</label>
+            <div class="col-sm-8">
+
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input"
+                           type="radio"
+                           id="isOwnerTrue"
+                           value="true"
+                           th:field="*{isOwner}">
+                    <label class="form-check-label" for="isOwnerTrue">Yes</label>
+                </div>
+
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input"
+                           type="radio"
+                           id="isOwnerFalse"
+                           value="false"
+                           th:field="*{isOwner}">
+                    <label class="form-check-label" for="isOwnerFalse">No</label>
+                </div>
+
             </div>
         </div>
-        <div class="form-group" required>
-            <label class="col-sm-4 control-label">Owner UUN: </label>
-            <span id="owner-uun-span" style="display:none"><th:block th:if="${loggedInAs != null}">[[${loggedInAs}]]</th:block></span>
-            <input id="vaultOwner" type="text"
-                   class="autocomplete uun-required unique-uun-required owner-uun-required" placeholder=""
-                   th:field="*{vaultOwner}"
-            />
-            <span class="uun-required-error-span owner-uun-required-error-span"></span>
+
+        <!-- Owner UUN -->
+        <div class="row mb-3 ms-3 required">
+            <label class="col-sm-4 col-form-label">Owner UUN:</label>
+
+            <div class="col-sm-8">
+                <span id="owner-uun-span" style="display:none">
+                    <th:block th:if="${loggedInAs != null}">[[${loggedInAs}]]</th:block>
+                </span>
+
+                <input id="vaultOwner"
+                       type="text"
+                       th:field="*{vaultOwner}"
+                       class="autocomplete uun-required unique-uun-required owner-uun-required"
+                       placeholder="">
+
+                <span class="uun-required-error-span owner-uun-required-error-span"></span>
+            </div>
         </div>
 
         <div class="form-group">
