@@ -175,33 +175,35 @@
         </div>
 
         <!-- Start: dataCreators -->
-        <div class="form-group">
-          <label class="col-sm-4 control-label">Data Creators: </label>
-        </div>
 
-        <th:block th:if="${! #lists.isEmpty(vault?.dataCreators)}">
-        <th:block th:each="dataCreator,dataCreatorStatus: ${vault.dataCreators}">
-        <th:block th:with="dataCreatorIndex=${dataCreatorStatus.index}">
-           <div class="extra-data-creator form-group col-sm-offset-4">
-              <input th:field="*{dataCreators[__${dataCreatorIndex}__]}" class="autocomplete uun-required" type="text" />
-              <!-- Add  remove button for inputs apart from first for which we add an add button. -->
-              <button th:if="${dataCreatorIndex == 0}" type="button" id="add-data-creator-btn" class="btn btn-default btn-sm">Add a Data Creator</button>
-              <button th:if="${dataCreatorIndex != 0}" type="button" class="remove-data-creator-btn btn btn-danger btn-xs">Remove</button>
-              <span class="uun-required-error-span"></span>
+        <div class="row mb-3">
+            <label class="col-sm-4 col-form-label">Data Creators:</label>
+            <div class="col-sm-6 d-flex gap-2">
+                <th:block th:if="${! #lists.isEmpty(vault?.dataCreators)}">
+                    <th:block th:each="dataCreator,dataCreatorStatus: ${vault.dataCreators}">
+                        <th:block th:with="dataCreatorIndex=${dataCreatorStatus.index}">
+                            <div class="extra-data-creator form-group col-sm-offset-4">
+                                <input th:field="*{dataCreators[__${dataCreatorIndex}__]}" class="autocomplete uun-required" type="text" />
+                                <!-- Add  remove button for inputs apart from first for which we add an add button. -->
+                                <button th:if="${dataCreatorIndex == 0}" type="button" id="add-data-creator-btn" class="btn btn-default btn-sm">Add a Data Creator</button>
+                                <button th:if="${dataCreatorIndex != 0}" type="button" class="remove-data-creator-btn btn btn-danger btn-xs">Remove</button>
+                                <span class="uun-required-error-span"></span>
+                            </div>
+                        </th:block>
+                    </th:block>
+                </th:block>
+
+                <th:block th:if="${#lists.isEmpty(vault?.dataCreators)}">
+                    <div class="extra-data-creator form-group col-sm-offset-4">
+                        <input name="dataCreators[0]" class="autocomplete uun-required" type="text" />
+                        <button type="button" id="add-data-creator-btn" class="btn btn-default btn-sm">Add a Data Creator</button>
+                        <span class="uun-required-error-span"></span>
+                    </div>
+                </th:block>
             </div>
-        </th:block>
-        </th:block>
-        </th:block>
 
-        <th:block th:if="${#lists.isEmpty(vault?.dataCreators)}">
-          <div class="extra-data-creator form-group col-sm-offset-4">
-              <input name="dataCreators[0]" class="autocomplete uun-required" type="text" />
-              <button type="button" id="add-data-creator-btn" class="btn btn-default btn-sm">Add a Data Creator</button>
-              <span class="uun-required-error-span"></span>
-          </div>
-        </th:block>
-           
-        <div id="extra-data-creator-list"></div>
+            <div id="extra-data-creator-list"></div>
+        </div>
           
         <!-- START: dataCreators hidden -->
         <div id="hidden-empty-data-creators" class="collapse col-sm-offset-4" th:with="existing=${#lists.isEmpty(vault?.dataCreators) ? 0 : #lists.size(vault.dataCreators)}">
