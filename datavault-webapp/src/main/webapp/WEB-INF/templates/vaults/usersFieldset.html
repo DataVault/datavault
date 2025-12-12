@@ -167,11 +167,12 @@
         <h4>Pure Information<i class="bi bi-info-circle" aria-hidden="true" data-bs-toggle="tooltip"
                   title="We will create a Pure record, publicly visible on the Research Explorer, describing this Vault. Please add here the names you wish to be included on that record."></i></h4>
 
-
-        <div id="contact-form-group" class="form-group">
-            <label for="contactPerson" class="col-sm-4 control-label">Contact person: </label>
-            <input id="contactPerson" th:field="*{contactPerson}" class="autocomplete uun-required" type="text" placeholder=""/>
-            <span class="uun-required-error-span"></span>
+        <div class="row mb-3">
+            <label for="contactPerson" class="col-sm-4 col-form-label">Contact person: </label>
+            <div class="col-sm-6 d-flex gap-2">
+                <input id="contactPerson" th:field="*{contactPerson}" class="autocomplete uun-required" type="text" placeholder=""/>
+                <span class="uun-required-error-span"></span>
+            </div>
         </div>
 
         <!-- Start: dataCreators -->
