@@ -145,10 +145,10 @@
                             <!--/* UsesRetrievesPaused */-->
                             <th:block th:with="notAffectedByRetrievesPaused=|hasRole('IS_ADMIN') or (!@permissionsService.retrievesPaused())|">
                                 <th:block th:if="${#authorization.expression(notAffectedByRetrievesPaused)}">
-                                    <button type="submit" value="submit" class="btn btn-primary"><i class="fa fa-upload fa-rotate-180" aria-hidden="true"></i> Retrieve data</button>
+                                    <button type="submit" value="submit" class="btn btn-primary"><i class="bi bi-download" aria-hidden="true"></i> Retrieve data</button>
                                 </th:block>
                                 <th:block th:unless="${#authorization.expression(notAffectedByRetrievesPaused)}">
-                                    <button type="button" class="btn btn-primary" disabled><i class="fa fa-upload fa-rotate-180" aria-hidden="true"></i> Retrieve data : PAUSED</button>
+                                    <button type="button" class="btn btn-primary" disabled><i class="bi bi-download" aria-hidden="true"></i> Retrieve data : PAUSED</button>
                                 </th:block>
                             </th:block>
                             <button id="retrieve-cancel" type="submit" value="cancel" class="btn btn-danger cancel">Cancel</button>

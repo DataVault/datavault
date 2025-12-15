@@ -201,7 +201,7 @@
                 <input type="hidden" th:name="${_csrf?.parameterName ?: ''}" th:value="${_csrf?.token ?: ''}" />
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default btn-cancel" data-bs-dismiss="modal"> Cancel</button>
-                    <button type="submit" class="btn btn-primary"><span class="fa fa-floppy-o"></span> Save</button>
+                    <button type="submit" class="btn btn-primary"><span class="bi bi-floppy"></span> Save</button>
                 </div>
             </form>
         </div>
@@ -245,7 +245,7 @@
                 <input type="hidden" th:name="${_csrf?.parameterName ?: ''}" th:value="${_csrf?.token ?: ''}" />
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default btn-cancel" data-bs-dismiss="modal"> Cancel</button>
-                    <button type="submit" class="btn btn-primary"><span class="fa fa-floppy-o"></span> Save</button>
+                    <button type="submit" class="btn btn-primary"><span class="bi bi-floppy"></span> Save</button>
                 </div>
             </form>
         </div>
@@ -284,7 +284,7 @@
                 <input type="hidden" th:name="${_csrf?.parameterName ?: ''}" th:value="${_csrf?.token ?: ''}" />
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default btn-cancel" data-bs-dismiss="modal"> Cancel</button>
-                    <button type="submit" class="btn btn-primary"><span class="fa fa-floppy-o"></span> Save</button>
+                    <button type="submit" class="btn btn-primary"><span class="bi bi-floppy"></span> Save</button>
                 </div>
             </form>
         </div>
@@ -312,7 +312,7 @@
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default btn-cancel" data-bs-dismiss="modal"> Cancel</button>
-                    <button type="submit" class="btn btn-danger btn-delete"><i class="fa fa-trash"></i> Delete</button>
+                    <button type="submit" class="btn btn-danger btn-delete"><i class="bi bi-trash"></i> Delete</button>
                 </div>
             </form>
         </div>
@@ -333,7 +333,7 @@
             <tr>
                 <th>User</th>
                 <th>
-                    <span id="role-filter-toggle">Role <i class="filter-toggle-icon fa fa-caret-down"></i></span>
+                    <span id="role-filter-toggle">Role <i class="filter-toggle-icon bi bi-caret-down"></i></span>
                     <div id="role-filter-panel" class="hidden">
                             <div th:each="role: ${roles}">
                                 <input type="checkbox" th:id="|role-filter-${role.id}|" name="role-filter"
@@ -392,11 +392,11 @@
                            data-bs-target="#update-existing-dialog" th:data-assignment-id="${assignment.id}"
                            th:data-user-name="${assignment.userId}"
                            th:data-user-role="${assignment.role.id}"
-                           th:title="|Edit role for ${assignment.userId}.|"><i class="fa fa-pencil"></i></a>
+                           th:title="|Edit role for ${assignment.userId}.|"><i class="bi bi-pencil"></i></a>
                         <a href="#" class="btn btn-outline-danger btn-delete me-1" data-bs-toggle="modal"
                            data-bs-target="#delete-dialog" th:data-assignment-id="${assignment.id}"
                            th:data-user-name="${assignment.userId}"
-                           th:title="|Delete role for ${assignment.userId}.|"><i class="fa fa-trash"></i></a>
+                           th:title="|Delete role for ${assignment.userId}.|"><i class="bi bi-trash"></i></a>
                         </th:block><!-- assignVaultRolesSecurityExpression -->
                     </td>
                     </th:block><!-- showActionsColumnSecurityExpression -->

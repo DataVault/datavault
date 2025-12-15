@@ -40,7 +40,7 @@
                                         <th:block th:with="notAffectedByDepositsPaused=|hasRole('IS_ADMIN') or (!@permissionsService.depositsPaused())|">
                                         <th:block th:if="${#authorization.expression(notAffectedByDepositsPaused)}">
                                             <a th:href="@{|/vaults/${vault.getID()}/deposits/create|}" class="btn btn-primary">
-                                                <i class="fa fa-download fa-rotate-180" aria-hidden="true"></i> Deposit
+                                                <i class="bi bi-upload" aria-hidden="true"></i> Deposit
                                             </a>
                                         </th:block>
                                         <th:block th:unless="${#authorization.expression(notAffectedByDepositsPaused)}">

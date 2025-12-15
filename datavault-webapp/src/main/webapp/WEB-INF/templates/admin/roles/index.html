@@ -105,8 +105,8 @@
                     <input type="hidden" id="submitAction" name="action" value="submit"/>
                     <input type="hidden" th:name="${_csrf?.parameterName ?: ''}" th:value="${_csrf?.token ?: ''}" />
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-default btn-cancel" data-bs-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> Cancel</button>
-                        <button type="submit" class="btn btn-primary"><span class="fa fa-floppy-o"></span> Save</button>
+                        <button type="button" class="btn btn-default btn-cancel" data-bs-dismiss="modal"><i class="bi bi-x" aria-hidden="true"></i> Cancel</button>
+                        <button type="submit" class="btn btn-primary"><span class="bi bi-floppy"></span> Save</button>
                     </div>
 
                 </form>
@@ -133,8 +133,8 @@
                     <input type="hidden" id="submitAction" name="action" value="submit"/>
                     <input type="hidden" th:name="${_csrf?.parameterName ?: ''}" th:value="${_csrf?.token ?: ''}" />
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-default btn-cancel" data-bs-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> Cancel</button>
-                        <button type="submit" class="btn btn-danger btn-delete"><i class="fa fa-trash"></i> Delete</button>
+                        <button type="button" class="btn btn-default btn-cancel" data-bs-dismiss="modal"><i class="bi bi-x" aria-hidden="true"></i> Cancel</button>
+                        <button type="submit" class="btn btn-danger btn-delete"><i class="bi bi-trash" aria-hidden="true"></i> Delete</button>
                     </div>
                 </form>
             </div>
@@ -176,7 +176,7 @@
                             <td>[[${superAdminRole.getStatus()}]]</td>
                             <td class="action-column">
                                 <a id="isadmin-button" class="btn btn-default" th:href="@{/admin/roles/isadmin}" th:title="|Manage ${superAdminRole.name} users.|">
-                                    <i class="fa fa-users"></i>
+                                    <i class="bi bi-people"></i>
                                 </a>
                             </td>
                         </tr>
@@ -188,10 +188,10 @@
                             <td>[[${role.getStatus()}]]</td>
                             <td class="action-column">
                                 <a href="#" class="btn btn-default disabled" role="button" tabindex="-1" aria-disabled="true" th:title="|Cannot edit the ${role.name} role.|">
-                                    <i class="fa fa-pencil"></i>
+                                    <i class="bi bi-pencil"></i>
                                 </a>
                                 <a href="#" class="btn btn-default disabled" role="button" tabindex="-1" aria-disabled="true" th:title="|Cannot delete the ${role.name} role.|">
-                                    <i class="fa fa-trash"></i>
+                                    <i class="bi bi-trash"></i>
                                 </a>
                             </td>
                         </tr>
@@ -202,11 +202,11 @@
                             <td>[[${role.getStatus()}]]</td>
                             <td class="action-column">
                                 <a href="#" class="btn btn-default editRoleButton" role="button" th:value="${role.getIdAsString()}" th:title="|Edit the ${role.name} role.|">
-                                    <i class="fa fa-pencil"></i>
+                                    <i class="bi bi-pencil"></i>
                                 </a>
                                 <a href="#" class="btn btn-delete" data-bs-toggle="modal" data-bs-target="#delete-dialog"
                                    th:data-role-id="${role.getIdAsString()}" th:data-role-name="${role.name}" role="button" th:title="|Delete the ${role.name} role.|">
-                                    <i class="fa fa-trash-o"></i>
+                                    <i class="bi bi-trash"></i>
                                 </a>
                             </td>
                         </tr>

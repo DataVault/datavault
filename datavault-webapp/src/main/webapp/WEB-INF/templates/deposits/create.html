@@ -111,7 +111,7 @@
 
                         <div class="btn-toolbar">
                             <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#add-from-storage">
-                                <i class="fa fa-hdd-o" aria-hidden="true"></i> Data Storage (SFTP)
+                                <i class="bi bi-hdd" aria-hidden="true"></i> Data Storage (SFTP)
                             </button>
                         </div>
 
@@ -266,13 +266,13 @@
                         <th:block th:with="notAffectedByDepositsPaused=|hasRole('IS_ADMIN') or (!@permissionsService.depositsPaused())|">
                             <th:block th:if="${#authorization.expression(notAffectedByDepositsPaused)}">
                                 <button type="submit" value="submit" class="btn btn-lg btn-primary">
-                                    <i class="fa fa-download fa-rotate-180" aria-hidden="true"></i>
+                                    <i class="bi bi-download" aria-hidden="true"></i>
                                     Deposit data
                                 </button>
                             </th:block>
                             <th:block th:unless="${#authorization.expression(notAffectedByDepositsPaused)}">
                                 <button type="button" class="btn btn-lg btn-primary" disabled>
-                                    <i class="fa fa-download fa-rotate-180" aria-hidden="true"></i>
+                                    <i class="bi bi-download" aria-hidden="true"></i>
                                     Deposit data : PAUSED
                                 </button>
                             </th:block>
