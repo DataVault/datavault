@@ -54,7 +54,7 @@
         </div>
 
         <!-- Start: NDMs -->
-        <div class="row mb-3">
+        <div class="row mb-3 ms-3">
             <label class="col-sm-4 col-form-label">Nominated Data Managers:
                 <i class="bi bi-info-circle" aria-hidden="true" data-bs-toggle="tooltip"
                    title="Nominated Data Manager: Acting on behalf of the Data Owner, may view the vault, edit metadata fields, deposit data and retrieve any deposit in the vault. Can assign other users to the Depositor role."></i>
@@ -112,7 +112,7 @@
         
         
        <!-- Start: Depositors -->
-       <div class="row mb-3">
+       <div class="row mb-3 ms-3">
            <label class="col-sm-4 col-form-label">Depositors:
                <i class="bi bi-info-circle" aria-hidden="true" data-bs-toggle="tooltip"
                   title="Depositor: Acting on behalf of the Data Owner, may view the vault, deposit data and retrieve any deposit in the vault."></i>
@@ -167,7 +167,7 @@
         <h4>Pure Information<i class="bi bi-info-circle" aria-hidden="true" data-bs-toggle="tooltip"
                   title="We will create a Pure record, publicly visible on the Research Explorer, describing this Vault. Please add here the names you wish to be included on that record."></i></h4>
 
-        <div class="row mb-3">
+        <div class="row mb-3 ms-3">
             <label for="contactPerson" class="col-sm-4 col-form-label">Contact person: </label>
             <div class="col-sm-6 d-flex gap-2">
                 <input id="contactPerson" th:field="*{contactPerson}" class="autocomplete uun-required" type="text" placeholder=""/>
@@ -177,7 +177,7 @@
 
         <!-- Start: dataCreators -->
 
-        <div class="row mb-3">
+        <div class="row mb-3 ms-3">
             <label class="col-sm-4 col-form-label">Data Creators:</label>
             <div class="col-sm-6 d-flex gap-2">
                 <th:block th:if="${! #lists.isEmpty(vault?.dataCreators)}">
