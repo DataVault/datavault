@@ -79,33 +79,33 @@
 }
 
 #progressbar #affirmation:before {
-    font-family: FontAwesome;
-    content: "\f00c"
+    font-family: "bootstrap-icons";
+    content: "\f633"
 }
 
 #progressbar #billing:before {
-    font-family: FontAwesome;
-    content: "\f0d6"
+    font-family: "bootstrap-icons";
+    content: "\f2dc"
 }
 
 #progressbar #vault-info:before {
-    font-family: FontAwesome;
-    content: "\f129"
+    font-family: "bootstrap-icons";
+    content: "\f431"
 }
 
 #progressbar #vault-access:before {
-    font-family: FontAwesome;
-    content: "\f0c0"
+    font-family: "bootstrap-icons";
+    content: "\f4d7"
 }
 
 #progressbar #vault-summary:before {
-    font-family: FontAwesome;
-    content: "\f291"
+    font-family: "bootstrap-icons";
+    content: "\f1e6"
 }
 
 #progressbar #vault-pending:before {
-    font-family: FontAwesome;
-    content: "\f254"
+    font-family: "bootstrap-icons";
+    content: "\f293"
 }
 
 
