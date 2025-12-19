@@ -1,5 +1,6 @@
 <div xmlns:th="http://www.thymeleaf.org" id="security-div" >
 <style>
+    /* Layout */
     #add-new {
         margin-top: 2em;
     }
@@ -15,23 +16,18 @@
         background: #fff;
     }
 
-    /* Optional: add a ruler */
-    .table-rule {
-        margin-top: 0;
-        margin-bottom: 10px;
-        border-top: 2px solid #ccc; /* nice subtle rule */
-    }
-
-    /* separator between header and body */
+    /* Table separators */
     .header-separator {
         border-top: 2px solid #ccc;
         margin: 0;
     }
+
     .table-separator td {
         padding: 0 !important;
         background: #fff !important;
     }
 
+    /* Role filter */
     #role-filter-toggle {
         cursor: pointer;
     }
@@ -42,64 +38,29 @@
         background-color: #ebebeb;
     }
 
-    .action-column {
-        width: 100px;
-        text-align: center;
+    /* Action column (Bootstrap 5-friendly) */
+    td.action-column {
+        white-space: nowrap;
+        width: 1%;
     }
 
-    .action-column .btn {
-        float: left;
-        margin: 0 2px;
+    td.action-column .btn {
+        padding: 0.25rem 0.4rem;
     }
 
-    .action-column.d-flex .btn {
-        float: none !important;
-        margin: 0 !important;
-    }
-
+    /* Role definitions */
     .role-definitions {
         border-left: 1px solid;
         padding: 0 1em;
     }
 
-    .role-definitions .role-definition-title {
-        margin-top: 0;
-    }
-
-    .role-definitions .definition {
-        margin: 0.5em 0;
-    }
-
+    /* Buttons */
     .btn-delete {
         color: #b94a48;
         background-color: #f2dede;
     }
 
-    .form-group {
-        display: block;
-        text-align: left;
-    }
-
-    .form-confirm {
-        display: flex;
-        margin-left: 0px !important;
-        padding-left: 10px;
-    }
-
-    .form-label {
-        display: block;
-        text-align: left !important;
-    }
-
-    .form-input {
-        min-width: 70%;
-        text-align: left !important;
-    }
-
-    .checkbox {
-        margin-left: 10px !important;
-    }
-
+    /* Typography */
     .modal-title {
         font-weight: 500;
         color: #000;
@@ -386,17 +347,20 @@
                     <td>[[${assignment.userId}]]</td>
                     <td class="role-column">[[${assignment.role.name}]]</td>
                     <th:block th:if="${#authorization.expression(showActionsColumnSecurityExpression)}">
-                    <td class="action-column d-flex gap-2 pe-2">
+                    <!-- <td class="action-column d-flex gap-2 pe-2"> -->
+                    <td class="action-column pe-2">
                         <th:block th:if="${#authorization.expression(assignVaultRolesSecurityExpression)}">
-                        <a href="#" class="btn btn-outline-secondary" data-bs-toggle="modal"
-                           data-bs-target="#update-existing-dialog" th:data-assignment-id="${assignment.id}"
-                           th:data-user-name="${assignment.userId}"
-                           th:data-user-role="${assignment.role.id}"
-                           th:title="|Edit role for ${assignment.userId}.|"><i class="bi bi-pencil"></i></a>
-                        <a href="#" class="btn btn-outline-danger btn-delete me-1" data-bs-toggle="modal"
-                           data-bs-target="#delete-dialog" th:data-assignment-id="${assignment.id}"
-                           th:data-user-name="${assignment.userId}"
-                           th:title="|Delete role for ${assignment.userId}.|"><i class="bi bi-trash"></i></a>
+                        <div class="d-inline-flex align-items-center gap-1">
+                            <a href="#" class="btn btn-outline-secondary" data-bs-toggle="modal"
+                               data-bs-target="#update-existing-dialog" th:data-assignment-id="${assignment.id}"
+                               th:data-user-name="${assignment.userId}"
+                               th:data-user-role="${assignment.role.id}"
+                               th:title="|Edit role for ${assignment.userId}.|"><i class="bi bi-pencil"></i></a>
+                            <a href="#" class="btn btn-outline-danger btn-delete me-1" data-bs-toggle="modal"
+                               data-bs-target="#delete-dialog" th:data-assignment-id="${assignment.id}"
+                               th:data-user-name="${assignment.userId}"
+                               th:title="|Delete role for ${assignment.userId}.|"><i class="bi bi-trash"></i></a>
+                        </div>
                         </th:block><!-- assignVaultRolesSecurityExpression -->
                     </td>
                     </th:block><!-- showActionsColumnSecurityExpression -->
