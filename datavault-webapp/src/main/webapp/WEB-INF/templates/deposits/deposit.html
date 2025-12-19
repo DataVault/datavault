@@ -44,7 +44,7 @@
             </div>
 
             <div id="job-info" class="alert alert-info" role="alert" style="display:none;">
-                <button type="button" class="btn-close" data-bs-dismiss="alert">&times;</button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 <span id="job-info-msq"></span>
             </div>
             <th:block th:with="canRetrieveDataExpression=|hasPermission('${vault.ID}', 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') or hasPermission('${vault.groupID}', 'GROUP', 'CAN_RETRIEVE_DATA')|">
