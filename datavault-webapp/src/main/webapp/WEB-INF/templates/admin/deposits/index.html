@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
+<html xmlns:th="http://www.thymeleaf.org" lang="en"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/defaultlayout(nav='admin')}">
 <head><title>Admin - Deposits</title></head>
@@ -8,7 +8,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true">×</button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
                     <h4 class="modal-title" id="confirmRemovalLabel">Confirm removal of Deposit</h4>
                 </div>
                 <div class="modal-body">
@@ -43,9 +43,9 @@
             </div>
         </form>
 
-        <div align="right">
+        <div class="text-end">
             <form id="search-vaults" class="form" role="form" th:action="@{/admin/deposits/csv}" method="get">
-                <div class="input-group" align="right">
+                <div class="input-group text-end">
                     <input type="text" class="form-control hidden" th:value="${queryPARAM}" name="query" placeholder="Search for...">
                     <input type="text" class="form-control hidden" th:value="${sort}" name="sort" placeholder="Search for...">
                     <input type="text" class="form-control hidden" th:value="${order}" name="order" placeholder="Search for...">
@@ -56,53 +56,39 @@
 
         <th:block th:if="${deposits != null}">
         <div class="table-responsive">
-            <table class="table table-striped">
+            <table class="table table-light table-striped table-hover align-middle">
                 <thead>
                     <tr class="tr">
                         <th><a th:href="|?sort=name&order=${orderName}&query=${queryPARAM}|">Deposit Name
-                            <th:block th:if="${sort == 'name'}">
-                                <span th:if="${order=='desc'}" class="dropup"><span class="caret"></span></span>
-                                <span th:if="${order!='desc'}" class="caret"></span>
-                            </th:block>
+                            <i th:if="${sort == 'name' and order == 'desc'}" class="bi bi-caret-up-fill ms-1"></i>
+                            <i th:if="${sort == 'name' and order != 'desc'}" class="bi bi-caret-down-fill ms-1"></i>
                         </a></th>
                         <th><a th:href="|?sort=depositSize&order=${orderDepositSize}&query=${queryPARAM}|">Size
-                            <th:block th:if="${sort == 'depositSize'}">
-                                <span th:if="${order=='desc'}" class="dropup"><span class="caret"></span></span>
-                                <span th:if="${order!='desc'}" class="caret"></span>
-                            </th:block>
+                            <i th:if="${sort == 'depositSize' and order == 'desc'}" class="bi bi-caret-up-fill ms-1"></i>
+                            <i th:if="${sort == 'depositSize' and order != 'desc'}" class="bi bi-caret-down-fill ms-1"></i>
                         </a></th>
                         <th><a th:href="|?sort=creationTime&order=${orderCreationTime}&query=${queryPARAM}|">Date deposited
-                            <th:block th:if="${sort == 'creationTime'}">
-                                <span th:if="${order=='desc'}" class="dropup"><span class="caret"></span></span>
-                                <span th:if="${order!='desc'}" class="caret"></span>
-                            </th:block>
+                            <i th:if="${sort == 'creationTime' and order == 'desc'}" class="bi bi-caret-up-fill ms-1"></i>
+                            <i th:if="${sort == 'creationTime' and order != 'desc'}" class="bi bi-caret-down-fill ms-1"></i>
                         </a></th>
                         <th><a th:href="|?sort=status&order=${orderStatus}&query=${queryPARAM}|">Status
-                            <th:block th:if="${sort == 'status'}">
-                                <span th:if="${order=='desc'}" class="dropup"><span class="caret"></span></span>
-                                <span th:if="${order!='desc'}" class="caret"></span>
-                            </th:block>
+                            <i th:if="${sort == 'status' and order == 'desc'}" class="bi bi-caret-up-fill ms-1"></i>
+                            <i th:if="${sort == 'status' and order != 'desc'}" class="bi bi-caret-down-fill ms-1"></i>
                         </a></th>
                         <th><a th:href="|?sort=userID&order=${orderUserID}&query=${queryPARAM}|">Depositor
-                            <th:block th:if="${sort == 'status'}">
-                                <span th:if="${order=='desc'}" class="dropup"><span class="caret"></span></span>
-                                <span th:if="${order!='desc'}" class="caret"></span>
-                            </th:block>
+                            <i th:if="${sort == 'userID' and order == 'desc'}" class="bi bi-caret-up-fill ms-1"></i>
+                            <i th:if="${sort == 'userID' and order != 'desc'}" class="bi bi-caret-down-fill ms-1"></i>
                         </a></th>
                         <th>Vault Name</th>
                         <th>Pure Record ID</th>
                         <th>School</th>
                         <th><a th:href="|?sort=id&order=${orderId}&query=${queryPARAM}|">Deposit ID
-                            <th:block th:if="${sort == 'id'}">
-                                <span th:if="${order=='desc'}" class="dropup"><span class="caret"></span></span>
-                                <span th:if="${order!='desc'}" class="caret"></span>
-                            </th:block>
+                            <i th:if="${sort == 'id' and order == 'desc'}" class="bi bi-caret-up-fill ms-1"></i>
+                            <i th:if="${sort == 'id' and order != 'desc'}" class="bi bi-caret-down-fill ms-1"></i>
                         </a></th>
                         <th><a th:href="|?sort=vaultID&order=${orderVaultId}&query=${queryPARAM}|">Vault ID
-                            <th:block th:if="${sort == 'vaultID'}">
-                                <span th:if="${order=='desc'}" class="dropup"><span class="caret"></span></span>
-                                <span th:if="${order!='desc'}" class="caret"></span>
-                            </th:block>
+                            <i th:if="${sort == 'vaultID' and order == 'desc'}" class="bi bi-caret-up-fill ms-1"></i>
+                            <i th:if="${sort == 'vaultID' and order != 'desc'}" class="bi bi-caret-down-fill ms-1"></i>
                         </a></th>
                         <th>Vault Owner</th>
                         <th>Vault Review Date</th>
@@ -127,15 +113,20 @@
                         <td th:with="removeDepositSecurityExpression=|hasPermission('${deposit.getGroupID()}', 'GROUP', 'DELETE_SCHOOL_VAULT_DEPOSITS')|">
                             <th:block th:if="${#authorization.expression(removeDepositSecurityExpression)}">
                             <th:block th:if="${deposit.status.name() != 'DELETED'}">
-                                <a class="btn btn-xs btn-danger pull-left" href="#" th:data-vault="${deposit.getVaultID()}" th:data-deposit="${deposit.getID()}" data-bs-toggle="modal" data-bs-target="#confirm-removal">
-                                    <i class="bi bi-x" aria-hidden="true"></i> Remove
+                                <a href="#"
+                                   class="btn btn-sm btn-danger d-inline-flex align-items-center gap-1 text-nowrap"
+                                   th:data-vault="${deposit.getVaultID()}"
+                                   th:data-deposit="${deposit.getID()}"
+                                   data-bs-toggle="modal"
+                                   data-bs-target="#confirm-removal">
+                                    <i class="bi bi-x" aria-hidden="true"></i>
+                                    <span>Remove</span>
                                 </a>
-                                <br>
                             </th:block>
                             </th:block>
 
                             <th:block th:if="${deposit.status.name() == 'FAILED'}">
-                                <a class="restart-deposit-btn btn btn-default btn-sm"
+                                <a class="restart-deposit-btn btn btn-sm btn-default d-inline-flex align-items-center gap-1 text-nowrap"
                                    th:href="@{|/vaults/__${deposit.vaultID}__/deposits/__${deposit.getID()}__/restart|}">
                                     Restart
                                 </a>
@@ -149,10 +140,10 @@
             </table>
         </div>
 
-        <div align="center">
-            <p class="text-info">Showing [[${offset}]] - <th:block th:text="${totalRecords < (offset + recordPerPage) ? totalRecords : (offset + recordPerPage)}" /> deposit of [[${totalRecords}]]</p>
+        <div class="text-center">
+            <p class="text-muted">Showing [[${offset}]] - <th:block th:text="${totalRecords < (offset + recordPerPage) ? totalRecords : (offset + recordPerPage)}" /> deposit of [[${totalRecords}]]</p>
         </div>
-        <div align="center">
+        <div class="d-flex justify-content-center">
         <nav aria-label="...">
             <ul class="pagination pagination-lg" id="paginationButton">
                 <th:block th:each="page: ${#numbers.sequence(1,totalPages)}">
