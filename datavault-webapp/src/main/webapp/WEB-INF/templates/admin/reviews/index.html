@@ -1,5 +1,5 @@
 <!DOCTYPE html><!--admin/reviews/index.html-->
-<html xmlns:th="http://www.thymeleaf.org"
+<html xmlns:th="http://www.thymeleaf.org" lang="en"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/defaultlayout(nav='admin')}" >
 <head><title>Admin - Reviews</title></head>
@@ -16,7 +16,7 @@
     <th:block th:if="${vaults != null}">
 
         <div class="table-responsive" id="vaultsTable">
-            <table class="table table-striped">
+            <table class="table table-light table-striped table-hover align-middle">
                 <thead>
                     <tr class="tr">
                        <th>Vault Name</th>
