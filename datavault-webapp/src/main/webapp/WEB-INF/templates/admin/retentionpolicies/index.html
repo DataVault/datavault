@@ -1,15 +1,17 @@
 <!DOCTYPE html><!--admin/retentionpolicies/index.html-->
-<html xmlns:th="http://www.thymeleaf.org"
+<html xmlns:th="http://www.thymeleaf.org" lang="en"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/defaultlayout(nav='admin')}" >
 <head><title>Admin - Retention Policies</title></head>
 <th:block layout:fragment="content">
 <div class="container">
-
-    <ol class="breadcrumb">
-        <li><a th:href="@{/admin/}"><b>Administration</b></a></li>
-        <li class="active"><b>Retention Policies</b></li>
-    </ol>
+    
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/admin/}"><b>Administration</b></a></li>
+            <li class="breadcrumb-item active" aria-current="page"><b>Retention Policies</b></li>
+        </ol>
+    </nav>
 
     <div class="row">
         <div class="col-md-12">
@@ -21,7 +23,7 @@
 
     <th:block th:if="${policies != null}">
         <div class="table-responsive">
-            <table class="table table-striped">
+            <table class="table table-light table-striped table-hover align-middle">
 
                 <thead>
                     <tr class="tr">
