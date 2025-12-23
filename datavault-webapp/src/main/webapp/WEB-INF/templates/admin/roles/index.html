@@ -1,5 +1,5 @@
 <!DOCTYPE html><!--admin/roles/index.html-->
-<html xmlns:th="http://www.thymeleaf.org"
+<html xmlns:th="http://www.thymeleaf.org" lang="en"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/defaultlayout(nav='admin')}">
 <head><title>Admin - Roles</title></head>
 <th:block layout:fragment="content">
@@ -145,7 +145,7 @@
 
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item">a th:href="@{/admin}"><b>Administration</b></a></li>
+                <li class="breadcrumb-item"><a th:href="@{/admin}"><b>Administration</b></a></li>
                 <li class="breadcrumb-item active" aria-current="page"><b>Roles</b></li>
             </ol>
         </nav>
@@ -158,7 +158,7 @@
 
         <div id="role-assignments" class="col-md-6">
             <div class="table-responsive">
-                <table class="table table-striped">
+                <table class="table table-light table-striped table-hover align-middle">
                     <thead>
                     <tr>
                         <th>Role</th>
