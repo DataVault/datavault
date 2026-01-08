@@ -1,5 +1,5 @@
 <!DOCTYPE html><!--admin/pendingVaults/saved.html-->
-<html xmlns:th="http://www.thymeleaf.org"
+<html xmlns:th="http://www.thymeleaf.org" lang="en"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/defaultlayout(nav='admin')}" >
 <head><title>Admin - Saved Pending Vaults</title></head>
@@ -29,7 +29,7 @@
         <th:block th:if="${pendingVaults != null}">
 
             <div class="table-responsive" id="pendingVaultsTable">
-                <table class="table table-striped">
+                <table class="table table-light table-striped">
                     <thead>
                     <tr class="tr">
                         <th><a th:href="|?sort=name&order=${ordername}&query=${queryPARAM}|">Vault Name
@@ -83,10 +83,10 @@
                 </table>
             </div>
 
-            <div align="center">
-                <p class="text-info">[[${recordsInfo}]]</p>
+            <div class="text-center">
+                <p class="text-muted">[[${recordsInfo}]]</p>
             </div>
-            <div align="center">
+            <div class="d-flex justify-content-center">
                 <nav aria-label="...">
                     <ul class="pagination pagination-lg" id="paginationButton">
                         <th:block th:each="page: ${#numbers.sequence(1,numberOfPages)}">
