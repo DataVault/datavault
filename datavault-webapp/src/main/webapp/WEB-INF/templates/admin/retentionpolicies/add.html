@@ -6,10 +6,12 @@
 <th:block layout:fragment="content">
     <div class="container">
 
-    <ol class="breadcrumb">
-        <li><a th:href="@{/admin/}"><b>Administration</b></a></li>
-        <li class="active"><b>Add Retention Policies</b></li>
-    </ol>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/admin/}"><b>Administration</b></a></li>
+                <li class="breadcrumb-item active" aria-current="page"><b>Add Retention Policies</b></li>
+            </ol>
+        </nav>
 
         <form id="add-rentention-policy-form" th:object="${retentionPolicy}" th:action="@{/admin/retentionpolicies/add}" method="post">
             <div class="form-rentention-policy">
