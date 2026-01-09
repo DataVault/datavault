@@ -18,12 +18,13 @@
                             </div>
                         </div>
                     </form>
-                    <div align="right">
+                    <div class="text-right">
+
                         <form id="search-vaults" class="form" role="form" th:action="@{/admin/billing/csv}" method="get">
-                            <div class="input-group" align="right">
+                            <div class="input-group text-right">
                                 <input type="text" class="form-control hidden" th:value="${queryPARAM}" name="query" placeholder="Search for...">
                                 <button class="btn btn-primary" type="submit"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> Download CSV File</button>
-                                <div align="right">
+                                <div class="text-right">
                                 </div>
                             </div>
                         </form>
