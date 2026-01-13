@@ -63,7 +63,7 @@
             <div class="modal-content">
                 <form id="create-form" class="form form-horizontal" role="form" th:action="@{|/admin/schools/${school.getID()}/user|}" method="post">
                     <div class="modal-header">
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"><i class="bi bi-x" aria-hidden="true"></i></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
                         <h4 class="modal-title" id="add-new-user-title">Add New User</h4>
                     </div>
                     <div class="modal-body">
@@ -158,11 +158,12 @@
 
     <div class="container">
 
-        <ol class="breadcrumb">
-            <li><a th:href="@{/admin}"><b>Administration</b></a></li>
-            <li><a th:href="@{/admin/schools}"><b>Schools</b></a></li>
-            <li class="active"><b>[[${school.name}]]</b></li>
-        </ol>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/admin/schools}"><b>Schools</b></a></li>
+                <li class="breadcrumb-item active" aria-current="page"><b>[[${school.name}]]</b></li>
+            </ol>
+        </nav>
 
         <h1 id="role-assignments-title">[[${school.name}]]</h1>
 
