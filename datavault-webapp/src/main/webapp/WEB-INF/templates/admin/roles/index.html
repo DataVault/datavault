@@ -201,13 +201,15 @@
                             <td>[[${role.getAssignedUserCount()}]]</td>
                             <td>[[${role.getStatus()}]]</td>
                             <td class="action-column">
+                                <div class="d-inline-flex align-items-center gap-1">
                                 <a href="#" class="btn btn-default editRoleButton" role="button" th:value="${role.getIdAsString()}" th:title="|Edit the ${role.name} role.|">
                                     <i class="bi bi-pencil"></i>
                                 </a>
-                                <a href="#" class="btn btn-delete" data-bs-toggle="modal" data-bs-target="#delete-dialog"
+                                <a href="#" class="btn btn-delete me-1" data-bs-toggle="modal" data-bs-target="#delete-dialog"
                                    th:data-role-id="${role.getIdAsString()}" th:data-role-name="${role.name}" role="button" th:title="|Delete the ${role.name} role.|">
                                     <i class="bi bi-trash"></i>
                                 </a>
+                                </div>
                             </td>
                         </tr>
                     </tbody>

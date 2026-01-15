@@ -171,6 +171,7 @@
             <a th:if="${canManageSchoolRoleAssignments}" href="#" data-bs-toggle="modal" data-bs-target="#add-new-dialog">+ Add new user to school</a>
         </div>
 
+        <div class="row">
         <div class="col-md-8" id="role-assignments">
             <div class="table-responsive">
                 <table class="table table-light table-striped">
@@ -194,8 +195,10 @@
                                 <td>[[${assignment.userId}]]</td>
                                 <td class="role-column">[[${assignment.role.name}]]</td>
                                 <td th:if="${canManageSchoolRoleAssignments}" class="action-column">
-                                    <a href="#" class="btn btn-default" data-bs-toggle="modal" data-bs-target="#update-existing-dialog" th:data-assignment-id="${assignment.id}" th:data-user-name="${assignment.userId}" th:data-user-role="${assignment.role.id}" th:title="|Edit role for ${assignment.userId}.|"><i class="bi bi-pencil"></i></a>
-                                    <a href="#" class="btn btn-default btn-delete" data-bs-toggle="modal" data-bs-target="#delete-dialog" th:data-assignment-id="${assignment.id}" th:data-user-name="${assignment.userId}" th:title="|Delete role for ${assignment.userId}.|"><i class="bi bi-trash"></i></a>
+                                    <div class="d-inline-flex align-items-center gap-1">
+                                        <a href="#" class="btn btn-default" data-bs-toggle="modal" data-bs-target="#update-existing-dialog" th:data-assignment-id="${assignment.id}" th:data-user-name="${assignment.userId}" th:data-user-role="${assignment.role.id}" th:title="|Edit role for ${assignment.userId}.|"><i class="bi bi-pencil"></i></a>
+                                        <a href="#" class="btn btn-outline-danger btn-delete me-1" data-bs-toggle="modal" data-bs-target="#delete-dialog" th:data-assignment-id="${assignment.id}" th:data-user-name="${assignment.userId}" th:title="|Delete role for ${assignment.userId}.|"><i class="bi bi-trash"></i></a>
+                                    </div>
                                 </td>
                             </tr>
                     </tbody>
@@ -213,7 +216,7 @@
         </div>
 
     </div>
-
+    </div>
     <script th:inline="javascript" type="text/javascript">
         $('#role-filter-toggle').click(function() {
             $('.filter-toggle-icon').toggleClass('fa-caret-down').toggleClass('fa-caret-up');
