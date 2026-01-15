@@ -3,43 +3,30 @@
     <link rel="icon" type="image/ico" th:href="@{/resources/favicon.ico?v=2}"/>
 
     <!-- CSS -->
-    <link th:href="@{/resources/bootstrap/css/bootstrap.min.css}" rel="stylesheet" type="text/css">
-    <link th:href="@{/resources/bootstrap-select/css/bootstrap-select.min.css}" rel="stylesheet" type="text/css">
-    <link th:href="@{/resources/font-awesome/css/font-awesome.min.css}" rel="stylesheet" type="text/css">
-    <link th:href="@{/resources/fancytree/skin-lion/ui.fancytree.min.css}" rel="stylesheet" type="text/css">
+    <link th:href="@{/resources/fancytree/2.38.5/skin-lion/ui.fancytree.min.css}" rel="stylesheet" type="text/css">
+
     <link th:href="@{/resources/theme/css/createVault.css}" rel="stylesheet" type="text/css">
-    <!--
-    <link href="/dv/resources/theme/css/vault.css" rel="stylesheet" type="text/css">
-    -->
 
     <!-- jQuery js -->
-    <script th:src="@{/resources/jquery/js/jquery-1.11.3.min.js}"></script>
+
+    <script th:src="@{/resources/jquery/js/jquery-3.7.1.min.js}"></script>
+    <!-- <script th:src="@{https://code.jquery.com/jquery-migrate-3.4.1.min.js}"></script> -->
 
     <!-- jQuery UI js -->
-    <script th:src="@{/resources/jquery-ui/jquery-ui.min.js}"></script>
-    <link th:href="@{/resources/jquery-ui/jquery-ui.min.css}" rel="stylesheet" type="text/css">
 
-    <!-- Bootstrap js -->
-    <script th:src="@{/resources/bootstrap/js/bootstrap.min.js}"></script>
+    <script th:src="@{/resources/jquery-ui/1.14.1/jquery-ui.min.js}"></script>
+    <link th:href="@{/resources/jquery-ui/1.14.1/themes/smoothness/jquery-ui.min.css}" rel="stylesheet" type="text/css">
 
-    <!-- Bootstrap-select js -->
-    <script th:src="@{/resources/bootstrap-select/js/bootstrap-select.min.js}"></script>
+    <!-- Bootstrap 5 -->
+    <link th:href="@{/resources/bootstrap/5.3.8/css/bootstrap.min.css}" rel="stylesheet" type="text/css">
+    <script th:src="@{/resources/bootstrap/5.3.8/js/bootstrap.bundle.min.js}"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css" rel="stylesheet" type="text/css">
 
     <!-- jQuery validate js -->
-    <script th:src="@{/resources/jquery-validate/js/jquery.validate.min.js}"></script>
+    <script th:src="@{/resources/jquery-validate/js/1.21.0/jquery.validate.min.js}"></script>
 
     <!-- Fancytree js -->
-    <script th:src="@{/resources/fancytree/jquery.fancytree-all.min.js}"></script>
-
-    <!-- Flow.js -->
-    <script th:src="@{/resources/flow/js/flow.min.js}"></script>
-
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-        <script th:src="@{/resources/html5shiv/html5shiv.min.js}"></script>
-        <script th:src="@{/resources/respond/respond.min.js}"></script>
-    <![endif]-->
+    <script th:src="@{/resources/fancytree/2.38.5/jquery.fancytree-all.min.js}"></script>
 
     <!-- Spring Security CSRF (ajax) -->
     <meta name="_csrf" th:content="${_csrf?.token ?: ''}" />
@@ -50,11 +37,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
     <!-- Jackie CSS, JS and IMG -->
-    <link th:href="@{/resources/theme/jackie/edgel.css}" rel="stylesheet" type="text/css">
+    <link th:href="@{/resources/theme/edgel-5.3.6/edgel-red.min.css}" rel="stylesheet" type="text/css">
     <link th:href="@{/resources/theme/jackie/jackie.css}" rel="stylesheet" type="text/css">
-    <!--
-    <script src="/dv/resources/theme/jackie/edgel.js"></script>
-    -->
     <link th:href="@{/resources/theme/jackie/jackie-quickfix.css}" rel="stylesheet" type="text/css">
     
     <!-- Styles to be overriden -->
@@ -66,5 +50,11 @@
         const contextPath = /*[(|'@{/}'|)]*/ 'replaced-by-tl';
         const springContextPath = contextPath.replace(/\/+$/, ''); //remove trailing slash
         ErrorHandler.initialiseSpringContextPath(springContextPath);
+
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        [...tooltipTriggerList].forEach(el => new bootstrap.Tooltip(el));
+        const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
+        [...popoverTriggerList].forEach(el => new bootstrap.Popover(el));
+
     </script>
 </th:block>

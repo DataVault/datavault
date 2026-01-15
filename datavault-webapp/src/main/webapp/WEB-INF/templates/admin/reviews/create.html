@@ -6,17 +6,19 @@
 <th:block layout:fragment="content">
     <div class="container">
 
-    <ol class="breadcrumb">
-        <li><a th:href="@{/admin/}"><b>Administration</b></a></li>
-        <li><a th:href="@{/admin/reviews}"><b>Reviews</b></a></li>
-        <li class="active"><b>Vault:</b> [[${vault.name}]]</li>
-    </ol>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/admin/}"><b>Administration</b></a></li>
+            <li class="breadcrumb-item"><a th:href="@{/admin/reviews}"><b>Reviews</b></a></li>
+            <li class="breadcrumb-item active" aria-current="page"><b>Vault:</b> [[${vault.name}]]</li>
+        </ol>
+    </nav>
 
     <form id="create-review" th:object="${vaultReviewModel}" th:action="@{|/admin/vaults/${vault.getID()}/reviews/${vaultReviewModel.getVaultReviewId()}|}" method="post">
 
     <div class="bs-callout">
         <h2>
-            <span class="glyphicon glyphicon-folder-close"></span> [[${vault.name}]]
+            <i class="bi bi-folder" aria-hidden="true"></i> [[${vault.name}]]
         </h2>
         <h2>
             <small>
@@ -128,18 +130,18 @@
                                     <div th:switch="${drm.statusName}" id="deposit-status" class="job-status">
                                         <th:block th:case="COMPLETE">
                                             <div class="text-success">
-                                                <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>&nbsp;Complete
+                                                <i class="bi bi-check" aria-hidden="true"></i>&nbsp;Complete
                                             </div>
                                         </th:block>
                                         <th:block th:case="FAILED">
                                             <div class="text-danger">
-                                                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>&nbsp;Failed
+                                                <i class="bi bi-x" aria-hidden="true"></i>&nbsp;Failed
                                             </div>
                                         </th:block>
                                         <th:block th:case="NOT_STARTED">&nbsp;Queued
                                         </th:block>
                                         <th:block th:case="IN_PROGRESS">
-                                            <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>&nbsp;In progress
+                                            <i class="bi bi-arrow-repeat spin"></i>&nbsp;In progress
                                         </th:block>
                                         <th:block th:case="*">
                                             [[${drm.statusName}]]
@@ -275,10 +277,10 @@
             }
         });
 
-        $('[data-toggle="tooltip"]').tooltip({
+        $('[data-ds-toggle="tooltip"]').tooltip({
             'placement': 'right'
         });
-    }); $('[data-toggle="popover"]').popover();
+    }); $('[data-ds-toggle="popover"]').popover();
 </script>
 
 </div>

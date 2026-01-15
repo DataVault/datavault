@@ -17,9 +17,8 @@
                         <h2>
                             Create new vault
                             <small>
-                                <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
-                                      title="Multiple deposits may be made into one vault. Usually one vault will correspond to one Pure record">
-                                </span>
+                                <i class="bi bi-info-circle" aria-hidden="true" data-bs-toggle="tooltip"
+                                   title="Multiple deposits may be made into one vault. Usually one vault will correspond to one Pure record"></i>
                             </small>
                         </h2>
 
@@ -65,9 +64,8 @@
                                     </div>
                                     <label class="control-label">
                                     </label>
-                                    <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
-                                          title="Your Pure Dataset records should be listed here. Before you create your vault, the Pure Dataset record must be validated by Research Data Service staff.&nbsp;Please contact us if you have any questions.">
-                                    </span>
+                                    <i class="bi bi-info-circle" aria-hidden="true" data-bs-toggle="tooltip"
+                                       title="Your Pure Dataset records should be listed here. Before you create your vault, the Pure Dataset record must be validated by Research Data Service staff.&nbsp;Please contact us if you have any questions."></i>
                                 </div>
                                 <div class="col-sm-3"></div>
 
@@ -86,9 +84,8 @@
                             </div>
                             <div class="form-group required">
                                 <label for="vaultName" class="control-label">Vault Name</label>
-                                <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
-                                      title="Maximum 400 characters.">
-                                </span>
+                                <i class="bi bi-info-circle" aria-hidden="true" data-bs-toggle="tooltip"
+                                   title="Maximum 400 characters."></i>
                                 <input type="text"
                                        class="form-control"
                                        id="vaultName"
@@ -100,9 +97,8 @@
 
                             <div class="form-group required">
                                 <label for="description" class="control-label">Description</label>
-                                <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
-                                      title="This description should contain information to assist you and any other colleagues who will be part of the review process when the vault retention period expires, in deciding whether the data should be retained or deleted. Maximum 6,000 characters.">
-                                </span>
+                                <i class="bi bi-info-circle" aria-hidden="true" data-bs-toggle="tooltip"
+                                   title="This description should contain information to assist you and any other colleagues who will be part of the review process when the vault retention period expires, in deciding whether the data should be retained or deleted. Maximum 6,000 characters."></i>
                                 <textarea type="text" class="form-control" name="description" id="description" rows="4" cols="60"
                                     th:disabled="${#lists.isEmpty(datasets)}"
                                     th:field="*{description}"
@@ -112,9 +108,8 @@
 
                             <div class="form-group required">
                                 <label for="policyID" class="control-label">Retention Policy</label>
-                                <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
-                                      title="This field indicates the policy with which we must comply, for the purpose of deciding the minimum amount of time for which this dataset &nbsp;must be archived. In most cases this will be the funder's policy. If there are multiple funders, it should be the one with the longest minimum among them.">
-                                </span>
+                                <i class="bi bi-info-circle" aria-hidden="true" data-bs-toggle="tooltip"
+                                   title="This field indicates the policy with which we must comply, for the purpose of deciding the minimum amount of time for which this dataset &nbsp;must be archived. In most cases this will be the funder's policy. If there are multiple funders, it should be the one with the longest minimum among them."></i>
                                 <a href="https://www.ed.ac.uk/information-services/research-support/research-data-service/planning-your-data/funder-requirements">
                                     Read more about retention policies
                                 </a>
@@ -142,9 +137,8 @@
                                 <label  for="grantEndDate" class="control-label">
                                     <strong>Grant End Date</strong>
                                 </label>
-                                <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
-                                      title="This information will assist the university in ensuring the archive is kept for at least the minimum amount of time required by the funder(s). This field should be left blank if there is no grant associated with the work.&nbsp;">
-                                </span>
+                                <i class="bi bi-info-circle" aria-hidden="true" data-bs-toggle="tooltip"
+                                   title="This information will assist the university in ensuring the archive is kept for at least the minimum amount of time required by the funder(s). This field should be left blank if there is no grant associated with the work.&nbsp;"></i>
                                 <input id="grantEndDate" name="grantEndDate" class="form-control date-picker" placeholder="yyyy-mm-dd"
                                     th:disabled="${#lists.isEmpty(datasets)}"
                                     th:field="*{grantEndDate}"
@@ -161,9 +155,8 @@
 
                             <div class="form-group required">
                                 <label for="groupID" class="control-label">School</label>
-                                <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
-                                      title="The School to which the vault belongs. In the absence of the vault Owner, School officers may be consulted on the management of the vault.">
-                                </span>
+                                <i class="bi bi-info-circle" aria-hidden="true" data-bs-toggle="tooltip"
+                                   title="The School to which the vault belongs. In the absence of the vault Owner, School officers may be consulted on the management of the vault."></i>
                                 <div class="row">
                                     <div class="col-md-12">
                                         <select id="groupID" name="groupID" data-width="auto" class="form-control group-select selectpicker show-tick"
@@ -195,9 +188,8 @@
                                 <label for="reviewDate" class="control-label">
                                     <strong>Review Date (the date before which we should not delete this data, typically ten years from now)</strong>
                                 </label>
-                                <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
-                                      title="The date by which the vault should be reviewed for decision as to whether it should be deleted or whether there are funds available to support continued storage.&nbsp;If you wish to extend the review date further into the future, please contact the support team to discuss the funding of the storage for the vault.">
-                                </span>
+                                <i class="bi bi-info-circle" aria-hidden="true" data-bs-toggle="tooltip"
+                                   title="The date by which the vault should be reviewed for decision as to whether it should be deleted or whether there are funds available to support continued storage.&nbsp;If you wish to extend the review date further into the future, please contact the support team to discuss the funding of the storage for the vault."></i>
                                 <input class="form-control" id="reviewDate" name="reviewDate" placeholder="yyyy-mm-dd"
                                     th:disabled="${#lists.isEmpty(datasets)}"
                                     th:field="*{reviewDate}"
@@ -211,7 +203,7 @@
                                 <button type="submit" value="submit" class="btn btn-lg btn-primary"
                                     th:disabled="${#lists.isEmpty(datasets)}"
                                 >
-                                    <span class="glyphicon glyphicon-folder-close"></span>
+                                    <i class="bi bi-folder" aria-hidden="true"></i>
                                     Create new Vault
                                 </button>
                             </div>
@@ -317,10 +309,10 @@
             $('.retentionPolicy-select').selectpicker();
             $('.group-select').selectpicker();
 
-            $('[data-toggle="tooltip"]').tooltip({
+            $('[data-ds-toggle="tooltip"]').tooltip({
                 'placement': 'right'
             });
-        }); $('[data-toggle="popover"]').popover();
+        }); $('[data-ds-toggle="popover"]').popover();
     </script>
 
 </th:block>

@@ -1521,7 +1521,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         String html = getHtml("deposits/create", modelMap);
         Document doc = getDocument(html);
 
-        displayFormFields(doc,"add-from-storage-form");
+        displayFormFields(doc,"create-deposit");
 
         //check title
         checkTitle(doc, "Deposits - Create");
@@ -1699,7 +1699,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         List<Element> scriptElements = doc.selectXpath("//script", Element.class);
         Element firstScript = scriptElements.get(0);
         assertThat(firstScript.hasAttr("src")).isTrue();
-        assertThat(firstScript.attr("src")).isEqualTo("/dv/resources/jquery/js/jquery-1.11.3.min.js");
+        assertThat(firstScript.attr("src")).isEqualTo("/dv/resources/jquery/js/jquery-3.7.1.min.js");
 
         //check nav value is 'none'
         List<Comment> comments = doc.selectXpath("//div[@id='datavault-header']/comment()", Comment.class);
@@ -1794,7 +1794,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         String html = getHtml("filestores/index", modelMap);
         Document doc = getDocument(html);
 
-        displayFormFields(doc, "add-filestoreSFTP-form");
+        //displayFormFields(doc, "add-filestoreSFTP-form");
 
         //check title
         checkTitle(doc, "Filestores");

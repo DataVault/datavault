@@ -9,7 +9,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true">×</button>
                     <h4 class="modal-title" id="confirmRemovalLabel">Confirm removal of Deposit</h4>
                 </div>
                 <div class="modal-body">
@@ -17,7 +17,7 @@
 
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-default" data-bs-dismiss="modal">Cancel</button>
                     <button type="button" class="btn btn-danger btn-ok" id="remove">Yes</button>
                 </div>
             </div>
@@ -26,12 +26,14 @@
 
     <div class="container">
 
-        <ol class="breadcrumb">
-            <li><a th:href="@{/admin/}"><b>Administration</b></a></li>
-            <li class="active"><b>Audits</b></li>
-        </ol>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/admin/}"><b>Administration</b></a></li>
+                <li class="breadcrumb-item active" aria-current="page"><b>Audits</b></li>
+            </ol>
+        </nav>
 
-        <button id="audit" class="btn btn-primary"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span> Run Audit</button>
+        <button id="audit" class="btn btn-primary"><i class="bi bi-eye" aria-hidden="true"></i> Run Audit</button>
 
         <th:block th:if="${audits != null}">
             <div class="table-responsive">
@@ -50,9 +52,9 @@
                         <tr class="tr">
                             <td>
                                 <a th:if="${audit.auditChunks != null}"
-                                   class="btn btn-link" data-toggle="collapse" th:href="|#collapse${audit.getId()}|"
+                                   class="btn btn-link" data-bs-toggle="collapse" th:href="|#collapse${audit.getId()}|"
                                    aria-expanded="false" th:aria-controls="|collapse${audit.getId()}|">
-                                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                                    <i class="bi bi-plus" aria-hidden="true"></i>
                                 </a>
                                 [[${audit.getId()}]]
                             </td>

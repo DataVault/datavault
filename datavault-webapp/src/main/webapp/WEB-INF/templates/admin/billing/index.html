@@ -1,80 +1,69 @@
 <!DOCTYPE html><!--admin/billing/index.html-->
-<html xmlns:th="http://www.thymeleaf.org"
+<html xmlns:th="http://www.thymeleaf.org" lang="en"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/defaultlayout(nav='admin')}">
 <head><title>Admin - Billing Details</title></head>
 <th:block layout:fragment="content" th:with="queryPARAM=${#uris.escapeQueryParam(query)}">
                 <div class="container">
-                    <ol class="breadcrumb">
-                        <li><a th:href="@{/admin/}"><b>Administration</b></a></li>
-                        <li class="active"><b>Billing</b></li>
-                    </ol>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a th:href="@{/admin/}"><b>Administration</b></a></li>
+                            <li class="breadcrumb-item active" aria-current="page"><b>Billing</b></li>
+                        </ol>
+                    </nav>
                     <form id="search-vaults" class="form" role="form" action="" method="get">
                         <div class="input-group">
                             <input type="text" class="form-control" th:value="${queryPARAM}" name="query" placeholder="Search for...">
                             <div class="input-group-btn">
-                                <button class="btn btn-primary" type="submit"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Search</button>
+                                <button class="btn btn-primary" type="submit"><i class="bi bi-search" aria-hidden="true"></i> Search</button>
                             </div>
                         </div>
                     </form>
-                    <div align="right">
+                    <div class="text-right">
+
                         <form id="search-vaults" class="form" role="form" th:action="@{/admin/billing/csv}" method="get">
-                            <div class="input-group" align="right">
+                            <div class="input-group text-right">
                                 <input type="text" class="form-control hidden" th:value="${queryPARAM}" name="query" placeholder="Search for...">
-                                <button class="btn btn-primary" type="submit"><span class="glyphicon glyphicon-export" aria-hidden="true"></span> Download CSV File</button>
-                                <div align="right">
+                                <button class="btn btn-primary" type="submit"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> Download CSV File</button>
+                                <div class="text-right">
                                 </div>
                             </div>
                         </form>
                     </div>
                     <th:block th:if="${vaults != null}">
                         <div class="table-responsive" id="vaultsTable">
-                            <table class="table table-striped">
+                            <table class="table table-light table-striped table-hover align-middle">
                                 <thead>
                                     <tr class="tr">
                                         <th><a th:href="|?sort=name&order=${ordername}&query=${queryPARAM}|">Vault Name
-                                            <th:block th:if="${sort == 'name'}">
-                                                    <span th:if="${order=='desc'}" class="dropup"><span class="caret"></span></span>
-                                                    <span th:if="${order!='desc'}" class="caret"></span>
-                                            </th:block>
+                                            <i th:if="${sort == 'name' and order == 'desc'}" class="bi bi-caret-up-fill ms-1"></i>
+                                            <i th:if="${sort == 'name' and order != 'desc'}" class="bi bi-caret-down-fill ms-1"></i>
                                         </a></th>
                                         <th><a th:href="|?sort=projectId&order=${orderProjectId}&query=${queryPARAM}|">Project Id
-                                            <th:block th:if="${sort == 'projectId'}">
-                                                <span th:if="${order=='desc'}" class="dropup"><span class="caret"></span></span>
-                                                <span th:if="${order!='desc'}" class="caret"></span>
-                                            </th:block>
+                                            <i th:if="${sort == 'projectId' and order == 'desc'}" class="bi bi-caret-up-fill ms-1"></i>
+                                            <i th:if="${sort == 'projectId' and order != 'desc'}" class="bi bi-caret-down-fill ms-1"></i>
                                         </a></th>
                                         <th>Project Size</th>
                                         <th><a th:href="|?sort=vaultSize&order=${ordervaultsize}&query=${queryPARAM}|">Vault Size
-                                            <th:block th:if="${sort == 'vaultSize'}">
-                                                <span th:if="${order=='desc'}" class="dropup"><span class="caret"></span></span>
-                                                <span th:if="${order!='desc'}" class="caret"></span>
-                                            </th:block>
+                                            <i th:if="${sort == 'vaultSize' and order == 'desc'}" class="bi bi-caret-up-fill ms-1"></i>
+                                            <i th:if="${sort == 'vaultSie' and order != 'desc'}" class="bi bi-caret-down-fill ms-1"></i>
                                         </a></th>
                                         <th><a th:href="|?sort=grantEndDate&order=${ordergrantEndDate}&query=${queryPARAM}|">Grant End Date
-                                            <th:block th:if="${sort == 'grantEndDateDate'}">
-                                                <span th:if="${order=='desc'}" class="dropup"><span class="caret"></span></span>
-                                                <span th:if="${order!='desc'}" class="caret"></span>
-                                            </th:block>
+                                            <i th:if="${sort == 'grantEndDateDate' and order == 'desc'}" class="bi bi-caret-up-fill ms-1"></i>
+                                            <i th:if="${sort == 'grantEndDateDate' and order != 'desc'}" class="bi bi-caret-down-fill ms-1"></i>
                                         </a></th>
                                         <th><a th:href="|?sort=creationTime&order=${ordercreationtime}&query=${queryPARAM}|">Date created
-                                            <th:block th:if="${sort == 'creationTime'}">
-                                                <span th:if="${order=='desc'}" class="dropup"><span class="caret"></span></span>
-                                                <span th:if="${order!='desc'}" class="caret"></span>
-                                            </th:block>
+                                            <i th:if="${sort == 'creationTime' and order == 'desc'}" class="bi bi-caret-up-fill ms-1"></i>
+                                            <i th:if="${sort == 'creationTime' and order != 'desc'}" class="bi bi-caret-down-fill ms-1"></i>
                                         </a></th>
                                         <th><a th:href="|?sort=reviewDate&order=${orderreviewDate}&query=${queryPARAM}|">Review Date
-                                            <th:block th:if="${sort == 'reviewDate'}">
-                                                <span th:if="${order=='desc'}" class="dropup"><span class="caret"></span></span>
-                                                <span th:if="${order!='desc'}" class="caret"></span>
-                                            </th:block>
+                                            <i th:if="${sort == 'reviewDate' and order == 'desc'}" class="bi bi-caret-up-fill ms-1"></i>
+                                            <i th:if="${sort == 'reviewDate' and order != 'desc'}" class="bi bi-caret-down-fill ms-1"></i>
                                         </a></th>
                                         <th>Amount to be Billed</th>
                                         <th>Amount Billed</th>
                                         <th><a th:href="|?sort=user&order=${orderuser}&query=${queryPARAM}|">Owner
-                                            <th:block th:if="${sort == 'vault.user.id'}">
-                                                <span th:if="${order=='desc'}" class="dropup"><span class="caret"></span></span>
-                                                <span th:if="${order!='desc'}" class="caret"></span>
- d                                            </th:block>
+                                            <i th:if="${sort == 'vault.user.id' and order == 'desc'}" class="bi bi-caret-up-fill ms-1"></i>
+                                            <i th:if="${sort == 'vault.user.id' and order != 'desc'}" class="bi bi-caret-down-fill ms-1"></i>
                                         </a></th>
                                         <th></th>
                                     </tr>
@@ -132,12 +121,12 @@
                                 </tbody>
                             </table>
                         </div>
-                        <div align="center">
-                            <p class="text-info">
+                        <div class="text-center">
+                            <p class="text-muted">
                                 [[${recordsInfo}]]
                             </p>
                         </div>
-                        <div align="center">
+                        <div class="d-flex justify-content-center">
                             <nav aria-label="...">
                                 <ul class="pagination pagination-lg" id="paginationButton">
                                     <th:block th:each="page: ${#numbers.sequence(1,numberOfPages)}">

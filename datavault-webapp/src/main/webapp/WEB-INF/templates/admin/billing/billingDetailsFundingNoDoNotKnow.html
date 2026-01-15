@@ -5,15 +5,13 @@
 <head><title>Admin - Billing Details (FUNDING: NO OR DO NOT KNOW)</title></head>
 <th:block layout:fragment="content">
             <div class="container">
-                <ol class="breadcrumb">
-                    <li><a
-                            th:href="@{/admin/}"><b>Administration</b></a></li>
-                    <li><a
-                            th:href="@{/admin/billing}"><b>Billing</b></a></li>
-                    <li class="active"><b>BillingDetails:</b>
-                        [[${billingDetails.vaultName}]]
-                    </li>
-                </ol>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a th:href="@{/admin/}"><b>Administration</b></a></li>
+                        <li class="breadcrumb-item"><a th:href="@{/admin/billing}"><b>Billing</b></a></li>
+                        <li class="breadcrumb-item active" aria-current="page"><b>BillingDetails:</b>[[${billingDetails.vaultName}]]</li>
+                    </ol>
+                </nav>
                 <div class="panel panel-uoe-low">
                     <div class="panel-body">
                         <h2>Billing Details (FUNDING: NO OR DO NOT KNOW): <small>
@@ -105,7 +103,7 @@
                             </tbody>
                         </table>
                         <div class="btn-toolbar pull-right">
-                            <button type="button" class="btn btn-default pull-right" data-toggle="modal" data-target="#update-billingDetails">
+                            <button type="button" class="btn btn-default pull-right" data-bs-toggle="modal" data-bs-target="#update-billingDetails">
                                 Edit
                             </button>
                         </div>
@@ -196,7 +194,7 @@
                                         <input type="hidden" name="vaultName" th:value="${billingDetails.getVaultName()}" />
                                         <input type="hidden" name="billingType" th:value="${billingDetails.getBillingType()}" />
                                         <div class="modal-footer">
-                                            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                                            <button type="button" class="btn btn-default" data-bs-dismiss="modal">Cancel</button>
                                             <button type="submit" id="update-billingDetails-btn" class="btn btn-primary btn-ok">Save</button>
                                         </div>
                                     </form>
