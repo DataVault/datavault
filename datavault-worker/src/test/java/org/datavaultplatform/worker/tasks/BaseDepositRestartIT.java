@@ -57,10 +57,8 @@ import static org.junit.jupiter.api.Assertions.*;
 public abstract class BaseDepositRestartIT extends BaseRabbitIT {
 
     static final String SRC_PATH_1 = "src-path-a";
-    static final String SRC_PATH_2 = "src-path-b";
     static final String SRC_PATH_DEFAULT = SRC_PATH_1;
     static final String BAG_ID_1 = "d87ca007-9cee-4c49-8169-f74c2b90b773";
-    static final String BAG_ID_2 = "bf73a7f5-42d1-4c3f-864a-a171af8373d4";
 
     static final String BAG_ID_DEFAULT = BAG_ID_1;
     static final String KEY_NAME_FOR_SSH = "key-name-for-ssh";
@@ -303,7 +301,7 @@ public abstract class BaseDepositRestartIT extends BaseRabbitIT {
                 FileUtils.copyFile(expectedEncChunk, decryptedChunkFile);
                 Encryption.decryptFile(aesMode, decryptedChunkFile, iv);
                 assertTrue(decryptedChunkFile.length() > 0);
-                assertTrue(decryptedChunkFile.length() != expectedEncChunk.length());
+                assertNotEquals(decryptedChunkFile.length(), expectedEncChunk.length());
             }
 
             decryptedTarFile = Files.createTempFile("decryptedTar", ".plain").toFile();
@@ -328,7 +326,7 @@ public abstract class BaseDepositRestartIT extends BaseRabbitIT {
             FileUtils.copyFile(destFiles[0], decryptedTarFile);
             Encryption.decryptFile(aesMode, decryptedTarFile, iv);
             assertTrue(decryptedTarFile.length() > 0);
-            assertTrue(decryptedTarFile.length() != expectedEncTar.length());
+            assertNotEquals(decryptedTarFile.length(), expectedEncTar.length());
         }
 
         Set<Path> tarEntryPaths = getPathsWithinTarFile(decryptedTarFile);
@@ -399,5 +397,7 @@ public abstract class BaseDepositRestartIT extends BaseRabbitIT {
                     .anyMatch(e -> e.getClass().equals(Complete.class));
         }
     }
+    
+    
 
 }

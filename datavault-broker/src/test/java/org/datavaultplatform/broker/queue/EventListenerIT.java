@@ -6,9 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.LocalDate;
-import java.util.Base64;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Stream;
+
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.app.DataVaultBrokerApp;
@@ -45,7 +45,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.amqp.rabbit.listener.RabbitListenerEndpointRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
@@ -65,7 +64,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Import({EventListener.class, TaskTimerSupport.class})
 @Slf4j
 @TestMethodOrder(MethodOrderer.MethodName.class)
-public class EventListenerIT extends BaseDatabaseTest {
+class EventListenerIT extends BaseDatabaseTest {
 
   @MockBean
   EmailService emailService;
@@ -100,6 +99,9 @@ public class EventListenerIT extends BaseDatabaseTest {
   @Autowired
   AuditsService auditsService;
 
+  @Autowired
+  EventService eventService;
+
   @MockBean
   RabbitListenerEndpointRegistry registry;
   private final String userId = "user123";
@@ -124,8 +126,6 @@ public class EventListenerIT extends BaseDatabaseTest {
   Audit audit;
 
   Group group;
-    @Autowired
-    private EventService eventService;
 
   @BeforeEach
   void setup(){
@@ -208,6 +208,16 @@ public class EventListenerIT extends BaseDatabaseTest {
     assertThat(retrieve.getID()).isNotNull();
   }
 
+  Optional<Event> getLastJobEvent(String jobID) {
+    List<Event> allEvents = eventService.getEvents();
+    Stream<Event> jobEvents = allEvents.stream()
+            .filter(ev -> jobID.equals(ev.getJob().getID()));
+    Optional<Event> lastJobEvent = jobEvents
+            .sorted(Comparator.comparing(Event::getSequence)) //sort by sequence number ascending
+            .reduce((first, second) -> second); //this is a trick to get the last event
+    return lastJobEvent;
+  }
+
   @Test
   void test00EventListener() {
     assertNotNull(eventListener);
@@ -274,6 +284,7 @@ public class EventListenerIT extends BaseDatabaseTest {
         + "      \"agentType\": \"WORKER\""
         + "    }";
     Event event = eventListener.onMessageInternal(message);
+    assertThat(event).isInstanceOf(UpdateProgress.class);
   }
 
   @SneakyThrows
@@ -521,6 +532,8 @@ public class EventListenerIT extends BaseDatabaseTest {
         + "      \"timestamp\": \"2022-09-16T15:12:40.152Z\","
         + "      \"sequence\": 36,"
         + "      \"persistent\": true,"
+        + "      \"chunkNumber\": 123,"
+        + "      \"message\": \"the error message\","
         + "      \"depositId\": \"" + depositId + "\","
         + "      \"vaultId\"  : \"" + vaultId + "\","
         + "      \"jobId\"    : \"" + jobGenericId + "\","
@@ -530,6 +543,20 @@ public class EventListenerIT extends BaseDatabaseTest {
         + "    }";
     Event event = eventListener.onMessageInternal(message);
     assertEquals(org.datavaultplatform.common.event.Error.class, event.getClass());
+
+    // double check that we have saved the Error event to the database by fetching it and checking it
+
+    org.datavaultplatform.common.event.Error error = (org.datavaultplatform.common.event.Error) event;
+    assertEquals(123, error.getChunkNumber());
+    assertEquals("the error message", error.getMessage());
+
+    Optional<Event> lastDepositJobEventOpt = getLastJobEvent(jobGenericId);
+    Event lastDepositEvent = lastDepositJobEventOpt.orElseThrow();
+    assertThat(lastDepositEvent).isEqualTo(event);
+    assertThat(lastDepositEvent.getJob()).isEqualTo(event.getJob());
+    assertThat(lastDepositEvent.getDeposit()).isEqualTo(event.getDeposit());
+    assertThat(lastDepositEvent.getMessage()).isEqualTo(event.getMessage());
+    assertThat(lastDepositEvent.getChunkNumber()).isEqualTo(event.getChunkNumber());
   }
 
   @Nested
@@ -736,8 +763,8 @@ public class EventListenerIT extends BaseDatabaseTest {
     })
     @SneakyThrows
     void testRetrieveError(String eventClass) {
-      Class clazz = Class.forName(eventClass);
-      assertThat(Event.class.isAssignableFrom(clazz));
+      Class<?> clazz = Class.forName(eventClass);
+      assertThat(Event.class).isAssignableFrom(clazz);
       String message = "{"
               + "      \"message\": \"CUSTOM ERROR MESSAGE\","
               + "      \"eventClass\": \"" + eventClass + "\","
