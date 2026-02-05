@@ -1132,6 +1132,9 @@ class EventListenerIT extends BaseDatabaseTest {
     assertThat(dc.getAgent())
             .withFailMessage("Agent is null")
             .isNotNull();
+    assertThat(dc.getArchive())
+            .withFailMessage("Archive is null")
+            .isNotNull();
     assertThat(dc.getAgentType())
             .withFailMessage("AgentType is null")
             .isNotNull();
