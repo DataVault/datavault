@@ -383,6 +383,7 @@ class DeleteTest {
         @ParameterizedTest
         @ValueSource(ints = {1, 10, 50, 100, 1000})
         void testSuccessWithChunks(int numberOfChunks) {
+            assertThat(numberOfChunks).isGreaterThan(0);
             Delete delete = createDelete(archiveStoreSuccess, numberOfChunks);
             performDeleteSuccess(delete);
 
@@ -452,6 +453,7 @@ class DeleteTest {
         @ValueSource(ints = {1, 10, 50, 100, 1000})
         @SneakyThrows
         void testFailureWithChunks(int numberOfChunks) {
+            assertThat(numberOfChunks).isGreaterThan(0);
             // put the ERROR_CHUNK_NUMBER into the 'fake archive' so it knows when to throw error
             int errorChunkNumber = getErrorChunkNumber(numberOfChunks);
             archiveStoreFailure.getProperties().put(ERROR_CHUNK_NUMBER, String.valueOf(errorChunkNumber));
@@ -626,6 +628,7 @@ class DeleteTest {
         @ParameterizedTest
         @ValueSource(ints = {1, 10, 50, 100, 1000})
         void testSuccessWithChunks(int numberOfChunks) {
+            assertThat(numberOfChunks).isGreaterThan(0);
             int numLocations = 2;
             Delete delete = createDelete(archiveStoreSuccess, numberOfChunks);
             performDeleteSuccess(delete);
@@ -712,6 +715,7 @@ class DeleteTest {
         @ValueSource(ints = {1, 10, 50, 100, 1000})
         @SneakyThrows
         void testFailureWithChunks(int numberOfChunks) {
+            assertThat(numberOfChunks).isGreaterThan(0);
             // put the ERROR_CHUNK_NUMBER into the 'fake archive' so it knows when to throw error
             int errorChunkNumber = getErrorChunkNumber(numberOfChunks);
             archiveStoreFailure.getProperties().put(ERROR_CHUNK_NUMBER, String.valueOf(errorChunkNumber));

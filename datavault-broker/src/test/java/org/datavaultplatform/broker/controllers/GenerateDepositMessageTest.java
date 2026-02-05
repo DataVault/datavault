@@ -31,6 +31,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.skyscreamer.jsonassert.JSONAssert;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -45,7 +46,7 @@ public class GenerateDepositMessageTest extends BaseGenerateMessageTest {
   private static final String FILE_STORE_SRC_LABEL = "FILE_STORE-SRC-LABEL";
 
   final File srcDir = new File(baseDir, "src");
-
+  
   @Captor
   ArgumentCaptor<String> argMessage;
   private DepositsController dc;
@@ -148,7 +149,9 @@ public class GenerateDepositMessageTest extends BaseGenerateMessageTest {
     assertEquals(destPath, actualDestPath);
 
     JsonNode expected = mapper.readTree(getExpectedJson(bagId, srcPath, destPath));
-    assertEquals(expected, convert(generated));
+    JsonNode actual = convert(generated);
+    JSONAssert.assertEquals(expected.toPrettyString(), actual.toPrettyString(), true);
+    assertEquals(expected, actual);
     log.info("Generated Message {}", expected.toPrettyString());
     log.info("END SENT MESSAGE");
   }
@@ -192,11 +195,11 @@ public class GenerateDepositMessageTest extends BaseGenerateMessageTest {
         + "  \"userFileStoreClasses\" : {"
         + "    \"FILE-STORE-SRC-ID\" : \"org.datavaultplatform.common.storage.impl.LocalFileSystem\""
         + "  },"
-        + "  \"chunkFilesDigest\" : null,"
+        + "  \"chunkFilesDigest\" : {},"
         + "  \"tarIV\" : null,"
-        + "  \"chunksIVs\" : null,"
+        + "  \"chunksIVs\" : {},"
         + "  \"encTarDigest\" : null,"
-        + "  \"encChunksDigest\" : null,"
+        + "  \"encChunksDigest\" : {},"
         + "  \"lastEvent\" : null,"
         + "  \"chunksToAudit\" : null,"
         + "  \"archiveIds\" : null,"

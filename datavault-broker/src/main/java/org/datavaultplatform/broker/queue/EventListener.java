@@ -35,6 +35,7 @@ import org.datavaultplatform.common.event.audit.ChunkAuditComplete;
 import org.datavaultplatform.common.event.audit.ChunkAuditStarted;
 import org.datavaultplatform.common.event.delete.DeleteComplete;
 import org.datavaultplatform.common.event.delete.DeleteStart;
+import org.datavaultplatform.common.event.delete.DeletedChunk;
 import org.datavaultplatform.common.event.deposit.ChunksDigestEvent;
 import org.datavaultplatform.common.event.deposit.Complete;
 import org.datavaultplatform.common.event.deposit.CompleteCopyUpload;
@@ -364,6 +365,8 @@ public class EventListener implements MessageListener {
       process28UploadedToUserStore(uploadedToUserStore);
     } else if (event instanceof UserStoreSpaceAvailableChecked userStoreSpaceAvailableChecked ){
       process29UserStoreSpaceAvailableChecked(userStoreSpaceAvailableChecked);
+    } else if (event instanceof DeletedChunk deletedChunk ){
+      process30DeletedChunk(deletedChunk);
     } else {
       throw new Exception(
           String.format("Failed to process unknown Event class[%s]message[%s]", event.getClass(),
@@ -880,6 +883,7 @@ public class EventListener implements MessageListener {
   protected void process29UserStoreSpaceAvailableChecked(UserStoreSpaceAvailableChecked event) {
     ignore(event);
   }
+  protected void process30DeletedChunk(DeletedChunk deletedChunk) { ignore(deletedChunk); }
 
   String getUserSubject(String type) {
     String userSubjectKey = USER_DEPOSIT_PREFIX + type;

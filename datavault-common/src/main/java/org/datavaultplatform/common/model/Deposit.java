@@ -64,33 +64,33 @@ public class Deposit implements Identified {
     @JsonIgnore
     @OneToMany(targetEntity=Event.class, mappedBy="deposit", fetch=FetchType.LAZY)
     @OrderBy("timestamp, sequence")
-    private List<Event> events;
+    private List<Event> events = new ArrayList<>();
     
     // A Deposit can have a number of deposit paths
     @OneToMany(targetEntity=DepositPath.class, mappedBy="deposit", fetch=FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<DepositPath> depositPaths;
+    private List<DepositPath> depositPaths = new ArrayList<>();
     
     // A Deposit can have a number of deposit chunks
     @OneToMany(targetEntity=DepositChunk.class, mappedBy="deposit", fetch=FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<DepositChunk> depositChunks;
+    private List<DepositChunk> depositChunks = new ArrayList<>();
     
     // A Deposit can have a number of active jobs
     @JsonIgnore
     @OneToMany(targetEntity=Job.class, mappedBy="deposit", fetch=FetchType.LAZY)
     @OrderBy("timestamp")
-    private List<Job> jobs;
+    private List<Job> jobs = new ArrayList<>();
     
     // A Deposit can have a number of retrieves
     @JsonIgnore
     @OneToMany(targetEntity=Retrieve.class, mappedBy="deposit", fetch=FetchType.LAZY)
     @OrderBy("timestamp")
-    private List<Retrieve> retrieves;
+    private List<Retrieve> retrieves = new ArrayList<>();
 
     // A Deposit can have a number of reviews
     @JsonIgnore
     @OneToMany(targetEntity=DepositReview.class, mappedBy="deposit", fetch=FetchType.LAZY)
     @OrderBy("creationTime")
-    private List<DepositReview> depositReviews;
+    private List<DepositReview> depositReviews = new ArrayList<>();
 
 
     @ApiObjectField(description = "Status of the Deposit", allowedvalues={"NOT_STARTED", "IN_PROGRESS", "COMPLETE"})

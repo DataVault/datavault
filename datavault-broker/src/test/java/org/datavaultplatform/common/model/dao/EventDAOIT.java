@@ -15,16 +15,20 @@ import jakarta.persistence.PersistenceContext;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.app.DataVaultBrokerApp;
+import org.datavaultplatform.broker.services.EventService;
 import org.datavaultplatform.broker.test.AddTestProperties;
 import org.datavaultplatform.broker.test.BaseDatabaseTest;
 import org.datavaultplatform.broker.test.TestUtils;
 import org.datavaultplatform.common.event.Event;
+import org.datavaultplatform.common.event.delete.DeletedChunk;
 import org.datavaultplatform.common.event.deposit.*;
 import org.datavaultplatform.common.event.Error;
 import org.datavaultplatform.common.event.retrieve.*;
+import org.datavaultplatform.common.model.Agent;
 import org.datavaultplatform.common.model.Deposit;
 import org.datavaultplatform.common.model.Job;
 import org.datavaultplatform.common.model.Vault;
+import org.datavaultplatform.common.storage.impl.LocalFileSystem;
 import org.datavaultplatform.common.util.RetrievedChunks;
 import org.datavaultplatform.common.util.StoredChunks;
 import org.junit.jupiter.api.AfterEach;
@@ -65,7 +69,10 @@ public class EventDAOIT extends BaseDatabaseTest {
 
   @PersistenceContext
   EntityManager em;
-  
+
+  @Autowired
+  private EventService eventService;
+
   @Nested
   class BlobTests {
 
@@ -777,5 +784,64 @@ public class EventDAOIT extends BaseDatabaseTest {
     RetrieveComplete get06RetrieveComplete(String jobId, String depositId, String retrieveId) {
       return new RetrieveComplete(jobId, depositId, retrieveId);
     }
+  }
+
+  /**
+   * Tests that the Deposit and Job associated with a DeletedChunk event are correctly handled
+   * by Hibernate's session cache/identity map.
+   * Verifies that when retrieving a DeletedChunk event, the associated Deposit and Job entities
+   * are the same instances as those expected.
+   * We have to use EntityManager::flush to force saving to DB as generally DB writes happen at end of transaction.
+   */
+  @Transactional
+  @Test
+  void testDepositAndJobLazyLoadingOfDeletedChunkEvent() {
+
+    Deposit deposit = new Deposit();
+    deposit.setHasPersonalData(false);
+    deposit.setName("test-deposit-name");
+    depositDAO.save(deposit);
+    
+    Job job = new Job();
+    job.setDeposit(deposit);
+    jobDAO.save(job);
+    
+    em.flush();
+    em.clear();
+    assertThat(em.contains(deposit)).isFalse();
+    assertThat(em.contains(job)).isFalse();
+
+    DeletedChunk dc = new DeletedChunk(job.getID(), deposit.getID(), 123, 999, LocalFileSystem.class, "TST-ARCHIVE-STORE-ID", "TST-LOCATION");
+    dc.setAgent("TST-AGENT");
+    dc.setAgentType(Agent.AgentType.WORKER);
+    dc.setMessage("test-message");
+    dc.setJob(job);
+    dc.setDeposit(deposit);
+    
+    eventService.addEvent(dc);
+    deposit.getEvents().add(dc);
+
+    em.flush();
+    em.clear();
+
+    // get back the job and deposit from db - check that have correct ids
+    Deposit depoFromDb = depositDAO.getReferenceById(deposit.getID());
+    Job jobFromDeposit = depoFromDb.getJobs().get(0);
+    assertThat(depoFromDb.getID()).isEqualTo(deposit.getID());
+    assertThat(jobFromDeposit.getID()).isEqualTo(job.getID());
+    assertThat(em.contains(depoFromDb)).isTrue();
+    assertThat(em.contains(jobFromDeposit)).isTrue();
+
+    // get back event from db - check it has correct id and Deposit and Job are existing hibernate objects
+    Event eventFromDb = eventService.getEvent(dc.getID());
+    assertThat(eventFromDb.getID()).isEqualTo(dc.getID());
+
+    assertThat(em.contains(eventFromDb)).isTrue();
+    
+    assertThat(eventFromDb.getDeposit()).isSameAs(depoFromDb);
+    assertThat(eventFromDb.getJob()).isSameAs(jobFromDeposit);
+
+    Event depositEvent1 = depoFromDb.getEvents().get(0);
+    assertThat(depositEvent1).isSameAs(eventFromDb);
   }
 }

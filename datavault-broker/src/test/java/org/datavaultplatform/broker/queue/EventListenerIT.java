@@ -25,6 +25,7 @@ import org.datavaultplatform.common.event.audit.ChunkAuditComplete;
 import org.datavaultplatform.common.event.audit.ChunkAuditStarted;
 import org.datavaultplatform.common.event.delete.DeleteComplete;
 import org.datavaultplatform.common.event.delete.DeleteStart;
+import org.datavaultplatform.common.event.delete.DeletedChunk;
 import org.datavaultplatform.common.event.deposit.Complete;
 import org.datavaultplatform.common.event.deposit.CompleteCopyUpload;
 import org.datavaultplatform.common.event.deposit.ComputedChunks;
@@ -1091,5 +1092,55 @@ class EventListenerIT extends BaseDatabaseTest {
         + "    }";
     Event event = eventListener.onMessageInternal(message);
     assertEquals(ValidationComplete.class, event.getClass());
+  }
+
+  @Test
+  @SneakyThrows
+  void test30DeletedChunk() {
+    String message = "{" +
+            "  \"message\" : \"Deleted Chunk [7/10] from (MultiLocationsArchiveStoreSuccessImpl/TEST-ARCHIVE-STORE-ID//private/tmp/delete/location-one)\"," +
+            "  \"eventClass\" : \"org.datavaultplatform.common.event.delete.DeletedChunk\"," +
+            "  \"timestamp\" : \"2026-02-03T15:05:08.385Z\"," +
+            "  \"sequence\" : 123," +
+            "  \"persistent\" : true," +
+            "  \"depositId\" : \"" + depositId + "\"," +
+            "  \"jobId\" : \"" + jobDepositId + "\"," +
+            "  \"userId\" : \"" + userId + "\"," +
+            "  \"agent\" : \"datavault-worker-1\"," +
+            "  \"agentType\" : \"WORKER\"," +
+            "  \"archiveId\" : \"TEST-ARCHIVE-ID\"," +
+            "  \"location\" : \"/private/tmp/delete/location-one\"," +
+            "  \"assigneeId\" : null," +
+            "  \"chunkNumber\" : 123," +
+            "  \"archiveStoreId\" : \"TEST-ARCHIVE-STORE-ID\"" +
+            "}";
+    Event event = eventListener.onMessageInternal(message);
+    assertEquals(DeletedChunk.class, event.getClass());
+    DeletedChunk dc = (DeletedChunk) event;
+    assertThat(dc.getID())
+            .withFailMessage("ID is null")
+            .isNotNull();
+    assertThat(dc.getDeposit())
+            .withFailMessage("Deposit is null")
+            .isNotNull();
+    assertThat(dc.getJob())
+            .withFailMessage("Job is null")
+            .isNotNull();
+    assertThat(dc.getUser())
+            .withFailMessage("User is null")
+            .isNotNull();
+    assertThat(dc.getAgent())
+            .withFailMessage("Agent is null")
+            .isNotNull();
+    assertThat(dc.getAgentType())
+            .withFailMessage("AgentType is null")
+            .isNotNull();
+    assertThat(dc.getVault())
+            .withFailMessage("Vault is NOT NULL")
+            .isNull();
+    assertThat(dc.getChunkNumber())
+            .isEqualTo(123);
+    assertThat(dc.getLocation())
+            .isEqualTo("/private/tmp/delete/location-one");
   }
 }
