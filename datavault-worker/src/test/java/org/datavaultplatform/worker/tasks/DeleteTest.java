@@ -1,5 +1,7 @@
 package org.datavaultplatform.worker.tasks;
 
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.datavaultplatform.common.PropNames;
@@ -87,7 +89,7 @@ class DeleteTest {
     org.datavaultplatform.common.model.ArchiveStore archiveStoreSuccess;
     org.datavaultplatform.common.model.ArchiveStore archiveStoreFailure;
     List<Event> nonDeletedChunks;
-    List<DeletedChunk> deletedChunks;
+    List<DeletedChunk> deletedChunkEvents;
     Date startTimestamp;
 
     @AfterEach
@@ -103,7 +105,7 @@ class DeleteTest {
 
         this.startTimestamp = new Date();
         this.nonDeletedChunks = new CopyOnWriteArrayList<>();
-        this.deletedChunks = new CopyOnWriteArrayList<>();
+        this.deletedChunkEvents = new CopyOnWriteArrayList<>();
         deletedFiles.clear();
         deletedFilesByLocation.clear();
 
@@ -124,7 +126,7 @@ class DeleteTest {
             // when the mock eventSender is sent an event - we put it into deletedChunks or nonDeletedChunks
             Event event = invocationOnMock.getArgument(0);
             if (event instanceof DeletedChunk dc) {
-                deletedChunks.add(dc);
+                deletedChunkEvents.add(dc);
             } else {
                 nonDeletedChunks.add(event);
             }
@@ -152,7 +154,7 @@ class DeleteTest {
         return errors.get(0);
     }
 
-    private Task getTask(org.datavaultplatform.common.model.ArchiveStore archiveStore, Integer numberOfChunks) {
+    private Task getTask(org.datavaultplatform.common.model.ArchiveStore archiveStore, Integer numberOfChunks, boolean sendDeletedChunks) {
         Map<String, String> properties = new HashMap<>();
         properties.put(ARCHIVE_STORE_ID, ARCHIVE_ID);
         if (numberOfChunks != null) {
@@ -162,6 +164,10 @@ class DeleteTest {
         properties.put(PropNames.DEPOSIT_ID, DEPOSIT_ID);
         properties.put(PropNames.BAG_ID, BAG_ID);
         properties.put(PropNames.USER_ID, USER_ID);
+        // we only want to send WORKERS_SEND_DELETED_CHUNK_EVENTS if true - to test that a missing value defaults to "false"
+        if (sendDeletedChunks) {
+            properties.put(PropNames.WORKERS_SEND_DELETED_CHUNK_EVENTS, "true");
+        }
         List<org.datavaultplatform.common.model.ArchiveStore> archiveStores = List.of(archiveStore);
         Map<String, Map<String, String>> userFileStoreProperties = Collections.emptyMap();
         Map<String, String> userFileStoreClasses = Collections.emptyMap();
@@ -304,7 +310,7 @@ class DeleteTest {
     }
 
     private Map<String, List<DeletedChunk>> getDeletedChunksByLocation() {
-        return deletedChunks.stream().
+        return deletedChunkEvents.stream().
                 sorted(Comparator.comparing(DeletedChunk::getChunkNumber)).
                 collect(Collectors.groupingBy(DeletedChunk::getLocation));
     }
@@ -332,7 +338,13 @@ class DeleteTest {
     }
 
     private Delete createDelete(ArchiveStore archiveStore, int numberOfChunks) {
-        Task task = getTask(archiveStore, numberOfChunks);
+        Task task = getTask(archiveStore, numberOfChunks, true);
+        task.setTaskClass(Delete.class.getName());
+        return getDelete(task);
+    }
+
+    private Delete createDeleteNoDeletedChunks(ArchiveStore archiveStore, int numberOfChunks) {
+        Task task = getTask(archiveStore, numberOfChunks, false);
         task.setTaskClass(Delete.class.getName());
         return getDelete(task);
     }
@@ -370,12 +382,12 @@ class DeleteTest {
             assertThat(nonDeletedChunks).hasSize(4);
 
             // check each deleted chunk
-            DeletedChunk dc = deletedChunks.get(0);
+            DeletedChunk dc = deletedChunkEvents.get(0);
             checkDeletedChunk(dc, Delete.NO_LOCATION, 0, "Deleted Chunk [0/0] from (ArchiveStoreSuccessImpl/TEST-ARCHIVE-STORE-ID/no-location)");
 
             verify(mContext, times(1)).isChunkingEnabled();
             verify(mEventSender, times(4 + 1)).send(any(Event.class));
-            pairUpDeletedChunksAndDeletedFilesNoLocation(1, deletedChunks);
+            pairUpDeletedChunksAndDeletedFilesNoLocation(1, deletedChunkEvents);
         }
 
         @Order(2)
@@ -405,17 +417,17 @@ class DeleteTest {
             // non DeletedChunk events
             assertThat(nonDeletedChunks).hasSize(4);
 
-            assertThat(deletedChunks).hasSize(numberOfChunks);
-            deletedChunks.sort(Comparator.comparingInt(DeletedChunk::getChunkNumber));
+            assertThat(deletedChunkEvents).hasSize(numberOfChunks);
+            deletedChunkEvents.sort(Comparator.comparingInt(DeletedChunk::getChunkNumber));
             for (int i = 0; i < numberOfChunks; i++) {
                 int chunkNumber = i + 1;
-                DeletedChunk dc = deletedChunks.get(i);
+                DeletedChunk dc = deletedChunkEvents.get(i);
                 String expectedMessage = "Deleted Chunk [%s/%s] from (ArchiveStoreSuccessImpl/TEST-ARCHIVE-STORE-ID/no-location)".formatted(chunkNumber, numberOfChunks);
                 checkDeletedChunk(dc, Delete.NO_LOCATION, chunkNumber, expectedMessage);
             }
             verify(mContext).isChunkingEnabled();
             checkNoErrors();
-            pairUpDeletedChunksAndDeletedFilesNoLocation(numberOfChunks, deletedChunks);
+            pairUpDeletedChunksAndDeletedFilesNoLocation(numberOfChunks, deletedChunkEvents);
         }
 
 
@@ -436,7 +448,7 @@ class DeleteTest {
             assertThat(deletedFiles).isEmpty();
 
             // deleted chunks
-            assertThat(deletedChunks).isEmpty();
+            assertThat(deletedChunkEvents).isEmpty();
 
             // verify
             verify(mEventSender, atLeast(4)).send(any(Event.class));
@@ -445,7 +457,7 @@ class DeleteTest {
             Error error = findDeleteError();
             checkError(error, Delete.NO_LOCATION, 0, "Deposit delete failed: " + expectedDteMessage);
 
-            pairUpDeletedChunksAndDeletedFilesNoLocation(0, deletedChunks);
+            pairUpDeletedChunksAndDeletedFilesNoLocation(0, deletedChunkEvents);
         }
 
         @Order(4)
@@ -466,16 +478,16 @@ class DeleteTest {
             assertThat(nonDeletedChunks).hasSize(4);
 
             int expectedDeletedChunks = numberOfChunks - 1;
-            assertThat(deletedChunks).hasSize(expectedDeletedChunks);
+            assertThat(deletedChunkEvents).hasSize(expectedDeletedChunks);
 
             // we are using deleteFiles not deletedFilesByLocation
             assertThat(deletedFiles).hasSize(expectedDeletedChunks);
 
-            deletedChunks.sort(Comparator.comparingInt(DeletedChunk::getChunkNumber));
+            deletedChunkEvents.sort(Comparator.comparingInt(DeletedChunk::getChunkNumber));
 
             // 1 .. errorChunkNumber-1
             for (int i = 0; i < errorChunkNumber - 1; i++) {
-                DeletedChunk dc = deletedChunks.get(i);
+                DeletedChunk dc = deletedChunkEvents.get(i);
                 int chunkNumber = i + 1;
                 String expectedMessage = "Deleted Chunk [%s/%s] from (ArchiveStoreFailureImpl/TEST-ARCHIVE-STORE-ID/no-location)".formatted(chunkNumber, numberOfChunks);
                 checkDeletedChunk(dc, Delete.NO_LOCATION, chunkNumber, expectedMessage);
@@ -483,14 +495,14 @@ class DeleteTest {
 
             // errorChunkNumber+1 .. numberOfChunks
             for (int i = errorChunkNumber - 1; i < numberOfChunks - 1; i++) {
-                DeletedChunk dc = deletedChunks.get(i);
+                DeletedChunk dc = deletedChunkEvents.get(i);
                 int chunkNumber = i + 2;
                 String expectedMessage = "Deleted Chunk [%s/%s] from (ArchiveStoreFailureImpl/TEST-ARCHIVE-STORE-ID/no-location)".formatted(chunkNumber, numberOfChunks);
                 checkDeletedChunk(dc, Delete.NO_LOCATION, chunkNumber, expectedMessage);
             }
 
             // check that there's no DeletedChunk errorChunkNumber
-            Optional<DeletedChunk> optionalDeletedChunk = deletedChunks.stream()
+            Optional<DeletedChunk> optionalDeletedChunk = deletedChunkEvents.stream()
                     .filter(dc -> dc.getChunkNumber().equals(errorChunkNumber))
                     .findFirst();
             assertThat(optionalDeletedChunk).isEmpty();
@@ -501,7 +513,61 @@ class DeleteTest {
             Error error = findDeleteError();
             checkError(error, Delete.NO_LOCATION, errorChunkNumber, "Deposit delete failed: " + expectedDteMessage);
 
-            pairUpDeletedChunksAndDeletedFilesNoLocation(numberOfChunks - 1, deletedChunks);
+            pairUpDeletedChunksAndDeletedFilesNoLocation(numberOfChunks - 1, deletedChunkEvents);
+        }
+        
+        @Order(5)
+        @ParameterizedTest
+        @ValueSource(ints = {1, 10, 50, 100, 1000})
+        @SneakyThrows
+        void testFailureWithChunksButNoDeletedChunkEventsSent(int numberOfChunks) {
+            assertThat(numberOfChunks).isGreaterThan(0);
+            // put the ERROR_CHUNK_NUMBER into the 'fake archive' so it knows when to throw error
+            int errorChunkNumber = getErrorChunkNumber(numberOfChunks);
+            archiveStoreFailure.getProperties().put(ERROR_CHUNK_NUMBER, String.valueOf(errorChunkNumber));
+
+            ch.qos.logback.classic.Logger deleteLogger = (ch.qos.logback.classic.Logger)LoggerFactory.getLogger(Delete.class);
+            ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
+            deleteLogger.addAppender(listAppender);
+            listAppender.start();
+
+            Delete delete = createDeleteNoDeletedChunks(archiveStoreFailure, numberOfChunks);
+            String expectedDteMessage = "ArchiveStore[ArchiveStoreFailureImpl/TEST-ARCHIVE-STORE-ID]Location[no-location]ChunkNum[%d]Cause[java.lang.RuntimeException/oops@%d]".formatted(errorChunkNumber, errorChunkNumber);
+            performDeleteAndCheckForDeleteFileException(delete, expectedDteMessage, errorChunkNumber);
+
+            // non DeletedChunk events
+            assertThat(nonDeletedChunks).hasSize(4);
+
+            int expectedDeletedChunks = numberOfChunks - 1;
+            assertThat(deletedChunkEvents).isEmpty();
+
+            // we are using deleteFiles not deletedFilesByLocation
+            assertThat(deletedFiles).hasSize(expectedDeletedChunks);
+            
+            verify(mContext).isChunkingEnabled();
+            verify(mEventSender, times(4)).send(any(Event.class));
+
+            Error error = findDeleteError();
+            checkError(error, Delete.NO_LOCATION, errorChunkNumber, "Deposit delete failed: " + expectedDteMessage);
+            
+            assertThat(deletedFiles).hasSize(expectedDeletedChunks);
+            
+            listAppender.stop();
+            deleteLogger.detachAppender(listAppender);
+            List<String> notSendingMessages = listAppender.list.stream()
+                    .map(ILoggingEvent::getFormattedMessage)
+                    .filter(m -> m.startsWith("NOT SENDING"))
+                    .toList();
+            assertThat(notSendingMessages).hasSize(expectedDeletedChunks);
+            String prefixTemplate = "NOT SENDING Deleted Chunk [%d/%d]";
+            for (int i = 1; i <= numberOfChunks; i++) {
+                if (i != errorChunkNumber) {
+                    String prefix = prefixTemplate.formatted(i, numberOfChunks);
+                    assertThat(notSendingMessages.stream().anyMatch(m -> m.startsWith(prefix))).isTrue();
+                }
+            }
+            String prefix = prefixTemplate.formatted(errorChunkNumber, numberOfChunks);
+            assertThat(notSendingMessages.stream().noneMatch(m -> m.startsWith(prefix))).isTrue();
         }
 
         /**
@@ -688,8 +754,8 @@ class DeleteTest {
             assertThat(deletedFilesByLocation.get(location1)).contains(noChunkFile);
 
             // deleted chunks
-            assertThat(deletedChunks).hasSize(1);
-            DeletedChunk dc1 = deletedChunks.get(0);
+            assertThat(deletedChunkEvents).hasSize(1);
+            DeletedChunk dc1 = deletedChunkEvents.get(0);
             checkDeletedChunk(dc1, location1, 0, "Deleted Chunk [0/0] from (MultiLocationsArchiveStoreFailureImpl/TEST-ARCHIVE-STORE-ID//private/tmp/delete/location-one)");
 
             // verify
@@ -731,7 +797,7 @@ class DeleteTest {
             int expectedDeletedChunksLocation1 = numberOfChunks;
             int expectedDeletedChunksLocation2 = numberOfChunks - 1;
             int expectedDeletedChunks = expectedDeletedChunksLocation1 + expectedDeletedChunksLocation2;
-            assertThat(deletedChunks).hasSize(expectedDeletedChunks);
+            assertThat(deletedChunkEvents).hasSize(expectedDeletedChunks);
 
             // we are using deleteFiles not deletedFilesByLocation
             Map<String, List<DeletedChunk>> deletedChunksByLocation = getDeletedChunksByLocation();
@@ -776,6 +842,77 @@ class DeleteTest {
             checkError(error, location2, errorChunkNumber, "Deposit delete failed: " + expectedDteMessage);
 
             pairUpDeletedChunksAndDeletedFilesWithLocation((numberOfChunks * 2) - 1, deletedChunksByLocation);
+        }
+        
+        @Order(5)
+        @ParameterizedTest
+        @ValueSource(ints = {1, 10, 50, 100, 1000})
+        @SneakyThrows
+        void testFailureWithChunksButNoDeletedChunkEventsSent(int numberOfChunks) {
+            assertThat(numberOfChunks).isGreaterThan(0);
+            // put the ERROR_CHUNK_NUMBER into the 'fake archive' so it knows when to throw error
+            int errorChunkNumber = getErrorChunkNumber(numberOfChunks);
+            archiveStoreFailure.getProperties().put(ERROR_CHUNK_NUMBER, String.valueOf(errorChunkNumber));
+
+            ch.qos.logback.classic.Logger deleteLogger = (ch.qos.logback.classic.Logger)LoggerFactory.getLogger(Delete.class);
+            ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
+            deleteLogger.addAppender(listAppender);
+            listAppender.start();
+
+            Delete delete = createDeleteNoDeletedChunks(archiveStoreFailure, numberOfChunks);
+            String expectedDteMessage = "ArchiveStore[MultiLocationsArchiveStoreFailureImpl/TEST-ARCHIVE-STORE-ID]Location[%s]ChunkNum[%d]Cause[java.lang.RuntimeException/oops@%d/%s]".formatted(location2, errorChunkNumber, errorChunkNumber, location2);
+            performDeleteAndCheckForDeleteFileException(delete, expectedDteMessage, errorChunkNumber, location2);
+
+            // non DeletedChunk events
+            assertThat(nonDeletedChunks).hasSize(4);
+
+            @SuppressWarnings("UnnecessaryLocalVariable")
+            int expectedDeletedChunksLocation1 = numberOfChunks;
+            int expectedDeletedChunksLocation2 = numberOfChunks - 1;
+            int expectedDeletedChunks = expectedDeletedChunksLocation1 + expectedDeletedChunksLocation2;
+            assertThat(deletedChunkEvents).isEmpty();
+
+            verify(mContext, times(2)).isChunkingEnabled();
+            verify(mEventSender, atLeast(4)).send(any(Event.class));
+
+            Error error = findDeleteError();
+            checkError(error, location2, errorChunkNumber, "Deposit delete failed: " + expectedDteMessage);
+
+            assertThat(deletedFilesByLocation.get(location1)).hasSize(numberOfChunks);
+            if (numberOfChunks == 1) {
+                assertThat(deletedFilesByLocation.containsKey(location2)).isFalse();
+            } else {
+                assertThat(deletedFilesByLocation.get(location2)).hasSize(numberOfChunks - 1);
+            }
+
+            listAppender.stop();
+            deleteLogger.detachAppender(listAppender);
+            List<String> notSendingMessages = listAppender.list.stream()
+                    .map(ILoggingEvent::getFormattedMessage)
+                    .filter(m -> m.startsWith("NOT SENDING"))
+                    .toList();
+            assertThat(notSendingMessages).hasSize(expectedDeletedChunks);
+
+            String msgTemplate = "NOT SENDING Deleted Chunk [%d/%d] from (MultiLocationsArchiveStoreFailureImpl/TEST-ARCHIVE-STORE-ID/%s)";
+
+            List<String> nonSentLocation1messages = notSendingMessages.stream().filter(m -> m.contains(location1)).toList();
+            assertThat(nonSentLocation1messages).hasSize(expectedDeletedChunksLocation1);
+            List<String> nonSentLocation2messages = notSendingMessages.stream().filter(m -> m.contains(location2)).toList();
+            assertThat(nonSentLocation2messages).hasSize(expectedDeletedChunksLocation2);
+            // LOCATION 1
+            for (int i = 1; i <= numberOfChunks; i++) {
+                String msg = msgTemplate.formatted(i, numberOfChunks, location1);
+                assertThat(nonSentLocation1messages.stream().anyMatch(m -> m.endsWith(msg))).isTrue();
+            }
+            // LOCATION 2
+            for (int i = 1; i <= numberOfChunks; i++) {
+                String msg = msgTemplate.formatted(i, numberOfChunks, location2);
+                if (i != errorChunkNumber) {
+                    assertThat(nonSentLocation2messages.stream().anyMatch(msg::equals)).isTrue();
+                }
+            }
+            String msg = msgTemplate.formatted(errorChunkNumber, numberOfChunks, location2);
+            assertThat(nonSentLocation2messages.stream().noneMatch(msg::equals)).isTrue();
         }
 
         /**

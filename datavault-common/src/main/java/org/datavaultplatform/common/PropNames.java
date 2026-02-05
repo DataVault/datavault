@@ -57,4 +57,5 @@ public interface PropNames {
   String USER_FS_RETRY_DELAY_MS_1 = "userFsRetryDelayMs1";
   String USER_FS_RETRY_DELAY_MS_2 = "userFsRetryDelayMs2";
   String NON_RESTART_JOB_ID = "nonRestartJobId";
+  String WORKERS_SEND_DELETED_CHUNK_EVENTS = "workersSendDeletedChunkEvents";
 }

@@ -67,6 +67,7 @@ public class AdminController {
     private final String region;
     private final String awsAccessKey;
     private final String awsSecretKey;
+    private final boolean workersSendDeletedChunkEvents;
 
     @Autowired
     public AdminController(VaultsService vaultsService, UsersService usersService,
@@ -79,7 +80,8 @@ public class AdminController {
         @Value("${s3.bucketName:#{null}}") String bucketName,
         @Value("${s3.region:#{null}}") String region,
         @Value("${s3.awsAccessKey:#{null}}") String awsAccessKey,
-        @Value("${s3.awsSecretKey:#{null}}") String awsSecretKey) {
+        @Value("${s3.awsSecretKey:#{null}}") String awsSecretKey,
+        @Value("${workers.send.deleted.chunk.events:false}") boolean workersSendDeletedChunkEvents) {
         this.vaultsService = vaultsService;
         this.usersService = usersService;
         this.depositsService = depositsService;
@@ -97,6 +99,7 @@ public class AdminController {
         this.region = region;
         this.awsAccessKey = awsAccessKey;
         this.awsSecretKey = awsSecretKey;
+        this.workersSendDeletedChunkEvents = workersSendDeletedChunkEvents;
     }
 
 
@@ -387,6 +390,8 @@ public class AdminController {
             for (Archive archive : deposit.getArchives()) {
                 deleteProperties.put(archive.getArchiveStore().getID(), archive.getArchiveId());
             }
+            deleteProperties.put(PropNames.WORKERS_SEND_DELETED_CHUNK_EVENTS,
+                    Boolean.toString(workersSendDeletedChunkEvents));
 
             // Add a single entry for the user file storage
             Map<String, String> userFileStoreClasses = new HashMap<>();

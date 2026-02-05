@@ -115,6 +115,7 @@ public class DepositEvents {
     topLevelProps.put(PropNames.USER_FS_RETRY_MAX_ATTEMPTS, "10");
     topLevelProps.put(PropNames.USER_FS_RETRY_DELAY_MS_1, "60000");
     topLevelProps.put(PropNames.USER_FS_RETRY_DELAY_MS_2, "300000");
+    topLevelProps.put(PropNames.WORKERS_SEND_DELETED_CHUNK_EVENTS, "true");
     Instant testInstant = LocalDate.of(2024, 1, 11)
             .atStartOfDay(ZoneOffset.UTC)
             .toInstant();

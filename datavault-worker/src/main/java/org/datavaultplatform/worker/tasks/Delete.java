@@ -44,6 +44,7 @@ public class Delete extends Task {
     private String depositId = null;
     private long archiveSize = 0;
     private EventSender eventSender = null;
+    private boolean sendDeletedChunkEvents = false;
 
     @Override
     public void performAction(Context context) {
@@ -56,6 +57,7 @@ public class Delete extends Task {
         this.userID = properties.get(PropNames.USER_ID);
         this.numOfChunks = Integer.parseInt(properties.get(PropNames.NUM_OF_CHUNKS));
         this.archiveSize = Long.parseLong(properties.get(PropNames.ARCHIVE_SIZE));
+        this.sendDeletedChunkEvents = Boolean.parseBoolean(properties.get(PropNames.WORKERS_SEND_DELETED_CHUNK_EVENTS));
 
         if (this.isRedeliver()) {
             eventSender.send(new Error(this.jobID, this.depositId, "Delete stopped: the message had been redelivered, please investigate")
@@ -247,11 +249,15 @@ public class Delete extends Task {
         private final TaskExecutor<DeletedChunk> taskExecutor;
 
         private DeletedChunk sendDeletedChunkEvent(int chunkNumber, String location) {
-            DeletedChunk event = new DeletedChunk(jobID, depositId, chunkNumber, numOfChunks, archiveContext.archiveStore().getClass(), archiveContext.archiveStoreId, location);
-            event.setUserId(userID);
-            event.setArchiveId(archiveId);
-            logger.info(event.getMessage());
-            eventSender.send(event);
+                DeletedChunk event = new DeletedChunk(jobID, depositId, chunkNumber, numOfChunks, archiveContext.archiveStore().getClass(), archiveContext.archiveStoreId, location);
+                event.setUserId(userID);
+                event.setArchiveId(archiveId);
+            if (sendDeletedChunkEvents) {
+                logger.info("SENDING {}", event);
+                eventSender.send(event);
+            } else {
+                logger.info("NOT SENDING {}", event);
+            }
             return event;
         }
 
