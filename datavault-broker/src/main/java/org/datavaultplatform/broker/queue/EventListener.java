@@ -60,6 +60,7 @@ import org.datavaultplatform.common.model.Job;
 import org.datavaultplatform.common.model.Retrieve;
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.model.Vault;
+import org.datavaultplatform.common.model.Archive;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageListener;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -883,7 +884,18 @@ public class EventListener implements MessageListener {
   protected void process29UserStoreSpaceAvailableChecked(UserStoreSpaceAvailableChecked event) {
     ignore(event);
   }
-  protected void process30DeletedChunk(DeletedChunk deletedChunk) { ignore(deletedChunk); }
+
+  protected void process30DeletedChunk(DeletedChunk deletedChunk) {
+    processDeposit(deletedChunk.getDeposit(), $deposit -> {
+      String archiveId = deletedChunk.getArchiveId();
+      if (archiveId != null) {
+        Archive archive = archivesService.getArchiveByArchiveId(archiveId);
+        if (archive != null) {
+          deletedChunk.setArchive(archive);
+        }
+      }
+    });
+  }
 
   String getUserSubject(String type) {
     String userSubjectKey = USER_DEPOSIT_PREFIX + type;

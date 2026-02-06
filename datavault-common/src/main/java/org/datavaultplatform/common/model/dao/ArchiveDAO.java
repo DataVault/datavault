@@ -30,4 +30,7 @@ public interface ArchiveDAO extends BaseDAO<Archive> {
     LIMIT 1
   """)
   Optional<Archive> findLatestByDepositIdAndArchiveStoreId(String depositId, String archiveStoreId);
+
+  @EntityGraph(Archive.EG_ARCHIVE)
+  Optional<Archive> findByArchiveId(String archiveId);
 }

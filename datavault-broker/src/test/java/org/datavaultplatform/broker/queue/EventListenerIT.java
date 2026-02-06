@@ -67,6 +67,8 @@ import org.springframework.transaction.annotation.Transactional;
 @TestMethodOrder(MethodOrderer.MethodName.class)
 class EventListenerIT extends BaseDatabaseTest {
 
+  private static final String TEST_ARCHIVE_ID = "TEST-ARCHIVE_ID";
+  
   @MockBean
   EmailService emailService;
 
@@ -102,6 +104,12 @@ class EventListenerIT extends BaseDatabaseTest {
 
   @Autowired
   EventService eventService;
+  
+  @Autowired
+  ArchivesService archivesService;
+
+  @Autowired
+  ArchiveStoreService archiveStoreService;
 
   @MockBean
   RabbitListenerEndpointRegistry registry;
@@ -1097,6 +1105,12 @@ class EventListenerIT extends BaseDatabaseTest {
   @Test
   @SneakyThrows
   void test30DeletedChunk() {
+    ArchiveStore archiveStore = new ArchiveStore();
+    archiveStoreService.addArchiveStore(archiveStore);
+
+    archivesService.addArchive(this.deposit, archiveStore, TEST_ARCHIVE_ID);
+
+    assertThat(archivesService.getArchiveByArchiveId(TEST_ARCHIVE_ID)).isNotNull();
     String message = "{" +
             "  \"message\" : \"Deleted Chunk [7/10] from (MultiLocationsArchiveStoreSuccessImpl/TEST-ARCHIVE-STORE-ID//private/tmp/delete/location-one)\"," +
             "  \"eventClass\" : \"org.datavaultplatform.common.event.delete.DeletedChunk\"," +
@@ -1108,38 +1122,64 @@ class EventListenerIT extends BaseDatabaseTest {
             "  \"userId\" : \"" + userId + "\"," +
             "  \"agent\" : \"datavault-worker-1\"," +
             "  \"agentType\" : \"WORKER\"," +
-            "  \"archiveId\" : \"TEST-ARCHIVE-ID\"," +
+            "  \"archiveId\" : \"" + TEST_ARCHIVE_ID + "\"," +
             "  \"location\" : \"/private/tmp/delete/location-one\"," +
             "  \"assigneeId\" : null," +
             "  \"chunkNumber\" : 123," +
             "  \"archiveStoreId\" : \"TEST-ARCHIVE-STORE-ID\"" +
             "}";
+
     Event event = eventListener.onMessageInternal(message);
     assertEquals(DeletedChunk.class, event.getClass());
     DeletedChunk dc = (DeletedChunk) event;
     assertThat(dc.getID())
             .withFailMessage("ID is null")
             .isNotNull();
+    // DEPOSIT
     assertThat(dc.getDeposit())
             .withFailMessage("Deposit is null")
+            .isNotNull();
+    assertThat(dc.getDepositId())
+            .withFailMessage("DepositId is null")
             .isNotNull();
     assertThat(dc.getJob())
             .withFailMessage("Job is null")
             .isNotNull();
+    assertThat(dc.getJobId())
+            .withFailMessage("JobId is null")
+            .isNotNull();
+    // USER
     assertThat(dc.getUser())
             .withFailMessage("User is null")
             .isNotNull();
+    assertThat(dc.getUserId())
+            .withFailMessage("UserId is null")
+            .isNotNull();
+    // AGENT
     assertThat(dc.getAgent())
             .withFailMessage("Agent is null")
             .isNotNull();
+    // Archive
     assertThat(dc.getArchive())
             .withFailMessage("Archive is null")
             .isNotNull();
+    assertThat(dc.getArchiveId())
+            .withFailMessage("ArchiveId is null")
+            .isNotNull();
+    // ArchiveStoreId
+    assertThat(dc.getArchiveStoreId())
+            .withFailMessage("ArchiveStoreId is null")
+            .isEqualTo("TEST-ARCHIVE-STORE-ID");
+    // AgentType
     assertThat(dc.getAgentType())
             .withFailMessage("AgentType is null")
             .isNotNull();
+    // VAULT
     assertThat(dc.getVault())
             .withFailMessage("Vault is NOT NULL")
+            .isNull();
+    assertThat(dc.getVaultId())
+            .withFailMessage("VaultId is NOT NULL")
             .isNull();
     assertThat(dc.getChunkNumber())
             .isEqualTo(123);

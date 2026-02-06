@@ -29,8 +29,12 @@ public class ArchivesService {
         return archiveDAO.list();
     }
 
-    public Archive getArchive(String archiveId) {
-        return archiveDAO.findById(archiveId).orElse(null);
+    public Archive getArchive(String id) {
+        return archiveDAO.findById(id).orElse(null);
+    }
+
+    public Archive getArchiveByArchiveId(String archiveId) {
+        return archiveDAO.findByArchiveId(archiveId).orElse(null);
     }
 
     public void addArchive(Deposit deposit, ArchiveStore archiveStore, String archiveId) {
