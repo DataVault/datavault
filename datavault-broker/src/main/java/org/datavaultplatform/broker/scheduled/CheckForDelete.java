@@ -2,6 +2,7 @@ package org.datavaultplatform.broker.scheduled;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.datavaultplatform.broker.queue.Sender;
+import org.datavaultplatform.broker.service.AdminDepositService;
 import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.model.*;
@@ -28,27 +29,17 @@ public class CheckForDelete implements ScheduledTask {
     private static final Logger log = LoggerFactory.getLogger(CheckForDelete.class);
 
     private final VaultsService vaultsService;
-    private final VaultsReviewService vaultsReviewService;
+
     private final DepositsReviewService depositsReviewService;
-    private final ArchiveStoreService archiveStoreService;
-    private final RolesAndPermissionsService rolesAndPermissionsService;
-    private final UsersService usersService;
-    private final JobsService jobsService;
-    private final Sender sender;
+    private final AdminDepositService adminDepositService;
 
     @Autowired
-    public CheckForDelete(VaultsService vaultsService, VaultsReviewService vaultsReviewService,
-        DepositsReviewService depositsReviewService, ArchiveStoreService archiveStoreService,
-        RolesAndPermissionsService rolesAndPermissionsService, UsersService usersService,
-        JobsService jobsService, Sender sender) {
+    public CheckForDelete(VaultsService vaultsService, 
+        DepositsReviewService depositsReviewService, 
+        AdminDepositService adminDepositService) {
         this.vaultsService = vaultsService;
-        this.vaultsReviewService = vaultsReviewService;
         this.depositsReviewService = depositsReviewService;
-        this.archiveStoreService = archiveStoreService;
-        this.rolesAndPermissionsService = rolesAndPermissionsService;
-        this.usersService = usersService;
-        this.jobsService = jobsService;
-        this.sender = sender;
+        this.adminDepositService = adminDepositService;
     }
 
     @Override
@@ -114,57 +105,6 @@ public class CheckForDelete implements ScheduledTask {
 
     // todo : move this method to a service class
     private void deleteDeposit(Deposit deposit) throws Exception {
-        log.info("Delete deposit with name " + deposit.getName());
-
-        List<Job> jobs = deposit.getJobs();
-        for (Job job : jobs) {
-            if (job.isError() == false && job.getState() != job.getStates().size() - 1) {
-                // There's an in-progress job for this deposit
-                throw new IllegalArgumentException("Job in-progress for this Deposit");
-            }
-        }
-
-        List<ArchiveStore> archiveStores = archiveStoreService.getArchiveStores();
-        if (archiveStores.isEmpty()) {
-            throw new Exception("No configured archive storage");
-        }
-
-        log.info("Delete deposit archiveStores : {}", archiveStores);
-        archiveStores = archiveStoreService.addArchiveSpecificOptions(archiveStores);
-
-        // Create a job to track this delete
-        Job job = new Job("org.datavaultplatform.worker.tasks.Delete");
-        jobsService.addJob(deposit, job);
-
-        // Ask the worker to process the data delete
-
-        HashMap<String, String> deleteProperties = new HashMap<>();
-        deleteProperties.put(PropNames.DEPOSIT_ID, deposit.getID());
-        deleteProperties.put(PropNames.BAG_ID, deposit.getBagId());
-        deleteProperties.put(PropNames.ARCHIVE_SIZE, Long.toString(deposit.getArchiveSize()));
-        // We have no record of who requested the delete, is that acceptable?
-        deleteProperties.put(PropNames.USER_ID, null);
-        deleteProperties.put(PropNames.NUM_OF_CHUNKS, Integer.toString(deposit.getNumOfChunks()));
-        for (Archive archive : deposit.getArchives()) {
-            deleteProperties.put(archive.getArchiveStore().getID(), archive.getArchiveId());
-        }
-
-        // Add a single entry for the user file storage
-        Map<String, String> userFileStoreClasses = new HashMap<>();
-        Map<String, Map<String, String>> userFileStoreProperties = new HashMap<>();
-        //userFileStoreClasses.put(storageID, userStore.getStorageClass());
-        //userFileStoreProperties.put(storageID, userStore.getProperties());
-
-        Task deleteTask = new Task(
-                job, deleteProperties, archiveStores,
-                userFileStoreProperties, userFileStoreClasses,
-                null, null,
-                null,
-                null, null,
-                null, null, null);
-        ObjectMapper mapper = new ObjectMapper();
-        String jsonDelete = mapper.writeValueAsString(deleteTask);
-        sender.send(jsonDelete);
-
+        adminDepositService.deleteDeposit(deposit, null);
     }
 }

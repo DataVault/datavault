@@ -1,6 +1,7 @@
 package org.datavaultplatform.broker.config;
 
 
+import org.datavaultplatform.broker.service.AdminDepositService;
 import org.datavaultplatform.broker.services.*;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -98,4 +99,6 @@ public class MockServicesConfig {
   @MockBean
   VaultsService mVaultsService;
 
+  @MockBean
+  AdminDepositService mAdminDepositService;
 }

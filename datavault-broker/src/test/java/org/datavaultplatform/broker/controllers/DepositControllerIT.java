@@ -3,6 +3,7 @@ package org.datavaultplatform.broker.controllers;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.app.DataVaultBrokerApp;
 import org.datavaultplatform.broker.config.MockRabbitConfig;
+import org.datavaultplatform.broker.service.AdminDepositService;
 import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.broker.test.AddTestProperties;
 import org.datavaultplatform.broker.test.BaseDatabaseTest;
@@ -54,7 +55,10 @@ class DepositControllerIT extends BaseDatabaseTest {
     
     @MockBean
     EmailService emailService;
-    
+
+    @MockBean
+    AdminDepositService mAdminDepositService;
+
     @Autowired
     DepositsController controller;
     

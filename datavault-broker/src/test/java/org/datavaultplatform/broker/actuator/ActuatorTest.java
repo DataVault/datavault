@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.app.DataVaultBrokerApp;
+import org.datavaultplatform.broker.service.AdminDepositService;
 import org.datavaultplatform.broker.queue.Sender;
 import org.datavaultplatform.broker.services.FileStoreService;
 import org.datavaultplatform.broker.test.AddTestProperties;
@@ -58,6 +59,9 @@ public class ActuatorTest extends BaseDatabaseTest {
 
   @MockBean
   FileStoreService mFileStoreService;
+
+  @MockBean
+  AdminDepositService mAdminDepositService;
 
   @Test
   void setup() {
