@@ -15,16 +15,15 @@ import java.io.File;
 import java.nio.file.Files;
 import java.time.Duration;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertThrows;
 
 @EnabledOnOs({OS.LINUX, OS.MAC})
 @DisabledInsideDocker //docker image where we run unit tests on Jenkins does not have 'logger' command
 class ProcessHelperTest {
-
-    public static final int EXIT_STATUS_FROM_SIGKILL = 137; //128 + 9 (for sigkill)
 
     @TempDir
     File tempDir;
@@ -38,7 +37,7 @@ class ProcessHelperTest {
         createFile(f1);
         createFile(f2);
         createFile(f3);
-        checkSuccess("test", matchList("file1.txt", "file2.txt", "file3.txt"), matchList(), "ls", tempDir.toString());
+        checkSuccess("test", matchList("file1.txt", "file2.txt", "file3.txt"), "ls", tempDir.toString());
     }
 
     void createFile(File file) throws Exception {
@@ -47,18 +46,14 @@ class ProcessHelperTest {
 
     void checkSuccess(String desc,
                       Matcher<List<String>> expectedOutputs,
-                      Matcher<List<String>> expectedErrors,
                       String... commands) throws Exception {
         ProcessHelper processHelper = new ProcessHelper(desc, commands);
         ProcessHelper.ProcessInfo info = processHelper.execute();
-        System.out.printf("output %s%n", info.getOutputMessages());
-        System.out.printf("error  %s%n", info.getErrorMessages());
+        System.out.printf("output %s%n", info.outputMessages());
 
-        assertThat(expectedOutputs.matches(info.getOutputMessages())).isTrue();
-        assertThat(expectedErrors.matches(info.getErrorMessages())).isTrue();
-        assertThat(info.getExitValue()).isZero();
+        assertThat(expectedOutputs.matches(info.outputMessages())).isTrue();
+        assertThat(info.exitValue()).isZero();
         assertThat(info.wasSuccess()).isTrue();
-        assertThat(info.isTimedOut()).isFalse();
     }
 
     private Matcher<List<String>> matchList(String... items) {
@@ -70,8 +65,7 @@ class ProcessHelperTest {
     @Test
     void testProcessWithPWD() throws Exception {
         String pwd = System.getProperty("user.dir");
-        Matcher<List<String>> matchErrors = Matchers.equalTo(Collections.emptyList());
-        checkSuccess("test", matchList(pwd), matchList(), "pwd");
+        checkSuccess("test", matchList(pwd), "pwd");
     }
 
     @Test
@@ -88,7 +82,7 @@ class ProcessHelperTest {
             }
         };
         //TODO gotta be a better way to get something to stderr during test
-        checkSuccess("test", matchList(), errorMatcher, "logger", "-s", "bob");
+        checkSuccess("test", errorMatcher, "logger", "-s", "bob");
     }
 
     @Nested
@@ -99,25 +93,24 @@ class ProcessHelperTest {
             ProcessHelper processHelper = new ProcessHelper("test", "sleep", "5");
             ProcessHelper.ProcessInfo info = processHelper.execute();
             System.out.printf("output %s%n", info.getOutputMessages());
-            System.out.printf("error  %s%n", info.getErrorMessages());
 
             assertThat(info.getExitValue()).isZero();
             assertThat(info.wasSuccess()).isTrue();
-            assertThat(info.isTimedOut()).isFalse();
             assertThat(info.getDuration()).isGreaterThanOrEqualTo(Duration.ofSeconds(5));
         }
 
         @Test
-        void testTimeout() throws Exception {
-            ProcessHelper processHelper = new ProcessHelper("test", Duration.ofSeconds(2), "sleep", "3");
-            ProcessHelper.ProcessInfo info = processHelper.execute();
-            System.out.printf("output %s%n", info.getOutputMessages());
-            System.out.printf("error  %s%n", info.getErrorMessages());
-            assertThat(info.getExitValue()).isEqualTo(EXIT_STATUS_FROM_SIGKILL);
-            assertThat(info.wasSuccess()).isFalse();
-            assertThat(info.isTimedOut()).isTrue();
-            assertThat(info.getDuration()).isLessThan(Duration.ofSeconds(3));
-
+        void testTimeout() {
+            String regex = "OS process desc\\[(.*?)]pid\\[(\\d+)]TimedOutAfter\\[(PT\\d+S)]forcedToShutdown\\[false]";
+            long start = System.nanoTime();
+            TimeoutException timeout = assertThrows(TimeoutException.class, () -> {
+                ProcessHelper processHelper = new ProcessHelper("test", Duration.ofSeconds(2), "sleep", "3");
+                processHelper.execute();
+            });
+            Duration diff = Duration.ofNanos(System.nanoTime() - start);
+            assertThat(timeout.getMessage()).matches(regex);
+            assertThat(diff)
+                    .isBetween(Duration.ofMillis(2000), Duration.ofMillis(2500));
         }
 
     }

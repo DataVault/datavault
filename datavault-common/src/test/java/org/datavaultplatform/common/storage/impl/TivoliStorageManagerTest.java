@@ -1,8 +1,10 @@
 package org.datavaultplatform.common.storage.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.util.ProcessHelper;
+import org.datavaultplatform.common.util.TestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -32,6 +34,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
+@Slf4j
 @SuppressWarnings("CodeBlock2Expr")
 @ExtendWith(MockitoExtension.class)
 class TivoliStorageManagerTest {
@@ -329,7 +332,7 @@ class TivoliStorageManagerTest {
             assertThat(argDesc.getValue()).isEqualTo("tsmDelete");
             
             String expectedTsmFile = tsmTemp.resolve("testDepositId").resolve(fileToDelete.getName()).toString();
-            assertThat(argCommands.getValue()).isEqualTo(new String[]{"dsmc","delete","archive", expectedTsmFile, "-noprompt","-optfile=specificLocation"});
+            assertThat(argCommands.getValue()).isEqualTo(TivoliStorageManager.cleanTsmCommand("dsmc","delete","archive", expectedTsmFile, "-noprompt","-optfile=specificLocation"));
 
             //Check that the local file has not been deleted. We are trying to delete file on TSM ONLY
             assertThat(fileToDelete).exists();
@@ -343,9 +346,9 @@ class TivoliStorageManagerTest {
 
             ProcessHelper.ProcessInfo mProcessInfo = Mockito.mock(ProcessHelper.ProcessInfo.class);
             lenient().when(mProcessInfo.wasFailure()).thenReturn(true);
+            lenient().when(mProcessInfo.getExitValue()).thenReturn(123);
             lenient().when(mProcessInfo.wasSuccess()).thenReturn(false);
-            when(mProcessInfo.getErrorMessages()).thenReturn(Arrays.asList("error-message-1","error-message-2"));
-            when(mProcessInfo.getOutputMessages()).thenReturn(Arrays.asList("info-message-1","info-message-2"));
+            lenient().when(mProcessInfo.getOutputMessages()).thenReturn(Arrays.asList("info-message-1","info-message-2"));
 
             Mockito.doReturn(mProcessInfo).when(tsm).getProcessInfo(argDesc.capture(), argCommands.capture());
 
@@ -355,7 +358,7 @@ class TivoliStorageManagerTest {
 
             assertThat(argDesc.getValue()).isEqualTo("tsmDelete");
 
-            assertThat(argCommands.getValue()).isEqualTo(new String[]{"dsmc","delete","archive", expectedTsmFile, "-noprompt","-optfile=specificLocation"});
+            assertThat(argCommands.getValue()).isEqualTo(TivoliStorageManager.cleanTsmCommand("dsmc","delete","archive", expectedTsmFile, "-noprompt","-optfile=specificLocation"));
 
             //Check that the local file has not been deleted. We are trying to delete file on TSM ONLY
             assertThat(fileToDelete).exists();
@@ -365,24 +368,24 @@ class TivoliStorageManagerTest {
 
     @Nested
     class RetrieveTests {
-        
+
         Path tsmTemp;
         TivoliStorageManager tsm;
-        
+
         @Captor
         ArgumentCaptor<String> argDesc;
         @Captor
         ArgumentCaptor<String[]> argCommands;
-        
+
         File targetFile;
-        
+
         final String timestampedDir = SftpUtils.getTimestampedDirectoryName(FIXED_CLOCK);
 
         @BeforeEach
         void setup() throws IOException {
             tsmTemp = tempPath.resolve("tsmTemp");
             Files.createDirectories(tsmTemp);
-            
+
             targetFile = tempPath.resolve("target.txt").toFile();
 
             Map<String, String> props = new HashMap<>();
@@ -392,18 +395,22 @@ class TivoliStorageManagerTest {
             tsm = Mockito.spy(new TivoliStorageManager("testTSM", props));
             tsm.setClock(FIXED_CLOCK);
         }
-         
+
         void checkGetProcessInfo(InvocationOnMock invocation) {
+
             assertThat(invocation.getArguments()[0]).isEqualTo("tsmRetrieve");
-            assertThat(invocation.getArguments()[1]).isEqualTo("dsmc");
-            assertThat(invocation.getArguments()[2]).isEqualTo("retrieve");
-            assertThat(invocation.getArguments()[3]).isEqualTo(tsmTemp.resolve("testDepositId").resolve(targetFile.getName()).toString());
-            assertThat(invocation.getArguments()[4]).isEqualTo(tsmTemp.resolve(timestampedDir).resolve(targetFile.getName()).toString());
-            assertThat(invocation.getArguments()[5]).isEqualTo("-description=testDepositId");
-            assertThat(invocation.getArguments()[6]).isEqualTo("-optfile=testLocation");
-            assertThat(invocation.getArguments()[7]).isEqualTo("-replace=true");
+
+            String[] expectedCommands = TivoliStorageManager.cleanTsmCommand("dsmc",
+                    "retrieve",
+                    tsmTemp.resolve("testDepositId").resolve(targetFile.getName()).toString(),
+                    tsmTemp.resolve(timestampedDir).resolve(targetFile.getName()).toString(),
+                    "-description=testDepositId",
+                    "-optfile=testLocation",
+                    "-replace=true");
+
+            TestUtils.testExpectedCommands(invocation, expectedCommands);
         }
-        
+       
         @ParameterizedTest
         @ValueSource(ints = {1,2,3,4,5})
         void testRetrieveSucceeds(int attemptWhichSucceeds) throws Exception {
@@ -447,8 +454,6 @@ class TivoliStorageManagerTest {
             
             Path targetFilePath = targetFile.toPath();
             assertThat(Files.exists(targetFilePath)).isFalse();
-
-            AtomicInteger attempts = new AtomicInteger(0);
 
             Mockito.doAnswer(invocation -> {
 
@@ -538,10 +543,6 @@ class TivoliStorageManagerTest {
         @BeforeEach
         void setup(){
             mProcessInfo = mock(ProcessHelper.ProcessInfo.class);
-
-            lenient().when(mProcessInfo.getErrorMessages()).thenReturn(Collections.emptyList());
-            lenient().when(mProcessInfo.isTimedOut()).thenReturn(false);
-
         }
         
         @Test

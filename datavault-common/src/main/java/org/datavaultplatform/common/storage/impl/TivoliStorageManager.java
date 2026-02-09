@@ -20,10 +20,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Clock;
 import java.time.Duration;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Function;
 
@@ -42,9 +39,10 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 	public static final Verify.Method VERIFICATION_METHOD = Verify.Method.COPY_BACK;
 	public static final String PROPERTY_USER_DIR = "user.dir";
 	public static final String ENV_PATH = "PATH";
+	public static final String DSMC = "dsmc";
 	// default locations of TSM option files
-	public static String DEFAULT_TSM_SERVER_NODE1_OPT = "/opt/tivoli/tsm/client/ba/bin/dsm1.opt";
-	public static String DEFAULT_TSM_SERVER_NODE2_OPT = "/opt/tivoli/tsm/client/ba/bin/dsm2.opt";
+	public static final String DEFAULT_TSM_SERVER_NODE1_OPT = "/opt/tivoli/tsm/client/ba/bin/dsm1.opt";
+	public static final String DEFAULT_TSM_SERVER_NODE2_OPT = "/opt/tivoli/tsm/client/ba/bin/dsm2.opt";
 	
     private final int maxRetries;
 	private final boolean reverse;
@@ -88,7 +86,7 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
     public long getUsableSpace() throws Exception {
     	long retVal = 0;
 
-		ProcessHelper.ProcessInfo info = getProcessInfo("tsmGetUsableSpace","dsmc", "query", "filespace");
+		ProcessHelper.ProcessInfo info = getProcessInfo("tsmGetUsableSpace", cleanTsmCommand("dsmc", "query", "filespace"));
 
         if (info.wasFailure()) {
 			String message = "Filespace output failed.";
@@ -131,7 +129,7 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
     	for (int r = 0; r < maxRetries && !retrieved; r++) {
 			log.info("retrieve [{}] attempt[{}/{}]", tsmFilePath, r+1, maxRetries);
 	        ProcessHelper.ProcessInfo info = getProcessInfo("tsmRetrieve" ,
-					"dsmc", "retrieve", tsmFilePath.toString(), retrieveToPath.toString(), "-description=" + depositId, "-optfile=" + optFilePath, "-replace=true");
+					cleanTsmCommand("dsmc", "retrieve", tsmFilePath.toString(), retrieveToPath.toString(), "-description=" + depositId, "-optfile=" + optFilePath, "-replace=true"));
 			String attemptCtx = String.format("attempt[%s/%s]", r+1, maxRetries);
 	        if (info.wasFailure()) {
 				String errMsg = String.format("Retrieval of [%s/%s] failed using location[%s]%s" , depositId, target.getName(), optFilePath, attemptCtx);
@@ -208,40 +206,22 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
     public void delete(String depositId, File working, Progress progress, String optFilePath) throws Exception {
 		Path depositDirectoryPath = getDepositDirectoryPath(depositId);
 		Path tsmFilePath = depositDirectoryPath.resolve(working.getName());
-		log.info("TSM Delete [{}] ",tsmFilePath);
 
-		boolean deleted = false;
-		for (int r = 0; r < maxRetries && !deleted; r++) {
-			ProcessHelper.ProcessInfo info = getProcessInfo("tsmDelete",
-					"dsmc", "delete", "archive", tsmFilePath.toString(), "-noprompt", "-optfile=" + optFilePath);
-			String attemptCtx = String.format("attempt[%s/%s]", r+1, maxRetries);
-			if (info.wasFailure()) {
-				boolean lastAttempt = r == (maxRetries -1);
-				String errMessage = String.format("Delete of [%s] failed using location[%s] %s", tsmFilePath, optFilePath, attemptCtx);
-				logProcessOutput(info, errMessage);
-				if (lastAttempt) {
-					// just exit as there may be reasons why data is not on tape
-					// we will have tried x number of times so can probably rule out
-					// TSM connection issue being the reason for failing
-					log.info("Delete of [{}] was skipped after multiple attempts.", tsmFilePath);
-					return;
-				}
-				log.info("{} Retrying in {} mins", errMessage, retryTimeSeconds);
-				TimeUnit.SECONDS.sleep(retryTimeSeconds);
-			} else {
-				log.info("Delete of [{}] was Successful.", tsmFilePath);
-				deleted = true;
+		String longDescription = "TSM Delete [%s]".formatted(tsmFilePath);
+		log.info(longDescription);
+		String[] commandArgs = cleanTsmCommand("dsmc", "delete", "archive", tsmFilePath.toString(), "-noprompt", "-optfile=" + optFilePath);
 
-			}
-		}
-    }
-	
+		TSMProcessRetrier retrier = new TSMProcessRetrier("tsmDelete", maxRetries, retryTimeSeconds, this::getProcessInfo,
+				TsmExitCode::isFailure, commandArgs);
+		retrier.execute();
+	}
+
 	/*
 	 * The TSM Tape Driver 'dsmc' executable should be on the Java PATH
 	 */
 	public static boolean checkTSMTapeDriver() {
 		try {
-			ProcessHelper.ProcessInfo info = CheckerUtils.getProcessInfo("tsmCheckTapeDriver", Duration.ofSeconds(5), "which", "dsmc");
+			ProcessHelper.ProcessInfo info = CheckerUtils.getProcessInfo("tsmCheckTapeDriver", Duration.ofSeconds(5), cleanTsmCommand("which", "dsmc"));
 
 			log.info("user.dir [{}]", System.getProperty(PROPERTY_USER_DIR));
 			log.info("PB 'path' [{}]", new ProcessBuilder().environment().get(ENV_PATH));
@@ -253,7 +233,8 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 				log.info("'dsmc' - is found on PATH by 'which' at [{}]", canonicalPath);
 				return true;
 			} else {
-				log.info("'dsmc' - is NOT found on PATH by 'which' {}", info.getErrorMessages());
+				log.warn("'dsmc' - is NOT found on PATH by 'which'");
+				info.getOutputMessages().forEach(log::warn);
 				return false;
 			}
 		} catch (Exception ex) {
@@ -313,8 +294,7 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 	
 	static void logProcessOutput(ProcessHelper.ProcessInfo info, String errMessage)  {
 		log.error(errMessage);
-		info.getErrorMessages().forEach( error -> log.error("stderr [{}]", error));
-		info.getOutputMessages().forEach( msg -> log.error("stdout [{}]", msg));
+		info.getOutputMessages().forEach( msg -> log.error("output [{}]", msg));
 	}
 
 	/*
@@ -344,6 +324,87 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 		Assert.notNull(clock, "The clock cannot be null");
 		this.clock = clock;
 	}
+	
+	public enum TsmExitCodeType {
+			SUCCESS,
+			WARNING,
+			ERROR,
+			SEVERE,
+			SYSTEM,
+			UNKNOWN			
+	}
+	
+	public static class TsmExitCode {
+
+		private static final List<TsmExitCodeType> NON_FAILURE_TYPES
+				= List.of(TsmExitCodeType.SUCCESS, TsmExitCodeType.WARNING);
+
+		@Getter
+		private final int exitCode;
+
+		@Getter
+		private final TsmExitCodeType exitCodeType;
+		
+		private TsmExitCode(int code, TsmExitCodeType type) {
+			this.exitCode = code;
+			this.exitCodeType = type;
+		}
+		
+		public static TsmExitCode of(int code) {
+			if (code > 12) {
+				return new TsmExitCode(code, TsmExitCodeType.SYSTEM);
+			}
+
+			TsmExitCodeType type = switch (code) {
+				case 0  -> TsmExitCodeType.SUCCESS;
+				case 4  -> TsmExitCodeType.WARNING;
+				case 8  -> TsmExitCodeType.ERROR;
+				case 12 -> TsmExitCodeType.SEVERE;
+				default -> TsmExitCodeType.UNKNOWN;
+			};
+
+			return new TsmExitCode(code, type);
+		}
+		public boolean hasFailed() {
+			return !NON_FAILURE_TYPES.contains(this.exitCodeType);
+		}
+
+		public static boolean isFailure(ProcessHelper.ProcessInfo processInfo) {
+			return isFailure(processInfo.getExitValue());
+		}
+
+		public static boolean isFailure(int exitCodeValue) {
+			TsmExitCode tsmExitCode = TsmExitCode.of(exitCodeValue);
+			return tsmExitCode.hasFailed();
+		}
+	}
+
+	/**
+	 * a way of ensuring that all dsmc commands have 'best practice' options
+	 * @param commands - the original array operating system command and arguments
+	 * @return a modified array of operating system command and arguments that follow 'dsmc' argument best practices
+	 */
+	public static String[] cleanTsmCommand(String... commands) {
+		if (commands == null || commands.length == 0) {
+			return new String[0];
+		}
+
+		if (DSMC.equalsIgnoreCase(commands[0])) {
+			List<String> list = new ArrayList<>();
+
+			//we add extra commands before 'dsmc' to force line-by-line buffering - means we don't lose output from 'dsmc'
+			list.addAll(new OsCommandLineBufferingPrefixGenerator().generate());
+
+			list.addAll(Arrays.asList(commands));
+			// these "dsmc" options are best practice when using 'dsmc' for non-interactive session where simple text output is best
+			list.add("-displaymode=list");
+			list.add("-noprompt");
+			return list.toArray(new String[0]);
+		}
+
+		return commands;
+	}
+
 }
 
 

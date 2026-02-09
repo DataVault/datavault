@@ -45,7 +45,7 @@ public class TSMTracker implements Callable<String> {
         for (int r = 0; r < maxRetries && !stored; r++) {
             String attemptCtx = String.format("attempt[%s/%s]", r+1, maxRetries);
             ProcessHelper.ProcessInfo info = getProcessInfo("tsmStore",
-                    "dsmc", "archive", working.getAbsolutePath(), "-description=" + description, "-optfile=" + location);
+                    TivoliStorageManager.cleanTsmCommand("dsmc", "archive", working.getAbsolutePath(), "-description=" + description, "-optfile=" + location));
             if (info.wasSuccess()) {
                 stored = true;
                 String msg = String.format("Deposit of [%s] succeeded using location[%s]%s", working.getAbsolutePath(), location, attemptCtx);
