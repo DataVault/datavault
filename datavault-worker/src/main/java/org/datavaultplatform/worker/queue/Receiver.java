@@ -18,12 +18,8 @@ import org.datavaultplatform.common.event.EventSender;
 import org.datavaultplatform.common.event.RecordingEventSender;
 import org.datavaultplatform.common.io.DataVaultFileUtils;
 import org.datavaultplatform.common.model.Job;
-import org.datavaultplatform.common.task.Context;
+import org.datavaultplatform.common.task.*;
 import org.datavaultplatform.common.task.Context.AESMode;
-import org.datavaultplatform.common.task.ContextVaultInfo;
-import org.datavaultplatform.common.task.Task;
-import org.datavaultplatform.common.task.TaskStageEventListener;
-import org.datavaultplatform.common.task.TaskConfig;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
 
 import org.datavaultplatform.worker.rabbit.RabbitMessageInfo;
@@ -147,12 +143,11 @@ public class Receiver implements RabbitMessageProcessor{
             String message = messageInfo.getMessageBody();
             MessageProperties props = messageInfo.message().getMessageProperties();
             // Decode and begin the job ...
-            TaskConfig.INSTANCE.reset();
-            try {
+            TaskConfigTL.reset();            try {
                 logMessageAsFormattedJson(props.getMessageId(), message);
 
                 Task concreteTask = getConcreteTask(message);
-                TaskConfig.INSTANCE.populate(concreteTask.getProperties());
+                TaskConfigTL.get().populate(concreteTask.getProperties());
     
                 // Is the message a redelivery ?
                 if (props.isRedelivered()) {
@@ -178,7 +173,7 @@ public class Receiver implements RabbitMessageProcessor{
                 log.info("Finished Processing message[{}]. Took [{}]secs",
                     messageInfo, TimeUnit.MILLISECONDS.toSeconds(diff));
 
-               boolean stopChildProcesses = TaskConfig.INSTANCE.isExecutorProperShutdownEnabled();
+               boolean stopChildProcesses = TaskConfigTL.get().isExecutorProperShutdownEnabled();
                operatingSystemChildProcessManager.findAndStopChildProcesses(stopChildProcesses);
             }
      }

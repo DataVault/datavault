@@ -22,7 +22,7 @@ class TaskConfigTest {
     final Duration duration3 = Duration.ofMinutes(3);
     final Duration duration4 = Duration.ofMinutes(4);
 
-    final TaskConfig config = TaskConfig.INSTANCE;
+    final TaskConfig config = new TaskConfig();
 
     @BeforeEach
     void setup() {

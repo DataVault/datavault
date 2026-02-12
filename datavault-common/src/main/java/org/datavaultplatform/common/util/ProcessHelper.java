@@ -3,6 +3,7 @@ package org.datavaultplatform.common.util;
 
 import org.apache.commons.io.IOUtils;
 import org.datavaultplatform.common.task.TaskConfig;
+import org.datavaultplatform.common.task.TaskConfigTL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
@@ -231,7 +232,7 @@ public class ProcessHelper {
 
             // 3. Wait for the PARENT to die. 
             // Usually if parent dies, we assume success, but strictly speaking children might linger.
-            if (!process.waitFor(TaskConfig.INSTANCE.getProcessSigTermTimeoutDuration().toMillis(), TimeUnit.MILLISECONDS)) {
+            if (!process.waitFor(TaskConfigTL.get().getProcessSigTermTimeoutDuration().toMillis(), TimeUnit.MILLISECONDS)) {
                 LOG.warn("pid[{}] - process did not respond to SIGTERM, sending SIGKILL", pid);
                 forcedToShutDown = true;
 
@@ -270,7 +271,7 @@ public class ProcessHelper {
             process.destroyForcibly();
 
             // 2. Wait for parent death
-            boolean killed = process.waitFor(TaskConfig.INSTANCE.getProcessPostSigKillTimeoutDuration().toMillis(), TimeUnit.MILLISECONDS);
+            boolean killed = process.waitFor(TaskConfigTL.get().getProcessPostSigKillTimeoutDuration().toMillis(), TimeUnit.MILLISECONDS);
             if (killed) {
                 LOG.info("pid[{}] - process successfully killed with SIGKILL", pid);
             } else {

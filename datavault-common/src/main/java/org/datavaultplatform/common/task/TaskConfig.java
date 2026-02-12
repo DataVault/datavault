@@ -9,17 +9,9 @@ import java.time.Duration;
 import java.time.format.DateTimeParseException;
 import java.util.Map;
 
-/**
- * Because were not using Spring beans for Worker Tasks - we need a way of getting timeout Config into the ProcessInfo and TaskExecutor without
- * passing it through the many layers of code which would be huge change.
- * We are going to use a singleton TaskConfig which can be populated via the Worker Task properties Map and reset before processing a new Worker Task;
- * This is okay because each Worker only processes a single Task at a time.
- */
 public class TaskConfig {
 
     public static final Logger LOG = LoggerFactory.getLogger(TaskConfig.class);
-
-    public static final TaskConfig INSTANCE = new TaskConfig();
 
     public static final boolean DEFAULT_EXECUTOR_PROPER_SHUTDOWN_ENABLED = true;
     public static final Duration DEFAULT_EXECUTOR_PRE_SHUTDOWN_NOW_DURATION = Duration.ofMinutes(5);
@@ -28,22 +20,26 @@ public class TaskConfig {
     public static final Duration DEFAULT_PROCESS_SIGTERM_TIMEOUT_DURATION = Duration.ofSeconds(30);
     public static final Duration DEFAULT_PROCESS_POST_SIGKILL_TIMEOUT_DURATION = Duration.ofSeconds(5);
 
-    static {
-        INSTANCE.reset();
-    }
-
     private boolean executorProperShutdownEnabled;
     private Duration executorPreShutdownNowDuration;
     private Duration processMaxDuration;
     private Duration processSigTermTimeoutDuration;
     private Duration processPostSigKillTimeoutDuration;
 
-    public synchronized void reset() {
+    public TaskConfig() {
+        initialize();
+    }
+
+    private synchronized void initialize() {
         this.executorProperShutdownEnabled = DEFAULT_EXECUTOR_PROPER_SHUTDOWN_ENABLED;
         this.executorPreShutdownNowDuration = DEFAULT_EXECUTOR_PRE_SHUTDOWN_NOW_DURATION;
         this.processMaxDuration = DEFAULT_PROCESS_MAX_DURATION;
         this.processSigTermTimeoutDuration = DEFAULT_PROCESS_SIGTERM_TIMEOUT_DURATION;
         this.processPostSigKillTimeoutDuration = DEFAULT_PROCESS_POST_SIGKILL_TIMEOUT_DURATION;
+    }
+    
+    public synchronized void reset() {
+        initialize();
     }
 
     public synchronized boolean isExecutorProperShutdownEnabled() {
@@ -112,9 +108,9 @@ public class TaskConfig {
         if (taskProperties == null) {
             return;
         }
-        Boolean properShutownEnabled = parseBoolean(taskProperties, PropNames.EXECUTOR_PROPER_SHUTDOWN_ENABLED);
-        if (properShutownEnabled != null) {
-            setExecutorProperShutdownEnabled(properShutownEnabled);
+        Boolean properShutdownEnabled = parseBoolean(taskProperties, PropNames.EXECUTOR_PROPER_SHUTDOWN_ENABLED);
+        if (properShutdownEnabled != null) {
+            setExecutorProperShutdownEnabled(properShutdownEnabled);
         }
         setExecutorPreShutdownNowDuration(parseDuration(taskProperties, PropNames.EXECUTOR_PRE_SHUTDOWN_NOW_DURATION));
 

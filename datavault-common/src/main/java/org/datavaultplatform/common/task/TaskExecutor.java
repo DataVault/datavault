@@ -42,12 +42,15 @@ public class TaskExecutor<T> {
 
     private Callable<T> wrap(Callable<T> task) {
         TaskInterrupter.Checker checker = TaskInterrupter.getInterrupterCheck();
+        TaskConfig config = TaskConfigTL.get();
         return () -> {
+            TaskConfigTL.set(config);
             TaskInterrupter.setInterrupterCheck(checker);
             try {
                 return task.call();
             } finally {
                 TaskInterrupter.setInterrupterCheck(null);
+                TaskConfigTL.reset();
             }
         };
     }
@@ -67,18 +70,19 @@ public class TaskExecutor<T> {
 
         ExecutorService service = Executors.newFixedThreadPool(numThreads);
 
-        List<Future<T>> futures = tasks.stream()
-                .map(service::submit)
-                .toList();
-        
-        // prevent any tasks being submitted and tell the service to exit when all tasks are done.
-        service.shutdown();
-
         try {
-            setupExecutorTimeout(executorTimeout, futures);
+            final List<Future<T>> futures;
+
+            if (TaskConfigTL.get().isExecutorProperShutdownEnabled() && executorTimeout != null) {
+                futures = service.invokeAll(tasks, executorTimeout.toMillis(), TimeUnit.MILLISECONDS);
+            } else {
+                futures = service.invokeAll(tasks);
+            }
+
+            service.shutdown();
 
             for (Future<T> future : futures) {
-                // this might cause cancellation exception if Future is cancelled because of TaskExecutor timeout
+                // this might cause a cancellation exception if Future is cancelled because of TaskExecutor timeout
                 getResultFromFuture(future, consumer);
             }
 
@@ -88,7 +92,9 @@ public class TaskExecutor<T> {
             Thread.currentThread().interrupt();
         } catch (CancellationException ce) {
             // we get here when Future.get() is called on Future that has been cancelled due to executorTimeout
-            throw new TimeoutException("The executor has timed out after [%s]".formatted(executorTimeout));
+            TimeoutException te = new TimeoutException("The executor [%s] has timed out after [%s]".formatted(errorLabel, executorTimeout));
+            te.initCause(ce);
+            throw te;
         } finally {
             handleShutdown(service);
         }
@@ -98,7 +104,7 @@ public class TaskExecutor<T> {
         if (executorTimeout == null) {
             return;
         }
-        if (!TaskConfig.INSTANCE.isExecutorProperShutdownEnabled()) {
+        if (!TaskConfigTL.get().isExecutorProperShutdownEnabled()) {
             return;
         }
 
@@ -116,7 +122,7 @@ public class TaskExecutor<T> {
 
     private void getResultFromFuture(Future<T> future, Consumer<T> consumer) throws Exception {
         try {
-            T result = future.get();
+            T result = future.get(); // we have added per-tsm/dsmc timeouts in ProcessHelper
             consumer.accept(result);
         } catch (ExecutionException ee) {
             Utils.handleExecutionException(ee, errorLabel);
@@ -124,22 +130,29 @@ public class TaskExecutor<T> {
     }
 
     private void handleShutdown(ExecutorService executor) {
+        try {
+            handleShutdownInternal(executor);
+        } finally {
+            LOG.warn("ExecutorService[{}]Terminated?[{}]", errorLabel, executor.isTerminated());}
+    }
+
+    private void handleShutdownInternal(ExecutorService executor) {
         // If it's already fully closed, we're done.
         if (executor == null || executor.isTerminated()) return;
 
-        if (!TaskConfig.INSTANCE.isExecutorProperShutdownEnabled()) {
+        if (!TaskConfigTL.get().isExecutorProperShutdownEnabled()) {
             return;
         }
 
         try {
             // Only call shutdown if it hasn't been called yet
             if (!executor.isShutdown()) {
-                
+
                 // shutdown indicates no more tasks coming and executor can clean up threads when current tasks are done
                 executor.shutdown();
             }
 
-            long executorPreShutdownNowMinutes = TaskConfig.INSTANCE.getExecutorPreShutdownNowDuration().toMinutes();
+            long executorPreShutdownNowMinutes = TaskConfigTL.get().getExecutorPreShutdownNowDuration().toMinutes();
             boolean success = executor.awaitTermination(executorPreShutdownNowMinutes, TimeUnit.MINUTES);
             LOG.info("Tasks Finished within [{}] minute timeout ? {}", executorPreShutdownNowMinutes, success);
 
@@ -154,7 +167,7 @@ public class TaskExecutor<T> {
                     // this is what will Interrupt any still running tasks and get them to stop
                     List<Runnable> notStarted = executor.shutdownNow();
                     LOG.warn("ExecutorService[{}]Terminated?[{}]. NotStartedCount[{}]", executor.isTerminated(), errorLabel, notStarted.size());
-                    if (!executor.awaitTermination(TaskConfig.INSTANCE.getExecutorShutdownDuration().getSeconds(), TimeUnit.SECONDS)) {
+                    if (!executor.awaitTermination(TaskConfigTL.get().getExecutorShutdownDuration().getSeconds(), TimeUnit.SECONDS)) {
                         LOG.error("TaskExecutor [{}] did not terminate!", errorLabel);
                     }
                 } catch (InterruptedException ex) {
@@ -162,7 +175,6 @@ public class TaskExecutor<T> {
                     Thread.currentThread().interrupt();
                 }
             }
-            LOG.warn("ExecutorService[{}]Terminated?[{}]", errorLabel, executor.isTerminated());
         }
     }
 }

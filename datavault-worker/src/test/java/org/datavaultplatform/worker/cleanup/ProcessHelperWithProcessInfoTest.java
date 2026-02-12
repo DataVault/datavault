@@ -5,12 +5,14 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.datavaultplatform.common.storage.impl.TivoliStorageManager;
-import org.datavaultplatform.common.task.TaskConfig;
+import org.datavaultplatform.common.task.TaskConfigTL;
 import org.datavaultplatform.common.task.TaskExecutor;
 import org.datavaultplatform.common.util.ProcessExitCodes;
 import org.datavaultplatform.common.util.ProcessHelper;
 import org.datavaultplatform.common.util.TestUtils;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -22,9 +24,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Tests ProcessHelper/ProcessInfo on its own and with TaskExecutor 
- * with non-zero exit codes, task-time-outs, and TaskExecutor timeouts
+ * with non-zero exit codes, task-time-outs, and TaskExecutor timeouts.
+ * This test does not run on Windows because the way windows process shutdown works is different from Mac/Linux.
  */
-class ProcessHelperWithProcessInfoTest {
+@DisabledOnOs(OS.WINDOWS)
+public class ProcessHelperWithProcessInfoTest {
     
     public static final String TIMEOUT_SIGTERM_REGEX = "OS process desc\\[(.*?)]pid\\[(\\d+)]TimedOutAfter\\[(PT\\d+S)]forcedToShutdown\\[false]";
     public static final String TIMEOUT_SIGKILL_REGEX = "OS process desc\\[(.*?)]pid\\[(\\d+)]TimedOutAfter\\[(PT\\d+S)]forcedToShutdown\\[true]";
@@ -106,7 +110,7 @@ class ProcessHelperWithProcessInfoTest {
             @Order(3)
             void testTimeoutFailureWithSigTerm() {
                 TimeoutException timeout = assertThrows(TimeoutException.class, () -> {
-                    getProcessInfo("test3", 2000, 123, DEFAULT_MAX_TASK_DURATION, false);
+                    getProcessInfo("test3", 2000, 999, DEFAULT_MAX_TASK_DURATION, false);
                 });
                 assertThat(timeout.getMessage()).matches(TIMEOUT_SIGTERM_REGEX);
             }
@@ -120,11 +124,11 @@ class ProcessHelperWithProcessInfoTest {
             void testTimeoutFailureWithSigKill() {
                 long startNanos = System.nanoTime();
                 TimeoutException timeout = assertThrows(TimeoutException.class, () -> {
-                    getProcessInfo("test4", 120_000, 123, Duration.ofSeconds(10), true);
+                    getProcessInfo("test4", 120_000, 999, Duration.ofSeconds(10), true);
                 });
                 assertThat(timeout.getMessage()).matches(TIMEOUT_SIGKILL_REGEX);
                 Duration diffDuration = Duration.ofNanos(System.nanoTime() - startNanos);
-                assertThat(diffDuration).isGreaterThanOrEqualTo(TaskConfig.INSTANCE.getProcessSigTermTimeoutDuration());
+                assertThat(diffDuration).isGreaterThanOrEqualTo(TaskConfigTL.get().getProcessSigTermTimeoutDuration());
             }
         }
 
@@ -210,7 +214,7 @@ class ProcessHelperWithProcessInfoTest {
                         // the executor timeout of 10 seconds happens before process-time of 20s (process timeout is 30s)
                         executor.execute(results::add, Duration.ofSeconds(10));
                     });
-                    assertThat(timeout).hasMessage("The executor has timed out after [PT10S]");
+                    assertThat(timeout).hasMessage("The executor [test] has timed out after [PT10S]");
                     assertThat(results).isEmpty();
                 });
                 assertThat(loggingEvents.stream().anyMatch(evt -> {
@@ -237,7 +241,7 @@ class ProcessHelperWithProcessInfoTest {
                         // the executor timeout of 10 seconds happens before process-time of 20s (process timeout is 30s)
                         executor.execute(results::add, Duration.ofSeconds(10));
                     });
-                    assertThat(timeout).hasMessage("The executor has timed out after [PT10S]");
+                    assertThat(timeout).hasMessage("The executor [test] has timed out after [PT10S]");
                     assertThat(results).isEmpty();
                 });
                 assertThat(loggingEvents.stream().anyMatch(evt -> {
