@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.util.ProcessHelper;
+import org.datavaultplatform.common.util.ProcessInfo;
 import org.datavaultplatform.common.util.TestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -320,7 +321,7 @@ class TivoliStorageManagerTest {
             File fileToDelete = Files.createTempFile("test",".txt").toFile();
             assertThat(fileToDelete).exists();
             
-            ProcessHelper.ProcessInfo mProcessInfo = Mockito.mock(ProcessHelper.ProcessInfo.class);
+            ProcessInfo mProcessInfo = Mockito.mock(ProcessInfo.class);
             lenient().when(mProcessInfo.wasFailure()).thenReturn(false);
             lenient().when(mProcessInfo.wasSuccess()).thenReturn(true);
 
@@ -344,7 +345,7 @@ class TivoliStorageManagerTest {
             File fileToDelete = Files.createTempFile("test",".txt").toFile();
             assertThat(fileToDelete).exists();
 
-            ProcessHelper.ProcessInfo mProcessInfo = Mockito.mock(ProcessHelper.ProcessInfo.class);
+            ProcessInfo mProcessInfo = Mockito.mock(ProcessInfo.class);
             lenient().when(mProcessInfo.wasFailure()).thenReturn(true);
             lenient().when(mProcessInfo.getExitValue()).thenReturn(123);
             lenient().when(mProcessInfo.wasSuccess()).thenReturn(false);
@@ -425,7 +426,7 @@ class TivoliStorageManagerTest {
                        checkGetProcessInfo(invocation);
 
                         boolean willSucceed = attemptWhichSucceeds == attempts.incrementAndGet();
-                        ProcessHelper.ProcessInfo mProcessInfo = Mockito.mock(ProcessHelper.ProcessInfo.class);
+                        ProcessInfo mProcessInfo = Mockito.mock(ProcessInfo.class);
                         lenient().when(mProcessInfo.wasFailure()).thenReturn(!willSucceed);
                         lenient().when(mProcessInfo.wasSuccess()).thenReturn(willSucceed);
                         if (willSucceed) {
@@ -459,7 +460,7 @@ class TivoliStorageManagerTest {
 
                 checkGetProcessInfo(invocation);
 
-                ProcessHelper.ProcessInfo mProcessInfo = Mockito.mock(ProcessHelper.ProcessInfo.class);
+                ProcessInfo mProcessInfo = Mockito.mock(ProcessInfo.class);
                 lenient().when(mProcessInfo.wasFailure()).thenReturn(false);
                 lenient().when(mProcessInfo.wasSuccess()).thenReturn(true);
                     Path retrieveToParentPath = tsmTemp.resolve(timestampedDir);
@@ -492,7 +493,7 @@ class TivoliStorageManagerTest {
             Mockito.doAnswer(invocation -> {
                 checkGetProcessInfo(invocation);
                 boolean willSucceed = attemptWhichProcessSucceeds == attempts.incrementAndGet();
-                ProcessHelper.ProcessInfo mProcessInfo = Mockito.mock(ProcessHelper.ProcessInfo.class);
+                ProcessInfo mProcessInfo = Mockito.mock(ProcessInfo.class);
                 lenient().when(mProcessInfo.wasFailure()).thenReturn(!willSucceed);
                 lenient().when(mProcessInfo.wasSuccess()).thenReturn(willSucceed);
                 return mProcessInfo;
@@ -519,7 +520,7 @@ class TivoliStorageManagerTest {
                 checkGetProcessInfo(invocation);
                 counter.incrementAndGet();
                 boolean willSucceed = false;
-                ProcessHelper.ProcessInfo mProcessInfo = Mockito.mock(ProcessHelper.ProcessInfo.class);
+                ProcessInfo mProcessInfo = Mockito.mock(ProcessInfo.class);
                 lenient().when(mProcessInfo.wasFailure()).thenReturn(!willSucceed);
                 lenient().when(mProcessInfo.wasSuccess()).thenReturn(willSucceed);
                 return mProcessInfo;
@@ -538,11 +539,11 @@ class TivoliStorageManagerTest {
     @Nested
     class  CheckTSMTapeDriverTests {
         
-        ProcessHelper.ProcessInfo mProcessInfo;
+        ProcessInfo mProcessInfo;
         
         @BeforeEach
         void setup(){
-            mProcessInfo = mock(ProcessHelper.ProcessInfo.class);
+            mProcessInfo = mock(ProcessInfo.class);
         }
         
         @Test

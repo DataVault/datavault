@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.util.ProcessHelper;
-
+import org.datavaultplatform.common.util.ProcessInfo;
 import java.io.File;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -44,7 +44,7 @@ public class TSMTracker implements Callable<String> {
         boolean stored = false;
         for (int r = 0; r < maxRetries && !stored; r++) {
             String attemptCtx = String.format("attempt[%s/%s]", r+1, maxRetries);
-            ProcessHelper.ProcessInfo info = getProcessInfo("tsmStore",
+            ProcessInfo info = getProcessInfo("tsmStore",
                     TivoliStorageManager.cleanTsmCommand("dsmc", "archive", working.getAbsolutePath(), "-description=" + description, "-optfile=" + location));
             if (info.wasSuccess()) {
                 stored = true;
@@ -68,9 +68,9 @@ public class TSMTracker implements Callable<String> {
      * This allows creation of ProcessInfo to be faked during unit tests.
      */
     @SuppressWarnings("UnnecessaryLocalVariable")
-    protected ProcessHelper.ProcessInfo getProcessInfo(String desc, String... commands) throws Exception {
+    protected ProcessInfo getProcessInfo(String desc, String... commands) throws Exception {
         ProcessHelper helper = new ProcessHelper(desc, commands);
-        ProcessHelper.ProcessInfo info = helper.execute();
+        ProcessInfo info = helper.execute();
         return info;
     }
 }

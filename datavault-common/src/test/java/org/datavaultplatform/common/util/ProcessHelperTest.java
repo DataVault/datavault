@@ -48,7 +48,7 @@ class ProcessHelperTest {
                       Matcher<List<String>> expectedOutputs,
                       String... commands) throws Exception {
         ProcessHelper processHelper = new ProcessHelper(desc, commands);
-        ProcessHelper.ProcessInfo info = processHelper.execute();
+        ProcessInfo info = processHelper.execute();
         System.out.printf("output %s%n", info.outputMessages());
 
         assertThat(expectedOutputs.matches(info.outputMessages())).isTrue();
@@ -91,7 +91,7 @@ class ProcessHelperTest {
         @Test
         void testDuration() throws Exception {
             ProcessHelper processHelper = new ProcessHelper("test", "sleep", "5");
-            ProcessHelper.ProcessInfo info = processHelper.execute();
+            ProcessInfo info = processHelper.execute();
             System.out.printf("output %s%n", info.getOutputMessages());
 
             assertThat(info.getExitValue()).isZero();

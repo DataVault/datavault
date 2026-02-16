@@ -3,6 +3,7 @@ package org.datavaultplatform.common.storage.impl;
 import org.assertj.core.api.Assertions;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.util.ProcessHelper;
+import org.datavaultplatform.common.util.ProcessInfo;
 import org.datavaultplatform.common.util.TestUtils;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -52,7 +53,7 @@ class TSMTrackerTest {
             TestUtils.testExpectedCommands(invocation, expectedCommands);
 
             boolean willSucceed = attempts.incrementAndGet() == attemptWhichSucceeds;
-            ProcessHelper.ProcessInfo mProcessInfo = Mockito.mock(ProcessHelper.ProcessInfo.class);
+            ProcessInfo mProcessInfo = Mockito.mock(ProcessInfo.class);
             if(willSucceed){
                 lenient().when(mProcessInfo.wasSuccess()).thenReturn(true);
                 lenient().when(mProcessInfo.wasFailure()).thenReturn(false);
@@ -101,7 +102,7 @@ class TSMTrackerTest {
 
             TestUtils.testExpectedCommands(invocation, expectedCommands);
             
-            ProcessHelper.ProcessInfo mProcessInfo = Mockito.mock(ProcessHelper.ProcessInfo.class);
+            ProcessInfo mProcessInfo = Mockito.mock(ProcessInfo.class);
                 lenient().when(mProcessInfo.wasSuccess()).thenReturn(false);
                 lenient().when(mProcessInfo.wasFailure()).thenReturn(true);
                 lenient().when(mProcessInfo.getOutputMessages()).thenReturn(Arrays.asList("message1","message2"));

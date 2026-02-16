@@ -9,6 +9,7 @@ import org.datavaultplatform.common.task.TaskConfigTL;
 import org.datavaultplatform.common.task.TaskExecutor;
 import org.datavaultplatform.common.util.ProcessExitCodes;
 import org.datavaultplatform.common.util.ProcessHelper;
+import org.datavaultplatform.common.util.ProcessInfo;
 import org.datavaultplatform.common.util.TestUtils;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.DisabledOnOs;
@@ -37,11 +38,11 @@ public class ProcessHelperWithProcessInfoTest {
 
     static final Duration DEFAULT_MAX_TASK_DURATION = Duration.ofSeconds(1);
 
-    private ProcessHelper.ProcessInfo getProcessInfo(String label, long delayMillis, int exitCode, Duration processMaxDuration, boolean ignoreSigterm) throws Exception {
+    private ProcessInfo getProcessInfo(String label, long delayMillis, int exitCode, Duration processMaxDuration, boolean ignoreSigterm) throws Exception {
         String ignoreSigtermStr = ignoreSigterm ? "yes" : "no";
         var helper = new ProcessHelper("processHelperTestUnixScript.sh", processMaxDuration,
                 TivoliStorageManager.cleanTsmCommand(SCRIPT_PATH, label, String.valueOf(delayMillis), String.valueOf(exitCode), ignoreSigtermStr));
-        ProcessHelper.ProcessInfo result = helper.execute();
+        ProcessInfo result = helper.execute();
         if (!result.wasSuccess()) {
             int actualExitCode = result.getExitValue();
             String actualExitCodeStr = ProcessExitCodes.getExitCodeString(actualExitCode);
@@ -57,11 +58,11 @@ public class ProcessHelperWithProcessInfoTest {
         assertThat(System.getProperty("user.dir")).isEqualTo("/Users/davidhay/UOFE3/DV/datavault/datavault-worker");
     }
 
-    Callable<ProcessHelper.ProcessInfo> getProcessCallable(String label, long delayMs, int exitCode, boolean ignoreSigTerm) {
+    Callable<ProcessInfo> getProcessCallable(String label, long delayMs, int exitCode, boolean ignoreSigTerm) {
         return () -> getProcessInfo(label, delayMs, exitCode, DEFAULT_MAX_TASK_DURATION, ignoreSigTerm);
     }
 
-    Callable<ProcessHelper.ProcessInfo> getProcessCallable(String label, long delayMs, int exitCode, boolean ignoreSigTerm, Duration processMaxDuration) {
+    Callable<ProcessInfo> getProcessCallable(String label, long delayMs, int exitCode, boolean ignoreSigTerm, Duration processMaxDuration) {
         return () -> getProcessInfo(label, delayMs, exitCode, processMaxDuration, ignoreSigTerm);
     }
 
@@ -89,7 +90,7 @@ public class ProcessHelperWithProcessInfoTest {
             @Order(1)
             void testSingleSuccess() {
                 TestUtils.withLevel(ProcessHelper.class, Level.DEBUG, () -> {
-                    ProcessHelper.ProcessInfo info = getProcessInfo("test1", 100, 0, DEFAULT_MAX_TASK_DURATION, false);
+                    ProcessInfo info = getProcessInfo("test1", 100, 0, DEFAULT_MAX_TASK_DURATION, false);
                     assertThat(info.wasSuccess()).isTrue();
                 });
             }
@@ -141,9 +142,9 @@ public class ProcessHelperWithProcessInfoTest {
             @Order(1)
             @SneakyThrows
             void testSingleSuccessWithExecutor() {
-                List<ProcessHelper.ProcessInfo> results = new ArrayList<>();
-                Callable<ProcessHelper.ProcessInfo> callable1 = getProcessCallable("test1", 100, 0, false);
-                TaskExecutor<ProcessHelper.ProcessInfo> executor = new TaskExecutor<>(1, "test");
+                List<ProcessInfo> results = new ArrayList<>();
+                Callable<ProcessInfo> callable1 = getProcessCallable("test1", 100, 0, false);
+                TaskExecutor<ProcessInfo> executor = new TaskExecutor<>(1, "test");
                 executor.add(callable1);
                 executor.execute(results::add);
                 assertThat(results.get(0).wasSuccess()).isTrue();
@@ -153,9 +154,9 @@ public class ProcessHelperWithProcessInfoTest {
             @Order(2)
             @SneakyThrows
             void testExitCodeFailureWithExecutor() {
-                List<ProcessHelper.ProcessInfo> results = new ArrayList<>();
-                Callable<ProcessHelper.ProcessInfo> callable1 = getProcessCallable("test2", 100, 123, false);
-                TaskExecutor<ProcessHelper.ProcessInfo> executor = new TaskExecutor<>(1, "test");
+                List<ProcessInfo> results = new ArrayList<>();
+                Callable<ProcessInfo> callable1 = getProcessCallable("test2", 100, 123, false);
+                TaskExecutor<ProcessInfo> executor = new TaskExecutor<>(1, "test");
                 executor.add(callable1);
                 ProcessException pe = assertThrows(ProcessException.class, () -> {
                     executor.execute(results::add);
@@ -169,9 +170,9 @@ public class ProcessHelperWithProcessInfoTest {
             @Order(3)
             @SneakyThrows
             void testProcessTimeoutWithSigTermFailureWithExecutor() {
-                List<ProcessHelper.ProcessInfo> results = new ArrayList<>();
-                Callable<ProcessHelper.ProcessInfo> callable1 = getProcessCallable("test3", 40_000, 123, false);
-                TaskExecutor<ProcessHelper.ProcessInfo> executor = new TaskExecutor<>(1, "test");
+                List<ProcessInfo> results = new ArrayList<>();
+                Callable<ProcessInfo> callable1 = getProcessCallable("test3", 40_000, 123, false);
+                TaskExecutor<ProcessInfo> executor = new TaskExecutor<>(1, "test");
                 executor.add(callable1);
                 TimeoutException pe = assertThrows(TimeoutException.class, () -> {
                     executor.execute(results::add);
@@ -184,9 +185,9 @@ public class ProcessHelperWithProcessInfoTest {
             @Order(4)
             @SneakyThrows
             void testProcessTimeoutWithSigKillFailureWithExecutor() {
-                List<ProcessHelper.ProcessInfo> results = new ArrayList<>();
-                Callable<ProcessHelper.ProcessInfo> callable1 = getProcessCallable("test3", 120_000, 123, true, Duration.ofSeconds(10));
-                TaskExecutor<ProcessHelper.ProcessInfo> executor = new TaskExecutor<>(1, "test");
+                List<ProcessInfo> results = new ArrayList<>();
+                Callable<ProcessInfo> callable1 = getProcessCallable("test3", 120_000, 123, true, Duration.ofSeconds(10));
+                TaskExecutor<ProcessInfo> executor = new TaskExecutor<>(1, "test");
                 executor.add(callable1);
                 TimeoutException pe = assertThrows(TimeoutException.class, () -> {
                     executor.execute(results::add);
@@ -206,9 +207,9 @@ public class ProcessHelperWithProcessInfoTest {
             void testExecutorTimeoutFailureProcessStoppedWithSigTerm() {
 
                 List<ILoggingEvent> loggingEvents = TestUtils.captureLogging(ProcessHelper.class, () -> {
-                    List<ProcessHelper.ProcessInfo> results = new ArrayList<>();
-                    Callable<ProcessHelper.ProcessInfo> callable1 = getProcessCallable("test3", 20_000, 123, false, Duration.ofSeconds(30));
-                    TaskExecutor<ProcessHelper.ProcessInfo> executor = new TaskExecutor<>(1, "test");
+                    List<ProcessInfo> results = new ArrayList<>();
+                    Callable<ProcessInfo> callable1 = getProcessCallable("test3", 20_000, 123, false, Duration.ofSeconds(30));
+                    TaskExecutor<ProcessInfo> executor = new TaskExecutor<>(1, "test");
                     executor.add(callable1);
                     TimeoutException timeout = assertThrows(TimeoutException.class, () -> {
                         // the executor timeout of 10 seconds happens before process-time of 20s (process timeout is 30s)
@@ -233,9 +234,9 @@ public class ProcessHelperWithProcessInfoTest {
             void testExecutorTimeoutFailureProcessStoppedWithSigKill() {
 
                 List<ILoggingEvent> loggingEvents = TestUtils.captureLogging(ProcessHelper.class, () -> {
-                    List<ProcessHelper.ProcessInfo> results = new ArrayList<>();
-                    Callable<ProcessHelper.ProcessInfo> callable1 = getProcessCallable("test3", 120_000, 123, true, Duration.ofSeconds(10));
-                    TaskExecutor<ProcessHelper.ProcessInfo> executor = new TaskExecutor<>(1, "test");
+                    List<ProcessInfo> results = new ArrayList<>();
+                    Callable<ProcessInfo> callable1 = getProcessCallable("test3", 120_000, 123, true, Duration.ofSeconds(10));
+                    TaskExecutor<ProcessInfo> executor = new TaskExecutor<>(1, "test");
                     executor.add(callable1);
                     TimeoutException timeout = assertThrows(TimeoutException.class, () -> {
                         // the executor timeout of 10 seconds happens before process-time of 20s (process timeout is 30s)

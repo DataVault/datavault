@@ -2,6 +2,7 @@ package org.datavaultplatform.common.storage.impl;
 
 import lombok.Getter;
 import org.datavaultplatform.common.util.ProcessHelper;
+import org.datavaultplatform.common.util.ProcessInfo;
 import org.datavaultplatform.common.util.ProcessInfoExitStatusSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,7 +87,7 @@ public class TSMProcessRetrier {
 
     @FunctionalInterface
     public interface ProcessInfoFactory {
-        ProcessHelper.ProcessInfo createProcessinfo(String desc, String... commands) throws Exception;
+        ProcessInfo createProcessinfo(String desc, String... commands) throws Exception;
     }
 
     /**
@@ -95,9 +96,9 @@ public class TSMProcessRetrier {
      */
     public static class ProcessInfoException extends RuntimeException {
         @Getter
-        private final ProcessHelper.ProcessInfo processInfo;
+        private final ProcessInfo processInfo;
 
-        public ProcessInfoException(ProcessHelper.ProcessInfo processInfo, String message) {
+        public ProcessInfoException(ProcessInfo processInfo, String message) {
             super(message);
             this.processInfo = processInfo;
         }
@@ -112,7 +113,7 @@ public class TSMProcessRetrier {
 
         @Override
         public <T, E extends Throwable> void onSuccess(RetryContext context, RetryCallback<T, E> callback, T result) {
-            if (result instanceof ProcessHelper.ProcessInfo info) {
+            if (result instanceof ProcessInfo info) {
                 if (processInfoExitStatusSupport.isProcessInfoFailure(info)) {
                     throw new ProcessInfoException(info, "Retry trigger: Exit code [%s]".formatted(info.getExitValue()));
                 } else {

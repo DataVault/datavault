@@ -10,6 +10,7 @@ import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.common.task.TaskExecutor;
 import org.datavaultplatform.common.util.ProcessHelper;
+import org.datavaultplatform.common.util.ProcessInfo;
 import org.slf4j.Logger;
 import org.springframework.util.Assert;
 
@@ -86,7 +87,7 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
     public long getUsableSpace() throws Exception {
     	long retVal = 0;
 
-		ProcessHelper.ProcessInfo info = getProcessInfo("tsmGetUsableSpace", cleanTsmCommand("dsmc", "query", "filespace"));
+		ProcessInfo info = getProcessInfo("tsmGetUsableSpace", cleanTsmCommand("dsmc", "query", "filespace"));
 
         if (info.wasFailure()) {
 			String message = "Filespace output failed.";
@@ -128,7 +129,7 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 		boolean retrieved = false;
     	for (int r = 0; r < maxRetries && !retrieved; r++) {
 			log.info("retrieve [{}] attempt[{}/{}]", tsmFilePath, r+1, maxRetries);
-	        ProcessHelper.ProcessInfo info = getProcessInfo("tsmRetrieve" ,
+	        ProcessInfo info = getProcessInfo("tsmRetrieve" ,
 					cleanTsmCommand("dsmc", "retrieve", tsmFilePath.toString(), retrieveToPath.toString(), "-description=" + depositId, "-optfile=" + optFilePath, "-replace=true"));
 			String attemptCtx = String.format("attempt[%s/%s]", r+1, maxRetries);
 	        if (info.wasFailure()) {
@@ -221,7 +222,7 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 	 */
 	public static boolean checkTSMTapeDriver() {
 		try {
-			ProcessHelper.ProcessInfo info = CheckerUtils.getProcessInfo("tsmCheckTapeDriver", Duration.ofSeconds(5), cleanTsmCommand("which", "dsmc"));
+			ProcessInfo info = CheckerUtils.getProcessInfo("tsmCheckTapeDriver", Duration.ofSeconds(5), cleanTsmCommand("which", "dsmc"));
 
 			log.info("user.dir [{}]", System.getProperty(PROPERTY_USER_DIR));
 			log.info("PB 'path' [{}]", new ProcessBuilder().environment().get(ENV_PATH));
@@ -292,7 +293,7 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 		return destinationDirectoryPath;
 	}
 	
-	static void logProcessOutput(ProcessHelper.ProcessInfo info, String errMessage)  {
+	static void logProcessOutput(ProcessInfo info, String errMessage)  {
 		log.error(errMessage);
 		info.getOutputMessages().forEach( msg -> log.error("output [{}]", msg));
 	}
@@ -301,7 +302,7 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 	 * This allows creation of ProcessInfo to be faked during unit tests.
 	 */
 	public static class CheckerUtils {
-		public static ProcessHelper.ProcessInfo getProcessInfo(String desc, Duration duration, String... commands) throws Exception {
+		public static ProcessInfo getProcessInfo(String desc, Duration duration, String... commands) throws Exception {
 			return new ProcessHelper(desc, duration, commands).execute();
 		}
 	}
@@ -309,7 +310,7 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 	/*
 	 * This allows creation of ProcessInfo to be faked during unit tests.
 	 */
-	protected ProcessHelper.ProcessInfo getProcessInfo(String desc, String... commands) throws Exception {
+	protected ProcessInfo getProcessInfo(String desc, String... commands) throws Exception {
 		return new ProcessHelper(desc, commands).execute();
 	}
 
@@ -369,7 +370,7 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 			return !NON_FAILURE_TYPES.contains(this.exitCodeType);
 		}
 
-		public static boolean isFailure(ProcessHelper.ProcessInfo processInfo) {
+		public static boolean isFailure(ProcessInfo processInfo) {
 			return isFailure(processInfo.getExitValue());
 		}
 

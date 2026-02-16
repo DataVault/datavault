@@ -285,35 +285,9 @@ public class ProcessHelper {
         }
     }
 
-    public record ProcessInfo(
-            String description,
-            long pid,
-            int exitValue,
-            List<String> outputMessages,
-            Duration duration
-    ) {
-
-        public boolean wasSuccess() {
-            return this.exitValue == 0;
-        }
-
-        public boolean wasFailure() {
-            return !wasSuccess();
-        }
-
-        public List<String> getOutputMessages() {
-            return outputMessages;
-        }
-
-        public int getExitValue() {
-            return exitValue;
-        }
-
-        public Duration getDuration() {
-            return duration;
-        }
-    }
-    
+    /**
+     * Slf4j does not define logging levels.  
+     */
     public enum LoggingLevel {
         INFO,
         WARN

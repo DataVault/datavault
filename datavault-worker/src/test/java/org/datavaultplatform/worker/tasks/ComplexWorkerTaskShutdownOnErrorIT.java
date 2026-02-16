@@ -6,6 +6,7 @@ import org.datavaultplatform.common.task.TaskConfig;
 import org.datavaultplatform.common.task.TaskConfigTL;
 import org.datavaultplatform.common.task.TaskExecutor;
 import org.datavaultplatform.common.util.ProcessHelper;
+import org.datavaultplatform.common.util.ProcessInfo;
 import org.datavaultplatform.common.util.TestUtils;
 import org.datavaultplatform.worker.cleanup.ProcessHelperWithProcessInfoTest;
 import org.junit.jupiter.api.*;
@@ -275,7 +276,7 @@ class ComplexWorkerTaskShutdownOnErrorIT {
             String[] commands = getCommands(leafLabel, osScriptErrorType, willError);
             try {
                 
-                ProcessHelper.ProcessInfo info = new ProcessHelper(leafLabel, Duration.ofMillis(maxProcessMs), commands).execute();
+                ProcessInfo info = new ProcessHelper(leafLabel, Duration.ofMillis(maxProcessMs), commands).execute();
                 if (info.wasFailure()) {
                     throw new SimulatedTaskException(errorControl, "oops[exitcode=%s]@%s]".formatted(errorControl.targetCoords, info.exitValue()));
                 }

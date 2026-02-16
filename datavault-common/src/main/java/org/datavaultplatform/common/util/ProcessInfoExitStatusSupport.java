@@ -6,7 +6,7 @@ package org.datavaultplatform.common.util;
  **/
 public interface ProcessInfoExitStatusSupport {
 
-    ProcessInfoExitStatusSupport DEFAULT = ProcessHelper.ProcessInfo::wasFailure;
+    ProcessInfoExitStatusSupport DEFAULT = ProcessInfo::wasFailure;
 
-    boolean isProcessInfoFailure(ProcessHelper.ProcessInfo processInfo);
+    boolean isProcessInfoFailure(ProcessInfo processInfo);
 }
