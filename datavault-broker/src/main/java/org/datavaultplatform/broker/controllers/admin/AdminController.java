@@ -9,8 +9,7 @@ import java.util.Map;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.datavaultplatform.broker.queue.Sender;
-import org.datavaultplatform.broker.service.AdminDepositService;
+import org.datavaultplatform.broker.queue.TaskSender;
 import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.event.Event;
@@ -18,7 +17,6 @@ import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.response.*;
 
-import org.datavaultplatform.common.task.Task;
 import org.jsondoc.core.annotation.Api;
 import org.jsondoc.core.annotation.ApiHeader;
 import org.jsondoc.core.annotation.ApiHeaders;
@@ -33,8 +31,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -62,7 +58,7 @@ public class AdminController {
     private final AuditsService auditsService;
     private final RolesAndPermissionsService permissionsService;
     private final AdminDepositService adminDepositService;
-    private final Sender sender;
+    private final TaskSender taskSender;
     private final String optionsDir;
     private final String tempDir;
     private final String bucketName;
@@ -76,7 +72,7 @@ public class AdminController {
         EventService eventService, ArchiveStoreService archiveStoreService, JobsService jobsService,
         ExternalMetadataService externalMetadataService, AuditsService auditsService,
         RolesAndPermissionsService permissionsService, AdminDepositService adminDepositService,
-        Sender sender,
+        TaskSender taskSender,
         @Value("${optionsDir:#{null}}") String optionsDir,
         @Value("${tempDir:#{null}}") String tempDir,
         @Value("${s3.bucketName:#{null}}") String bucketName,
@@ -94,7 +90,7 @@ public class AdminController {
         this.auditsService = auditsService;
         this.permissionsService = permissionsService;
         this.adminDepositService = adminDepositService;
-        this.sender = sender;
+        this.taskSender = taskSender;
         this.optionsDir = optionsDir;
         this.tempDir = tempDir;
         this.bucketName = bucketName;

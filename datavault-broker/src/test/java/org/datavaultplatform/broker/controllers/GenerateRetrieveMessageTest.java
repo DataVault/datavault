@@ -22,6 +22,7 @@ import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.common.storage.impl.LocalFileSystem;
+import org.datavaultplatform.common.task.Task;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,7 +42,7 @@ public class GenerateRetrieveMessageTest extends BaseGenerateMessageTest {
   final File retrieveDir = new File(baseDir, "retrieved");
   final File destDir = new File(baseDir, "dest");
   @Captor
-  ArgumentCaptor<String> argMessage;
+  ArgumentCaptor<Task> argTask;
   private DepositsController dc;
 
   @BeforeEach
@@ -121,11 +122,11 @@ public class GenerateRetrieveMessageTest extends BaseGenerateMessageTest {
     when(usersService.getUser("user123")).thenReturn(mockUser);
     when(depositDao.findById("deposit-id-123")).thenReturn(Optional.of(deposit));
 
-    when(sender.send(argMessage.capture(), any(Boolean.class))).thenReturn("message-id");
+    when(taskSender.send(argTask.capture(), any(Boolean.class))).thenReturn("message-id");
 
     dc.retrieveDeposit("user123", "deposit-id-123", retrieve);
 
-    String sentMessage = argMessage.getValue();
+    String sentMessage = mapper.writeValueAsString(argTask.getValue());
     log.info("START SENT MESSAGE");
     mapper.enable(SerializationFeature.INDENT_OUTPUT);
 

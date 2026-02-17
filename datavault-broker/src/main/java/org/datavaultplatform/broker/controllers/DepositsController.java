@@ -4,7 +4,7 @@ import static org.datavaultplatform.common.util.Constants.HEADER_USER_ID;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
-import org.datavaultplatform.broker.queue.Sender;
+import org.datavaultplatform.broker.queue.TaskSender;
 import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.event.Event;
@@ -45,7 +45,7 @@ public class DepositsController {
     private final ArchiveStoreService archiveStoreService;
     private final JobsService jobsService;
     private final AdminService adminService;
-    private final Sender sender;
+    private final TaskSender taskSender;
     private final String optionsDir;
     private final String tempDir;
     private final String bucketName;
@@ -73,7 +73,7 @@ public class DepositsController {
         RetrievesService retrievesService, MetadataService metadataService,
         ExternalMetadataService externalMetadataService, FilesService filesService,
         UsersService usersService, ArchiveStoreService archiveStoreService, JobsService jobsService,
-        AdminService adminService, Sender sender,
+        AdminService adminService, TaskSender taskSender,
         @Value("${optionsDir:#{null}}") String optionsDir,
         @Value("${tempDir:#{null}}") String tempDir,
         @Value("${s3.bucketName:#{null}}") String bucketName,
@@ -101,7 +101,7 @@ public class DepositsController {
         this.archiveStoreService = archiveStoreService;
         this.jobsService = jobsService;
         this.adminService = adminService;
-        this.sender = sender;
+        this.taskSender = taskSender;
         this.optionsDir = optionsDir;
         this.tempDir = tempDir;
         this.bucketName = bucketName;
@@ -345,9 +345,8 @@ public class DepositsController {
                     chunksDigest,
                     tarIVs, chunksIVs,
                     encTarDigest, encChunksDigests, lastEvent);
-            String jsonRetrieve = mapper.writeValueAsString(retrieveTask);
 
-            sender.send(jsonRetrieve, isRestart);
+            taskSender.send(retrieveTask, isRestart);
         } catch (Exception e) {
             logger.error("unexpected exception", e);
         }
@@ -678,8 +677,7 @@ public class DepositsController {
         if (archiveIDs != null) {
             depositTask.setRestartArchiveIds(archiveIDs);
         }
-        String jsonDeposit = this.mapper.writeValueAsString(depositTask);
-        sender.send(jsonDeposit, isRestart);
+        taskSender.send(depositTask, isRestart);
 
         return job;
     }

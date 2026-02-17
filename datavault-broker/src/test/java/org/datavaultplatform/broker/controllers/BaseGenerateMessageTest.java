@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.datavaultplatform.broker.queue.Sender;
+import org.datavaultplatform.broker.queue.TaskSender;
 import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.common.model.ArchiveStore;
 import org.datavaultplatform.common.model.dao.*;
@@ -73,7 +73,7 @@ public abstract class BaseGenerateMessageTest {
   @Mock
   EventDAO eventDAO;
   @Mock
-  Sender sender;
+  TaskSender taskSender;
   @TempDir
   File baseDir;
 
@@ -109,7 +109,7 @@ public abstract class BaseGenerateMessageTest {
         archiveStoreService,
         jobsService,
         adminService,
-        sender,
+        taskSender,
         optionsDir.getAbsolutePath(),
         tempDir.getAbsolutePath(),
         bucketName,

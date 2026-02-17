@@ -6,7 +6,6 @@ import jakarta.annotation.PostConstruct;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.app.DataVaultBrokerApp;
-import org.datavaultplatform.broker.service.AdminDepositService;
 import org.datavaultplatform.broker.email.EmailBodyGenerator;
 import org.datavaultplatform.broker.queue.MessageIdProcessedListener;
 import org.datavaultplatform.broker.services.*;
@@ -384,7 +383,7 @@ class RetrieveRestartIT extends BaseDatabaseTest {
     private void sendDepositEventsFromBroker(String depositId) {
         Deposit deposit = depositsService.getDeposit(depositId);
         String bagId = deposit.getBagId();
-        HashMap archiveIdsHashMap = new HashMap();
+        HashMap<String,String> archiveIdsHashMap = new HashMap<>();
         archiveIdsHashMap.put("AS1", bagId+".tar");
 
         InitStates event1 = createEvent(InitStates.class, deposit);

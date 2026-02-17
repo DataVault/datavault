@@ -143,7 +143,8 @@ public class Receiver implements RabbitMessageProcessor{
             String message = messageInfo.getMessageBody();
             MessageProperties props = messageInfo.message().getMessageProperties();
             // Decode and begin the job ...
-            TaskConfigTL.reset();            try {
+            TaskConfigTL.reset();
+            try {
                 logMessageAsFormattedJson(props.getMessageId(), message);
 
                 Task concreteTask = getConcreteTask(message);

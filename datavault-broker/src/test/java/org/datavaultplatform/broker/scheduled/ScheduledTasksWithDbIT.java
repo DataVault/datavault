@@ -8,7 +8,7 @@ import java.util.Date;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.app.DataVaultBrokerApp;
 import org.datavaultplatform.broker.config.MockRabbitConfig;
-import org.datavaultplatform.broker.service.AdminDepositService;
+import org.datavaultplatform.broker.services.AdminDepositService;
 import org.datavaultplatform.broker.services.EmailService;
 import org.datavaultplatform.broker.test.AddTestProperties;
 import org.datavaultplatform.broker.test.BaseReuseDatabaseTest;

@@ -1,9 +1,6 @@
-package org.datavaultplatform.broker.service;
+package org.datavaultplatform.broker.services;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.datavaultplatform.broker.queue.Sender;
-import org.datavaultplatform.broker.services.ArchiveStoreService;
-import org.datavaultplatform.broker.services.JobsService;
+import org.datavaultplatform.broker.queue.TaskSender;
 import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.task.Task;
@@ -21,22 +18,22 @@ import java.util.Map;
 
 @Service
 @Transactional
-//@ConditionalOnBean(Sender.class)
+@ConditionalOnBean(TaskSender.class)
 public class AdminDepositService {
     
     private static final Logger LOG = LoggerFactory.getLogger(AdminDepositService.class);
     
     private final ArchiveStoreService archiveStoreService;
     private final JobsService jobsService;
-    private final Sender sender;
+    private final TaskSender taskSender;
     private final boolean workersSendDeletedChunkEvents;
 
     public AdminDepositService(ArchiveStoreService archiveStoreService,
-                               JobsService jobsService, Sender sender,
+                               JobsService jobsService, TaskSender taskSender,
                                @Value("${workers.send.deleted.chunk.events:false}") boolean workersSendDeletedChunkEvents) {
         this.archiveStoreService = archiveStoreService;
         this.jobsService = jobsService;
-        this.sender = sender;
+        this.taskSender = taskSender;
         this.workersSendDeletedChunkEvents = workersSendDeletedChunkEvents;
     }
 
@@ -93,9 +90,7 @@ public class AdminDepositService {
                     null,
                     null, null,
                     null, null, null);
-            ObjectMapper mapper = new ObjectMapper();
-            String jsonDelete = mapper.writeValueAsString(deleteTask);
-            sender.send(jsonDelete);
+            taskSender.send(deleteTask);
         } catch (Exception e) {
             LOG.error("Exception while deleting a deposit", e);
         }

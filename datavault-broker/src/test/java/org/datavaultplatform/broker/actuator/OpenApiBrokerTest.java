@@ -3,8 +3,8 @@ package org.datavaultplatform.broker.actuator;
 import io.swagger.v3.oas.models.OpenAPI;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.app.DataVaultBrokerApp;
-import org.datavaultplatform.broker.service.AdminDepositService;
-import org.datavaultplatform.broker.queue.Sender;
+import org.datavaultplatform.broker.services.AdminDepositService;
+import org.datavaultplatform.broker.queue.TaskSender;
 import org.datavaultplatform.broker.services.FileStoreService;
 import org.datavaultplatform.broker.test.AddTestProperties;
 import org.datavaultplatform.broker.test.BaseDatabaseTest;
@@ -43,7 +43,7 @@ public class OpenApiBrokerTest extends BaseDatabaseTest {
     MockMvc mvc;
 
     @MockBean
-    Sender sender;
+    TaskSender taskSender;
 
     @MockBean
     FileStoreService mFileStoreService;

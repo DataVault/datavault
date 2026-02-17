@@ -2,7 +2,7 @@ package org.datavaultplatform.broker.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import org.datavaultplatform.broker.queue.Sender;
+import org.datavaultplatform.broker.queue.TaskSender;
 import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.event.retrieve.ArchiveStoreRetrievedChunk;
@@ -11,6 +11,7 @@ import org.datavaultplatform.common.request.CreateDeposit;
 import org.datavaultplatform.common.storage.SFTPFileSystemDriver;
 import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.common.storage.impl.TivoliStorageManager;
+import org.datavaultplatform.common.task.Task;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -246,7 +247,7 @@ public class DepositsControllerTest {
     RetrievesService mRetrievesService;
 
     @Mock
-    Sender mSender;
+    TaskSender mTaskSender;
 
     @Mock
     User mUser;
@@ -266,7 +267,7 @@ public class DepositsControllerTest {
     ArgumentCaptor<Job> argJob;
 
     @Captor
-    ArgumentCaptor<String> argRetrieveJson;
+    ArgumentCaptor<Task> argTask;
 
     @Captor
     ArgumentCaptor<Boolean> argIsRestart;
@@ -318,7 +319,7 @@ public class DepositsControllerTest {
                 mExternalMetaDataService, mFilesService,
                 mUsersService, mArchiveStoreService, 
                 
-                mJobsService, mAdminService, mSender,
+                mJobsService, mAdminService, mTaskSender,
 
                 optionsDir, tempDir,
                 s3bucketName,  s3region, s3accessKey, s3secretKey, 
@@ -574,7 +575,7 @@ public class DepositsControllerTest {
             if (lastEvent == null) {
                 doNothing().when(mRetrievesService).addRetrieve(eq(mRetrieve), eq(mDeposit), any(String.class));
             }
-            when(mSender.send(argRetrieveJson.capture(), argIsRestart.capture())).thenReturn("MESSAGE_ID_123");
+            when(mTaskSender.send(argTask.capture(), argIsRestart.capture())).thenReturn("MESSAGE_ID_123");
 
             when(mUser.getFileStores()).thenReturn(List.of(fileStore));
 
@@ -587,8 +588,9 @@ public class DepositsControllerTest {
             boolean result = controller.runRetrieveDeposit(mUser, mDeposit, mRetrieve, lastEvent);
             assertThat(result).isTrue();
 
-            System.out.println(argRetrieveJson.getValue());
-            JSONAssert.assertEquals(expectedJson, argRetrieveJson.getValue(), false);
+            String retrieveJson = mapper.writeValueAsString(argTask.getValue());
+            System.out.println(retrieveJson);
+            JSONAssert.assertEquals(expectedJson, retrieveJson, false);
 
             verify(mDepositsService).getDeposit("test-deposit-id");
             
@@ -647,7 +649,7 @@ public class DepositsControllerTest {
                     mAdminService, mArchive, mArchiveStoreService, mCreateDeposit,
                     mDeposit, mDepositsService, mExternalMetaDataService, mFilesService,
                     mJob, mJobsService, mMetaDataService,
-                    mRetrieve, mRetrievesService, mSender,
+                    mRetrieve, mRetrievesService, mTaskSender,
                     mUser, mUsersService, mVault, mVaultsService);
         }
     }

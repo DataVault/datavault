@@ -2,6 +2,7 @@ package org.datavaultplatform.broker.config;
 
 
 import org.datavaultplatform.broker.queue.Sender;
+import org.datavaultplatform.broker.queue.TaskSender;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
@@ -13,5 +14,9 @@ public class MockRabbitConfig {
 
   @MockBean
   Sender mSender;
+
+  @MockBean
+  TaskSender mTaskSender;
+
 
 }
