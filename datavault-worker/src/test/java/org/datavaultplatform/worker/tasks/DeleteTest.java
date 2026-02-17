@@ -4,6 +4,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
+import org.apache.commons.lang3.SystemUtils;
 import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.event.Error;
 import org.datavaultplatform.common.event.Event;
@@ -750,13 +751,14 @@ class DeleteTest {
 
             // the single delete chunk that was attempted failed for location2
             assertThat(deletedFilesByLocation).hasSize(1);
-            File noChunkFile = new File("/tmp/delete/tempDir/TEST-BAG-ID.tar");
+            File noChunkFile = new File("/tmp/delete/tempDir/TEST-BAG-ID.tar"); //this resolves to /private/tmp/delete/tempDir/TEST-BAG-ID.tar on mac
             assertThat(deletedFilesByLocation.get(location1)).contains(noChunkFile);
 
             // deleted chunks
             assertThat(deletedChunkEvents).hasSize(1);
             DeletedChunk dc1 = deletedChunkEvents.get(0);
-            checkDeletedChunk(dc1, location1, 0, "Deleted Chunk [0/0] from (MultiLocationsArchiveStoreFailureImpl/TEST-ARCHIVE-STORE-ID//private/tmp/delete/location-one)");
+            String tmpPrefix = SystemUtils.IS_OS_MAC ? "/private" : "";
+            checkDeletedChunk(dc1, location1, 0, "Deleted Chunk [0/0] from (MultiLocationsArchiveStoreFailureImpl/TEST-ARCHIVE-STORE-ID/" + tmpPrefix + "/tmp/delete/location-one)");
 
             // verify
             verify(mEventSender, times(5)).send(any(Event.class));

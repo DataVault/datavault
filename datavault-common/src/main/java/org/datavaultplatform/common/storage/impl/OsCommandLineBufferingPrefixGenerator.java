@@ -5,18 +5,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
 @SuppressWarnings("SameReturnValue")
 public class OsCommandLineBufferingPrefixGenerator {
-    
-    public static final Logger LOG = LoggerFactory.getLogger(OsCommandLineBufferingPrefixGenerator.class);
-    public static final String LINUX_STDBUF = "stdBuf";
-    public static final String MACOS_SCRIPT = "script";
 
-    public boolean isOnPath(String command) {
+    public static final Logger LOG = LoggerFactory.getLogger(OsCommandLineBufferingPrefixGenerator.class);
+    public static final String COMMAND_STDBUF = "stdBuf";
+    public static final String COMMAND_SCRIPT = "script";
+
+    public static boolean isCommandOnPath(String command) {
         String path = System.getenv("PATH");
         if (path == null || path.isEmpty()) {
             return false;
@@ -32,27 +32,44 @@ public class OsCommandLineBufferingPrefixGenerator {
         return false;
     }
 
+    public boolean isOnPath(String command) {
+        return isCommandOnPath(command);
+    }
+
     /*
     Forces line-buffered output instead of block-buffered - helps us get output from dsmc on a line-by-line basis - not wait until 4K buffer is full
      */
     public List<String> generate() {
-        List<String> result = new ArrayList<>();
+        List<String> result;
         if (isLinux()) {
-            if (isOnPath(LINUX_STDBUF)) {
-                result.addAll(List.of(LINUX_STDBUF, "-oL"));
+            if (isOnPath(COMMAND_STDBUF)) {
+                result = getStdBufPrefix();
+            } else if (isOnPath(COMMAND_SCRIPT)) {
+                result = getScriptPrefix();
             } else {
-                LOG.warn("CANNOT FIND {} on Linux Path", LINUX_STDBUF);
+                LOG.warn("CANNOT FIND [{}] or [{}]on Linux Path", COMMAND_SCRIPT, COMMAND_STDBUF);
+                return Collections.emptyList();
             }
         } else if (isMacOs()) {
-            if (isOnPath(MACOS_SCRIPT)) {
-                result.addAll(List.of(MACOS_SCRIPT, "-q", "/dev/null"));
+            if (isOnPath(COMMAND_SCRIPT)) {
+                result = getScriptPrefix();
             } else {
-                LOG.warn("CANNOT FIND {} on MacOs Path", MACOS_SCRIPT);
+                result = Collections.emptyList();
+                LOG.warn("CANNOT FIND [{}] on MacOs Path", COMMAND_SCRIPT);
             }
         } else {
             LOG.warn("OS is neither Linux nor MacOs");
+            result = Collections.emptyList();
         }
         return result;
+    }
+
+    List<String> getScriptPrefix() {
+        return List.of(COMMAND_SCRIPT, "-q", "/dev/null");
+    }
+
+    List<String> getStdBufPrefix() {
+        return List.of(COMMAND_STDBUF, "-oL");
     }
 
     public boolean isMacOs() {

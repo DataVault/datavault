@@ -62,7 +62,7 @@ public class ProcessHelperWithProcessInfoTest {
 
     @Test
     void testUserDir() {
-        assertThat(System.getProperty("user.dir")).isEqualTo("/Users/davidhay/UOFE3/DV/datavault/datavault-worker");
+        assertThat(System.getProperty("user.dir")).endsWith("/datavault-worker");
     }
 
     Callable<ProcessInfo> getProcessCallable(String label, long delayMs, int exitCode, boolean ignoreSigTerm) {
