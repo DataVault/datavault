@@ -48,7 +48,8 @@ public class ProcessHelperWithProcessInfoTest {
         } else {
             modifiedCommands = TivoliStorageManager.addLineBufferingPrefix(commands);
         }
-        var helper = new ProcessHelper("processHelperTestUnixScript.sh", processMaxDuration, modifiedCommands.toArray(String[]::new));
+        var desc = "processHelperTestUnixScript.sh[%s]".formatted(label);
+        var helper = new ProcessHelper(desc, processMaxDuration, modifiedCommands.toArray(String[]::new));
         ProcessInfo result = helper.execute();
         if (!result.wasSuccess()) {
             int actualExitCode = result.getExitValue();
@@ -97,7 +98,7 @@ public class ProcessHelperWithProcessInfoTest {
             @Order(1)
             void testSingleSuccess() {
                 TestUtils.withLevel(ProcessHelper.class, Level.DEBUG, () -> {
-                    ProcessInfo info = getProcessInfo("test1", 100, 0, DEFAULT_MAX_TASK_DURATION, false);
+                    ProcessInfo info = getProcessInfo("non-exec-single-test", 100, 0, DEFAULT_MAX_TASK_DURATION, false);
                     assertThat(info.wasSuccess()).isTrue();
                 });
             }
@@ -107,9 +108,9 @@ public class ProcessHelperWithProcessInfoTest {
             @Order(2)
             void testExitCodeFailure() {
                 ProcessException pe = assertThrows(ProcessException.class, () -> {
-                    getProcessInfo("test2", 100, 123, DEFAULT_MAX_TASK_DURATION, false);
+                    getProcessInfo("non-exec-exitcode-test", 100, 123, DEFAULT_MAX_TASK_DURATION, false);
                 });
-                assertThat(pe.getMessage()).isEqualTo("label[test2]delayMs[100]expectedExitCode[123]actualExitCode[123]");
+                assertThat(pe.getMessage()).isEqualTo("label[non-exec-exitcode-test]delayMs[100]expectedExitCode[123]actualExitCode[123]");
                 assertThat(pe.getExitCode()).isEqualTo(123);
             }
 
@@ -118,7 +119,7 @@ public class ProcessHelperWithProcessInfoTest {
             @Order(3)
             void testTimeoutFailureWithSigTerm() {
                 TimeoutException timeout = assertThrows(TimeoutException.class, () -> {
-                    getProcessInfo("test3", 2000, 999, DEFAULT_MAX_TASK_DURATION, false);
+                    getProcessInfo("non-exec-exit-via-sigterm", 2000, 999, DEFAULT_MAX_TASK_DURATION, false);
                 });
                 assertThat(timeout.getMessage()).matches(TIMEOUT_SIGTERM_REGEX);
             }
@@ -132,7 +133,7 @@ public class ProcessHelperWithProcessInfoTest {
             void testTimeoutFailureWithSigKill() {
                 long startNanos = System.nanoTime();
                 TimeoutException timeout = assertThrows(TimeoutException.class, () -> {
-                    getProcessInfo("test4", 120_000, 999, Duration.ofSeconds(10), true);
+                    getProcessInfo("non-exec-exit-via-sigkill", 120_000, 999, Duration.ofSeconds(10), true);
                 });
                 assertThat(timeout.getMessage()).matches(TIMEOUT_SIGKILL_REGEX);
                 Duration diffDuration = Duration.ofNanos(System.nanoTime() - startNanos);
@@ -150,7 +151,7 @@ public class ProcessHelperWithProcessInfoTest {
             @SneakyThrows
             void testSingleSuccessWithExecutor() {
                 List<ProcessInfo> results = new ArrayList<>();
-                Callable<ProcessInfo> callable1 = getProcessCallable("test1", 100, 0, false);
+                Callable<ProcessInfo> callable1 = getProcessCallable("executor-single-success", 100, 0, false);
                 TaskExecutor<ProcessInfo> executor = new TaskExecutor<>(1, "test");
                 executor.add(callable1);
                 executor.execute(results::add);
@@ -162,13 +163,13 @@ public class ProcessHelperWithProcessInfoTest {
             @SneakyThrows
             void testExitCodeFailureWithExecutor() {
                 List<ProcessInfo> results = new ArrayList<>();
-                Callable<ProcessInfo> callable1 = getProcessCallable("test2", 100, 123, false);
+                Callable<ProcessInfo> callable1 = getProcessCallable("executor-exit-code-failure", 100, 123, false);
                 TaskExecutor<ProcessInfo> executor = new TaskExecutor<>(1, "test");
                 executor.add(callable1);
                 ProcessException pe = assertThrows(ProcessException.class, () -> {
                     executor.execute(results::add);
                 });
-                assertThat(pe.getMessage()).isEqualTo("label[test2]delayMs[100]expectedExitCode[123]actualExitCode[123]");
+                assertThat(pe.getMessage()).isEqualTo("label[executor-exit-code-failure]delayMs[100]expectedExitCode[123]actualExitCode[123]");
                 assertThat(pe.getExitCode()).isEqualTo(123);
                 assertThat(results).isEmpty();
             }
@@ -178,7 +179,7 @@ public class ProcessHelperWithProcessInfoTest {
             @SneakyThrows
             void testProcessTimeoutWithSigTermFailureWithExecutor() {
                 List<ProcessInfo> results = new ArrayList<>();
-                Callable<ProcessInfo> callable1 = getProcessCallable("test3", 40_000, 123, false);
+                Callable<ProcessInfo> callable1 = getProcessCallable("executor-timeout-exit-via-sigterm", 40_000, 123, false);
                 TaskExecutor<ProcessInfo> executor = new TaskExecutor<>(1, "test");
                 executor.add(callable1);
                 TimeoutException pe = assertThrows(TimeoutException.class, () -> {
@@ -193,7 +194,7 @@ public class ProcessHelperWithProcessInfoTest {
             @SneakyThrows
             void testProcessTimeoutWithSigKillFailureWithExecutor() {
                 List<ProcessInfo> results = new ArrayList<>();
-                Callable<ProcessInfo> callable1 = getProcessCallable("test3", 120_000, 123, true, Duration.ofSeconds(10));
+                Callable<ProcessInfo> callable1 = getProcessCallable("executor-timeout-exit-via-sigkill", 120_000, 123, true, Duration.ofSeconds(10));
                 TaskExecutor<ProcessInfo> executor = new TaskExecutor<>(1, "test");
                 executor.add(callable1);
                 TimeoutException pe = assertThrows(TimeoutException.class, () -> {
@@ -213,9 +214,10 @@ public class ProcessHelperWithProcessInfoTest {
              */
             void testExecutorTimeoutFailureProcessStoppedWithSigTerm() {
 
+                String label = "executor-process-stopped-via-sigterm";
                 List<ILoggingEvent> loggingEvents = TestUtils.captureLogging(ProcessHelper.class, () -> {
                     List<ProcessInfo> results = new ArrayList<>();
-                    Callable<ProcessInfo> callable1 = getProcessCallable("test3", 20_000, 123, false, Duration.ofSeconds(30));
+                    Callable<ProcessInfo> callable1 = getProcessCallable(label, 20_000, 123, false, Duration.ofSeconds(30));
                     TaskExecutor<ProcessInfo> executor = new TaskExecutor<>(1, "test");
                     executor.add(callable1);
                     TimeoutException timeout = assertThrows(TimeoutException.class, () -> {
@@ -227,7 +229,7 @@ public class ProcessHelperWithProcessInfoTest {
                 });
                 assertThat(loggingEvents.stream().anyMatch(evt -> {
                     return evt.getLevel().equals(Level.WARN) &&
-                    evt.getFormattedMessage().endsWith(" OS process desc[processHelperTestUnixScript.sh] exitCode[SIGTERM(143)] exception[java.lang.InterruptedException]");
+                    evt.getFormattedMessage().endsWith(" OS process desc[processHelperTestUnixScript.sh[" + label + "]] exitCode[SIGTERM(143)] exception[java.lang.InterruptedException]");
                 })).isTrue();
             }
             @Test
@@ -239,10 +241,10 @@ public class ProcessHelperWithProcessInfoTest {
              * We have captured the logging of the ProcessHelper to check that the Process that was running in the executor stopped as expected.
              */
             void testExecutorTimeoutFailureProcessStoppedWithSigKill() {
-
+                String label = "executor-process-stopped-via-sigkill";
                 List<ILoggingEvent> loggingEvents = TestUtils.captureLogging(ProcessHelper.class, () -> {
                     List<ProcessInfo> results = new ArrayList<>();
-                    Callable<ProcessInfo> callable1 = getProcessCallable("test3", 120_000, 123, true, Duration.ofSeconds(10));
+                    Callable<ProcessInfo> callable1 = getProcessCallable(label, 120_000, 123, true, Duration.ofSeconds(10));
                     TaskExecutor<ProcessInfo> executor = new TaskExecutor<>(1, "test");
                     executor.add(callable1);
                     TimeoutException timeout = assertThrows(TimeoutException.class, () -> {
@@ -254,7 +256,7 @@ public class ProcessHelperWithProcessInfoTest {
                 });
                 assertThat(loggingEvents.stream().anyMatch(evt -> {
                     return evt.getLevel().equals(Level.WARN) &&
-                            evt.getFormattedMessage().endsWith(" OS process desc[processHelperTestUnixScript.sh] exitCode[SIGKILL(137)] exception[java.lang.InterruptedException]");
+                            evt.getFormattedMessage().endsWith(" OS process desc[processHelperTestUnixScript.sh[" + label + "]] exitCode[SIGKILL(137)] exception[java.lang.InterruptedException]");
                 })).isTrue();
             }
         }

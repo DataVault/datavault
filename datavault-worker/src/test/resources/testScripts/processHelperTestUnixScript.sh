@@ -17,10 +17,10 @@ EXITCODE="$3" # the code to exit with
 IGNORESIGERM="$4" # 'yes/no' - whether this script will ignore SIGTERM and have to be stopped with SIGKILL instead
 
 if [[ $IGNORESIGERM == "yes" ]]; then
-  trap 'echo "Received SIGTERM: Staying Alive!" >&2' SIGTERM
-  echo "Custom SIGTERM handling enabled";
+  trap 'echo "Received SIGTERM: Staying Alive! for ${LABEL}" >&2' SIGTERM
+  echo "Custom SIGTERM handling enabled for ${LABEL}";
 else
-  echo "Standard signal handling enabled";
+  echo "Standard signal handling enabled for ${LABEL}";
 fi
 
 if ! [[ $EXITCODE =~ ^[0-9]+$ ]]; then 
@@ -61,7 +61,7 @@ echo "stdout: ${LABEL}" # sends text to stdout
 echo "stderr: ${LABEL}" >&2 # sends text to stderr
 # for macos at least - the arg to sleep has to be in parts of seconds - so 100ms would be '0.1 seconds'
 SECONDS_ARG=$(perl -e "print $DELAYMS / 1000")
-echo "SLEEPING $SECONDS_ARG SECONDS..."
+echo "BEFORE SLEEPING $SECONDS_ARG SECONDS : TIME IS $(date +"%H:%M:%S") for ${LABEL}"
 if [[ $IGNORESIGERM == "yes" ]]; then
   # we need to sleep but without a long running child process and the best way is to use 'read -t' but we require whole seconds
   WHOLE_SECONDS_ARG=$(round_up $SECONDS_ARG)
@@ -70,6 +70,7 @@ if [[ $IGNORESIGERM == "yes" ]]; then
 else
   sleep $SECONDS_ARG
 fi
+echo "AFTER SLEEPING $SECONDS_ARG SECONDS : TIME IS $(date +"%H:%M:%S") for ${LABEL}"
 echo "end: ${LABEL}"
-echo "exiting with: $((EXITCODE))"
+echo "exiting with: $((EXITCODE)) for ${LABEL}"
 exit $((EXITCODE));
