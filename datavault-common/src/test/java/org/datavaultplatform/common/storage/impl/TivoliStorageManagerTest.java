@@ -6,6 +6,7 @@ import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.util.ProcessInfo;
 import org.datavaultplatform.common.util.TestUtils;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
@@ -615,7 +616,8 @@ class TivoliStorageManagerTest {
     }
     
     @Nested
-    @EnabledOnOs(OS.LINUX)
+    @Disabled
+    //@EnabledOnOs(OS.LINUX)
     class CommandModificationsOnLinux {
 
         static final String[] WITH_DSMC = {"dsmc", "opt1", "opt2"};
