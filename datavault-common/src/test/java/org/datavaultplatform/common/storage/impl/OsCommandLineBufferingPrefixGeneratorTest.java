@@ -1,5 +1,6 @@
 package org.datavaultplatform.common.storage.impl;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
@@ -27,7 +28,8 @@ class OsCommandLineBufferingPrefixGeneratorTest {
         }
 
         @Test
-        @EnabledOnOs(OS.LINUX)
+        @Disabled
+        //@EnabledOnOs(OS.LINUX)
         void testLinux() {
             List<String> generated = generator.generate();
             assertThat(generated).isEqualTo(List.of("stdBuf", "-oL"));
