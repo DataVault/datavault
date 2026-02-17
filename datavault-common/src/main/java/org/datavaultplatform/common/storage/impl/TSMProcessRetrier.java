@@ -1,7 +1,6 @@
 package org.datavaultplatform.common.storage.impl;
 
 import lombok.Getter;
-import org.datavaultplatform.common.util.ProcessHelper;
 import org.datavaultplatform.common.util.ProcessInfo;
 import org.datavaultplatform.common.util.ProcessInfoExitStatusSupport;
 import org.slf4j.Logger;

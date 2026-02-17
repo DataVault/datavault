@@ -40,8 +40,15 @@ public class ProcessHelperWithProcessInfoTest {
 
     private ProcessInfo getProcessInfo(String label, long delayMillis, int exitCode, Duration processMaxDuration, boolean ignoreSigterm) throws Exception {
         String ignoreSigtermStr = ignoreSigterm ? "yes" : "no";
-        var helper = new ProcessHelper("processHelperTestUnixScript.sh", processMaxDuration,
-                TivoliStorageManager.cleanTsmCommand(SCRIPT_PATH, label, String.valueOf(delayMillis), String.valueOf(exitCode), ignoreSigtermStr));
+        List<String> commands = List.of(SCRIPT_PATH, label, String.valueOf(delayMillis), String.valueOf(exitCode), ignoreSigtermStr);
+        List<String> modifiedCommands;
+        if (ignoreSigterm) {
+            // workaround: don't add 'script/stdbuf line-buffering options' : we cannot use them when we want to ignore sigterm
+            modifiedCommands = commands;
+        } else {
+            modifiedCommands = TivoliStorageManager.addLineBufferingPrefix(commands);
+        }
+        var helper = new ProcessHelper("processHelperTestUnixScript.sh", processMaxDuration, modifiedCommands.toArray(String[]::new));
         ProcessInfo result = helper.execute();
         if (!result.wasSuccess()) {
             int actualExitCode = result.getExitValue();

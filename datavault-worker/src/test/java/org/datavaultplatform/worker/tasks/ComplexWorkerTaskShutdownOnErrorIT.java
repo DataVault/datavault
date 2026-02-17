@@ -2,6 +2,7 @@ package org.datavaultplatform.worker.tasks;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import lombok.Getter;
+import org.datavaultplatform.common.storage.impl.TivoliStorageManager;
 import org.datavaultplatform.common.task.TaskConfig;
 import org.datavaultplatform.common.task.TaskConfigTL;
 import org.datavaultplatform.common.task.TaskExecutor;
@@ -252,7 +253,7 @@ class ComplexWorkerTaskShutdownOnErrorIT {
             this(null);
         }
 
-        private String[] getCommands(String label, OsScriptType osScriptErrorType, boolean willError) {
+        private List<String> getBaseCommands(String label, OsScriptType osScriptErrorType, boolean willError) {
             String arg1Label = label;
             String arg2DelayMs;
             String arg3ExitCodeStr;
@@ -266,7 +267,21 @@ class ComplexWorkerTaskShutdownOnErrorIT {
                 arg3ExitCodeStr = OsScriptType.EXIT_SUCCESS.getScriptExitCodeStr();
                 arg4IgnoreSigTerm = OsScriptType.EXIT_SUCCESS.getScriptExitCodeStr();
             }
-            return new String[]{SCRIPT_PATH, arg1Label, arg2DelayMs, arg3ExitCodeStr, arg4IgnoreSigTerm};
+            List<String> baseCommands = List.of(SCRIPT_PATH, arg1Label, arg2DelayMs, arg3ExitCodeStr, arg4IgnoreSigTerm);
+            return baseCommands;
+        }
+        
+        private String[] getCommands(String label, OsScriptType osScriptErrorType, boolean willError) {
+            final List<String> baseCommands = getBaseCommands(label, osScriptErrorType, willError);
+            final List<String> result;
+            if (osScriptErrorType == OsScriptType.LONG_RUNNING_DOES_NOT_STOP_ON_SIGTERM && willError) {
+                // this is a bit of a workaround because we cannot setup 'script/stdbuf' line buffering prefix to ignore SIGERM
+                // so don't add script/stdbuf line buffering prefix when we want to ignore sigterm
+                result = baseCommands;
+            } else {
+                result = TivoliStorageManager.addLineBufferingPrefix(baseCommands);
+            }
+            return result.toArray(String[]::new);
         }
 
         @Override

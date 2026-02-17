@@ -389,23 +389,36 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 		if (commands == null || commands.length == 0) {
 			return new String[0];
 		}
-
 		if (DSMC.equalsIgnoreCase(commands[0])) {
-			List<String> list = new ArrayList<>();
-
-			//we add extra commands before 'dsmc' to force line-by-line buffering - means we don't lose output from 'dsmc'
-			list.addAll(new OsCommandLineBufferingPrefixGenerator().generate());
-
-			list.addAll(Arrays.asList(commands));
-			// these "dsmc" options are best practice when using 'dsmc' for non-interactive session where simple text output is best
-			list.add("-displaymode=list");
-			list.add("-noprompt");
-			return list.toArray(new String[0]);
+			List<String> list = addLineBufferingPrefix(addDsmcOptionsSuffix(Arrays.asList(commands)));
+			return list.toArray(String[]::new);
+		} else {
+			return commands;
 		}
+	}
+	
+	public static List<String> addLineBufferingPrefix(List<String> commands) {
+		Assert.notNull(commands, "The commands cannot be null");
+		List<String> result = new ArrayList<>();
 
-		return commands;
+		//we add extra commands before 'dsmc' to force line-by-line buffering - means we don't lose output from 'dsmc'
+		result.addAll(new OsCommandLineBufferingPrefixGenerator().generate());
+		result.addAll(commands);
+		return result;
 	}
 
+	public static List<String> addDsmcOptionsSuffix(List<String> commands) {
+		Assert.notNull(commands, "The commands cannot be null");
+		if (!commands.get(0).equals(DSMC)) {
+			return commands;
+		}
+		List<String> result = new ArrayList<>(commands);
+		// these "dsmc" options are best practice when
+		// using 'dsmc' for non-interactive session where simple text output is best
+		result.add("-displaymode=list");
+		result.add("-noprompt");
+		return result;
+	}
 }
 
 

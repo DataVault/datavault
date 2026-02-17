@@ -3,12 +3,13 @@ package org.datavaultplatform.common.storage.impl;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.io.Progress;
-import org.datavaultplatform.common.util.ProcessHelper;
 import org.datavaultplatform.common.util.ProcessInfo;
 import org.datavaultplatform.common.util.TestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -592,6 +593,44 @@ class TivoliStorageManagerTest {
                 assertThat(result).isEqualTo(expectedSuccess);
             }
         }
-
    }
+
+    @Nested
+    @EnabledOnOs(OS.MAC)
+    class CommandModificationsOnMacOs {
+        static final String[] WITH_DSMC = {"dsmc", "opt1", "opt2"};
+        static final String[] WITHOUT_DSMC = {"blah", "opt1", "opt2"};
+
+        @Test
+        void testCommandsWithDsmc() {
+            String[] result = TivoliStorageManager.cleanTsmCommand(WITH_DSMC);
+            assertThat(result).containsExactly("script", "-q", "/dev/null", "dsmc", "opt1", "opt2", "-displaymode=list", "-noprompt");
+        }
+
+        @Test
+        void testCommandsWithoutDsmc() {
+            String[] result = TivoliStorageManager.cleanTsmCommand(WITHOUT_DSMC);
+            assertThat(result).containsExactly("blah", "opt1", "opt2");
+        }
+    }
+    
+    @Nested
+    @EnabledOnOs(OS.LINUX)
+    class CommandModificationsOnLinux {
+
+        static final String[] WITH_DSMC = {"dsmc", "opt1", "opt2"};
+        static final String[] WITHOUT_DSMC = {"blah", "opt1", "opt2"};
+
+        @Test
+        void testCommandsWithDsmc() {
+            String[] result = TivoliStorageManager.cleanTsmCommand(WITH_DSMC);
+            assertThat(result).containsExactly("stdBuf", "-oL", "dsmc", "opt1", "opt2", "-displaymode=list", "-noprompt");
+        }
+
+        @Test
+        void testCommandsWithoutDsmc() {
+            String[] result = TivoliStorageManager.cleanTsmCommand(WITHOUT_DSMC);
+            assertThat(result).containsExactly("blah", "opt1", "opt2");
+        }
+    }
 }
