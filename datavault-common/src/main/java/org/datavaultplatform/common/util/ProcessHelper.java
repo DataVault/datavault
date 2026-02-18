@@ -2,7 +2,6 @@ package org.datavaultplatform.common.util;
 
 
 import org.apache.commons.io.IOUtils;
-import org.datavaultplatform.common.task.TaskConfig;
 import org.datavaultplatform.common.task.TaskConfigTL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +30,7 @@ public class ProcessHelper {
     private final AtomicBoolean executed = new AtomicBoolean(false);
 
     public ProcessHelper(String description, String... commands) throws IOException {
-        this(description, TaskConfig.DEFAULT_PROCESS_MAX_DURATION, commands);
+        this(description, TaskConfigTL.get().getProcessMaxDuration(), commands);
     }
 
     public ProcessHelper(String desc, Duration maxProcessDuration, String... commands) throws IOException {

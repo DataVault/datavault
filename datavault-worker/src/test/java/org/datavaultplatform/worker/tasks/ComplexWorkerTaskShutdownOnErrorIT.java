@@ -41,10 +41,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * This test does not run on Windows because the way windows process shutdown works is different from Mac/Linux.
  * <p>
  * Most of the complexity in this test class is dynamically creating a tree of TaskExecutors where we can control if/when an error occurs.
- * We can also control via TaskConfig whether the TaskExecutors perform a proper shutdown to prove that without a proper shutdown - an error would leave some of
  * the TaskExecutors having their internal ExecutorService in a non-terminated state.
  * Some features of TaskExecutors: 1) they are not spring beans 2) they don't share the same "java.lang.Thread" so sharing information between them is not straightforward.
- * At the moment, they can reach out to singleton "TaskConfig.INSTANCE" but this is not ideal. We are relying on that there is only one 'tree' of TaskExecutors active in a Worker Task(Deposit/Delete/Retrieve) at a time.
+ * Each worker thread within the tree of TaskExecutors has access to the current TaskConfig via TaskConfigTL. Note that TaskExecutor#wrap copies the TaskConfigTL into each child task thread. 
+ * We are relying on the fact that there is only one 'tree' of TaskExecutors active in a Worker Task(Deposit/Delete/Retrieve) at a time.
  */
 @DisabledOnOs(OS.WINDOWS)
 class ComplexWorkerTaskShutdownOnErrorIT {
@@ -54,6 +54,9 @@ class ComplexWorkerTaskShutdownOnErrorIT {
     private static final LevelInfo LEVEL_1 = new LevelInfo("level1", 1, 2, 10);
     private static final LevelInfo LEVEL_2 = new LevelInfo("level2", 2, 2, 10);
     private static final LevelInfo LEVEL_3 = new LevelInfo("level3", 3, 2, 10);
+
+    // 10 x 10 X 10 - means there are 1000 Leaf-Actions running at the same time.
+
     private static final List<LevelInfo> LEVELS_ONE_ONLY = List.of(LEVEL_1);
     private static final List<LevelInfo> LEVELS_ONE_AND_TWO = List.of(LEVEL_1, LEVEL_2);
     private static final List<LevelInfo> LEVELS_ONE_TWO_AND_THREE = List.of(LEVEL_1, LEVEL_2, LEVEL_3);

@@ -100,26 +100,6 @@ public class TaskExecutor<T> {
         }
     }
 
-    private void setupExecutorTimeout(Duration executorTimeout, List<Future<T>> futures) {
-        if (executorTimeout == null) {
-            return;
-        }
-        if (!TaskConfigTL.get().isExecutorProperShutdownEnabled()) {
-            return;
-        }
-
-        Assert.isTrue(executorTimeout.getSeconds() > 0, "The executorTimeout has to be greater than 1 second");
-
-        // EXECUTOR OVERALL TIMEOUT
-        Runnable cancelAllTasks = () -> {
-            for (Future<T> f : futures) {
-                f.cancel(true);
-            }
-        };
-        var watchdog = Executors.newSingleThreadScheduledExecutor();
-        watchdog.schedule(cancelAllTasks, executorTimeout.getSeconds(), TimeUnit.SECONDS);
-    }
-
     private void getResultFromFuture(Future<T> future, Consumer<T> consumer) throws Exception {
         try {
             T result = future.get(); // we have added per-tsm/dsmc timeouts in ProcessHelper

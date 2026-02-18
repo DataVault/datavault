@@ -27,7 +27,7 @@ import java.util.concurrent.TimeoutException;
 public class TSMProcessRetrier {
 
     private final String description;
-    private final Logger LOG = LoggerFactory.getLogger(TSMProcessRetrier.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TSMProcessRetrier.class);
     private final int maxRetries;
     private final String[] osCommand;
     private final int retryTimeSeconds;
@@ -110,6 +110,11 @@ public class TSMProcessRetrier {
             this.description = description;
         }
 
+        /**
+         * onSuccess - the name might be misleading - it means we got a result.
+         * We look at that result - if it's a ProcessInfo - we check to consider whether it represents true success.
+         * If the ProcessIinfo does not represent true success, we throw ProcessInfoException. This would force a retry.
+         */
         @Override
         public <T, E extends Throwable> void onSuccess(RetryContext context, RetryCallback<T, E> callback, T result) {
             if (result instanceof ProcessInfo info) {
