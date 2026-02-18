@@ -11,6 +11,8 @@ import org.datavaultplatform.common.util.*;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -28,6 +30,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @DisabledOnOs(OS.WINDOWS)
 public class ProcessHelperWithProcessInfoTest {
     
+    public static final Logger LOG = LoggerFactory.getLogger(ProcessHelperWithProcessInfoTest.class);
+    
     public static final String TIMEOUT_SIGTERM_REGEX = "OS process desc\\[(.*?)]pid\\[(\\d+)]TimedOutAfter\\[(PT\\d+S)]forcedToShutdown\\[false]";
     public static final String TIMEOUT_SIGKILL_REGEX = "OS process desc\\[(.*?)]pid\\[(\\d+)]TimedOutAfter\\[(PT\\d+S)]forcedToShutdown\\[true]";
 
@@ -43,12 +47,8 @@ public class ProcessHelperWithProcessInfoTest {
             // workaround: don't add 'script/stdbuf line-buffering options' : we cannot use them when we want to ignore sigterm
             modifiedCommands = commands;
         } else {
-            if (DockerUtils.isRunningInsideDocker()) {
-                // had to do this - we had problems with 'line-buffering' options in Docker
-                modifiedCommands = commands;
-            } else {
-                modifiedCommands = TivoliStorageManager.addLineBufferingPrefix(commands);
-            }
+            modifiedCommands = TivoliStorageManager.addLineBufferingPrefix(commands);
+            LOG.warn("XXX modified commands {}", modifiedCommands);
         }
         var desc = "processHelperTestUnixScript.sh[%s]".formatted(label);
         var helper = new ProcessHelper(desc, processMaxDuration, modifiedCommands.toArray(String[]::new));

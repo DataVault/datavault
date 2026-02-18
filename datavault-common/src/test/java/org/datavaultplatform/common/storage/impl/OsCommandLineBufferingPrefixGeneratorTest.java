@@ -21,7 +21,7 @@ class OsCommandLineBufferingPrefixGeneratorTest {
     final OsCommandLineBufferingPrefixGenerator generator = Mockito.spy(new OsCommandLineBufferingPrefixGenerator());
 
     private static final List<String> SCRIPT_COMMANDS = List.of("script", "-q", "/dev/null");
-    private static final List<String> STD_BUF_COMMANDS  = List.of("stdBuf", "-oL");
+    private static final List<String> STD_BUF_COMMANDS  = List.of("stdbuf", "-oL");
     
     @Nested
     class OperatingSystemTests {
@@ -36,7 +36,7 @@ class OsCommandLineBufferingPrefixGeneratorTest {
         @EnabledOnOs(OS.LINUX)
         void testLinux() {
             List<String> generated = generator.generate();
-            if (OsCommandLineBufferingPrefixGenerator.isCommandOnPath(OsCommandLineBufferingPrefixGenerator.COMMAND_STDBUF)) {
+            if (OsCommandLineBufferingPrefixGenerator.isCommandOnPath(OsCommandLineBufferingPrefixGenerator.COMMAND_STD_BUF)) {
                 assertThat(generated).isEqualTo(STD_BUF_COMMANDS);
             } else if (OsCommandLineBufferingPrefixGenerator.isCommandOnPath(OsCommandLineBufferingPrefixGenerator.COMMAND_SCRIPT)) {
                 assertThat(generated).isEqualTo(SCRIPT_COMMANDS);
@@ -68,12 +68,12 @@ class OsCommandLineBufferingPrefixGeneratorTest {
 
         @Test
         void testLinuxStdBuf() {
-            Mockito.doReturn(true).when(generator).isOnPath(OsCommandLineBufferingPrefixGenerator.COMMAND_STDBUF);
+            Mockito.doReturn(true).when(generator).isOnPath(OsCommandLineBufferingPrefixGenerator.COMMAND_STD_BUF);
             Mockito.doReturn(true).when(generator).isLinux();
             Mockito.lenient().doReturn(false).when(generator).isMacOs();
             List<String> generated = generator.generate();
             Mockito.verify(generator).isLinux();
-            Mockito.verify(generator).isOnPath(OsCommandLineBufferingPrefixGenerator.COMMAND_STDBUF);
+            Mockito.verify(generator).isOnPath(OsCommandLineBufferingPrefixGenerator.COMMAND_STD_BUF);
             assertThat(generated).isEqualTo(STD_BUF_COMMANDS);
         }
 
@@ -87,14 +87,14 @@ class OsCommandLineBufferingPrefixGeneratorTest {
                     return false;
                 }
             }).when(generator).isOnPath(anyString());
-            Mockito.doReturn(false).when(generator).isOnPath(OsCommandLineBufferingPrefixGenerator.COMMAND_STDBUF);
+            Mockito.doReturn(false).when(generator).isOnPath(OsCommandLineBufferingPrefixGenerator.COMMAND_STD_BUF);
             Mockito.doReturn(true).when(generator).isLinux();
             Mockito.lenient().doReturn(false).when(generator).isMacOs();
             List<String> generated = generator.generate();
             Mockito.verify(generator).isLinux();
             ArgumentCaptor<String> argCommand = ArgumentCaptor.forClass(String.class);
             Mockito.verify(generator, times(2)).isOnPath(argCommand.capture());
-            assertThat(argCommand.getAllValues()).containsExactlyInAnyOrder(OsCommandLineBufferingPrefixGenerator.COMMAND_STDBUF, OsCommandLineBufferingPrefixGenerator.COMMAND_SCRIPT);
+            assertThat(argCommand.getAllValues()).containsExactlyInAnyOrder(OsCommandLineBufferingPrefixGenerator.COMMAND_STD_BUF, OsCommandLineBufferingPrefixGenerator.COMMAND_SCRIPT);
             assertThat(generated).isEqualTo(SCRIPT_COMMANDS);
         }
 

@@ -13,7 +13,7 @@ import java.util.List;
 public class OsCommandLineBufferingPrefixGenerator {
 
     public static final Logger LOG = LoggerFactory.getLogger(OsCommandLineBufferingPrefixGenerator.class);
-    public static final String COMMAND_STDBUF = "stdBuf";
+    public static final String COMMAND_STD_BUF = "stdbuf";
     public static final String COMMAND_SCRIPT = "script";
 
     public static boolean isCommandOnPath(String command) {
@@ -42,25 +42,31 @@ public class OsCommandLineBufferingPrefixGenerator {
     public List<String> generate() {
         List<String> result;
         if (isLinux()) {
-            if (isOnPath(COMMAND_STDBUF)) {
+            LOG.warn("XXX ON LINUX");
+            if (isOnPath(COMMAND_STD_BUF)) {
+                LOG.warn("XXX STDBUF ON PATH");
                 result = getStdBufPrefix();
             } else if (isOnPath(COMMAND_SCRIPT)) {
+                LOG.warn("XXX SCRIPT ON PATH");
                 result = getScriptPrefix();
             } else {
-                LOG.warn("CANNOT FIND [{}] or [{}]on Linux Path", COMMAND_SCRIPT, COMMAND_STDBUF);
+                LOG.warn("XXX CANNOT FIND [{}] or [{}]on Linux Path", COMMAND_SCRIPT, COMMAND_STD_BUF);
                 return Collections.emptyList();
             }
         } else if (isMacOs()) {
+            LOG.warn("XXX ON MACOS");
             if (isOnPath(COMMAND_SCRIPT)) {
+                LOG.warn("XXX SCRIPT ON PATH");
                 result = getScriptPrefix();
             } else {
                 result = Collections.emptyList();
-                LOG.warn("CANNOT FIND [{}] on MacOs Path", COMMAND_SCRIPT);
+                LOG.warn("XXX CANNOT FIND [{}] on MacOs Path", COMMAND_SCRIPT);
             }
         } else {
-            LOG.warn("OS is neither Linux nor MacOs");
+            LOG.warn("XXX OS is neither Linux nor MacOs");
             result = Collections.emptyList();
         }
+        LOG.warn("XXX The line buffering options are {}", result);
         return result;
     }
 
@@ -69,7 +75,7 @@ public class OsCommandLineBufferingPrefixGenerator {
     }
 
     List<String> getStdBufPrefix() {
-        return List.of(COMMAND_STDBUF, "-oL");
+        return List.of(COMMAND_STD_BUF, "-oL");
     }
 
     public boolean isMacOs() {

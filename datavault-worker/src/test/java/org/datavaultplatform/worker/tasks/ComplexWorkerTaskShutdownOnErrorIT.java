@@ -6,7 +6,6 @@ import org.datavaultplatform.common.storage.impl.TivoliStorageManager;
 import org.datavaultplatform.common.task.TaskConfig;
 import org.datavaultplatform.common.task.TaskConfigTL;
 import org.datavaultplatform.common.task.TaskExecutor;
-import org.datavaultplatform.common.util.DockerUtils;
 import org.datavaultplatform.common.util.ProcessHelper;
 import org.datavaultplatform.common.util.ProcessInfo;
 import org.datavaultplatform.common.util.TestUtils;
@@ -15,6 +14,8 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
 import java.time.Duration;
@@ -48,6 +49,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @DisabledOnOs(OS.WINDOWS)
 class ComplexWorkerTaskShutdownOnErrorIT {
 
+    public static final Logger LOG = LoggerFactory.getLogger(ComplexWorkerTaskShutdownOnErrorIT.class);
+    
     private static final LevelInfo LEVEL_1 = new LevelInfo("level1", 1, 2, 10);
     private static final LevelInfo LEVEL_2 = new LevelInfo("level2", 2, 2, 10);
     private static final LevelInfo LEVEL_3 = new LevelInfo("level3", 3, 2, 10);
@@ -276,16 +279,12 @@ class ComplexWorkerTaskShutdownOnErrorIT {
             final List<String> baseCommands = getBaseCommands(label, osScriptErrorType, willError);
             final List<String> result;
             if (osScriptErrorType == OsScriptType.LONG_RUNNING_DOES_NOT_STOP_ON_SIGTERM && willError) {
-                // this is a bit of a workaround because we cannot setup 'script/stdbuf' line buffering prefix to ignore SIGERM
+                // this is a bit of a workaround because we cannot setup 'script/stdbuf' line buffering prefix to ignore SIGTERM
                 // so don't add script/stdbuf line buffering prefix when we want to ignore sigterm
                 result = baseCommands;
             } else {
-                if (DockerUtils.isRunningInsideDocker()) {
-                    // had to do this - we had problems with 'line-buffering' options in Docker
-                    result = baseCommands;
-                } else {
-                    result = TivoliStorageManager.addLineBufferingPrefix(baseCommands);
-                }
+                result = TivoliStorageManager.addLineBufferingPrefix(baseCommands);
+                LOG.warn("XXX modified commands {}", result);
             }
             return result.toArray(String[]::new);
         }
