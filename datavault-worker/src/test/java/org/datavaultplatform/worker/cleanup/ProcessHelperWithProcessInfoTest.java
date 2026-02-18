@@ -7,10 +7,7 @@ import lombok.SneakyThrows;
 import org.datavaultplatform.common.storage.impl.TivoliStorageManager;
 import org.datavaultplatform.common.task.TaskConfigTL;
 import org.datavaultplatform.common.task.TaskExecutor;
-import org.datavaultplatform.common.util.ProcessExitCodes;
-import org.datavaultplatform.common.util.ProcessHelper;
-import org.datavaultplatform.common.util.ProcessInfo;
-import org.datavaultplatform.common.util.TestUtils;
+import org.datavaultplatform.common.util.*;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
@@ -46,7 +43,12 @@ public class ProcessHelperWithProcessInfoTest {
             // workaround: don't add 'script/stdbuf line-buffering options' : we cannot use them when we want to ignore sigterm
             modifiedCommands = commands;
         } else {
-            modifiedCommands = TivoliStorageManager.addLineBufferingPrefix(commands);
+            if (DockerUtils.isRunningInsideDocker()) {
+                // had to do this - we had problems with 'line-buffering' options in Docker
+                modifiedCommands = commands;
+            } else {
+                modifiedCommands = TivoliStorageManager.addLineBufferingPrefix(commands);
+            }
         }
         var desc = "processHelperTestUnixScript.sh[%s]".formatted(label);
         var helper = new ProcessHelper(desc, processMaxDuration, modifiedCommands.toArray(String[]::new));

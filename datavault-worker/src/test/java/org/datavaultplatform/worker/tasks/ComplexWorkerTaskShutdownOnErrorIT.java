@@ -6,6 +6,7 @@ import org.datavaultplatform.common.storage.impl.TivoliStorageManager;
 import org.datavaultplatform.common.task.TaskConfig;
 import org.datavaultplatform.common.task.TaskConfigTL;
 import org.datavaultplatform.common.task.TaskExecutor;
+import org.datavaultplatform.common.util.DockerUtils;
 import org.datavaultplatform.common.util.ProcessHelper;
 import org.datavaultplatform.common.util.ProcessInfo;
 import org.datavaultplatform.common.util.TestUtils;
@@ -279,7 +280,12 @@ class ComplexWorkerTaskShutdownOnErrorIT {
                 // so don't add script/stdbuf line buffering prefix when we want to ignore sigterm
                 result = baseCommands;
             } else {
-                result = TivoliStorageManager.addLineBufferingPrefix(baseCommands);
+                if (DockerUtils.isRunningInsideDocker()) {
+                    // had to do this - we had problems with 'line-buffering' options in Docker
+                    result = baseCommands;
+                } else {
+                    result = TivoliStorageManager.addLineBufferingPrefix(baseCommands);
+                }
             }
             return result.toArray(String[]::new);
         }
