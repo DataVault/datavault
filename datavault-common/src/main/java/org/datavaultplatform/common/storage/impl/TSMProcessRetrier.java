@@ -56,7 +56,7 @@ public class TSMProcessRetrier {
         template.execute(
                 // this callback is called on every attempt
                 retryContext -> {
-                    LOG.info("Executing TSM Delete (Attempt {})", retryContext.getRetryCount() + 1);
+                    LOG.info("Executing TSM [{}] (Attempt {})", description, retryContext.getRetryCount() + 1);
 
                     return processInfoFactory.createProcessinfo(description, osCommand);
 
