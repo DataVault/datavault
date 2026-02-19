@@ -20,10 +20,19 @@ public class TaskConfig {
     public static final Duration DEFAULT_PROCESS_SIGTERM_TIMEOUT_DURATION = Duration.ofSeconds(30);
     public static final Duration DEFAULT_PROCESS_POST_SIGKILL_TIMEOUT_DURATION = Duration.ofSeconds(5);
 
+    // Whether each TaskExecutor will stop other sub-tasks should 1 sub-task have an error - defaults to true
     private boolean executorProperShutdownEnabled;
+
+    // after initial sub-task error, how long does TaskExecutor wait for other sub-tasks to complete normally before telling them to stop - defaults to 5 minutes
     private Duration executorPreShutdownNowDuration;
+    
+    // How long each process has to run before timing out - defaults to 1 hour
     private Duration processMaxDuration;
+    
+    // how long we wait for a process to stop after sending SIGTERM before we send SIGKILL - defaults to 30 seconds
     private Duration processSigTermTimeoutDuration;
+
+    // how long we wait for a process to stop after sending SIGKILL before we log error - defaults to 5 seconds
     private Duration processPostSigKillTimeoutDuration;
 
     public TaskConfig() {

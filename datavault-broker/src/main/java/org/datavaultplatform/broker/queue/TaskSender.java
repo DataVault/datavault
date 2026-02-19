@@ -17,7 +17,7 @@ import java.util.Map;
 
 /**
  * This class is used to wrap the Sender class - allowing a single place where Worker Timeout properties can be configured
- * in a single place for all Worker Tasks. The worker timeout properties can be configured on the Broker and they will be sent with each Task to the workers.
+ * for all Worker Tasks. The worker timeout properties can be configured on the Broker, and they will be sent with each Task to the Workers.
  * This method is preferred to configuring the working timeouts on every worker individually.
  */
 @Slf4j
@@ -36,15 +36,23 @@ public class TaskSender {
     private final Sender sender;
 
     @Getter
+    // after initial sub-task error, how long do we wait for other sub-tasks to complete normally before telling them to stop - defaults to 5 minutes
     private final Duration workersExecutorPreShutdownNowDuration;
-    @Getter
-    private final boolean workersExecutorProperShutdownEnabled;
 
     @Getter
+    // Whether each TaskExecutor will stop other sub-tasks should 1 sub-task have an error - defaults to true
+    private final boolean workersExecutorProperShutdownEnabled;
+    
+    @Getter
+    // How long each process has to run before timing out - defaults to 1 hour
     private final Duration workersProcessMaxDuration;
+
     @Getter
+    // how long we wait for a process to stop after sending SIGTERM before we send SIGKILL - defaults to 30 secondsprivate Duration processSigTermTimeoutDuration;
     private final Duration workersProcessSigTermTimeoutDuration;
+
     @Getter
+    // how long we wait for a process to stop after sending SIGKILL before we log error - defaults to 5 seconds
     private final Duration workersProcessPostSigKillTimeoutDuration;
 
     public TaskSender(Sender sender,
