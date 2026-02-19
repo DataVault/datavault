@@ -1,6 +1,7 @@
 package org.datavaultplatform.common.storage.impl;
 
 import lombok.Getter;
+import org.apache.commons.lang3.StringUtils;
 import org.datavaultplatform.common.util.ProcessInfo;
 import org.datavaultplatform.common.util.ProcessInfoExitStatusSupport;
 import org.slf4j.Logger;
@@ -14,9 +15,10 @@ import org.springframework.util.Assert;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Predicate;
 
 /**
- * Abstracts away the pain of using Spring's Retry template with ProcessHelper/ProcessInfo which we use to run Unix processes.
+ * Abstracts away the pain of using Spring's Retry template with ProcessHelper/ProcessInfo which we use to run Operating System processes.
  * Developed to work with "TivoliStorageManager.delete" - can be used in other places.
  * Handles the case where a unix process times out which would cause a retry
  * Handles the case where a unix process returns a non-zero error code and would cause a retry.
@@ -26,8 +28,11 @@ import java.util.concurrent.TimeoutException;
  */
 public class TSMProcessRetrier {
 
-    private final String description;
     private static final Logger LOG = LoggerFactory.getLogger(TSMProcessRetrier.class);
+    private static final List<Class<? extends Throwable>> RETRY_EXCEPTION_TYPES = List.of(TimeoutException.class, ProcessInfoException.class);
+    private static final Predicate<Throwable> RETRY_ON_EXCEPTION = th ->
+            RETRY_EXCEPTION_TYPES.stream().anyMatch(type -> type.isInstance(th));    
+    private final String description;
     private final int maxRetries;
     private final String[] osCommand;
     private final int retryTimeSeconds;
@@ -39,7 +44,14 @@ public class TSMProcessRetrier {
     }
 
     public TSMProcessRetrier(String description, int maxRetries, int retryTimeSeconds, ProcessInfoFactory processInfoFactory, ProcessInfoExitStatusSupport processInfoExitStatusSupport, String... osCommand) {
+        Assert.isTrue(retryTimeSeconds >= 0, "The retryTimeSeconds cannot be less than 0");
         Assert.isTrue(maxRetries >= 1, "The maxRetries cannot be less than 1");
+        Assert.isTrue(StringUtils.isNoneBlank(description), "The description cannot be blank");
+        Assert.notNull(processInfoFactory, "The processInfoFactory cannot be null");
+        Assert.notNull(processInfoExitStatusSupport, "The processInfoExitStatusSupport cannot be null");
+        if (osCommand == null || osCommand.length == 0) {
+            throw new IllegalArgumentException("At least one command must be provided");
+        }
         this.description = description;
         this.maxRetries = maxRetries;
         this.retryTimeSeconds = retryTimeSeconds;
@@ -48,21 +60,28 @@ public class TSMProcessRetrier {
         this.processInfoFactory = processInfoFactory;
     }
 
-    public void execute() throws Exception {
-        RetryTemplate template = RetryTemplate.builder().maxAttempts(maxRetries).fixedBackoff(Duration.ofSeconds(retryTimeSeconds)) // Delay between retries
-                .retryOn(List.of(TimeoutException.class, ProcessInfoException.class)) // we should retry on TimeoutException as well as ProcessInfpException
-                .withListener(new ProcessInfoRetryListener(description)).build();
+    public ProcessInfo execute() throws Exception {
+        RetryTemplate template = RetryTemplate.builder()
+                .maxAttempts(maxRetries)
+                .fixedBackoff(Duration.ofSeconds(retryTimeSeconds)) // Delay between retries
+                .retryOn(RETRY_ON_EXCEPTION) // we should retry on TimeoutException as well as ProcessInfoException
+                .withListener(new ProcessInfoRetryListener())
+                .build();
 
-        template.execute(
+        return template.execute(
                 // this callback is called on every attempt
                 retryContext -> {
                     LOG.info("Executing TSM [{}] (Attempt {})", description, retryContext.getRetryCount() + 1);
 
-                    return processInfoFactory.createProcessinfo(description, osCommand);
+                    return processInfoFactory.createProcessInfo(description, osCommand);
 
                 }, // this callback is called at the very end
                 retryContext -> {
                     Throwable lastError = retryContext.getLastThrowable();
+
+                    if (lastError == null) {
+                        throw new RuntimeException("Retry exhausted without recording a specific exception.");
+                    }
 
                     /*
                      we use ProcessInfoException to get non-success ProcessInfo to cause retry 
@@ -84,9 +103,12 @@ public class TSMProcessRetrier {
                 });
     }
 
+    /**
+     * This interface represents some piece of code that creates a ProcessInfo result from a description and process arguments.
+     */
     @FunctionalInterface
     public interface ProcessInfoFactory {
-        ProcessInfo createProcessinfo(String desc, String... commands) throws Exception;
+        ProcessInfo createProcessInfo(String desc, String... commands) throws Exception;
     }
 
     /**
@@ -104,12 +126,7 @@ public class TSMProcessRetrier {
     }
 
     public class ProcessInfoRetryListener implements RetryListener {
-        private final String description;
-
-        public ProcessInfoRetryListener(String description) {
-            this.description = description;
-        }
-
+        
         /**
          * onSuccess - the name might be misleading - it means we got a result.
          * We look at that result - if it's a ProcessInfo - we check to consider whether it represents true success.
@@ -119,10 +136,12 @@ public class TSMProcessRetrier {
         public <T, E extends Throwable> void onSuccess(RetryContext context, RetryCallback<T, E> callback, T result) {
             if (result instanceof ProcessInfo info) {
                 if (processInfoExitStatusSupport.isProcessInfoFailure(info)) {
-                    throw new ProcessInfoException(info, "Retry trigger: Exit code [%s]".formatted(info.getExitValue()));
+                    throw new ProcessInfoException(info, "Retry trigger: Exit code [%s]".formatted(info.exitValue()));
                 } else {
-                    LOG.info("Process [{}] was Successful.", description);
+                    LOG.info("Attempt [{}/{}] was successful for [{}]. Exit code [{}].", context.getRetryCount() + 1, maxRetries, description, info.exitValue());
                 }
+            } else {
+                LOG.warn("Attempt [{}/{}] was successful for [{}]. non-ProcessInfo result[{}]", context.getRetryCount() + 1, maxRetries, description, result);
             }
         }
 
@@ -130,21 +149,35 @@ public class TSMProcessRetrier {
          * This runs after EVERY failed attempt - just logging
          */
         @Override
-        public <T, E extends Throwable> void onError(RetryContext context, RetryCallback<T, E> callback, Throwable throwable) {
+        public <T, E extends Throwable> void onError(RetryContext context, RetryCallback<T, E> callback, Throwable th) {
             int attempt = context.getRetryCount();
-            LOG.warn("Attempt [{}/{}] failed for [{}]. Reason: {}. Waiting for next retry...", attempt, maxRetries, description, throwable.getMessage());
+            boolean willRetryAgain = context.getRetryCount() < maxRetries && RETRY_ON_EXCEPTION.test(th);
+            LOG.warn("Attempt [{}/{}] failed for [{}]. Reason: {}. Will retry?[{}]", attempt, maxRetries, description, getReason(th), willRetryAgain);
         }
+
 
         /*
          * For when we've exhausted retries, and we want to log stuff
          */
         @Override
-        public <T, E extends Throwable> void close(RetryContext context, RetryCallback<T, E> callback, Throwable throwable) {
+        public <T, E extends Throwable> void close(RetryContext context, RetryCallback<T, E> callback, Throwable th) {
             // Check if we actually reached the limit without a successful result
-            if (context.getRetryCount() >= maxRetries || context.isExhaustedOnly() || throwable != null) {
-                LOG.info("Process for [{}] was skipped after multiple [{}] attempts.", description, context.getRetryCount());
-                LOG.error("All [{}] attempts exhausted for [{}]. Final error: {}", context.getRetryCount(), description, throwable.getMessage());
+            if (context.getRetryCount() >= maxRetries || context.isExhaustedOnly() || th != null) {
+                LOG.info("Retrying Process for [{}] has ended after [{}] attempt(s).", description, context.getRetryCount());
+                LOG.error("All [{}] attempt(s) exhausted for [{}]. Final error: {}", context.getRetryCount(), description, getReason(th));
             }
+        }
+
+        private String getReason(Throwable th) {
+            String reason;
+            if (th == null) {
+                reason = "No exception recorded";
+            } else if (th instanceof ProcessInfoException pie) {
+                reason = pie.getMessage();
+            } else {
+                reason = "%s/%s".formatted(th.getClass().getName(), th.getMessage());
+            }
+            return reason;
         }
     }
 }
