@@ -1,14 +1,33 @@
 <div xmlns:th="http://www.thymeleaf.org" id="security-div" >
 <style>
+    /* Layout */
     #add-new {
         margin-top: 2em;
     }
 
     #role-assignments {
         margin-top: 2em;
-        padding: 0 2em 0 0;
+        padding-left: 15px;
     }
 
+    /* Fix responsive table bleed */
+    #role-assignments .table-responsive {
+        margin: 0 !important;
+        background: #fff;
+    }
+
+    /* Table separators */
+    .header-separator {
+        border-top: 2px solid #ccc;
+        margin: 0;
+    }
+
+    .table-separator td {
+        padding: 0 !important;
+        background: #fff !important;
+    }
+
+    /* Role filter */
     #role-filter-toggle {
         cursor: pointer;
     }
@@ -19,60 +38,29 @@
         background-color: #ebebeb;
     }
 
-    .action-column {
-        width: 100px;
-        text-align: center;
+    /* Action column (Bootstrap 5-friendly) */
+    td.action-column {
+        white-space: nowrap;
+        width: 1%;
     }
 
-    .action-column .btn {
-        float: left;
-        margin: 0 2px;
+    td.action-column .btn {
+        padding: 0.25rem 0.4rem;
     }
 
+    /* Role definitions */
     .role-definitions {
-        margin-top: 2em;
         border-left: 1px solid;
         padding: 0 1em;
     }
 
-    .role-definitions .role-definition-title {
-        margin-top: 0;
-    }
-
-    .role-definitions .definition {
-        margin: 0.5em 0;
-    }
-
+    /* Buttons */
     .btn-delete {
         color: #b94a48;
         background-color: #f2dede;
     }
 
-    .form-group {
-        display: block;
-        text-align: left;
-    }
-
-    .form-confirm {
-        display: flex;
-        margin-left: 0px !important;
-        padding-left: 10px;
-    }
-
-    .form-label {
-        display: block;
-        text-align: left !important;
-    }
-
-    .form-input {
-        min-width: 70%;
-        text-align: left !important;
-    }
-
-    .checkbox {
-        margin-left: 10px !important;
-    }
-
+    /* Typography */
     .modal-title {
         font-weight: 500;
         color: #000;
@@ -94,18 +82,17 @@
 <th:block th:with="showActionsColumnSecurityExpression=|${assignVaultRolesSecurityExpression} or ${transferOwnershipSecurityExpression}|">
 
 <th:block th:if="${#authorization.expression(transferOwnershipSecurityExpression)}" >
-<div id="orphan-dialog" class="modal fade" tabindex="-1" role="dialog"
+<div id="orphan-dialog" class="modal fade" tabindex="-1"
      aria-labelledby="orphan-user-title"
      aria-hidden="true">
 
     <div class="modal-dialog">
         <div class="modal-content">
-            <form id="transfer-form" class="form form-horizontal" role="form"
+            <form id="transfer-form" class="form form-horizontal"
                   th:action="@{|/vaults/${vault.ID}/data-owner/update|}"
                   method="post" >
                 <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i
-                                class="fa fa-times" aria-hidden="true"></i></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
                     <h4 class="modal-title" id="orphan-user-title">Transfer Ownership</h4>
                 </div>
                 <div class="modal-body">
@@ -174,8 +161,8 @@
                 <input type="hidden" id="submitAction" name="action" value="submit"/>
                 <input type="hidden" th:name="${_csrf?.parameterName ?: ''}" th:value="${_csrf?.token ?: ''}" />
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default btn-cancel" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> Cancel</button>
-                    <button type="submit" class="btn btn-primary"><span class="fa fa-floppy-o"></span> Save</button>
+                    <button type="button" class="btn btn-default btn-cancel" data-bs-dismiss="modal"> Cancel</button>
+                    <button type="submit" class="btn btn-primary"><span class="bi bi-floppy"></span> Save</button>
                 </div>
             </form>
         </div>
@@ -184,22 +171,21 @@
 </th:block><!-- transferOwnershipSecurityExpression -->
 
 <th:block th:if="${#authorization.expression(assignVaultRolesSecurityExpression)}">
-<div id="add-new-dialog" class="modal fade" tabindex="-1" role="dialog"
+<div id="add-new-dialog" class="modal fade" tabindex="-1"
      aria-labelledby="add-new-user-title"
      aria-hidden="true">
 
     <div class="modal-dialog">
         <div class="modal-content">
-            <form id="create-form" class="form form-horizontal" role="form"
+            <form id="create-form" class="form form-horizontal"
                   th:action="@{|/security/roles/vault/${vault.ID}/user|}"
                   method="post">
                 <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i
-                                class="fa fa-times" aria-hidden="true"></i></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
                     <h4 class="modal-title" id="add-new-user-title">Add New User</h4>
                 </div>
                 <div class="modal-body">
-                    <div id="add-new-dialog-error" class="alert alert-danger error hidden" role="alert"></div>
+                    <div id="add-new-dialog-error" class="alert alert-danger error hidden"></div>
                     <div class="form-group ui-widget">
                         <label for="new-user-name" class="control-label col-sm-2">Name</label>
                         <div class="col-sm-10">
@@ -219,8 +205,8 @@
                 <input type="hidden" id="submitAction" name="action" value="submit"/>
                 <input type="hidden" th:name="${_csrf?.parameterName ?: ''}" th:value="${_csrf?.token ?: ''}" />
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default btn-cancel" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> Cancel</button>
-                    <button type="submit" class="btn btn-primary"><span class="fa fa-floppy-o"></span> Save</button>
+                    <button type="button" class="btn btn-default btn-cancel" data-bs-dismiss="modal"> Cancel</button>
+                    <button type="submit" class="btn btn-primary"><span class="bi bi-floppy"></span> Save</button>
                 </div>
             </form>
         </div>
@@ -228,20 +214,19 @@
 
 </div>
 
-<div id="update-existing-dialog" class="modal fade" tabindex="-1" role="dialog"
+<div id="update-existing-dialog" class="modal fade" tabindex="-1"
      aria-labelledby="update-existing-title" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form id="update-form" class="form form-horizontal" role="form"
+            <form id="update-form" class="form form-horizontal"
                   th:action="@{|/security/roles/vault/${vault.ID}/user/update|}"
                   method="post">
                 <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i
-                                class="fa fa-times" aria-hidden="true"></i></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
                     <h4 class="modal-title" id="update-existing-title">Edit User's Role</h4>
                 </div>
                 <div class="modal-body">
-                    <div id="update-existing-dialog-error" class="alert alert-danger error hidden" role="alert"></div>
+                    <div id="update-existing-dialog-error" class="alert alert-danger error hidden"></div>
                     <div class="form-group ui-widget">
                         <label for="role-update-user-name" class="control-label col-sm-2">Name</label>
                         <label id="role-update-user-name"></label>
@@ -259,8 +244,8 @@
                 <input type="hidden" id="submitAction" name="action" value="submit"/>
                 <input type="hidden" th:name="${_csrf?.parameterName ?: ''}" th:value="${_csrf?.token ?: ''}" />
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default btn-cancel" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> Cancel</button>
-                    <button type="submit" class="btn btn-primary"><span class="fa fa-floppy-o"></span> Save</button>
+                    <button type="button" class="btn btn-default btn-cancel" data-bs-dismiss="modal"> Cancel</button>
+                    <button type="submit" class="btn btn-primary"><span class="bi bi-floppy"></span> Save</button>
                 </div>
             </form>
         </div>
@@ -271,15 +256,14 @@
      aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form id="delete-form" class="form form-horizontal" role="form"
+            <form id="delete-form" class="form form-horizontal"
                   th:action="@{|/security/roles/vault/${vault.ID}/user/delete|}"
                   method="post">
                 <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i
-                                class="fa fa-times" aria-hidden="true"></i></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
                     <h4 class="modal-title" id="delete-title">Delete User</h4>
                 </div>
-                <div id="delete-dialog-error" class="alert alert-danger hidden error" role="alert"></div>
+                <div id="delete-dialog-error" class="alert alert-danger hidden error"></div>
                 <div class="modal-body">
                     <p>Do you want to delete <label id="delete-role-user-name"></label> from this vault?</p>
                 </div>
@@ -288,8 +272,8 @@
                 <input type="hidden" th:name="${_csrf?.parameterName ?: ''}" th:value="${_csrf?.token ?: ''}" />
 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default btn-cancel" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> Cancel</button>
-                    <button type="submit" class="btn btn-danger btn-delete"><i class="fa fa-trash"></i> Delete</button>
+                    <button type="button" class="btn btn-default btn-cancel" data-bs-dismiss="modal"> Cancel</button>
+                    <button type="submit" class="btn btn-danger btn-delete"><i class="bi bi-trash"></i> Delete</button>
                 </div>
             </form>
         </div>
@@ -298,10 +282,11 @@
 
 
 <div id="add-new">
-    <a href="#" data-toggle="modal" data-target="#add-new-dialog">+ Add new user to vault</a>
+    <a href="#" data-bs-toggle="modal" data-bs-target="#add-new-dialog">+ Add new user to vault</a>
 </div>
 </th:block><!-- assignVaultRolesSecurityExpression -->
 
+<div class="row">
 <div class="col-md-8" id="role-assignments">
     <div class="table-responsive">
         <table class="table table-striped">
@@ -309,7 +294,7 @@
             <tr>
                 <th>User</th>
                 <th>
-                    <span id="role-filter-toggle">Role <i class="filter-toggle-icon fa fa-caret-down"></i></span>
+                    <span id="role-filter-toggle">Role <i class="filter-toggle-icon bi bi-caret-down"></i></span>
                     <div id="role-filter-panel" class="hidden">
                             <div th:each="role: ${roles}">
                                 <input type="checkbox" th:id="|role-filter-${role.id}|" name="role-filter"
@@ -324,6 +309,7 @@
             </tr>
             </thead>
             <tbody>
+            <tr class="table-separator"><td colspan="99"><div class="header-separator"></div></td></tr>
             <th:block th:if="${dataOwner != null}">
                 <tr>
                     <td>[[${dataOwner.userId}]]</td>
@@ -331,11 +317,10 @@
                     <th:block th:if="${#authorization.expression(showActionsColumnSecurityExpression)}">
                     <td class="action-column">
                         <th:block th:if="${#authorization.expression(transferOwnershipSecurityExpression)}">
-                        <a href="#" class="btn btn-default" data-toggle="modal"
-                           data-target="#orphan-dialog"
+                        <a href="#" class="btn btn-default" data-bs-toggle="modal"
+                           data-bs-target="#orphan-dialog"
                            data-user-name="${dataOwner.userId}"
-                           title="Transfer ownership of this vault."><i
-                                    class="glyphicon glyphicon-transfer"></i></a>
+                           title="Transfer ownership of this vault."><i class="bi bi-arrow-left-right"></i></a>
                         </th:block><!-- transferOwnershipSecurityExpression -->
                     </td>
                     </th:block><!-- showActionsColumnSecurityExpression -->
@@ -348,11 +333,10 @@
                     <th:block th:if="${#authorization.expression(showActionsColumnSecurityExpression)}">
                         <td class="action-column">
                             <th:block th:if="${#authorization.expression(transferOwnershipSecurityExpression)}">
-                                <a href="#" class="btn btn-default" data-toggle="modal"
-                                   data-target="#orphan-dialog"
+                                <a href="#" class="btn btn-default" data-bs-toggle="modal"
+                                   data-bs-target="#orphan-dialog"
                                    data-user-name=""
-                                   title="Transfer ownership of this vault."><i
-                                            class="glyphicon glyphicon-transfer"></i></a>
+                                   title="Transfer ownership of this vault."><i class="bi bi-arrow-left-right"></i></a>
                             </th:block><!-- transferOwnershipSecurityExpression -->
                         </td>
                     </th:block><!-- showActionsColumnSecurityExpression -->
@@ -363,17 +347,20 @@
                     <td>[[${assignment.userId}]]</td>
                     <td class="role-column">[[${assignment.role.name}]]</td>
                     <th:block th:if="${#authorization.expression(showActionsColumnSecurityExpression)}">
-                    <td class="action-column">
+                    <!-- <td class="action-column d-flex gap-2 pe-2"> -->
+                    <td class="action-column pe-2">
                         <th:block th:if="${#authorization.expression(assignVaultRolesSecurityExpression)}">
-                        <a href="#" class="btn btn-default" data-toggle="modal"
-                           data-target="#update-existing-dialog" th:data-assignment-id="${assignment.id}"
-                           th:data-user-name="${assignment.userId}"
-                           th:data-user-role="${assignment.role.id}"
-                           th:title="|Edit role for ${assignment.userId}.|"><i class="fa fa-pencil"></i></a>
-                        <a href="#" class="btn btn-default btn-delete" data-toggle="modal"
-                           data-target="#delete-dialog" th:data-assignment-id="${assignment.id}"
-                           th:data-user-name="${assignment.userId}"
-                           th:title="|Delete role for ${assignment.userId}.|"><i class="fa fa-trash"></i></a>
+                        <div class="d-inline-flex align-items-center gap-1">
+                            <a href="#" class="btn btn-default" data-bs-toggle="modal"
+                               data-bs-target="#update-existing-dialog" th:data-assignment-id="${assignment.id}"
+                               th:data-user-name="${assignment.userId}"
+                               th:data-user-role="${assignment.role.id}"
+                               th:title="|Edit role for ${assignment.userId}.|"><i class="bi bi-pencil"></i></a>
+                            <a href="#" class="btn btn-outline-danger btn-delete me-1" data-bs-toggle="modal"
+                               data-bs-target="#delete-dialog" th:data-assignment-id="${assignment.id}"
+                               th:data-user-name="${assignment.userId}"
+                               th:title="|Delete role for ${assignment.userId}.|"><i class="bi bi-trash"></i></a>
+                        </div>
                         </th:block><!-- assignVaultRolesSecurityExpression -->
                     </td>
                     </th:block><!-- showActionsColumnSecurityExpression -->
@@ -382,17 +369,19 @@
         </table>
     </div>
 </div>
-
 <div id="role-definitions" class="col-md-4">
     <div class="role-definitions">
-        <h3 class="role-definition-title">Role Definitions</h3>
-        <th:block th:each="role: ${roles}">
+         <h3 class="role-definition-title">Role Definitions</h3>
+         <th:block th:each="role: ${roles}">
             <div class="definition">
                 <b>[[${role.name}]]:</b> [[${role.description}]]
             </div>
-        </th:block>
+         </th:block>
     </div>
 </div>
+</div>
+
+
 
 <script th:inline="javascript" type="text/javascript">
     $('#role-filter-toggle').click(function () {
@@ -409,17 +398,17 @@
             $(this).toggle(allValues.length === 0 || allValues.indexOf($(this).find('.role-column').text()) >= 0);
         });
     });
-    $('[data-target="#add-new-dialog"]').click(function () {
+    $('[data-bs-target="#add-new-dialog"]').click(function () {
         $('#add-new-dialog form').trigger('reset');
         $('#add-new-dialog .error').addClass('hidden').text('');
     });
 
-    $('[data-target="#orphan-dialog"]').click(function () {
+    $('[data-bs-target="#orphan-dialog"]').click(function () {
         $('#orphan-dialog form').trigger('reset');
         $('#orphan-dialog .error').addClass('hidden').text('');
     });
 
-    $('[data-target="#update-existing-dialog"]').click(function () {
+    $('[data-bs-target="#update-existing-dialog"]').click(function () {
         $('#update-existing-dialog form').trigger('reset');
 
         var assignmentId = $(this).data('assignment-id');
@@ -431,7 +420,7 @@
         $('#update-error').addClass('hidden').text('');
     });
 
-    $('[data-target="#delete-dialog"]').click(function () {
+    $('[data-bs-target="#delete-dialog"]').click(function () {
         $('#delete-dialog form').trigger('reset');
         var assignmentId = $(this).data('assignment-id');
         var userName = $(this).data('user-name');

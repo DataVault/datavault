@@ -6,17 +6,19 @@
 <th:block layout:fragment="content">
 <div class="container">
 
-    <ol class="breadcrumb">
-        <li><a th:href="@{/admin/}"><b>Administration</b></a></li>
-        <li><a th:href="@{/admin/vaults}"><b>Vaults</b></a></li>
-        <li class="active"><b>Vault:</b> [[${vault.name}]]</li>
-    </ol>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/admin/}"><b>Administration</b></a></li>
+            <li class="breadcrumb-item"><a th:href="@{/admin/vaults}"><b>Vaults</b></a></li>
+            <li class="breadcrumb-item active" aria-current="page"><b>Vault:</b> [[${vault.name}]]</li>
+        </ol>
+    </nav>
 
     <form th:action="@{|/admin/vaults/${vault.getID()}/checkretentionpolicy|}" method="post">
 
     <div class="bs-callout">
         <h2>
-            <span class="glyphicon glyphicon-folder-close"></span> [[${vault.name}]]
+            <i class="bi bi-folder" aria-hidden="true"></i> [[${vault.name}]]
         </h2>
         <h2>
             <small>
@@ -31,7 +33,7 @@
             <b>Group:</b> [[${group.name}]]<br/>
             <b>Created:</b> [[${#dates.format(vault.creationTime,globalDateTimeFormat)}]]<!--/* datetime */--><br/>
             <b>Review date:</b> [[${#dates.format(vault.policyExpiry,globalDateTimeFormat)}]]<!--/* datetime */--> (Status: [[${vault.policyStatusStr}]])<br/>
-            <b>Last checked:</b> [[${#dates.format(vault.policyLastChecked,globalDateTimeFormat)}]]<!--/* datetime */--><button type="submit" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Update</button><br/>
+            <b>Last checked:</b> [[${#dates.format(vault.policyLastChecked,globalDateTimeFormat)}]]<!--/* datetime */--><button type="submit" class="btn btn-default btn-sm"><i class="bi bi-arrow-repeat spin" aria-hidden="true"></i> Update</button><br/>
             <b>Size:</b> [[${vault.getSizeStr()}]]
         </p>
 
@@ -61,16 +63,16 @@
                                     <div id="deposit-status" class="job-status">
                                         <th:block th:switch="${deposit.status.name()}">
                                             <div th:case="COMPLETE" class="text-success">
-                                                <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>&nbsp;Complete
+                                                <i class="bi bi-check" aria-hidden="true"></i>&nbsp;Complete
                                             </div>
                                             <div th:case="FAILED" class="text-danger">
-                                                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>&nbsp;Failed
+                                                <i class="bi bi-x" aria-hidden="true"></i>&nbsp;Failed
                                             </div>
                                             <div th:case="NOT_STARTED">
                                                 &nbsp;Queued
                                             </div>
                                             <div th:case="IN_PROGRESS">
-                                                <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>&nbsp;In progress
+                                                <i class="bi bi-arrow-repeat spin"></i>&nbsp;In progress
                                             </div>
                                             <div th:case="*">
                                                [[${deposit.status}]]

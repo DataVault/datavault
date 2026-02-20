@@ -11,7 +11,7 @@ public class FilestoresPage extends Page {
     }
 
     public FilestoresPage clickAddLocalFilestore() throws InterruptedException {
-        focusAndClick(driver.findElement(By.xpath("//a[@data-target='#add-filestoreLocal']")));
+        focusAndClick(driver.findElement(By.xpath("//a[@data-bs-target='#add-filestoreLocal']")));
         Thread.sleep(1000);
         return this;
     }

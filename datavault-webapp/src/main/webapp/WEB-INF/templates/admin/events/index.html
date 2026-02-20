@@ -7,13 +7,15 @@
 
 <div class="container">
 
-    <ol class="breadcrumb">
-        <li><a th:href="@{/admin/}"><b>Administration</b></a></li>
-        <li class="active"><b>Events</b></li>
-    </ol>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/admin/}"><b>Administration</b></a></li>
+            <li class="breadcrumb-item active" aria-current="page"><b>Events</b></li>
+        </ol>
+    </nav>
     <th:block th:if="${events != null}">
         <div class="table-responsive" style="overflow: scroll; font-family:monospace;">
-            <table class="table table-striped text-nowrap">
+            <table class="table table-light table-striped text-nowrap">
                 <thead>
                     <tr class="tr">
                         <th>Agent</th>

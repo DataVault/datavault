@@ -134,8 +134,8 @@
             <div class="well">
                 <div class="form-group required" style="padding-bottom: 1.5rem;">
                     <label class="col-sm-4 control-label">Authoriser:
-                        <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
-                            title="The name of someone in your School/Unit or Sub-Unit who can authorise the payment."></span>
+                        <i class="bi bi-info-circle" aria-hidden="true" data-bs-toggle="tooltip"
+                           title="The name of someone in your School/Unit or Sub-Unit who can authorise the payment."></i>
                     </label>
                     <input type="text" class="col-sm-6" id="budget-authoriser" th:field="*{budgetAuthoriser}" />
                 </div>
@@ -149,15 +149,15 @@
                 </div>
                 <div class="form-group required" style="padding-bottom: 1.5rem;">
                     <label class="col-sm-4 control-label">Project Title:
-                        <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
-                            title="If you are planning to pay the bill from a grant, please enter the Project Title."></span>
+                        <i class="bi bi-info-circle" aria-hidden="true" data-bs-toggle="tooltip"
+                           title="If you are planning to pay the bill from a grant, please enter the Project Title."></i>
                     </label>
                     <input type="text" class="col-sm-6" id="projectTitle" th:field="*{projectTitle}"/>
                 </div>
                 <div class="form-group" style="padding-bottom: 1.5rem;">
                     <label for="billingGrantEndDate" class="col-sm-4 control-label">
-                        Grant End Date:<span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
-                            title="This information will assist the university in ensuring the archive is kept for at least the minimum amount of time required by the funder(s). This field should be left blank if there is no grant associated with the work.&nbsp;"></span>
+                        Grant End Date:<i class="bi bi-info-circle" aria-hidden="true" data-bs-toggle="tooltip"
+                           title="This information will assist the university in ensuring the archive is kept for at least the minimum amount of time required by the funder(s). This field should be left blank if there is no grant associated with the work.&nbsp;"></i>
                     </label>
                     <input id="billingGrantEndDate" class="date-picker col-sm-6" placeholder="yyyy-mm-dd"
                            th:field="*{billingGrantEndDate}"
@@ -183,7 +183,7 @@
     <button type="button" name="previous" class="previous action-button-previous btn btn-default">&laquo; Previous</button>
     <th:block th:if="${!vault.confirmed}">
         <button type="submit" name="save" value="Save" class="save action-button-previous btn btn-default">
-            <span class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span> Save
+            <i class="bi bi-save" aria-hidden="true"></i> Save
         </button>
     </th:block>
     <button type="button" name="next" class="next action-button btn btn-primary" disabled>Next Step &raquo;</button>

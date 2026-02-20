@@ -13,12 +13,12 @@
     <th:block th:if="${groups != null}">
             <div th:each="group,gStatus: ${groups}" class="panel panel-success">
                 <div class="panel-heading">
-                    <h3 class="panel-title"><i class="fa fa-users" aria-hidden="true"></i> [[${group.name}]] ([[${group.getID()}]])</h3>
+                    <h3 class="panel-title"><i class="bi bi-people" aria-hidden="true"></i> [[${group.name}]] ([[${group.getID()}]])</h3>
                 </div>
                 <div class="panel-body">
 
                    <div th:if="${!group.enabled}" class="alert alert-warning" role="alert">
-                    <span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span>
+                    <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
                     This group is disabled and cannot be used for new Vaults
                    </div>
 

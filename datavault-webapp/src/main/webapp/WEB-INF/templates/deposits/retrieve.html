@@ -5,12 +5,14 @@
 <th:block layout:fragment="content">
 <div class="container">
 
+    <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
-        <li><a th:href="@{/}"><b>Home</b></a></li>
-        <li><a th:href="@{|/vaults/${vault.getID()}/|}"><b>Vault:</b> [[${vault.name}]]</a></li>
-        <li><a th:href="@{|/vaults/${vault.getID()}/deposits/${deposit.getID()}|}"><b>Deposit:</b> [[${deposit.name}]]</a></li>
-        <li class="active">Retrieve data</li>
+        <li class="breadcrumb-item"><a th:href="@{/}"><b>Home</b></a></li>
+        <li class="breadcrumb-item"><a th:href="@{|/vaults/${vault.getID()}/|}"><b>Vault:</b> [[${vault.name}]]</a></li>
+        <li class="breadcrumb-item"><a th:href="@{|/vaults/${vault.getID()}/deposits/${deposit.getID()}|}"><b>Deposit:</b> [[${deposit.name}]]</a></li>
+        <li class="breadcrumb-item active">Retrieve data</li>
     </ol>
+    </nav>
     
     <div class="row">
         <div class="col-md-12">
@@ -31,39 +33,43 @@
 
 
                     <form id="retrieve-deposit" class="form" role="form" th:action="@{|/vaults/${vault.getID()}/deposits/${deposit.getID()}/retrieve|}" method="post" th:object="${retrieve}" >
-                        
-                        <div class="form-group">
-                            <label>Are any of the intended recipients external to the University of Edinburgh?</label>
-                            <span class="text-muted">
-                                <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
-                                      title="'External' means they are neither a member of staff nor a student currently at the university. We must record this information to for compliance with funder requirements, with respect to how long a deposit is kept">
+
+                        <div class="mb-3">
+                            <label class="form-label">
+                                Are any of the intended recipients external to the University of Edinburgh?
+                                <span class="text-muted">
+                                    <i class="bi bi-info-circle" aria-hidden="true"
+                                        data-bs-toggle="tooltip"
+                                        title="'External' means they are neither a member of staff nor a student currently at the university. We must record this information to for compliance with funder requirements, with respect to how long a deposit is kept"></i>
                                 </span>
-                            </span>
-                            <br/>
-                            <div class="radio-inline">
-                                <label>
-                                    <input type="radio" name="hasExternalRecipients" value="true"
-                                           th:field="*{hasExternalRecipients}"
-                                    >
-                                    Yes
-                                </label>
-                            </div>
-                            <div class="radio-inline">
-                                <label>
-                                    <input type="radio" name="hasExternalRecipients" value="false"
-                                           th:field="*{hasExternalRecipients}"
-                                    >
-                                    No
-                                </label>
+                            </label>
+
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="form-check form-check-inline m-0">
+                                    <input class="form-check-input"
+                                           type="radio"
+                                           name="hasExternalRecipients"
+                                           value="true"
+                                           th:field="*{hasExternalRecipients}">
+                                    <label class="form-check-label">Yes</label>
+                                </div>
+
+                                <div class="form-check form-check-inline m-0">
+                                    <input class="form-check-input"
+                                           type="radio"
+                                           name="hasExternalRecipients"
+                                           value="false"
+                                           th:field="*{hasExternalRecipients}">
+                                    <label class="form-check-label">No</label>
+                                </div>
                             </div>
                         </div>
                         
                         <div class="form-group hidden">
                             <label class="control-label">Retrieve Note:</label>
                             <span class="text-muted">
-                                <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
-                                    title="Explain the reason why this Deposit is being retrieved.">
-                                </span>
+                                <i class="bi bi-info-circle" aria-hidden="true" data-bs-toggle="tooltip"
+                                   title="Explain the reason why this Deposit is being retrieved."></i>
                             </span>
                             <input type="text"
                                    class="form-control"
@@ -73,7 +79,7 @@
                 
                         <div class="form-group">
                             <label class="control-label">Target directory:</label>
-                            <span class="text-muted"><span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" title="Select the destination directory where you wish the data to be saved to."></span></span>
+                            <span class="text-muted"><i class="bi bi-info-circle" aria-hidden="true" data-bs-toggle="tooltip" title="Select the destination directory where you wish the data to be saved to."></i></span>
                             <input type="text"
                                    style="display:none;"
                                    class="form-control file-path"
@@ -139,10 +145,10 @@
                             <!--/* UsesRetrievesPaused */-->
                             <th:block th:with="notAffectedByRetrievesPaused=|hasRole('IS_ADMIN') or (!@permissionsService.retrievesPaused())|">
                                 <th:block th:if="${#authorization.expression(notAffectedByRetrievesPaused)}">
-                                    <button type="submit" value="submit" class="btn btn-primary"><i class="fa fa-upload fa-rotate-180" aria-hidden="true"></i> Retrieve data</button>
+                                    <button type="submit" value="submit" class="btn btn-primary"><i class="bi bi-download" aria-hidden="true"></i> Retrieve data</button>
                                 </th:block>
                                 <th:block th:unless="${#authorization.expression(notAffectedByRetrievesPaused)}">
-                                    <button type="button" class="btn btn-primary" disabled><i class="fa fa-upload fa-rotate-180" aria-hidden="true"></i> Retrieve data : PAUSED</button>
+                                    <button type="button" class="btn btn-primary" disabled><i class="bi bi-download" aria-hidden="true"></i> Retrieve data : PAUSED</button>
                                 </th:block>
                             </th:block>
                             <button id="retrieve-cancel" type="submit" value="cancel" class="btn btn-danger cancel">Cancel</button>
@@ -203,7 +209,7 @@
             }
         });
 
-        $('[data-toggle="tooltip"]').tooltip({
+        $('[data-bs-toggle="tooltip"]').tooltip({
             'placement': 'top'
         });
     });

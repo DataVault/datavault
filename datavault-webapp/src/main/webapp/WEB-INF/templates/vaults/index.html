@@ -9,9 +9,8 @@
         <th:block th:if="${vaults != null}">
         <h3>
             Current Vaults
-            <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
-                title="Vaults of which you are either the Owner or the Nominated Data Manager. If you think a vault is missing from this list, please contact the Research Data Service">
-            </span>
+            <i class="bi bi-info-circle" aria-hidden="true" data-bs-toggle="tooltip"
+               title="Vaults of which you are either the Owner or the Nominated Data Manager. If you think a vault is missing from this list, please contact the Research Data Service"></i>
         </h3>
         
         <div class="row">
@@ -41,7 +40,7 @@
                                         <th:block th:with="notAffectedByDepositsPaused=|hasRole('IS_ADMIN') or (!@permissionsService.depositsPaused())|">
                                         <th:block th:if="${#authorization.expression(notAffectedByDepositsPaused)}">
                                             <a th:href="@{|/vaults/${vault.getID()}/deposits/create|}" class="btn btn-primary">
-                                                <i class="fa fa-download fa-rotate-180" aria-hidden="true"></i> Deposit
+                                                <i class="bi bi-upload" aria-hidden="true"></i> Deposit
                                             </a>
                                         </th:block>
                                         <th:block th:unless="${#authorization.expression(notAffectedByDepositsPaused)}">
@@ -66,9 +65,8 @@
         <th:block th:if="${pendingVaults != null}">
             <h3>
                 Pending Vaults
-                <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
-                      title="Vaults of which are pending. If you think a vault is missing from this list, please contact the Research Data Service">
-                </span>
+                <i class="bi bi-info-circle" aria-hidden="true" data-bs-toggle="tooltip"
+                   title="Vaults of which are pending. If you think a vault is missing from this list, please contact the Research Data Service"></i>
             </h3>
 
             <div class="row">
@@ -102,7 +100,7 @@
         </th:block>
         <div class="row">
             <a th:href="@{/vaults/buildsteps}" class="btn btn-lg btn-primary">
-                <span class="glyphicon glyphicon-folder-close"></span>
+                <i class="bi bi-folder" aria-hidden="true"></i>
                 Create vault
             </a>
         </div>

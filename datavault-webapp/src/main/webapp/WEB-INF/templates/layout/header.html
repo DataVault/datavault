@@ -1,74 +1,125 @@
 <!--layout/header.html-->
 <!-- nav is ([[${nav}]]) -->
 <div class="datavault-header" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+
+    <!-- Debug info (optional) -->
     <div id="dv-user-info" style="display:none">
         <div id="loggedin" sec:authorize="isFullyAuthenticated()">
             <p>Authenticated as [<span id="dv-user-name" sec:authentication="name"></span>]</p>
             <p>Granted Authorities : [<span th:text="${#lists.size(#authentication.authorities)}">-1</span>]</p>
             <p th:each="user_role, iter: ${#authentication.authorities}">
-                Granted Authority : [<span>[[${iter.count}]]/[[${iter.size}]]</span>] : <span class="dv-user-role" th:text="${user_role.authority}">DUMMY_ROLE_NAME</span>
+                Granted Authority : [<span>[[${iter.count}]]/[[${iter.size}]]</span>] :
+                <span class="dv-user-role" th:text="${user_role.authority}">DUMMY_ROLE_NAME</span>
             </p>
         </div>
-        <div id="notloggedin" sec:authorize="!isFullyAuthenticated()">
-            NOT LOGGED IN
-        </div>
+        <div id="notloggedin" sec:authorize="!isFullyAuthenticated()">NOT LOGGED IN</div>
     </div>
-    <nav class="navbar navbar-default">
-      <div class="container-fluid">
-        <div class="navbar-header"></div>
-        <ul class="nav navbar-nav ">
-            <li th:class="${nav == 'home' ? 'active' : '' }"><a th:href="@{/}">DATAVAULT</a></li>
-        </ul>
-        <ul class="nav navbar-nav navbar-right">
-            <li sec:authorize-url="/admin" th:class="${nav == 'admin' ? 'active' : ''}">
-                <a th:href="@{/admin}">Administration</a>
-            </li>
-            <li sec:authorize="isAuthenticated()" th:class="${nav == 'user' ? 'active' : ''}">
-                <a th:href="@{/filestores}">File Locations</a>
-            </li>
-            <li th:class="${nav == 'feedback' ? 'active' : ''}">
-                <a href="https://www.ed.ac.uk/information-services/research-support/research-data-service/contact" target="_blank">Contact</a>
-            </li>
-            <li th:class="${nav == 'help' ? 'active' : ''}">
-                <a href="http://www.ed.ac.uk/is/research-support/datavault" target="_blank">More Info</a>
-            </li>
-            <li sec:authorize="isAuthenticated()">
-                <a th:href="@{/auth/logout}">Logout</a>
-            </li>
-        </ul>
-      </div>
+
+    <!-- ✅ Modern Bootstrap 5 Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+
+            <!-- Brand -->
+            <!--
+            <a class="navbar-brand" th:classappend="${nav == 'home' ? ' active' : ''}" th:href="@{/}">
+                DATAVAULT
+            </a>
+            -->
+            <!-- Toggler -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar"
+                    aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Navbar Content -->
+            <div class="collapse navbar-collapse" id="mainNavbar">
+                <!-- Left group -->
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item" sec:authorize="isAuthenticated()">
+                        <a class="nav-link" th:classappend="${nav == 'home' ? ' active' : ''}" th:href="@{/}">
+                            DATAVAULT
+                        </a>
+                    </li>
+                </ul>
+
+                <!-- Right group -->
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    <li class="nav-item" sec:authorize-url="/admin">
+                        <a class="nav-link" th:classappend="${nav == 'admin' ? ' active' : ''}" th:href="@{/admin}">
+                            Administration
+                        </a>
+                    </li>
+                    <li class="nav-item" sec:authorize="isAuthenticated()">
+                        <a class="nav-link" th:classappend="${nav == 'user' ? ' active' : ''}" th:href="@{/filestores}">
+                            File Locations
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:classappend="${nav == 'feedback' ? ' active' : ''}"
+                           href="https://www.ed.ac.uk/information-services/research-support/research-data-service/contact"
+                           target="_blank">
+                            Contact
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:classappend="${nav == 'help' ? ' active' : ''}"
+                           href="http://www.ed.ac.uk/is/research-support/datavault" target="_blank">
+                            More Info
+                        </a>
+                    </li>
+                    <li class="nav-item" sec:authorize="isAuthenticated()">
+                        <a class="nav-link" th:href="@{/auth/logout}">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
     </nav>
-    <div class="container-fluid whitebackground">
-        <div class="row">
+
+    <!-- University header (white background) -->
+    <div class="container-fluid whitebackground py-2">
+        <div class="row align-items-center">
             <div class="col-sm-4">
                 <span class="titleblock">
-                    <img th:src="@{/resources/theme/jackie/logo.png}" alt="The University of Edinburgh">
+                    <img th:src="@{/resources/theme/jackie/logo.png}" alt="The University of Edinburgh" class="img-fluid">
                 </span>
             </div>
-            <div class="col-sm-2"></div>
         </div>
     </div>
-    
-    <div class="container-fluid greyblue">
-        <div class="page-head-title ">
-            <h1 class="sr-only">
-                <a href="https://www.ed.ac.uk/information-services/research-support/research-data-service" class="active">
-                    Research Data Service
-                </a>
-            </h1>
-            <h2 class="sr-only">
-                <a href="http://www.ed.ac.uk/information-services">Information Services</a>
-            </h2>
+
+    <!-- Research Data Service title (greyblue bar) -->
+    <!--
+    <div class="container-fluid greyblue py-3">
+        <div class="page-head-title text-center text-white">
             <h2 aria-hidden="true">
-                <a href="http://www.ed.ac.uk/information-services">
+                <a href="http://www.ed.ac.uk/information-services" class="text-white text-decoration-none">
                     Information Services
                 </a>
             </h2>
             <h1 aria-hidden="true">
-                <a href="https://www.ed.ac.uk/information-services/research-support/research-data-service" class="active">
+                <a href="https://www.ed.ac.uk/information-services/research-support/research-data-service"
+                   class="text-white text-decoration-none active">
                     Research Data Service
                 </a>
             </h1>
         </div>
     </div>
+    -->
+
+    <!-- Research Data Service title (greyblue bar) -->
+    <div class="container-fluid greyblue py-3">
+        <div class="page-head-title text-start text-white">
+            <h2 aria-hidden="true" class="page-subtitle mb-1">
+                <a href="http://www.ed.ac.uk/information-services" class="text-white text-decoration-none">
+                    Information Services
+                </a>
+            </h2>
+            <h1 aria-hidden="true" class="page-title mb-0">
+                <a href="https://www.ed.ac.uk/information-services/research-support/research-data-service"
+                   class="text-white text-decoration-none">
+                    RESEARCH DATA SERVICE
+                </a>
+            </h1>
+        </div>
+    </div>
+
 </div>

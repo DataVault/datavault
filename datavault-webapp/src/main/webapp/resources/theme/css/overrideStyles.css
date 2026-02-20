@@ -34,3 +34,351 @@ a {
 .text-muted {
 	color: #000;
 }
+
+:root {
+    --bs-primary: #337ab7;
+    --bs-primary-rgb: 51, 122, 183;
+}
+
+/* =============================
+   Bootstrap 3-style Button Colors
+   ============================= */
+
+/* Primary – Classic dark blue */
+.btn-primary {
+    background-color: #337ab7 !important;
+    border-color: #2e6da4 !important;
+    color: #fff !important;
+}
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+    background-color: #286090 !important;
+    border-color: #204d74 !important;
+    color: #fff !important;
+}
+
+/* Secondary / Default – Light grey */
+.btn-secondary,
+.btn-default {
+    background-color: #f8f9fa !important;
+    border-color: #ccc !important;
+    color: #333 !important;
+}
+.btn-secondary:hover,
+.btn-default:hover,
+.btn-secondary:focus,
+.btn-default:focus,
+.btn-secondary:active,
+.btn-default:active {
+    background-color: #e6e6e6 !important;
+    border-color: #adadad !important;
+    color: #222 !important;
+}
+
+/* Success – Green */
+.btn-success {
+    background-color: #5cb85c !important;
+    border-color: #4cae4c !important;
+    color: #fff !important;
+}
+.btn-success:hover,
+.btn-success:focus,
+.btn-success:active {
+    background-color: #449d44 !important;
+    border-color: #398439 !important;
+    color: #fff !important;
+}
+
+/* Danger – Red */
+.btn-danger {
+    background-color: #d9534f !important;
+    border-color: #d43f3a !important;
+    color: #fff !important;
+}
+.btn-danger:hover,
+.btn-danger:focus,
+.btn-danger:active {
+    background-color: #c9302c !important;
+    border-color: #ac2925 !important;
+    color: #fff !important;
+}
+
+/* Warning – Orange */
+.btn-warning {
+    background-color: #f0ad4e !important;
+    border-color: #eea236 !important;
+    color: #fff !important;
+}
+.btn-warning:hover,
+.btn-warning:focus,
+.btn-warning:active {
+    background-color: #ec971f !important;
+    border-color: #d58512 !important;
+    color: #fff !important;
+}
+
+/* Info – Light blue */
+.btn-info {
+    background-color: #5bc0de !important;
+    border-color: #46b8da !important;
+    color: #fff !important;
+}
+.btn-info:hover,
+.btn-info:focus,
+.btn-info:active {
+    background-color: #31b0d5 !important;
+    border-color: #269abc !important;
+    color: #fff !important;
+}
+
+/* Link – subtle text button */
+.btn-link {
+    color: #337ab7 !important;
+    text-decoration: none !important;
+}
+.btn-link:hover,
+.btn-link:focus {
+    color: #23527c !important;
+    text-decoration: underline !important;
+}
+
+/* === Datavault Header Fixes === */
+
+.datavault-header .navbar {
+    border-radius: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+.datavault-header .navbar-brand {
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.datavault-header .navbar-dark .nav-link {
+    color: #f8f9fa !important;
+    padding-right: 1rem;
+    padding-left: 1rem;
+}
+
+.datavault-header .navbar-dark .nav-link.active,
+.datavault-header .navbar-dark .nav-link:hover {
+    /*color: #fff !important;
+    background-color: #337ab7 !important;*/
+    color: #D50032 !important;
+    background-color: #fff !important;
+    border-radius: 4px;
+}
+
+.whitebackground {
+    background-color: #fff !important;
+}
+
+.greyblue {
+    background-color: #D50032; !important;
+}
+
+.page-head-title a {
+    color: #fff !important;
+    text-decoration: none !important;
+}
+
+.datavault-footer {
+    font-size: 0.9rem;
+}
+
+.datavault-footer .footer {
+    background-color: #2a2a2a !important;
+}
+
+.datavault-footer a:hover {
+    text-decoration: underline !important;
+}
+
+.datavault-footer .footer-copyright,
+.datavault-footer .footer-login {
+    background-color: #e8e8e8 !important;
+}
+
+.datavault-footer .login-link {
+    color: #337ab7 !important;
+}
+
+/* === Page heading area === */
+.page-head-title {
+    text-align: left !important;
+    color: #fff;
+    margin: 0;
+    padding: 0 1rem; /* small left padding for alignment consistency */
+}
+
+/* “Information Services” (smaller subtitle) */
+.page-head-title .page-subtitle {
+    font-size: 1.25rem;       /* ~20px */
+    font-weight: 400;         /* normal weight */
+    margin-bottom: 0.25rem;
+    line-height: 1.2;
+}
+
+/* “Research Data Service” (main title) */
+.page-head-title .page-title {
+    font-size: 2rem;          /* ~32px */
+    font-weight: 600;         /* semi-bold */
+    margin: 0;
+    line-height: 1.1;
+}
+
+/* Links */
+.page-head-title a {
+    color: #fff !important;
+    text-decoration: none !important;
+    border: none !important;
+}
+
+.page-head-title a:hover {
+    text-decoration: underline !important;
+}
+
+/* Remove the underline “ruler” from .active links (old EdGEL effect) */
+.page-head-title .active {
+    border-bottom: none !important;
+    box-shadow: none !important;
+}
+
+/* === Bootstrap 3 Panel Compatibility Layer for Bootstrap 5 === */
+
+/* Panel container */
+.panel {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+}
+
+/* Optional “low” or “highlight” color variants */
+.panel-uoe-low {
+    border-color: #1e73be; /* your UoE blue */
+}
+
+/* Panel heading */
+.panel-heading {
+    padding: 10px 15px;
+    border-bottom: 1px solid #ddd;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    background-color: #f5f5f5;
+    font-weight: 600;
+}
+
+/* Panel body */
+.panel-body {
+    padding: 15px;
+}
+
+/* Panel footer */
+.panel-footer {
+    padding: 10px 15px;
+    background-color: #f5f5f5;
+    border-top: 1px solid #ddd;
+    border-bottom-right-radius: 3px;
+    border-bottom-left-radius: 3px;
+}
+
+/* Remove unwanted space between consecutive panels */
+.panel + .panel {
+    margin-top: 10px;
+}
+
+/* Restore spacing inside panels within containers */
+.container .panel {
+    margin-top: 15px;
+}
+
+/* If using whitebackground, ensure clean edge and consistent padding */
+.panel-body.whitebackground {
+    background-color: #fff;
+    padding: 20px 30px;
+    margin-top: 0;
+}
+
+/* Tighten top gaps caused by Bootstrap 5’s spacing reset */
+.panel:first-child {
+    margin-top: 0;
+}
+
+.panel-warning {
+    border-color: #faebcc;
+}
+
+.panel-warning > .panel-heading {
+    background-color: #fcf8e3;
+    border-color: #faebcc;
+}
+
+.panel-info {
+    border-color: #bce8f1;
+}
+.panel-info > .panel-heading {
+    background-color: #d9edf7;
+    border-color: #bce8f1;
+}
+
+.panel-success {
+    border-color: #d6e9c6;
+}
+.panel-success > .panel-heading {
+    background-color: #dff0d8;
+    border-color: #d6e9c6;
+}
+
+.panel-default {
+    border-color: #ddd;
+}
+.panel-default > .panel-heading {
+    background-color: #f5f5f5;
+    border-color: #ddd;
+}
+
+/* Restore a '>' divider for breadcrumbs (force it after Edgel theme overrides) */
+nav[aria-label="breadcrumb"] .breadcrumb {
+    /* keep the breadcrumb display/layout from Edgel but ensure the divider works */
+    --bs-breadcrumb-divider: ">" !important;
+}
+
+/* Bulletproof: explicitly inject '>' for cases where theme overrides the variable */
+nav[aria-label="breadcrumb"] .breadcrumb-item + .breadcrumb-item::before {
+    content: ">" !important;             /* explicit fallback */
+    display: inline-block !important;
+    padding: 0 0.5rem !important;        /* spacing around divider */
+    color: #707070 !important;           /* tweak color to match previous look */
+    font-weight: 400 !important;
+    vertical-align: middle !important;
+}
+
+/* Keep the active item styling similar to old BS3 look */
+nav[aria-label="breadcrumb"] .breadcrumb-item.active {
+    color: #000 !important;
+    font-weight: 600 !important;
+}
+
+/* If Edgel adds strange background/padding, provide a safe neutral baseline */
+nav[aria-label="breadcrumb"] .breadcrumb {
+    background: transparent !important;
+    padding: 0.5rem 0 !important;
+    margin-bottom: 1rem !important;
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+
+#upload-tree {
+    text-align: left !important;
+}

@@ -10,7 +10,7 @@
             <div class="modal-content">
                 <form id="add-data-manager-form" class="form" role="form" th:action="@{|/vaults/${vault.getID()}/addDataManager|}" method="post">
                     <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"><i class="bi bi-x"></i></button>
                         <h4 class="modal-title" id="addDataManger">Add Data Manager</h4>
                     </div>
                     <div class="modal-body">
@@ -26,7 +26,7 @@
                     <input type="hidden" th:name="${_csrf?.parameterName ?: ''}" th:value="${_csrf?.token ?: ''}" />
                     
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-default" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" id="add-data-manager-btn" class="btn btn-primary btn-ok">Add</button>
                     </div>
                 </form>
@@ -38,7 +38,7 @@
             <div class="modal-content">
                 <form id="update-vault-description-form" th:object="${vault}" class="form" role="form" action="updateVaultDescription" method="post">
                     <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"><i class="bi bi-x"></i></button>
                         <h4 class="modal-title" id="editDescription">Edit Description</h4>
                     </div>
                     <div class="modal-body">
@@ -56,8 +56,8 @@
                     <input type="hidden" th:name="${_csrf?.parameterName ?: ''}" th:value="${_csrf?.token ?: ''}" />
 
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-default btn-cancel" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> Cancel</button>
-                        <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
+                        <button type="button" class="btn btn-default btn-cancel" data-bs-dismiss="modal"><i class="bi bi-x" aria-hidden="true"></i> Cancel</button>
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-save" aria-hidden="true"></i> Save</button>
                     </div>
                 </form>
             </div>
@@ -69,7 +69,7 @@
             <div class="modal-content">
                 <form id="update-vault-name-form" th:object="${vault}" class="form" role="form" action="updateVaultName" method="post">
                     <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"><i class="bi bi-x" aria-hidden="true"></i></button>
                         <h4 class="modal-title" id="editName">Edit Name</h4>
                     </div>
                     <div class="modal-body">
@@ -88,18 +88,20 @@
                     <input type="hidden" th:name="${_csrf?.parameterName ?: ''}" th:value="${_csrf?.token ?: ''}" />
 
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-default btn-cancel" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> Cancel</button>
-                        <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
+                        <button type="button" class="btn btn-default btn-cancel" data-bs-dismiss="modal"><i class="bi bi-x" aria-hidden="true"></i> Cancel</button>
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-save" aria-hidden="true"></i> Save</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
     
-    <ol class="breadcrumb">
-        <li><a th:href="@{/}"><b>Home</b></a></li>
-        <li class="active"><b>Vault:</b> [[${vault.name}]]</li>
-    </ol>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/}"><b>Home</b></a></li>
+            <li class="breadcrumb-item active" aria-current="page"><b>Vault:</b> [[${vault.name}]]</li>
+        </ol>
+    </nav>
 
     <div class="panel panel-uoe-low">
         <div class="associated-image">
@@ -138,7 +140,7 @@
                     <th:block th:with="notAffectedByDepositsPaused=|hasRole('IS_ADMIN') or (!@permissionsService.depositsPaused())|">
                     <th:block th:if="${#authorization.expression(notAffectedByDepositsPaused)}">
                         <a class="btn btn-primary pull-right" th:href="@{|/vaults/${vault.getID()}/deposits/create|}">
-                            <i class="fa fa-download fa-rotate-180" aria-hidden="true"></i> Deposit data
+                            <i class="bi bi-upload" aria-hidden="true"></i> Deposit data
                         </a>
                     </th:block>
                     <th:block th:unless="${#authorization.expression(notAffectedByDepositsPaused)}">
@@ -156,9 +158,8 @@
                         <th>Date and Time</th>
                         <th>Total Size of Selected Deposits</th>
                         <th>Select Deposit(s) to be Retrieved
-                            <span class="glyphicon glyphicon-info-sign text-muted" aria-hidden="true" data-toggle="tooltip" 
-                                title="Please make sure you have enough space for the full contents of the vault to be copied to the location you will specify (see 'Size', below).">
-                            </span>
+                            <i class="bi bi-info-circle" aria-hidden="true" data-bs-toggle="tooltip"
+                               title="Please make sure you have enough space for the full contents of the vault to be copied to the location you will specify (see 'Size', below)."></i>
                         </th>
                     </tr>
                 </thead>
@@ -193,7 +194,7 @@
                                             <th:block th:if="${#authorization.expression(notAffectedByRetrievesPaused)}">
                                                 <a id="retrievebtn" class="btn btn-default"
                                                     th:href="@{|/vaults/${vault.getID()}/deposits/${deposit.getID()}/retrieve|}">
-                                                    <span class="fa fa-upload fa-rotate-180" aria-hidden="true"></span> Retrieve
+                                                    <span class="bi bi-download" aria-hidden="true"></span> Retrieve
                                                 </a>
                                              </th:block>
                                              <th:block th:unless="${#authorization.expression(notAffectedByRetrievesPaused)}">
@@ -227,7 +228,7 @@
             <div class="row">
                 <div class="col-md-12">
                     <a class="btn btn-primary" th:href="@{|/vaults/${vault.getID()}/deposits/create|}">
-                        <i class="fa fa-download fa-rotate-180" aria-hidden="true"></i> Deposit data
+                        <i class="bi bi-upload" aria-hidden="true"></i> Deposit data
                     </a>
                 </div>
             </div>
@@ -251,7 +252,7 @@
                                 <td>
                                     <th:block th:with="editVaultNameSecurityExpression6=|hasRole('ROLE_ADMIN')|">
                                     <th:block th:if="${#authorization.expression(editVaultNameSecurityExpression6)}">
-                                        <button type="button" class="btn btn-default pull-right" data-toggle="modal" data-target="#update-vault-name">
+                                        <button type="button" class="btn btn-default pull-right" data-bs-toggle="modal" data-bs-target="#update-vault-name">
                                             Edit
                                         </button>
                                     </th:block></th:block><!-- editVaultNameSecurityExpression6 -->
@@ -263,7 +264,7 @@
                                 <td>
                                     <th:block th:with="editVaultSecurityExpression7=|hasPermission('${vault.ID}', 'vault', 'VIEW_VAULT_METADATA') or hasPermission('${vault.getGroupID()}', 'GROUP', 'EDIT_SCHOOL_VAULT_METADATA')|">
                                     <th:block th:if="${#authorization.expression(editVaultSecurityExpression7)}">
-                                    <button type="button" class="btn btn-default pull-right" data-toggle="modal" data-target="#update-vault-description">
+                                    <button type="button" class="btn btn-default pull-right" data-bs-toggle="modal" data-bs-target="#update-vault-description">
                                         Edit
                                     </button>
                                     </th:block></th:block><!-- editVaultSecurityExpression7 -->
@@ -355,13 +356,13 @@
                                         <div th:switch="${retrieve?.status?.name()}" class="job-status">
                                         <th:block th:case="COMPLETE">
                                             <div class="text-success">
-                                                <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                                                <i class="bi bi-check" aria-hidden="true"></i>
                                                 Complete
                                             </div>
                                         </th:block>
                                         <th:block th:case="FAILED">
                                             <div class="text-danger">
-                                                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                                                <i class="bi bi-x" aria-hidden="true"></i>
                                                 Failed
                                             </div>
                                         </th:block>
@@ -369,7 +370,7 @@
                                             Queued
                                         </th:block>
                                         <th:block th:case="IN_PROGRESS">
-                                            <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
+                                            <i class="bi bi-arrow-repeat spin"></i>
                                             In progress
                                         </th:block>
                                         <th:block th:case="*">
@@ -463,7 +464,7 @@
 </div>
 <script th:inline="javascript" type="text/javascript">
 $(document).ready(function(){
-    $('[data-toggle="popover"]').popover();
+    $('[data-bs-toggle="popover"]').popover();
 
     $('#accordion').find('.accordion-toggle').click(function(){
 
@@ -475,7 +476,7 @@ $(document).ready(function(){
 
     });
     
-    $('[data-toggle="tooltip"]').tooltip({
+    $('[data-bs-toggle="tooltip"]').tooltip({
         'placement': 'right'
     });
 

@@ -1,17 +1,20 @@
 <!DOCTYPE html><!--admin/retrieves/index.html-->
-<html xmlns:th="http://www.thymeleaf.org"
+<html xmlns:th="http://www.thymeleaf.org" lang="en"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/defaultlayout(nav='admin')}">
 <head><title>Admin - Retrievals</title></head>
 <th:block layout:fragment="content" th:with="queryPARAM=${#uris.escapeQueryParam(query)}">
-    <div class="container">
+<div class="container">
 
-    <ol class="breadcrumb">
-        <li><a th:href="@{/admin/}"><b>Administration</b></a></li>
-        <li class="active"><b>Retrievals</b></li>
-    </ol>
+    <nav aria-label="breadcrumb">
+         <ol class="breadcrumb">
+             <li class="breadcrumb-item"><a th:href="@{/admin/}"><b>Administration</b></a></li>
+             <li class="breadcrumb-item active" aria-current="page"><b>Retrievals</b></li>
+         </ol>
+    </nav>
+
     <th:block th:if="${retrieves != null && !#lists.isEmpty(retrieves)}">
         <div class="table-responsive">
-            <table class="table table-striped">
+            <table class="table table-light table-striped table-hover align-middle">
                 <thead>
                 <tr class="tr">
                     <th>Retrieval</th>
@@ -43,10 +46,10 @@
             </table>
         </div>
 
-        <div align="center">
-            <p class="text-info">Showing [[${offset}]] - <th:block th:text="${totalRecords < (offset + recordPerPage) ? totalRecords : (offset + recordPerPage)}" /> retrieve of [[${totalRecords}]]</p>
+        <div class="text-center">
+            <p class="text-muted">Showing [[${offset}]] - <th:block th:text="${totalRecords < (offset + recordPerPage) ? totalRecords : (offset + recordPerPage)}" /> retrieve of [[${totalRecords}]]</p>
         </div>
-        <div align="center">
+        <div class="d-flex justify-content-center">
             <nav aria-label="...">
                 <ul class="pagination pagination-lg" id="paginationButton">
                     <th:block th:each="page: ${#numbers.sequence(1,totalPages)}">
