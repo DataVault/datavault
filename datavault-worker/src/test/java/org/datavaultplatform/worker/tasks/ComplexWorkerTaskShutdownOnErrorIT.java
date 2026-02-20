@@ -9,7 +9,7 @@ import org.datavaultplatform.common.task.TaskExecutor;
 import org.datavaultplatform.common.util.ProcessHelper;
 import org.datavaultplatform.common.util.ProcessInfo;
 import org.datavaultplatform.common.util.TestUtils;
-import org.datavaultplatform.worker.cleanup.ProcessHelperWithProcessInfoTest;
+import org.datavaultplatform.worker.cleanup.ProcessHelperWithProcessInfoIT;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.EnabledOnOs;
@@ -249,7 +249,7 @@ class ComplexWorkerTaskShutdownOnErrorIT {
 
     static class OperatingSystemScriptLeafAction implements LeafAction {
 
-        public static final String SCRIPT_PATH = ProcessHelperWithProcessInfoTest.SCRIPT_PATH;
+        public static final String SCRIPT_PATH = ProcessHelperWithProcessInfoIT.SCRIPT_PATH;
         private final OsScriptType osScriptErrorType;
 
         OperatingSystemScriptLeafAction(OsScriptType osScriptErrorType) {

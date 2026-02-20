@@ -28,9 +28,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * This test does not run on Windows because the way windows process shutdown works is different from Mac/Linux.
  */
 @DisabledOnOs(OS.WINDOWS)
-public class ProcessHelperWithProcessInfoTest {
+public class ProcessHelperWithProcessInfoIT {
     
-    public static final Logger LOG = LoggerFactory.getLogger(ProcessHelperWithProcessInfoTest.class);
+    public static final Logger LOG = LoggerFactory.getLogger(ProcessHelperWithProcessInfoIT.class);
     
     public static final String TIMEOUT_SIGTERM_REGEX = "OS process desc\\[(.*?)]pid\\[(\\d+)]TimedOutAfter\\[(PT\\d+S)]forcedToShutdown\\[false]";
     public static final String TIMEOUT_SIGKILL_REGEX = "OS process desc\\[(.*?)]pid\\[(\\d+)]TimedOutAfter\\[(PT\\d+S)]forcedToShutdown\\[true]";

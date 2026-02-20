@@ -2,10 +2,12 @@
 
 # Author David Hay
 # Used to test the startup/shutdown of operating system processes via ProcessHelper
-# Please see 'org.datavaultplatform.worker.cleanup.ProcessHelperWithProcessInfoTest'
-# this script is run as part of ProcessHelperWithProcessInfoTest - which runs on Jenkins CI/CD via Docker 
+# Please see 'org.datavaultplatform.worker.cleanup.ProcessHelperWithProcessInfoIT'
+# Please see 'org.datavaultplatform.worker.tasks.ComplexWorkerTaskShutdownOnErrorIT'
+# this script is run as part of ProcessHelperWithProcessInfoIT - which runs on Jenkins CI/CD via Docker 
+# this script is run as part of ComplexWorkerTaskShutdownOnErrorIT - which runs on Jenkins CI/CD via Docker 
 # the Docker image we run the tests on is created via Dockerfile.jenkins
-# this script assumes that both 'perl' and 'bash' are available in the operating system 'environment' running 'ProcessHelperWithProcessInfoTest'
+# this script assumes that both 'perl' and 'bash' are available in the operating system 'environment'
 if [[ $# -ne 4 ]]; then
     echo "Error: You must provide exactly 4 arguments."
     echo "Usage: $0 <label> <delayMillis> <exitcode> <ignoresigerm>"
