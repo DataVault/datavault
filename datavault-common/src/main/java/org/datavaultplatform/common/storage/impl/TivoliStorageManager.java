@@ -229,13 +229,13 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 
 			if (info.wasSuccess()) {
 				// canonicalPath resolves relative paths against user.dir and removes . and ..
-				String pOutput = info.getOutputMessages().get(0);
+				String pOutput = info.outputMessages().get(0);
 				Path canonicalPath = Paths.get(new File(pOutput).getCanonicalPath());
 				log.info("'dsmc' - is found on PATH by 'which' at [{}]", canonicalPath);
 				return true;
 			} else {
 				log.warn("'dsmc' - is NOT found on PATH by 'which'");
-				info.getOutputMessages().forEach(log::warn);
+				info.outputMessages().forEach(log::warn);
 				return false;
 			}
 		} catch (Exception ex) {
@@ -295,7 +295,7 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 	
 	static void logProcessOutput(ProcessInfo info, String errMessage)  {
 		log.error(errMessage);
-		info.getOutputMessages().forEach( msg -> log.error("output [{}]", msg));
+		info.outputMessages().forEach( msg -> log.error("output [{}]", msg));
 	}
 
 	/*
@@ -371,7 +371,7 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 		}
 
 		public static boolean isFailure(ProcessInfo processInfo) {
-			return isFailure(processInfo.getExitValue());
+			return isFailure(processInfo.exitValue());
 		}
 
 		public static boolean isFailure(int exitCodeValue) {

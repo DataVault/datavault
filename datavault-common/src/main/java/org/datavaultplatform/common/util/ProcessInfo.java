@@ -18,16 +18,4 @@ public record ProcessInfo(
     public boolean wasFailure() {
         return !wasSuccess();
     }
-
-    public List<String> getOutputMessages() {
-        return outputMessages;
-    }
-
-    public int getExitValue() {
-        return exitValue;
-    }
-
-    public Duration getDuration() {
-        return duration;
-    }
 }

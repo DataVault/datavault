@@ -349,9 +349,9 @@ class TivoliStorageManagerTest {
 
             ProcessInfo mProcessInfo = Mockito.mock(ProcessInfo.class);
             lenient().when(mProcessInfo.wasFailure()).thenReturn(true);
-            lenient().when(mProcessInfo.getExitValue()).thenReturn(123);
+            lenient().when(mProcessInfo.exitValue()).thenReturn(123);
             lenient().when(mProcessInfo.wasSuccess()).thenReturn(false);
-            lenient().when(mProcessInfo.getOutputMessages()).thenReturn(Arrays.asList("info-message-1","info-message-2"));
+            lenient().when(mProcessInfo.outputMessages()).thenReturn(Arrays.asList("info-message-1","info-message-2"));
 
             Mockito.doReturn(mProcessInfo).when(tsm).getProcessInfo(argDesc.capture(), argCommands.capture());
 
@@ -553,8 +553,8 @@ class TivoliStorageManagerTest {
 
             lenient().when(mProcessInfo.wasSuccess()).thenReturn(true);
             lenient().when(mProcessInfo.wasFailure()).thenReturn(false);
-            lenient().when(mProcessInfo.getExitValue()).thenReturn(0);
-            lenient().when(mProcessInfo.getOutputMessages()).thenReturn(Collections.singletonList("/tmp/dsmc"));
+            lenient().when(mProcessInfo.exitValue()).thenReturn(0);
+            lenient().when(mProcessInfo.outputMessages()).thenReturn(Collections.singletonList("/tmp/dsmc"));
 
             checkCheckTSMTapeDrive(true);
         }
@@ -564,8 +564,8 @@ class TivoliStorageManagerTest {
 
             lenient().when(mProcessInfo.wasSuccess()).thenReturn(false);
             lenient().when(mProcessInfo.wasFailure()).thenReturn(true);
-            lenient().when(mProcessInfo.getExitValue()).thenReturn(1);
-            lenient().when(mProcessInfo.getOutputMessages()).thenReturn(Collections.emptyList());
+            lenient().when(mProcessInfo.exitValue()).thenReturn(1);
+            lenient().when(mProcessInfo.outputMessages()).thenReturn(Collections.emptyList());
 
             checkCheckTSMTapeDrive(false);
         }

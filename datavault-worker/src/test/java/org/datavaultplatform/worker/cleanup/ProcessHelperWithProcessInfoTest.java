@@ -54,7 +54,7 @@ public class ProcessHelperWithProcessInfoTest {
         var helper = new ProcessHelper(desc, processMaxDuration, modifiedCommands.toArray(String[]::new));
         ProcessInfo result = helper.execute();
         if (!result.wasSuccess()) {
-            int actualExitCode = result.getExitValue();
+            int actualExitCode = result.exitValue();
             String actualExitCodeStr = ProcessExitCodes.getExitCodeString(actualExitCode);
             String expectedExitCodeStr = ProcessExitCodes.getExitCodeString(exitCode);
             throw new ProcessException("label[%s]delayMs[%d]expectedExitCode[%s]actualExitCode[%s]".formatted(label, delayMillis, expectedExitCodeStr, actualExitCodeStr), actualExitCode);

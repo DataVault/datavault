@@ -105,7 +105,7 @@ class TSMTrackerTest {
             ProcessInfo mProcessInfo = Mockito.mock(ProcessInfo.class);
                 lenient().when(mProcessInfo.wasSuccess()).thenReturn(false);
                 lenient().when(mProcessInfo.wasFailure()).thenReturn(true);
-                lenient().when(mProcessInfo.getOutputMessages()).thenReturn(Arrays.asList("message1","message2"));
+                lenient().when(mProcessInfo.outputMessages()).thenReturn(Arrays.asList("message1","message2"));
             return mProcessInfo;
         }).when(tracker).getProcessInfo(any(String.class), any(String[].class));
 

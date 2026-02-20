@@ -92,11 +92,11 @@ class ProcessHelperTest {
         void testDuration() throws Exception {
             ProcessHelper processHelper = new ProcessHelper("test", "sleep", "5");
             ProcessInfo info = processHelper.execute();
-            System.out.printf("output %s%n", info.getOutputMessages());
+            System.out.printf("output %s%n", info.outputMessages());
 
-            assertThat(info.getExitValue()).isZero();
+            assertThat(info.exitValue()).isZero();
             assertThat(info.wasSuccess()).isTrue();
-            assertThat(info.getDuration()).isGreaterThanOrEqualTo(Duration.ofSeconds(5));
+            assertThat(info.duration()).isGreaterThanOrEqualTo(Duration.ofSeconds(5));
         }
 
         @Test
