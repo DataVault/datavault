@@ -1,5 +1,8 @@
 package org.datavaultplatform.common.task;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.SneakyThrows;
 import org.datavaultplatform.common.PropNames;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -157,5 +160,38 @@ class TaskConfigTest {
         assertThat(config.getProcessPostSigKillTimeoutDuration().toMinutes()).isEqualTo(sigKillMinutes);
 
         assertThat(config.getExecutorShutdownDuration().toMinutes()).isEqualTo(expectedExecutorShutdownMinutes);
+    }
+
+    @Test
+    void testFullyPopulatedTaskConfigFromBrokerTaskProperties() {
+        String brokerTaskPropertiesJson = """
+                {"executorPreShutdownNowDuration":"PT24H","executorProperShutdownEnabled":"true","processMaxDuration":"PT21H","processPostSigKillTimeoutDuration":"PT5S","processSigTermTimeoutDuration":"PT11M","prop1":"value1"}
+                """;
+        TaskConfig expected = new TaskConfig();
+        expected.setExecutorProperShutdownEnabled(true);
+        expected.setExecutorPreShutdownNowDuration(Duration.ofDays(1));
+        expected.setProcessMaxDuration(Duration.ofHours(21));
+        expected.setProcessSigTermTimeoutDuration(Duration.ofMinutes(11));
+        expected.setProcessPostSigKillTimeoutDuration(Duration.ofSeconds(5));
+
+        checkParseFromBrokerTaskProperties(brokerTaskPropertiesJson, expected);
+    }
+
+    @Test
+    void testUnPopulatedTaskConfigFromBrokerTaskProperties() {
+        String brokerTaskPropertiesJson = """
+                {"executorPreShutdownNowDuration":null,"executorProperShutdownEnabled":null,"processMaxDuration":null,"processPostSigKillTimeoutDuration":null,"processSigTermTimeoutDuration":null,"prop1":"value1"}
+                """;
+        TaskConfig expected = new TaskConfig();
+        checkParseFromBrokerTaskProperties(brokerTaskPropertiesJson, expected);
+    }
+
+    @SneakyThrows
+    void checkParseFromBrokerTaskProperties(String brokerTaskPropertiesJson, TaskConfig expectedTaskConfig) {
+        Map<String, String> brokerTaskProperties = new ObjectMapper().readValue(brokerTaskPropertiesJson, new TypeReference<>() {
+        });
+        TaskConfig taskConfig = new TaskConfig();
+        taskConfig.populate(brokerTaskProperties);
+        assertThat(taskConfig).isEqualTo(expectedTaskConfig);
     }
 }

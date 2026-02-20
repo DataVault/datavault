@@ -1,7 +1,13 @@
 package org.datavaultplatform.broker.queue;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.datavaultplatform.common.PropNames;
+import org.datavaultplatform.common.task.Task;
+import org.datavaultplatform.common.task.TaskConfig;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -14,9 +20,13 @@ import java.util.*;
 import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.doAnswer;
 
 @SuppressWarnings("CodeBlock2Expr")
-class TaskSenderDurationPropertiesTest {
+class TaskSenderSpringPropertiesTest {
+
+    public static final Logger LOG = LoggerFactory.getLogger(TaskSenderSpringPropertiesTest.class);
 
     static final Map<String, Duration> DURATION_MAP;
 
@@ -45,18 +55,18 @@ class TaskSenderDurationPropertiesTest {
 
     @Test
     void testExecutorProperShutdownEnabled() {
-        Map<String,Boolean> enabledMap = new HashMap<>();
+        Map<String, Boolean> enabledMap = new HashMap<>();
         enabledMap.put("true", true);
         enabledMap.put("false", false);
         enabledMap.forEach((key, value) -> {
             checkTaskSenderProperties(taskSender -> {
-                assertThat(taskSender.isWorkersExecutorProperShutdownEnabled()).isEqualTo(value);
+                assertThat(taskSender.getWorkersExecutorProperShutdownEnabled()).isEqualTo(value);
             }, TaskSender.WORKERS_EXECUTOR_PROPER_SHUTDOWN_ENABLED + "=" + key);
         });
-        
-        //defaults to true
+
+        //defaults to null
         checkTaskSenderProperties(taskSender -> {
-            assertThat(taskSender.isWorkersExecutorProperShutdownEnabled()).isTrue();
+            assertThat(taskSender.getWorkersExecutorProperShutdownEnabled()).isNull();
         });
     }
 
@@ -94,6 +104,72 @@ class TaskSenderDurationPropertiesTest {
                 assertThat(taskSender.getWorkersProcessPostSigKillTimeoutDuration()).isEqualTo(value);
             }, TaskSender.WORKERS_PROCESS_POST_SIGKILL_TIMEOUT_DURATION + "=" + key);
         });
+    }
+
+    @Test
+    void testNoWorkerShutdownProperties() {
+
+        Map<String, String> expected = new HashMap<>();
+        expected.put(PropNames.EXECUTOR_PROPER_SHUTDOWN_ENABLED, null);
+        expected.put(PropNames.EXECUTOR_PRE_SHUTDOWN_NOW_DURATION, null);
+        expected.put(PropNames.PROCESS_MAX_DURATION, null);
+        expected.put(PropNames.PROCESS_SIGTERM_TIMEOUT_DURATION, null);
+        expected.put(PropNames.PROCESS_POST_SIGKILL_TIMEOUT_DURATION, null);
+
+        checkWorkerShutdownPropertiesSet(expected);
+    }
+
+    @Test
+    void testAllWorkerShutdownProperties() {
+
+        Map<String, String> expected = new HashMap<>();
+        expected.put(PropNames.EXECUTOR_PROPER_SHUTDOWN_ENABLED, "true");
+        expected.put(PropNames.EXECUTOR_PRE_SHUTDOWN_NOW_DURATION, "PT24H"); // 1 day
+        expected.put(PropNames.PROCESS_MAX_DURATION, "PT21H"); // 21 hours
+        expected.put(PropNames.PROCESS_SIGTERM_TIMEOUT_DURATION, "PT11M"); // 11 mins
+        expected.put(PropNames.PROCESS_POST_SIGKILL_TIMEOUT_DURATION, "PT5S"); // 5 sec
+
+        checkWorkerShutdownPropertiesSet(expected,
+                "workers.executor.proper.shutdown.enabled=true",
+                "workers.executor.pre.shutdown.now.duration=P1D",
+                "workers.process.max.duration=PT21H",
+                "workers.process.sigterm.timeout.duration=PT11M",
+                "workers.process.post.sigkill.timeout.duration=PT5S");
+    }
+
+    void checkWorkerShutdownPropertiesSet(Map<String, String> expectedProperties, String... additionalProperties) {
+        checkTaskSenderProperties(taskSender -> {
+            Sender sender = taskSender.getSender();
+
+            assertThat(Mockito.mockingDetails(sender).isMock()).isTrue();
+
+            List<String> sentMessages = new ArrayList<>();
+            doAnswer(invocation -> {
+                String message = invocation.getArgument(0);
+                sentMessages.add(message);
+                return "message-id";
+            }).when(sender).send(anyString(), anyBoolean());
+
+            try {
+                Task task = new Task();
+                task.setTaskClass(TaskConfig.class.getName());
+                task.setProperties(Map.of("prop1","value1"));
+
+                taskSender.send(task);
+
+                assertThat(sentMessages).hasSize(1);
+                String sentMessage = sentMessages.get(0);
+
+                Task fromMessage = new ObjectMapper().readValue(sentMessage, Task.class);
+                Map<String, String> props = fromMessage.getProperties();
+                assertThat(props).containsEntry("prop1", "value1");
+                assertThat(props).containsAllEntriesOf(expectedProperties);
+                
+                LOG.info("sending ... {}", new ObjectMapper().writeValueAsString(fromMessage.getProperties()));
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
+        }, additionalProperties);
     }
 
     void checkTaskSenderProperties(Consumer<TaskSender> checker, String... additionalProperties) {

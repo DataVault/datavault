@@ -1,6 +1,7 @@
 package org.datavaultplatform.common.task;
 
 
+import lombok.Data;
 import org.datavaultplatform.common.PropNames;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +10,7 @@ import java.time.Duration;
 import java.time.format.DateTimeParseException;
 import java.util.Map;
 
+@Data
 public class TaskConfig {
 
     public static final Logger LOG = LoggerFactory.getLogger(TaskConfig.class);
@@ -64,7 +66,7 @@ public class TaskConfig {
     }
 
     public synchronized void setProcessMaxDuration(Duration processMaxDuration) {
-        if (isValidDuration(processSigTermTimeoutDuration)) {
+        if (isValidDuration(processMaxDuration)) {
             this.processMaxDuration = processMaxDuration;
         }
     }

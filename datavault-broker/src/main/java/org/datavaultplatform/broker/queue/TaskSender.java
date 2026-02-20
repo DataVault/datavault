@@ -10,10 +10,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
 
 import java.time.Duration;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.TreeMap;
 
 /**
  * This class is used to wrap the Sender class - allowing a single place where Worker Timeout properties can be configured
@@ -36,27 +38,27 @@ public class TaskSender {
     private final Sender sender;
 
     @Getter
-    // after initial sub-task error, how long do we wait for other sub-tasks to complete normally before telling them to stop - defaults to 5 minutes
+    // after initial sub-task error, how long do we wait for other sub-tasks to complete normally before telling them to stop - on worker, defaults to 5 minutes
     private final Duration workersExecutorPreShutdownNowDuration;
 
     @Getter
-    // Whether each TaskExecutor will stop other sub-tasks should 1 sub-task have an error - defaults to true
-    private final boolean workersExecutorProperShutdownEnabled;
+    // Whether each TaskExecutor will stop other sub-tasks should 1 sub-task have an error - on worker, defaults to true
+    private final Boolean workersExecutorProperShutdownEnabled;
     
     @Getter
     // How long each process has to run before timing out - defaults to 1 hour
     private final Duration workersProcessMaxDuration;
 
     @Getter
-    // how long we wait for a process to stop after sending SIGTERM before we send SIGKILL - defaults to 30 secondsprivate Duration processSigTermTimeoutDuration;
+    // how long we wait for a process to stop after sending SIGTERM before we send SIGKILL - on worker, defaults to 30 seconds
     private final Duration workersProcessSigTermTimeoutDuration;
 
     @Getter
-    // how long we wait for a process to stop after sending SIGKILL before we log error - defaults to 5 seconds
+    // how long we wait for a process to stop after sending SIGKILL before we log error - on worker, defaults to 5 seconds
     private final Duration workersProcessPostSigKillTimeoutDuration;
 
     public TaskSender(Sender sender,
-                      @Value("${" + WORKERS_EXECUTOR_PROPER_SHUTDOWN_ENABLED + ":true}") boolean workersExecutorProperShutdownEnabled,
+                      @Value("${" + WORKERS_EXECUTOR_PROPER_SHUTDOWN_ENABLED + ":}") Boolean workersExecutorProperShutdownEnabled,
                       @Value("${" + WORKERS_EXECUTOR_PRE_SHUTDOWN_NOW_DURATION + ":}") Duration workersExecutorPreShutdownNowDuration,
 
                       @Value("${" + WORKERS_PROCESS_MAX_DURATION + ":}") Duration workersProcessMaxDuration,
@@ -80,22 +82,29 @@ public class TaskSender {
     }
 
     public String send(Task task, boolean restart) throws JsonProcessingException {
+        Assert.notNull(task, "the task cannot be null");
+        Assert.notNull(task.getTaskClass(), "the task's taskClass cannot be null");
         ObjectMapper mapper = new ObjectMapper();
-        String jsonTask = mapper.writeValueAsString(task);
-        Map<String, String> taskProperties = new HashMap<>();
+        Map<String, String> taskProperties = new TreeMap<>();
         Map<String, String> origTaskProperties = task.getProperties(); // this map might be read-only or null
         if (origTaskProperties != null) {
             taskProperties.putAll(origTaskProperties);
         }
         // put a writable Map back into the Task
         task.setProperties(taskProperties);
-        taskProperties.put(PropNames.EXECUTOR_PROPER_SHUTDOWN_ENABLED, String.valueOf(workersExecutorProperShutdownEnabled));
-        taskProperties.put(PropNames.EXECUTOR_PRE_SHUTDOWN_NOW_DURATION, String.valueOf(workersExecutorPreShutdownNowDuration));
+        addIfNotNull(taskProperties, PropNames.EXECUTOR_PROPER_SHUTDOWN_ENABLED, workersExecutorProperShutdownEnabled);
+        addIfNotNull(taskProperties, PropNames.EXECUTOR_PRE_SHUTDOWN_NOW_DURATION, workersExecutorPreShutdownNowDuration);
 
-        taskProperties.put(PropNames.PROCESS_MAX_DURATION, String.valueOf(workersProcessMaxDuration));
-        taskProperties.put(PropNames.PROCESS_SIGTERM_TIMEOUT_DURATION, String.valueOf(workersProcessSigTermTimeoutDuration));
-        taskProperties.put(PropNames.PROCESS_POST_SIGKILL_TIMEOUT_DURATION, String.valueOf(workersProcessPostSigKillTimeoutDuration));
+        addIfNotNull(taskProperties, PropNames.PROCESS_MAX_DURATION, workersProcessMaxDuration);
+        addIfNotNull(taskProperties, PropNames.PROCESS_SIGTERM_TIMEOUT_DURATION, workersProcessSigTermTimeoutDuration);
+        addIfNotNull(taskProperties, PropNames.PROCESS_POST_SIGKILL_TIMEOUT_DURATION, workersProcessPostSigKillTimeoutDuration);
+
+        String jsonTask = mapper.writeValueAsString(task);
         return sender.send(jsonTask, restart);
+    }
+
+    private void addIfNotNull(Map<String, String> map, String key, Object value) {
+        map.put(key, Objects.toString(value, null));
     }
 
     public String send(Task task) throws JsonProcessingException {

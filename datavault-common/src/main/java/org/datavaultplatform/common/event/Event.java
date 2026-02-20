@@ -288,6 +288,11 @@ public class Event {
         return eventClass;
     }
 
+    /**
+     * This is the name of a class.
+     * We can't use Class.forName to check if it's valid because it might be the name of a class in another module.
+     * @param eventClass the name of java Event class.
+     */
     public void setEventClass(String eventClass) {
         this.eventClass = eventClass;
     }
