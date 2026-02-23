@@ -120,7 +120,7 @@ class TaskSenderSpringPropertiesTest {
     }
 
     @Test
-    void testAllWorkerShutdownProperties() {
+    void testAllWorkerShutdownPropertiesISO8601DurationStrings() {
 
         Map<String, String> expected = new HashMap<>();
         expected.put(PropNames.EXECUTOR_PROPER_SHUTDOWN_ENABLED, "true");
@@ -137,6 +137,49 @@ class TaskSenderSpringPropertiesTest {
                 "workers.process.post.sigkill.timeout.duration=PT5S");
     }
 
+    @Test
+    void testAllWorkerShutdownPropertiesDurationStrings() {
+
+        Map<String, String> expected = new HashMap<>();
+        expected.put(PropNames.EXECUTOR_PROPER_SHUTDOWN_ENABLED, "true");
+        expected.put(PropNames.EXECUTOR_PRE_SHUTDOWN_NOW_DURATION, "PT24H"); // 1 day
+        expected.put(PropNames.PROCESS_MAX_DURATION, "PT21H"); // 21 hours
+        expected.put(PropNames.PROCESS_SIGTERM_TIMEOUT_DURATION, "PT11M"); // 11 mins
+        expected.put(PropNames.PROCESS_POST_SIGKILL_TIMEOUT_DURATION, "PT5S"); // 5 sec
+
+        checkWorkerShutdownPropertiesSet(expected,
+                "workers.executor.proper.shutdown.enabled=true",
+                "workers.executor.pre.shutdown.now.duration=1d",
+                "workers.process.max.duration=21h",
+                "workers.process.sigterm.timeout.duration=11m",
+                "workers.process.post.sigkill.timeout.duration=5s");
+    }
+
+
+    @Test
+    void testAllWorkerShutdownPropertiesDurationStringDefaultValues() {
+
+        Map<String, String> expected = new HashMap<>();
+        expected.put(PropNames.EXECUTOR_PROPER_SHUTDOWN_ENABLED, "true");
+        expected.put(PropNames.EXECUTOR_PRE_SHUTDOWN_NOW_DURATION, "PT5M");
+        expected.put(PropNames.PROCESS_MAX_DURATION, "PT1H");
+        expected.put(PropNames.PROCESS_SIGTERM_TIMEOUT_DURATION, "PT30S");
+        expected.put(PropNames.PROCESS_POST_SIGKILL_TIMEOUT_DURATION, "PT5S");
+
+        checkWorkerShutdownPropertiesSet(expected, """
+                workers.executor.proper.shutdown.enabled=true
+                workers.executor.pre.shutdown.now.duration=5m
+                workers.process.max.duration=1h
+                workers.process.sigterm.timeout.duration=30s
+                workers.process.post.sigkill.timeout.duration=5s
+                """.split("\n"));
+
+        TaskConfig populated  = new TaskConfig();
+        populated.populate(expected);
+        
+        assertThat(populated).isEqualTo(new TaskConfig());
+    }
+    
     void checkWorkerShutdownPropertiesSet(Map<String, String> expectedProperties, String... additionalProperties) {
         checkTaskSenderProperties(taskSender -> {
             Sender sender = taskSender.getSender();

@@ -22,8 +22,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertThrows;
 
 @EnabledOnOs({OS.LINUX, OS.MAC})
-@DisabledInsideDocker //docker image where we run unit tests on Jenkins does not have 'logger' command
-class ProcessHelperTest {
+@DisabledInsideDocker //docker image where we run tests on Jenkins does not have 'logger' command
+class ProcessHelperIT {
 
     @TempDir
     File tempDir;
