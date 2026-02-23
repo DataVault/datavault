@@ -8,9 +8,10 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by stuartlewis on 01/06/2016.
@@ -18,12 +19,13 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class CheckRetentionPolicies implements ScheduledTask {
 
+    private static final Logger LOG = LoggerFactory.getLogger(CheckRetentionPolicies.class);
     private final VaultsService vaultsService;
+    private final Clock clock;
 
-    private static final Logger log = LoggerFactory.getLogger(CheckRetentionPolicies.class);
-
-    public CheckRetentionPolicies(VaultsService vaultsService) {
+    public CheckRetentionPolicies(VaultsService vaultsService, Clock clock) {
         this.vaultsService = vaultsService;
+        this.clock = clock;
     }
 
     @Override
@@ -31,36 +33,40 @@ public class CheckRetentionPolicies implements ScheduledTask {
     @Transactional
     public void execute() {
         // Start the check
-        Date start = new Date();
-        log.info("Initiating check of retention policies at " + start);
+        Instant start = clock.instant();
+        LOG.info("Initiating check of retention policies at " + start);
 
         // Get all the vaults
         List<Vault> vaults = vaultsService.getVaults();
-        for (Vault v : vaults) {
-            // Process each vault
-            log.info("Checking retention policiy of vault: " + v.getID() + " (" + v.getName() + ") with policy " + v.getRetentionPolicy().getID());
-            vaultsService.checkRetentionPolicy(v.getID());
-            Vault checked = vaultsService.getVault(v.getID());
-            int status = checked.getRetentionPolicyStatus();
-            switch (status) {
-                case 0:
-                    log.info("Status of vault " + v.getID() + " is " + "UNCHECKED");
-                    break;
-                case 1:
-                    log.info("Status of vault " + v.getID() + " is " + "OK");
-                    break;
-                case 2:
-                    log.info("Status of vault " + v.getID() + " is " + "REVIEW");
-                    break;
-                case 3:
-                    log.info("Status of vault " + v.getID() + " is " + "ERROR");
-                    break;
-            }
-        }
+        vaults.forEach(this::processVault);
 
         // End the check
-        Date end = new Date();
-        log.info("Finished check of retention policies at " + start);
-        log.info("Check took " + TimeUnit.MILLISECONDS.toSeconds(end.getTime() - start.getTime()) + " seconds");
+        Instant end = clock.instant();
+        LOG.info("Finished check of retention policies at [{}]", end);
+        Duration time = Duration.between(start, end);
+        LOG.info("Check took [{}] seconds", time.getSeconds());
+    }
+
+    private void processVault(Vault vault) {
+
+        String vaultId = vault.getID();
+        // Process each vault
+        LOG.info("Checking retention policy of vault: {} ({}) with policy {}",
+                vaultId,
+                vault.getName(),
+                vault.getRetentionPolicy().getID()
+        );
+        vaultsService.checkRetentionPolicy(vaultId);
+        Vault checkedVault = vaultsService.getVault(vaultId);
+        int status = checkedVault.getRetentionPolicyStatus();
+        // TODO does this mapping happen elsewhere.
+        String statusDesc = switch (status) {
+            case 0 -> "UNCHECKED";
+            case 1 -> "OK";
+            case 2 -> "REVIEW";
+            case 3 -> "ERROR";
+            default -> "UNKNOWN[" + status + "]";
+        };
+        LOG.info("Status of vault {} is {}", vaultId, statusDesc);
     }
 }

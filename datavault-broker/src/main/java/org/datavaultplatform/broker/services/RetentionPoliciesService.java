@@ -12,11 +12,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.time.Clock;
+import java.util.*;
+
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 @Service
 @Transactional
@@ -157,7 +157,7 @@ public class RetentionPoliciesService {
         }
 
         Calendar c = Calendar.getInstance();
-        c.setTime(check);
+        c.setTime(check);s
         c.add(Calendar.YEAR, rp.getMinRetentionPeriod());
         check = c.getTime();
 
@@ -167,8 +167,12 @@ public class RetentionPoliciesService {
     }
      **/
 
-    public static void setRetention(Vault v) {
+    public static void setRetention(Vault v, Clock clock) {
 
+        Date now = Date.from(clock.instant());
+
+        // TODO : error if rp is null
+        // TODO : error if rp.getRetentionPeriod < 0
         RetentionPolicy rp = v.getRetentionPolicy();
 
         Date check;
@@ -176,22 +180,42 @@ public class RetentionPoliciesService {
             check = v.getCreationTime();
         } else {
             check = v.getGrantEndDate();
+            
 
             if (rp.getMinRetentionPeriod() > 0 && rp.isExtendUponRetrieval()) {
                 // At the time of writing this means its EPSRC
 
                 // Get all the retrieve events
+                // find the latest Timestamp and use that for the base
                 ArrayList<Retrieve> retrieves = new ArrayList<>();
+                // TODO : error if v.getDeposits is null
                 for (Deposit d : v.getDeposits()) {
-                    retrieves.addAll(d.getRetrieves());
+                    if (d == null) {
+                        continue;
+                    }
+                    var depRetreived = d.getRetrieves();
+                    if (depRetreived != null) {
+                        retrieves.addAll(d.getRetrieves());
+                    }
                 }
 
-                // Have their been any retrieves?
+                // Have there been any retrieves?
+                // if so - set the retentionPeriodExpiryDate to be the 
                 if (!retrieves.isEmpty()) {
-                    check = retrieves.get(0).getTimestamp();
-                    for (Retrieve r : retrieves) {
-                        if (r.getTimestamp().after(check)) {
-                            check = r.getTimestamp();
+                    Date temp1 = retrieves.get(0).getTimestamp();
+                    if(temp1 != null) {
+                        check = temp1;
+                        for (Retrieve r : retrieves) {
+                            if(r == null){
+                                continue;
+                            }
+                            Date temp2 = r.getTimestamp();
+                            if(temp2 == null){
+                                continue;
+                            }
+                            if (temp2.after(check)) {
+                                check = temp2;
+                            }
                         }
                     }
                 }
@@ -202,13 +226,11 @@ public class RetentionPoliciesService {
             c.setTime(check);
             c.add(Calendar.YEAR, rp.getMinRetentionPeriod());
             check = c.getTime();
-
         }
 
         v.setRetentionPolicyExpiry(check);
 
         // Is it time for review?
-        Date now = new Date();
         if (check.before(now)) {
             v.setRetentionPolicyStatus(RetentionPolicyStatus.REVIEW);
         } else {
@@ -216,7 +238,7 @@ public class RetentionPoliciesService {
         }
 
         // Record when we checked it
-        v.setRetentionPolicyLastChecked(new Date());
+        v.setRetentionPolicyLastChecked(now);
 
     }
 }

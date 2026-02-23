@@ -42,18 +42,6 @@ public class Retrieve {
     @ManyToOne
     private Deposit deposit;
 
-    // A Retrieve can have a number of events
-    //@JsonIgnore
-    //@OneToMany(targetEntity=Event.class, mappedBy="retrieve", fetch=FetchType.LAZY)
-    //@OrderBy("timestamp, sequence")
-    //private List<Event> events;
-
-    // A Retrieve can have a number of active jobs
-    //@JsonIgnore
-    //@OneToMany(targetEntity=Job.class, mappedBy="retrieve", fetch=FetchType.LAZY)
-    //@OrderBy("timestamp")
-    //private List<Job> jobs;
-
     public enum Status {
         NOT_STARTED,
         IN_PROGRESS,
@@ -129,15 +117,6 @@ public class Retrieve {
     public void setUser(User user) {
         this.user = user;
     }
-
-//    public List<Event> getEvents() {
-//        return events;
-//    }
-
-//    public List<Job> getJobs() {
-//        return jobs;
-//    }
-
 
     @Override
     public boolean equals(Object o) {

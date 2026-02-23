@@ -1,5 +1,6 @@
 package org.datavaultplatform.broker.services;
 
+import java.time.Clock;
 import java.util.*;
 
 import org.datavaultplatform.common.event.roles.CreateRoleAssignment;
@@ -41,12 +42,13 @@ public class VaultsService {
     private final EventService eventService;
     private final ClientsService clientsService;
     private final EmailService emailService;
+    private final Clock clock;
 
     @Autowired
     public VaultsService(VaultDAO vaultDAO, RolesAndPermissionsService rolesAndPermissionsService,
             RetentionPoliciesService retentionPoliciesService, DataCreatorsService dataCreatorsService,
             BillingService billingService, UsersService usersService, EventService eventService,
-            ClientsService clientsService, EmailService emailService) {
+            ClientsService clientsService, EmailService emailService, Clock clock) {
         this.vaultDAO = vaultDAO;
         this.rolesAndPermissionsService = rolesAndPermissionsService;
         this.retentionPoliciesService = retentionPoliciesService;
@@ -56,6 +58,7 @@ public class VaultsService {
         this.eventService = eventService;
         this.clientsService = clientsService;
         this.emailService = emailService;
+        this.clock = clock;
     }
 
     public RetentionPoliciesService getRetentionPoliciesService() {
@@ -165,11 +168,14 @@ public class VaultsService {
         return vaultDAO.getRetentionPolicyCount(status);
     }
 
+    
     public Vault checkRetentionPolicy(String vaultID) {
         // Get the vault
-        Vault vault = vaultDAO.findById(vaultID).orElse(null);
-
-        RetentionPoliciesService.setRetention(vault);
+        Vault vault = getVault(vaultID);
+        if (vault == null) {
+            logger.info("The vault with id {} does not exist", vaultID);
+        }
+        retentionPoliciesService.setRetention(vault, clock);
 
         // Check the policy
         // retentionPoliciesService.run(vault);

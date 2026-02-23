@@ -76,7 +76,10 @@ public class TaskExecutor<T> {
             if (TaskConfigTL.get().isExecutorProperShutdownEnabled() && executorTimeout != null) {
                 futures = service.invokeAll(tasks, executorTimeout.toMillis(), TimeUnit.MILLISECONDS);
             } else {
-                futures = service.invokeAll(tasks);
+                futures = new ArrayList<>();
+                for (Callable<T> task : tasks) {
+                    futures.add(service.submit(task));
+                }
             }
 
             service.shutdown();
@@ -111,12 +114,13 @@ public class TaskExecutor<T> {
 
     private void handleShutdown(ExecutorService executor) {
         try {
-            handleShutdownInternal(executor);
+            //handleShutdownInternal(executor);
         } finally {
             LOG.warn("ExecutorService[{}]Terminated?[{}]", errorLabel, executor.isTerminated());}
     }
 
     private void handleShutdownInternal(ExecutorService executor) {
+        LOG.info("IN: handleShutdownInternal");
         // If it's already fully closed, we're done.
         if (executor == null || executor.isTerminated()) return;
 
@@ -156,5 +160,6 @@ public class TaskExecutor<T> {
                 }
             }
         }
+        LOG.info("OUT: handleShutdownInternal");
     }
 }
