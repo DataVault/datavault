@@ -39,6 +39,15 @@ public class ProcessHelperWithProcessInfoIT {
 
     static final Duration DEFAULT_MAX_TASK_DURATION = Duration.ofSeconds(1);
 
+    @BeforeEach
+    void setUp() {
+        TaskConfigTL.get().setExecutorProperShutdownEnabled(true);
+    }
+    @AfterEach
+    void tearDown() {
+        TaskConfigTL.reset();
+    }
+
     private ProcessInfo getProcessInfo(String label, long delayMillis, int exitCode, Duration processMaxDuration, boolean ignoreSigterm) throws Exception {
         String ignoreSigtermStr = ignoreSigterm ? "yes" : "no";
         List<String> commands = List.of(SCRIPT_PATH, label, String.valueOf(delayMillis), String.valueOf(exitCode), ignoreSigtermStr);

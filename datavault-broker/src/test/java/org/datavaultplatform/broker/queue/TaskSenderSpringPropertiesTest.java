@@ -160,14 +160,14 @@ class TaskSenderSpringPropertiesTest {
     void testAllWorkerShutdownPropertiesDurationStringDefaultValues() {
 
         Map<String, String> expected = new HashMap<>();
-        expected.put(PropNames.EXECUTOR_PROPER_SHUTDOWN_ENABLED, "true");
+        expected.put(PropNames.EXECUTOR_PROPER_SHUTDOWN_ENABLED, "false");
         expected.put(PropNames.EXECUTOR_PRE_SHUTDOWN_NOW_DURATION, "PT5M");
         expected.put(PropNames.PROCESS_MAX_DURATION, "PT1H");
         expected.put(PropNames.PROCESS_SIGTERM_TIMEOUT_DURATION, "PT30S");
         expected.put(PropNames.PROCESS_POST_SIGKILL_TIMEOUT_DURATION, "PT5S");
 
         checkWorkerShutdownPropertiesSet(expected, """
-                workers.executor.proper.shutdown.enabled=true
+                workers.executor.proper.shutdown.enabled=false
                 workers.executor.pre.shutdown.now.duration=5m
                 workers.process.max.duration=1h
                 workers.process.sigterm.timeout.duration=30s

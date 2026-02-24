@@ -76,8 +76,12 @@ public class TaskExecutor<T> {
             if (TaskConfigTL.get().isExecutorProperShutdownEnabled() && executorTimeout != null) {
                 futures = service.invokeAll(tasks, executorTimeout.toMillis(), TimeUnit.MILLISECONDS);
             } else {
-                futures = service.invokeAll(tasks);
+                futures = new ArrayList<>();
+                for (Callable<T> task : tasks) {
+                    futures.add(service.submit(task));
+                }
             }
+            
 
             service.shutdown();
 

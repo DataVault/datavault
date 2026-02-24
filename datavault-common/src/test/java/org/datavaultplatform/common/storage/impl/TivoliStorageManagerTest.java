@@ -616,8 +616,7 @@ class TivoliStorageManagerTest {
     }
     
     @Nested
-    @Disabled
-    //@EnabledOnOs(OS.LINUX)
+    @EnabledOnOs(OS.LINUX)
     class CommandModificationsOnLinux {
 
         static final String[] WITH_DSMC = {"dsmc", "opt1", "opt2"};
@@ -626,7 +625,7 @@ class TivoliStorageManagerTest {
         @Test
         void testCommandsWithDsmc() {
             String[] result = TivoliStorageManager.cleanTsmCommand(WITH_DSMC);
-            assertThat(result).containsExactly("stdBuf", "-oL", "dsmc", "opt1", "opt2", "-displaymode=list", "-noprompt");
+            assertThat(result).containsExactly("stdbuf", "-oL", "dsmc", "opt1", "opt2", "-displaymode=list", "-noprompt");
         }
 
         @Test

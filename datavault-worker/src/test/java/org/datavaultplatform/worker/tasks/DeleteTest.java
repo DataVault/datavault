@@ -18,6 +18,7 @@ import org.datavaultplatform.common.storage.impl.LocalFileSystem;
 import org.datavaultplatform.common.storage.impl.MultiLocalFileSystem;
 import org.datavaultplatform.common.task.Context;
 import org.datavaultplatform.common.task.Task;
+import org.datavaultplatform.common.task.TaskConfigTL;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -97,11 +98,13 @@ class DeleteTest {
     void tearDown() {
         deletedFiles.clear();
         deletedFilesByLocation.clear();
+        TaskConfigTL.reset();
     }
 
     @BeforeEach
     @SneakyThrows
     void setup() {
+        TaskConfigTL.get().setExecutorProperShutdownEnabled(true);
         Files.createDirectories(archiveStoreRoot);
 
         this.startTimestamp = new Date();

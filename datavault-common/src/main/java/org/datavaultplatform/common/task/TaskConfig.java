@@ -15,7 +15,7 @@ public class TaskConfig {
 
     public static final Logger LOG = LoggerFactory.getLogger(TaskConfig.class);
 
-    public static final boolean DEFAULT_EXECUTOR_PROPER_SHUTDOWN_ENABLED = true;
+    public static final boolean DEFAULT_EXECUTOR_PROPER_SHUTDOWN_ENABLED = false;
     public static final Duration DEFAULT_EXECUTOR_PRE_SHUTDOWN_NOW_DURATION = Duration.ofMinutes(5);
 
     public static final Duration DEFAULT_PROCESS_MAX_DURATION = Duration.ofHours(1);
