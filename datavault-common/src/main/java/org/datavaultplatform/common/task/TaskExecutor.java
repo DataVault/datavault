@@ -114,7 +114,7 @@ public class TaskExecutor<T> {
 
     private void handleShutdown(ExecutorService executor) {
         try {
-            //handleShutdownInternal(executor);
+            handleShutdownInternal(executor);
         } finally {
             LOG.warn("ExecutorService[{}]Terminated?[{}]", errorLabel, executor.isTerminated());}
     }

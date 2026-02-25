@@ -3,7 +3,7 @@ package org.datavaultplatform.common.util;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
+import java.time.*;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -93,5 +93,52 @@ public class DateTimeUtils {
     public static String formatDateBasicISO(Date date) {
         DateFormat formatter = new SimpleDateFormat(ISO_DATE_BASIC_FORMAT);
         return formatter.format(date);
+    }
+
+    public static LocalDate toLocalDate(Date date) {
+        if (date == null) {
+            return null;
+        }
+
+        if (date instanceof java.sql.Date sqlDate) {
+            return sqlDate.toLocalDate();
+        }
+        
+        return date.toInstant()
+                .atZone(ZoneId.systemDefault()).toLocalDate();
+    }
+
+    public static LocalDate getDateAdjustedByMonths(Date initialDate, int months) {
+        LocalDate localDate = toLocalDate(initialDate);
+        return getDateAdjustedByMonths(localDate, months);
+    }
+
+    public static LocalDate getDateAdjustedByMonths(LocalDate initialDate, int months) {
+        if (initialDate == null) {
+            return null;
+        }
+        return initialDate.plusMonths(months);
+    }
+
+    public static LocalDate getDateAdjustedByYears(LocalDate initialDate, int years) {
+        if (initialDate == null) {
+            return null;
+        }
+        return initialDate.plusYears(years);
+    }
+
+    public static Date toDateAtNoon(LocalDate localDate) {
+        if (localDate == null) {
+            return null;
+        }
+        ZonedDateTime zonedDateTime = localDate.atTime(LocalTime.NOON).atZone(ZoneId.systemDefault());
+        return Date.from(zonedDateTime.toInstant());
+    }
+
+    public static Date toDateAtNoon(Date date) {
+        if (date == null) {
+            return null;
+        }
+        return toDateAtNoon(toLocalDate(date));
     }
 }

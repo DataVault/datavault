@@ -30,21 +30,21 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class RetentionPoliciesServiceTest {
 
-    static Instant TS_1 = Instant.parse("2005-12-03T10:15:31.00Z");
-    static Instant TS_2 = Instant.parse("2006-12-03T10:15:31.00Z");
-    static Instant TS_NOW_3 = Instant.parse("2007-12-03T10:15:31.00Z");
-    static Instant TS_4 = Instant.parse("2008-12-03T10:15:31.00Z");
-    static Instant TS_5 = Instant.parse("2009-12-03T10:15:31.00Z");
-    static Instant TS_6 = Instant.parse("2010-12-03T10:15:31.00Z");
+    static final Instant TS_1 = Instant.parse("2005-12-03T12:00:00.00Z");
+    static final Instant TS_2 = Instant.parse("2006-12-03T12:00:00.00Z");
+    static final Instant TS_NOW_3 = Instant.parse("2007-12-03T12:00:00.00Z");
+    static final Instant TS_4 = Instant.parse("2008-12-03T12:00:00.00Z");
+    static final Instant TS_5 = Instant.parse("2009-12-03T12:00:00.00Z");
+    static final Instant TS_6 = Instant.parse("2010-12-03T12:00:00.00Z");
 
-    static Date DATE_1 = Date.from(TS_1);
-    static Date DATE_2 = Date.from(TS_2);
-    static Date DATE_NOW_3 = Date.from(TS_NOW_3);
-    static Date DATE_4 = Date.from(TS_4);
-    static Date DATE_5 = Date.from(TS_5);
-    static Date DATE_6 = Date.from(TS_6);
+    static final Date DATE_1 = Date.from(TS_1);
+    static final Date DATE_2 = Date.from(TS_2);
+    static final Date DATE_NOW_3 = Date.from(TS_NOW_3);
+    static final Date DATE_4 = Date.from(TS_4);
+    static final Date DATE_5 = Date.from(TS_5);
+    static final Date DATE_6 = Date.from(TS_6);
 
-    static Clock CLOCK = Clock.fixed(TS_NOW_3, ZoneOffset.UTC);
+    static final Clock CLOCK = Clock.fixed(TS_NOW_3, ZoneOffset.UTC);
 
     private RetentionPolicy getRetentionPolicy(int minRetentionPeriodYears, boolean extendUponRetrieval) {
         RetentionPolicy rp = new RetentionPolicy();
@@ -103,7 +103,7 @@ class RetentionPoliciesServiceTest {
             vault.setGrantEndDate(null);
             vault.setCreationTime(vaultCreationTime);
 
-            RetentionPoliciesService.setRetention(vault, CLOCK);
+            RetentionPoliciesService.updateRetentionPolicyExpiryDate(vault, CLOCK);
             assertThat(vault.getRetentionPolicyExpiry()).isEqualTo(vaultCreationTime);
             assertThat(vault.getRetentionPolicyStatus()).isEqualTo(expectedRetentionPolicyStatus);
             assertThat(vault.getRetentionPolicyLastChecked()).isEqualTo(DATE_NOW_3);
@@ -139,7 +139,7 @@ class RetentionPoliciesServiceTest {
 
             lenient().doReturn(List.of()).when(vault).getDeposits();
 
-            RetentionPoliciesService.setRetention(vault, CLOCK);
+            RetentionPoliciesService.updateRetentionPolicyExpiryDate(vault, CLOCK);
 
             assertThat(vault.getRetentionPolicyStatus()).isEqualTo(expectedRetentionPolicyStatus);
             assertThat(vault.getRetentionPolicyLastChecked()).isEqualTo(DATE_NOW_3);
@@ -159,7 +159,7 @@ class RetentionPoliciesServiceTest {
 
             lenient().doReturn(getDeposit(lastestRetieveDate)).when(vault).getDeposits();
 
-            RetentionPoliciesService.setRetention(vault, CLOCK);
+            RetentionPoliciesService.updateRetentionPolicyExpiryDate(vault, CLOCK);
 
             assertThat(vault.getRetentionPolicyStatus()).isEqualTo(expectedRetentionPolicyStatus);
             assertThat(vault.getRetentionPolicyLastChecked()).isEqualTo(DATE_NOW_3);

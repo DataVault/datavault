@@ -174,17 +174,10 @@ public class VaultsService {
         Vault vault = getVault(vaultID);
         if (vault == null) {
             logger.info("The vault with id {} does not exist", vaultID);
+            return null;
         }
-        retentionPoliciesService.setRetention(vault, clock);
-
-        // Check the policy
-        // retentionPoliciesService.run(vault);
-
-        // Set the expiry date
-        // vault.setRetentionPolicyExpiry(retentionPoliciesService.getReviewDate(vault));
-
-        // Record when we checked it
-        // vault.setRetentionPolicyLastChecked(new Date());
+        
+        RetentionPoliciesService.updateRetentionPolicyExpiryDate(vault, clock);
 
         // Update and return the policy
         vaultDAO.update(vault);

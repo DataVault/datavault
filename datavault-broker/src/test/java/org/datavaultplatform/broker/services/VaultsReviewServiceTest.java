@@ -3,19 +3,24 @@ package org.datavaultplatform.broker.services;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.Calendar;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.List;
 import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.model.VaultReview;
-import org.junit.Test;
+import org.datavaultplatform.common.util.DateTimeUtils;
+import org.junit.jupiter.api.Test;
 
-public class VaultsReviewServiceTest {
+class VaultsReviewServiceTest {
 
-    private final VaultsReviewService vaultsReviewService = new VaultsReviewService(null);
+    private static final Clock CLOCK = Clock.fixed(Instant.parse("2007-12-03T12:00:00.00Z"), ZoneOffset.UTC);
+    private final VaultsReviewService vaultsReviewService = new VaultsReviewService(null, CLOCK);
 
     @Test
-    public void testIsVaultForReview() {
+    void testIsVaultForReview() {
         System.out.println("Test if vault due for review");
 
         // todo : needs expanded to be a comprehensive list of tests
@@ -34,7 +39,7 @@ public class VaultsReviewServiceTest {
     }
 
     @Test
-    public void testDueForReviewEmail() {
+    void testDueForReviewEmail() {
         System.out.println("Test if vault due for a review email");
 
         // todo : needs expanded to be a comprehensive list of tests
@@ -60,15 +65,13 @@ public class VaultsReviewServiceTest {
 
 
     private boolean isVaultForReview(int reviewDateOffset, int actionedDateOffset) {
-        Calendar c = Calendar.getInstance();
+        LocalDate today = LocalDate.now(CLOCK);
 
-        c.setTime(new Date());
-        c.add(Calendar.MONTH, reviewDateOffset);
-        Date reviewDate = c.getTime();
+        LocalDate reviewLocalDate = DateTimeUtils.getDateAdjustedByMonths(today, reviewDateOffset);
+        Date reviewDate = DateTimeUtils.toDateAtNoon(reviewLocalDate);
 
-        c.setTime(new Date());
-        c.add(Calendar.MONTH, actionedDateOffset);
-        Date actionedDate = c.getTime();
+        LocalDate actionedLocalDate = DateTimeUtils.getDateAdjustedByMonths(today, actionedDateOffset);
+        Date actionedDate = DateTimeUtils.toDateAtNoon(actionedLocalDate);
 
         VaultReview vaultReview = new VaultReview();
         vaultReview.setActionedDate(actionedDate);
@@ -82,15 +85,13 @@ public class VaultsReviewServiceTest {
     }
 
     private boolean dueForReviewEmail(int reviewDateOffset, int actionedDateOffset, boolean actioned) {
-        Calendar c = Calendar.getInstance();
+        LocalDate today = LocalDate.now(CLOCK);
 
-        c.setTime(new Date());
-        c.add(Calendar.MONTH, reviewDateOffset);
-        Date reviewDate = c.getTime();
+        LocalDate reviewLocalDate = DateTimeUtils.getDateAdjustedByMonths(today, reviewDateOffset);
+        Date reviewDate = DateTimeUtils.toDateAtNoon(reviewLocalDate);
 
-        c.setTime(new Date());
-        c.add(Calendar.MONTH, actionedDateOffset);
-        Date actionedDate = c.getTime();
+        LocalDate actionedLocalDate = DateTimeUtils.getDateAdjustedByMonths(today, actionedDateOffset);
+        Date actionedDate = DateTimeUtils.toDateAtNoon(actionedLocalDate);
 
         VaultReview vaultReview = new VaultReview();
         if (actioned) {

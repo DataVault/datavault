@@ -2,6 +2,7 @@ package org.datavaultplatform.broker.scheduled;
 
 import org.datavaultplatform.broker.services.VaultsService;
 import org.datavaultplatform.common.model.Vault;
+import org.datavaultplatform.common.retentionpolicy.RetentionPolicyStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -34,24 +35,32 @@ public class CheckRetentionPolicies implements ScheduledTask {
     public void execute() {
         // Start the check
         Instant start = clock.instant();
-        LOG.info("Initiating check of retention policies at " + start);
+        LOG.info("Initiating check of retention policies.");
 
-        // Get all the vaults
-        List<Vault> vaults = vaultsService.getVaults();
-        vaults.forEach(this::processVault);
-
+        checkRetentionPoliciesForVaults();
+        
         // End the check
         Instant end = clock.instant();
-        LOG.info("Finished check of retention policies at [{}]", end);
         Duration time = Duration.between(start, end);
-        LOG.info("Check took [{}] seconds", time.getSeconds());
+        LOG.info("Finished check of retention policies. Took [{}]seconds", time.toSeconds());
+    }
+    
+    private void checkRetentionPoliciesForVaults(){
+        // Get all the vaults
+        List<Vault> vaults = vaultsService.getVaults();
+        for(Vault vault : vaults){
+            if(vault == null){
+                continue;
+            }
+            checkRetentionPoliciesForVault(vault);
+        }
     }
 
-    private void processVault(Vault vault) {
+    private void checkRetentionPoliciesForVault(Vault vault) {
 
         String vaultId = vault.getID();
         // Process each vault
-        LOG.info("Checking retention policy of vault: {} ({}) with policy {}",
+        LOG.info("Checking retention policy of vault: {} ({}) with retention policy {}",
                 vaultId,
                 vault.getName(),
                 vault.getRetentionPolicy().getID()
@@ -59,14 +68,7 @@ public class CheckRetentionPolicies implements ScheduledTask {
         vaultsService.checkRetentionPolicy(vaultId);
         Vault checkedVault = vaultsService.getVault(vaultId);
         int status = checkedVault.getRetentionPolicyStatus();
-        // TODO does this mapping happen elsewhere.
-        String statusDesc = switch (status) {
-            case 0 -> "UNCHECKED";
-            case 1 -> "OK";
-            case 2 -> "REVIEW";
-            case 3 -> "ERROR";
-            default -> "UNKNOWN[" + status + "]";
-        };
+        String statusDesc = RetentionPolicyStatus.getDescription(status);
         LOG.info("Status of vault {} is {}", vaultId, statusDesc);
     }
 }

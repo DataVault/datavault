@@ -2,6 +2,8 @@ package org.datavaultplatform.broker.scheduled;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.time.Clock;
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.Date;
 
@@ -31,6 +33,7 @@ import org.datavaultplatform.common.model.dao.RetentionPolicyDAO;
 import org.datavaultplatform.common.model.dao.VaultDAO;
 import org.datavaultplatform.common.model.dao.VaultReviewDAO;
 import org.datavaultplatform.common.services.LDAPService;
+import org.datavaultplatform.common.util.DateTimeUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -113,6 +116,9 @@ public class ScheduledTasksWithDbIT extends BaseReuseDatabaseTest {
 
     @Autowired
     GroupDAO groupDAO;
+    
+    @Autowired
+    Clock clock;
 
     @Test
     void testScheduled1AuditDepositsChunks() {
@@ -157,23 +163,28 @@ public class ScheduledTasksWithDbIT extends BaseReuseDatabaseTest {
 
     private Vault setupVault(RetentionPolicy rp) {
 
+        Date now = Date.from(clock.instant());
+        LocalDate today = LocalDate.now(clock);
+        LocalDate todayPlus1Year = today.plusYears(1);
+        Date todayPlus1YearDate = DateTimeUtils.toDateAtNoon(todayPlus1Year);
+
         Vault vault = new Vault();
         vault.setContact("James Bond");
         vault.setName("test-vault");
-        vault.setCreationTime(new Date());
-        vault.setReviewDate(new Date(ZonedDateTime.now().plusYears(1).toInstant().toEpochMilli()));
+        vault.setCreationTime(now);
+        vault.setReviewDate(todayPlus1YearDate);
         vault.setRetentionPolicy(rp);
         vaultDAO.save(vault);
 
         VaultReview vr1 = new VaultReview();
         vr1.setVault(vault);
         vr1.setId("vr-1");
-        vr1.setCreationTime(new Date());
+        vr1.setCreationTime(now);
 
         VaultReview vr2 = new VaultReview();
         vr2.setVault(vault);
         vr2.setId("vr-2");
-        vr2.setCreationTime(new Date());
+        vr2.setCreationTime(now);
 
         vaultReviewDAO.save(vr1);
         vaultReviewDAO.save(vr2);
