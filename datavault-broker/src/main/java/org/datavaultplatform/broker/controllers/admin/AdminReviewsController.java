@@ -4,6 +4,7 @@ import static org.datavaultplatform.common.util.Constants.HEADER_CLIENT_KEY;
 import static org.datavaultplatform.common.util.Constants.HEADER_USER_ID;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.datavaultplatform.broker.controllers.ReviewsController;
 import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.common.event.vault.Review;
 import org.datavaultplatform.common.model.*;
@@ -20,6 +21,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 
@@ -67,6 +69,9 @@ public class AdminReviewsController {
 
         if(CollectionUtils.isNotEmpty(vaultsForReview)) {
             for (Vault vault : vaultsForReview) {
+                if (vault == null) {
+                    continue;
+                }
                 vaultResponses.add(vault.convertToResponse());
             }
         }
@@ -93,41 +98,24 @@ public class AdminReviewsController {
 
         User user = usersService.getUser(userID);
         Vault vault = vaultsService.getUserVault(user, vaultID);
-        List<Deposit> deposits = vault.getDeposits();
-
-        VaultReview vaultReview = null;
-        List <DepositReview> depositReviews = null;
-
-        // If we find a record that has not been actioned then we know we have an active current record.
-        for (VaultReview vr : vault.getVaultReviews()) {
-            if (vr.getActionedDate() == null) {
-                vaultReview = vr;
-                depositReviews = vr.getDepositReviews();
-            }
-        }
+        
+        VaultReview vaultReview = findVaultReviewWithoutActionedDate(vault);
 
         if (vaultReview == null) {
            return null;
-        } else {
-            // If we pass back the Vault Review and Deposit Review we lose the links between the objects, so pass
-            // back a wee Transfer Object POJO that just contains the ids, and let the client then request whatever it needs.
-
-            // Create Lists of Deposit and DepositReview ids
-            List<String> depositIds = new ArrayList<>();
-            List<String> depositReviewIds = new ArrayList<>();
-
-            for (DepositReview depositReview : depositReviews) {
-                depositIds.add(depositReview.getDeposit().getID());
-                depositReviewIds.add(depositReview.getId());
-            }
-
-            ReviewInfo reviewInfo = new ReviewInfo();
-            reviewInfo.setVaultReviewId(vaultReview.getId());
-            reviewInfo.setDepositIds(depositIds);
-            reviewInfo.setDepositReviewIds(depositReviewIds);
-
-            return reviewInfo;
         }
+
+        ReviewInfo reviewInfo = getReviewInfo(vaultReview);
+        return reviewInfo;
+    }
+
+    private VaultReview findVaultReviewWithoutActionedDate(Vault vault) {
+        VaultReview newestActive = vault.getVaultReviews()
+                .stream()
+                .filter(vr -> vr.getActionedDate() == null)
+                .max(Comparator.comparing(VaultReview::getCreationTime))
+                .orElse(null);
+        return newestActive;
     }
 
     @ApiMethod(
@@ -148,24 +136,11 @@ public class AdminReviewsController {
         Vault vault = vaultsService.getUserVault(user, vaultID);
 
         VaultReview vaultReview = vaultsReviewService.createVaultReview(vault);
-        List <DepositReview> depositReviews = depositsReviewService.addDepositReviews(vault, vaultReview);
+        depositsReviewService.addDepositReviews(vault, vaultReview);
 
         // If we pass back the Vault Review and Deposit Review we lose the links between the objects, so pass
         // back a wee Transfer Object POJO that just contains the ids, and let the client then request whatever it needs.
-
-        List<String> depositIds = new ArrayList<>();
-        List<String> depositReviewIds = new ArrayList<>();
-
-        for (DepositReview depositReview : depositReviews) {
-            depositIds.add(depositReview.getDeposit().getID());
-            depositReviewIds.add(depositReview.getId());
-        }
-
-        ReviewInfo reviewInfo = new ReviewInfo();
-        reviewInfo.setVaultReviewId(vaultReview.getId());
-        reviewInfo.setDepositIds(depositIds);
-        reviewInfo.setDepositReviewIds(depositReviewIds);
-
+        ReviewInfo reviewInfo = getReviewInfo(vaultReview);
         return reviewInfo;
     }
 
@@ -226,4 +201,22 @@ public class AdminReviewsController {
     }
 
 
+    public static ReviewInfo getReviewInfo(VaultReview vaultReview) {
+        List<DepositReview> depositReviews = vaultReview.getDepositReviews();
+
+        // Create Lists of Deposit and DepositReview ids
+        List<String> depositIds = new ArrayList<>();
+        List<String> depositReviewIds = new ArrayList<>();
+
+        for (DepositReview depositReview : depositReviews) {
+            depositIds.add(depositReview.getDeposit().getID());
+            depositReviewIds.add(depositReview.getId());
+        }
+
+        ReviewInfo reviewInfo = new ReviewInfo();
+        reviewInfo.setVaultReviewId(vaultReview.getId());
+        reviewInfo.setDepositIds(depositIds);
+        reviewInfo.setDepositReviewIds(depositReviewIds);
+        return reviewInfo;
+    }
 }

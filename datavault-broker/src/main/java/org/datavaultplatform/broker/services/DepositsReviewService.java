@@ -9,6 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -18,35 +20,40 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class DepositsReviewService {
 
-    private static final Logger logger = LoggerFactory.getLogger(DepositsReviewService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DepositsReviewService.class);
 
     private final DepositReviewDAO depositReviewDAO;
+    private final Clock clock;
 
     @Autowired
-    public DepositsReviewService(DepositReviewDAO depositReviewDAO) {
+    public DepositsReviewService(DepositReviewDAO depositReviewDAO, Clock clock) {
         this.depositReviewDAO = depositReviewDAO;
+        this.clock = clock;
     }
 
 
-    public void addDepositReview(DepositReview depositReview) {
-        depositReview.setCreationTime(new Date());
+    public void saveDepositReview(DepositReview depositReview) {
+        depositReview.setCreationTime(Date.from(clock.instant()));
         depositReviewDAO.save(depositReview);
     }
 
     public List<DepositReview> addDepositReviews(Vault vault, VaultReview vaultReview) {
-        List <DepositReview> depositReviews = new ArrayList<>();
+        List <DepositReview> result = new ArrayList<>();
 
         for (Deposit deposit : vault.getDeposits()) {
+            if (deposit == null) {
+                continue;
+            }
             DepositReview depositReview = new DepositReview();
 
             depositReview.setVaultReview(vaultReview);
             depositReview.setDeposit(deposit);
-            addDepositReview(depositReview);
+            saveDepositReview(depositReview);
 
-            depositReviews.add(depositReview);
+            result.add(depositReview);
         }
 
-        return depositReviews;
+        return result;
     }
 
     public List<DepositReview> getDepositReviews() {

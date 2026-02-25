@@ -3,6 +3,7 @@ package org.datavaultplatform.broker.controllers;
 import static org.datavaultplatform.common.util.Constants.HEADER_CLIENT_KEY;
 import static org.datavaultplatform.common.util.Constants.HEADER_USER_ID;
 
+import org.datavaultplatform.broker.controllers.admin.AdminReviewsController;
 import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.response.ReviewInfo;
@@ -64,30 +65,15 @@ public class ReviewsController {
 
         List<VaultReview> reviews = this.vaultsReviewService.findByVaultId(vault.getID());
         for (VaultReview vr : reviews) {
-
-            VaultReview vaultReview = vr;
-            List <DepositReview> depositReviews = vr.getDepositReviews();
-
-            // Create Lists of Deposit and DepositReview ids
-            List<String> depositIds = new ArrayList<>();
-            List<String> depositReviewIds = new ArrayList<>();
-
-            for (DepositReview depositReview : depositReviews) {
-                depositIds.add(depositReview.getDeposit().getID());
-                depositReviewIds.add(depositReview.getId());
+            if (vr == null) {
+                continue;
             }
-
-            ReviewInfo reviewInfo = new ReviewInfo();
-            reviewInfo.setVaultReviewId(vaultReview.getId());
-            reviewInfo.setDepositIds(depositIds);
-            reviewInfo.setDepositReviewIds(depositReviewIds);
-
+            ReviewInfo reviewInfo = AdminReviewsController.getReviewInfo(vr);
             reviewinfos.add(reviewInfo);
         }
 
         return reviewinfos;
     }
-
 
     @ApiMethod(
             path = "/vaults/vaultreviews/{vaultReviewId}",
