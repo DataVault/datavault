@@ -219,6 +219,8 @@ a {
     font-weight: 400;         /* normal weight */
     margin-bottom: 0.25rem;
     line-height: 1.2;
+    font-family: 'Crimson Text', serif;
+    font-style: italic;
 }
 
 /* “Research Data Service” (main title) */
@@ -227,6 +229,7 @@ a {
     font-weight: 600;         /* semi-bold */
     margin: 0;
     line-height: 1.1;
+    font-family: 'Crimson Text', serif;
 }
 
 /* Links */
