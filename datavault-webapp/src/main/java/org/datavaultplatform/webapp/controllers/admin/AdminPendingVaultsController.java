@@ -2,8 +2,8 @@ package org.datavaultplatform.webapp.controllers.admin;
 
 
 import java.security.Principal;
-import java.util.Date;
-import java.text.ParseException;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.request.CreateVault;
@@ -180,10 +180,10 @@ public class AdminPendingVaultsController {
     		                   @RequestParam("reviewDate") String reviewDateString) {
         // need to either pass in create vault or get vaultnfo from the pending id param
         // and convert it to create vault object like in VaultController.getPendingVault
-    	Date reviewDate = null;
+    	LocalDate reviewDate = null;
 		try {
-			reviewDate = DateTimeUtils.parseDate(reviewDateString);
-		} catch(ParseException pe ) {
+			reviewDate = DateTimeUtils.parseLocalDate(reviewDateString);
+		} catch(DateTimeParseException pe ) {
 			logger.info("Parse error: " + pe);
 		}
 		VaultInfo pendingVault = restService.getPendingVault(pendingVaultID);

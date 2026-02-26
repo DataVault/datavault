@@ -3,21 +3,36 @@ package org.datavaultplatform.broker.services;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.time.Clock;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneOffset;
+import java.time.*;
 import java.util.Date;
 import java.util.List;
 import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.model.VaultReview;
+import org.datavaultplatform.common.model.dao.VaultReviewDAO;
 import org.datavaultplatform.common.util.DateTimeUtils;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 class VaultsReviewServiceTest {
 
     private static final Clock CLOCK = Clock.fixed(Instant.parse("2007-12-03T12:00:00.00Z"), ZoneOffset.UTC);
-    private final VaultsReviewService vaultsReviewService = new VaultsReviewService(null, CLOCK);
+    
+    VaultsReviewService vaultsReviewService;
+
+    @Mock
+    VaultReviewDAO mVaultReviewDAO;
+
+    @Mock
+    DepositsReviewService mDepositReviewService;
+
+    @BeforeEach
+    public void setup() {
+        vaultsReviewService = new VaultsReviewService(mVaultReviewDAO, mDepositReviewService, CLOCK);
+    }
 
     @Test
     void testIsVaultForReview() {
@@ -71,14 +86,14 @@ class VaultsReviewServiceTest {
         Date reviewDate = DateTimeUtils.toDateAtNoon(reviewLocalDate);
 
         LocalDate actionedLocalDate = DateTimeUtils.getDateAdjustedByMonths(today, actionedDateOffset);
-        Date actionedDate = DateTimeUtils.toDateAtNoon(actionedLocalDate);
+        LocalDateTime actionedLTD = DateTimeUtils.toLocalDateTimeAtNoon(actionedLocalDate);
 
         VaultReview vaultReview = new VaultReview();
-        vaultReview.setActionedDate(actionedDate);
+        vaultReview.setActionedDate(actionedLTD);
         List<VaultReview> vaultReviews = List.of(vaultReview);
 
         Vault vault = new Vault();
-        vault.setReviewDate(reviewDate);
+        vault.setReviewDate(DateTimeUtils.toLocalDate(reviewDate));
         vault.setVaultReviews(vaultReviews);
 
         return vaultsReviewService.isVaultForReview(vault);
@@ -91,7 +106,7 @@ class VaultsReviewServiceTest {
         Date reviewDate = DateTimeUtils.toDateAtNoon(reviewLocalDate);
 
         LocalDate actionedLocalDate = DateTimeUtils.getDateAdjustedByMonths(today, actionedDateOffset);
-        Date actionedDate = DateTimeUtils.toDateAtNoon(actionedLocalDate);
+        LocalDateTime actionedDate = DateTimeUtils.toLocalDateTimeAtNoon(actionedLocalDate);
 
         VaultReview vaultReview = new VaultReview();
         if (actioned) {
@@ -100,7 +115,7 @@ class VaultsReviewServiceTest {
         List<VaultReview> vaultReviews = List.of(vaultReview);
 
         Vault vault = new Vault();
-        vault.setReviewDate(reviewDate);
+        vault.setReviewDate(DateTimeUtils.toLocalDate(reviewDate));
         vault.setVaultReviews(vaultReviews);
 
         return vaultsReviewService.dueForReviewEmail(vault);

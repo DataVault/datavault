@@ -1,7 +1,7 @@
 package org.datavaultplatform.broker.config;
 
-import java.sql.Date;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
@@ -38,7 +38,7 @@ public class EmailLocalConfig {
     ZonedDateTime now = ZonedDateTime.ofInstant(instant, ZoneId.of("Europe/London"));
     ZonedDateTime plus1year = now.plusYears(1);
     Vault vault = new Vault();
-    vault.setReviewDate(new Date(plus1year.toInstant().toEpochMilli()));
+    vault.setReviewDate(LocalDate.ofInstant(plus1year.toInstant(), now.getZone()));
     HashMap<String, Object> model = new HashMap<>();
     model.put(EMAIL_HOME_PAGE, "https://www.google.com");
     model.put(EMAIL_HELP_PAGE, "https://stackoverflow.com");

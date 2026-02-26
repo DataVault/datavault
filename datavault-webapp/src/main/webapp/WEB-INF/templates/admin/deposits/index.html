@@ -100,7 +100,7 @@
                     <tr class="tr">
                         <td>[[${deposit.name}]]</td>
                         <td>[[${deposit.getSizeStr()}]]</td>
-                        <td>[[${#dates.format(deposit.getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */--></td>
+                        <td>[[${#temporals.format(deposit.getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */--></td>
                         <td>[[${deposit.status}]]</td>
                         <td><th:block th:if="${!#strings.isEmpty(deposit?.getUserName())}">[[${deposit.getUserName()}]]</th:block> ([[${deposit.userID}]])</td>
                         <td><th:block th:if="${!#strings.isEmpty(deposit?.getVaultName())}">[[${deposit.getVaultName()}]]</th:block></td>

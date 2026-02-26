@@ -10,7 +10,7 @@ import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
 import org.datavaultplatform.common.io.DataVaultFileUtils;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -23,7 +23,7 @@ public class DepositInfo {
     // Serialise date in ISO 8601 format
     @ApiObjectField(description = "Date that the vault was created")
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern= DateTimeUtils.ISO_DATE_TIME_FORMAT)
-    private Date creationTime;
+    private LocalDateTime creationTime;
 
     @ApiObjectField(description = "Status of the Deposit", allowedvalues={"NOT_STARTED", "IN_PROGRESS", "COMPLETE"})
     private Deposit.Status status;
@@ -94,7 +94,7 @@ public class DepositInfo {
     private String vaultReviewDate;
     
     public DepositInfo() {}
-    public DepositInfo(String id, String userID, Date creationTime, Deposit.Status status, String name,
+    public DepositInfo(String id, String userID, LocalDateTime creationTime, Deposit.Status status, String name,
                        String description, boolean hasPersonalData, String personalDataStatement, String fileOrigin,
                        String shortFilePath, String filePath, long depositSize, String vaultID,
                        List<DepositPath> depositPaths, List<DepositChunk> depositChunks) {
@@ -131,11 +131,11 @@ public class DepositInfo {
         this.userID = userID;
     }
     
-    public Date getCreationTime() {
+    public LocalDateTime getCreationTime() {
         return creationTime;
     }
 
-    public void setCreationTime(Date creationTime) {
+    public void setCreationTime(LocalDateTime creationTime) {
         this.creationTime = creationTime;
     }
 

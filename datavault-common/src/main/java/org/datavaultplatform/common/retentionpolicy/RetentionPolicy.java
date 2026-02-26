@@ -2,7 +2,7 @@ package org.datavaultplatform.common.retentionpolicy;
 
 import org.datavaultplatform.common.model.Vault;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 public interface RetentionPolicy {
 
@@ -14,5 +14,5 @@ public interface RetentionPolicy {
     /**
      * Get the current review date of the policy
      */
-    Date getReviewDate(Vault v);
+    LocalDate getReviewDate(Vault v);
 }

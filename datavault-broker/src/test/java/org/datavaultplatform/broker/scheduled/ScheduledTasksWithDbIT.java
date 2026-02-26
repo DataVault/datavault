@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.Date;
 
@@ -151,7 +152,7 @@ public class ScheduledTasksWithDbIT extends BaseReuseDatabaseTest {
         rp1.setName("rp-1");
         rp1.setEngine("engine-1");
         rp1.setDescription("desc-1");
-        rp1.setEndDate(new Date(ZonedDateTime.now().plusYears(1).toInstant().toEpochMilli()));
+        rp1.setEndDate(LocalDate.now().plusYears(1));
         retentionPolicyDAO.save(rp1);
 
         Vault vault = setupVault(rp1);
@@ -171,20 +172,20 @@ public class ScheduledTasksWithDbIT extends BaseReuseDatabaseTest {
         Vault vault = new Vault();
         vault.setContact("James Bond");
         vault.setName("test-vault");
-        vault.setCreationTime(now);
-        vault.setReviewDate(todayPlus1YearDate);
+        vault.setCreationTime(DateTimeUtils.toLocalDateTime(now));
+        vault.setReviewDate(DateTimeUtils.toLocalDate(todayPlus1YearDate));
         vault.setRetentionPolicy(rp);
         vaultDAO.save(vault);
 
         VaultReview vr1 = new VaultReview();
         vr1.setVault(vault);
         vr1.setId("vr-1");
-        vr1.setCreationTime(now);
+        vr1.setCreationTime(DateTimeUtils.toLocalDateTime(now));
 
         VaultReview vr2 = new VaultReview();
         vr2.setVault(vault);
         vr2.setId("vr-2");
-        vr2.setCreationTime(now);
+        vr2.setCreationTime(DateTimeUtils.toLocalDateTime(now));
 
         vaultReviewDAO.save(vr1);
         vaultReviewDAO.save(vr2);
@@ -197,12 +198,15 @@ public class ScheduledTasksWithDbIT extends BaseReuseDatabaseTest {
     }
 
     private void setupDeposit(Vault vault, Date depositCreationTime) {
+        
+        LocalDateTime now = LocalDateTime.now();
+        
         Deposit deposit = new Deposit();
         deposit.setStatus(Status.COMPLETE);
         deposit.setHasPersonalData(false);
         deposit.setName("test-vault-1");
         deposit.setDescription("desc-test-vault-1");
-        deposit.setCreationTime(depositCreationTime);
+        deposit.setCreationTime(DateTimeUtils.toLocalDateTime(depositCreationTime));
         deposit.setVault(vault);
         depositDAO.save(deposit);
 
@@ -224,15 +228,18 @@ public class ScheduledTasksWithDbIT extends BaseReuseDatabaseTest {
 
         VaultReview vr1 = new VaultReview();
         vr1.setVault(vault);
-        vr1.setCreationTime(new Date());
+        //was new Date()
+        vr1.setCreationTime(now);
         vaultReviewDAO.save(vr1);
 
         DepositReview dr = new DepositReview();
         dr.setVaultReview(vr1);
         dr.setDeposit(deposit);
-        dr.setActionedDate(new Date());
+        //was new Date()
+        dr.setActionedDate(now);
         dr.setDeleteStatus(DepositReviewDeleteStatus.ONREVIEW);
-        dr.setCreationTime(new Date());
+        //was new Date()
+        dr.setCreationTime(now);
 
         depositReviewDAO.save(dr);
     }
@@ -248,8 +255,8 @@ public class ScheduledTasksWithDbIT extends BaseReuseDatabaseTest {
         vault.setRetentionPolicy(rp);
         vault.setContact("Bruce Wayne");
         vault.setName("test-vault-for-review");
-        vault.setCreationTime(new Date());
-        vault.setReviewDate(new Date(ZonedDateTime.now().plusMonths(5).toInstant().toEpochMilli()));
+        vault.setCreationTime(LocalDateTime.now());
+        vault.setReviewDate(LocalDate.now().plusMonths(5));
         vault.setGroup(group);
 
         vaultDAO.save(vault);

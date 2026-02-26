@@ -2,6 +2,8 @@ package org.datavaultplatform.common.response;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -25,15 +27,15 @@ public class VaultInfo {
     
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern=DateTimeUtils.ISO_DATE_TIME_FORMAT)
     @ApiObjectField(description = "The date and time when this vault was created")
-    private Date creationTime;
+    private LocalDateTime creationTime;
 
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern=DateTimeUtils.ISO_DATE_TIME_FORMAT)
     @ApiObjectField(description = "The date and time when the policy will expire")
-    private Date policyExpiry;
+    private LocalDateTime policyExpiry;
 
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern=DateTimeUtils.ISO_DATE_TIME_FORMAT)
     @ApiObjectField(description = "The date and time when the policy check was last carried out")
-    private Date policyLastChecked;
+    private LocalDateTime policyLastChecked;
 
     @ApiObjectField(description = "The name of this vault")
     private String name;
@@ -82,11 +84,11 @@ public class VaultInfo {
 
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern= DateTimeUtils.ISO_DATE_FORMAT)
     @ApiObjectField(description = "Define the minimum of time the archive will be kept")
-    private Date grantEndDate;
+    private LocalDate grantEndDate;
 
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern= DateTimeUtils.ISO_DATE_FORMAT)
     @ApiObjectField(description = "The date by which the vault should be reviewed for decision as to whether it should be deleted or whether there are funds available to support continued storage")
-    private Date reviewDate;
+    private LocalDate reviewDate;
     
     @ApiObjectField(description = "Number of Deposits in a vault")
     private long numberOfDeposits;
@@ -163,9 +165,9 @@ public class VaultInfo {
     public VaultInfo() { }
 
     public VaultInfo(String id, String userID, String userName, String datasetID, String crisID, String datasetName,
-                     Date creationTime, String name, String description, String policyID, String policyLength, String groupID,
-                     long vaultSize, int policyStatus, Date policyExpiry, Date policyLastChecked, Date grantEndDate,
-                     Date reviewDate, long numberOfDeposits, String projectId) {
+                     LocalDateTime creationTime, String name, String description, String policyID, String policyLength, String groupID,
+                     long vaultSize, int policyStatus, LocalDateTime policyExpiry, LocalDateTime policyLastChecked, LocalDate grantEndDate,
+                     LocalDate reviewDate, long numberOfDeposits, String projectId) {
         this.id = id;
         this.userID = userID;
         this.userName = userName;
@@ -188,8 +190,8 @@ public class VaultInfo {
         this.crisID = crisID;
     }
 
-     public VaultInfo(String id,String userName, Date creationTime, String name,
-    		long vaultSize, Date reviewDate, Date grantEndDate, BigDecimal amountToBeBilled,BigDecimal amountBilled, String projectId,
+     public VaultInfo(String id,String userName, LocalDateTime creationTime, String name,
+    		long vaultSize, LocalDate reviewDate, LocalDate grantEndDate, BigDecimal amountToBeBilled,BigDecimal amountBilled, String projectId,
             String paymentDetails) {
         this.id = id;
         this.userName = userName;
@@ -204,8 +206,8 @@ public class VaultInfo {
         this.paymentDetails = paymentDetails;
     }
 
-    public VaultInfo(String id,String userName, Date creationTime, String name,
-    		long vaultSize, Date reviewDate,BigDecimal amountToBeBilled,BigDecimal amountBilled, String projectId,
+    public VaultInfo(String id,String userName, LocalDateTime creationTime, String name,
+    		long vaultSize, LocalDate reviewDate,BigDecimal amountToBeBilled,BigDecimal amountBilled, String projectId,
             String paymentDetails) {
         this.id = id;        
         this.userName = userName;    
@@ -267,11 +269,11 @@ public class VaultInfo {
         this.datasetName = datasetName;
     }
 
-    public Date getCreationTime() {
+    public LocalDateTime getCreationTime() {
         return creationTime;
     }
 
-    public void setCreationTime(Date creationTime) {
+    public void setCreationTime(LocalDateTime creationTime) {
         this.creationTime = creationTime;
     }
 
@@ -369,19 +371,19 @@ public class VaultInfo {
         this.policyStatus = policyStatus;
     }
 
-    public Date getPolicyLastChecked() {
+    public LocalDateTime getPolicyLastChecked() {
         return policyLastChecked;
     }
 
-    public void setPolicyLastChecked(Date policyLastChecked) {
+    public void setPolicyLastChecked(LocalDateTime policyLastChecked) {
         this.policyLastChecked = policyLastChecked;
     }
 
-    public Date getPolicyExpiry() {
+    public LocalDateTime getPolicyExpiry() {
         return policyExpiry;
     }
 
-    public void setPolicyExpiry(Date policyExpiry) {
+    public void setPolicyExpiry(LocalDateTime policyExpiry) {
         this.policyExpiry = policyExpiry;
     }
 
@@ -392,19 +394,19 @@ public class VaultInfo {
         else return ("Unknown");
     }
     
-    public Date getGrantEndDate() {
+    public LocalDate getGrantEndDate() {
         return grantEndDate;
     }
 
-    public void setGrantEndDate(Date grantEndDate) {
+    public void setGrantEndDate(LocalDate grantEndDate) {
         this.grantEndDate = grantEndDate;
     }
 
-    public Date getReviewDate() {
+    public LocalDate getReviewDate() {
         return reviewDate;
     }
 
-    public void setReviewDate(Date reviewDate) {
+    public void setReviewDate(LocalDate reviewDate) {
         this.reviewDate = reviewDate;
     }
 

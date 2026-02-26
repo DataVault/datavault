@@ -4,20 +4,21 @@ import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.retentionpolicy.RetentionPolicyStatus;
 import org.datavaultplatform.common.retentionpolicy.RetentionPolicy;
 
-import java.util.Calendar;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**
  * Created by Stuart Lewis on 30/10/2015.
  */
 public class FiveMinuteRetentionPolicy implements RetentionPolicy {
 
+    @Override
     public int run(Vault v) {
-        Date now = new Date();
-        Date check = getReviewDate(v);
+        LocalDate now = LocalDate.now();
+        LocalDate check = getReviewDate(v);
 
         // Is it time for review?
-        if (check.before(now)) {
+        if (check.isBefore(now)) {
             v.setRetentionPolicyStatus(RetentionPolicyStatus.REVIEW);
             return RetentionPolicyStatus.REVIEW;
         } else {
@@ -26,15 +27,12 @@ public class FiveMinuteRetentionPolicy implements RetentionPolicy {
         }
     }
 
-    public Date getReviewDate(Vault v) {
-        Date check = v.getCreationTime();
+    public LocalDate getReviewDate(Vault v) {
+        LocalDateTime check = v.getCreationTime();
 
         // Add five minutes
-        Calendar c = Calendar.getInstance();
-        c.setTime(check);
-        c.add(Calendar.MINUTE, 5);
-        check = c.getTime();
-
-        return check;
+        check = check.plusMinutes(5);
+        
+        return check.toLocalDate();
     }
 }

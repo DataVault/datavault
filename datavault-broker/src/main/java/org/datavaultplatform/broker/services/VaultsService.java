@@ -1,6 +1,7 @@
 package org.datavaultplatform.broker.services;
 
 import java.time.Clock;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import org.datavaultplatform.common.event.roles.CreateRoleAssignment;
@@ -75,7 +76,7 @@ public class VaultsService {
     }
 
     public void addVault(Vault vault) {
-        Date d = new Date();
+        LocalDateTime d = LocalDateTime.now();
         vault.setCreationTime(d);
         vaultDAO.save(vault);
     }

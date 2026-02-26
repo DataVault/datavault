@@ -173,7 +173,7 @@
                             </a>
                         </td>
                         <td>[[${deposit.getUserID()}]]</td>
-                        <td>[[${#dates.format(deposit.getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */--></td>
+                        <td>[[${#temporals.format(deposit.getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */--></td>
                         <td>
                             <th:block th:if="${deposit?.status?.name() != 'NOT_STARTED'}">
                             [[${deposit.getSizeStr()}]]
@@ -281,7 +281,7 @@
                                 <th scope="col">Grant End Date</th>
                                 <td>
                                     <th:block th:if="${vault.grantEndDate != null}">
-                                        [[${#dates.format(vault.getGrantEndDate(),dateFormatISO)}]]<!--/* date */-->
+                                        [[${#temporals.format(vault.getGrantEndDate(),dateFormatISO)}]]<!--/* date */-->
                                     </th:block>
                                     <th:block th:if="${vault.grantEndDate == null}">
                                         No end date
@@ -295,7 +295,7 @@
                             </tr>
                             <tr>
                                 <th scope="col">Review Date</th>
-                                <td>[[${#dates.format(vault.getReviewDate(),dateFormatISO)}]]<!--/* date */--></td>
+                                <td>[[${#temporals.format(vault.getReviewDate(),dateFormatISO)}]]<!--/* date */--></td>
                                 <td>
                                     <button type="button" class="btn btn-default pull-right" disabled>
                                         Edit review date
@@ -351,7 +351,7 @@
                                     <td>[[${depositName}]]</td>
                                     <td>[[${retrieve?.user?.getID()}]]</td>
                                     <td>[[${#bools.isTrue(retrieve?.hasExternalRecipients) ? 'Yes' : 'No'}]]</td>
-                                    <td>[[${#dates.format(retrieve.timestamp,globalDateTimeFormat)}]]<!--/* datetime */--></td>
+                                    <td>[[${#temporals.format(retrieve.timestamp,globalDateTimeFormat)}]]<!--/* datetime */--></td>
                                     <td>
                                         <div th:switch="${retrieve?.status?.name()}" class="job-status">
                                         <th:block th:case="COMPLETE">
@@ -422,7 +422,7 @@
                                  <tbody>
                                  <tr>
                                      <th:block th:if="${vrm.actionedDate != null}">
-                                        <td>[[${#dates.format(vrm.actionedDate,dateFormatISO)}]]<!--/* date */--></td>
+                                        <td>[[${#temporals.format(vrm.actionedDate,dateFormatISO)}]]<!--/* date */--></td>
                                      </th:block>
                                      <th:block th:if="${vrm.actionedDate == null}">
                                         <td>Review still in progress</td>

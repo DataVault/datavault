@@ -49,6 +49,8 @@ import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.junit.jupiter.Container;
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.stream.Stream;
@@ -222,11 +224,11 @@ class RetrieveRestartIT extends BaseDatabaseTest {
         fileStoreService.addFileStore(fileStore1);
 
         Vault vault = new Vault();
-        vault.setReviewDate(new Date());
+        vault.setReviewDate(LocalDate.now());
         vault.setRetentionPolicyStatus(123);
         vault.setName("test vault");
         vault.setDescription("test vault description");
-        vault.setCreationTime(new Date());
+        vault.setCreationTime(LocalDateTime.now());
         vault.setContact("Vault Owner");
         vault.setRetentionPolicy(rps.get(0));
         vault.setGroup(group1);
@@ -268,7 +270,7 @@ class RetrieveRestartIT extends BaseDatabaseTest {
         retrieve.setNote("test note");
         retrieve.setRetrievePath(fileStore1.getID()+"/A/B/C");
         retrieve.setHasExternalRecipients(false);
-        retrieve.setTimestamp(new Date());
+        retrieve.setTimestamp(LocalDateTime.now());
         retrieve.setDeposit(deposit2);
 
         boolean result = depositsController.retrieveDeposit(ADMIN_USER_ID, depositID, retrieve);

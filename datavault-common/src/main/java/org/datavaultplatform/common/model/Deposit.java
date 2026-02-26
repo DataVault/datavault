@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import org.datavaultplatform.common.util.DateTimeUtils;
 import org.hibernate.Hibernate;
@@ -48,8 +49,9 @@ public class Deposit implements Identified {
     // Serialise date in ISO 8601 format
     @ApiObjectField(description = "Date that the vault was created")
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern= DateTimeUtils.ISO_DATE_TIME_FORMAT)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date creationTime;
+    //LTD @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "creationTime", nullable = false, columnDefinition = "TIMESTAMP")
+    private LocalDateTime creationTime;
     
     @ManyToOne
     private Vault vault;
@@ -183,11 +185,11 @@ public class Deposit implements Identified {
 
     public long getVersion() { return version; }
 
-    public void setCreationTime(Date creationTime) {
+    public void setCreationTime(LocalDateTime creationTime) {
         this.creationTime = creationTime;
     }
 
-    public Date getCreationTime() {
+    public LocalDateTime getCreationTime() {
         return creationTime;
     }
     

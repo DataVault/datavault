@@ -6,21 +6,22 @@ import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.retentionpolicy.RetentionPolicy;
 import org.datavaultplatform.common.retentionpolicy.RetentionPolicyStatus;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 
 /**
  * Created by Stuart Lewis on 29/10/2015.
  */
 public class EPSRCRetentionPolicy implements RetentionPolicy {
 
+    @Override
     public int run(Vault v) {
-        Date now = new Date();
-        Date check = getReviewDate(v);
+        LocalDate now = LocalDate.now();
+        LocalDate check = getReviewDate(v);
 
         // Is it time for review?
-        if (check.before(now)) {
+        if (check.isBefore(now)) {
             v.setRetentionPolicyStatus(RetentionPolicyStatus.REVIEW);
             return RetentionPolicyStatus.REVIEW;
         } else {
@@ -29,8 +30,8 @@ public class EPSRCRetentionPolicy implements RetentionPolicy {
         }
     }
 
-    public Date getReviewDate(Vault v) {
-        Date check;
+    public LocalDate getReviewDate(Vault v) {
+        LocalDateTime check;
 
         // Get all the retrieve events
         ArrayList<Retrieve> retrieves = new ArrayList<>();
@@ -42,7 +43,7 @@ public class EPSRCRetentionPolicy implements RetentionPolicy {
         if (!retrieves.isEmpty()) {
             check = retrieves.get(0).getTimestamp();
             for (Retrieve r : retrieves) {
-                if (r.getTimestamp().after(check)) {
+                if (r.getTimestamp().isAfter(check)) {
                     check = r.getTimestamp();
                 }
             }
@@ -58,11 +59,8 @@ public class EPSRCRetentionPolicy implements RetentionPolicy {
         }
 
         // Add ten years
-        Calendar c = Calendar.getInstance();
-        c.setTime(check);
-        c.add(Calendar.YEAR, 10);
-        check = c.getTime();
+        check = check.plusYears(10);
 
-        return check;
+        return check.toLocalDate();
     }
 }

@@ -11,8 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Clock;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,9 +31,8 @@ public class DepositsReviewService {
         this.clock = clock;
     }
 
-
     public void saveDepositReview(DepositReview depositReview) {
-        depositReview.setCreationTime(Date.from(clock.instant()));
+        depositReview.setCreationTime(LocalDateTime.now(clock));
         depositReviewDAO.save(depositReview);
     }
 
@@ -75,7 +74,6 @@ public class DepositsReviewService {
 
 
     public long count() { return depositReviewDAO.count(); }
-
 
 
 

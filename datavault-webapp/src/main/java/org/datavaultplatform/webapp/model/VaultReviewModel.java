@@ -1,6 +1,7 @@
 package org.datavaultplatform.webapp.model;
 
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.model.VaultReview;
@@ -10,8 +11,8 @@ import org.datavaultplatform.common.model.VaultReview;
 public class VaultReviewModel {
 
     private String vaultReviewId;
-    private Date actionedDate;
-    private Date newReviewDate;
+    private LocalDateTime actionedDate;
+    private LocalDate newReviewDate;
     private String comment;
 
     private List<DepositReviewModel> depositReviewModels;
@@ -34,19 +35,19 @@ public class VaultReviewModel {
         this.vaultReviewId = vaultReviewId;
     }
 
-    public Date getActionedDate() {
+    public LocalDateTime getActionedDate() {
         return actionedDate;
     }
 
-    public void setActionedDate(Date actionedDate) {
+    public void setActionedDate(LocalDateTime actionedDate) {
         this.actionedDate = actionedDate;
     }
 
-    public Date getNewReviewDate() {
+    public LocalDate getNewReviewDate() {
         return newReviewDate;
     }
 
-    public void setNewReviewDate(Date newReviewDate) {
+    public void setNewReviewDate(LocalDate newReviewDate) {
         this.newReviewDate = newReviewDate;
     }
 

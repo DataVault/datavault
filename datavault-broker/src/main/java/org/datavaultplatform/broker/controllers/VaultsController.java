@@ -928,7 +928,7 @@ public class VaultsController {
         User user = usersService.getUser(userID);
         Vault vault = vaultsService.getUserVault(user, vaultID);
 
-        vault.setReviewDate(DateTimeUtils.parseDate(reviewDate));
+        vault.setReviewDate(DateTimeUtils.parseLocalDate(reviewDate));
 
         logger.info("Updating Review Date for Vault Id " + vaultID);
         vaultsService.updateVault(vault);

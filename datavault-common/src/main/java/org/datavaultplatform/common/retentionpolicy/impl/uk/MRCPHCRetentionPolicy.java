@@ -4,8 +4,8 @@ import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.retentionpolicy.RetentionPolicy;
 import org.datavaultplatform.common.retentionpolicy.RetentionPolicyStatus;
 
-import java.util.Calendar;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**
  * Created by Stuart Lewis on 13/6/2016.
@@ -22,12 +22,13 @@ import java.util.Date;
  */
 public class MRCPHCRetentionPolicy implements RetentionPolicy {
 
+    @Override
     public int run(Vault v) {
-        Date now = new Date();
-        Date check = getReviewDate(v);
+        LocalDate now = LocalDate.now();
+        LocalDate check = getReviewDate(v);
 
         // Is it time for review?
-        if (check.before(now)) {
+        if (check.isBefore(now)) {
             v.setRetentionPolicyStatus(RetentionPolicyStatus.REVIEW);
             return RetentionPolicyStatus.REVIEW;
         } else {
@@ -36,19 +37,16 @@ public class MRCPHCRetentionPolicy implements RetentionPolicy {
         }
     }
 
-    public Date getReviewDate(Vault v) {
+    public LocalDate getReviewDate(Vault v) {
         // Work from the date of last deposit
-        Date check = v.getCreationTime();
+        LocalDateTime check = v.getCreationTime();
         if (!v.getDeposits().isEmpty()) {
             check = v.getDeposits().get(v.getDeposits().size() - 1).getCreationTime();
         }
 
         // Add ten years
-        Calendar c = Calendar.getInstance();
-        c.setTime(check);
-        c.add(Calendar.YEAR, 20);
-        check = c.getTime();
+        check = check.plusYears(10);
 
-        return check;
+        return check.toLocalDate();
     }
 }

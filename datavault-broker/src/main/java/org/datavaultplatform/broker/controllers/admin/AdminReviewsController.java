@@ -4,7 +4,6 @@ import static org.datavaultplatform.common.util.Constants.HEADER_CLIENT_KEY;
 import static org.datavaultplatform.common.util.Constants.HEADER_USER_ID;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.datavaultplatform.broker.controllers.ReviewsController;
 import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.common.event.vault.Review;
 import org.datavaultplatform.common.model.*;
@@ -109,6 +108,7 @@ public class AdminReviewsController {
         return reviewInfo;
     }
 
+    // This is for finding the current VaultReview
     private VaultReview findVaultReviewWithoutActionedDate(Vault vault) {
         VaultReview newestActive = vault.getVaultReviews()
                 .stream()
@@ -135,8 +135,10 @@ public class AdminReviewsController {
         User user = usersService.getUser(userID);
         Vault vault = vaultsService.getUserVault(user, vaultID);
 
+        // if vault is not due - return null else create a vault if a pending review does not exist?
+        // TODO DJH - we should create a review if one is due and does not exist already ?
+        
         VaultReview vaultReview = vaultsReviewService.createVaultReview(vault);
-        depositsReviewService.addDepositReviews(vault, vaultReview);
 
         // If we pass back the Vault Review and Deposit Review we lose the links between the objects, so pass
         // back a wee Transfer Object POJO that just contains the ids, and let the client then request whatever it needs.

@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.*;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Service
@@ -26,22 +25,25 @@ public class VaultsReviewService {
     private static final int MONTHS_BEFORE_REVIEW_DATE = -6;
 
     private final VaultReviewDAO vaultReviewDAO;
+    private final DepositsReviewService depositsReviewService;
     private final Clock clock;
 
     @Autowired
-    public VaultsReviewService(VaultReviewDAO vaultReviewDAO, Clock clock) {
+    public VaultsReviewService(VaultReviewDAO vaultReviewDAO, DepositsReviewService depositsReviewService, Clock clock) {
         this.vaultReviewDAO = vaultReviewDAO;
+        this.depositsReviewService = depositsReviewService;
         this.clock = clock;
     }
 
     public VaultReview createVaultReview(Vault vault) {
         VaultReview vaultReview = new VaultReview();
 
-        vaultReview.setCreationTime(Date.from(clock.instant()));
+        vaultReview.setCreationTime(LocalDateTime.now(clock));
         vaultReview.setVault(vault);
 
         vaultReviewDAO.save(vaultReview);
 
+        depositsReviewService.addDepositReviews(vault, vaultReview);
         return vaultReview;
     }
 
@@ -92,11 +94,11 @@ public class VaultsReviewService {
             return false;
         }
 
-        boolean currentReviewExists = vault.getVaultReviews().stream().anyMatch(vr -> {
+        boolean currentReviewHasHappened = vault.getVaultReviews().stream().anyMatch(vr -> {
             LocalDate actionedDate = DateTimeUtils.toLocalDate(vr.getActionedDate());
             return actionedDate != null && actionedDate.isAfter(preReviewDate);
         });
-        return !currentReviewExists;
+        return !currentReviewHasHappened;
     }
 
 
@@ -115,11 +117,11 @@ public class VaultsReviewService {
         }
 
         // Looks like it's due an email, but check if a review is already underway or has happened.
-        boolean currentReviewExists = vault.getVaultReviews().stream().anyMatch(vr -> {
+        boolean reviewUnderwayOrHasHappened = vault.getVaultReviews().stream().anyMatch(vr -> {
             LocalDate actionedDate = DateTimeUtils.toLocalDate(vr.getActionedDate());
             return actionedDate == null || actionedDate.isAfter(preReviewEmailNotificationDate);
         });
-        return !currentReviewExists;
+        return !reviewUnderwayOrHasHappened;
     }
 
     public List<VaultReview> findByVaultId(String vaultId) {

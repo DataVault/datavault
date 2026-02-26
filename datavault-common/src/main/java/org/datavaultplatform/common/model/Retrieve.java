@@ -8,7 +8,8 @@ import org.hibernate.Hibernate;
 import org.hibernate.annotations.UuidGenerator;
 
 import jakarta.persistence.*;
-import java.util.Date;
+
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -36,8 +37,9 @@ public class Retrieve {
 
     // Serialise date in ISO 8601 format
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern= DateTimeUtils.ISO_DATE_TIME_FORMAT)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date timestamp;
+    //LTD @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "timestamp", nullable = false, columnDefinition = "TIMESTAMP")
+    private LocalDateTime timestamp;
 
     @ManyToOne
     private Deposit deposit;
@@ -78,11 +80,11 @@ public class Retrieve {
         this.retrievePath = retrievePath;
     }
 
-    public void setTimestamp(Date timestamp) {
+    public void setTimestamp(LocalDateTime timestamp) {
         this.timestamp = timestamp;
     }
 
-    public Date getTimestamp() {
+    public LocalDateTime getTimestamp() {
         return timestamp;
     }
 

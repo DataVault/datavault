@@ -38,6 +38,7 @@ import org.springframework.web.servlet.view.RedirectView;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.AssertTrue;
 import java.security.Principal;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -272,6 +273,7 @@ public class VaultsController {
                 depositReviewModels.add(drm);
             }
 
+            // the oldest DRM first, most recent DRM last
             depositReviewModels.sort(Comparator.comparing(DepositReviewModel::getCreationTime));
             vaultReviewModel.setDepositReviewModels(depositReviewModels);
 
@@ -346,7 +348,7 @@ public class VaultsController {
         vault.setIsOwner(true);
         vault.setLoggedInAs(principal.getName());
         model.addAttribute("vault", vault);
-        Date defaultReviewDate = validateService.getDefaultReviewDate();
+        LocalDate defaultReviewDate = validateService.getDefaultReviewDate();
         vault.setReviewDate(defaultReviewDate);
 
         RetentionPolicy[] policies = restService.getRetentionPolicyListing();

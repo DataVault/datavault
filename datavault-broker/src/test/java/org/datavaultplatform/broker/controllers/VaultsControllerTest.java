@@ -15,8 +15,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.time.Month;
-import java.time.ZoneOffset;
-import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -70,7 +68,7 @@ class VaultsControllerTest {
     VaultInfo mVaultInfo;
     
     @Captor
-    ArgumentCaptor<Date> argReviewDate;
+    ArgumentCaptor<LocalDate> argReviewDate;
     
     @BeforeEach
     void setup(){
@@ -106,7 +104,7 @@ class VaultsControllerTest {
         VaultInfo result = controller.updateVaultReviewDate(USER_ID, VAULT_ID, testReviewDateString);
         assertThat(result).isSameAs(mVaultInfo);
         
-        LocalDate localVaultReviewDate = LocalDate.ofInstant(argReviewDate.getValue().toInstant(), ZoneOffset.UTC);
+        LocalDate localVaultReviewDate = argReviewDate.getValue();
         assertThat(localVaultReviewDate).hasYear(2112);
         assertThat(localVaultReviewDate).hasMonth(Month.DECEMBER);
         assertThat(localVaultReviewDate).hasDayOfMonth(21);

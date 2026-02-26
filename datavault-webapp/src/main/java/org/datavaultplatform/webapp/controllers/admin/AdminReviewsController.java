@@ -18,13 +18,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
+import java.time.Clock;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -32,13 +32,18 @@ import java.util.stream.Collectors;
 @ConditionalOnBean(RestService.class)
 public class AdminReviewsController {
 
-    private static final Logger logger = LoggerFactory.getLogger(AdminReviewsController.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AdminReviewsController.class);
+    public static final String ACTION_CANCEL = "Cancel";
+    public static final String ACTION_SUBMIT = "Submit";
+    public static final String ACTION_SAVE = "Save";
 
     private final RestService restService;
+    private final Clock clock;
 
     @Autowired
-    public AdminReviewsController(RestService restService) {
+    public AdminReviewsController(RestService restService, Clock clock) {
         this.restService = restService;
+        this.clock = clock;
     }
 
     @GetMapping("/admin/reviews")
@@ -70,11 +75,13 @@ public class AdminReviewsController {
         List<RoleAssignment> roleAssignmentsForVault = restService.getRoleAssignmentsForVault(vaultID);
 
         List<RoleAssignment> dataManagers = roleAssignmentsForVault.stream()
+                .filter(Objects::nonNull)
                 .filter(roleAssignment -> RoleUtils.isRoleOfName(roleAssignment, "Nominated Data Manager"))
                 .collect(Collectors.toList());
         model.addAttribute("dataManagers", dataManagers);
 
         roleAssignmentsForVault.stream()
+                .filter(Objects::nonNull)
                 .filter(RoleUtils::isDataOwner)
                 .findFirst()
                 .ifPresent(roleAssignment -> model.addAttribute("dataOwner", roleAssignment));
@@ -84,12 +91,16 @@ public class AdminReviewsController {
 
         ReviewInfo reviewInfo = restService.getCurrentReview(vaultID);
         if (reviewInfo == null) {
-            // There isn't a current review so create one.
+            // There isn't a current review, so create one.
             reviewInfo = restService.createCurrentReview(vaultID);
         }
-
         VaultReview currentReview = restService.getVaultReview(reviewInfo.getVaultReviewId());
         VaultReviewModel vaultReviewModel = new VaultReviewModel(currentReview);
+
+        int sizeDepositReviewIds = reviewInfo.getDepositReviewIds().size();
+        int sizeDepositIds = reviewInfo.getDepositIds().size();
+        
+        Assert.isTrue(sizeDepositIds >= sizeDepositReviewIds, "size of depositIds not >= to size of depositReviewIds");
 
         List<DepositReviewModel> depositReviewModels = new ArrayList<>();
         for (int i = 0; i < reviewInfo.getDepositReviewIds().size(); i++) {
@@ -125,7 +136,7 @@ public class AdminReviewsController {
 
 
     // Process the completed review page
-    @RequestMapping(value = "/admin/vaults/{vaultid}/reviews/{reviewid}", method = RequestMethod.POST)
+    @PostMapping("/admin/vaults/{vaultid}/reviews/{reviewid}")
     public String processReview(@ModelAttribute VaultReviewModel vaultReviewModel,
                                 ModelMap model,
                                 RedirectAttributes redirectAttributes,
@@ -133,19 +144,24 @@ public class AdminReviewsController {
                                 @PathVariable("reviewid") String reviewID,
                                 @RequestParam String action) {
 
+        // ??? the valid actions Submit, Cancel and Save
+        
         // Note - The ModelAttributes made available here are not the same objects as those passed to the View,
         // they only contain the values entered on screen. With that in mind, fetch the original objects again and
         // update them appropriately.
 
-        if ("Cancel".equals(action)) {
+        if (ACTION_CANCEL.equals(action)) {
             return "redirect:/admin/reviews";
         }
 
-        if ("Submit".equals(action)) {
+        if (ACTION_SUBMIT.equals(action)) {
             // Throw back an error if a new review date has not been entered but some deposits are being retained.
             if (vaultReviewModel.getNewReviewDate() == null) {
                 if (vaultReviewModel.getDepositReviewModels() != null) {
                     for (DepositReviewModel drm : vaultReviewModel.getDepositReviewModels()) {
+                        if (drm == null) {
+                            continue;
+                        }
                         if (drm.getDeleteStatus() == DepositReviewDeleteStatus.RETAIN) {
                             redirectAttributes.addAttribute("error", "reviewdate");
                             return "redirect:/admin/vaults/" + vaultID + "/reviews";
@@ -155,28 +171,30 @@ public class AdminReviewsController {
             }
         }
 
+        LocalDateTime now = LocalDateTime.now(clock);
+        
         // Get the old stuff and update it
-        VaultReview originalReview = restService.getVaultReview(reviewID);
-        originalReview.setNewReviewDate(vaultReviewModel.getNewReviewDate());
-        originalReview.setComment(vaultReviewModel.getComment());
+        VaultReview originalVaultReview = restService.getVaultReview(reviewID);
+        originalVaultReview.setNewReviewDate(vaultReviewModel.getNewReviewDate());
+        originalVaultReview.setComment(vaultReviewModel.getComment());
 
-        if ("Submit".equals(action)) {
-            originalReview.setActionedDate(new Date());
+        if (ACTION_SUBMIT.equals(action)) {
+            originalVaultReview.setActionedDate(now);
 
             // Save the old review date in the VaultReview
             VaultInfo vault = restService.getVault(vaultID);
-            originalReview.setOldReviewDate(vault.getReviewDate());
+            originalVaultReview.setOldReviewDate(vault.getReviewDate());
 
             // And update the review date in the Vault if a new one has been entered
             if (vaultReviewModel.getNewReviewDate() != null) {
                 // Update the review date in the Vault object.
-                logger.info("Editing Review Date for Vault id " + vaultID + " with new Review Date " + vaultReviewModel.getNewReviewDate());
+                LOG.info("Editing Review Date for Vault id " + vaultID + " with new Review Date " + vaultReviewModel.getNewReviewDate());
                 restService.updateVaultReviewDate(vaultID, vaultReviewModel.getNewReviewDate());
             }
         }
 
-        logger.info("Editing Vault Review id " + originalReview.getId());
-        restService.editVaultReview(originalReview);
+        LOG.info("Editing Vault Review id " + originalVaultReview.getId());
+        restService.editVaultReview(originalVaultReview);
 
         if (vaultReviewModel.getDepositReviewModels() != null) {
             for (DepositReviewModel drm : vaultReviewModel.getDepositReviewModels()) {
@@ -184,19 +202,19 @@ public class AdminReviewsController {
                 originalDepositReview.setDeleteStatus(drm.getDeleteStatus());
                 originalDepositReview.setComment(drm.getComment());
 
-                if ("Submit".equals(action)) {
+                if (ACTION_SUBMIT.equals(action)) {
                     if (drm.getDeleteStatus() == DepositReviewDeleteStatus.NOW) {
                         // Stand back everyone!
-                        logger.info("Deleting deposit id " + drm.getDepositId());
-                        originalDepositReview.setActionedDate(new Date());
+                        LOG.info("Deleting deposit id " + drm.getDepositId());
+                        originalDepositReview.setActionedDate(now);
                         restService.deleteDeposit(drm.getDepositId());
                     } else if (drm.getDeleteStatus() == DepositReviewDeleteStatus.RETAIN) {
-                        logger.info("Retaining deposit id " + drm.getDepositId());
-                        originalDepositReview.setActionedDate(new Date());
+                        LOG.info("Retaining deposit id " + drm.getDepositId());
+                        originalDepositReview.setActionedDate(now);
                     } // Otherwise it has been flagged to be deleted later.
                 }
 
-                logger.info("Editing Deposit Review id " + originalDepositReview.getId());
+                LOG.info("Editing Deposit Review id " + originalDepositReview.getId());
                 restService.editDepositReview(originalDepositReview);
             }
         }

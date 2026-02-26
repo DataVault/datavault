@@ -13,6 +13,8 @@ import static org.junit.jupiter.api.Assertions.*;
 class DateTimeUtilsTest {
     Date firstOfMonth;
     Date lastOfMonth;
+    LocalDate firstOfMonthLocalDate;
+    LocalDate lastOfMonthLocalDate;
 
     @BeforeEach
     void setup() {
@@ -26,6 +28,9 @@ class DateTimeUtilsTest {
                 ZoneOffset.UTC
         );
         lastOfMonth = new Date(last.toInstant().toEpochMilli());
+        
+        firstOfMonthLocalDate = LocalDate.of(2024,4,1);
+        lastOfMonthLocalDate = LocalDate.of(2024,4,30);
     }
 
     @Test
@@ -63,9 +68,23 @@ class DateTimeUtilsTest {
 
     @Test
     @SneakyThrows
+    void testParseLocalDate() {
+        LocalDate date = DateTimeUtils.parseLocalDate("2000-04-2");
+        assertThat(date).isEqualTo(LocalDate.of(2000, 4, 2));
+    }
+
+    @Test
+    @SneakyThrows
     void testFormatDate() {
         assertThat(DateTimeUtils.formatDate(firstOfMonth)).isEqualTo("2024-04-01");
         assertThat(DateTimeUtils.formatDate(lastOfMonth)).isEqualTo("2024-04-30");
+    }
+
+    @Test
+    @SneakyThrows
+    void testFormatLocalDate() {
+        assertThat(DateTimeUtils.formatLocalDate(firstOfMonthLocalDate)).isEqualTo("2024-04-01");
+        assertThat(DateTimeUtils.formatLocalDate(lastOfMonthLocalDate)).isEqualTo("2024-04-30");
     }
 
     @Test

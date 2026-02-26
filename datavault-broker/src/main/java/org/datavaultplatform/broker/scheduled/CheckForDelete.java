@@ -15,8 +15,8 @@ import org.springframework.util.Assert;
 
 import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -117,13 +117,15 @@ public class CheckForDelete implements ScheduledTask {
         var deleteStatus = dr.getDeleteStatus();
         switch (deleteStatus) {
             case (DepositReviewDeleteStatus.ONREVIEW):
-                if (today.isAfter(DateTimeUtils.toLocalDate(vaultReview.getOldReviewDate()))) {
+                //TODO - do I need to check getOldReviewDate is not null
+                if (today.isAfter(vaultReview.getOldReviewDate())) {
                     LOG.info("Deleting Deposit [{}] because today is after Old Review Date", dr.getDeposit().getID());
                     depositReviewDeleteDeposit(dr);
                 }
                 break;
 
             case (DepositReviewDeleteStatus.ONEXPIRY):
+                //TODO - do I need to check getRetentionPolicyExpiry is not null
                 if (today.isAfter(DateTimeUtils.toLocalDate(vault.getRetentionPolicyExpiry()))) {
                     LOG.info("Deleting Deposit [{}] because today is after Retention Policy Expiry", dr.getDeposit().getID());
                     depositReviewDeleteDeposit(dr);
@@ -138,7 +140,7 @@ public class CheckForDelete implements ScheduledTask {
         Deposit deposit = dr.getDeposit();
         LOG.info("deleting deposit {}/{}", deposit.getID(), deposit.getName());
         adminDepositService.deleteDeposit(deposit, null);
-        dr.setActionedDate(Date.from(clock.instant()));
+        dr.setActionedDate(LocalDateTime.now(clock));
         depositsReviewService.updateDepositReview(dr);
     }
 }

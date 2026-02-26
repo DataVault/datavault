@@ -1,18 +1,25 @@
 package org.datavaultplatform.common.util;
 
+import org.joda.time.DateTime;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.*;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.DateTimeParseException;
 import java.util.Calendar;
 import java.util.Date;
 
-public class DateTimeUtils {
+public class  DateTimeUtils {
 
+    private DateTimeUtils() {
+    }
     public static final String ISO_DATE_BASIC_FORMAT = "yyyyMMdd";
     public static final String ISO_DATE_FORMAT = "yyyy-MM-dd";
 
-    public static final String ISO_DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+    public static final String ISO_DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS";
 
     public static final String VERBOSE_DATE_TIME_FORMAT = "EEE MMM dd HH:mm:ss zzz yyyy";
 
@@ -31,8 +38,41 @@ public class DateTimeUtils {
         }
     }
 
+    public static String formatDate(LocalDateTime date) {
+        if (date == null) {
+            return "";
+        } else {
+            DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE;
+            return formatter.format(date);
+        }
+    }
+
+    public static String formatLocalDate(LocalDate date) {
+        if (date == null) {
+            return "";
+        } else {
+            DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE;
+            return formatter.format(date);
+        }
+    }
+
+    public static String formatDate(LocalDate date) {
+        if (date == null) {
+            return "";
+        }
+        // LocalDate has its own format method that takes a DateTimeFormatter
+        return date.format(DateTimeFormatter.ISO_DATE);
+    }
+    
     public static Date parseDate(String value) throws ParseException {
         return new SimpleDateFormat(ISO_DATE_FORMAT).parse(value);
+    }
+
+    public static LocalDate parseLocalDate(String value) throws DateTimeParseException {
+        DateTimeFormatter lenientFormatter = new DateTimeFormatterBuilder().
+                parseLenient().append(DateTimeFormatter.ISO_LOCAL_DATE)
+                .toFormatter();
+        return LocalDate.parse(value, lenientFormatter);
     }
 
     public static boolean isSameDay(Date date1, Date date2) {
@@ -46,6 +86,17 @@ public class DateTimeUtils {
         LocalDate ld2 = getLocalDate(date2);
         return ld1.equals(ld2);
     }
+
+    public static boolean isSameDay(LocalDate date1, LocalDate date2) {
+        if (date1 == null && date2 == null) {
+            return true;
+        }
+        if (date1 == null || date2 == null) {
+            return false;
+        }
+        return date1.equals(date2);
+    }
+
     public static boolean isBeforeToday(Date date1) {
         return isBefore(date1, new Date());
     }
@@ -79,6 +130,31 @@ public class DateTimeUtils {
         LocalDate ld2 = getLocalDate(date2);
         return ld1.isAfter(ld2);
     }
+    public static boolean isBefore(LocalDate date1, LocalDate date2) {
+        if (date1 == null && date2 == null) {
+            return false;
+        }
+        if (date1 == null) {
+            return true;
+        }
+        if (date2 == null) {
+            return false;
+        }
+        return date1.isBefore(date2);
+    }
+
+    public static boolean isAfter(LocalDate date1, LocalDate date2) {
+        if (date1 == null && date2 == null) {
+            return false;
+        }
+        if (date1 == null) {
+            return true;
+        }
+        if (date2 == null) {
+            return false;
+        }
+        return date1.isAfter(date2);
+    }
 
     private static LocalDate getLocalDate(Date date) {
         Calendar cal = Calendar.getInstance();
@@ -94,6 +170,23 @@ public class DateTimeUtils {
         DateFormat formatter = new SimpleDateFormat(ISO_DATE_BASIC_FORMAT);
         return formatter.format(date);
     }
+    public static String formatLocalDateBasicISO(LocalDate date) {
+        if (date == null) {
+            return "";
+        } else {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(ISO_DATE_BASIC_FORMAT);
+            return formatter.format(date);
+        }
+    }
+    
+    public static String formatLocalDateTimeBasicISO(LocalDateTime date) {
+        if (date == null) {
+            return "";
+        } else {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(ISO_DATE_BASIC_FORMAT);
+            return formatter.format(date);
+        }
+    }
 
     public static LocalDate toLocalDate(Date date) {
         if (date == null) {
@@ -108,6 +201,27 @@ public class DateTimeUtils {
                 .atZone(ZoneId.systemDefault()).toLocalDate();
     }
 
+    public static LocalDate toLocalDate(LocalDateTime date) {
+        if (date == null) {
+            return null;
+        }
+        return date.toLocalDate();
+    }
+
+    public static LocalDateTime toLocalDateTime(Date date) {
+        if (date == null) {
+            return null;
+        }
+
+        if (date instanceof java.sql.Date sqlDate) {
+            return sqlDate.toLocalDate().atTime(LocalTime.MIDNIGHT);
+        }
+
+        return date.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime();
+    }
+
     public static LocalDate getDateAdjustedByMonths(Date initialDate, int months) {
         LocalDate localDate = toLocalDate(initialDate);
         return getDateAdjustedByMonths(localDate, months);
@@ -120,7 +234,14 @@ public class DateTimeUtils {
         return initialDate.plusMonths(months);
     }
 
-    public static LocalDate getDateAdjustedByYears(LocalDate initialDate, int years) {
+    public static LocalDate getLocalDateAdjustedByYears(LocalDate initialDate, int years) {
+        if (initialDate == null) {
+            return null;
+        }
+        return initialDate.plusYears(years);
+    }
+
+    public static LocalDateTime getLocalDateTimeAdjustedByYears(LocalDateTime initialDate, int years) {
         if (initialDate == null) {
             return null;
         }
@@ -133,6 +254,13 @@ public class DateTimeUtils {
         }
         ZonedDateTime zonedDateTime = localDate.atTime(LocalTime.NOON).atZone(ZoneId.systemDefault());
         return Date.from(zonedDateTime.toInstant());
+    }
+    
+    public static LocalDateTime toLocalDateTimeAtNoon(LocalDate localDate) {
+        if (localDate == null) {
+            return null;
+        }
+        return localDate.atTime(LocalTime.NOON);
     }
 
     public static Date toDateAtNoon(Date date) {

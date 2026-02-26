@@ -5,6 +5,7 @@ import org.datavaultplatform.common.model.RetentionPolicy;
 import org.datavaultplatform.common.model.Retrieve;
 import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.retentionpolicy.RetentionPolicyStatus;
+import org.datavaultplatform.common.util.DateTimeUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -101,17 +102,17 @@ class RetentionPoliciesServiceTest {
 
             vault.setRetentionPolicy(null);
             vault.setGrantEndDate(null);
-            vault.setCreationTime(vaultCreationTime);
+            vault.setCreationTime(DateTimeUtils.toLocalDateTime(vaultCreationTime));
 
             RetentionPoliciesService.updateRetentionPolicyExpiryDate(vault, CLOCK);
-            assertThat(vault.getRetentionPolicyExpiry()).isEqualTo(vaultCreationTime);
+            assertThat(vault.getRetentionPolicyExpiry()).isEqualTo(DateTimeUtils.toLocalDateTime(vaultCreationTime));
             assertThat(vault.getRetentionPolicyStatus()).isEqualTo(expectedRetentionPolicyStatus);
-            assertThat(vault.getRetentionPolicyLastChecked()).isEqualTo(DATE_NOW_3);
+            assertThat(vault.getRetentionPolicyLastChecked()).isEqualTo(DateTimeUtils.toLocalDateTime(DATE_NOW_3));
         }
 
         private Deposit getDepositAndRetrieveWithTimestamp(Date timestamp) {
             Retrieve retrieve = new Retrieve();
-            retrieve.setTimestamp(timestamp);
+            retrieve.setTimestamp(DateTimeUtils.toLocalDateTime(timestamp));
             List<Retrieve> result = List.of(retrieve);
             Deposit deposit = Mockito.spy(new Deposit());
             lenient().doAnswer(invocation -> result).when(deposit).getRetrieves();
@@ -135,15 +136,15 @@ class RetentionPoliciesServiceTest {
 
             vault.setRetentionPolicy(getRetentionPolicy(rpMinRetentionPeriod, rpExtendUponRetrieval));
             vault.setCreationTime(null);
-            vault.setGrantEndDate(vaultGrantEndDate);
+            vault.setGrantEndDate(DateTimeUtils.toLocalDate(vaultGrantEndDate));
 
             lenient().doReturn(List.of()).when(vault).getDeposits();
 
             RetentionPoliciesService.updateRetentionPolicyExpiryDate(vault, CLOCK);
 
             assertThat(vault.getRetentionPolicyStatus()).isEqualTo(expectedRetentionPolicyStatus);
-            assertThat(vault.getRetentionPolicyLastChecked()).isEqualTo(DATE_NOW_3);
-            assertThat(vault.getRetentionPolicyExpiry()).isEqualTo(expectedRetentionPolicyExpiry);
+            assertThat(vault.getRetentionPolicyLastChecked()).isEqualTo(DateTimeUtils.toLocalDateTime(DATE_NOW_3));
+            assertThat(vault.getRetentionPolicyExpiry()).isEqualTo(DateTimeUtils.toLocalDateTime(expectedRetentionPolicyExpiry));
         }
 
         @ParameterizedTest
@@ -155,15 +156,15 @@ class RetentionPoliciesServiceTest {
 
             vault.setRetentionPolicy(getRetentionPolicy(rpMinRetentionPeriod, rpExtendUponRetrieval));
             vault.setCreationTime(null);
-            vault.setGrantEndDate(vaultGrantEndDate);
+            vault.setGrantEndDate(DateTimeUtils.toLocalDate(vaultGrantEndDate));
 
             lenient().doReturn(getDeposit(lastestRetieveDate)).when(vault).getDeposits();
 
             RetentionPoliciesService.updateRetentionPolicyExpiryDate(vault, CLOCK);
 
             assertThat(vault.getRetentionPolicyStatus()).isEqualTo(expectedRetentionPolicyStatus);
-            assertThat(vault.getRetentionPolicyLastChecked()).isEqualTo(DATE_NOW_3);
-            assertThat(vault.getRetentionPolicyExpiry()).isEqualTo(expectedRetentionPolicyExpiry);
+            assertThat(vault.getRetentionPolicyLastChecked()).isEqualTo(DateTimeUtils.toLocalDateTime(DATE_NOW_3));
+            assertThat(vault.getRetentionPolicyExpiry()).isEqualTo(DateTimeUtils.toLocalDateTime(expectedRetentionPolicyExpiry));
         }
     }
 }

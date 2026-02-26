@@ -3,8 +3,10 @@ package org.datavaultplatform.common.model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import jakarta.persistence.CascadeType;
@@ -20,8 +22,6 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.persistence.Version;
 import org.datavaultplatform.common.util.DateTimeUtils;
 import org.hibernate.Hibernate;
@@ -62,22 +62,23 @@ public class Vault implements Identified {
 
     // Serialise date in ISO 8601 format
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateTimeUtils.ISO_DATE_TIME_FORMAT)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date creationTime;
+    //LTD @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "creationTime", nullable = false, columnDefinition = "TIMESTAMP")
+    private LocalDateTime creationTime;
 
     // NOTE: This field is optional. Always remember to check for null when handling
     // it!
     // Serialise date in ISO 8601 format
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateTimeUtils.ISO_DATE_FORMAT)
-    @Temporal(TemporalType.DATE)
-    @Column(name = "grantEndDate", nullable = true)
-    private Date grantEndDate;
+    //@Temporal(TemporalType.DATE)
+    @Column(name = "grantEndDate", nullable = true, columnDefinition = "DATE")
+    private LocalDate grantEndDate;
 
     // Serialise date in ISO 8601 format
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateTimeUtils.ISO_DATE_FORMAT)
-    @Temporal(TemporalType.DATE)
-    @Column(name = "reviewDate", nullable = false)
-    private Date reviewDate;
+    //@Temporal(TemporalType.DATE)
+    @Column(name = "reviewDate", nullable = false, columnDefinition = "DATE")
+    private LocalDate reviewDate;
 
     // Name of the vault
     @Column(name = "name", nullable = false, columnDefinition = "TEXT", length = 400)
@@ -120,13 +121,15 @@ public class Vault implements Identified {
 
     // Date retention policy will expire
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateTimeUtils.ISO_DATE_TIME_FORMAT)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date retentionPolicyExpiry;
+    //LTD @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "retentionPolicyExpiry", nullable = true, columnDefinition = "TIMESTAMP")
+    private LocalDateTime retentionPolicyExpiry;
 
     // Date retention policy was last checked
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateTimeUtils.ISO_DATE_TIME_FORMAT)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date retentionPolicyLastChecked;
+    //LTD @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "retentionPolicyLastChecked", nullable = true, columnDefinition = "TIMESTAMP")
+    private LocalDateTime retentionPolicyLastChecked;
 
     @JsonIgnore
     @ManyToOne
@@ -172,7 +175,7 @@ public class Vault implements Identified {
 
     public Vault(String name) {
         this.name = name;
-        this.creationTime = new Date();
+        this.creationTime = LocalDateTime.now();
         retentionPolicyStatus = RetentionPolicyStatus.UNCHECKED;
     }
 
@@ -184,27 +187,27 @@ public class Vault implements Identified {
         return version;
     }
 
-    public void setCreationTime(Date creationTime) {
+    public void setCreationTime(LocalDateTime creationTime) {
         this.creationTime = creationTime;
     }
 
-    public Date getCreationTime() {
+    public LocalDateTime getCreationTime() {
         return creationTime;
     }
 
-    public void setGrantEndDate(Date grantEndDate) {
+    public void setGrantEndDate(LocalDate grantEndDate) {
         this.grantEndDate = grantEndDate;
     }
 
-    public Date getGrantEndDate() {
+    public LocalDate getGrantEndDate() {
         return grantEndDate;
     }
 
-    public void setReviewDate(Date reviewDate) {
+    public void setReviewDate(LocalDate reviewDate) {
         this.reviewDate = reviewDate;
     }
 
-    public Date getReviewDate() {
+    public LocalDate getReviewDate() {
         return reviewDate;
     }
 
@@ -283,19 +286,19 @@ public class Vault implements Identified {
         return retentionPolicyStatus;
     }
 
-    public void setRetentionPolicyExpiry(Date retentionPolicyExpiry) {
+    public void setRetentionPolicyExpiry(LocalDateTime retentionPolicyExpiry) {
         this.retentionPolicyExpiry = retentionPolicyExpiry;
     }
 
-    public Date getRetentionPolicyExpiry() {
+    public LocalDateTime getRetentionPolicyExpiry() {
         return retentionPolicyExpiry;
     }
 
-    public void setRetentionPolicyLastChecked(Date retentionPolicyLastChecked) {
+    public void setRetentionPolicyLastChecked(LocalDateTime retentionPolicyLastChecked) {
         this.retentionPolicyLastChecked = retentionPolicyLastChecked;
     }
 
-    public Date getRetentionPolicyLastChecked() {
+    public LocalDateTime getRetentionPolicyLastChecked() {
         return retentionPolicyLastChecked;
     }
 

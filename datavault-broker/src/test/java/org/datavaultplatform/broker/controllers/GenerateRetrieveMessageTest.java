@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import java.io.File;
 import java.lang.reflect.Field;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import lombok.SneakyThrows;
@@ -83,7 +84,7 @@ public class GenerateRetrieveMessageTest extends BaseGenerateMessageTest {
     deposit.setUser(mockUser);
     deposit.setNumOfChunks(1);
     deposit.setVault(mockVault);
-    deposit.setCreationTime(new Date());
+    deposit.setCreationTime(LocalDateTime.now());
     DepositChunk chunk1 = new DepositChunk();
     chunk1.setDeposit(deposit);
     chunk1.setChunkNum(1);

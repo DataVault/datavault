@@ -17,6 +17,7 @@ import org.springframework.util.Assert;
 
 import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -107,29 +108,28 @@ public class RetentionPoliciesService {
      */
     public static void updateRetentionPolicyExpiryDate(Vault vault, Clock clock) {
         
-        final Date retentionPolicyExpiryDate;
+        final LocalDateTime retentionPolicyExpiryLocalDateTime;
         
         RetentionPolicy retentionPolicy = vault.getRetentionPolicy();
         if (vault.getGrantEndDate() == null) {
-            retentionPolicyExpiryDate = DateTimeUtils.toDateAtNoon(vault.getCreationTime());
+            retentionPolicyExpiryLocalDateTime = vault.getCreationTime();
         } else {
-            Date baseRetentionPolicyExpiryDate = getBaseRetentionPolicyExpiryDate(vault, retentionPolicy);
-            LocalDate baseRetentionPolicyExpiryLocalDate = DateTimeUtils.toLocalDate(baseRetentionPolicyExpiryDate);
+            LocalDate baseRetentionPolicyExpiryLocalDate = getBaseRetentionPolicyExpiryDate(vault, retentionPolicy);
             int retentionPolicyMinPeriod = retentionPolicy.getMinRetentionPeriod();
             // Add on the minimum retention period (a number of years)
-            LocalDate retentionPolicyExpiryLocalDate = DateTimeUtils.getDateAdjustedByYears(baseRetentionPolicyExpiryLocalDate, retentionPolicyMinPeriod);
-            retentionPolicyExpiryDate = DateTimeUtils.toDateAtNoon(retentionPolicyExpiryLocalDate);
+            LocalDate retentionPolicyExpiryLocalDate = DateTimeUtils.getLocalDateAdjustedByYears(baseRetentionPolicyExpiryLocalDate, retentionPolicyMinPeriod);
+            retentionPolicyExpiryLocalDateTime = DateTimeUtils.toLocalDateTimeAtNoon(retentionPolicyExpiryLocalDate);
         }
 
-        vault.setRetentionPolicyExpiry(retentionPolicyExpiryDate);
+        vault.setRetentionPolicyExpiry(retentionPolicyExpiryLocalDateTime);
 
-        int retentionPolicyStatus = getRetentionPolicyStatus(clock, retentionPolicyExpiryDate);
+        int retentionPolicyStatus = getRetentionPolicyStatus(clock, retentionPolicyExpiryLocalDateTime);
         vault.setRetentionPolicyStatus(retentionPolicyStatus);
         
-        vault.setRetentionPolicyLastChecked(Date.from(clock.instant()));
+        vault.setRetentionPolicyLastChecked(LocalDateTime.now(clock));
     }
     
-    private static int getRetentionPolicyStatus(Clock clock, Date retentionPolicyExpiryDate) {
+    private static int getRetentionPolicyStatus(Clock clock, LocalDateTime retentionPolicyExpiryDate) {
         // Is it time for review? - to 'date arithmetic' using LocalDate - not Date.
         LocalDate today = LocalDate.now(clock);
         if (DateTimeUtils.toLocalDate(retentionPolicyExpiryDate).isBefore(today)) {
@@ -139,13 +139,13 @@ public class RetentionPoliciesService {
         }
     }
 
-    private static Date getBaseRetentionPolicyExpiryDate(Vault vault, RetentionPolicy retentionPolicy) {
+    private static LocalDate getBaseRetentionPolicyExpiryDate(Vault vault, RetentionPolicy retentionPolicy) {
         Assert.notNull(vault, "The vault cannot be null");
         Assert.notNull(retentionPolicy, "The retention policy cannot be null");
 
-        Date grantEndDate = vault.getGrantEndDate();
+        LocalDate grantEndDate = vault.getGrantEndDate();
 
-        final Date result;
+        final LocalDate result;
         if (retentionPolicy.getMinRetentionPeriod() > 0 && retentionPolicy.isExtendUponRetrieval()) {
             // At the time of writing this means its EPSRC
 
@@ -160,21 +160,22 @@ public class RetentionPoliciesService {
                 // Have there been any retrieves?
                 // if so - set the retentionPeriodExpiryDate to be the max timestamp
                 // NOTE: We do not consider the status of these retrieves
-                result = getMaxTimestamp(allRetrieves).orElseThrow();
+                LocalDateTime maxTimestamp = getMaxTimestamp(allRetrieves).orElseThrow();
+                result = maxTimestamp.toLocalDate();
             }
         } else {
             result = grantEndDate;
         }
-        return DateTimeUtils.toDateAtNoon(result);
+        return result;
     }
 
-    private static Optional<Date> getMaxTimestamp(List<Retrieve> retrieves) {
+    private static Optional<LocalDateTime> getMaxTimestamp(List<Retrieve> retrieves) {
         Assert.isTrue(!retrieves.isEmpty(), "the retrieves cannot be empty");
         return retrieves
                 .stream()
                 .map(Retrieve::getTimestamp)
                 .filter(Objects::nonNull)
-                .max(Date::compareTo);
+                .max(LocalDateTime::compareTo);
     }
 
     private static List<Retrieve> getAllRetrieves(Vault vault) {

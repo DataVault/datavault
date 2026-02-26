@@ -21,6 +21,7 @@ import org.datavaultplatform.common.model.Group;
 import org.datavaultplatform.common.model.Permission;
 import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.model.User;
+import org.datavaultplatform.common.util.DateTimeUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -706,8 +707,8 @@ public class VaultDAOIT extends BaseReuseDatabaseTest {
     Vault result = new Vault();
     result.setContact("contact-1");
     result.setName("vault-1");
-    result.setReviewDate(NOW);
-    result.setCreationTime(ONE_WEEK_AGO);
+    result.setReviewDate(DateTimeUtils.toLocalDate(NOW));
+    result.setCreationTime(DateTimeUtils.toLocalDateTime(ONE_WEEK_AGO));
     return result;
   }
 
@@ -715,8 +716,8 @@ public class VaultDAOIT extends BaseReuseDatabaseTest {
     Vault result = new Vault();
     result.setContact("contact-2");
     result.setName("vault-2");
-    result.setReviewDate(NOW);
-    result.setCreationTime(NOW);
+    result.setReviewDate(DateTimeUtils.toLocalDate(NOW));
+    result.setCreationTime(DateTimeUtils.toLocalDateTime(NOW));
     return result;
   }
 
@@ -724,8 +725,8 @@ public class VaultDAOIT extends BaseReuseDatabaseTest {
     Vault result = new Vault();
     result.setContact("contact-2");
     result.setName("vault-2");
-    result.setReviewDate(NOW);
-    result.setCreationTime(TWO_WEEKS_AGO);
+    result.setReviewDate(DateTimeUtils.toLocalDate(NOW));
+    result.setCreationTime(DateTimeUtils.toLocalDateTime(TWO_WEEKS_AGO));
     return result;
   }
 
@@ -733,8 +734,8 @@ public class VaultDAOIT extends BaseReuseDatabaseTest {
     Vault result = new Vault();
     result.setContact("contact-3");
     result.setName("vault-3");
-    result.setReviewDate(NOW);
-    result.setCreationTime(NOW);
+    result.setReviewDate(DateTimeUtils.toLocalDate(NOW));
+    result.setCreationTime(DateTimeUtils.toLocalDateTime(NOW));
     result.setSnapshot(String.join(",", TestUtils.getRandomList()));
     return result;
   }

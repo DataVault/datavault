@@ -399,7 +399,7 @@ public class DepositsController {
     private HashMap<String,String> getRetrieveProperties(User user, Deposit deposit, Retrieve retrieve, String retrievePath, String archiveID) {
         var result = new HashMap<String,String>();
         result.put(PropNames.DEPOSIT_ID, deposit.getID());
-        result.put(PropNames.DEPOSIT_CREATION_DATE, DateTimeUtils.formatDateBasicISO(deposit.getCreationTime()));
+        result.put(PropNames.DEPOSIT_CREATION_DATE, DateTimeUtils.formatLocalDateTimeBasicISO(deposit.getCreationTime()));
         result.put(PropNames.RETRIEVE_ID, retrieve.getID());
         result.put(PropNames.BAG_ID, deposit.getBagId());
         result.put(PropNames.RETRIEVE_PATH, retrievePath); // No longer the absolute path

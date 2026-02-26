@@ -2,6 +2,7 @@ package org.datavaultplatform.common.response;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
+import java.time.LocalDate;
 import java.util.Date;
 
 import lombok.Data;
@@ -77,7 +78,7 @@ public class BillingInformation {
 	private String paymentDetails;
 
 	@ApiObjectField(description = "The grant end Date of the vault")
-	private Date grantEndDate;
+	private LocalDate grantEndDate;
     
     public BillingInformation() {
     	
@@ -86,7 +87,7 @@ public class BillingInformation {
 	public BillingInformation(String id, String vaultID, String contactName, String school, String subUnit, Boolean budgetCode,
 			String specialComments, BigDecimal amountToBeBilled, BigDecimal amountBilled, long vaultSize, Date reviewDate,
 							  Date creationTime, String vaultName,String projectId,String userName, String sliceID,
-							  String projectTitle, PendingVault.Billing_Type billingType, String paymentDetails, Date grantEndDate) {
+							  String projectTitle, PendingVault.Billing_Type billingType, String paymentDetails, LocalDate grantEndDate) {
     	this.id = id;        
         this.vaultID = vaultID;    
         this.contactName = contactName; 
@@ -315,11 +316,11 @@ public class BillingInformation {
         this.paymentDetails = paymentDetails;
     }
 
-	public Date getGrantEndDate() {
+	public LocalDate getGrantEndDate() {
 		return grantEndDate;
 	}
 
-	public void setGrantEndDate(Date grantEndDate) {
+	public void setGrantEndDate(LocalDate grantEndDate) {
 		this.grantEndDate = grantEndDate;
 	}
 

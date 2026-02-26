@@ -18,8 +18,6 @@ import org.springframework.test.context.TestPropertySource;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.Date;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -120,26 +118,14 @@ class RestServiceTest extends BaseRestTemplateWithLoggingTest {
         @WithMockUser(username = "user1")
         void testUpdateReviewDateIsOkay() {
             LocalDate localVaultReviewDate = LocalDate.of(2112, 12, 21);
-            Date vaultReviewDate = convertToDateViaInstant(localVaultReviewDate);
-            VaultInfo vaultInfo = restService.updateVaultReviewDate("vault-abc",vaultReviewDate);
+            VaultInfo vaultInfo = restService.updateVaultReviewDate("vault-abc",localVaultReviewDate);
 
             assertThat(vaultInfo.getID()).isEqualTo("vault-abc-id");
             assertThat(vaultInfo.getName()).isEqualTo("test-vault-info");
             assertThat(vaultInfo.getNotes()).isEqualTo("test-vault-info-notes");
             assertThat(vaultInfo.getDescription()).isEqualTo("test-vault-info-description");
-            assertThat(convertToLocalDateViaInstant(vaultInfo.getReviewDate())).isEqualTo(localVaultReviewDate);
+            assertThat(vaultInfo.getReviewDate()).isEqualTo(localVaultReviewDate);
         }
-    }
-
-    public LocalDate convertToLocalDateViaInstant(Date dateToConvert) {
-        return dateToConvert.toInstant()
-                .atZone(ZoneOffset.UTC)
-                .toLocalDate();
-    }
-    public Date convertToDateViaInstant(LocalDate dateToConvert) {
-        return java.util.Date.from(dateToConvert.atStartOfDay()
-                .atZone(ZoneOffset.UTC)
-                .toInstant());
     }
     
     @Nested

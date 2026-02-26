@@ -3,7 +3,8 @@ package org.datavaultplatform.broker.services;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Date;
+import java.time.LocalDate;
+
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.app.DataVaultBrokerApp;
 import org.datavaultplatform.broker.config.MockRabbitConfig;
@@ -48,8 +49,8 @@ public class VaultsServiceIT extends BaseReuseDatabaseTest {
         Vault vault = new Vault("Vault Test");
         vault.setContact("vault contact");
         vault.setDescription("Vault for test");
-        vault.setGrantEndDate(new Date());
-        vault.setReviewDate(new Date());
+        vault.setGrantEndDate(LocalDate.now());
+        vault.setReviewDate(LocalDate.now());
         vault.setSnapshot("This is a dummy snapshot");
         vaultsService.addVault(vault);
         

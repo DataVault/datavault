@@ -6,8 +6,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
@@ -53,13 +53,13 @@ public class CreateVault {
     private String datasetID;
 
     @ApiObjectField(description = "Define the minimum of time the archive will be kept")
-    private Date billingGrantEndDate;
+    private LocalDate billingGrantEndDate;
 
     @ApiObjectField(description = "Define the minimum of time the archive will be kept")
-    private Date grantEndDate;
+    private LocalDate grantEndDate;
 
     @ApiObjectField(description = "The date by which the vault should be reviewed for decision as to whether it should be deleted or whether there are funds available to support continued storage")
-    private Date reviewDate;
+    private LocalDate reviewDate;
 
     @ApiObjectField(description = "Has the pending vault been confirmed")
     private Boolean confirmed = false;
@@ -226,27 +226,27 @@ public class CreateVault {
         this.datasetID = datasetID;
     }
 
-    public Date getGrantEndDate() {
+    public LocalDate getGrantEndDate() {
         return grantEndDate;
     }
 
-    public void setGrantEndDate(Date grantEndDate) {
+    public void setGrantEndDate(LocalDate grantEndDate) {
         this.grantEndDate = grantEndDate;
     }
 
-    public Date getBillingGrantEndDate() {
+    public LocalDate getBillingGrantEndDate() {
         return billingGrantEndDate ;
     }
 
-    public void setBillingGrantEndDate(Date billingGrantEndDate) {
+    public void setBillingGrantEndDate(LocalDate billingGrantEndDate) {
         this.billingGrantEndDate = billingGrantEndDate;
     }
 
-    public Date getReviewDate() {
+    public LocalDate getReviewDate() {
         return reviewDate;
     }
 
-    public void setReviewDate(Date reviewDate) {
+    public void setReviewDate(LocalDate reviewDate) {
         this.reviewDate = reviewDate;
     }
 

@@ -8,7 +8,9 @@ import org.datavaultplatform.common.util.DateTimeUtils;
 import org.jsondoc.core.annotation.ApiObject;
 
 import jakarta.persistence.*;
-import java.util.Date;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import org.hibernate.Hibernate;
@@ -38,9 +40,9 @@ public class VaultReview {
 
     // Serialise date in ISO 8601 format
     //@JsonFormat(shape=JsonFormat.Shape.STRING, pattern= DateTimeUtils.ISO_DATE_TIME_FORMAT)
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "creationTime", nullable = false)
-    private Date creationTime;
+    //LTD @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "creationTime", nullable = false, columnDefinition = "TIMESTAMP")
+    private LocalDateTime creationTime;
 
     @ManyToOne
     private Vault vault;
@@ -53,22 +55,22 @@ public class VaultReview {
 
     // Serialise date in ISO 8601 format
     //@JsonFormat(shape=JsonFormat.Shape.STRING, pattern=DateTimeUtils.ISO_DATE_FORMAT)
-    @Temporal(TemporalType.DATE)
-    @Column(name = "newReviewDate", nullable = true)
-    private Date newReviewDate;
-
+    //@Temporal(TemporalType.DATE)
+    @Column(name = "newReviewDate", nullable = true, columnDefinition = "DATE")
+    private LocalDate newReviewDate; //we will get java.sql.Date - a sublass of java.util.Date but without time part.
+    
     // Serialise date in ISO 8601 format
     //@JsonFormat(shape=JsonFormat.Shape.STRING, pattern=DateTimeUtils.ISO_DATE_FORMAT)
-    @Temporal(TemporalType.DATE)
-    @Column(name = "oldReviewDate", nullable = true)
-    private Date oldReviewDate;
+    //@Temporal(TemporalType.DATE)
+    @Column(name = "oldReviewDate", nullable = true, columnDefinition = "DATE")
+    private LocalDate oldReviewDate;
 
     // The date this review was finally actioned.
     // Serialise date in ISO 8601 format
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern=DateTimeUtils.ISO_DATE_TIME_FORMAT)
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "actionedDate", nullable = true)
-    private Date actionedDate;
+    //LTD @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "actionedDate", nullable = true, columnDefinition = "TIMESTAMP")
+    private LocalDateTime actionedDate;
 
     // A comment, what more can I say
     @Column(name = "comment", nullable = true, columnDefinition = "TEXT")
@@ -86,11 +88,11 @@ public class VaultReview {
         this.id = id;
     }
 
-    public Date getCreationTime() {
+    public LocalDateTime getCreationTime() {
         return creationTime;
     }
 
-    public void setCreationTime(Date creationTime) {
+    public void setCreationTime(LocalDateTime creationTime) {
         this.creationTime = creationTime;
     }
 
@@ -109,27 +111,27 @@ public class VaultReview {
         this.depositReviews = depositReviews;
     }
 
-    public Date getNewReviewDate() {
+    public LocalDate getNewReviewDate() {
         return newReviewDate;
     }
 
-    public void setNewReviewDate(Date newReviewDate) {
+    public void setNewReviewDate(LocalDate newReviewDate) {
         this.newReviewDate = newReviewDate;
     }
 
-    public Date getOldReviewDate() {
+    public LocalDate getOldReviewDate() {
         return oldReviewDate;
     }
 
-    public void setOldReviewDate(Date oldReviewDate) {
+    public void setOldReviewDate(LocalDate oldReviewDate) {
         this.oldReviewDate = oldReviewDate;
     }
 
-    public Date getActionedDate() {
+    public LocalDateTime getActionedDate() {
         return actionedDate;
     }
 
-    public void setActionedDate(Date actionedDate) {
+    public void setActionedDate(LocalDateTime actionedDate) {
         this.actionedDate = actionedDate;
     }
 

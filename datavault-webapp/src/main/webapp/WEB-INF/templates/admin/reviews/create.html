@@ -41,7 +41,7 @@
 
             <br/>
             <b>Dataset name:</b> <th:block th:if="${vault.datasetName != null}">[[${vault.datasetName}]]</th:block> <br/>
-            <b>Created:</b> [[${#dates.format(vault.creationTime,dateFormatISO)}]]<!--/* date */--><br/>
+            <b>Created:</b> [[${#temporals.format(vault.creationTime,dateFormatISO)}]]<!--/* date */--><br/>
             <b>Group:</b> [[${group.name}]]<br/>
 
             <b>Retention Policy:</b> [[${createRetentionPolicy.name}]] :
@@ -56,7 +56,7 @@
             <b>Retention Policy minimum retention period (years):</b> [[${createRetentionPolicy.minRetentionPeriod}]]
             <br/>
 
-            <b>Retention Policy expiry date:</b> [[${#dates.format(vault.policyExpiry,dateFormatISO)}]]<!--/* date */--><br/>
+            <b>Retention Policy expiry date:</b> [[${#temporals.format(vault.policyExpiry,dateFormatISO)}]]<!--/* date */--><br/>
             (Date before which data should not be deleted, according to the funder retention policy, taking into account any extensions caused by retrievals for external users, if applicable. The expiry date is calculated by adding the minimum number of years to the grant end date. Data may be deleted sooner for overriding reason such as data protection, or if the funder counts the retention period as starting from the data creation date.)
             <br/>
 
@@ -72,7 +72,7 @@
             <b>Size:</b> [[${vault.getSizeStr()}]]<br/>
 
             <th:block th:if="${vault.grantEndDate != null}">
-                <b>Grant End Date:</b> [[${#dates.format(vault.grantEndDate,dateFormatISO)}]]<!--/* date */--><br/>
+                <b>Grant End Date:</b> [[${#temporals.format(vault.grantEndDate,dateFormatISO)}]]<!--/* date */--><br/>
             </th:block>
             <th:block th:if="${vault.grantEndDate == null}">
                 <b>Grant End Date:</b> N/A<br/>
@@ -82,7 +82,7 @@
 
 
         <p>
-            <b>Current review date:</b> [[${#dates.format(vault.reviewDate,dateFormatISO)}]]<!--/* date */--><br/>
+            <b>Current review date:</b> [[${#temporals.format(vault.reviewDate,dateFormatISO)}]]<!--/* date */--><br/>
         </p>
 
 
@@ -149,7 +149,7 @@
                                     </div>
                                 </td>
 
-                                <td>[[${#dates.format(drm.getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */--></td>
+                                <td>[[${#temporals.format(drm.getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */--></td>
 
                                 <td>
                                     <input type="radio" class="radio-inline" value="0"

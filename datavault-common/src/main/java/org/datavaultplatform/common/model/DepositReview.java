@@ -8,7 +8,8 @@ import org.hibernate.annotations.UuidGenerator;
 import org.jsondoc.core.annotation.ApiObject;
 
 import jakarta.persistence.*;
-import java.util.Date;
+
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -48,9 +49,9 @@ public class DepositReview  {
 
     // Serialise date in ISO 8601 format
     //@JsonFormat(shape=JsonFormat.Shape.STRING, pattern= DateTimeUtils.ISO_DATE_TIME_FORMAT)
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "creationTime", nullable = false)
-    private Date creationTime;
+    //LTD @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "creationTime", nullable = false, columnDefinition = "TIMESTAMP")
+    private LocalDateTime creationTime;
 
     /*  DEPRECATED */
     @Deprecated
@@ -69,10 +70,9 @@ public class DepositReview  {
     // The date this review was finally actioned.
     // Serialise date in ISO 8601 format
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern=DateTimeUtils.ISO_DATE_TIME_FORMAT)
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "actionedDate", nullable = true)
-    private Date actionedDate;
-
+    //LTD @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "actionedDate", nullable = true, columnDefinition = "TIMESTAMP")
+    private LocalDateTime actionedDate;
 
     @ManyToOne
     private VaultReview vaultReview;
@@ -89,11 +89,11 @@ public class DepositReview  {
         this.id = id;
     }
 
-    public Date getCreationTime() {
+    public LocalDateTime getCreationTime() {
         return creationTime;
     }
 
-    public void setCreationTime(Date creationTime) {
+    public void setCreationTime(LocalDateTime creationTime) {
         this.creationTime = creationTime;
     }
 
@@ -121,11 +121,11 @@ public class DepositReview  {
         this.comment = comment;
     }
 
-    public Date getActionedDate() {
+    public LocalDateTime getActionedDate() {
         return actionedDate;
     }
 
-    public void setActionedDate(Date actionedDate) {
+    public void setActionedDate(LocalDateTime actionedDate) {
         this.actionedDate = actionedDate;
     }
 

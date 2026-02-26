@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -41,6 +42,7 @@ import org.datavaultplatform.common.event.deposit.ValidationComplete;
 import org.datavaultplatform.common.event.retrieve.*;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.storage.Verify;
+import org.datavaultplatform.common.util.DateTimeUtils;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -155,7 +157,7 @@ class EventListenerIT extends BaseDatabaseTest {
     vault.setContact("contact name");
     vault.setGroup(group);
     Date nowPlus1Year = java.sql.Date.valueOf(LocalDate.now().plusYears(1));
-    vault.setReviewDate(nowPlus1Year);
+    vault.setReviewDate(DateTimeUtils.toLocalDate(nowPlus1Year));
     vaultsService.addVault(vault);
     this.vaultId = vault.getID();
 
@@ -209,7 +211,7 @@ class EventListenerIT extends BaseDatabaseTest {
 
     Retrieve retrieve = new Retrieve();
     retrieve.setHasExternalRecipients(false);
-    retrieve.setTimestamp(new Date());
+    retrieve.setTimestamp(LocalDateTime.now());
     retrieve.setDeposit(deposit);
 
     retrievesService.addRetrieve(retrieve, deposit, "/path");

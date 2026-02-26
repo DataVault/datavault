@@ -7,6 +7,7 @@ import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.common.response.ReviewInfo;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.response.VaultsData;
+import org.datavaultplatform.common.util.DateTimeUtils;
 import org.datavaultplatform.webapp.app.DataVaultWebApp;
 import org.datavaultplatform.webapp.model.DepositReviewModel;
 import org.datavaultplatform.webapp.model.VaultReviewModel;
@@ -36,6 +37,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.ui.ModelMap;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -140,12 +143,10 @@ public class AdminReviewsControllerTest {
     @Mock
     DepositReviewModel mDepositReviewModel2;
     
-    @Mock
-    Date mDate1;
+    Date date1;
     
-    @Mock
-    Date mDate2;
-    
+    Date date2;
+
     List<RoleAssignment>  roleAssignments = new ArrayList<>();
 
     List<VaultInfo> vaultsInfo = new ArrayList<>();
@@ -194,6 +195,9 @@ public class AdminReviewsControllerTest {
         lenient().when(mRestService.getRetentionPolicy(String.valueOf(TEST_RETENTION_POLICY_ID_1))).thenReturn(mCreateRetentionPolicy1);
         lenient().when(mRestService.getRetentionPolicy(String.valueOf(TEST_RETENTION_POLICY_ID_2))).thenReturn(mCreateRetentionPolicy1);
         mapper = new ObjectMapper();
+
+        date1 = Date.from(Instant.parse("2007-12-03T10:15:30.00Z"));
+        date2 = Date.from(Instant.parse("2008-12-03T10:15:30.00Z"));
     }
 
 
@@ -253,7 +257,7 @@ public class AdminReviewsControllerTest {
         assertThat(drm1.getDepositId()).isEqualTo(TEST_DEPOSIT_ID_1);
         assertThat(drm1.getName()).isEqualTo(TEST_DEPOSIT_1_NAME);
         assertThat(drm1.getStatusName()).isEqualTo(Audit.Status.IN_PROGRESS.name());
-        assertThat(drm1.getCreationTime()).isEqualTo(mDate1);
+        assertThat(drm1.getCreationTime()).isEqualTo(DateTimeUtils.toLocalDateTime(date1));
 
         DepositReviewModel drm2 = drms.get(1);
         assertThat(drm2.getDepositReviewId()).isEqualTo(TEST_DEPOSIT_REVIEW_2_ID);
@@ -262,7 +266,7 @@ public class AdminReviewsControllerTest {
         assertThat(drm2.getDepositId()).isEqualTo(TEST_DEPOSIT_ID_2);
         assertThat(drm2.getName()).isEqualTo(TEST_DEPOSIT_2_NAME);
         assertThat(drm2.getStatusName()).isEqualTo(Audit.Status.COMPLETE.name());
-        assertThat(drm2.getCreationTime()).isEqualTo(mDate2);
+        assertThat(drm2.getCreationTime()).isEqualTo(DateTimeUtils.toLocalDateTime(date2));
 
         // No error key in modelMap
         assertThat((String) modelMap.get("error")).isBlank();
@@ -431,7 +435,7 @@ public class AdminReviewsControllerTest {
 
         verify(mRestService).getVaultReview(TEST_VAULT_REVIEW_ID);
         verify(mRestService).getVault(TEST_VAULT_ID_1);
-        verify(mRestService).updateVaultReviewDate(eq(TEST_VAULT_ID_1), any(Date.class)); //could use clock
+        verify(mRestService).updateVaultReviewDate(eq(TEST_VAULT_ID_1), any(LocalDate.class)); //could use clock
         verify(mRestService).editVaultReview(any(VaultReview.class)); //could use captor here
         verify(mRestService, times(2)).getDepositReview(null);//FIX THIS
         verify(mRestService, times(2)).editDepositReview(any(DepositReview.class)); //could use captor here
@@ -490,7 +494,7 @@ public class AdminReviewsControllerTest {
         when(mDepositInfo1.getID()).thenReturn(TEST_DEPOSIT_ID_1);
         when(mDepositInfo1.getName()).thenReturn(TEST_DEPOSIT_1_NAME);
         when(mDepositInfo1.getStatus()).thenReturn(Deposit.Status.IN_PROGRESS);
-        when(mDepositInfo1.getCreationTime()).thenReturn(mDate1);
+        when(mDepositInfo1.getCreationTime()).thenReturn(DateTimeUtils.toLocalDateTime(date1));
 
         when(mDepositReview2.getId()).thenReturn(TEST_DEPOSIT_REVIEW_2_ID);
         when(mDepositReview2.getComment()).thenReturn(TEST_DEPOSIT_REVIEW_2_COMMENT);
@@ -498,7 +502,7 @@ public class AdminReviewsControllerTest {
         when(mDepositInfo2.getID()).thenReturn(TEST_DEPOSIT_ID_2);
         when(mDepositInfo2.getName()).thenReturn(TEST_DEPOSIT_2_NAME);
         when(mDepositInfo2.getStatus()).thenReturn(Deposit.Status.COMPLETE);
-        when(mDepositInfo2.getCreationTime()).thenReturn(mDate2);
+        when(mDepositInfo2.getCreationTime()).thenReturn(DateTimeUtils.toLocalDateTime(date2));
         List<DepositReviewModel> drm = new ArrayList<>();
         drm.add(mDepositReviewModel1);
         drm.add(mDepositReviewModel2);
@@ -509,7 +513,7 @@ public class AdminReviewsControllerTest {
         when(mDepositReviewModel2.getDeleteStatus()).thenReturn(DepositReviewDeleteStatus.ONREVIEW);
         when(mVaultReviewModel.getDepositReviewModels()).thenReturn(drm);
         // Default ReviewDate set, this overriden in some tests
-        when(mVaultReviewModel.getNewReviewDate()).thenReturn(new Date());
+        when(mVaultReviewModel.getNewReviewDate()).thenReturn(LocalDate.now());
     }
 
     @SneakyThrows

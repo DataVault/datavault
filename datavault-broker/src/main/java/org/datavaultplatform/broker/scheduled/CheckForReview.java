@@ -110,8 +110,7 @@ public class CheckForReview implements ScheduledTask {
         // decision.
 
         // IMPORTANT - do not remove
-        VaultReview vaultReview = vaultsReviewService.createVaultReview(vault);
-        depositsReviewService.addDepositReviews(vault, vaultReview);
+        vaultsReviewService.createVaultReview(vault);
         // IMPORTANT - do not remove.
 
         // Now bash on with the emailing.

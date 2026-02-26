@@ -12,6 +12,7 @@ import org.datavaultplatform.broker.app.DataVaultBrokerApp;
 import org.datavaultplatform.broker.test.AddTestProperties;
 import org.datavaultplatform.broker.test.BaseReuseDatabaseTest;
 import org.datavaultplatform.common.model.VaultReview;
+import org.datavaultplatform.common.util.DateTimeUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -102,14 +103,14 @@ public class VaultReviewDAOIT extends BaseReuseDatabaseTest {
   private VaultReview getVaultReview1() {
     VaultReview result = new VaultReview();
     result.setComment("review-1");
-    result.setCreationTime(NOW);
+    result.setCreationTime(DateTimeUtils.toLocalDateTime(NOW));
     return result;
   }
 
   private VaultReview getVaultReview2() {
     VaultReview result = new VaultReview();
     result.setComment("review-2");
-    result.setCreationTime(NOW);
+    result.setCreationTime(DateTimeUtils.toLocalDateTime(NOW));
     return result;
   }
 

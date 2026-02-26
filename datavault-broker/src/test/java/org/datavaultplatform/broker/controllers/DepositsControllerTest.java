@@ -12,6 +12,7 @@ import org.datavaultplatform.common.storage.SFTPFileSystemDriver;
 import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.common.storage.impl.TivoliStorageManager;
 import org.datavaultplatform.common.task.Task;
+import org.datavaultplatform.common.util.DateTimeUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -555,7 +556,7 @@ public class DepositsControllerTest {
             when(mDeposit.getArchiveDigest()).thenReturn("tar-digest");
             when(mDeposit.getEncArchiveDigest()).thenReturn("enc-tar-digest");
             when(mDeposit.getEncIV()).thenReturn("enc-tar-iv".getBytes(StandardCharsets.UTF_8));
-            when(mDeposit.getCreationTime()).thenReturn(fixedDate);
+            when(mDeposit.getCreationTime()).thenReturn(DateTimeUtils.toLocalDateTime(fixedDate));
 
             when(mFilesService.validPath(TEST_RETRIEVE_PATH, fileStore)).thenReturn(true);
 

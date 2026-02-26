@@ -19,6 +19,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -726,7 +727,7 @@ public class RestService implements NotifyLogoutService, NotifyLoginService, Eva
         return response.getBody();
     }
 
-    public VaultInfo updateVaultReviewDate(String vaultId, Date reviewDate) {
+    public VaultInfo updateVaultReviewDate(String vaultId, LocalDate reviewDate) {
         String reviewDateString = DateTimeUtils.formatDate(reviewDate);
         ResponseEntity<VaultInfo> response = post(brokerURL + "/vaults/" + vaultId + "/updatereviewdate", VaultInfo.class, reviewDateString);
         return response.getBody();

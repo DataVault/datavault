@@ -1,6 +1,6 @@
 package org.datavaultplatform.webapp.model;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 public class DepositReviewModel {
 
@@ -17,7 +17,7 @@ public class DepositReviewModel {
     private String depositId;
     private String name;
     private String statusName;
-    private Date creationTime;
+    private LocalDateTime creationTime;
 
     public String getDepositReviewId() {
         return depositReviewId;
@@ -75,11 +75,11 @@ public class DepositReviewModel {
         this.statusName = statusName;
     }
 
-    public Date getCreationTime() {
+    public LocalDateTime getCreationTime() {
         return creationTime;
     }
 
-    public void setCreationTime(Date creationTime) {
+    public void setCreationTime(LocalDateTime creationTime) {
         this.creationTime = creationTime;
     }
 }
