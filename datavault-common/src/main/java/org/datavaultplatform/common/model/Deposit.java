@@ -90,7 +90,7 @@ public class Deposit implements Identified {
 
     // A Deposit can have a number of reviews
     @JsonIgnore
-    @OneToMany(targetEntity=DepositReview.class, mappedBy="deposit", fetch=FetchType.LAZY)
+    @OneToMany(targetEntity=DepositReview.class, mappedBy="deposit", fetch=FetchType.LAZY, cascade = CascadeType.ALL)
     @OrderBy("creationTime")
     private List<DepositReview> depositReviews = new ArrayList<>();
 
