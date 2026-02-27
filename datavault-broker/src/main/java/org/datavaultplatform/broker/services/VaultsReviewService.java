@@ -71,22 +71,23 @@ public class VaultsReviewService {
                 .filter(this::isVaultForReview)
                 .toList();
     }
-//    /**
-//     * Shared logic: Is the vault within its review window and not yet completed?
-//     */
-//    private boolean isEligibleForReviewAction(Vault vault) {
-//        if (vault == null || vault.getReviewDate() == null) {
-//            return false;
-//        }
-//
-//        LocalDate today = LocalDate.now(clock);
-//        LocalDate windowStart = DateTimeUtils.getDateAdjustedByMonths(vault.getReviewDate(), MONTHS_BEFORE_REVIEW_DATE);
-//
-//        // 1) Must be within or after the window
-//        // 2) No review completed within this window
-//        return !today.isBefore(windowStart) &&
-//                reviewHasNotHappenedAfterReviewWindowStart(vault, windowStart);
-//    }
+
+    /**
+     * Shared logic: Is the vault within its review window and not yet completed?
+     */
+    private boolean isEligibleForReviewAction(Vault vault) {
+        if (vault == null || vault.getReviewDate() == null) {
+            return false;
+        }
+
+        LocalDate today = LocalDate.now(clock);
+        LocalDate windowStart = DateTimeUtils.getDateAdjustedByMonths(vault.getReviewDate(), MONTHS_BEFORE_REVIEW_DATE);
+
+        // 1) Must be within or after the window
+        // 2) No review completed within this window
+        return !today.isBefore(windowStart) &&
+                reviewHasNotHappenedAfterReviewWindowStart(vault, windowStart);
+    }
     
     /*
      Returns true if the vault is due for review, or is currently being reviewed.     
@@ -97,20 +98,7 @@ public class VaultsReviewService {
      * 2) No review has already been completed (Actioned) within this window.
      */
     public boolean isVaultForReview(Vault vault) {
-        if (vault == null || vault.getReviewDate() == null) {
-            return false;
-        }
-
-        LocalDate today = LocalDate.now(clock);
-        LocalDate reviewWindowStartDate = DateTimeUtils.getDateAdjustedByMonths(vault.getReviewDate(), MONTHS_BEFORE_REVIEW_DATE);
-
-        // might be due for review email on reviewWindowStartDate
-        if (today.isBefore(reviewWindowStartDate)) {
-            return false;
-        }
-
-        // Looks like it's due a review, but check if a review has happened.
-        boolean vaultNeedsReview = reviewHasNotHappenedAfterReviewWindowStart(vault, reviewWindowStartDate);
+        boolean vaultNeedsReview = isEligibleForReviewAction(vault);
         return vaultNeedsReview;
     }
 
@@ -122,21 +110,9 @@ public class VaultsReviewService {
      * There is a chance the latest VaultReview was created a while ago and is still open - we won't send reminder emails.
      */
     public boolean dueForReviewEmail(Vault vault) {
-
-        if (vault == null || vault.getReviewDate() == null) {
-            return false;
-        }
-
-        LocalDate today = LocalDate.now(clock);
-        LocalDate reviewWindowStartDate = DateTimeUtils.getDateAdjustedByMonths(vault.getReviewDate(), MONTHS_BEFORE_REVIEW_DATE);
-
-        // might be due for review email on reviewWindowStartDate
-        if (today.isBefore(reviewWindowStartDate)) {
-            return false;
-        }
-        
-        // Looks like it's due an email, but check if a review is already underway or has happened.
-        boolean vaultNeedsReviewEmail = !vault.isVaultReviewUnderway() && reviewHasNotHappenedAfterReviewWindowStart(vault, reviewWindowStartDate);
+        boolean vaultNeedsReviewEmail = vault != null
+                && !vault.isVaultReviewUnderway()
+                && isEligibleForReviewAction(vault);
         return vaultNeedsReviewEmail;
     }
     
