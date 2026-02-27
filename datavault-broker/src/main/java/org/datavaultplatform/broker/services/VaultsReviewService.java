@@ -4,15 +4,16 @@ import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.model.VaultReview;
 import org.datavaultplatform.common.model.dao.VaultReviewDAO;
 import org.datavaultplatform.common.util.DateTimeUtils;
+import org.datavaultplatform.common.util.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 import java.time.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Service
 @Transactional
@@ -47,14 +48,6 @@ public class VaultsReviewService {
         return vaultReview;
     }
 
-    public void addVaultReview(VaultReview vaultReview) {
-        vaultReviewDAO.save(vaultReview);
-    }
-
-    public List<VaultReview> getVaultReviews() {
-        return vaultReviewDAO.list();
-    }
-
     public VaultReview getVaultReview(String vaultReviewID) {
         return vaultReviewDAO.findById(vaultReviewID).orElse(null);
     }
@@ -87,42 +80,57 @@ public class VaultsReviewService {
      */
     public boolean isVaultForReview(Vault vault) {
 
-        LocalDate today = LocalDate.now(clock);
-        LocalDate preReviewDate = DateTimeUtils.getDateAdjustedByMonths(vault.getReviewDate(), MONTHS_BEFORE_REVIEW_DATE);
-
-        if (preReviewDate == null || !today.isAfter(preReviewDate)) {
+        if (vault == null || vault.getReviewDate() == null) {
             return false;
         }
 
-        boolean currentReviewHasHappened = vault.getVaultReviews().stream().anyMatch(vr -> {
-            LocalDate actionedDate = DateTimeUtils.toLocalDate(vr.getActionedDate());
-            return actionedDate != null && actionedDate.isAfter(preReviewDate);
-        });
-        return !currentReviewHasHappened;
+        LocalDate today = LocalDate.now(clock);
+        LocalDate reviewWindowStartDate = DateTimeUtils.getDateAdjustedByMonths(vault.getReviewDate(), MONTHS_BEFORE_REVIEW_DATE);
+
+        if (!today.isAfter(reviewWindowStartDate)) {
+            return false;
+        }
+
+        boolean vaultNeedsReview = reviewHasNotHappenedAfterReviewWindowStart(vault, reviewWindowStartDate);
+        return vaultNeedsReview;
     }
 
-
-    /*
-     Returns true only if the vault is due for review.
+    /**
+     * A Vault is due for a review email if:
+     * 1) The current date is within or after the Review Window (X months before review date).
+     * 2) There is no review currently in progress (Underway).
+     * 3) No review has already been completed (Actioned) within this window.
+     * There is a chance the latest VaultReview was created a while ago and is still open - we won't send reminder emails.
      */
     public boolean dueForReviewEmail(Vault vault) {
 
-        LocalDate today = LocalDate.now(clock);
-
-        LocalDate preReviewEmailNotificationDate = DateTimeUtils.getDateAdjustedByMonths(vault.getReviewDate(), MONTHS_BEFORE_REVIEW_DATE);
-
-        // easier to test when using LocalDates instead of Dates
-        if (preReviewEmailNotificationDate == null || !today.isAfter(preReviewEmailNotificationDate)) {
+        if (vault == null || vault.getReviewDate() == null) {
             return false;
         }
 
+        LocalDate today = LocalDate.now(clock);
+        LocalDate reviewWindowStartDate = DateTimeUtils.getDateAdjustedByMonths(vault.getReviewDate(), MONTHS_BEFORE_REVIEW_DATE);
+        
+        if (!today.isAfter(reviewWindowStartDate)) {
+            return false;
+        }
+        
         // Looks like it's due an email, but check if a review is already underway or has happened.
-        boolean reviewUnderwayOrHasHappened = vault.getVaultReviews().stream().anyMatch(vr -> {
-            LocalDate actionedDate = DateTimeUtils.toLocalDate(vr.getActionedDate());
-            return actionedDate == null || actionedDate.isAfter(preReviewEmailNotificationDate);
-        });
-        return !reviewUnderwayOrHasHappened;
+        boolean vaultNeedsReviewEmail = !vault.isVaultReviewUnderway() && reviewHasNotHappenedAfterReviewWindowStart(vault, reviewWindowStartDate);
+        return vaultNeedsReviewEmail;
     }
+    
+
+    private boolean reviewHasNotHappenedAfterReviewWindowStart(Vault vault, LocalDate reviewWindowStartDate){
+        Assert.notNull(vault, "The vault cannot be null");
+        return Utils.getSafeStream(vault.getVaultReviews())
+                .filter(Objects::nonNull)
+                .map(VaultReview::getActionedDate)
+                .filter(Objects::nonNull)
+                .map(DateTimeUtils::toLocalDate)
+                .noneMatch(actionedLocalDate -> actionedLocalDate.isAfter(reviewWindowStartDate));
+    }
+
 
     public List<VaultReview> findByVaultId(String vaultId) {
         return vaultReviewDAO.findByVaultId(vaultId);

@@ -6,9 +6,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -24,6 +23,7 @@ import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import org.datavaultplatform.common.util.DateTimeUtils;
+import org.datavaultplatform.common.util.Utils;
 import org.hibernate.Hibernate;
 import org.datavaultplatform.common.response.BillingInformation;
 import org.datavaultplatform.common.response.VaultInfo;
@@ -489,5 +489,16 @@ public class Vault implements Identified {
     @Override
     public int hashCode() {
         return getClass().hashCode();
+    }
+
+    public Optional<VaultReview> getMostRecentVaultReview() {
+        // take max VaultReview - based on VaultReview::creationTime
+        return Utils.getSafeStream(vaultReviews).max(Comparator.comparing(VaultReview::getCreationTime));
+    }
+
+    public boolean isVaultReviewUnderway() {
+        return this.getMostRecentVaultReview()
+                .map(vr -> vr.getActionedDate() == null)
+                .orElse(false);
     }
 }

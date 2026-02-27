@@ -11,6 +11,7 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 public class Utils {
@@ -26,12 +27,12 @@ public class Utils {
   public static void handleExecutionException(ExecutionException ee, String label) throws Exception {
     Throwable cause = ee.getCause();
     if (cause instanceof Exception ex) {
-      log.error(label + " " + ex.getMessage());
+        log.error("{} {}", label, ex.getMessage());
       throw ex;
     }
     log.error("unexpected non-Exception", cause);
     if (cause instanceof Error error) {
-      log.error(label + " " + error.getMessage());
+        log.error("{} {}", label, error.getMessage());
       throw error;
     }
   }
@@ -41,7 +42,7 @@ public class Utils {
       log.warn("NULL expectedHash for [{}][{}]", label, file);
       return;
     }
-    log.info("Calculate Checksum Digest for: " + file.getAbsolutePath());
+      log.info("Calculate Checksum Digest for: {}", file.getAbsolutePath());
     Assert.isTrue(file.exists(), () -> "File does not exist: " + file.getAbsolutePath());
     Assert.isTrue(file.isFile(), () -> "File is not a file: " + file.getAbsolutePath());
     String computedHash = Verify.getDigest(file);
@@ -57,7 +58,7 @@ public class Utils {
     }
   }
   
-  public static <T> String toCommaSeparatedString(Collection<?> collection) {
+  public static String toCommaSeparatedString(Collection<?> collection) {
     if (collection == null || collection.isEmpty()) {
       return "";
     }
@@ -98,6 +99,14 @@ public class Utils {
       Assert.isTrue(!isRunningWithinTest(), "As not a test - running within a test should NOT be true");
     } finally {
       logback.setLevel(initLevel);
+    }
+  }
+
+  public static <T> Stream<T> getSafeStream(Collection<T> collection) {
+    if (collection == null) {
+      return Stream.empty();
+    } else {
+      return collection.stream();
     }
   }
 }

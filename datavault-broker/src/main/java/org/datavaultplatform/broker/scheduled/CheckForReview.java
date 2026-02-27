@@ -39,8 +39,7 @@ public class CheckForReview implements ScheduledTask {
 
     private final VaultsService vaultsService;
     private final VaultsReviewService vaultsReviewService;
-    private final DepositsReviewService depositsReviewService;
-    private final LDAPService LDAPService;
+    private final LDAPService ldapService;
     private final EmailService emailService;
     private final RolesAndPermissionsService rolesAndPermissionsService;
     private final UsersService usersService;
@@ -52,7 +51,6 @@ public class CheckForReview implements ScheduledTask {
 
     @Autowired
     public CheckForReview(VaultsService vaultsService, VaultsReviewService vaultsReviewService,
-                           DepositsReviewService depositsReviewService,
                            LDAPService ldapService, EmailService emailService,
                            RolesAndPermissionsService rolesAndPermissionsService, UsersService usersService,
                            @Value("${home.page}") String homeUrl,
@@ -61,8 +59,7 @@ public class CheckForReview implements ScheduledTask {
                            Clock clock) {
         this.vaultsService = vaultsService;
         this.vaultsReviewService = vaultsReviewService;
-        this.depositsReviewService = depositsReviewService;
-        LDAPService = ldapService;
+        this.ldapService = ldapService;
         this.emailService = emailService;
         this.rolesAndPermissionsService = rolesAndPermissionsService;
         this.usersService = usersService;
@@ -110,6 +107,7 @@ public class CheckForReview implements ScheduledTask {
         // decision.
 
         // IMPORTANT - do not remove
+        Assert.isTrue(!vault.isVaultReviewUnderway(), "We are about to create a new vault review - just double checking one doesn't exist");
         vaultsReviewService.createVaultReview(vault);
         // IMPORTANT - do not remove.
 
@@ -153,7 +151,7 @@ public class CheckForReview implements ScheduledTask {
             return false;
         }
         try {
-            var attrs = LDAPService.getLDAPAttributes(userID);
+            var attrs = ldapService.getLDAPAttributes(userID);
             result = !attrs.isEmpty();
         } catch (Exception ex) {
             LOG.warn("problem looking up LDAP attributes for [{}]", userID);

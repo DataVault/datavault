@@ -16,7 +16,6 @@ import org.springframework.util.Assert;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -65,6 +64,9 @@ public class CheckForDelete implements ScheduledTask {
     private void checkVaultsForDelete(LocalDate today) throws Exception {
         List<Vault> vaults = vaultsService.getVaults();
         for (Vault vault : vaults) {
+            if (vault == null) {
+                continue;
+            }
             checkVaultForDelete(vault, today);
         }
     }
@@ -80,9 +82,7 @@ public class CheckForDelete implements ScheduledTask {
         LOG.info("Checking if Vault {}/{} has deposits to delete?", vault.getID(), vault.getName());
 
         // Get the most recent VaultReview - all VaultReviews are for the vault - DepositReviews are associated with Deposit.
-        // Sort by creation time in descending order to get the most recent first.
-        vaultReviews.sort(Comparator.comparing(VaultReview::getCreationTime).reversed());
-        VaultReview mostRecentVaultReview = vaultReviews.get(0);
+        VaultReview mostRecentVaultReview = vault.getMostRecentVaultReview().orElseThrow();
 
         LOG.info("Processing most recent VaultReview with id {} for Vault {}/{}",
                 mostRecentVaultReview.getId(), vault.getID(), vault.getName());
