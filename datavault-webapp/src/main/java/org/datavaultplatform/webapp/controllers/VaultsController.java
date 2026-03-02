@@ -252,7 +252,7 @@ public class VaultsController {
         for (ReviewInfo reviewInfo : reviewInfos) {
 
             VaultReview currentReview = restService.getVaultReview(reviewInfo.getVaultReviewId());
-            VaultReviewModel vaultReviewModel = new VaultReviewModel(currentReview);
+            VaultReviewModel vaultReviewModel = new VaultReviewModel(currentReview, vault.getReviewDate());
             List<DepositReviewModel> depositReviewModels = new ArrayList<>();
             for (int i = 0; i < reviewInfo.getDepositIds().size(); i++) {
                 DepositInfo depositInfo = restService.getDeposit(reviewInfo.getDepositIds().get(i));

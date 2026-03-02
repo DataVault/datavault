@@ -399,7 +399,7 @@ public class AdminReviewsControllerTest {
             // Arrange
             mocksForShowAndProcessReviewTests();
             // ReviewDate not set
-            when(mVaultReviewModel.getNewReviewDate()).thenReturn(null);
+            when(mVaultReviewModel.getNextReviewDate()).thenReturn(null);
 
             RequestBuilder requestBuilder = MockMvcRequestBuilders.post("/admin/vaults/" + TEST_VAULT_ID_1 + "/reviews/" + TEST_VAULT_REVIEW_ID)
                     .queryParam("action", "Submit")
@@ -453,7 +453,7 @@ public class AdminReviewsControllerTest {
             mocksForShowAndProcessReviewTests();
 
             // Override ReviewDate and set RETAIN delete status for one Deposit
-            when(mVaultReviewModel.getNewReviewDate()).thenReturn(null);
+            when(mVaultReviewModel.getNextReviewDate()).thenReturn(null);
             when(mDepositReviewModel1.getDeleteStatus()).thenReturn(DepositReviewDeleteStatus.RETAIN);
 
             RequestBuilder requestBuilder = MockMvcRequestBuilders.post("/admin/vaults/" + TEST_VAULT_ID_1 + "/reviews/" + TEST_VAULT_REVIEW_ID)
@@ -516,7 +516,7 @@ public class AdminReviewsControllerTest {
         when(mDepositReviewModel2.getDeleteStatus()).thenReturn(DepositReviewDeleteStatus.ONREVIEW);
         when(mVaultReviewModel.getDepositReviewModels()).thenReturn(drm);
         // Default ReviewDate set, this overriden in some tests
-        when(mVaultReviewModel.getNewReviewDate()).thenReturn(LocalDate.now());
+        when(mVaultReviewModel.getNextReviewDate()).thenReturn(LocalDate.now());
     }
 
     @SneakyThrows

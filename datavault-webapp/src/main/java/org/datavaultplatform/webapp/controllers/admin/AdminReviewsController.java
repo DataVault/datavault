@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.Clock;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -99,7 +100,7 @@ public class AdminReviewsController {
             reviewInfo = restService.createCurrentReview(vaultID);
         }
         VaultReview currentReview = restService.getVaultReview(reviewInfo.getVaultReviewId());
-        VaultReviewModel vaultReviewModel = new VaultReviewModel(currentReview);
+        VaultReviewModel vaultReviewModel = new VaultReviewModel(currentReview, vault.getReviewDate());
 
         int sizeDepositReviewIds = reviewInfo.getDepositReviewIds().size();
         int sizeDepositIds = reviewInfo.getDepositIds().size();
@@ -160,7 +161,7 @@ public class AdminReviewsController {
         }
 
         if (ACTION_SUBMIT.equals(action)) {
-            if (!validateNewReviewDate(vaultReviewModel, redirectAttributes)) {
+            if (!validateNextReviewDate(vaultReviewModel, redirectAttributes)) {
                 return "redirect:/admin/vaults/" + vaultID + "/reviews";
             }
         }
@@ -181,14 +182,14 @@ public class AdminReviewsController {
     }
 
     /**
-     * You cannot have a DepositReviewModel:RETAIN without a new New ReviewDate
+     * You cannot have a DepositReviewModel:RETAIN without a non-null nextReviewDate
      * @param vaultReviewModel
      * @param redirectAttributes
      * @return false if there's no NEW REVIEW DATE and at least 1 DRM with retain.
      */
-    private boolean validateNewReviewDate(VaultReviewModel vaultReviewModel, RedirectAttributes redirectAttributes) {
+    private boolean validateNextReviewDate(VaultReviewModel vaultReviewModel, RedirectAttributes redirectAttributes) {
         
-        if (vaultReviewModel.getNewReviewDate() != null) {
+        if (vaultReviewModel.getNextReviewDate() != null) {
             return true;
         }
 
@@ -215,7 +216,6 @@ public class AdminReviewsController {
 
     private void updateVaultReviewAndVault(VaultReview originalVaultReview, VaultReviewModel vrm, String vaultID, LocalDateTime now, String action) {
         
-        originalVaultReview.setNewReviewDate(vrm.getNewReviewDate());
         originalVaultReview.setComment(vrm.getComment());
 
         if (ACTION_SUBMIT.equals(action)) {
@@ -224,15 +224,15 @@ public class AdminReviewsController {
             Assert.isTrue(StringUtils.isNotBlank(vaultID), "The vaultId cannot be blank");
             VaultInfo vault = restService.getVault(vaultID);
 
-            // copy the original ReviewDate into oldReviewDate on DRM
-            // at the point you create a new REVIEW - the VRMs act against the original review date.
-            // the NewReviewDate will be used for any later reviews.
+            // copy the current 'Vault.reviewDate' into 'originalVaultReview.oldReviewDate'
             originalVaultReview.setOldReviewDate(vault.getReviewDate());
 
-            if (vrm.getNewReviewDate() != null) {
-                LOG.info("Editing Review Date for Vault id {} with new Review Date {}", vaultID, vrm.getNewReviewDate());
-                // update the Vault with the newVaultReviewDate
-                restService.updateVaultReviewDate(vaultID, vrm.getNewReviewDate());
+            // the nextReviewDate is the used to update the Vault.reviewDate FOR THE NEXT REVIEW - not this one.
+            LocalDate nextReviewDate = vrm.getNextReviewDate();
+            if (nextReviewDate != null) {
+                LOG.info("Editing Review Date for Vault id {} with new Review Date {}", vaultID, nextReviewDate);
+                // the nextReviewDate is the used to update the Vault.reviewDate FOR THE NEXT REVIEW - not this one.
+                restService.updateVaultReviewDate(vaultID, nextReviewDate);
             }
         }
 

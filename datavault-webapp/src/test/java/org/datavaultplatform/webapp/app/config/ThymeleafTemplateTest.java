@@ -962,7 +962,6 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
 
         VaultReviewModel vrModel = new VaultReviewModel();
         vrModel.setVaultReviewId("vault-review-id-1");
-        vrModel.setNewReviewDate(DateTimeUtils.toLocalDate(getNowValue()));
         vrModel.setComment("comment-1");
         vrModel.setActionedDate(DateTimeUtils.toLocalDateTime(now));
 
@@ -2106,14 +2105,14 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         vrm1.setActionedDate(DateTimeUtils.toLocalDateTime(now));
         vrm1.setComment("vrm1 - comment");
         vrm1.setVaultReviewId("vault-review-id-1");
-        vrm1.setNewReviewDate(DateTimeUtils.toLocalDate(getNowValue()));
+        vrm1.setNextReviewDate(DateTimeUtils.toLocalDate(getNowValue()));
         vrm1.setDepositReviewModels(Arrays.asList(drm1, drm2));
 
         VaultReviewModel vrm2 = new VaultReviewModel();
         vrm2.setActionedDate(DateTimeUtils.toLocalDateTime(now));
         vrm2.setComment("vrm2 - comment");
         vrm2.setVaultReviewId("vault-review-id-2");
-        vrm2.setNewReviewDate(DateTimeUtils.toLocalDate(getNowValue()));
+        vrm2.setNextReviewDate(DateTimeUtils.toLocalDate(getNowValue()));
         vrm2.setDepositReviewModels(Arrays.asList(drm1, drm2));
 
         VaultReviewHistoryModel vrhm = new VaultReviewHistoryModel();

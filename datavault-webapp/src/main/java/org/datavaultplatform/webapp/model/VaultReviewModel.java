@@ -12,7 +12,7 @@ public class VaultReviewModel {
 
     private String vaultReviewId;
     private LocalDateTime actionedDate;
-    private LocalDate newReviewDate;
+    private LocalDate nextReviewDate;
     private String comment;
 
     private List<DepositReviewModel> depositReviewModels;
@@ -20,10 +20,10 @@ public class VaultReviewModel {
     public VaultReviewModel() {
     }
 
-    public VaultReviewModel(VaultReview vaultReview) {
+    public VaultReviewModel(VaultReview vaultReview, LocalDate nextReviewDate) {
         vaultReviewId = vaultReview.getId();
         actionedDate = vaultReview.getActionedDate();
-        newReviewDate = vaultReview.getNewReviewDate();
+        this.nextReviewDate = nextReviewDate;
         comment = vaultReview.getComment();
     }
 
@@ -43,12 +43,12 @@ public class VaultReviewModel {
         this.actionedDate = actionedDate;
     }
 
-    public LocalDate getNewReviewDate() {
-        return newReviewDate;
+    public LocalDate getNextReviewDate() {
+        return nextReviewDate;
     }
 
-    public void setNewReviewDate(LocalDate newReviewDate) {
-        this.newReviewDate = newReviewDate;
+    public void setNextReviewDate(LocalDate nextReviewDate) {
+        this.nextReviewDate = nextReviewDate;
     }
 
     public String getComment() {

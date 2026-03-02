@@ -120,11 +120,13 @@ public class VaultReview {
         this.depositReviews = depositReviews;
     }
 
-    public LocalDate getNewReviewDate() {
+    @Deprecated
+    private LocalDate getNewReviewDate() {
         return newReviewDate;
     }
 
-    public void setNewReviewDate(LocalDate newReviewDate) {
+    @Deprecated
+    private void setNewReviewDate(LocalDate newReviewDate) {
         this.newReviewDate = newReviewDate;
     }
 
@@ -132,6 +134,11 @@ public class VaultReview {
         return oldReviewDate;
     }
 
+    /**
+     * Just after this VaultReview is actioned - the Vault's reviewDate can be updated for the next review.
+     * @param oldReviewDate - the Vault.reviewDate at the time the VaultReview is actioned.
+     * @see org.datavaultplatform.broker.scheduled.CheckForDelete
+     */
     public void setOldReviewDate(LocalDate oldReviewDate) {
         this.oldReviewDate = oldReviewDate;
     }
