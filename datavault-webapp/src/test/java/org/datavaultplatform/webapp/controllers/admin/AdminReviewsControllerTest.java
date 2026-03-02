@@ -20,6 +20,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -147,9 +148,9 @@ public class AdminReviewsControllerTest {
     
     Date date2;
 
-    List<RoleAssignment>  roleAssignments = new ArrayList<>();
+    final List<RoleAssignment>  roleAssignments = new ArrayList<>();
 
-    List<VaultInfo> vaultsInfo = new ArrayList<>();
+    final List<VaultInfo> vaultsInfo = new ArrayList<>();
     
     ObjectMapper mapper = new ObjectMapper();
     
@@ -343,133 +344,135 @@ public class AdminReviewsControllerTest {
         Mockito.verifyNoMoreInteractions(mRestService);
     }
 
-    @DisplayName("Test processReview() with action Cancel.")
-    @Test
-    @WithMockUser(roles = {"ADMIN_VAULTS"})
-    void testProcessReview_ActionCancel() throws Exception {
+    @Nested
+    class ProcessReviewTests {
+        @DisplayName("Test processReview() with action Cancel.")
+        @Test
+        @WithMockUser(roles = {"ADMIN_VAULTS"})
+        void testProcessReview_ActionCancel() throws Exception {
 
-        // Arrange
-        mocksForShowAndProcessReviewTests();
+            // Arrange
+            mocksForShowAndProcessReviewTests();
 
-        RequestBuilder requestBuilder = MockMvcRequestBuilders.post("/admin/vaults/"+TEST_VAULT_ID_1+"/reviews/" + TEST_VAULT_REVIEW_ID)
-                .queryParam("action", "Cancel")
-                .flashAttr("VaultReviewModel", mVaultReviewModel)
-                .contentType(MediaType.APPLICATION_JSON)
-                .with(csrf());
-        // Act
-        MvcResult mvcResult = mockMvc.perform(requestBuilder).andReturn();
-        //Assert
-        assertThat(mvcResult.getModelAndView().getViewName()).isEqualTo("redirect:/admin/reviews");
-        Mockito.verifyNoMoreInteractions(mRestService);
+            RequestBuilder requestBuilder = MockMvcRequestBuilders.post("/admin/vaults/" + TEST_VAULT_ID_1 + "/reviews/" + TEST_VAULT_REVIEW_ID)
+                    .queryParam("action", "Cancel")
+                    .flashAttr("VaultReviewModel", mVaultReviewModel)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .with(csrf());
+            // Act
+            MvcResult mvcResult = mockMvc.perform(requestBuilder).andReturn();
+            //Assert
+            assertThat(mvcResult.getModelAndView().getViewName()).isEqualTo("redirect:/admin/reviews");
+            Mockito.verifyNoMoreInteractions(mRestService);
+        }
+
+        @DisplayName("Test processReview() with action Save.")
+        @Test
+        @WithMockUser(roles = {"ADMIN_VAULTS"})
+        void testProcessReview_ActionSave() throws Exception {
+            // Arrange
+            mocksForShowAndProcessReviewTests();
+
+            RequestBuilder requestBuilder = MockMvcRequestBuilders.post("/admin/vaults/" + TEST_VAULT_ID_1 + "/reviews/" + TEST_VAULT_REVIEW_ID)
+                    .queryParam("action", "Save")
+                    .flashAttr("vaultReviewModel", mVaultReviewModel)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .with(csrf());
+            // Act
+            MvcResult mvcResult = mockMvc.perform(requestBuilder).andReturn();
+            // Assert
+            assertThat(mvcResult.getModelAndView().getViewName()).isEqualTo("redirect:/admin/reviews");
+
+            verify(mRestService).getVaultReview(TEST_VAULT_REVIEW_ID);
+
+            verify(mRestService).editVaultReview(mVaultReview);
+            verify(mRestService, times(2)).getDepositReview(null); //FIX THIS
+            verify(mRestService, times(2)).editDepositReview(any(DepositReview.class));
+            verifyNoMoreInteractions(mRestService);
+        }
+
+
+        @DisplayName("Test processReview() with action Submit with no retained deposits and no review date.")
+        @Test
+        @WithMockUser(roles = "ADMIN_VAULTS")
+        void testProcessReview_Submit_WithNoReviewDate_AndNoRetainedDeposits() throws Exception {
+            // Arrange
+            mocksForShowAndProcessReviewTests();
+            // ReviewDate not set
+            when(mVaultReviewModel.getNewReviewDate()).thenReturn(null);
+
+            RequestBuilder requestBuilder = MockMvcRequestBuilders.post("/admin/vaults/" + TEST_VAULT_ID_1 + "/reviews/" + TEST_VAULT_REVIEW_ID)
+                    .queryParam("action", "Submit")
+                    .flashAttr("vaultReviewModel", mVaultReviewModel)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .with(csrf());
+            // Act
+            MvcResult mvcResult = mockMvc.perform(requestBuilder).andReturn();
+            //Assert
+            assertThat(mvcResult.getModelAndView().getViewName()).isEqualTo("redirect:/admin/reviews");
+
+            verify(mRestService).getVaultReview(TEST_VAULT_REVIEW_ID);
+            verify(mRestService).getVault(TEST_VAULT_ID_1);
+            verify(mRestService, times(2)).editDepositReview(any(DepositReview.class));//USE CAPTORS
+            verify(mRestService).editVaultReview(any(VaultReview.class));//USE CAPTORS
+            verify(mRestService, times(2)).getDepositReview(null);//FIX
+            Mockito.verifyNoMoreInteractions(mRestService);
+        }
+
+        @DisplayName("Test processReview() with action Submit with no retained deposits and a review date not null.")
+        @Test
+        @WithMockUser(roles = "ADMIN_VAULTS")
+        void testProcessReview_Submit_WithNoRetainedDeposits_AndReviewDateNotNull() throws Exception {
+            // Arrange
+            mocksForShowAndProcessReviewTests();
+
+            RequestBuilder requestBuilder = MockMvcRequestBuilders.post("/admin/vaults/" + TEST_VAULT_ID_1 + "/reviews/" + TEST_VAULT_REVIEW_ID)
+                    .queryParam("action", "Submit")
+                    .flashAttr("vaultReviewModel", mVaultReviewModel)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .with(csrf());
+            // Act
+            MvcResult mvcResult = mockMvc.perform(requestBuilder).andReturn();
+            //Assert
+            assertThat(mvcResult.getModelAndView().getViewName()).isEqualTo("redirect:/admin/reviews");
+
+            verify(mRestService).getVaultReview(TEST_VAULT_REVIEW_ID);
+            verify(mRestService).getVault(TEST_VAULT_ID_1);
+            verify(mRestService).updateVaultReviewDate(eq(TEST_VAULT_ID_1), any(LocalDate.class)); //could use clock
+            verify(mRestService).editVaultReview(any(VaultReview.class)); //could use captor here
+            verify(mRestService, times(2)).getDepositReview(null);//FIX THIS
+            verify(mRestService, times(2)).editDepositReview(any(DepositReview.class)); //could use captor here
+            Mockito.verifyNoMoreInteractions(mRestService);
+        }
+
+        @DisplayName("Test processReview() with action Submit with a retained deposit and a review date null.")
+        @Test
+        @WithMockUser(roles = "ADMIN_VAULTS")
+        void testProcessReview_Submit_WithNoReviewDate_AndRetainedDeposits_ThenError() throws Exception {
+            // Arrange
+            mocksForShowAndProcessReviewTests();
+
+            // Override ReviewDate and set RETAIN delete status for one Deposit
+            when(mVaultReviewModel.getNewReviewDate()).thenReturn(null);
+            when(mDepositReviewModel1.getDeleteStatus()).thenReturn(DepositReviewDeleteStatus.RETAIN);
+
+            RequestBuilder requestBuilder = MockMvcRequestBuilders.post("/admin/vaults/" + TEST_VAULT_ID_1 + "/reviews/" + TEST_VAULT_REVIEW_ID)
+                    .queryParam("action", "Submit")
+                    .flashAttr("vaultReviewModel", mVaultReviewModel)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .with(csrf());
+            // Act
+            MvcResult mvcResult = mockMvc.perform(requestBuilder).andReturn();
+            // Assert
+            assertThat(mvcResult.getModelAndView().getViewName()).isEqualTo("redirect:/admin/vaults/" + TEST_VAULT_ID_1 + "/reviews");
+
+            ModelMap modelMap = mvcResult.getModelAndView().getModelMap();
+
+            // Error key in modelMap
+            assertThat((String) modelMap.get("error")).isEqualTo("reviewdate");
+            Mockito.verifyNoMoreInteractions(mRestService);
+        }
     }
-
-    @DisplayName("Test processReview() with action Save.")
-    @Test
-    @WithMockUser(roles = {"ADMIN_VAULTS"})
-    void testProcessReview_ActionSave() throws Exception {
-        // Arrange
-        mocksForShowAndProcessReviewTests();
-
-        RequestBuilder requestBuilder = MockMvcRequestBuilders.post("/admin/vaults/"+TEST_VAULT_ID_1+"/reviews/" + TEST_VAULT_REVIEW_ID)
-                .queryParam("action", "Save")
-                .flashAttr("vaultReviewModel", mVaultReviewModel)
-                .contentType(MediaType.APPLICATION_JSON)
-                .with(csrf());
-        // Act
-        MvcResult mvcResult = mockMvc.perform(requestBuilder).andReturn();
-        // Assert
-        assertThat(mvcResult.getModelAndView().getViewName()).isEqualTo("redirect:/admin/reviews");
-
-        verify(mRestService).getVaultReview(TEST_VAULT_REVIEW_ID);
-
-        verify(mRestService).editVaultReview(mVaultReview);
-        verify(mRestService, times(2)).getDepositReview(null); //FIX THIS
-        verify(mRestService, times(2)).editDepositReview(any(DepositReview.class));
-        verifyNoMoreInteractions(mRestService);
-    }
-
-
-    @DisplayName("Test processReview() with action Submit with no retained deposits and no review date.")
-    @Test
-    @WithMockUser(roles = "ADMIN_VAULTS")
-    void testProcessReview_Submit_WithNoReviewDate_AndNoRetainedDeposits() throws Exception {
-        // Arrange
-        mocksForShowAndProcessReviewTests();
-        // ReviewDate not set
-        when(mVaultReviewModel.getNewReviewDate()).thenReturn(null);
-
-        RequestBuilder requestBuilder = MockMvcRequestBuilders.post("/admin/vaults/"+TEST_VAULT_ID_1+"/reviews/" + TEST_VAULT_REVIEW_ID)
-                .queryParam("action", "Submit")
-                .flashAttr("vaultReviewModel", mVaultReviewModel)
-                .contentType(MediaType.APPLICATION_JSON)
-                .with(csrf());
-        // Act
-        MvcResult mvcResult = mockMvc.perform(requestBuilder).andReturn();
-        //Assert
-        assertThat(mvcResult.getModelAndView().getViewName()).isEqualTo("redirect:/admin/reviews");
-
-        verify(mRestService).getVaultReview(TEST_VAULT_REVIEW_ID);
-        verify(mRestService).getVault(TEST_VAULT_ID_1);
-        verify(mRestService, times(2)).editDepositReview(any(DepositReview.class));//USE CAPTORS
-        verify(mRestService).editVaultReview(any(VaultReview.class));//USE CAPTORS
-        verify(mRestService, times(2)).getDepositReview(null);//FIX
-        Mockito.verifyNoMoreInteractions(mRestService);
-    }
-
-    @DisplayName("Test processReview() with action Submit with no retained deposits and a review date not null.")
-    @Test
-    @WithMockUser(roles = "ADMIN_VAULTS")
-    void testProcessReview_Submit_WithNoRetainedDeposits_AndReviewDateNotNull() throws Exception {
-        // Arrange
-        mocksForShowAndProcessReviewTests();
-
-        RequestBuilder requestBuilder = MockMvcRequestBuilders.post("/admin/vaults/"+TEST_VAULT_ID_1+"/reviews/" + TEST_VAULT_REVIEW_ID)
-                .queryParam("action", "Submit")
-                .flashAttr("vaultReviewModel", mVaultReviewModel)
-                .contentType(MediaType.APPLICATION_JSON)
-                .with(csrf());
-        // Act
-        MvcResult mvcResult = mockMvc.perform(requestBuilder).andReturn();
-        //Assert
-        assertThat(mvcResult.getModelAndView().getViewName()).isEqualTo("redirect:/admin/reviews");
-
-        verify(mRestService).getVaultReview(TEST_VAULT_REVIEW_ID);
-        verify(mRestService).getVault(TEST_VAULT_ID_1);
-        verify(mRestService).updateVaultReviewDate(eq(TEST_VAULT_ID_1), any(LocalDate.class)); //could use clock
-        verify(mRestService).editVaultReview(any(VaultReview.class)); //could use captor here
-        verify(mRestService, times(2)).getDepositReview(null);//FIX THIS
-        verify(mRestService, times(2)).editDepositReview(any(DepositReview.class)); //could use captor here
-        Mockito.verifyNoMoreInteractions(mRestService);
-    }
-
-    @DisplayName("Test processReview() with action Submit with a retained deposit and a review date null.")
-    @Test
-    @WithMockUser(roles = "ADMIN_VAULTS")
-    void testProcessReview_Submit_WithNoReviewDate_AndRetainedDeposits_ThenError() throws Exception {
-        // Arrange
-        mocksForShowAndProcessReviewTests();
-
-        // Override ReviewDate and set RETAIN delete status for one Deposit
-        when(mVaultReviewModel.getNewReviewDate()).thenReturn(null);
-        when(mDepositReviewModel1.getDeleteStatus()).thenReturn(DepositReviewDeleteStatus.RETAIN);
-
-        RequestBuilder requestBuilder = MockMvcRequestBuilders.post("/admin/vaults/"+TEST_VAULT_ID_1+"/reviews/" + TEST_VAULT_REVIEW_ID)
-                .queryParam("action", "Submit")
-                .flashAttr("vaultReviewModel", mVaultReviewModel)
-                .contentType(MediaType.APPLICATION_JSON)
-                .with(csrf());
-        // Act
-        MvcResult mvcResult = mockMvc.perform(requestBuilder).andReturn();
-        // Assert
-        assertThat(mvcResult.getModelAndView().getViewName()).isEqualTo("redirect:/admin/vaults/"+TEST_VAULT_ID_1+"/reviews" );
-
-        ModelMap modelMap = mvcResult.getModelAndView().getModelMap();
-
-        // Error key in modelMap
-        assertThat((String) modelMap.get("error")).isEqualTo("reviewdate");
-        Mockito.verifyNoMoreInteractions(mRestService);
-    }
-
 
     private void mocksForShowAndProcessReviewTests() {
         // Arrange
