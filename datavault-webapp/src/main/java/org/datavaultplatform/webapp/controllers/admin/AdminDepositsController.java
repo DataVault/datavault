@@ -127,14 +127,21 @@ public class AdminDepositsController {
         }
     }
 
-
-    @RequestMapping(value = "/admin/deposits/{depositID}", method = RequestMethod.DELETE)
+    /**
+     * Deletes a specific deposit and returns the redirect path to the vault's deposit index.
+     * <p>
+     * This method coordinates with the administrative view at 
+     * {@code WEB-INF/templates/admin/deposits/index.html}.
+     * @param depositID specifies the deposit to be removed.
+     * @param vaultId the id of the vault that contains this deposit.
+     * required to construct the result.
+     * @return a URL pointing back to the deposit page.
+     */
+    @DeleteMapping("/admin/deposits/{depositID}")
     @ResponseBody
-    public String deleteDeposit(ModelMap model, @PathVariable("depositID") String depositID,
-                                @RequestParam(value = "vaultId", required = false) String vaultId) throws Exception {
-
+    public String deleteDeposit(@PathVariable String depositID, @RequestParam(value = "vaultId") String vaultId) {
         restService.deleteDeposit(depositID);
-        return "vaults/"+vaultId+"/deposits/"+ depositID;
+        return "vaults/" + vaultId + "/deposits/" + depositID;
     }
 
     @RequestMapping(value = "/admin/deposits/audit", method = RequestMethod.GET)
