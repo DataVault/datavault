@@ -20,12 +20,12 @@ import static org.datavaultplatform.common.util.Utils.getSafeStream;
 @Transactional
 public class VaultsReviewService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(VaultsReviewService.class);
-
     // The number of months before the review date at which people should be notified.
     // This could be moved into datavault.properties if they keep on changing their minds about the value.
-    private static final int MONTHS_BEFORE_REVIEW_DATE = -6;
+    public static final int MONTHS_BEFORE_REVIEW_DATE = -6;
 
+    private static final Logger LOG = LoggerFactory.getLogger(VaultsReviewService.class);
+    
     private final VaultReviewDAO vaultReviewDAO;
     private final DepositsReviewService depositsReviewService;
     private final Clock clock;
@@ -73,7 +73,20 @@ public class VaultsReviewService {
     }
 
     /**
-     * Shared logic: Is the vault within its review window and not yet completed?
+     * Determines if a Vault is currently eligible for a review action based on its review schedule.
+     * <p>
+     * Eligibility is defined by two criteria:
+     * <ul>
+     * <li><b>Temporal:</b> The current date must be within or after the "Review Window." 
+     * The window starts {@code MONTHS_BEFORE_REVIEW_DATE} months before the {@code vault.reviewDate}.</li>
+     * <li><b>Status:</b> No other review record must have been actioned/completed 
+     * from the start of this current review window.</li>
+     * </ul>
+     * <p>
+     * The window is treated as a "half-open" interval: {@code [windowStart, infinity)}.
+     *
+     * @param vault the Vault entity to check; if null or missing a review date, returns {@code false}.
+     * @return {@code true} if the vault is due for review and hasn't been actioned yet in this VaultReviewTimeWindow, {@code false} otherwise.
      */
     private boolean isEligibleForReviewAction(Vault vault) {
         if (vault == null || vault.getReviewDate() == null) {
@@ -81,17 +94,14 @@ public class VaultsReviewService {
         }
 
         LocalDate today = LocalDate.now(clock);
-        LocalDate windowStart = DateTimeUtils.getDateAdjustedByMonths(vault.getReviewDate(), MONTHS_BEFORE_REVIEW_DATE);
+        LocalDate reviewWindowStartDate = DateTimeUtils.getDateAdjustedByMonths(vault.getReviewDate(), MONTHS_BEFORE_REVIEW_DATE);
 
-        // 1) Must be within or after the window
-        // 2) No review completed within this window
-        return !today.isBefore(windowStart) &&
-                reviewHasNotHappenedAfterReviewWindowStart(vault, windowStart);
+        // Rule 1: Today is not before the window
+        // Rule 2: No review has happened since the window opened
+        return !today.isBefore(reviewWindowStartDate) &&
+                reviewHasNotHappenedAfterReviewWindowStart(vault, reviewWindowStartDate);
     }
-    
-    /*
-     Returns true if the vault is due for review, or is currently being reviewed.     
-     */
+
     /*
      * A Vault is due for a review if:
      * 1) The current date is within or after the Review Window (X months before review date).
@@ -104,8 +114,8 @@ public class VaultsReviewService {
 
     /*
      * A Vault is due for a review email if:
-     * 1) The current date is within or after the Review Window (X months before review date).
-     * 2) There is no review currently in progress (Underway).
+     * 1) There is no review currently in progress (Underway).
+     * 2) The current date is within or after the Review Window (X months before review date).
      * 3) No review has already been completed (Actioned) within this window.
      * There is a chance the latest VaultReview was created a while ago and is still open - we won't send reminder emails.
      */

@@ -47,7 +47,7 @@ import org.hibernate.annotations.UuidGenerator;
         @NamedAttributeNode(Vault_.DEPOSITS),
 })
 public class Vault implements Identified {
-
+    
     public static final String EG_VAULT = "eg.Vault.1";
     private static final long ZERO = 0L;
     // Vault Identifier
@@ -491,14 +491,29 @@ public class Vault implements Identified {
         return getClass().hashCode();
     }
 
+    /**
+     * Get the most recent vault review.
+     * @return will return 'Optional.empty' if no VaultReviews
+     */
     public Optional<VaultReview> getMostRecentVaultReview() {
-        // take max VaultReview - based on VaultReview::creationTime
-        return Utils.getSafeStream(vaultReviews).max(Comparator.comparing(VaultReview::getCreationTime));
+        return Utils.getSafeStream(vaultReviews)
+                .max(VaultReview.BY_CREATION_TIME);
     }
 
+    /**
+     * Gets the most recent vault review where that most recent vault review also has NO actioned data.
+     * @return will return 'Optional.empty' if no VaultReviews OR most recent VaultReview has non-null actionedDate.
+     */
+    public Optional<VaultReview> findLatestVaultReviewIfStillUnderway() {
+        return getMostRecentVaultReview()
+                .filter(VaultReview.NO_ACTION_DATE);
+    }
+
+    /**
+     * A VaultReview is underway if it has a null actionedDate
+     * @return true if the most recent vault review has no actionedDate.
+     */
     public boolean isVaultReviewUnderway() {
-        return this.getMostRecentVaultReview()
-                .map(vr -> vr.getActionedDate() == null)
-                .orElse(false);
+        return findLatestVaultReviewIfStillUnderway().isPresent();
     }
 }

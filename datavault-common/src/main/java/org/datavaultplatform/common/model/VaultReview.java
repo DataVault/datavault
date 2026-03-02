@@ -11,8 +11,11 @@ import jakarta.persistence.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
+
 import org.hibernate.Hibernate;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -30,6 +33,12 @@ import org.hibernate.Hibernate;
     }))
 public class VaultReview {
 
+    public static final Predicate<VaultReview> NO_ACTION_DATE =
+            vr -> vr.getActionedDate() == null;
+
+    public static final Comparator<VaultReview> BY_CREATION_TIME =
+            Comparator.comparing(VaultReview::getCreationTime);
+    
     public static final String EG_VAULT_REVIEW = "eg.VaultReview.1";
 
     // VaultReview Identifier
@@ -77,7 +86,7 @@ public class VaultReview {
     private String comment;
 
     public VaultReview() {
-
+        // Default Constructor
     }
 
     public String getId() {
