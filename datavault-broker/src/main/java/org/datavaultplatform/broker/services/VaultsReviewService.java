@@ -20,12 +20,12 @@ import static org.datavaultplatform.common.util.Utils.getSafeStream;
 @Transactional
 public class VaultsReviewService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(VaultsReviewService.class);
+
     // The number of months before the review date at which people should be notified.
     // This could be moved into datavault.properties if they keep on changing their minds about the value.
     public static final int MONTHS_BEFORE_REVIEW_DATE = -6;
 
-    private static final Logger LOG = LoggerFactory.getLogger(VaultsReviewService.class);
-    
     private final VaultReviewDAO vaultReviewDAO;
     private final DepositsReviewService depositsReviewService;
     private final Clock clock;
@@ -96,7 +96,7 @@ public class VaultsReviewService {
         LocalDate today = LocalDate.now(clock);
         LocalDate reviewWindowStartDate = DateTimeUtils.getDateAdjustedByMonths(vault.getReviewDate(), MONTHS_BEFORE_REVIEW_DATE);
 
-        // Rule 1: Today is not before the window
+        // Rule 1: Today is not before the Window Start Date
         // Rule 2: No review has happened since the window opened
         return !today.isBefore(reviewWindowStartDate) &&
                 reviewHasNotHappenedAfterReviewWindowStart(vault, reviewWindowStartDate);

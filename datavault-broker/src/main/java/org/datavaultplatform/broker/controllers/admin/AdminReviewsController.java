@@ -3,13 +3,13 @@ package org.datavaultplatform.broker.controllers.admin;
 import static org.datavaultplatform.common.util.Constants.HEADER_CLIENT_KEY;
 import static org.datavaultplatform.common.util.Constants.HEADER_USER_ID;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.common.event.vault.Review;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.response.ReviewInfo;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.response.VaultsData;
+import org.datavaultplatform.common.util.Utils;
 import org.jsondoc.core.annotation.Api;
 import org.jsondoc.core.annotation.ApiHeader;
 import org.jsondoc.core.annotation.ApiHeaders;
@@ -17,11 +17,12 @@ import org.jsondoc.core.annotation.ApiMethod;
 import org.jsondoc.core.pojo.ApiVerb;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 
 @RestController
@@ -62,22 +63,19 @@ public class AdminReviewsController {
     @GetMapping("/admin/vaultsForReview")
     public VaultsData getVaultsForReview(@RequestHeader(HEADER_USER_ID) String userID) {
 
-        List<VaultInfo> vaultResponses = new ArrayList<>();
         List<Vault> vaults = vaultsService.getVaults();
         List<Vault> vaultsForReview = vaultsReviewService.getVaultsForReview(vaults);
+        
+        Assert.state(vaultsForReview != null, "The vaultsForReview should not be null");
 
-        if(CollectionUtils.isNotEmpty(vaultsForReview)) {
-            for (Vault vault : vaultsForReview) {
-                if (vault == null) {
-                    continue;
-                }
-                vaultResponses.add(vault.convertToResponse());
-            }
-        }
+        List<VaultInfo> vaultResponses = vaultsForReview.stream()
+                .filter(Objects::nonNull)
+                .map(Vault::convertToResponse)
+                .toList();
 
-        VaultsData vaultsData = new VaultsData();
-        vaultsData.setData(vaultResponses);
-        return vaultsData;
+        VaultsData result = new VaultsData();
+        result.setData(vaultResponses);
+        return result;
     }
 
 
@@ -91,33 +89,27 @@ public class AdminReviewsController {
     @ApiHeaders(headers={
             @ApiHeader(name=HEADER_USER_ID, description="DataVault Broker User ID")
     })
-    @GetMapping("/admin/vaults/{vaultid}/vaultreviews/current")
+    @GetMapping("/admin/vaults/{vaultID}/vaultreviews/current")
     public ReviewInfo getCurrentReview(@RequestHeader(HEADER_USER_ID) String userID,
-                                             @PathVariable("vaultid") String vaultID) throws Exception {
+                                       @PathVariable String vaultID) throws Exception {
 
         User user = usersService.getUser(userID);
+        if (user == null) {
+            return null;
+        }
+
+        // throws Exception if vault cannot be found
         Vault vault = vaultsService.getUserVault(user, vaultID);
-        
-        VaultReview vaultReview = findVaultReviewWithoutActionedDate(vault);
+
+        VaultReview vaultReview = vault.getMostRecentVaultReview().orElse(null);
 
         if (vaultReview == null) {
            return null;
         }
 
-        ReviewInfo reviewInfo = getReviewInfo(vaultReview);
-        return reviewInfo;
+        return getReviewInfo(vaultReview);
     }
-
-    // This is for finding the current VaultReview
-    private VaultReview findVaultReviewWithoutActionedDate(Vault vault) {
-        VaultReview newestActive = vault.getVaultReviews()
-                .stream()
-                .filter(vr -> vr.getActionedDate() == null)
-                .max(Comparator.comparing(VaultReview::getCreationTime))
-                .orElse(null);
-        return newestActive;
-    }
-
+    
     @ApiMethod(
             path = "/admin/vaults/vaultreviews/current",
             verb = ApiVerb.POST,
@@ -204,16 +196,18 @@ public class AdminReviewsController {
 
 
     public static ReviewInfo getReviewInfo(VaultReview vaultReview) {
+        Assert.notNull(vaultReview, "The vaultReview cannot be null");
         List<DepositReview> depositReviews = vaultReview.getDepositReviews();
 
         // Create Lists of Deposit and DepositReview ids
         List<String> depositIds = new ArrayList<>();
         List<String> depositReviewIds = new ArrayList<>();
 
-        for (DepositReview depositReview : depositReviews) {
-            depositIds.add(depositReview.getDeposit().getID());
-            depositReviewIds.add(depositReview.getId());
-        }
+        Utils.getSafeStream(depositReviews)
+                .filter(Objects::nonNull).forEach(dr -> {
+                    depositIds.add(dr.getDeposit().getID());
+                    depositReviewIds.add(dr.getId());
+                });
 
         ReviewInfo reviewInfo = new ReviewInfo();
         reviewInfo.setVaultReviewId(vaultReview.getId());

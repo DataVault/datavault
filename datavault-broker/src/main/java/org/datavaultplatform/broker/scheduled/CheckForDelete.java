@@ -17,6 +17,7 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -63,15 +64,18 @@ public class CheckForDelete implements ScheduledTask {
 
     private void checkVaultsForDelete(LocalDate today) throws Exception {
         List<Vault> vaults = vaultsService.getVaults();
+        if (vaults == null) {
+            return;
+        }
         for (Vault vault : vaults) {
-            if (vault == null) {
-                continue;
-            }
             checkVaultForDelete(vault, today);
         }
     }
 
     private void checkVaultForDelete(Vault vault, LocalDate today) throws Exception {
+        if (vault == null) {
+            return;
+        }
 
         List<VaultReview> vaultReviews = vault.getVaultReviews();
 
@@ -82,7 +86,11 @@ public class CheckForDelete implements ScheduledTask {
         LOG.info("Checking if Vault {}/{} has deposits to delete?", vault.getID(), vault.getName());
 
         // Get the most recent VaultReview - all VaultReviews are for the vault - DepositReviews are associated with Deposit.
-        VaultReview mostRecentVaultReview = vault.getMostRecentVaultReview().orElseThrow();
+        Optional<VaultReview> optMostRecentVaultReview = vault.getMostRecentVaultReview();
+        if (optMostRecentVaultReview.isEmpty()) {
+            return;
+        }
+        VaultReview mostRecentVaultReview = optMostRecentVaultReview.get();
 
         LOG.info("Processing most recent VaultReview with id {} for Vault {}/{}",
                 mostRecentVaultReview.getId(), vault.getID(), vault.getName());
@@ -98,41 +106,44 @@ public class CheckForDelete implements ScheduledTask {
                 if (dr == null) {
                     continue;
                 }
-                checkDepositReview(vault, mostRecentVaultReview, dr, today);
+                checkActionedDepositReview(vault, mostRecentVaultReview, dr, today);
             }
         }
     }
 
-    private void checkDepositReview(Vault vault, VaultReview vaultReview, DepositReview dr, LocalDate today) throws Exception {
+    private void checkActionedDepositReview(Vault vault, VaultReview vaultReview, DepositReview dr, LocalDate today) throws Exception {
         Assert.notNull(vault, "The vault cannot be null");
         Assert.notNull(vaultReview, "The vaultReview cannot be null");
         Assert.notNull(dr, "The depositReview cannot be null");
+        Assert.notNull(dr.getDeposit(), "The depositReview.deposit cannot be null");
         Assert.notNull(today, "The Date 'today' cannot be null");
 
+        // we are only interested in actioned DepositReviews
         if (dr.getActionedDate() != null) {
             return;
         }
-        LOG.debug("Vault {} has an uncompleted depositReview for Deposit {}", vault.getName(), dr.getDeposit().getID());
+        String depositId = dr.getDeposit().getID();
+        LOG.debug("Vault {} has an uncompleted depositReview for Deposit {}", vault.getName(), depositId);
 
         var deleteStatus = dr.getDeleteStatus();
         switch (deleteStatus) {
             case (DepositReviewDeleteStatus.ONREVIEW):
-                //TODO - do I need to check getOldReviewDate is not null
-                if (today.isAfter(vaultReview.getOldReviewDate())) {
-                    LOG.info("Deleting Deposit [{}] because today is after Old Review Date", dr.getDeposit().getID());
+                LocalDate oldReviewDate = vaultReview.getOldReviewDate();
+                if (oldReviewDate != null && today.isAfter(oldReviewDate)) {
+                    LOG.info("Deleting Deposit [{}] because today is after OLD Review Date [{}]" , depositId, oldReviewDate);
                     depositReviewDeleteDeposit(dr);
                 }
                 break;
 
             case (DepositReviewDeleteStatus.ONEXPIRY):
-                //TODO - do I need to check getRetentionPolicyExpiry is not null
-                if (today.isAfter(DateTimeUtils.toLocalDate(vault.getRetentionPolicyExpiry()))) {
-                    LOG.info("Deleting Deposit [{}] because today is after Retention Policy Expiry", dr.getDeposit().getID());
+                LocalDate retentionPolicyExpiryDate = DateTimeUtils.toLocalDate(vault.getRetentionPolicyExpiry());
+                if (today.isAfter(retentionPolicyExpiryDate)) {
+                    LOG.info("Deleting Deposit [{}] because today is after Retention Policy Expiry [{}]", depositId, retentionPolicyExpiryDate);
                     depositReviewDeleteDeposit(dr);
                 }
                 break;
             default:
-                LOG.warn("unexpected DepositReview.deleteStatus {}", deleteStatus);
+                LOG.warn("unexpected DepositReview.deleteStatus [{}] for Deposit [{}]", deleteStatus, depositId);
         }
     }
 

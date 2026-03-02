@@ -1,6 +1,7 @@
 package org.datavaultplatform.webapp.controllers.admin;
 
 
+import org.apache.commons.lang3.StringUtils;
 import org.datavaultplatform.common.model.*;
 
 import org.datavaultplatform.common.request.CreateRetentionPolicy;
@@ -9,6 +10,7 @@ import org.datavaultplatform.common.response.ReviewInfo;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.response.VaultsData;
 import org.datavaultplatform.common.util.RoleUtils;
+import org.datavaultplatform.common.util.Utils;
 import org.datavaultplatform.webapp.model.DepositReviewModel;
 import org.datavaultplatform.webapp.model.VaultReviewModel;
 import org.datavaultplatform.webapp.services.RestService;
@@ -25,7 +27,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
+
+import static org.datavaultplatform.common.util.Utils.*;
 
 
 @Controller
@@ -74,10 +77,10 @@ public class AdminReviewsController {
 
         List<RoleAssignment> roleAssignmentsForVault = restService.getRoleAssignmentsForVault(vaultID);
 
-        List<RoleAssignment> dataManagers = roleAssignmentsForVault.stream()
+        List<RoleAssignment> dataManagers = Utils.getSafeStream(roleAssignmentsForVault)
                 .filter(Objects::nonNull)
                 .filter(roleAssignment -> RoleUtils.isRoleOfName(roleAssignment, "Nominated Data Manager"))
-                .collect(Collectors.toList());
+                .toList();
         model.addAttribute("dataManagers", dataManagers);
 
         roleAssignmentsForVault.stream()
@@ -86,7 +89,8 @@ public class AdminReviewsController {
                 .findFirst()
                 .ifPresent(roleAssignment -> model.addAttribute("dataOwner", roleAssignment));
 
-        model.addAttribute("createRetentionPolicy", restService.getRetentionPolicy(vault.getPolicyID()));
+        CreateRetentionPolicy retentionPolicy = restService.getRetentionPolicy(vault.getPolicyID());
+        model.addAttribute("createRetentionPolicy", retentionPolicy);
         model.addAttribute(restService.getGroup(vault.getGroupID()));
 
         ReviewInfo reviewInfo = restService.getCurrentReview(vaultID);
@@ -102,30 +106,7 @@ public class AdminReviewsController {
         
         Assert.isTrue(sizeDepositIds >= sizeDepositReviewIds, "size of depositIds not >= to size of depositReviewIds");
 
-        List<DepositReviewModel> depositReviewModels = new ArrayList<>();
-        for (int i = 0; i < reviewInfo.getDepositReviewIds().size(); i++) {
-            String depositReviewId = reviewInfo.getDepositReviewIds().get(i);
-            String depositId = reviewInfo.getDepositIds().get(i);
-            DepositInfo depositInfo = restService.getDeposit(depositId);
-            DepositReview depositReview = restService.getDepositReview(depositReviewId);
-            DepositReviewModel drm = new DepositReviewModel();
-
-            // Set DepositReview stuff
-            drm.setDepositReviewId(depositReview.getId());
-            drm.setDeleteStatus(depositReview.getDeleteStatus());
-            drm.setComment(depositReview.getComment());
-
-            // Set Deposit stuff
-            drm.setDepositId(depositInfo.getID());
-            drm.setName(depositInfo.getName());
-            drm.setStatusName(depositInfo.getStatus().name());
-            drm.setCreationTime(depositInfo.getCreationTime());
-
-            depositReviewModels.sort(Comparator.comparing(DepositReviewModel::getCreationTime));
-            depositReviewModels.add(drm);
-        }
-
-        vaultReviewModel.setDepositReviewModels(depositReviewModels);
+        vaultReviewModel.setDepositReviewModels(buildDepositReviewModels(reviewInfo));
 
         model.addAttribute("createRetentionPolicy", new CreateRetentionPolicy());
         model.addAttribute("vaultReviewModel", vaultReviewModel);
@@ -133,18 +114,42 @@ public class AdminReviewsController {
         return "admin/reviews/create";
     }
 
+    private List<DepositReviewModel> buildDepositReviewModels(ReviewInfo reviewInfo) {
+        Assert.notNull(reviewInfo, "ReviewInfo must not be null");
 
+        List<DepositReviewModel> result = new ArrayList<>();
+        for (int i = 0; i < reviewInfo.getDepositReviewIds().size(); i++) {
+
+            String depositReviewId = reviewInfo.getDepositReviewIds().get(i);
+            String depositId = reviewInfo.getDepositIds().get(i);
+
+            var drm = buildDepositReviewModel(depositReviewId, depositId);
+            result.add(drm);
+        }
+
+        result.sort(Comparator.comparing(DepositReviewModel::getCreationTime));
+        return result;
+    }
+
+    private DepositReviewModel buildDepositReviewModel(String depositReviewId, String depositId) {
+        DepositReviewModel drm = new DepositReviewModel();
+
+        DepositInfo depositInfo = restService.getDeposit(depositId);
+        DepositReview depositReview = restService.getDepositReview(depositReviewId);
+
+        drm.updateFromDepositReviewAndDepositInfo(depositReview, depositInfo);
+        return drm;
+    }
 
     // Process the completed review page
-    @PostMapping("/admin/vaults/{vaultid}/reviews/{reviewid}")
+    @PostMapping("/admin/vaults/{vaultID}/reviews/{reviewID}")
     public String processReview(@ModelAttribute VaultReviewModel vaultReviewModel,
-                                ModelMap model,
                                 RedirectAttributes redirectAttributes,
-                                @PathVariable("vaultid") String vaultID,
-                                @PathVariable("reviewid") String reviewID,
+                                @PathVariable String vaultID,
+                                @PathVariable String reviewID,
                                 @RequestParam String action) {
 
-        // ??? the valid actions Submit, Cancel and Save
+        Assert.notNull(vaultReviewModel, "VaultReviewModel must not be null");
         
         // Note - The ModelAttributes made available here are not the same objects as those passed to the View,
         // they only contain the values entered on screen. With that in mind, fetch the original objects again and
@@ -155,71 +160,103 @@ public class AdminReviewsController {
         }
 
         if (ACTION_SUBMIT.equals(action)) {
-            // Throw back an error if a new review date has not been entered but some deposits are being retained.
-            if (vaultReviewModel.getNewReviewDate() == null) {
-                if (vaultReviewModel.getDepositReviewModels() != null) {
-                    for (DepositReviewModel drm : vaultReviewModel.getDepositReviewModels()) {
-                        if (drm == null) {
-                            continue;
-                        }
-                        if (drm.getDeleteStatus() == DepositReviewDeleteStatus.RETAIN) {
-                            redirectAttributes.addAttribute("error", "reviewdate");
-                            return "redirect:/admin/vaults/" + vaultID + "/reviews";
-                        }
-                    }
-                }
+            if (!validateNewReviewDate(vaultReviewModel, redirectAttributes)) {
+                return "redirect:/admin/vaults/" + vaultID + "/reviews";
             }
         }
 
         LocalDateTime now = LocalDateTime.now(clock);
-        
-        // Get the old stuff and update it
+
         VaultReview originalVaultReview = restService.getVaultReview(reviewID);
-        originalVaultReview.setNewReviewDate(vaultReviewModel.getNewReviewDate());
-        originalVaultReview.setComment(vaultReviewModel.getComment());
+
+        updateVaultReviewAndVault(originalVaultReview, vaultReviewModel, vaultID, now, action);
+
+        List<DepositReviewModel> depositReviewModels = vaultReviewModel.getDepositReviewModels();
+
+        getSafeStream(depositReviewModels).forEach(drm -> {
+            processSingleDepositReview(drm, now, action);
+        });
+
+        return "redirect:/admin/reviews";
+    }
+
+    /**
+     * You cannot have a DepositReviewModel:RETAIN without a new New ReviewDate
+     * @param vaultReviewModel
+     * @param redirectAttributes
+     * @return false if there's no NEW REVIEW DATE and at least 1 DRM with retain.
+     */
+    private boolean validateNewReviewDate(VaultReviewModel vaultReviewModel, RedirectAttributes redirectAttributes) {
+        
+        if (vaultReviewModel.getNewReviewDate() != null) {
+            return true;
+        }
+
+        if (vaultReviewModel.getDepositReviewModels() == null) {
+            return true;
+        }
+
+        List<DepositReviewModel> depositReviewModels = vaultReviewModel.getDepositReviewModels();
+        if (depositReviewModels == null) {
+            return true;
+        }
+        for (DepositReviewModel drm : depositReviewModels) {
+            if (drm == null) {
+                continue;
+            }
+            if (drm.getDeleteStatus() == DepositReviewDeleteStatus.RETAIN) {
+                redirectAttributes.addAttribute("error", "reviewdate");
+                return false;
+            }
+        }
+        return true;
+    }
+
+
+    private void updateVaultReviewAndVault(VaultReview originalVaultReview, VaultReviewModel vrm, String vaultID, LocalDateTime now, String action) {
+        
+        originalVaultReview.setNewReviewDate(vrm.getNewReviewDate());
+        originalVaultReview.setComment(vrm.getComment());
 
         if (ACTION_SUBMIT.equals(action)) {
             originalVaultReview.setActionedDate(now);
 
-            // Save the old review date in the VaultReview
+            Assert.isTrue(StringUtils.isNotBlank(vaultID), "The vaultId cannot be blank");
             VaultInfo vault = restService.getVault(vaultID);
+
+            // copy the original ReviewDate into oldReviewDate on DRM
+            // at the point you create a new REVIEW - the VRMs act against the original review date.
+            // the NewReviewDate will be used for any later reviews.
             originalVaultReview.setOldReviewDate(vault.getReviewDate());
 
-            // And update the review date in the Vault if a new one has been entered
-            if (vaultReviewModel.getNewReviewDate() != null) {
-                // Update the review date in the Vault object.
-                LOG.info("Editing Review Date for Vault id " + vaultID + " with new Review Date " + vaultReviewModel.getNewReviewDate());
-                restService.updateVaultReviewDate(vaultID, vaultReviewModel.getNewReviewDate());
+            if (vrm.getNewReviewDate() != null) {
+                LOG.info("Editing Review Date for Vault id {} with new Review Date {}", vaultID, vrm.getNewReviewDate());
+                // update the Vault with the newVaultReviewDate
+                restService.updateVaultReviewDate(vaultID, vrm.getNewReviewDate());
             }
         }
 
-        LOG.info("Editing Vault Review id " + originalVaultReview.getId());
+        LOG.info("Editing Vault Review id {}", originalVaultReview.getId());
         restService.editVaultReview(originalVaultReview);
+    }
 
-        if (vaultReviewModel.getDepositReviewModels() != null) {
-            for (DepositReviewModel drm : vaultReviewModel.getDepositReviewModels()) {
-                DepositReview originalDepositReview = restService.getDepositReview(drm.getDepositReviewId());
-                originalDepositReview.setDeleteStatus(drm.getDeleteStatus());
-                originalDepositReview.setComment(drm.getComment());
+    private void processSingleDepositReview(DepositReviewModel drm, LocalDateTime now, String action) {
+        DepositReview originalDepositReview = restService.getDepositReview(drm.getDepositReviewId());
+        originalDepositReview.setDeleteStatus(drm.getDeleteStatus());
+        originalDepositReview.setComment(drm.getComment());
 
-                if (ACTION_SUBMIT.equals(action)) {
-                    if (drm.getDeleteStatus() == DepositReviewDeleteStatus.NOW) {
-                        // Stand back everyone!
-                        LOG.info("Deleting deposit id " + drm.getDepositId());
-                        originalDepositReview.setActionedDate(now);
-                        restService.deleteDeposit(drm.getDepositId());
-                    } else if (drm.getDeleteStatus() == DepositReviewDeleteStatus.RETAIN) {
-                        LOG.info("Retaining deposit id " + drm.getDepositId());
-                        originalDepositReview.setActionedDate(now);
-                    } // Otherwise it has been flagged to be deleted later.
-                }
-
-                LOG.info("Editing Deposit Review id " + originalDepositReview.getId());
-                restService.editDepositReview(originalDepositReview);
+        if (ACTION_SUBMIT.equals(action)) {
+            if (drm.getDeleteStatus() == DepositReviewDeleteStatus.NOW) {
+                originalDepositReview.setActionedDate(now);
+                LOG.info("Deleting deposit id {}", drm.getDepositId());
+                restService.deleteDeposit(drm.getDepositId());
+            } else if (drm.getDeleteStatus() == DepositReviewDeleteStatus.RETAIN) {
+                originalDepositReview.setActionedDate(now);
+                LOG.info("Retaining deposit id {}", drm.getDepositId());
             }
         }
-
-        return "redirect:/admin/reviews";
+        LOG.info("Editing Deposit Review id {}", originalDepositReview.getId());
+        restService.editDepositReview(originalDepositReview);
     }
 
 }

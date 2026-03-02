@@ -257,19 +257,10 @@ public class VaultsController {
             for (int i = 0; i < reviewInfo.getDepositIds().size(); i++) {
                 DepositInfo depositInfo = restService.getDeposit(reviewInfo.getDepositIds().get(i));
                 DepositReview depositReview = restService.getDepositReview(reviewInfo.getDepositReviewIds().get(i));
+
                 DepositReviewModel drm = new DepositReviewModel();
-
-                // Set DepositReview stuff
-                drm.setDepositReviewId(depositReview.getId());
-                drm.setDeleteStatus(depositReview.getDeleteStatus());
-                drm.setComment(depositReview.getComment());
-
-                // Set Deposit stuff
-                drm.setDepositId(depositInfo.getID());
-                drm.setName(depositInfo.getName());
-                drm.setStatusName(depositInfo.getStatus().name());
-                drm.setCreationTime(depositInfo.getCreationTime());
-
+                drm.updateFromDepositReviewAndDepositInfo(depositReview, depositInfo);
+                
                 depositReviewModels.add(drm);
             }
 

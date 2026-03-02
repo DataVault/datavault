@@ -1,5 +1,9 @@
 package org.datavaultplatform.webapp.model;
 
+import org.datavaultplatform.common.model.DepositReview;
+import org.datavaultplatform.common.response.DepositInfo;
+import org.springframework.util.Assert;
+
 import java.time.LocalDateTime;
 
 public class DepositReviewModel {
@@ -81,5 +85,25 @@ public class DepositReviewModel {
 
     public void setCreationTime(LocalDateTime creationTime) {
         this.creationTime = creationTime;
+    }
+
+    /**
+     * This common code was put here to avoid duplication.
+     * @param depositReview
+     * @param depositInfo
+     */
+    public void updateFromDepositReviewAndDepositInfo(DepositReview depositReview, DepositInfo depositInfo) {
+        Assert.notNull(depositReview, "The depositReview cannot be null");
+        Assert.notNull(depositInfo, "The depositInfo cannot be null");
+        // Set DepositReview stuff
+        this.setDepositReviewId(depositReview.getId());
+        this.setDeleteStatus(depositReview.getDeleteStatus());
+        this.setComment(depositReview.getComment());
+
+        // Set Deposit stuff
+        this.setDepositId(depositInfo.getID());
+        this.setName(depositInfo.getName());
+        this.setStatusName(depositInfo.getStatus().name());
+        this.setCreationTime(depositInfo.getCreationTime());
     }
 }
