@@ -176,7 +176,7 @@ a {
 }
 
 .greyblue {
-    background-color: #D50032; !important;
+    background-color: #D50032 !important;
 }
 
 .page-head-title a {
@@ -384,4 +384,15 @@ nav[aria-label="breadcrumb"] .breadcrumb {
 
 #upload-tree {
     text-align: left !important;
+}
+
+.datavault-footer > .footer {
+    max-width: none !important;
+    margin: 0 !important;
+}
+
+/* Neutralise EdGEL navbar width restriction inside Datavault */
+.datavault-header .navbar:not(.fluid .navbar) {
+    max-width: none !important;
+    margin: 0 !important;
 }
