@@ -2,6 +2,7 @@ package org.datavaultplatform.common.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
 import org.datavaultplatform.common.model.Deposit;
 import org.datavaultplatform.common.model.DepositChunk;
 import org.datavaultplatform.common.model.DepositPath;
@@ -15,6 +16,7 @@ import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiObject(name = "Deposit")
+@Data
 public class DepositInfo {
 
     @ApiObjectField(description = "Universally Unique Identifier for the Deposit", name="Deposit")
@@ -123,189 +125,5 @@ public class DepositInfo {
         this.id = id;
     }
 
-    public String getUserID() {
-        return userID;
-    }
-
-    public void setUserID(String userID) {
-        this.userID = userID;
-    }
-    
-    public LocalDateTime getCreationTime() {
-        return creationTime;
-    }
-
-    public void setCreationTime(LocalDateTime creationTime) {
-        this.creationTime = creationTime;
-    }
-
-    public Deposit.Status getStatus() {
-        return status;
-    }
-
-    public void setStatus(Deposit.Status status) {
-        this.status = status;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-    
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-    
-    public Boolean getHasPersonalData() {
-        return hasPersonalData;
-    }
-    
-    public void setHasPersonalData(Boolean hasPersonalData) {
-        this.hasPersonalData = hasPersonalData;
-    }
-    
-    public String getPersonalDataStatement() {
-        return personalDataStatement;
-    }
-    
-    public void setPersonalDataStatement(String personalDataStatement) {
-        this.personalDataStatement = personalDataStatement;
-    }
-    
-    public String getFileOrigin() {
-        return fileOrigin;
-    }
-
-    public void setFileOrigin(String fileOrigin) {
-        this.fileOrigin = fileOrigin;
-    }
-
-    public String getShortFilePath() {
-        return shortFilePath;
-    }
-
-    public void setShortFilePath(String shortFilePath) {
-        this.shortFilePath = shortFilePath;
-    }
-
-    public String getFilePath() {
-        return filePath;
-    }
-
-    public void setFilePath(String filePath) {
-        this.filePath = filePath;
-    }
-
-    public String getVaultID() {
-        return vaultID;
-    }
-
-    public void setVaultID(String vaultID) {
-        this.vaultID = vaultID;
-    }
-
-    public long getDepositSize() {
-        return depositSize;
-    }
-
-    public void setDepositSize(long depositSize) {
-        this.depositSize = depositSize;
-    }
-
     public String getSizeStr() { return DataVaultFileUtils.getGibibyteSizeStr(depositSize); }
-
-    public List<DepositPath> getDepositPaths() {
-        return depositPaths;
-    }
-
-    public void setDepositPaths(List<DepositPath> depositPaths) {
-        this.depositPaths = depositPaths;
-    }
-
-    public List<DepositChunk> getDepositChunks() {
-        return depositChunks;
-    }
-
-    public void setDepositChunks(List<DepositChunk> depositChunks) {
-        this.depositChunks = depositChunks;
-    }
-
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
-    public String getVaultName() {
-        return vaultName;
-    }
-
-    public void setVaultName(String vaultName) {
-        this.vaultName = vaultName;
-    }
-
-    public String getVaultOwnerID() {
-        return vaultOwnerID;
-    }
-
-    public void setVaultOwnerID(String vaultOwnerID) {
-        this.vaultOwnerID = vaultOwnerID;
-    }
-
-    public String getVaultOwnerName() {
-        return vaultOwnerName;
-    }
-
-    public void setVaultOwnerName(String vaultOwnerName) {
-        this.vaultOwnerName = vaultOwnerName;
-    }
-
-    public String getDatasetID() {
-        return datasetID;
-    }
-
-    public void setDatasetID(String datasetId) {
-        this.datasetID = datasetId;
-    }
-
-    public String getCrisID() {
-        return this.crisID;
-    }
-
-    public void setCrisID(String crisId) {
-        this.crisID = crisId;
-    }
-
-    public String getGroupName() {
-        return groupName;
-    }
-
-    public void setGroupName(String groupName) {
-        this.groupName = groupName;
-    }
-
-    public String getGroupID() {
-        return this.groupID;
-    }
-
-    public void setGroupID(String groupID) {
-        this.groupID = groupID;
-    }
-
-    public void setVaultReviewDate(String vaultReviewDate) {
-        this.vaultReviewDate = vaultReviewDate;
-    }
-
-    public String getVaultReviewDate() {
-        return vaultReviewDate;
-    }
 }

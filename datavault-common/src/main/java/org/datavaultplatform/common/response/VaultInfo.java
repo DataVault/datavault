@@ -8,6 +8,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import lombok.Data;
 import org.datavaultplatform.common.model.PendingVault;
 import org.datavaultplatform.common.request.CreateVault;
 import org.datavaultplatform.common.retentionpolicy.RetentionPolicyStatus;
@@ -20,6 +21,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiObject(name = "VaultInfo")
+@Data
 public class VaultInfo {
     
     @ApiObjectField(description = "The unique identifier for this vault")
@@ -229,125 +231,6 @@ public class VaultInfo {
         this.id = id;
     }
 
-    public String getUserID() {
-        return userID;
-    }
-
-    public void setUserID(String userID) {
-        this.userID = userID;
-    }
-    
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
-    public String getDatasetID() {
-        return datasetID;
-    }
-
-    public void setDatasetID(String datasetID) {
-        this.datasetID = datasetID;
-    }
-
-    public String getCrisID() {
-        return crisID;
-    }
-
-    public void setCrisID(String crisID) {
-        this.crisID = crisID;
-    }
-
-    public String getDatasetName() {
-        return datasetName;
-    }
-
-    public void setDatasetName(String datasetName) {
-        this.datasetName = datasetName;
-    }
-
-    public LocalDateTime getCreationTime() {
-        return creationTime;
-    }
-
-    public void setCreationTime(LocalDateTime creationTime) {
-        this.creationTime = creationTime;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getNotes() {
-        return this.notes;
-    }
-
-    public void setNotes(String notes) {
-        this.notes = notes;
-    }
-
-    public PendingVault.Estimate getEstimate() {
-        return this.estimate;
-    }
-
-    public void setEstimate(PendingVault.Estimate estimate) {
-        this.estimate = estimate;
-    }
-
-    public PendingVault.Billing_Type getBillingType() {
-        return this.billingType;
-    }
-
-    public void setBillingType(PendingVault.Billing_Type billingType) {
-        this.billingType = billingType;
-    }
-
-    public String getPolicyID() {
-        return policyID;
-    }
-
-    public void setPolicyID(String policyID) {
-        this.policyID = policyID;
-    }
-
-    public String getPolicyLength() {
-        return policyLength;
-    }
-
-    public void setPolicyLength(String policyLength) {
-        this.policyLength = policyLength;
-    }
-
-    public String getGroupID() {
-        return groupID;
-    }
-
-    public void setGroupID(String groupID) {
-        this.groupID = groupID;
-    }
-
-    public long getVaultSize() {
-        return vaultSize;
-    }
-
-    public void setVaultSize(long vaultSize) {
-        this.vaultSize = vaultSize;
-    }
 
     public String getSizeStr() {
         if ( vaultSize == 0 ){
@@ -363,30 +246,6 @@ public class VaultInfo {
         return dx + " GB";
     }
 
-    public int getPolicyStatus() {
-        return policyStatus;
-    }
-
-    public void setPolicyStatus(int policyStatus) {
-        this.policyStatus = policyStatus;
-    }
-
-    public LocalDateTime getPolicyLastChecked() {
-        return policyLastChecked;
-    }
-
-    public void setPolicyLastChecked(LocalDateTime policyLastChecked) {
-        this.policyLastChecked = policyLastChecked;
-    }
-
-    public LocalDateTime getPolicyExpiry() {
-        return policyExpiry;
-    }
-
-    public void setPolicyExpiry(LocalDateTime policyExpiry) {
-        this.policyExpiry = policyExpiry;
-    }
-
     public String getPolicyStatusStr() {
         if (policyStatus == RetentionPolicyStatus.UNCHECKED) return "Un-checked";
         else if (policyStatus == RetentionPolicyStatus.OK) return "OK";
@@ -394,64 +253,6 @@ public class VaultInfo {
         else return ("Unknown");
     }
     
-    public LocalDate getGrantEndDate() {
-        return grantEndDate;
-    }
-
-    public void setGrantEndDate(LocalDate grantEndDate) {
-        this.grantEndDate = grantEndDate;
-    }
-
-    public LocalDate getReviewDate() {
-        return reviewDate;
-    }
-
-    public void setReviewDate(LocalDate reviewDate) {
-        this.reviewDate = reviewDate;
-    }
-
-	public long getNumberOfDeposits() {
-		return numberOfDeposits;
-	}
-
-	public void setNumberOfDeposits(long numberOfDeposits) {
-		this.numberOfDeposits = numberOfDeposits;
-	}
-
-	public String getProjectId() {
-		return projectId;
-	}
-
-	public void setProjectId(String projectId) {
-		this.projectId = projectId;
-	}
-
-    public String getProjectTitle() {
-        return projectTitle;
-    }
-
-    public void setProjectTitle(String projectTitle) {
-        this.projectTitle = projectTitle;
-    }
-
-    public String getSliceID() {
-        return this.sliceID;
-    }
-
-    public void setSliceID(String sliceID) {
-        this.sliceID = sliceID;
-    }
-
-	public long getProjectSize() {
-		return projectSize;
-	}
-
-
-
-	public void setProjectSize(long projectSize) {
-		this.projectSize = projectSize;
-	}
-	
 	public String getProjectSizeStr() {
         if ( projectSize == 0 ){
             return "0";
@@ -464,160 +265,6 @@ public class VaultInfo {
             return "< 1 GB";
         }
         return dx + " GB";
-    }
-
-
-	public BigDecimal getAmountToBeBilled() {
-		return amountToBeBilled;
-	}
-
-	public void setAmountToBeBilled(BigDecimal amountToBeBilled) {
-		this.amountToBeBilled = amountToBeBilled;
-	}
-
-	public BigDecimal getAmountBilled() {
-		return amountBilled;
-	}
-
-	public void setAmountBilled(BigDecimal amountBilled) {
-		this.amountBilled = amountBilled;
-	}
-
-    public Boolean getAffirmed() {
-        return affirmed;
-    }
-
-    public void setAffirmed(Boolean affirmed) {
-        this.affirmed = affirmed;
-    }
-
-    public String getAuthoriser() {
-        return this.authoriser;
-    }
-
-    public void setAuthoriser(String authoriser) {
-        this.authoriser = authoriser;
-    }
-
-    public String getSchoolOrUnit() {
-        return this.schoolOrUnit;
-    }
-
-    public void setSchoolOrUnit(String schoolOrUnit) {
-        this.schoolOrUnit = schoolOrUnit;
-    }
-
-    public String getSubunit() {
-        return this.subunit;
-    }
-
-    public void setSubunit(String subunit) {
-        this.subunit = subunit;
-    }
-
-    public String getContact() {
-        return this.contact;
-    }
-
-    public void setContact(String contact) {
-        this.contact = contact;
-    }
-
-    public String getOwnerId() {
-        return this.ownerId;
-    }
-
-    public void setOwnerId(String ownerId) {
-        this.ownerId = ownerId;
-    }
-
-    public String getOwnerName() {
-        return this.ownerName;
-    }
-
-    public void setOwnerName(String ownerName) {
-        this.ownerName = ownerName;
-    }
-
-    public void setDataCreators(List<String> creators) {
-        this.creators = creators;
-    }
-
-    public List<String> getDataCreators() {
-        return this.creators;
-    }
-
-    public List<String> getNominatedDataManagerIds() {
-        return nominatedDataManagerIds;
-    }
-
-    public void setNominatedDataManagerIds(List<String> nominatedDataManagerIds) {
-        this.nominatedDataManagerIds = nominatedDataManagerIds;
-    }
-
-    public List<String> getDepositorIds() {
-        return depositorIds;
-    }
-
-    public void setDepositorIds(List<String> depositorIds) {
-        this.depositorIds = depositorIds;
-    }
-
-    public Boolean getPureLink() {
-        return pureLink;
-    }
-
-    public void setPureLink(Boolean pureLink) {
-        this.pureLink = pureLink;
-    }
-
-    public Boolean getConfirmed() {
-        return confirmed;
-    }
-
-    public void setConfirmed(Boolean confirmed) {
-        this.confirmed = confirmed;
-    }
-    
-
-    public String getVaultCreatorId() {
-		return vaultCreatorId;
-	}
-
-	public void setVaultCreatorId(String vaultCreatorId) {
-		this.vaultCreatorId = vaultCreatorId;
-	}
-
-    public PendingVault.Slice_Query_Choice getSliceQueryChoice() {
-		return sliceQueryChoice;
-	}
-
-	public void setSliceQueryChoice(PendingVault.Slice_Query_Choice sliceQueryChoice) {
-		this.sliceQueryChoice = sliceQueryChoice;
-	}
-
-	public PendingVault.Funding_Query_Choice getFundingQueryChoice() {
-		return fundingQueryChoice;
-	}
-
-	public void setFundingQueryChoice(PendingVault.Funding_Query_Choice fundingQueryChoice) {
-		this.fundingQueryChoice = fundingQueryChoice;
-	}
-
-	public PendingVault.Feewaiver_Query_Choice getFeewaiverQueryChoice() {
-		return feewaiverQueryChoice;
-	}
-
-	public void setFeewaiverQueryChoice(PendingVault.Feewaiver_Query_Choice feewaiverQueryChoice) {
-		this.feewaiverQueryChoice = feewaiverQueryChoice;
-	}
-
-    public String getPaymentDetails() {
-        return this.paymentDetails;
-    }
-
-    public void setPaymentDetails(String paymentDetails) {
-        this.paymentDetails = paymentDetails;
     }
 
 	public CreateVault convertToCreate() {
@@ -742,4 +389,13 @@ public class VaultInfo {
     public static VaultInfo create(){
         return new VaultInfo();
     }
+
+    public void setDataCreators(List<String> creators) {
+        this.creators = creators;
+    }
+
+    public List<String> getDataCreators() {
+        return this.creators;
+    }
+
 }
