@@ -184,7 +184,7 @@ public class AdminPendingVaultsController {
 		try {
 			reviewDate = DateTimeUtils.parseLocalDate(reviewDateString);
 		} catch(DateTimeParseException pe ) {
-			logger.info("Parse error: " + pe);
+			logger.info("Parse error: ",  pe);
 		}
 		VaultInfo pendingVault = restService.getPendingVault(pendingVaultID);
         if(reviewDate != null && !DateTimeUtils.isSameDay(reviewDate, pendingVault.getReviewDate())) {

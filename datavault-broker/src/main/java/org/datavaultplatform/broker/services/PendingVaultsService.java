@@ -68,8 +68,8 @@ public class PendingVaultsService {
 
   public void addOrUpdatePendingVault(PendingVault vault) {
     LocalDateTime now = LocalDateTime.now();
-    vault.setCreationTime(now);
     if (vault != null) {
+      vault.setCreationTime(now);
       if (vault.getId() == null || vault.getId().isEmpty()) {
         logger.info("Saving a new pending vault");
         pendingVaultDAO.save(vault);
@@ -221,6 +221,7 @@ public class PendingVaultsService {
       permissionsService.createRoleAssignment(ownerRoleAssignment);
     } else {
       // error!
+      logger.error("unexpected null owner!");
     }
   }
 

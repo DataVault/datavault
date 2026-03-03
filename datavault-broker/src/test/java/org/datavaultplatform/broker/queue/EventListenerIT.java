@@ -42,7 +42,6 @@ import org.datavaultplatform.common.event.deposit.ValidationComplete;
 import org.datavaultplatform.common.event.retrieve.*;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.storage.Verify;
-import org.datavaultplatform.common.util.DateTimeUtils;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -156,8 +155,8 @@ class EventListenerIT extends BaseDatabaseTest {
     vault.setName("test-vault");
     vault.setContact("contact name");
     vault.setGroup(group);
-    Date nowPlus1Year = java.sql.Date.valueOf(LocalDate.now().plusYears(1));
-    vault.setReviewDate(DateTimeUtils.toLocalDate(nowPlus1Year));
+    LocalDate nowPlus1Year = LocalDate.now().plusYears(1);
+    vault.setReviewDate(nowPlus1Year);
     vaultsService.addVault(vault);
     this.vaultId = vault.getID();
 

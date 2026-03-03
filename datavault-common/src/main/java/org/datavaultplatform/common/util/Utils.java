@@ -42,7 +42,7 @@ public class Utils {
       log.warn("NULL expectedHash for [{}][{}]", label, file);
       return;
     }
-      log.info("Calculate Checksum Digest for: {}", file.getAbsolutePath());
+    log.info("Calculate Checksum Digest for: {}", file.getAbsolutePath());
     Assert.isTrue(file.exists(), () -> "File does not exist: " + file.getAbsolutePath());
     Assert.isTrue(file.isFile(), () -> "File is not a file: " + file.getAbsolutePath());
     String computedHash = Verify.getDigest(file);

@@ -16,6 +16,7 @@ import org.datavaultplatform.common.email.EmailTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 @Service
 @Transactional
@@ -76,8 +77,9 @@ public class VaultsService {
     }
 
     public void addVault(Vault vault) {
-        LocalDateTime d = LocalDateTime.now();
-        vault.setCreationTime(d);
+        Assert.notNull(vault, "The vault cannot be null");
+        LocalDateTime creationTime = LocalDateTime.now();
+        vault.setCreationTime(creationTime);
         vaultDAO.save(vault);
     }
 

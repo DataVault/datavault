@@ -164,28 +164,27 @@ public class ScheduledTasksWithDbIT extends BaseReuseDatabaseTest {
 
     private Vault setupVault(RetentionPolicy rp) {
 
-        Date now = Date.from(clock.instant());
         LocalDate today = LocalDate.now(clock);
         LocalDate todayPlus1Year = today.plusYears(1);
-        Date todayPlus1YearDate = DateTimeUtils.toDateAtNoon(todayPlus1Year);
+        LocalDateTime todayAtNoon = DateTimeUtils.toLocalDateTimeAtNoon(today);
 
         Vault vault = new Vault();
         vault.setContact("James Bond");
         vault.setName("test-vault");
-        vault.setCreationTime(DateTimeUtils.toLocalDateTime(now));
-        vault.setReviewDate(DateTimeUtils.toLocalDate(todayPlus1YearDate));
+        vault.setCreationTime(todayAtNoon);
+        vault.setReviewDate(todayPlus1Year);
         vault.setRetentionPolicy(rp);
         vaultDAO.save(vault);
 
         VaultReview vr1 = new VaultReview();
         vr1.setVault(vault);
         vr1.setId("vr-1");
-        vr1.setCreationTime(DateTimeUtils.toLocalDateTime(now));
+        vr1.setCreationTime(todayAtNoon);
 
         VaultReview vr2 = new VaultReview();
         vr2.setVault(vault);
         vr2.setId("vr-2");
-        vr2.setCreationTime(DateTimeUtils.toLocalDateTime(now));
+        vr2.setCreationTime(todayAtNoon);
 
         vaultReviewDAO.save(vr1);
         vaultReviewDAO.save(vr2);
@@ -228,17 +227,14 @@ public class ScheduledTasksWithDbIT extends BaseReuseDatabaseTest {
 
         VaultReview vr1 = new VaultReview();
         vr1.setVault(vault);
-        //was new Date()
         vr1.setCreationTime(now);
         vaultReviewDAO.save(vr1);
 
         DepositReview dr = new DepositReview();
         dr.setVaultReview(vr1);
         dr.setDeposit(deposit);
-        //was new Date()
         dr.setActionedDate(now);
         dr.setDeleteStatus(DepositReviewDeleteStatus.ONREVIEW);
-        //was new Date()
         dr.setCreationTime(now);
 
         depositReviewDAO.save(dr);
