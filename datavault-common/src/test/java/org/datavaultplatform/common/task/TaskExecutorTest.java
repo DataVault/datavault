@@ -127,6 +127,7 @@ class TaskExecutorTest {
 
   @Test
   void testTaskExecutorTimeout() {
+    TaskConfigTL.get().setExecutorProperShutdownEnabled(true);
     TimeoutException te = assertThrows(TimeoutException.class, () -> {
 
       TaskExecutor<String> executor = new TaskExecutor<>(1, "executorTimeoutTest");

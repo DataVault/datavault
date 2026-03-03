@@ -93,6 +93,11 @@ class ComplexWorkerTaskShutdownOnErrorIT {
         }
     }
 
+    @BeforeEach
+    void setup() {
+        TaskConfigTL.get().setExecutorProperShutdownEnabled(true);
+    }
+
     @AfterEach
     void tearDown() {
         TaskConfigTL.reset();

@@ -120,7 +120,6 @@ public class TaskExecutor<T> {
     }
 
     private void handleShutdownInternal(ExecutorService executor) {
-        LOG.info("IN: handleShutdownInternal");
         // If it's already fully closed, we're done.
         if (executor == null || executor.isTerminated()) return;
 
@@ -160,6 +159,5 @@ public class TaskExecutor<T> {
                 }
             }
         }
-        LOG.info("OUT: handleShutdownInternal");
     }
 }
