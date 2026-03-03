@@ -1,11 +1,15 @@
 package org.datavaultplatform.webapp.model;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.datavaultplatform.common.model.DepositReview;
 import org.datavaultplatform.common.response.DepositInfo;
 import org.springframework.util.Assert;
 
 import java.time.LocalDateTime;
 
+@Data
+@NoArgsConstructor
 public class DepositReviewModel {
 
     // DepositReview Identifier
@@ -23,74 +27,10 @@ public class DepositReviewModel {
     private String statusName;
     private LocalDateTime creationTime;
 
-    public String getDepositReviewId() {
-        return depositReviewId;
-    }
-
-    public void setDepositReviewId(String depositReviewId) {
-        this.depositReviewId = depositReviewId;
-    }
-
-    public boolean isToBeDeleted() {
-        return toBeDeleted;
-    }
-
-    public void setToBeDeleted(boolean toBeDeleted) {
-        this.toBeDeleted = toBeDeleted;
-    }
-
-    public int getDeleteStatus() {
-        return deleteStatus;
-    }
-
-    public void setDeleteStatus(int deleteStatus) {
-        this.deleteStatus = deleteStatus;
-    }
-
-    public String getComment() {
-        return comment;
-    }
-
-    public void setComment(String comment) {
-        this.comment = comment;
-    }
-
-    public String getDepositId() {
-        return depositId;
-    }
-
-    public void setDepositId(String depositId) {
-        this.depositId = depositId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getStatusName() {
-        return statusName;
-    }
-
-    public void setStatusName(String statusName) {
-        this.statusName = statusName;
-    }
-
-    public LocalDateTime getCreationTime() {
-        return creationTime;
-    }
-
-    public void setCreationTime(LocalDateTime creationTime) {
-        this.creationTime = creationTime;
-    }
-
     /**
      * This common code was put here to avoid duplication.
-     * @param depositReview
-     * @param depositInfo
+     * @param depositReview the deposit review from where to get data from
+     * @param depositInfo the deposit info from where to get data from
      */
     public void updateFromDepositReviewAndDepositInfo(DepositReview depositReview, DepositInfo depositInfo) {
         Assert.notNull(depositReview, "The depositReview cannot be null");

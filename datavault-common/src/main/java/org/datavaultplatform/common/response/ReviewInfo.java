@@ -2,6 +2,7 @@ package org.datavaultplatform.common.response;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.NoArgsConstructor;
 import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
 import lombok.Data;
@@ -15,6 +16,7 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiObject(name = "ReviewInfo")
 @Data
+@NoArgsConstructor
 public class ReviewInfo {
 
     @ApiObjectField(description = "Universally Unique Identifier for the VaultReview", name="VaultReview Id")
@@ -26,29 +28,4 @@ public class ReviewInfo {
     @ApiObjectField(description = "List of all depositReviews associated with a VaultReview", name="DepositReview Ids")
     private List<String> depositReviewIds;
 
-
-
-    public String getVaultReviewId() {
-        return vaultReviewId;
-    }
-
-    public void setVaultReviewId(String vaultReviewId) {
-        this.vaultReviewId = vaultReviewId;
-    }
-
-    public List<String> getDepositIds() {
-        return depositIds;
-    }
-
-    public void setDepositIds(List<String> depositIds) {
-        this.depositIds = depositIds;
-    }
-
-    public List<String> getDepositReviewIds() {
-        return depositReviewIds;
-    }
-
-    public void setDepositReviewIds(List<String> depositReviewIds) {
-        this.depositReviewIds = depositReviewIds;
-    }
 }
