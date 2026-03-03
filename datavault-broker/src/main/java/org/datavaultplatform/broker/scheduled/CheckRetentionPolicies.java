@@ -1,18 +1,22 @@
 package org.datavaultplatform.broker.scheduled;
 
 import org.datavaultplatform.broker.services.VaultsService;
+import org.datavaultplatform.common.model.RetentionPolicy;
 import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.retentionpolicy.RetentionPolicyStatus;
+import org.datavaultplatform.common.util.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by stuartlewis on 01/06/2016.
@@ -25,6 +29,8 @@ public class CheckRetentionPolicies implements ScheduledTask {
     private final Clock clock;
 
     public CheckRetentionPolicies(VaultsService vaultsService, Clock clock) {
+        Assert.notNull(vaultsService, "VaultsService must not be null");
+        Assert.notNull(clock, "clock must not be null");
         this.vaultsService = vaultsService;
         this.clock = clock;
     }
@@ -47,26 +53,27 @@ public class CheckRetentionPolicies implements ScheduledTask {
     
     private void checkRetentionPoliciesForVaults(){
         // Get all the vaults
-        List<Vault> vaults = vaultsService.getVaults();
-        for(Vault vault : vaults){
-            if(vault == null){
-                continue;
-            }
-            checkRetentionPoliciesForVault(vault);
-        }
+        Utils.getSafeStream(vaultsService.getVaults())
+                .filter(Objects::nonNull)
+                .forEach(this::checkRetentionPoliciesForVault);
     }
 
     private void checkRetentionPoliciesForVault(Vault vault) {
 
         String vaultId = vault.getID();
+        RetentionPolicy retentionPolicy = vault.getRetentionPolicy();
+        String retentionPolicyDesc = retentionPolicy == null ? "null" : String.valueOf(retentionPolicy.getID());
         // Process each vault
         LOG.info("Checking retention policy of vault: {} ({}) with retention policy {}",
                 vaultId,
                 vault.getName(),
-                vault.getRetentionPolicy().getID()
+                retentionPolicyDesc
         );
         vaultsService.checkRetentionPolicy(vaultId);
         Vault checkedVault = vaultsService.getVault(vaultId);
+        if (checkedVault == null) {
+            return;
+        }
         int status = checkedVault.getRetentionPolicyStatus();
         String statusDesc = RetentionPolicyStatus.getDescription(status);
         LOG.info("Status of vault {} is {}", vaultId, statusDesc);
