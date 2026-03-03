@@ -1,7 +1,5 @@
 package org.datavaultplatform.common.util;
 
-import org.joda.time.DateTime;
-
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -9,7 +7,6 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
-import java.util.Calendar;
 import java.util.Date;
 
 public class  DateTimeUtils {
@@ -29,6 +26,11 @@ public class  DateTimeUtils {
     public static final Object DATE_FORMAT_DD_MMM_YYYY = "dd MMM yyyy";
     public static final Object DATE_FORMAT_DD_MM_YYYY = "dd/MM/yyyy";
 
+    private static final DateTimeFormatter LENIENT_ISO_LOCAL_DATE_FORMATTER = new DateTimeFormatterBuilder()
+            .parseLenient()
+            .append(DateTimeFormatter.ISO_LOCAL_DATE)
+            .toFormatter();
+    
     public static String formatDate(Date date) {
         if (date == null) {
             return "";
@@ -37,26 +39,16 @@ public class  DateTimeUtils {
             return formatter.format(date);
         }
     }
-
-    public static String formatDate(LocalDateTime date) {
-        if (date == null) {
-            return "";
-        } else {
-            DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE;
-            return formatter.format(date);
-        }
-    }
-
-    public static String formatLocalDate(LocalDate date) {
-        if (date == null) {
-            return "";
-        } else {
-            DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE;
-            return formatter.format(date);
-        }
-    }
-
+    
     public static String formatDate(LocalDate date) {
+        if (date == null) {
+            return "";
+        }
+        // LocalDate has its own format method that takes a DateTimeFormatter
+        return date.format(DateTimeFormatter.ISO_DATE);
+    }
+    
+    public static String formatDate(LocalDateTime date) {
         if (date == null) {
             return "";
         }
@@ -69,10 +61,7 @@ public class  DateTimeUtils {
     }
 
     public static LocalDate parseLocalDate(String value) throws DateTimeParseException {
-        DateTimeFormatter lenientFormatter = new DateTimeFormatterBuilder().
-                parseLenient().append(DateTimeFormatter.ISO_LOCAL_DATE)
-                .toFormatter();
-        return LocalDate.parse(value, lenientFormatter);
+        return LocalDate.parse(value, LENIENT_ISO_LOCAL_DATE_FORMATTER);
     }
 
     public static boolean isSameDay(Date date1, Date date2) {
@@ -95,10 +84,6 @@ public class  DateTimeUtils {
             return false;
         }
         return date1.equals(date2);
-    }
-
-    public static boolean isBeforeToday(Date date1) {
-        return isBefore(date1, new Date());
     }
 
     public static boolean isBefore(Date date1, Date date2) {
@@ -130,6 +115,7 @@ public class  DateTimeUtils {
         LocalDate ld2 = getLocalDate(date2);
         return ld1.isAfter(ld2);
     }
+    
     public static boolean isBefore(LocalDate date1, LocalDate date2) {
         if (date1 == null && date2 == null) {
             return false;
@@ -157,26 +143,26 @@ public class  DateTimeUtils {
     }
 
     private static LocalDate getLocalDate(Date date) {
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(date);
-
-        int day = cal.get(Calendar.DAY_OF_MONTH);
-        int month = cal.get(Calendar.MONTH);//January is 0
-        int year = cal.get(Calendar.YEAR);
-        return LocalDate.of(year, month + 1, day);
+        if (date == null) {
+            return null;
+        }
+        return LocalDate.ofInstant(date.toInstant(), ZoneId.systemDefault());
     }
 
     public static String formatDateBasicISO(Date date) {
+        if (date == null) {
+            return "";
+        }
         DateFormat formatter = new SimpleDateFormat(ISO_DATE_BASIC_FORMAT);
         return formatter.format(date);
     }
+    
     public static String formatLocalDateBasicISO(LocalDate date) {
         if (date == null) {
             return "";
-        } else {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(ISO_DATE_BASIC_FORMAT);
-            return formatter.format(date);
         }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(ISO_DATE_BASIC_FORMAT);
+        return formatter.format(date);
     }
     
     public static String formatLocalDateTimeBasicISO(LocalDateTime date) {
@@ -214,20 +200,15 @@ public class  DateTimeUtils {
         }
 
         if (date instanceof java.sql.Date sqlDate) {
-            return sqlDate.toLocalDate().atTime(LocalTime.MIDNIGHT);
+            return sqlDate.toLocalDate().atTime(LocalTime.NOON);
         }
 
         return date.toInstant()
                 .atZone(ZoneId.systemDefault())
-                .toLocalDateTime();
+                .toLocalDate().atTime(LocalTime.NOON);
     }
 
-    public static LocalDate getDateAdjustedByMonths(Date initialDate, int months) {
-        LocalDate localDate = toLocalDate(initialDate);
-        return getDateAdjustedByMonths(localDate, months);
-    }
-
-    public static LocalDate getDateAdjustedByMonths(LocalDate initialDate, int months) {
+    public static LocalDate getLocalDateAdjustedByMonths(LocalDate initialDate, int months) {
         if (initialDate == null) {
             return null;
         }
@@ -241,32 +222,10 @@ public class  DateTimeUtils {
         return initialDate.plusYears(years);
     }
 
-    public static LocalDateTime getLocalDateTimeAdjustedByYears(LocalDateTime initialDate, int years) {
-        if (initialDate == null) {
-            return null;
-        }
-        return initialDate.plusYears(years);
-    }
-
-    public static Date toDateAtNoon(LocalDate localDate) {
-        if (localDate == null) {
-            return null;
-        }
-        ZonedDateTime zonedDateTime = localDate.atTime(LocalTime.NOON).atZone(ZoneId.systemDefault());
-        return Date.from(zonedDateTime.toInstant());
-    }
-    
     public static LocalDateTime toLocalDateTimeAtNoon(LocalDate localDate) {
         if (localDate == null) {
             return null;
         }
         return localDate.atTime(LocalTime.NOON);
-    }
-
-    public static Date toDateAtNoon(Date date) {
-        if (date == null) {
-            return null;
-        }
-        return toDateAtNoon(toLocalDate(date));
     }
 }
