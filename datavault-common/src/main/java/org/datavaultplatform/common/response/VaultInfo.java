@@ -4,8 +4,6 @@ import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 import lombok.Data;
@@ -369,20 +367,7 @@ public class VaultInfo {
 
         return cv;
     }
-
-    private Date plusOneDay(Date date) {
-        Date retVal = null;
-        if (date != null) {
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(date);
-            cal.add(Calendar.DATE, 1);
-            retVal =  cal.getTime();
-        }
-
-        return retVal;
-
-    }
-
+    
     /**
      * see 'templates/vaults/security.html'
      */

@@ -94,7 +94,7 @@ public class VaultsReviewService {
         }
 
         LocalDate today = LocalDate.now(clock);
-        LocalDate reviewWindowStartDate = DateTimeUtils.getDateAdjustedByMonths(vault.getReviewDate(), MONTHS_BEFORE_REVIEW_DATE);
+        LocalDate reviewWindowStartDate = DateTimeUtils.getLocalDateAdjustedByMonths(vault.getReviewDate(), MONTHS_BEFORE_REVIEW_DATE);
 
         // Rule 1: Today is not before the Window Start Date
         // Rule 2: No review has happened since the window opened
