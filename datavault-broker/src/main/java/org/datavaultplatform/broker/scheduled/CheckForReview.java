@@ -57,6 +57,16 @@ public class CheckForReview implements ScheduledTask {
                            @Value("${help.page}") String helpUrl,
                            @Value("${help.mail}") String helpMail,
                            Clock clock) {
+        Assert.notNull(vaultsService, "vaultsService must not be null");
+        Assert.notNull(vaultsReviewService, "vaultsReviewService must not be null");
+        Assert.notNull(ldapService, "ldapService must not be null");
+        Assert.notNull(emailService, "emailSerivce must not be null");
+        Assert.notNull(rolesAndPermissionsService, "rolesAndPermissionService must not be null");
+        Assert.notNull(usersService, "usersService must not be null");
+        Assert.notNull(homeUrl, "homeUrl must not be null");
+        Assert.notNull(helpUrl, "helpUrl must not be null");
+        Assert.notNull(helpMail, "helpMail must not be null");
+
         this.vaultsService = vaultsService;
         this.vaultsReviewService = vaultsReviewService;
         this.ldapService = ldapService;
@@ -77,15 +87,20 @@ public class CheckForReview implements ScheduledTask {
         long start = clock.millis();
         LOG.info("Initiating check of Vaults for review");
 
-        checkVaultsForReview();
-
-        long end = clock.millis();
-        long durationSecs = TimeUnit.MILLISECONDS.toSeconds(end - start);
-        LOG.info("Finished check of Vaults for review. Took [{}] seconds", durationSecs);
+        try {
+            checkVaultsForReview();
+        } finally {
+            long end = clock.millis();
+            long durationSecs = TimeUnit.MILLISECONDS.toSeconds(end - start);
+            LOG.info("Finished check of Vaults for review. Took [{}] seconds", durationSecs);
+        }
     }
 
     private void checkVaultsForReview() {
         List<Vault> vaults = vaultsService.getVaults();
+        if (vaults == null) {
+            return;
+        }
         for (Vault vault : vaults) {
             if (vault == null) {
                 continue;
@@ -94,12 +109,12 @@ public class CheckForReview implements ScheduledTask {
         }
     }
 
-    private void checkVaultForReview(Vault vault) {
+    protected void checkVaultForReview(Vault vault) {
         if (!vaultsReviewService.dueForReviewEmail(vault)) {
             return;
         }
 
-        LOG.info("Vault [{}}/{}] is due for review", vault.getID(), vault.getName());
+        LOG.info("Vault [{}/{}] is due for review", vault.getID(), vault.getName());
 
         // Start the review process by creating the VaultReview and DepositReview objects. TBH I am not sure
         // this should be done here. The review process should possibly only be started by a user. The reason
@@ -107,7 +122,7 @@ public class CheckForReview implements ScheduledTask {
         // decision.
 
         // IMPORTANT - do not remove
-        Assert.isTrue(!vault.isVaultReviewUnderway(), "We are about to create a new vault review - just double checking one doesn't exist");
+        Assert.isTrue(!vault.isVaultReviewUnderway(), "We were about to create a new vault review - but a vault review is already underway");
         vaultsReviewService.createVaultReview(vault);
         // IMPORTANT - do not remove.
 
@@ -136,9 +151,11 @@ public class CheckForReview implements ScheduledTask {
                 LOG.info("Email {} ({}) as Review is due", roleLabel, userId);
                 if (isUserInLdap(userId)) {
                     User user = usersService.getUser(userId);
-                    // User still appears to be at the Uni
-                    emailService.sendTemplateMail(user.getEmail(), "[Edinburgh DataVault] Your vault’s review date is approaching ", emailTemplate, model);
-                    emailed = true;
+                    if (user != null) {
+                        // User still appears to be at the Uni
+                        emailService.sendTemplateMail(user.getEmail(), "[Edinburgh DataVault] Your vault’s review date is approaching ", emailTemplate, model);
+                        emailed = true;
+                    }
                 }
             }
         }
@@ -160,7 +177,7 @@ public class CheckForReview implements ScheduledTask {
         return result;
     }
 
-    private Map<String, Object> getEmailTemplateModel(Vault vault) {
+    protected Map<String, Object> getEmailTemplateModel(Vault vault) {
         Assert.notNull(vault, "The vault cannot be null");
         HashMap<String, Object> model = new HashMap<>();
         model.put(EMAIL_VAULT_NAME, vault.getName());
