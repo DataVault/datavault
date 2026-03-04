@@ -146,7 +146,7 @@ public class PendingVaultDAOIT extends BaseDatabaseTest {
     PendingVault pendingVault = new PendingVault();
     pendingVault.setName("111");
     pendingVault.setContact("contact-1");
-    pendingVault.setCreationTime(DateTimeUtils.toLocalDateTime(ONE_WEEK_AGO));
+    pendingVault.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(ONE_WEEK_AGO));
     return pendingVault;
   }
 
@@ -154,7 +154,7 @@ public class PendingVaultDAOIT extends BaseDatabaseTest {
     PendingVault pendingVault = new PendingVault();
     pendingVault.setName("222");
     pendingVault.setContact("contact-2");
-    pendingVault.setCreationTime(DateTimeUtils.toLocalDateTime(NOW));
+    pendingVault.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(NOW));
     return pendingVault;
   }
 
@@ -162,7 +162,7 @@ public class PendingVaultDAOIT extends BaseDatabaseTest {
     PendingVault pendingVault = new PendingVault();
     pendingVault.setName("333");
     pendingVault.setContact("contact-3");
-    pendingVault.setCreationTime(DateTimeUtils.toLocalDateTime(TWO_WEEKS_AGO));
+    pendingVault.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(TWO_WEEKS_AGO));
     return pendingVault;
   }
 
@@ -191,7 +191,7 @@ public class PendingVaultDAOIT extends BaseDatabaseTest {
     pendingVault1.setName("pv-name-1");
     pendingVault1.setGroup(group1);
     pendingVault1.setConfirmed(true);
-    pendingVault1.setCreationTime(DateTimeUtils.toLocalDateTime(TestUtils.TWO_YEARS_AGO));
+    pendingVault1.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(TestUtils.TWO_YEARS_AGO));
 
     PendingVault pendingVault2 = getPendingVault2();
     pendingVault2.setName("pv-name-12");
@@ -201,7 +201,7 @@ public class PendingVaultDAOIT extends BaseDatabaseTest {
     pendingVault3.setName("pv-name-12");
     pendingVault3.setGroup(group1);
     pendingVault3.setConfirmed(false);
-    pendingVault3.setCreationTime(DateTimeUtils.toLocalDateTime(TestUtils.ONE_YEAR_AGO));
+    pendingVault3.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(TestUtils.ONE_YEAR_AGO));
 
     dao.save(pendingVault1);
     dao.save(pendingVault2);
@@ -294,14 +294,14 @@ public class PendingVaultDAOIT extends BaseDatabaseTest {
 
     PendingVault pendingVault1 = getPendingVault1();
     pendingVault1.setGroup(group1);
-    pendingVault1.setCreationTime(DateTimeUtils.toLocalDateTime(TestUtils.TWO_YEARS_AGO));
+    pendingVault1.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(TestUtils.TWO_YEARS_AGO));
 
     PendingVault pendingVault2 = getPendingVault2();
     pendingVault2.setGroup(group2);
 
     PendingVault pendingVault3 = getPendingVault3();
     pendingVault3.setGroup(group1);
-    pendingVault3.setCreationTime(DateTimeUtils.toLocalDateTime(TestUtils.ONE_YEAR_AGO));
+    pendingVault3.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(TestUtils.ONE_YEAR_AGO));
 
     dao.save(pendingVault1);
     dao.save(pendingVault2);
@@ -379,14 +379,14 @@ public class PendingVaultDAOIT extends BaseDatabaseTest {
 
     PendingVault pendingVault1 = getPendingVault1();
     pendingVault1.setGroup(group1);
-    pendingVault1.setCreationTime(DateTimeUtils.toLocalDateTime(TestUtils.TWO_YEARS_AGO));
+    pendingVault1.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(TestUtils.TWO_YEARS_AGO));
 
     PendingVault pendingVault2 = getPendingVault2();
     pendingVault2.setGroup(group2);
 
     PendingVault pendingVault3 = getPendingVault3();
     pendingVault3.setGroup(group1);
-    pendingVault3.setCreationTime(DateTimeUtils.toLocalDateTime(TestUtils.ONE_YEAR_AGO));
+    pendingVault3.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(TestUtils.ONE_YEAR_AGO));
 
     dao.save(pendingVault1);
     dao.save(pendingVault2);

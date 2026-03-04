@@ -159,6 +159,7 @@ public class ScheduledTasksWithDbIT extends BaseReuseDatabaseTest {
         Date moreThan2YearsAgo = new Date(
                 ZonedDateTime.now().minusYears(2).minusDays(10).toInstant().toEpochMilli());
         setupDeposit(vault, moreThan2YearsAgo);
+        @SuppressWarnings("unused") 
         Vault vaultForReview = setupVaultForReview(rp1);
     }
 
@@ -166,12 +167,12 @@ public class ScheduledTasksWithDbIT extends BaseReuseDatabaseTest {
 
         LocalDate today = LocalDate.now(clock);
         LocalDate todayPlus1Year = today.plusYears(1);
-        LocalDateTime todayAtNoon = DateTimeUtils.toLocalDateTimeAtNoon(today);
+        LocalDateTime todayAtMidnight = DateTimeUtils.toLocalDateTimeAtMidnight(today);
 
         Vault vault = new Vault();
         vault.setContact("James Bond");
         vault.setName("test-vault");
-        vault.setCreationTime(todayAtNoon);
+        vault.setCreationTime(todayAtMidnight);
         vault.setReviewDate(todayPlus1Year);
         vault.setRetentionPolicy(rp);
         vaultDAO.save(vault);
@@ -179,12 +180,12 @@ public class ScheduledTasksWithDbIT extends BaseReuseDatabaseTest {
         VaultReview vr1 = new VaultReview();
         vr1.setVault(vault);
         vr1.setId("vr-1");
-        vr1.setCreationTime(todayAtNoon);
+        vr1.setCreationTime(todayAtMidnight);
 
         VaultReview vr2 = new VaultReview();
         vr2.setVault(vault);
         vr2.setId("vr-2");
-        vr2.setCreationTime(todayAtNoon);
+        vr2.setCreationTime(todayAtMidnight);
 
         vaultReviewDAO.save(vr1);
         vaultReviewDAO.save(vr2);
@@ -205,7 +206,7 @@ public class ScheduledTasksWithDbIT extends BaseReuseDatabaseTest {
         deposit.setHasPersonalData(false);
         deposit.setName("test-vault-1");
         deposit.setDescription("desc-test-vault-1");
-        deposit.setCreationTime(DateTimeUtils.toLocalDateTime(depositCreationTime));
+        deposit.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(depositCreationTime));
         deposit.setVault(vault);
         depositDAO.save(deposit);
 

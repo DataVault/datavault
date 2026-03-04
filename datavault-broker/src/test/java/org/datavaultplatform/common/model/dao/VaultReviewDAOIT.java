@@ -103,14 +103,14 @@ public class VaultReviewDAOIT extends BaseReuseDatabaseTest {
   private VaultReview getVaultReview1() {
     VaultReview result = new VaultReview();
     result.setComment("review-1");
-    result.setCreationTime(DateTimeUtils.toLocalDateTime(NOW));
+    result.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(NOW));
     return result;
   }
 
   private VaultReview getVaultReview2() {
     VaultReview result = new VaultReview();
     result.setComment("review-2");
-    result.setCreationTime(DateTimeUtils.toLocalDateTime(NOW));
+    result.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(NOW));
     return result;
   }
 

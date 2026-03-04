@@ -708,7 +708,7 @@ public class VaultDAOIT extends BaseReuseDatabaseTest {
     result.setContact("contact-1");
     result.setName("vault-1");
     result.setReviewDate(DateTimeUtils.toLocalDate(NOW));
-    result.setCreationTime(DateTimeUtils.toLocalDateTime(ONE_WEEK_AGO));
+    result.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(ONE_WEEK_AGO));
     return result;
   }
 
@@ -717,7 +717,7 @@ public class VaultDAOIT extends BaseReuseDatabaseTest {
     result.setContact("contact-2");
     result.setName("vault-2");
     result.setReviewDate(DateTimeUtils.toLocalDate(NOW));
-    result.setCreationTime(DateTimeUtils.toLocalDateTime(NOW));
+    result.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(NOW));
     return result;
   }
 
@@ -726,7 +726,7 @@ public class VaultDAOIT extends BaseReuseDatabaseTest {
     result.setContact("contact-2");
     result.setName("vault-2");
     result.setReviewDate(DateTimeUtils.toLocalDate(NOW));
-    result.setCreationTime(DateTimeUtils.toLocalDateTime(TWO_WEEKS_AGO));
+    result.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(TWO_WEEKS_AGO));
     return result;
   }
 
@@ -735,7 +735,7 @@ public class VaultDAOIT extends BaseReuseDatabaseTest {
     result.setContact("contact-3");
     result.setName("vault-3");
     result.setReviewDate(DateTimeUtils.toLocalDate(NOW));
-    result.setCreationTime(DateTimeUtils.toLocalDateTime(NOW));
+    result.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(NOW));
     result.setSnapshot(String.join(",", TestUtils.getRandomList()));
     return result;
   }

@@ -58,11 +58,11 @@ public class DepositReviewDAOIT extends BaseReuseDatabaseTest {
   void testList() {
     DepositReview depositReview1 = new DepositReview();
     depositReview1.setComment("dr1-comment");
-    depositReview1.setCreationTime(DateTimeUtils.toLocalDateTime(NOW));
+    depositReview1.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(NOW));
 
     DepositReview depositReview2 = new DepositReview();
     depositReview2.setComment("dr2-comment");
-    depositReview2.setCreationTime(DateTimeUtils.toLocalDateTime(NOW));
+    depositReview2.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(NOW));
 
     dao.save(depositReview1);
     assertNotNull(depositReview1.getId());
@@ -155,14 +155,14 @@ public class DepositReviewDAOIT extends BaseReuseDatabaseTest {
   DepositReview getDepositReview1() {
     DepositReview result = new DepositReview();
     result.setComment("dr1-comment");
-    result.setCreationTime(DateTimeUtils.toLocalDateTime(NOW));
+    result.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(NOW));
     return result;
   }
 
   DepositReview getDepositReview2(){
     DepositReview result = new DepositReview();
     result.setComment("dr2-comment");
-    result.setCreationTime(DateTimeUtils.toLocalDateTime(NOW));
+    result.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(NOW));
     return result;
   }
 }

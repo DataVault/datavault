@@ -556,7 +556,7 @@ public class DepositsControllerTest {
             when(mDeposit.getArchiveDigest()).thenReturn("tar-digest");
             when(mDeposit.getEncArchiveDigest()).thenReturn("enc-tar-digest");
             when(mDeposit.getEncIV()).thenReturn("enc-tar-iv".getBytes(StandardCharsets.UTF_8));
-            when(mDeposit.getCreationTime()).thenReturn(DateTimeUtils.toLocalDateTime(fixedDate));
+            when(mDeposit.getCreationTime()).thenReturn(DateTimeUtils.toLocalDateTimeAtMidnight(fixedDate));
 
             when(mFilesService.validPath(TEST_RETRIEVE_PATH, fileStore)).thenReturn(true);
 

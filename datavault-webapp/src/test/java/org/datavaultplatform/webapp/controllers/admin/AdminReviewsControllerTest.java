@@ -258,7 +258,7 @@ public class AdminReviewsControllerTest {
         assertThat(drm1.getDepositId()).isEqualTo(TEST_DEPOSIT_ID_1);
         assertThat(drm1.getName()).isEqualTo(TEST_DEPOSIT_1_NAME);
         assertThat(drm1.getStatusName()).isEqualTo(Audit.Status.IN_PROGRESS.name());
-        assertThat(drm1.getCreationTime()).isEqualTo(DateTimeUtils.toLocalDateTime(date1));
+        assertThat(drm1.getCreationTime()).isEqualTo(DateTimeUtils.toLocalDateTimeAtMidnight(date1));
 
         DepositReviewModel drm2 = drms.get(1);
         assertThat(drm2.getDepositReviewId()).isEqualTo(TEST_DEPOSIT_REVIEW_2_ID);
@@ -267,7 +267,7 @@ public class AdminReviewsControllerTest {
         assertThat(drm2.getDepositId()).isEqualTo(TEST_DEPOSIT_ID_2);
         assertThat(drm2.getName()).isEqualTo(TEST_DEPOSIT_2_NAME);
         assertThat(drm2.getStatusName()).isEqualTo(Audit.Status.COMPLETE.name());
-        assertThat(drm2.getCreationTime()).isEqualTo(DateTimeUtils.toLocalDateTime(date2));
+        assertThat(drm2.getCreationTime()).isEqualTo(DateTimeUtils.toLocalDateTimeAtMidnight(date2));
 
         // No error key in modelMap
         assertThat((String) modelMap.get("error")).isBlank();
@@ -497,7 +497,7 @@ public class AdminReviewsControllerTest {
         when(mDepositInfo1.getID()).thenReturn(TEST_DEPOSIT_ID_1);
         when(mDepositInfo1.getName()).thenReturn(TEST_DEPOSIT_1_NAME);
         when(mDepositInfo1.getStatus()).thenReturn(Deposit.Status.IN_PROGRESS);
-        when(mDepositInfo1.getCreationTime()).thenReturn(DateTimeUtils.toLocalDateTime(date1));
+        when(mDepositInfo1.getCreationTime()).thenReturn(DateTimeUtils.toLocalDateTimeAtMidnight(date1));
 
         when(mDepositReview2.getId()).thenReturn(TEST_DEPOSIT_REVIEW_2_ID);
         when(mDepositReview2.getComment()).thenReturn(TEST_DEPOSIT_REVIEW_2_COMMENT);
@@ -505,7 +505,7 @@ public class AdminReviewsControllerTest {
         when(mDepositInfo2.getID()).thenReturn(TEST_DEPOSIT_ID_2);
         when(mDepositInfo2.getName()).thenReturn(TEST_DEPOSIT_2_NAME);
         when(mDepositInfo2.getStatus()).thenReturn(Deposit.Status.COMPLETE);
-        when(mDepositInfo2.getCreationTime()).thenReturn(DateTimeUtils.toLocalDateTime(date2));
+        when(mDepositInfo2.getCreationTime()).thenReturn(DateTimeUtils.toLocalDateTimeAtMidnight(date2));
         List<DepositReviewModel> drm = new ArrayList<>();
         drm.add(mDepositReviewModel1);
         drm.add(mDepositReviewModel2);

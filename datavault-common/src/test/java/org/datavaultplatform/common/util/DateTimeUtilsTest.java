@@ -23,13 +23,13 @@ class DateTimeUtilsTest {
     @BeforeEach
     void setup() {
         ZonedDateTime first = ZonedDateTime.of(
-                LocalDateTime.of(2024, 4, 1, 12, 0, 0),
+                LocalDateTime.of(2024, 4, 1, 0, 0, 0),
                 ZoneOffset.UTC
         );
         firstOfMonth = new Date(first.toInstant().toEpochMilli());
         firstOfMonthSQL = new java.sql.Date(firstOfMonth.getTime());
         ZonedDateTime last = ZonedDateTime.of(
-                LocalDateTime.of(2024, 4, 30, 12, 0, 0),
+                LocalDateTime.of(2024, 4, 30, 0, 0, 0),
                 ZoneOffset.UTC
         );
         lastOfMonth = new Date(last.toInstant().toEpochMilli());
@@ -37,8 +37,8 @@ class DateTimeUtilsTest {
         
         firstOfMonthLocalDate = LocalDate.of(2024,4,1);
         lastOfMonthLocalDate = LocalDate.of(2024,4,30);
-        firstOfMonthLocalDateTime = LocalDateTime.of(firstOfMonthLocalDate, LocalTime.NOON);
-        lastOfMonthLocalDateTime = LocalDateTime.of(lastOfMonthLocalDate, LocalTime.NOON);
+        firstOfMonthLocalDateTime = LocalDateTime.of(firstOfMonthLocalDate, LocalTime.MIDNIGHT);
+        lastOfMonthLocalDateTime = LocalDateTime.of(lastOfMonthLocalDate, LocalTime.MIDNIGHT);
     }
 
     @Test
@@ -49,7 +49,7 @@ class DateTimeUtilsTest {
         assertFalse(DateTimeUtils.isBefore(lastOfMonth, lastOfMonth));
 
         assertTrue(DateTimeUtils.isBefore(null, lastOfMonth));
-        assertFalse(DateTimeUtils.isBefore((Date) null, (Date) null));
+        assertFalse(DateTimeUtils.isBefore(null, (Date) null));
         assertFalse(DateTimeUtils.isBefore(lastOfMonth, null));
     }
 
@@ -187,6 +187,7 @@ class DateTimeUtilsTest {
         assertThat(DateTimeUtils.toLocalDate(lastOfMonthSQL)).isEqualTo(lastOfMonthLocalDate);
 
     }
+
     @Test
     void testLocalDateTimeToLocalDate() {
         assertThat(DateTimeUtils.toLocalDate((LocalDateTime) null)).isNull();
@@ -195,12 +196,19 @@ class DateTimeUtilsTest {
     }
 
     @Test
-    void testDateToLocalDateTime() {
-        assertThat(DateTimeUtils.toLocalDateTime(null)).isNull();
-        assertThat(DateTimeUtils.toLocalDateTime(firstOfMonth)).isEqualTo(firstOfMonthLocalDateTime);
-        assertThat(DateTimeUtils.toLocalDateTime(lastOfMonth)).isEqualTo(lastOfMonthLocalDateTime);
-        assertThat(DateTimeUtils.toLocalDateTime(firstOfMonthSQL)).isEqualTo(firstOfMonthLocalDateTime);
-        assertThat(DateTimeUtils.toLocalDateTime(lastOfMonthSQL)).isEqualTo(lastOfMonthLocalDateTime);
+    void testLocalDatetoLocalDateTimeAtMidnight() {
+        assertThat(DateTimeUtils.toLocalDateTimeAtMidnight((LocalDate) null)).isNull();
+        assertThat(DateTimeUtils.toLocalDateTimeAtMidnight(firstOfMonthLocalDate)).isEqualTo(firstOfMonthLocalDateTime);
+        assertThat(DateTimeUtils.toLocalDateTimeAtMidnight(lastOfMonthLocalDate)).isEqualTo(lastOfMonthLocalDateTime);
+    }
+
+    @Test
+    void testDatetoLocalDateTimeAtMidnight() {
+        assertThat(DateTimeUtils.toLocalDateTimeAtMidnight((Date)null)).isNull();
+        assertThat(DateTimeUtils.toLocalDateTimeAtMidnight(firstOfMonth)).isEqualTo(firstOfMonthLocalDateTime);
+        assertThat(DateTimeUtils.toLocalDateTimeAtMidnight(lastOfMonth)).isEqualTo(lastOfMonthLocalDateTime);
+        assertThat(DateTimeUtils.toLocalDateTimeAtMidnight(firstOfMonthSQL)).isEqualTo(firstOfMonthLocalDateTime);
+        assertThat(DateTimeUtils.toLocalDateTimeAtMidnight(lastOfMonthSQL)).isEqualTo(lastOfMonthLocalDateTime);
     }
 
     @Test
@@ -234,10 +242,10 @@ class DateTimeUtilsTest {
     }
     
     @Test
-    void testToLocalDateTimeAtNoon(){
-        assertThat(DateTimeUtils.toLocalDateTimeAtNoon(null)).isNull();
-        assertThat(DateTimeUtils.toLocalDateTimeAtNoon(firstOfMonthLocalDate)).isEqualTo(firstOfMonthLocalDateTime);
-        assertThat(DateTimeUtils.toLocalDateTimeAtNoon(lastOfMonthLocalDate)).isEqualTo(lastOfMonthLocalDateTime);
+    void testToLocalDateTimeAtMidnight() {
+        assertThat(DateTimeUtils.toLocalDateTimeAtMidnight((Date) null)).isNull();
+        assertThat(DateTimeUtils.toLocalDateTimeAtMidnight(firstOfMonth)).isEqualTo(firstOfMonthLocalDateTime);
+        assertThat(DateTimeUtils.toLocalDateTimeAtMidnight(lastOfMonth)).isEqualTo(lastOfMonthLocalDateTime);
     }
 
 }

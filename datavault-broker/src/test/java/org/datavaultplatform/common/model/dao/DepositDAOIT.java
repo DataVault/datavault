@@ -95,12 +95,12 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
     Deposit deposit1 = new Deposit();
     deposit1.setName("dep1-name");
     deposit1.setHasPersonalData(false);
-    deposit1.setCreationTime(DateTimeUtils.toLocalDateTime(NOW));
+    deposit1.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(NOW));
 
     Deposit deposit2 = new Deposit();
     deposit2.setHasPersonalData(true);
     deposit2.setName("dep2-name");
-    deposit2.setCreationTime(DateTimeUtils.toLocalDateTime(NOW));
+    deposit2.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(NOW));
 
     dao.save(deposit1);
     assertNotNull(deposit1.getID());
@@ -794,7 +794,7 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
   Deposit getDeposit1() {
     Deposit result = new Deposit();
     result.setName("dep1-name");
-    result.setCreationTime(DateTimeUtils.toLocalDateTime(NOW));
+    result.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(NOW));
     result.setHasPersonalData(false);
     result.setStatus(Status.COMPLETE);
     return result;
@@ -812,7 +812,7 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
   Deposit getDeposit2(){
     Deposit result = new Deposit();
     result.setName("dep2-name");
-    result.setCreationTime(DateTimeUtils.toLocalDateTime(NOW));
+    result.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(NOW));
     result.setHasPersonalData(true);
     result.setStatus(Status.IN_PROGRESS);
     return result;
@@ -821,7 +821,7 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
   Deposit getDeposit3(){
     Deposit result = new Deposit();
     result.setName("dep3-name");
-    result.setCreationTime(DateTimeUtils.toLocalDateTime(NOW));
+    result.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(NOW));
     result.setHasPersonalData(true);
     result.setStatus(Status.COMPLETE);
     return result;
@@ -830,7 +830,7 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
   Deposit getDeposit4() {
     Deposit result = new Deposit();
     result.setName("dep4-name");
-    result.setCreationTime(DateTimeUtils.toLocalDateTime(NOW));
+    result.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(NOW));
     result.setHasPersonalData(true);
     result.setStatus(Status.DELETE_FAILED);
     return result;
@@ -839,7 +839,7 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
   Deposit getDeposit5() {
     Deposit result = new Deposit();
     result.setName("dep5-name");
-    result.setCreationTime(DateTimeUtils.toLocalDateTime(NOW));
+    result.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(NOW));
     result.setHasPersonalData(true);
     result.setStatus(Status.FAILED);
     return result;
@@ -848,7 +848,7 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
   Deposit getDeposit6() {
     Deposit result = new Deposit();
     result.setName("dep6-name");
-    result.setCreationTime(DateTimeUtils.toLocalDateTime(NOW));
+    result.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(NOW));
     result.setHasPersonalData(true);
     result.setStatus(Status.IN_PROGRESS);
     return result;
@@ -857,7 +857,7 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
   Deposit getDeposit7AwaitAuditNOW() {
     Deposit result = new Deposit();
     result.setName("dep7-name");
-    result.setCreationTime(DateTimeUtils.toLocalDateTime(NOW));
+    result.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(NOW));
     result.setHasPersonalData(true);
     result.setStatus(Status.COMPLETE);
     return result;
@@ -866,7 +866,7 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
   Deposit getDeposit8AwaitAudit1YearAgo() {
     Deposit result = new Deposit();
     result.setName("dep8-name");
-    result.setCreationTime(DateTimeUtils.toLocalDateTime(ONE_YEAR_AGO));
+    result.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(ONE_YEAR_AGO));
     result.setHasPersonalData(true);
     result.setStatus(Status.COMPLETE);
     return result;
@@ -875,7 +875,7 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
   Deposit getDeposit9AwaitAudit2YearsAgo() {
     Deposit result = new Deposit();
     result.setName("dep9-name");
-    result.setCreationTime(DateTimeUtils.toLocalDateTime(TWO_YEARS_AGO));
+    result.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(TWO_YEARS_AGO));
     result.setHasPersonalData(true);
     result.setStatus(Status.NOT_STARTED);
     return result;
@@ -884,7 +884,7 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
   Deposit getDeposit10AwaitAudit3YearsAgo() {
     Deposit result = new Deposit();
     result.setName("dep10-name");
-    result.setCreationTime(DateTimeUtils.toLocalDateTime(THREE_YEARS_AGO));
+    result.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(THREE_YEARS_AGO));
     result.setHasPersonalData(true);
     result.setStatus(Status.IN_PROGRESS);
     return result;

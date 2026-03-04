@@ -118,7 +118,7 @@ public class RetentionPoliciesService {
             int retentionPolicyMinPeriod = retentionPolicy.getMinRetentionPeriod();
             // Add on the minimum retention period (a number of years)
             LocalDate retentionPolicyExpiryLocalDate = DateTimeUtils.getLocalDateAdjustedByYears(baseRetentionPolicyExpiryLocalDate, retentionPolicyMinPeriod);
-            retentionPolicyExpiryLocalDateTime = DateTimeUtils.toLocalDateTimeAtNoon(retentionPolicyExpiryLocalDate);
+            retentionPolicyExpiryLocalDateTime = DateTimeUtils.toLocalDateTimeAtMidnight(retentionPolicyExpiryLocalDate);
         }
 
         vault.setRetentionPolicyExpiry(retentionPolicyExpiryLocalDateTime);

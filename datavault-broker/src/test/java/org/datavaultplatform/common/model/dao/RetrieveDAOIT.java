@@ -151,7 +151,7 @@ public class RetrieveDAOIT extends BaseReuseDatabaseTest {
     result.setHasExternalRecipients(false);
     result.setNote("note-1");
     result.setStatus(Status.NOT_STARTED);
-    result.setTimestamp(DateTimeUtils.toLocalDateTime(TestUtils.TWO_YEARS_AGO));
+    result.setTimestamp(DateTimeUtils.toLocalDateTimeAtMidnight(TestUtils.TWO_YEARS_AGO));
      return result;
   }
 
@@ -160,7 +160,7 @@ public class RetrieveDAOIT extends BaseReuseDatabaseTest {
     result.setHasExternalRecipients(false);
     result.setNote("note-2");
     result.setStatus(Status.IN_PROGRESS);
-    result.setTimestamp(DateTimeUtils.toLocalDateTime(TestUtils.TWO_YEARS_AGO));
+    result.setTimestamp(DateTimeUtils.toLocalDateTimeAtMidnight(TestUtils.TWO_YEARS_AGO));
     return result;
   }
 
@@ -169,7 +169,7 @@ public class RetrieveDAOIT extends BaseReuseDatabaseTest {
     result.setHasExternalRecipients(false);
     result.setNote("note-3");
     result.setStatus(Status.COMPLETE);
-    result.setTimestamp(DateTimeUtils.toLocalDateTime(TestUtils.NOW));
+    result.setTimestamp(DateTimeUtils.toLocalDateTimeAtMidnight(TestUtils.NOW));
     return result;
   }
 
@@ -178,7 +178,7 @@ public class RetrieveDAOIT extends BaseReuseDatabaseTest {
     result.setHasExternalRecipients(false);
     result.setNote("note-4");
     result.setStatus(Status.IN_PROGRESS);
-    result.setTimestamp(DateTimeUtils.toLocalDateTime(TestUtils.THREE_YEARS_AGO));
+    result.setTimestamp(DateTimeUtils.toLocalDateTimeAtMidnight(TestUtils.THREE_YEARS_AGO));
     return result;
   }
 
@@ -258,13 +258,13 @@ public class RetrieveDAOIT extends BaseReuseDatabaseTest {
 
     Retrieve ret1 = getRetrieve1();
     ret1.setDeposit(deposit);
-    ret1.setTimestamp(DateTimeUtils.toLocalDateTime(TestUtils.NOW));
+    ret1.setTimestamp(DateTimeUtils.toLocalDateTimeAtMidnight(TestUtils.NOW));
     Retrieve ret2 = getRetrieve2();
     ret2.setDeposit(deposit);
-    ret2.setTimestamp(DateTimeUtils.toLocalDateTime(TestUtils.TWO_YEARS_AGO));
+    ret2.setTimestamp(DateTimeUtils.toLocalDateTimeAtMidnight(TestUtils.TWO_YEARS_AGO));
     Retrieve ret3 = getRetrieve3();
     ret3.setDeposit(deposit);
-    ret3.setTimestamp(DateTimeUtils.toLocalDateTime(TestUtils.ONE_YEAR_AGO));
+    ret3.setTimestamp(DateTimeUtils.toLocalDateTimeAtMidnight(TestUtils.ONE_YEAR_AGO));
 
     dao.save(ret1);
     dao.save(ret2);

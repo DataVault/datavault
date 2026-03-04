@@ -1,5 +1,7 @@
 package org.datavaultplatform.common.util;
 
+import org.springframework.util.Assert;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -8,6 +10,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
 import java.util.Date;
+import java.util.function.BiPredicate;
 
 public class  DateTimeUtils {
 
@@ -87,36 +90,14 @@ public class  DateTimeUtils {
     }
 
     public static boolean isBefore(Date date1, Date date2) {
-        if (date1 == null && date2 == null) {
-            return false;
-        }
-        if (date1 == null) {
-            return true;
-        }
-        if (date2 == null) {
-            return false;
-        }
-        LocalDate ld1 = getLocalDate(date1);
-        LocalDate ld2 = getLocalDate(date2);
-        return ld1.isBefore(ld2);
+        return compareDates(date1, date2, LocalDate::isBefore);
     }
-    
+
     public static boolean isAfter(Date date1, Date date2) {
-        if (date1 == null && date2 == null) {
-            return false;
-        }
-        if (date1 == null) {
-            return true;
-        }
-        if (date2 == null) {
-            return false;
-        }
-        LocalDate ld1 = getLocalDate(date1);
-        LocalDate ld2 = getLocalDate(date2);
-        return ld1.isAfter(ld2);
+        return compareDates(date1, date2, LocalDate::isAfter);
     }
-    
-    public static boolean isBefore(LocalDate date1, LocalDate date2) {
+
+    private static boolean compareDates(Date date1, Date date2, BiPredicate<LocalDate, LocalDate> comparison) {
         if (date1 == null && date2 == null) {
             return false;
         }
@@ -126,10 +107,24 @@ public class  DateTimeUtils {
         if (date2 == null) {
             return false;
         }
-        return date1.isBefore(date2);
+
+        // 2. Convert to Modern API
+        LocalDate ld1 = toLocalDate(date1);
+        LocalDate ld2 = toLocalDate(date2);
+
+        // 3. Apply the specific comparison logic
+        return comparison.test(ld1, ld2);
+    }
+
+    public static boolean isBefore(LocalDate date1, LocalDate date2) {
+        return compareLocalDates(date1, date2, LocalDate::isBefore);
     }
 
     public static boolean isAfter(LocalDate date1, LocalDate date2) {
+        return compareLocalDates(date1, date2, LocalDate::isAfter);
+    }
+
+    private static boolean compareLocalDates(LocalDate date1, LocalDate date2, BiPredicate<LocalDate, LocalDate> comparison) {
         if (date1 == null && date2 == null) {
             return false;
         }
@@ -139,13 +134,11 @@ public class  DateTimeUtils {
         if (date2 == null) {
             return false;
         }
-        return date1.isAfter(date2);
+        return comparison.test(date1, date2);
     }
 
     private static LocalDate getLocalDate(Date date) {
-        if (date == null) {
-            return null;
-        }
+        Assert.notNull(date, "The date cannot be null");
         return LocalDate.ofInstant(date.toInstant(), ZoneId.systemDefault());
     }
 
@@ -194,18 +187,24 @@ public class  DateTimeUtils {
         return date.toLocalDate();
     }
 
-    public static LocalDateTime toLocalDateTime(Date date) {
+    public static LocalDateTime toLocalDateTimeAtMidnight(Date date) {
+        return getLocalDateTime(date, LocalTime.MIDNIGHT);
+    }
+
+    @SuppressWarnings("SameParameterValue")
+    private static LocalDateTime getLocalDateTime(Date date, LocalTime localTime) {
+        Assert.notNull(localTime, "The localTime cannot be null");
         if (date == null) {
             return null;
         }
 
         if (date instanceof java.sql.Date sqlDate) {
-            return sqlDate.toLocalDate().atTime(LocalTime.NOON);
+            return sqlDate.toLocalDate().atTime(localTime);
         }
 
         return date.toInstant()
                 .atZone(ZoneId.systemDefault())
-                .toLocalDate().atTime(LocalTime.NOON);
+                .toLocalDate().atTime(localTime);
     }
 
     public static LocalDate getLocalDateAdjustedByMonths(LocalDate initialDate, int months) {
@@ -222,10 +221,15 @@ public class  DateTimeUtils {
         return initialDate.plusYears(years);
     }
 
-    public static LocalDateTime toLocalDateTimeAtNoon(LocalDate localDate) {
+    public static LocalDateTime toLocalDateTimeAtMidnight(LocalDate localDate) {
+        return toLocalDateTime(localDate, LocalTime.MIDNIGHT);
+    }
+
+    private static LocalDateTime toLocalDateTime(LocalDate localDate, LocalTime localTime) {
+        Assert.notNull(localTime, "The localTime cannot be null");
         if (localDate == null) {
             return null;
         }
-        return localDate.atTime(LocalTime.NOON);
+        return localDate.atTime(localTime);
     }
 }

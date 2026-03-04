@@ -16,37 +16,38 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.util.Assert;
 
-import java.time.Clock;
-import java.time.Instant;
-import java.time.ZoneOffset;
+import java.time.*;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.apache.commons.lang3.time.DateUtils.addDays;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class RetentionPoliciesServiceTest {
 
-    static final Instant TS_1 = Instant.parse("2005-12-03T12:00:00.00Z");
-    static final Instant TS_2 = Instant.parse("2006-12-03T12:00:00.00Z");
-    static final Instant TS_NOW_3 = Instant.parse("2007-12-03T12:00:00.00Z");
-    static final Instant TS_4 = Instant.parse("2008-12-03T12:00:00.00Z");
-    static final Instant TS_5 = Instant.parse("2009-12-03T12:00:00.00Z");
-    static final Instant TS_6 = Instant.parse("2010-12-03T12:00:00.00Z");
+    static final Instant TS_1 = Instant.parse("2005-12-03T00:00:00.00Z");
+    static final Instant TS_2 = Instant.parse("2006-12-03T00:00:00.00Z");
+    static final Instant TS_NOW_3 = Instant.parse("2007-12-03T00:00:00.00Z");
+    static final Instant TS_4 = Instant.parse("2008-12-03T00:00:00.00Z");
+    static final Instant TS_5 = Instant.parse("2009-12-03T00:00:00.00Z");
+    static final Instant TS_6 = Instant.parse("2010-12-03T00:00:00.00Z");
 
-    static final Date DATE_1 = Date.from(TS_1);
-    static final Date DATE_2 = Date.from(TS_2);
-    static final Date DATE_NOW_3 = Date.from(TS_NOW_3);
-    static final Date DATE_4 = Date.from(TS_4);
-    static final Date DATE_5 = Date.from(TS_5);
-    static final Date DATE_6 = Date.from(TS_6);
+    static final LocalDateTime DATE_1 = toLocalDateTimeAtMidnight(TS_1);
+    static final LocalDateTime DATE_2 = toLocalDateTimeAtMidnight(TS_2);
+    static final LocalDateTime DATE_NOW_3 = toLocalDateTimeAtMidnight(TS_NOW_3);
+    static final LocalDateTime DATE_4 = toLocalDateTimeAtMidnight(TS_4);
+    static final LocalDateTime DATE_5 = toLocalDateTimeAtMidnight(TS_5);
+    static final LocalDateTime DATE_6 = toLocalDateTimeAtMidnight(TS_6);
+    
 
     static final Clock CLOCK = Clock.fixed(TS_NOW_3, ZoneOffset.UTC);
 
+    private static LocalDateTime toLocalDateTimeAtMidnight(Instant instant) {
+        return LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
+    }
+    
     private RetentionPolicy getRetentionPolicy(int minRetentionPeriodYears, boolean extendUponRetrieval) {
         RetentionPolicy rp = new RetentionPolicy();
         rp.setMinRetentionPeriod(minRetentionPeriodYears);
@@ -95,41 +96,41 @@ class RetentionPoliciesServiceTest {
 
         @ParameterizedTest
         @MethodSource("noGrantEndDateProvider")
-        void testNoGrantEndDate(Date vaultCreationTime, int expectedRetentionPolicyStatus) {
+        void testNoGrantEndDate(LocalDateTime vaultCreationTime, int expectedRetentionPolicyStatus) {
 
             Assert.notNull(vaultCreationTime, "the vaultCreationTime cannot be null");
             validateRetentionPolicyStatus(expectedRetentionPolicyStatus);
 
             vault.setRetentionPolicy(null);
             vault.setGrantEndDate(null);
-            vault.setCreationTime(DateTimeUtils.toLocalDateTime(vaultCreationTime));
+            vault.setCreationTime(vaultCreationTime);
 
             RetentionPoliciesService.updateRetentionPolicyExpiryDate(vault, CLOCK);
-            assertThat(vault.getRetentionPolicyExpiry()).isEqualTo(DateTimeUtils.toLocalDateTime(vaultCreationTime));
+            assertThat(vault.getRetentionPolicyExpiry()).isEqualTo(vaultCreationTime);
             assertThat(vault.getRetentionPolicyStatus()).isEqualTo(expectedRetentionPolicyStatus);
-            assertThat(vault.getRetentionPolicyLastChecked()).isEqualTo(DateTimeUtils.toLocalDateTime(DATE_NOW_3));
+            assertThat(vault.getRetentionPolicyLastChecked()).isEqualTo(DATE_NOW_3);
         }
 
-        private Deposit getDepositAndRetrieveWithTimestamp(Date timestamp) {
+        private Deposit getDepositAndRetrieveWithTimestamp(LocalDateTime timestamp) {
             Retrieve retrieve = new Retrieve();
-            retrieve.setTimestamp(DateTimeUtils.toLocalDateTime(timestamp));
+            retrieve.setTimestamp(timestamp);
             List<Retrieve> result = List.of(retrieve);
             Deposit deposit = Mockito.spy(new Deposit());
             lenient().doAnswer(invocation -> result).when(deposit).getRetrieves();
             return deposit;
         }
 
-        public List<Deposit> getDeposit(Date timestamp1) {
+        public List<Deposit> getDeposit(LocalDateTime timestamp1) {
             List<Deposit> result = new ArrayList<>();
-            result.add(getDepositAndRetrieveWithTimestamp(addDays(timestamp1, -2)));
-            result.add(getDepositAndRetrieveWithTimestamp(addDays(timestamp1, -1)));
+            result.add(getDepositAndRetrieveWithTimestamp(timestamp1.plusDays(-2)));
+            result.add(getDepositAndRetrieveWithTimestamp(timestamp1.plusDays(-1)));
             result.add(getDepositAndRetrieveWithTimestamp(timestamp1));
             return result;
         }
 
         @ParameterizedTest
         @MethodSource("grantEndDateProviderNoRetrieves")
-        void testHasGrantEndDateNoRetrieves(Date vaultGrantEndDate, int rpMinRetentionPeriod, boolean rpExtendUponRetrieval, int expectedRetentionPolicyStatus, Date expectedRetentionPolicyExpiry) {
+        void testHasGrantEndDateNoRetrieves(LocalDateTime vaultGrantEndDate, int rpMinRetentionPeriod, boolean rpExtendUponRetrieval, int expectedRetentionPolicyStatus, LocalDateTime expectedRetentionPolicyExpiry) {
 
             Assert.notNull(vaultGrantEndDate, "the vaultGrantEndDate cannot be null");
             validateRetentionPolicyStatus(expectedRetentionPolicyStatus);
@@ -143,13 +144,13 @@ class RetentionPoliciesServiceTest {
             RetentionPoliciesService.updateRetentionPolicyExpiryDate(vault, CLOCK);
 
             assertThat(vault.getRetentionPolicyStatus()).isEqualTo(expectedRetentionPolicyStatus);
-            assertThat(vault.getRetentionPolicyLastChecked()).isEqualTo(DateTimeUtils.toLocalDateTime(DATE_NOW_3));
-            assertThat(vault.getRetentionPolicyExpiry()).isEqualTo(DateTimeUtils.toLocalDateTime(expectedRetentionPolicyExpiry));
+            assertThat(vault.getRetentionPolicyLastChecked()).isEqualTo(DATE_NOW_3);
+            assertThat(vault.getRetentionPolicyExpiry()).isEqualTo(expectedRetentionPolicyExpiry);
         }
 
         @ParameterizedTest
         @MethodSource("grantEndDateProviderWithRetrieves")
-        void testHasGrantEndDateWithRetries(Date vaultGrantEndDate, int rpMinRetentionPeriod, boolean rpExtendUponRetrieval, Date lastestRetieveDate, int expectedRetentionPolicyStatus, Date expectedRetentionPolicyExpiry) {
+        void testHasGrantEndDateWithRetries(LocalDateTime vaultGrantEndDate, int rpMinRetentionPeriod, boolean rpExtendUponRetrieval, LocalDateTime lastestRetieveDate, int expectedRetentionPolicyStatus, LocalDateTime expectedRetentionPolicyExpiry) {
 
             Assert.notNull(vaultGrantEndDate, "the vaultGrantEndDate cannot be null");
             validateRetentionPolicyStatus(expectedRetentionPolicyStatus);
@@ -163,8 +164,8 @@ class RetentionPoliciesServiceTest {
             RetentionPoliciesService.updateRetentionPolicyExpiryDate(vault, CLOCK);
 
             assertThat(vault.getRetentionPolicyStatus()).isEqualTo(expectedRetentionPolicyStatus);
-            assertThat(vault.getRetentionPolicyLastChecked()).isEqualTo(DateTimeUtils.toLocalDateTime(DATE_NOW_3));
-            assertThat(vault.getRetentionPolicyExpiry()).isEqualTo(DateTimeUtils.toLocalDateTime(expectedRetentionPolicyExpiry));
+            assertThat(vault.getRetentionPolicyLastChecked()).isEqualTo(DATE_NOW_3);
+            assertThat(vault.getRetentionPolicyExpiry()).isEqualTo(expectedRetentionPolicyExpiry);
         }
     }
 }
