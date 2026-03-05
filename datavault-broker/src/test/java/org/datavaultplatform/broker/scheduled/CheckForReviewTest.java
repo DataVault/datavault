@@ -28,8 +28,6 @@ import java.util.stream.Stream;
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -79,10 +77,8 @@ class CheckForReviewTest {
     private RoleAssignment ownerRoleAssignment;
     private RoleAssignment ndmRoleAssignment;
     private Group group1;
-    private Group group2;
     
     private LocalDateTime retentionPolicyExpiry1;
-    private LocalDateTime retentionPolicyExpiry2;
 
     private static RoleModel createRoleModel(String name) {
         RoleModel result = new RoleModel();
@@ -94,7 +90,6 @@ class CheckForReviewTest {
     void setUp() {
 
         retentionPolicyExpiry1 = LocalDateTime.of(2026, 4, 4, 16, 42 , 42);
-        retentionPolicyExpiry2 = LocalDateTime.of(2026, 5, 4, 16, 42 , 42);
         
         // Initialize the clock for deterministic time
         lenient().when(clock.millis()).thenReturn(Instant.parse("2023-01-01T10:00:00Z").toEpochMilli());
@@ -108,8 +103,8 @@ class CheckForReviewTest {
         this.group1 = new Group("group1id");
         this.group1.setName("group1name");
 
-        this.group2 = new Group("group2id");
-        this.group2.setName("group2name");
+        Group group2 = new Group("group2id");
+        group2.setName("group2name");
 
         // Setup mock vaults
         vault1 = new Vault(VAULT_1_ID);
@@ -355,9 +350,19 @@ class CheckForReviewTest {
         );
         assertThat(email1Map).isEqualTo(expected);
     }
-    @Test
+
+    static Stream<Arguments> ldapAttributeMapProvider() {
+        return Stream.of(Arguments.of((Map<String, String>) null), Arguments.of(Map.of()));
+    }
+
+    /**
+     * The ldapAttibutes is null or empty map.
+     * @param ldapAttributes the ldapAttributes for the user.
+     */
+    @ParameterizedTest
+    @MethodSource("ldapAttributeMapProvider")
     @Order(8)
-    void testCheckVaultForReviewWhenDueForReviewAndNoExistingReviewDontSendEmailsToNdmIfNoOwnerButNdmUserNotInLdap1() throws Exception {
+    void testCheckVaultForReviewWhenDueForReviewAndNoExistingReviewDontSendEmailsToNdmIfNoOwnerButNdmUserNotInLdap(Map<String,String> ldapAttributes) throws Exception {
         Vault mVault = mock(Vault.class);
         when(mVault.getID()).thenReturn(VAULT_1_ID);
         when(mVault.getName()).thenReturn(VAULT_1_NAME);
@@ -368,7 +373,7 @@ class CheckForReviewTest {
         when(mVaultsReviewService.dueForReviewEmail(mVault)).thenReturn(true);
         when(mRolesAndPermissionsService.getRoleAssignmentsForVault(VAULT_1_ID))
                 .thenReturn(Arrays.asList(null, ndmRoleAssignment));
-        when(mLdapService.getLDAPAttributes(NDM_USER_ID)).thenReturn(null);
+        when(mLdapService.getLDAPAttributes(NDM_USER_ID)).thenReturn(ldapAttributes);
 
         checkForReviewSpy.checkVaultForReview(mVault);
 
@@ -400,54 +405,13 @@ class CheckForReviewTest {
         );
         assertThat(email1Map).isEqualTo(expected);
     }
+
+    /*
+     * RoleAssignment has null userId
+     */
     @Test
     @Order(9)
-    void testCheckVaultForReviewWhenDueForReviewAndNoExistingReviewDontSendEmailsToNdmIfNoOwnerButNdmUserNotInLdap2() throws Exception {
-        Vault mVault = mock(Vault.class);
-        when(mVault.getID()).thenReturn(VAULT_1_ID);
-        when(mVault.getName()).thenReturn(VAULT_1_NAME);
-        when(mVault.isVaultReviewUnderway()).thenReturn(false);
-        when(mVault.getGroup()).thenReturn(group1);
-        when(mVault.getRetentionPolicyExpiry()).thenReturn(retentionPolicyExpiry1);
-
-        when(mVaultsReviewService.dueForReviewEmail(mVault)).thenReturn(true);
-        when(mRolesAndPermissionsService.getRoleAssignmentsForVault(VAULT_1_ID))
-                .thenReturn(Arrays.asList(null, ndmRoleAssignment));
-        when(mLdapService.getLDAPAttributes(NDM_USER_ID)).thenReturn(Map.of());
-
-        checkForReviewSpy.checkVaultForReview(mVault);
-
-        // Verify VaultReview is created
-        verify(mVaultsReviewService, times(1)).createVaultReview(mVault);
-
-        // Verify email to support team
-        verify(mEmailService, times(1)).sendTemplateMail(eq(HELP_MAIL), anyString(), eq(EmailTemplate.REVIEW_DUE_SUPPORT), argEmail1Map.capture());
-
-        // Verify NO email to data owner
-        verify(mEmailService, never()).sendTemplateMail(eq(VAULT_OWNER_EMAIL), anyString(), eq(EmailTemplate.REVIEW_DUE_OWNER), anyMap());
-
-        // Verify email to NDM if data owner is NOT found
-        verify(mEmailService, never()).sendTemplateMail(eq(NDM_EMAIL), anyString(), eq(EmailTemplate.REVIEW_DUE_DATA_MANAGER), anyMap());
-
-        verifyNoMoreInteractions(mVaultsService, mVaultsReviewService, mLdapService, mEmailService, mRolesAndPermissionsService, mUsersService);
-
-        var email1Map = argEmail1Map.getValue();
-        Map<String, Object> expected = Map.ofEntries(
-                entry("vault-review-date", ""), //1
-                entry("vault-id", "vault1-id"), //2
-                entry("home-page", "http://localhost:8080"), //3
-                entry("help-mail", "help@example.com"), //4
-                entry("vault-name", "vault1name"), //5
-                entry("group-name", "group1name"), //6
-                entry("help-page", "http://localhost:8080/help"), //7
-                entry("vault-review-link", "http://localhost:8080/admin/vaults/vault1-id/reviews"), //8
-                entry("retention-policy-expiry-date", "2026-04-04") //9
-        );
-        assertThat(email1Map).isEqualTo(expected);
-    }
-    @Test
-    @Order(10)
-    void testCheckVaultForReviewWhenDueForReviewAndNoExistingReviewDontSendEmailsToNdmIfNoOwnerButNdmUserNotInLdap3() throws Exception {
+    void testCheckVaultForReviewWhenDueForReviewAndNoExistingReviewDontSendEmailsToNdmIfNoOwnerButRoleAssignmentHasNullUserId() {
         Vault mVault = mock(Vault.class);
         when(mVault.getID()).thenReturn(VAULT_1_ID);
         when(mVault.getName()).thenReturn(VAULT_1_NAME);
@@ -494,7 +458,7 @@ class CheckForReviewTest {
     }
 
     @Test
-    @Order(11)
+    @Order(10)
     void testCheckVaultForReviewWhenDueForReviewAndExistingReviewThrowsError() {
 
         Vault mVault = mock(Vault.class);

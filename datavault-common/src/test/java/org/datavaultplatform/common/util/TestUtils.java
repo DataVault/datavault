@@ -9,6 +9,7 @@ import lombok.SneakyThrows;
 import org.awaitility.Awaitility;
 import org.mockito.invocation.InvocationOnMock;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.Assert;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TestUtils {
     
@@ -78,6 +80,16 @@ public class TestUtils {
             actualLogger.detachAppender(listAppender);
         }
         return listAppender.list;
+    }
+
+    public static void checkHasNoArgsConstructor(Class<?> clazz) {
+        Assert.notNull(clazz, "The clazz cannot be null");
+
+        // Get all declared constructors (public, private, protected)
+        boolean hasNoArgsConstructor = Arrays.stream(clazz.getDeclaredConstructors())
+                .anyMatch(constructor -> constructor.getParameterCount() == 0);
+
+        assertTrue(hasNoArgsConstructor, "Class " + clazz.getSimpleName() + " should have a no-args constructor");
     }
 
 }

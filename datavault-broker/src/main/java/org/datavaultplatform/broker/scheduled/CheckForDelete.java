@@ -64,18 +64,19 @@ public class CheckForDelete implements ScheduledTask {
 
     private void checkVaultsForDelete(LocalDate today) throws Exception {
         List<Vault> vaults = vaultsService.getVaults();
+
         if (vaults == null) {
             return;
         }
         for (Vault vault : vaults) {
-            checkVaultForDelete(vault, today);
+            if (vault != null) {
+                checkVaultForDelete(vault, today);
+            }
         }
     }
 
-    private void checkVaultForDelete(Vault vault, LocalDate today) throws Exception {
-        if (vault == null) {
-            return;
-        }
+    protected void checkVaultForDelete(Vault vault, LocalDate today) throws Exception {
+        Assert.notNull(vault, "The vault cannot be null");
 
         List<VaultReview> vaultReviews = vault.getVaultReviews();
 
@@ -101,8 +102,12 @@ public class CheckForDelete implements ScheduledTask {
         if (mostRecentVaultReview.getActionedDate() != null) {
             LOG.info("Vault {} has a completed review", vault.getName());
 
+            List<DepositReview> depositReviews = mostRecentVaultReview.getDepositReviews();
+            if (depositReviews == null) {
+                return;
+            }
             // Iterate through DepositReviews associated with the most recent, completed VaultReview
-            for (DepositReview dr : mostRecentVaultReview.getDepositReviews()) {
+            for (DepositReview dr : depositReviews) {
                 if (dr == null) {
                     continue;
                 }
@@ -111,14 +116,14 @@ public class CheckForDelete implements ScheduledTask {
         }
     }
 
-    private void checkActionedDepositReview(Vault vault, VaultReview vaultReview, DepositReview dr, LocalDate today) throws Exception {
+    protected void checkActionedDepositReview(Vault vault, VaultReview vaultReview, DepositReview dr, LocalDate today) throws Exception {
         Assert.notNull(vault, "The vault cannot be null");
         Assert.notNull(vaultReview, "The vaultReview cannot be null");
         Assert.notNull(dr, "The depositReview cannot be null");
         Assert.notNull(dr.getDeposit(), "The depositReview.deposit cannot be null");
         Assert.notNull(today, "The Date 'today' cannot be null");
 
-        // we are only interested in actioned DepositReviews
+        // we are only interested in DepositReviews that have not been actioned
         if (dr.getActionedDate() != null) {
             return;
         }
@@ -137,7 +142,7 @@ public class CheckForDelete implements ScheduledTask {
 
             case (DepositReviewDeleteStatus.ONEXPIRY):
                 LocalDate retentionPolicyExpiryDate = DateTimeUtils.toLocalDate(vault.getRetentionPolicyExpiry());
-                if (today.isAfter(retentionPolicyExpiryDate)) {
+                if (retentionPolicyExpiryDate != null && today.isAfter(retentionPolicyExpiryDate)) {
                     LOG.info("Deleting Deposit [{}] because today is after Retention Policy Expiry [{}]", depositId, retentionPolicyExpiryDate);
                     depositReviewDeleteDeposit(dr);
                 }
@@ -148,6 +153,9 @@ public class CheckForDelete implements ScheduledTask {
     }
 
     private void depositReviewDeleteDeposit(DepositReview dr) throws Exception {
+        Assert.notNull(dr, "The depositReview cannot be null");
+        Assert.notNull(dr.getDeposit(), "The depositReview.deposit cannot be null");
+
         Deposit deposit = dr.getDeposit();
         LOG.info("deleting deposit {}/{}", deposit.getID(), deposit.getName());
         adminDepositService.deleteDeposit(deposit, null);

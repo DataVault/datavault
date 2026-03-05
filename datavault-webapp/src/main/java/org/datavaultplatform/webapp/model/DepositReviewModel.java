@@ -2,6 +2,7 @@ package org.datavaultplatform.webapp.model;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.datavaultplatform.common.model.Deposit;
 import org.datavaultplatform.common.model.DepositReview;
 import org.datavaultplatform.common.response.DepositInfo;
 import org.springframework.util.Assert;
@@ -15,12 +16,12 @@ public class DepositReviewModel {
     // DepositReview Identifier
     private String depositReviewId;
     /*  DEPRECATED */
-    @Deprecated
+    @Deprecated(since = "8/Jul/2020")
     private boolean toBeDeleted;
     private int deleteStatus;
     private String comment;
 
-    ////// Add in here any fields from the Deposit that we want to display
+    // Add in here any fields from the Deposit that we want to display
 
     private String depositId;
     private String name;
@@ -43,7 +44,9 @@ public class DepositReviewModel {
         // Set Deposit stuff
         this.setDepositId(depositInfo.getID());
         this.setName(depositInfo.getName());
-        this.setStatusName(depositInfo.getStatus().name());
+        Deposit.Status status = depositInfo.getStatus();
+        String statusNameStr = status == null ? "" : status.name();
+        this.setStatusName(statusNameStr);
         this.setCreationTime(depositInfo.getCreationTime());
     }
 }
