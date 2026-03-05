@@ -15,8 +15,6 @@ import org.springframework.util.Assert;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.List;
-import java.util.Objects;
 
 /**
  * Created by stuartlewis on 01/06/2016.
@@ -54,7 +52,6 @@ public class CheckRetentionPolicies implements ScheduledTask {
     private void checkRetentionPoliciesForVaults(){
         // Get all the vaults
         Utils.getSafeStream(vaultsService.getVaults())
-                .filter(Objects::nonNull)
                 .forEach(this::checkRetentionPoliciesForVault);
     }
 

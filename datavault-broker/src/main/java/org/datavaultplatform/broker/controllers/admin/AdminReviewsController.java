@@ -204,7 +204,6 @@ public class AdminReviewsController {
         List<String> depositReviewIds = new ArrayList<>();
 
         Utils.getSafeStream(depositReviews)
-                .filter(Objects::nonNull)
                 .forEach(dr -> {
                     depositIds.add(dr.getDeposit().getID());
                     depositReviewIds.add(dr.getId());

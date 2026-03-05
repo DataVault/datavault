@@ -106,7 +106,7 @@ public class Utils {
     if (collection == null) {
       return Stream.empty();
     } else {
-      return collection.stream();
+      return collection.stream().filter(Objects::nonNull);
     }
   }
 }

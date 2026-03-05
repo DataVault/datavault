@@ -67,7 +67,6 @@ public class VaultsReviewService {
 
     public List<Vault> getVaultsForReview(List<Vault> vaults) {
         return getSafeStream(vaults)
-                .filter(Objects::nonNull)
                 .filter(this::isVaultForReview)
                 .toList();
     }
@@ -129,7 +128,6 @@ public class VaultsReviewService {
     private boolean reviewHasNotHappenedAfterReviewWindowStart(Vault vault, LocalDate reviewWindowStartDate){
         Assert.notNull(vault, "The vault cannot be null");
         return getSafeStream(vault.getVaultReviews())
-                .filter(Objects::nonNull)
                 .map(VaultReview::getActionedDate)
                 .filter(Objects::nonNull)
                 .map(DateTimeUtils::toLocalDate)
