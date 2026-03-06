@@ -36,9 +36,12 @@ public class VaultReview {
     public static final Predicate<VaultReview> NO_ACTION_DATE =
             vr -> vr.getActionedDate() == null;
 
+    // handles VaultReviews with null creationTime
     public static final Comparator<VaultReview> BY_CREATION_TIME =
-            Comparator.comparing(VaultReview::getCreationTime);
-    
+            Comparator.comparing(
+                    VaultReview::getCreationTime,
+                    Comparator.nullsFirst(Comparator.naturalOrder())); 
+
     public static final String EG_VAULT_REVIEW = "eg.VaultReview.1";
 
     // VaultReview Identifier
