@@ -5,6 +5,7 @@ import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,7 +24,7 @@ class ErrorController implements org.springframework.boot.web.servlet.error.Erro
 
     private static final Logger logger = LoggerFactory.getLogger(ErrorController.class);
 
-    @RequestMapping("/error")
+    @RequestMapping(value = "/error", produces = MediaType.TEXT_HTML_VALUE)
     public String customError(HttpServletRequest request, HttpServletResponse response, Model model) {
         // Retrieve some useful information from the request
         Integer statusCode = (Integer) request.getAttribute("jakarta.servlet.error.status_code");
@@ -64,9 +65,7 @@ class ErrorController implements org.springframework.boot.web.servlet.error.Erro
             StringWriter reason = new StringWriter();
             throwable.printStackTrace(new PrintWriter(reason));
             response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
-            if (reason != null) {
-                return reason.toString();
-            }
+            return reason.toString();
         }
         if(statusCode == null){
             statusCode = HttpStatus.INTERNAL_SERVER_ERROR.value();

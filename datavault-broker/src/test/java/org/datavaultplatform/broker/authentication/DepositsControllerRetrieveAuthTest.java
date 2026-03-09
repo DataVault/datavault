@@ -1,8 +1,15 @@
 package org.datavaultplatform.broker.authentication;
 
 import org.datavaultplatform.broker.controllers.DepositsController;
+import org.datavaultplatform.common.model.Permission;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
+import java.util.logging.Handler;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -12,21 +19,18 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
-public class DepositsControllerRetrieveNoAuthTest extends BaseControllerAuthTest {
+ 
+class DepositsControllerRetrieveAuthTest extends BaseControllerAuthTest {
 
   @MockBean
   DepositsController controller;
   
   @Test
-  void testRestartRetrieveNoSecurity() throws Exception {
+  void testRestartRetrieveHasSecurity() throws Exception {
     when(controller.retrieveRestart("retrieve-id-1")).thenReturn(true);
 
-    mvc.perform(
-            post("/retrieve/{retrieveId}/restart", "retrieve-id-1")).andDo(print())
-            .andExpect(status().isOk())
-            .andExpect(content().contentTypeCompatibleWith("application/json"))
-            .andExpect(content().string("true"));
+    MockHttpServletRequestBuilder builder = setupAuthentication(post("/retrieve/{retrieveId}/restart", "retrieve-id-1"));
+    checkSuccessWhenAuthenticated(builder, Boolean.TRUE, HttpStatus.OK, false, Permission.CAN_MANAGE_DEPOSITS);
 
     verify(controller).retrieveRestart("retrieve-id-1");
   }

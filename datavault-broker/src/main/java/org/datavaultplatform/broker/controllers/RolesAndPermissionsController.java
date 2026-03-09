@@ -3,16 +3,14 @@ package org.datavaultplatform.broker.controllers;
 import static org.datavaultplatform.common.util.Constants.HEADER_CLIENT_KEY;
 import static org.datavaultplatform.common.util.Constants.HEADER_USER_ID;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.datavaultplatform.common.email.EmailTemplate;
 import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.common.event.roles.CreateRoleAssignment;
 import org.datavaultplatform.common.event.roles.DeleteRoleAssignment;
 import org.datavaultplatform.common.event.roles.UpdateRoleAssignment;
 import org.datavaultplatform.common.model.*;
-import org.jsondoc.core.annotation.Api;
-import org.jsondoc.core.annotation.ApiMethod;
-import org.jsondoc.core.annotation.ApiPathParam;
-import org.jsondoc.core.pojo.ApiVerb;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -25,7 +23,7 @@ import java.util.List;
 @RestController
 //@CrossOrigin
 @RequestMapping("/permissions")
-@Api(name="Permissions", description = "Interact with DataVault Roles and Permissions")
+@Tag(name = "roles-and-permissions-controller", description = "Interact with DataVault Roles and Permissions")
 public class RolesAndPermissionsController {
 
     public static final String EMAIL_ROLE = "role";
@@ -64,43 +62,35 @@ public class RolesAndPermissionsController {
         this.clientsService = clientsService;
     }
 
-    @ApiMethod(
-            path = "/permissions/role",
-            verb = ApiVerb.POST,
-            description = "Create a new DataVault Role",
-            consumes = { MediaType.APPLICATION_JSON_VALUE },
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
+    @Operation(
+            summary = "Create a new DataVault Role",
+            description = "Create a new DataVault Role"
     )
-    @PostMapping("/role")
+    @PostMapping(value = "/role", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public RoleModel createRole(@RequestBody RoleModel role) {
         return rolesAndPermissionsService.createRole(role);
     }
 
-    @ApiMethod(
-            path = "/permissions/roleAssignment",
-            verb = ApiVerb.POST,
-            description = "Create a new DataVault Role Assignment",
-            consumes = { MediaType.APPLICATION_JSON_VALUE },
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
+    @Operation(
+            summary = "Create a new DataVault Role Assignment",
+            description = "Create a new DataVault Role Assignment"
     )
-    @PostMapping("/roleAssignment")
-    public RoleAssignment createRoleAssignment(@RequestHeader(HEADER_USER_ID) String userID,
+    @PostMapping(value = "/roleAssignment", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public RoleAssignment createRoleAssignment(@RequestHeader(HEADER_USER_ID) String userId,
                                                @RequestHeader(HEADER_CLIENT_KEY) String clientKey,
                                                @RequestBody RoleAssignment roleAssignment) {
-        sendEmails(EmailTemplate.NEW_ROLE_ASSIGNMENT, roleAssignment, userID);
+        sendEmails(EmailTemplate.NEW_ROLE_ASSIGNMENT, roleAssignment, userId);
 
         RoleAssignment assignment = rolesAndPermissionsService.createRoleAssignment(roleAssignment);
 
-        CreateRoleAssignment roleAssignmentEvent = new CreateRoleAssignment(roleAssignment, userID);
+        CreateRoleAssignment roleAssignmentEvent = new CreateRoleAssignment(roleAssignment, userId);
         RoleType type = roleAssignment.getRole().getType();
         if (type == RoleType.VAULT){
             roleAssignmentEvent.setVault(vaultsService.getVault(roleAssignment.getVaultId()));
         } else if (type == RoleType.SCHOOL) {
             roleAssignmentEvent.setSchool(groupsService.getGroup(roleAssignment.getSchoolId()));
         }
-        roleAssignmentEvent.setUser(usersService.getUser(userID));
+        roleAssignmentEvent.setUser(usersService.getUser(userId));
         roleAssignmentEvent.setAgentType(Agent.AgentType.BROKER);
         roleAssignmentEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
         roleAssignmentEvent.setAssignee(usersService.getUser(roleAssignment.getUserId()));
@@ -111,205 +101,158 @@ public class RolesAndPermissionsController {
         return assignment;
     }
 
-    @ApiMethod(
-            path = "/permissions/school",
-            verb = ApiVerb.GET,
-            description = "Gets all school permissions",
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
+    @Operation(
+            summary = "Get all school permissions",
+            description = "Gets all school permissions"
     )
-    @GetMapping("/school")
+    @GetMapping(value = "/school", produces = MediaType.APPLICATION_JSON_VALUE)
     public PermissionModel[] getSchoolPermissions() {
         List<PermissionModel> schoolPermissions = rolesAndPermissionsService.getSchoolPermissions();
         return schoolPermissions.toArray(new PermissionModel[0]);
     }
 
-    @ApiMethod(
-            path = "/permissions/school",
-            verb = ApiVerb.GET,
-            description = "Gets all school permissions",
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
+    @Operation(
+            summary = "Get all vault permissions",
+            description = "Gets all vault permissions"
     )
-    @GetMapping("/vault")
+    @GetMapping(value = "/vault", produces = MediaType.APPLICATION_JSON_VALUE)
     public PermissionModel[] getVaultPermissions() {
         List<PermissionModel> vaultPermissions = rolesAndPermissionsService.getVaultPermissions();
         return vaultPermissions.toArray(new PermissionModel[0]);
     }
 
-    @ApiMethod(
-            path = "/permissions/role/{roleId}",
-            verb = ApiVerb.GET,
-            description = "Gets all roles which can be edited",
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
+    @Operation(
+            summary = "Get a specific role by ID",
+            description = "Gets a specific role by its ID"
     )
-    @GetMapping("/role/{roleId}")
-    public RoleModel getRole(@PathVariable("roleId") @ApiPathParam(name = "Role ID", description = "The ID of the role to get") Long id) {
-        return rolesAndPermissionsService.getRole(id);
+    @GetMapping(value = "/role/{roleId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public RoleModel getRole(@PathVariable Long roleId) {
+        return rolesAndPermissionsService.getRole(roleId);
     }
 
-    @ApiMethod(
-            path = "/permissions/role/isAdmin",
-            verb = ApiVerb.GET,
-            description = "Gets all roles which can be edited",
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
+    @Operation(
+            summary = "Get the 'I.S. Admin' Role",
+            description = "Gets the 'I.S. Admin' Role"
     )
-    @GetMapping("/role/isAdmin")
+    @GetMapping(value = "/role/isAdmin", produces = MediaType.APPLICATION_JSON_VALUE)
     public RoleModel getIsAdmin() {
         return rolesAndPermissionsService.getIsAdmin();
     }
 
-    @ApiMethod(
-            path = "/permissions/roles",
-            verb = ApiVerb.GET,
-            description = "Gets all roles which can be edited",
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
+    @Operation(
+            summary = "Get all editable roles",
+            description = "Gets all roles which can be edited"
     )
-    @GetMapping("/roles")
+    @GetMapping(value = "/roles", produces = MediaType.APPLICATION_JSON_VALUE)
     public RoleModel[] getEditableRoles() {
         List<RoleModel> editableRoles = rolesAndPermissionsService.getEditableRoles();
         return editableRoles.toArray(new RoleModel[0]);
     }
 
-    @ApiMethod(
-            path = "/permissions/roles/readOnly",
-            verb = ApiVerb.GET,
-            description = "Gets all roles which can be viewed but not edited",
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
+    @Operation(
+            summary = "Get all viewable (read-only) roles",
+            description = "Gets all roles which can be viewed but not edited"
     )
-    @GetMapping("/roles/readOnly")
+    @GetMapping(value = "/roles/readOnly", produces = MediaType.APPLICATION_JSON_VALUE)
     public RoleModel[] getViewableRoles() {
         List<RoleModel> viewableRoles = rolesAndPermissionsService.getViewableRoles();
         return viewableRoles.toArray(new RoleModel[0]);
     }
 
-    @ApiMethod(
-            path = "/permissions/roles/school",
-            verb = ApiVerb.GET,
-            description = "Gets all school roles",
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
+    @Operation(
+            summary = "Get all school roles",
+            description = "Gets all school roles"
     )
-    @GetMapping("/roles/school")
+    @GetMapping(value = "/roles/school", produces = MediaType.APPLICATION_JSON_VALUE)
     public RoleModel[] getAllSchoolRoles() {
         List<RoleModel> editableRoles = rolesAndPermissionsService.getSchoolRoles();
         return editableRoles.toArray(new RoleModel[0]);
     }
 
-    @ApiMethod(
-            path = "/permissions/roles/vault",
-            verb = ApiVerb.GET,
-            description = "Gets all vault roles",
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
+    @Operation(
+            summary = "Get all vault roles",
+            description = "Gets all vault roles"
     )
-    @GetMapping("/roles/vault")
+    @GetMapping(value = "/roles/vault", produces = MediaType.APPLICATION_JSON_VALUE)
     public RoleModel[] getAllVaultRoles() {
         List<RoleModel> editableRoles = rolesAndPermissionsService.getVaultRoles();
         return editableRoles.toArray(new RoleModel[0]);
     }
 
-    @ApiMethod(
-            path = "/permissions/roleAssignments/school/{assignmentId}",
-            verb = ApiVerb.GET,
-            description = "Gets a specified role assignment",
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
+    @Operation(
+            summary = "Get a specified role assignment by ID",
+            description = "Gets a specified role assignment by its ID"
     )
-    @GetMapping("/roleAssignment/{assignmentId}")
+    @GetMapping(value = "/roleAssignment/{assignmentId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public RoleAssignment getRoleAssignment(
-            @ApiPathParam(name = "Role ID", description = "The ID of the school to get role assignments for") @PathVariable("assignmentId") Long assignmentId) {
+            @PathVariable Long assignmentId) {
         return rolesAndPermissionsService.getRoleAssignment(assignmentId);
     }
 
-    @ApiMethod(
-            path = "/permissions/roleAssignments/school/{schoolId}",
-            verb = ApiVerb.GET,
-            description = "Gets all role assignments for a given school",
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
+    @Operation(
+            summary = "Get all role assignments for a given school",
+            description = "Gets all role assignments for a given school"
     )
-    @GetMapping("/roleAssignments/school/{schoolId}")
+    @GetMapping(value = "/roleAssignments/school/{schoolId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public RoleAssignment[] getRoleAssignmentsForSchool(
-            @ApiPathParam(name = "Role ID", description = "The ID of the school to get role assignments for") @PathVariable("schoolId") String schoolId) {
+            @PathVariable String schoolId) {
         List<RoleAssignment> schoolRoleAssignments = rolesAndPermissionsService.getRoleAssignmentsForSchool(schoolId);
         return schoolRoleAssignments.toArray(new RoleAssignment[0]);
     }
 
-    @ApiMethod(
-            path = "/permissions/roleAssignments/vault/{vaultId}",
-            verb = ApiVerb.GET,
-            description = "Gets all role assignments for a given school",
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
+    @Operation(
+            summary = "Get all role assignments for a given vault",
+            description = "Gets all role assignments for a given vault"
     )
-    @GetMapping("/roleAssignments/vault/{vaultId}")
+    @GetMapping(value = "/roleAssignments/vault/{vaultId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public RoleAssignment[] getRoleAssignmentsForVault(
-            @ApiPathParam(name = "Vault ID", description = "The ID of the vault to get role assignments for") @PathVariable("vaultId") String vaultId) {
+            @PathVariable String vaultId) {
         List<RoleAssignment> schoolRoleAssignments = rolesAndPermissionsService.getRoleAssignmentsForVault(vaultId);
         return schoolRoleAssignments.toArray(new RoleAssignment[0]);
     }
 
-    @ApiMethod(
-            path = "/permissions/roleAssignments/user/{userId}",
-            verb = ApiVerb.GET,
-            description = "Gets all role assignments for a given school",
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
+    @Operation(
+            summary = "Get all role assignments for a given user",
+            description = "Gets all role assignments for a given user"
     )
-    @GetMapping("/roleAssignments/user/{userId}")
+    @GetMapping(value = "/roleAssignments/user/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public RoleAssignment[] getRoleAssignmentsForUser(
-            @ApiPathParam(name = "User ID", description = "The ID of the user to get role assignments for") @PathVariable("userId") String userId) {
+            @PathVariable String userId) {
         List<RoleAssignment> schoolRoleAssignments = rolesAndPermissionsService.getRoleAssignmentsForUser(userId);
         return schoolRoleAssignments.toArray(new RoleAssignment[0]);
     }
 
-    @ApiMethod(
-            path = "/permissions/roleAssignments/role/{roleId}",
-            verb = ApiVerb.GET,
-            description = "Gets all role assignments for a given role",
-            produces = {MediaType.APPLICATION_JSON_VALUE},
-            responsestatuscode = "200 - OK"
+    @Operation(
+            summary = "Get all role assignments for a given role",
+            description = "Gets all role assignments for a given role"
     )
-    @GetMapping("/roleAssignments/role/{roleId}")
+    @GetMapping(value = "/roleAssignments/role/{roleId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public RoleAssignment[] getRoleAssignmentsForRole(
-            @ApiPathParam(name = "Role ID", description = "The ID of the role to get role assignments for") @PathVariable("roleId") Long roleId) {
+            @PathVariable Long roleId) {
         List<RoleAssignment> roleAssignments = rolesAndPermissionsService.getRoleAssignmentsForRole(roleId);
         return roleAssignments.toArray(new RoleAssignment[0]);
     }
 
-    @ApiMethod(
-            path = "/permissions/role",
-            verb = ApiVerb.PUT,
-            description = "Updates a role",
-            consumes = { MediaType.APPLICATION_JSON_VALUE },
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
+    @Operation(
+            summary = "Update an existing role",
+            description = "Updates an existing role"
     )
-    @PutMapping("/role")
+    @PutMapping(value = "/role", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public RoleModel updateRole(@RequestBody RoleModel role) {
         return rolesAndPermissionsService.updateRole(role);
     }
 
-    @ApiMethod(
-            path = "/permissions/roleAssignment",
-            verb = ApiVerb.PUT,
-            description = "Update an existing DataVault Role Assignment",
-            consumes = { MediaType.APPLICATION_JSON_VALUE },
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
+    @Operation(
+            summary = "Update an existing DataVault Role Assignment",
+            description = "Update an existing DataVault Role Assignment"
     )
-    @PutMapping("/roleAssignment")
-    public RoleAssignment updateRoleAssignment(@RequestHeader(HEADER_USER_ID) String userID,
+    @PutMapping(value = "/roleAssignment", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public RoleAssignment updateRoleAssignment(@RequestHeader(HEADER_USER_ID) String userId,
                                                @RequestHeader(HEADER_CLIENT_KEY) String clientKey,
-                                                     @RequestBody RoleAssignment roleAssignment) {
-        sendEmails(EmailTemplate.UPDATE_ROLE_ASSIGNMENT, roleAssignment, userID);
+                                               @RequestBody RoleAssignment roleAssignment) {
+        sendEmails(EmailTemplate.UPDATE_ROLE_ASSIGNMENT, roleAssignment, userId);
 
-        UpdateRoleAssignment roleAssignmentEvent = new UpdateRoleAssignment(roleAssignment, userID);
+        UpdateRoleAssignment roleAssignmentEvent = new UpdateRoleAssignment(roleAssignment, userId);
 
         RoleType type = roleAssignment.getRole().getType();
         if (type == RoleType.VAULT){
@@ -317,7 +260,7 @@ public class RolesAndPermissionsController {
         } else if (type == RoleType.SCHOOL) {
             roleAssignmentEvent.setSchool(groupsService.getGroup(roleAssignment.getSchoolId()));
         }
-        roleAssignmentEvent.setUser(usersService.getUser(userID));
+        roleAssignmentEvent.setUser(usersService.getUser(userId));
         roleAssignmentEvent.setAgentType(Agent.AgentType.BROKER);
         roleAssignmentEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
         roleAssignmentEvent.setAssignee(usersService.getUser(roleAssignment.getUserId()));
@@ -330,37 +273,31 @@ public class RolesAndPermissionsController {
         return assignment;
     }
 
-    @ApiMethod(
-            path = "/permissions/role/{roleId}",
-            verb = ApiVerb.DELETE,
-            description = "Deletes a role",
-            responsestatuscode = "200 - OK"
+    @Operation(
+            summary = "Delete a role by ID",
+            description = "Deletes a role by its ID"
     )
     @DeleteMapping("/role/{roleId}")
-    public ResponseEntity<Void> deleteRole(@PathVariable("roleId") @ApiPathParam(name = "Role ID", description = "The ID of the role to delete") Long roleId) {
+    public ResponseEntity<Void> deleteRole(@PathVariable Long roleId) {
         rolesAndPermissionsService.deleteRole(roleId);
         return ResponseEntity.ok().build();
     }
 
-    @ApiMethod(
-            path = "/permissions/roleAssignment/{roleAssignmentId}",
-            verb = ApiVerb.DELETE,
-            description = "Delete a DataVault Role Assignment",
-            consumes = { MediaType.APPLICATION_JSON_VALUE },
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
+    @Operation(
+            summary = "Delete a DataVault Role Assignment",
+            description = "Delete a DataVault Role Assignment"
     )
     @DeleteMapping("/roleAssignment/{roleAssignmentId}")
     public ResponseEntity<Void> deleteRoleAssignment(
-            @RequestHeader(HEADER_USER_ID) String userID,
-            @RequestHeader(HEADER_CLIENT_KEY) String clientKey,
-            @PathVariable("roleAssignmentId") @ApiPathParam(name = "Role ID", description = "The ID of the role assignment to delete") Long roleAssignmentId) {
+             @RequestHeader(HEADER_USER_ID) String userId,
+             @RequestHeader(HEADER_CLIENT_KEY) String clientKey,
+            @PathVariable Long roleAssignmentId) {
 
         RoleAssignment assignment = rolesAndPermissionsService.getRoleAssignment(roleAssignmentId);
 
-        sendEmails("delete-role-assignment.vm", assignment, userID);
+        sendEmails("delete-role-assignment.vm", assignment, userId);
 
-        DeleteRoleAssignment roleAssignmentEvent = new DeleteRoleAssignment(assignment, userID);
+        DeleteRoleAssignment roleAssignmentEvent = new DeleteRoleAssignment(assignment, userId);
 
         RoleType type = assignment.getRole().getType();
         if (type == RoleType.VAULT){
@@ -368,7 +305,7 @@ public class RolesAndPermissionsController {
         } else if (type == RoleType.SCHOOL) {
             roleAssignmentEvent.setSchool(groupsService.getGroup(assignment.getSchoolId()));
         }
-        roleAssignmentEvent.setUser(usersService.getUser(userID));
+        roleAssignmentEvent.setUser(usersService.getUser(userId));
         roleAssignmentEvent.setAgentType(Agent.AgentType.BROKER);
         roleAssignmentEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
         roleAssignmentEvent.setAssignee(usersService.getUser(assignment.getUserId()));

@@ -14,23 +14,7 @@ import org.datavaultplatform.broker.actuator.LocalFileStoreEndpoint;
 import org.datavaultplatform.broker.actuator.LocalFileStoreInfo;
 import org.datavaultplatform.broker.actuator.SftpFileStoreEndpoint;
 import org.datavaultplatform.broker.actuator.SftpFileStoreInfo;
-import org.datavaultplatform.broker.config.ActuatorConfig;
-import org.datavaultplatform.broker.config.ControllerConfig;
-import org.datavaultplatform.broker.config.DatabaseConfig;
-import org.datavaultplatform.broker.config.EmailConfig;
-import org.datavaultplatform.broker.config.EmailLocalConfig;
-import org.datavaultplatform.broker.config.EncryptionConfig;
-import org.datavaultplatform.broker.config.InitialiseConfig;
-import org.datavaultplatform.broker.config.JacksonConfig;
-import org.datavaultplatform.broker.config.LdapConfig;
-import org.datavaultplatform.broker.config.PropertiesConfig;
-import org.datavaultplatform.broker.config.RabbitConfig;
-import org.datavaultplatform.broker.config.ScheduleConfig;
-import org.datavaultplatform.broker.config.SecurityActuatorConfig;
-import org.datavaultplatform.broker.config.SecurityConfig;
-import org.datavaultplatform.broker.config.ServiceConfig;
-import org.datavaultplatform.broker.config.StorageClassNameResolverConfig;
-import org.datavaultplatform.broker.config.WebConfig;
+import org.datavaultplatform.broker.config.*;
 import org.datavaultplatform.common.crypto.EncryptionValidator;
 import org.datavaultplatform.common.monitor.MemoryStats;
 import org.datavaultplatform.common.services.LDAPService;
@@ -57,10 +41,9 @@ import org.springframework.core.env.Environment;
     SecurityActuatorConfig.class, SecurityConfig.class, ControllerConfig.class,
     DatabaseConfig.class,
     LdapConfig.class, EmailConfig.class, EmailLocalConfig.class, RabbitConfig.class,
-    StorageClassNameResolverConfig.class, WebConfig.class, ServiceConfig.class
+    StorageClassNameResolverConfig.class, WebConfig.class, ServiceConfig.class, OpenApiConfig.class
 })
 @Slf4j
-//@EnableJSONDoc
 public class DataVaultBrokerApp implements CommandLineRunner {
 
   @Value("${validate.encryption.config:false}")

@@ -152,9 +152,6 @@
     <!-- https://mvnrepository.com/artifact/com.bettercloud/vault-java-driver -->
     <vault.java.driver.version>5.1.0</vault.java.driver.version>
 
-    <!-- https://mvnrepository.com/artifact/org.jsondoc/jsondoc-core -->
-    <jsondoc.core.version>1.2.23</jsondoc.core.version>
-
     <!-- https://mvnrepository.com/artifact/net.sf.supercsv/super-csv -->
     <super.csv.version>2.4.0</super.csv.version>
 
@@ -169,6 +166,9 @@
 
     <!-- https://mvnrepository.com/artifact/oro/oro -->
     <!-- <oro.version>2.0.8</oro.version> -->
+    
+    <!-- https://mvnrepository.com/artifact/com.tngtech.archunit/archunit-junit5 -->
+    <arch.unit.version>1.4.1</arch.unit.version>
   </properties>
 
   <dependencyManagement>
@@ -286,11 +286,6 @@
         <groupId>commons-io</groupId>
         <artifactId>commons-io</artifactId>
         <version>${commons.io.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.jsondoc</groupId>
-        <artifactId>jsondoc-core</artifactId>
-        <version>${jsondoc.core.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.directory.api</groupId>
@@ -419,6 +414,12 @@
         <groupId>nz.net.ultraq.thymeleaf</groupId>
         <artifactId>thymeleaf-layout-dialect</artifactId>
         <version>${thymeleaf.layout.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.tngtech.archunit</groupId>
+        <artifactId>archunit-junit5</artifactId>
+        <version>${arch.unit.version}</version>
+        <scope>test</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>

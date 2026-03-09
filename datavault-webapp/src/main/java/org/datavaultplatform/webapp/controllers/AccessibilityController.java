@@ -1,22 +1,21 @@
 package org.datavaultplatform.webapp.controllers;
 
 import org.datavaultplatform.webapp.services.RestService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.GetMapping;
 
 
 @Controller
 @ConditionalOnBean(RestService.class)
-public class AccessibilityController {
+public class AccessibilityController implements AccessibilityControllerApi {
 
-    @Autowired
     public AccessibilityController() {
     }
 
-    @RequestMapping(value = "/accessibility", method = RequestMethod.GET)
+    @Override
+    @GetMapping(value = "/accessibility", produces = MediaType.TEXT_HTML_VALUE)
     public String accessibility() {
         return "accessibility";
     }

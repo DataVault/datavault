@@ -12,12 +12,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import jakarta.servlet.ServletException;
@@ -29,7 +27,7 @@ import java.util.stream.Collectors;
 
 @Controller
 @ConditionalOnBean(RestService.class)
-public class AdminRolesController {
+public class AdminRolesController implements AdminRolesControllerApi {
 
     private static final Logger logger = LoggerFactory.getLogger(AdminRolesController.class);
 
@@ -44,7 +42,8 @@ public class AdminRolesController {
         this.forceLogoutService = forceLogoutService;
     }
 
-    @GetMapping("/admin/roles")
+    @Override
+    @GetMapping(value = "/admin/roles", produces = MediaType.TEXT_HTML_VALUE)
     public ModelAndView getRolesListing(Principal principal) {
         ModelAndView mav = new ModelAndView();
         mav.setViewName("admin/roles/index");
@@ -56,7 +55,8 @@ public class AdminRolesController {
         return mav;
     }
 
-    @GetMapping("/admin/roles/isadmin")
+    @Override
+    @GetMapping(value = "/admin/roles/isadmin", produces = MediaType.TEXT_HTML_VALUE)
     public ModelAndView getSuperAdminUsersListing(Principal principal) {
 
         RoleModel superAdminRole = restService.getIsAdmin();
@@ -72,7 +72,8 @@ public class AdminRolesController {
         return mav;
     }
 
-    @PostMapping("/admin/roles/save")
+    @Override
+    @PostMapping(value = "/admin/roles/save", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public ResponseEntity<?> save(@RequestParam(value = "id") long id,
                                @RequestParam(value = "name") String name,
                                @RequestParam(value = "type") String type,
@@ -247,7 +248,8 @@ public class AdminRolesController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/admin/roles/delete")
+    @Override
+    @PostMapping(value = "/admin/roles/delete", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public ResponseEntity<?> deleteRole(@RequestParam("id") long roleId) {
 
         logger.debug("Preparing to delete role with ID={}", roleId);
@@ -266,8 +268,9 @@ public class AdminRolesController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/admin/roles/op")
-    public ResponseEntity<?> addSuperAdmin(@RequestParam("op-id") String userId) {
+    @Override
+    @PostMapping(value = "/admin/roles/op", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public ResponseEntity<?> addSuperAdmin(@RequestParam(OP_ID) String userId) {
 
         logger.debug("Preparing to add user ID={} to IS ADMIN role", userId);
         if (StringUtils.isEmpty(userId)) {
@@ -303,8 +306,9 @@ public class AdminRolesController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/admin/roles/deop")
-    public ResponseEntity<?> deleteSuperAdmin(Principal principal, HttpServletRequest request, @RequestParam("deop-id") String userId) throws ServletException {
+    @Override
+    @PostMapping(value = "/admin/roles/deop", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public ResponseEntity<?> deleteSuperAdmin(Principal principal, HttpServletRequest request, @RequestParam(DEOP_ID) String userId) throws ServletException {
 
         logger.debug("Preparing to remove user ID={} from IS ADMIN role", userId);
         RoleModel superAdminRole = restService.getIsAdmin();
@@ -333,8 +337,9 @@ public class AdminRolesController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping(value = "/admin/roles/{id}", produces = "application/json")
-    public ResponseEntity<RoleViewModel> getRole(@PathVariable("id") long roleId) {
+    @Override
+    @GetMapping(value = "/admin/roles/{roleId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<RoleViewModel> getRole(@PathVariable long roleId) {
 
         Optional<RoleModel> role = restService.getRole(roleId);
         if (role.isEmpty()) {
@@ -350,13 +355,15 @@ public class AdminRolesController {
         return ResponseEntity.ok(new RoleViewModel(role.get(), unsetPermissions));
     }
 
-    @GetMapping(value = "/admin/roles/getvaultpermissions", produces = "application/json")
+    @Override
+    @GetMapping(value = "/admin/roles/getvaultpermissions", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<PermissionModel>> getAllVaultPermissions() {
         List<PermissionModel> permissions = restService.getVaultPermissions();
         return ResponseEntity.ok(permissions);
     }
 
-    @GetMapping(value = "/admin/roles/getschoolpermissions", produces = "application/json")
+    @Override
+    @GetMapping(value = "/admin/roles/getschoolpermissions", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<PermissionModel>> getAllSchoolPermissions() {
         List<PermissionModel> permissions = restService.getSchoolPermissions();
         return ResponseEntity.ok(permissions);

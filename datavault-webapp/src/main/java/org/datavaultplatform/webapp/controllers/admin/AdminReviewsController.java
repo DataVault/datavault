@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.Assert;
@@ -32,9 +33,10 @@ import java.util.*;
 import static org.datavaultplatform.common.util.Utils.*;
 
 
+@SuppressWarnings("CodeBlock2Expr")
 @Controller
 @ConditionalOnBean(RestService.class)
-public class AdminReviewsController {
+public class AdminReviewsController implements AdminReviewsControllerApi {
 
     private static final Logger LOG = LoggerFactory.getLogger(AdminReviewsController.class);
     public static final String ACTION_CANCEL = "Cancel";
@@ -50,7 +52,8 @@ public class AdminReviewsController {
         this.clock = clock;
     }
 
-    @GetMapping("/admin/reviews")
+    @Override
+    @GetMapping(value = "/admin/reviews", produces = MediaType.TEXT_HTML_VALUE)
     public String getVaultsForReview(ModelMap model) {
 
         VaultsData vaultsData = restService.getVaultsForReview();
@@ -62,9 +65,10 @@ public class AdminReviewsController {
     }
 
     // Return a review page
-    @GetMapping("/admin/vaults/{vaultid}/reviews")
-    public String showReview(ModelMap model, 
-                             @PathVariable("vaultid") String vaultID, 
+    @Override
+    @GetMapping(value = "/admin/vaults/{vaultId}/reviews", produces = MediaType.TEXT_HTML_VALUE)
+    public String showReview(ModelMap model,
+                             @PathVariable String vaultId,
                              @RequestParam(value = "error", required = false) String error) {
 
         if (error != null) {
@@ -73,10 +77,10 @@ public class AdminReviewsController {
             }
         }
 
-        VaultInfo vault = restService.getVault(vaultID);
+        VaultInfo vault = restService.getVault(vaultId);
         model.addAttribute("vault", vault);
 
-        List<RoleAssignment> roleAssignmentsForVault = restService.getRoleAssignmentsForVault(vaultID);
+        List<RoleAssignment> roleAssignmentsForVault = restService.getRoleAssignmentsForVault(vaultId);
 
         List<RoleAssignment> dataManagers = Utils.getSafeStream(roleAssignmentsForVault)
                 .filter(Objects::nonNull)
@@ -94,10 +98,10 @@ public class AdminReviewsController {
         model.addAttribute("createRetentionPolicy", retentionPolicy);
         model.addAttribute(restService.getGroup(vault.getGroupID()));
 
-        ReviewInfo reviewInfo = restService.getCurrentReview(vaultID);
+        ReviewInfo reviewInfo = restService.getCurrentReview(vaultId);
         if (reviewInfo == null) {
             // There isn't a current review, so create one.
-            reviewInfo = restService.createCurrentReview(vaultID);
+            reviewInfo = restService.createCurrentReview(vaultId);
         }
         VaultReview currentReview = restService.getVaultReview(reviewInfo.getVaultReviewId());
         VaultReviewModel vaultReviewModel = new VaultReviewModel(currentReview, vault.getReviewDate());
@@ -143,11 +147,12 @@ public class AdminReviewsController {
     }
 
     // Process the completed review page
-    @PostMapping("/admin/vaults/{vaultID}/reviews/{reviewID}")
+    @Override
+    @PostMapping(value = "/admin/vaults/{vaultId}/reviews/{reviewId}", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public String processReview(@ModelAttribute VaultReviewModel vaultReviewModel,
                                 RedirectAttributes redirectAttributes,
-                                @PathVariable String vaultID,
-                                @PathVariable String reviewID,
+                                @PathVariable String vaultId,
+                                @PathVariable String reviewId,
                                 @RequestParam String action) {
 
         Assert.notNull(vaultReviewModel, "VaultReviewModel must not be null");
@@ -162,18 +167,19 @@ public class AdminReviewsController {
 
         if (ACTION_SUBMIT.equals(action)) {
             if (!validateNextReviewDate(vaultReviewModel, redirectAttributes)) {
-                return "redirect:/admin/vaults/" + vaultID + "/reviews";
+                return "redirect:/admin/vaults/" + vaultId + "/reviews";
             }
         }
 
         LocalDateTime now = LocalDateTime.now(clock);
 
-        VaultReview originalVaultReview = restService.getVaultReview(reviewID);
+        VaultReview originalVaultReview = restService.getVaultReview(reviewId);
 
-        updateVaultReviewAndVault(originalVaultReview, vaultReviewModel, vaultID, now, action);
+        updateVaultReviewAndVault(originalVaultReview, vaultReviewModel, vaultId, now, action);
 
         List<DepositReviewModel> depositReviewModels = vaultReviewModel.getDepositReviewModels();
 
+        //noinspection CodeBlock2Expr
         getSafeStream(depositReviewModels).forEach(drm -> {
             processSingleDepositReview(drm, now, action);
         });

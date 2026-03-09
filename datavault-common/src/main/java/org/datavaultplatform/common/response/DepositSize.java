@@ -1,17 +1,16 @@
 package org.datavaultplatform.common.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.jsondoc.core.annotation.ApiObject;
-import org.jsondoc.core.annotation.ApiObjectField;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiObject(name = "DepositSize")
+@Schema(name = "DepositSize")
 public class DepositSize {
-    @ApiObjectField(description = "The max deposit size allowed")
+    @Schema(description = "The max deposit size allowed")
     private Long max;
-    @ApiObjectField(description = "Whether the potential deposit is under the limit")
+    @Schema(description = "Whether the potential deposit is under the limit")
     private Boolean result;
-    @ApiObjectField(description = "The size of deposit as string with units.")
+    @Schema(description = "The size of deposit as string with units.")
     private String sizeWithUnits;
 
     public Long getMax() {

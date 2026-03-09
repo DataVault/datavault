@@ -14,10 +14,10 @@ import jakarta.persistence.Version;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.UuidGenerator;
-import org.jsondoc.core.annotation.ApiObject;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiObject(name = "PendingDataCreator")
+@Schema(name = "PendingDataCreator")
 @Entity
 @Table(name="PendingDataCreators")
 @NamedEntityGraph(name = PendingDataCreator.EG_PENDING_DATA_CREATOR, attributeNodes =

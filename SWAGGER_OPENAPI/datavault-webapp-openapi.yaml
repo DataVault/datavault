@@ -1,0 +1,3437 @@
+openapi: 3.1.0
+info:
+  title: DataVault WebApp API
+  description: API documentation for the DataVault WebApp module.
+  version: 0.0.0 (a16f01e)
+  x-generated-at: 2026-03-13T12:04:59.608241
+servers:
+- url: http://localhost
+  description: Generated server url
+security:
+- SSOHeaderAuth: []
+tags:
+- name: System
+  description: Get Favicon
+paths:
+  /vaults/{vaultId}/updateVaultName:
+    post:
+      tags:
+      - vaults-controller
+      description: updates the vault name then redirects to vault page
+      operationId: updateVaultName
+      parameters:
+      - name: vaultId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Form data for updating vault name
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/NameRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: string
+  /vaults/{vaultId}/updateVaultDescription:
+    post:
+      tags:
+      - vaults-controller
+      description: updates the vault description then redirects to vault page
+      operationId: updateVaultDescription
+      parameters:
+      - name: vaultId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Form data for updating vault description
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/DescriptionRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: string
+  /vaults/{vaultId}/deposits/{depositId}/retrieve:
+    get:
+      tags:
+      - deposits-controller
+      description: shows to the retrieves page
+      operationId: retrieveDeposit
+      parameters:
+      - name: retrieve
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/Retrieve"
+      - name: vaultId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: depositId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                type: string
+    post:
+      tags:
+      - deposits-controller
+      description: starts a deposit retrieval then redirects to show deposit page
+      operationId: processRetrieve
+      parameters:
+      - name: vaultId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: depositId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/Retrieve"
+      responses:
+        "302":
+          description: "Redirects to the vault details page (`/vaults/{vaultId}/deposits/{depositId}`)\
+            \ after retrieve started."
+          headers:
+            Location:
+              description: The target URL for the redirect.
+              style: simple
+              schema: {}
+          content:
+            '*/*':
+              schema:
+                type: string
+  /vaults/{vaultId}/deposits/create:
+    get:
+      tags:
+      - deposits-controller
+      description: returns the deposit creation HTML page
+      operationId: createDeposit
+      parameters:
+      - name: vaultId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                type: string
+    post:
+      tags:
+      - deposits-controller
+      description: adds a deposit then redirects to show new vault deposit page
+      operationId: createAndAddDeposit
+      parameters:
+      - name: vaultId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Deposit details sent as form data
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/CreateDeposit"
+        required: true
+      responses:
+        "302":
+          description: "Redirects to the vault details page (`/vaults/{vaultId}/deposits/{depositId}`)\
+            \ after deposit added."
+          headers:
+            Location:
+              description: The target URL for the redirect.
+              style: simple
+              schema: {}
+          content:
+            '*/*':
+              schema:
+                type: string
+  /vaults/{vaultId}/deleteDataManager:
+    post:
+      tags:
+      - vaults-controller
+      description: deletes 'uun' as dataManager from specified vault then redirects
+        to vault page
+      operationId: deleteDataManager
+      parameters:
+      - name: vaultId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: uun
+        in: query
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Form data for deleting data manager role from user
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/UunRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: string
+  /vaults/{vaultId}/data-owner/update:
+    post:
+      tags:
+      - vaults-controller
+      description: updates the vault ownership
+      operationId: transferOwnership
+      parameters:
+      - name: vaultId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Ownership transfer details
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/VaultTransferRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+  /vaults/{vaultId}/addDataManager:
+    post:
+      tags:
+      - vaults-controller
+      description: adds 'uun' as dataManager to specified vault then redirects
+      operationId: addDataManager
+      parameters:
+      - name: vaultId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Form data for adding data manager role to user
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/UunRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: string
+  /vaults/stepCreate:
+    post:
+      tags:
+      - vaults-controller
+      description: Process the completed 'create new vault' page - based on action
+        - return the appropriate HTML or redirect
+      operationId: addVault
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/CreateVaultForm"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: string
+  /security/roles/{roleType}/{targetId}/user:
+    post:
+      tags:
+      - role-assignment-controller
+      description: creates a new role assignment
+      operationId: createRoleAssignment
+      parameters:
+      - name: roleType
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: targetId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/RoleAssignmentRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+  /security/roles/{roleType}/{targetId}/user/update:
+    post:
+      tags:
+      - role-assignment-controller
+      description: updates the role assignment
+      operationId: updateRoleAssignment
+      parameters:
+      - name: roleType
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: targetId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/UpdateRoleAssignmentRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+  /security/roles/{roleType}/{targetId}/user/delete:
+    post:
+      tags:
+      - role-assignment-controller
+      description: removes a role assignment
+      operationId: removeRoleAssignment
+      parameters:
+      - name: roleType
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: targetId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/RemoveRoleAssignmentRequest"
+      responses:
+        "200":
+          description: OK
+  /fileupload:
+    post:
+      tags:
+      - files-controller
+      summary: Upload a file chunk
+      operationId: fileUpload
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                metadata:
+                  $ref: "#/components/schemas/FileUploadRequest"
+                file:
+                  type: string
+                  format: binary
+              required:
+              - file
+      responses:
+        "200":
+          description: OK
+  /filestores/sftp:
+    post:
+      tags:
+      - file-store-controller
+      summary: Add SFTP Filestore
+      operationId: addSFTPFilestore
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/AddSFTPFilestoreRequest"
+      responses:
+        "200":
+          description: OK
+  /filestores/local:
+    post:
+      tags:
+      - file-store-controller
+      summary: Add local filestore
+      operationId: addLocalFilestore
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/AddLocalFileStoreRequest"
+      responses:
+        "200":
+          description: OK
+  /admin/vaults/{vaultId}/reviews/{reviewId}:
+    post:
+      tags:
+      - admin-reviews-controller
+      description: processes the updated vault review
+      operationId: processReview
+      parameters:
+      - name: vaultId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: reviewId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/VaultReviewModelForm"
+      responses:
+        "302":
+          description: |-
+            ### Possible Redirects:
+            * **Success:** Redirects to `/admin/reviews` after the review is processed.
+            * **Cancel:** Redirects to `/admin/reviews` if the action is 'cancel'.
+            * **Invalid Date:** Redirects to `/admin/vaults/{vaultId}/reviews` if the action is 'submit' and the date is invalid.
+          headers:
+            Location:
+              description: The destination URL based on the logic described above.
+              style: simple
+              schema: {}
+          content:
+            '*/*':
+              schema:
+                type: string
+  /admin/vaults/{vaultId}/checkretentionpolicy:
+    post:
+      tags:
+      - admin-vaults-controller
+      description: redirects to vaults HTML page for the specified vault after checking
+        vault retention policy
+      operationId: checkPolicy
+      parameters:
+      - name: vaultId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "302":
+          description: "Redirects to the vault details page (`/admin/vaults/{vaultId}`)\
+            \ after the retention policy check is complete."
+          headers:
+            Location:
+              description: The target URL for the redirect.
+              style: simple
+              schema: {}
+          content:
+            '*/*':
+              schema:
+                type: string
+  /admin/users/edit/{userId}:
+    get:
+      tags:
+      - admin-users-controller
+      description: returns the edit user HTML page
+      operationId: editUser
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                type: string
+    post:
+      tags:
+      - admin-users-controller
+      description: processes the edit user HTML page then shows vaults
+      operationId: editUser_1
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/UserForm"
+      responses:
+        "302":
+          description: "Redirect: redirects to / if the action is 'cancel'"
+          headers:
+            Location:
+              style: simple
+              schema: {}
+          content:
+            '*/*':
+              schema:
+                type: string
+        "200":
+          description: An HTML page showing vaults
+          content:
+            text/html:
+              schema:
+                type: string
+  /admin/users/create:
+    get:
+      tags:
+      - admin-users-controller
+      description: returns the create user HTML page
+      operationId: createUserPage
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                type: string
+    post:
+      tags:
+      - admin-users-controller
+      description: processes the create user HTML page
+      operationId: addUser
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/UserForm"
+      responses:
+        "302":
+          description: "Redirect: if user does not exist - redirects to /admin/users\
+            \ after creating user"
+          headers:
+            Location:
+              style: simple
+              schema: {}
+          content:
+            '*/*':
+              schema:
+                type: string
+        "200":
+          description: if user already exists just show HTML page to create user
+          content:
+            text/html:
+              schema:
+                type: string
+  /admin/schools/{schoolId}/user:
+    post:
+      tags:
+      - admin-schools-controller
+      description: adds a new role assignment for the specified userId and role if
+        the user has permission
+      operationId: addNewRoleAssignment
+      parameters:
+      - name: schoolId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/AddNewRoleAssignmentRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+  /admin/schools/{schoolId}/user/update:
+    post:
+      tags:
+      - admin-schools-controller
+      description: updates role assignment with the specified role if the user has
+        permission
+      operationId: updateExistingRoleAssignment
+      parameters:
+      - name: schoolId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/UpdateExistingRoleAssignmentRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+  /admin/schools/{schoolId}/user/delete:
+    post:
+      tags:
+      - admin-schools-controller
+      description: deletes the specified role assignment if the user has permission
+      operationId: deleteRoleAssignment
+      parameters:
+      - name: schoolId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/DeleteRoleAssignmentRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+  /admin/roles/save:
+    post:
+      tags:
+      - admin-roles-controller
+      description: Saves a Role that has been edited
+      operationId: save
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/RoleSaveRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+  /admin/roles/op:
+    post:
+      tags:
+      - admin-roles-controller
+      description: assigns the specified user the SuperAdmin(IS) Role
+      operationId: addSuperAdmin
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/SuperAdminRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+  /admin/roles/deop:
+    post:
+      tags:
+      - admin-roles-controller
+      description: removes the specified user from the SuperAdmin(IS) Role
+      operationId: deleteSuperAdmin
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/DeleteSuperAdminRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+  /admin/roles/delete:
+    post:
+      tags:
+      - admin-roles-controller
+      description: Deletes the specified role as long as it is not assigned
+      operationId: deleteRole
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/DeleteRoleRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+  /admin/retentionpolicies/edit/{retentionPolicyId}:
+    get:
+      tags:
+      - admin-retention-policies-controller
+      description: returns an HTML page to allow a retentionpolicy to be edited
+      operationId: editRetentionPolicyPage
+      parameters:
+      - name: retentionPolicyId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                type: string
+    post:
+      tags:
+      - admin-retention-policies-controller
+      description: edits a retention policy and then redirects to show all retention
+        policies
+      operationId: editRetentionPolicy
+      parameters:
+      - name: retentionPolicyId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/CreateRetentionPolicy"
+      responses:
+        "302":
+          description: Redirects to /admin/retentionpolicies
+          headers:
+            Location:
+              description: The URL to display all retentionpolicies
+              style: simple
+              schema: {}
+          content:
+            '*/*':
+              schema:
+                type: string
+        "400":
+          description: Invalid date format or ID
+          content:
+            '*/*':
+              schema:
+                type: string
+  /admin/retentionpolicies/add:
+    get:
+      tags:
+      - admin-retention-policies-controller
+      description: returns an HTML page to allow a new retentionpolicy to be added
+      operationId: addRetentionPolicyPage
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                type: string
+    post:
+      tags:
+      - admin-retention-policies-controller
+      description: add a new retention policy
+      operationId: addRetentionPolicy
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/CreateRetentionPolicy"
+      responses:
+        "302":
+          description: Redirects to /admin/retentionpolicies
+          headers:
+            Location:
+              description: The URL to display all retentionpolicies
+              style: simple
+              schema: {}
+          content:
+            '*/*':
+              schema:
+                type: string
+        "400":
+          description: Invalid date format or ID
+          content:
+            '*/*':
+              schema:
+                type: string
+  /admin/pendingVaults/edit:
+    post:
+      tags:
+      - admin-pending-vaults-controller
+      description: updates pending vault then return a redirect to continue edit of
+        a pending vault
+      operationId: editPendingVault
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/CreateVaultForm"
+      responses:
+        "302":
+          description: "Redirects to /admin/pendingVaults/edit/{vaultId}"
+          headers:
+            Location:
+              description: The URL to continue editing the pending vault
+              style: simple
+              schema: {}
+          content:
+            '*/*':
+              schema:
+                type: string
+  /admin/paused/retrieve/toggle:
+    post:
+      tags:
+      - admin-paused-retrieve-state-controller
+      description: toggles the 'pause retrieve state' and returns the paused retrieve
+        state HTML page
+      operationId: toggleRetrievePause
+      responses:
+        "302":
+          description: State toggled successfully. Redirecting to history page.
+          headers:
+            Location:
+              description: URL of the history page
+              style: simple
+              schema: {}
+          content:
+            '*/*':
+              schema:
+                type: string
+        "403":
+          description: Forbidden - User lacks IS_ADMIN role
+          content:
+            '*/*':
+              schema:
+                type: string
+  /admin/paused/deposit/toggle:
+    post:
+      tags:
+      - admin-paused-deposit-state-controller
+      description: toggles the 'pause deposits state' and returns the paused deposit
+        state HTML page
+      operationId: toggleDepositPause
+      responses:
+        "302":
+          description: State toggled successfully. Redirecting to history page.
+          headers:
+            Location:
+              description: URL of the history page
+              style: simple
+              schema: {}
+          content:
+            '*/*':
+              schema:
+                type: string
+        "403":
+          description: Forbidden - User lacks IS_ADMIN role
+          content:
+            '*/*':
+              schema:
+                type: string
+  /admin/billing/updateBillingDetails:
+    post:
+      tags:
+      - admin-billing-controller
+      description: updates billing details and returns HTML page based on billing
+        type
+      operationId: updateBillingDetails
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/BillingInfo"
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                type: string
+  /admin/archivestores/{archiveStoreId}/update/properties:
+    post:
+      tags:
+      - admin-archive-store-controller
+      summary: Update store properties
+      operationId: updateArchiveStore
+      parameters:
+      - name: archiveStoreId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/ArchiveStoredUpdateRequest"
+      responses:
+        "200":
+          description: OK
+  /admin/archivestores/{archiveStoreId}/enable:
+    post:
+      tags:
+      - admin-archive-store-controller
+      operationId: enableRetrieve
+      parameters:
+      - name: archiveStoreId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+  /admin/archivestores/{archiveStoreId}/disable:
+    post:
+      tags:
+      - admin-archive-store-controller
+      operationId: disableRetrieve
+      parameters:
+      - name: archiveStoreId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+  /admin/archivestores/local:
+    post:
+      tags:
+      - admin-archive-store-controller
+      summary: Add local Archive Store
+      operationId: addLocalArchiveStore
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/ArchiveStoreRequest"
+      responses:
+        "200":
+          description: OK
+  /welcome:
+    get:
+      tags:
+      - welcome-controller
+      description: displays the welcome HTML page
+      operationId: welcome
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                type: string
+  /vaults:
+    get:
+      tags:
+      - vaults-controller
+      description: returns HTML page listing vaults
+      operationId: getVaultsListing
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                type: string
+  /vaults/{vaultId}:
+    get:
+      tags:
+      - vaults-controller
+      description: returns HTML page for specific vault
+      operationId: getVaultByVaultId
+      parameters:
+      - name: vaultId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                type: string
+  /vaults/{vaultId}/{userId}:
+    get:
+      tags:
+      - vaults-controller
+      description: returns HTML page for showing all vaults associated with a user
+      operationId: getUserVaults
+      parameters:
+      - name: vaultId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                type: string
+  /vaults/{vaultId}/deposits/{depositId}:
+    get:
+      tags:
+      - deposits-controller
+      description: returns the deposit HTML page
+      operationId: getDeposit
+      parameters:
+      - name: vaultId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: depositId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                type: string
+  /vaults/{vaultId}/deposits/{depositId}/retrieves/{retrieveId}/restart:
+    get:
+      tags:
+      - deposits-controller
+      description: re-starts a deposit retrieval then redirects to show deposit page
+      operationId: restartRetrieve
+      parameters:
+      - name: vaultId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: depositId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: retrieveId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "302":
+          description: "Redirects to the vault details page (`/vaults/{vaultId}/deposits/{depositId}`)\
+            \ after retrieve restarted."
+          headers:
+            Location:
+              description: The target URL for the redirect.
+              style: simple
+              schema: {}
+          content:
+            '*/*':
+              schema:
+                type: string
+  /vaults/{vaultId}/deposits/{depositId}/restart:
+    get:
+      tags:
+      - deposits-controller
+      description: re-starts a deposit then redirects to show deposit page
+      operationId: restartDeposit
+      parameters:
+      - name: vaultId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: depositId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "302":
+          description: "Redirects to the vault details page (`/vaults/{vaultId}/deposits/{depositId}`)\
+            \ after deposit restarted."
+          headers:
+            Location:
+              description: The target URL for the redirect.
+              style: simple
+              schema: {}
+          content:
+            '*/*':
+              schema:
+                type: string
+  /vaults/{vaultId}/deposits/{depositId}/json:
+    get:
+      tags:
+      - deposits-controller
+      description: returns the deposit information as json
+      operationId: getDepositJson
+      parameters:
+      - name: vaultId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: depositId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Deposit"
+  /vaults/{vaultId}/deposits/{depositId}/jobs:
+    get:
+      tags:
+      - deposits-controller
+      description: returns the deposit jobs as json
+      operationId: getDepositJobsJson
+      parameters:
+      - name: vaultId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: depositId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Job"
+  /vaults/isuun/{uun}:
+    get:
+      tags:
+      - vaults-controller
+      description: returns true if the 'uun' is a valid UUN
+      operationId: isUUN
+      parameters:
+      - name: uun
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+  /vaults/confirmed:
+    get:
+      tags:
+      - vaults-controller
+      description: returns HTML page for confirming a pending vault
+      operationId: confirmPendingVault
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                type: string
+  /vaults/buildsteps:
+    get:
+      tags:
+      - vaults-controller
+      description: returns HTML page for building a new vault
+      operationId: buildVault
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                type: string
+  /vaults/autocompleteuun/{term}:
+    get:
+      tags:
+      - vaults-controller
+      description: get autocomplete on a partial 'uun'
+      operationId: autocompleteUUN
+      parameters:
+      - name: term
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+  /pendingVaults/{vaultId}:
+    get:
+      tags:
+      - vaults-controller
+      description: returns HTML page for showing details of a specific pending vault
+      operationId: getPendingVault
+      parameters:
+      - name: vaultId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                type: string
+  /help:
+    get:
+      tags:
+      - help-controller
+      description: displays the help HTML page
+      operationId: help
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                type: string
+  /groups:
+    get:
+      tags:
+      - group-vaults-controller
+      description: returns the groups listing HTML page
+      operationId: getGroupVaultsListing
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                type: string
+  /filestores:
+    get:
+      tags:
+      - file-store-controller
+      description: returns HTML for listing filestores
+      operationId: listFilestores
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                type: string
+  /filesize:
+    get:
+      tags:
+      - files-controller
+      description: Get the filesize as text
+      operationId: getFilesize
+      parameters:
+      - name: filepath
+        in: query
+        description: The full path to the file
+        required: true
+        schema:
+          type: string
+        example: /uploads/documents/report.pdf
+      responses:
+        "200":
+          description: gets filesize of 'filepath'
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: english description of size
+                examples:
+                - 5 GB
+  /files:
+    get:
+      tags:
+      - files-controller
+      description: Get the files listing as JSON
+      operationId: getFilesListing
+      parameters:
+      - name: mode
+        in: query
+        description: "Fancytree mode parameter (e.g., 'init', 'lazy')"
+        required: false
+        schema:
+          type: string
+        example: init
+      - name: parent
+        in: query
+        description: The parent path to list files from
+        required: false
+        schema:
+          type: string
+        example: /path/to/directory
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FancytreeNode"
+  /favicon.ico:
+    get:
+      tags:
+      - System
+      description: returns the favicon
+      operationId: favicon
+      responses:
+        "200":
+          description: OK
+          content:
+            image/x-icon:
+              schema:
+                type: string
+                format: binary
+  /dir:
+    get:
+      tags:
+      - files-controller
+      description: Get the directory listing as JSON
+      operationId: getDirListing
+      parameters:
+      - name: mode
+        in: query
+        description: "Fancytree mode parameter (e.g., 'init', 'lazy')"
+        required: false
+        schema:
+          type: string
+        example: init
+      - name: parent
+        in: query
+        description: The parent path to list directories from
+        required: false
+        schema:
+          type: string
+        example: /path/to/directory
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FancytreeNode"
+  /checkdepositsize:
+    get:
+      tags:
+      - files-controller
+      description: Checks Deposit Size returns JSON
+      operationId: checkDepositSize
+      parameters:
+      - name: "filepath[]"
+        in: query
+        description: An array of file paths to check the deposit size for
+        required: true
+        schema:
+          type: array
+          items:
+            type: string
+        example: /path/to/file1.txt
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckDepositSizeResponse"
+  /auth/logout:
+    get:
+      tags:
+      - auth-controller
+      description: returns the denied page
+      operationId: getLogoutPath
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: string
+  /auth/login:
+    get:
+      tags:
+      - auth-controller
+      description: returns the login page
+      operationId: getLoginPage
+      parameters:
+      - name: error
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: logout
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: security
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                type: string
+  /auth/denied:
+    get:
+      tags:
+      - auth-controller
+      description: returns the logout page
+      operationId: getLogoutPath_1
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: string
+  /auth/confirmation:
+    get:
+      tags:
+      - auth-controller
+      description: returns the confirmation page
+      operationId: getConfirmationPage
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                type: string
+  /admin:
+    get:
+      tags:
+      - admin-controller
+      description: returns the admin dashboard HTML page
+      operationId: adminIndex
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                type: string
+  /admin/vaults:
+    get:
+      tags:
+      - admin-vaults-controller
+      description: returns the vaults listing HTML page
+      operationId: searchVaults
+      parameters:
+      - name: query
+        in: query
+        required: false
+        schema:
+          type: string
+          default: ""
+      - name: sort
+        in: query
+        required: false
+        schema:
+          type: string
+          default: creationTime
+      - name: order
+        in: query
+        required: false
+        schema:
+          type: string
+          default: desc
+      - name: pageId
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 1
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                type: string
+  /admin/vaults/{vaultId}:
+    get:
+      tags:
+      - admin-vaults-controller
+      description: returns the vaults HTML page for the specified vault
+      operationId: showVault
+      parameters:
+      - name: vaultId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                type: string
+  /admin/vaults/{vaultId}/reviews:
+    get:
+      tags:
+      - admin-reviews-controller
+      description: returns the reviews HTML page for the specified vault
+      operationId: showReview
+      parameters:
+      - name: vaultId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: error
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                type: string
+  /admin/vaults/csv:
+    get:
+      tags:
+      - admin-vaults-controller
+      description: returns the vaults listing CSV file
+      operationId: exportVaults
+      parameters:
+      - name: query
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: sort
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: order
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successful export of vaults CSV
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+  /admin/users:
+    get:
+      tags:
+      - admin-users-controller
+      description: returns the users listing HTML page
+      operationId: getUsersListing
+      parameters:
+      - name: query
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                type: string
+  /admin/schools:
+    get:
+      tags:
+      - admin-schools-controller
+      description: if there is 1 manageble school redirects to show that otherwise
+        displays page showing all manageable schools
+      operationId: getSchoolsListingPage
+      responses:
+        "403":
+          description: Forbidden if there are no manageable schools
+          content:
+            '*/*':
+              schema:
+                type: string
+        "302":
+          description: "Redirect: redirects to /admin/schools/{schoolId}"
+          headers:
+            Location:
+              style: simple
+              schema: {}
+          content:
+            '*/*':
+              schema:
+                type: string
+        "200":
+          description: A page showing multiple manageable schools
+          content:
+            text/html:
+              schema:
+                type: string
+  /admin/schools/{schoolId}:
+    get:
+      tags:
+      - admin-schools-controller
+      description: shows the roles for the specified school if the user has permission
+      operationId: getSchoolRoleAssignmentsPage
+      parameters:
+      - name: schoolId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                type: string
+  /admin/roles:
+    get:
+      tags:
+      - admin-roles-controller
+      description: returns the roles listing HTML page
+      operationId: getRolesListing
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                type: string
+  /admin/roles/{roleId}:
+    get:
+      tags:
+      - admin-roles-controller
+      description: gets the RoleModelView for the specified roleId
+      operationId: getRole
+      parameters:
+      - name: roleId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RoleViewModel"
+  /admin/roles/isadmin:
+    get:
+      tags:
+      - admin-roles-controller
+      description: returns the HTML page showing Super(IS) Admins
+      operationId: getSuperAdminUsersListing
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                type: string
+  /admin/roles/getvaultpermissions:
+    get:
+      tags:
+      - admin-roles-controller
+      description: returns a list of PermissionModels for all Vault permissions
+      operationId: getAllVaultPermissions
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PermissionModel"
+  /admin/roles/getschoolpermissions:
+    get:
+      tags:
+      - admin-roles-controller
+      description: returns a list of PermissionModels for all School permissions
+      operationId: getAllSchoolPermissions
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PermissionModel"
+  /admin/reviews:
+    get:
+      tags:
+      - admin-reviews-controller
+      description: returns the vault reviews HTML page
+      operationId: getVaultsForReview
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                type: string
+  /admin/retrieves:
+    get:
+      tags:
+      - admin-retrieves-controller
+      description: returns the retrieves listing HTML page
+      operationId: getRetrievesListing
+      parameters:
+      - name: query
+        in: query
+        required: false
+        schema:
+          type: string
+          default: ""
+      - name: sort
+        in: query
+        required: false
+        schema:
+          type: string
+          default: timestamp
+      - name: order
+        in: query
+        required: false
+        schema:
+          type: string
+          default: desc
+      - name: pageId
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 1
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                type: string
+  /admin/retentionpolicies:
+    get:
+      tags:
+      - admin-retention-policies-controller
+      description: returns the retention policies listing HTML page
+      operationId: getRetentionPoliciesListing
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                type: string
+  /admin/pendingVaults:
+    get:
+      tags:
+      - admin-pending-vaults-controller
+      description: returns the pending vaults listing HTML page
+      operationId: searchPendingVaults
+      parameters:
+      - name: query
+        in: query
+        required: false
+        schema:
+          type: string
+          default: ""
+      - name: sort
+        in: query
+        required: false
+        schema:
+          type: string
+          default: creationTime
+      - name: order
+        in: query
+        required: false
+        schema:
+          type: string
+          default: desc
+      - name: pageId
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 1
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                type: string
+  /admin/pendingVaults/{pendingVaultId}:
+    get:
+      tags:
+      - admin-pending-vaults-controller
+      description: Deletes a pending vault and returns redirect to show pending vaults
+      operationId: deletePendingVault
+      parameters:
+      - name: pendingVaultId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "302":
+          description: Redirects to /admin/pendingVaults
+          headers:
+            Location:
+              description: The URL to show pending vaults
+              style: simple
+              schema: {}
+          content:
+            '*/*':
+              schema:
+                type: string
+  /admin/pendingVaults/upgrade/{pendingVaultId}:
+    get:
+      tags:
+      - admin-pending-vaults-controller
+      description: returns redirect to show vault after pending vault has been upgraded
+      operationId: upgradeVault
+      parameters:
+      - name: pendingVaultId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: reviewDate
+        in: query
+        description: The date the vault was reviewed in ISO 8601 format (YYYY-MM-DD)
+        required: true
+        schema:
+          type: string
+          format: date
+      responses:
+        "302":
+          description: "Redirects to /vaults/{vaultId}"
+          headers:
+            Location:
+              description: The URL of the upgraded vault
+              style: simple
+              schema: {}
+          content:
+            '*/*':
+              schema:
+                type: string
+  /admin/pendingVaults/summary/{pendingVaultId}:
+    get:
+      tags:
+      - admin-pending-vaults-controller
+      description: returns an HTML page which shows summary of pending vault specified
+        via pendingVaultId
+      operationId: getVault
+      parameters:
+      - name: pendingVaultId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                type: string
+  /admin/pendingVaults/saved:
+    get:
+      tags:
+      - admin-pending-vaults-controller
+      description: returns an HTML page of saved PendingVaults that match the query/pageId
+        parameters sorted using 'sort and order' parameters
+      operationId: searchSavedPendingVaults
+      parameters:
+      - name: query
+        in: query
+        required: false
+        schema:
+          type: string
+          default: ""
+      - name: sort
+        in: query
+        required: false
+        schema:
+          type: string
+          default: creationTime
+      - name: order
+        in: query
+        required: false
+        schema:
+          type: string
+          default: desc
+      - name: pageId
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 1
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                type: string
+  /admin/pendingVaults/edit/{vaultId}:
+    get:
+      tags:
+      - admin-pending-vaults-controller
+      description: returns the HTML page to edit pending vault specified by vaultId
+      operationId: getPendingVault_1
+      parameters:
+      - name: vaultId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                type: string
+  /admin/pendingVaults/confirmed:
+    get:
+      tags:
+      - admin-pending-vaults-controller
+      description: returns an HTML page of confirmed PendingVaults that match the
+        query/pageId parameters sorted using 'sort and order' parameters
+      operationId: searchConfirmedPendingVaults
+      parameters:
+      - name: query
+        in: query
+        required: false
+        schema:
+          type: string
+          default: ""
+      - name: sort
+        in: query
+        required: false
+        schema:
+          type: string
+          default: creationTime
+      - name: order
+        in: query
+        required: false
+        schema:
+          type: string
+          default: desc
+      - name: pageId
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 1
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                type: string
+  /admin/paused/retrieve/history:
+    get:
+      tags:
+      - admin-paused-retrieve-state-controller
+      description: returns the paused retrieve state HTML page
+      operationId: showPausedRetrieveHistory
+      responses:
+        "200":
+          description: HTML page showing 'paused retrieve state' history
+          content:
+            text/html: {}
+  /admin/paused/deposit/history:
+    get:
+      tags:
+      - admin-paused-deposit-state-controller
+      description: returns the paused deposit state HTML page
+      operationId: showPausedDepositHistory
+      responses:
+        "200":
+          description: HTML page showing'paused deposit state' history
+          content:
+            text/html: {}
+  /admin/events:
+    get:
+      tags:
+      - admin-events-controller
+      description: returns the events listing HTML page
+      operationId: getEventsListing
+      parameters:
+      - name: query
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: sort
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                type: string
+  /admin/deposits:
+    get:
+      tags:
+      - admin-deposits-controller
+      description: returns the deposits listing HTML page
+      operationId: getDepositsListing
+      parameters:
+      - name: query
+        in: query
+        required: false
+        schema:
+          type: string
+          default: ""
+      - name: sort
+        in: query
+        required: false
+        schema:
+          type: string
+          default: creationTime
+      - name: order
+        in: query
+        required: false
+        schema:
+          type: string
+          default: desc
+      - name: pageId
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 1
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                type: string
+  /admin/depositsAudits:
+    get:
+      tags:
+      - admin-deposits-controller
+      description: returns an HTML page for deposit audits
+      operationId: getDepositsAuditsListing
+      parameters:
+      - name: sort
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                type: string
+  /admin/deposits/csv:
+    get:
+      tags:
+      - admin-deposits-controller
+      description: returns DEPOSITS report as CSV
+      operationId: exportVaults_1
+      parameters:
+      - name: query
+        in: query
+        required: false
+        schema:
+          type: string
+          default: ""
+      - name: sort
+        in: query
+        required: false
+        schema:
+          type: string
+          default: creationTime
+      - name: order
+        in: query
+        required: false
+        schema:
+          type: string
+          default: desc
+      responses:
+        "200":
+          description: Successful CSV export
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+  /admin/deposits/audit:
+    get:
+      tags:
+      - admin-deposits-controller
+      description: returns an HTML page for running a deposit audit
+      operationId: runDepositAudit
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                type: string
+  /admin/billing:
+    get:
+      tags:
+      - admin-billing-controller
+      description: returns BILLING report as HTML page
+      operationId: billingByVaults
+      parameters:
+      - name: query
+        in: query
+        required: false
+        schema:
+          type: string
+          default: ""
+      - name: sort
+        in: query
+        required: false
+        schema:
+          type: string
+          default: creationTime
+      - name: order
+        in: query
+        required: false
+        schema:
+          type: string
+          default: desc
+      - name: pageId
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 1
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                type: string
+  /admin/billing/{vaultId}:
+    get:
+      tags:
+      - admin-billing-controller
+      description: returns HTML page for billing details for specified vaultId
+      operationId: retrieveBillingInfo
+      parameters:
+      - name: vaultId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                type: string
+  /admin/billing/csv:
+    get:
+      tags:
+      - admin-billing-controller
+      description: returns BILLING report as CSV
+      operationId: exportBillingVaults
+      parameters:
+      - name: query
+        in: query
+        required: false
+        schema:
+          type: string
+          default: ""
+      - name: sort
+        in: query
+        required: false
+        schema:
+          type: string
+          default: creationTime
+      - name: order
+        in: query
+        required: false
+        schema:
+          type: string
+          default: desc
+      responses:
+        "200":
+          description: Successful CSV export
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+  /admin/audits:
+    get:
+      tags:
+      - admin-deposits-controller
+      description: returns an HTML for all Audits
+      operationId: getAuditsListing
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                type: string
+  /admin/archivestores:
+    get:
+      tags:
+      - admin-archive-store-controller
+      description: returns HTML for listing archive stores
+      operationId: listArchivestores
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                type: string
+  /accessibility:
+    get:
+      tags:
+      - accessibility-controller
+      description: returns the accessibility HTML page
+      operationId: accessibility
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                type: string
+  /:
+    get:
+      tags:
+      - welcome-controller
+      description: redirects / to /vaults
+      operationId: getVaultsListing_1
+      responses:
+        "302":
+          description: Redirects to /vaults
+          headers:
+            Location:
+              description: The URL to display vaults
+              style: simple
+              schema: {}
+          content:
+            '*/*':
+              schema:
+                type: string
+  /filestores/{fileStoreId}:
+    delete:
+      tags:
+      - file-store-controller
+      description: Deletes the specified filestore
+      operationId: deleteFileStore
+      parameters:
+      - name: fileStoreId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+  /admin/retentionpolicies/delete/{policyId}:
+    delete:
+      tags:
+      - admin-retention-policies-controller
+      description: deletes a retention policy
+      operationId: deleteRetentionPoliciesListing
+      parameters:
+      - name: policyId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+  /admin/deposits/{depositId}:
+    delete:
+      tags:
+      - admin-deposits-controller
+      description: deletes the specified deposit
+      operationId: deleteDeposit
+      parameters:
+      - name: depositId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: vaultId
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                type: string
+  /admin/archivestores/{archiveStoreId}:
+    delete:
+      tags:
+      - admin-archive-store-controller
+      operationId: deleteArchiveStore
+      parameters:
+      - name: archiveStoreId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+components:
+  schemas:
+    NameRequest:
+      type: object
+      properties:
+        name:
+          type: string
+    DescriptionRequest:
+      type: object
+      properties:
+        description:
+          type: string
+    DataCreator:
+      type: object
+      properties:
+        id:
+          type: string
+        version:
+          type: integer
+          format: int64
+        name:
+          type: string
+    Dataset:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        visible:
+          type: boolean
+        crisId:
+          type: string
+    Deposit:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Universally Unique Identifier for the Deposit
+        version:
+          type: integer
+          format: int64
+        creationTime:
+          type: string
+          format: date-time
+          description: Date that the vault was created
+        vault:
+          $ref: "#/components/schemas/Vault"
+        depositPaths:
+          type: array
+          items:
+            $ref: "#/components/schemas/DepositPath"
+        depositChunks:
+          type: array
+          items:
+            $ref: "#/components/schemas/DepositChunk"
+        status:
+          type: string
+          description: Status of the Deposit
+          enum:
+          - NOT_STARTED
+          - IN_PROGRESS
+          - COMPLETE
+          - FAILED
+          - DELETE_IN_PROGRESS
+          - DELETED
+          - DELETE_FAILED
+        name:
+          type: string
+          description: Deposit name to briefly describe the Deposit
+        description:
+          type: string
+          description: Deposit description to provide more information about the Deposit
+        hasPersonalData:
+          type: boolean
+          description: Whether the deposit contains personal data or not
+        personalDataStatement:
+          type: string
+          description: Description of the nature of the personal data
+        bagId:
+          type: string
+          description: ID of the bag associated with this Deposit
+        archiveSize:
+          type: integer
+          format: int64
+        archiveDigest:
+          type: string
+        archiveDigestAlgorithm:
+          type: string
+        numOfChunks:
+          type: integer
+          format: int32
+        encArchiveDigest:
+          type: string
+        encIV:
+          type: string
+          format: byte
+        fileOrigin:
+          type: string
+          description: Origin of the deposited filepath
+        shortFilePath:
+          type: string
+          description: Short version of the origin of the deposited filepath
+        filePath:
+          type: string
+          description: Filepath of the origin deposit
+        user:
+          $ref: "#/components/schemas/User"
+        nonRestartJobId:
+          type: string
+        size:
+          type: integer
+          format: int64
+    DepositChunk:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Universally Unique Identifier for the Deposit Path
+        chunkNum:
+          type: integer
+          format: int32
+          description: Filepath of the origin deposit
+        archiveDigest:
+          type: string
+        archiveDigestAlgorithm:
+          type: string
+        encIV:
+          type: string
+          format: byte
+        ecnArchiveDigest:
+          type: string
+    DepositPath:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Universally Unique Identifier for the Deposit Path
+        filePath:
+          type: string
+          description: Filepath of the origin deposit
+        pathType:
+          type: string
+          enum:
+          - FILESTORE
+          - USER_UPLOAD
+    RetentionPolicy:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        name:
+          type: string
+        description:
+          type: string
+        url:
+          type: string
+        minRetentionPeriod:
+          type: integer
+          format: int32
+        extendUponRetrieval:
+          type: boolean
+        inEffectDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        dataGuidanceReviewed:
+          type: string
+          format: date
+        engine:
+          type: string
+          deprecated: true
+        sort:
+          type: integer
+          format: int32
+          deprecated: true
+        minDataRetentionPeriod:
+          type: string
+          deprecated: true
+        policyInfo:
+          type: string
+    Retrieve:
+      type: object
+      properties:
+        id:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        deposit:
+          $ref: "#/components/schemas/Deposit"
+        note:
+          type: string
+        status:
+          type: string
+          enum:
+          - NOT_STARTED
+          - IN_PROGRESS
+          - COMPLETE
+          - FAILED
+        retrievePath:
+          type: string
+        hasExternalRecipients:
+          type: boolean
+        user:
+          $ref: "#/components/schemas/User"
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        firstname:
+          type: string
+        lastname:
+          type: string
+        password:
+          type: string
+        email:
+          type: string
+        properties:
+          type: object
+          additionalProperties:
+            type: string
+    Vault:
+      type: object
+      properties:
+        id:
+          type: string
+        version:
+          type: integer
+          format: int64
+        creationTime:
+          type: string
+          format: date-time
+        grantEndDate:
+          type: string
+          format: date
+        reviewDate:
+          type: string
+          format: date
+        name:
+          type: string
+        description:
+          type: string
+        retentionPolicy:
+          $ref: "#/components/schemas/RetentionPolicy"
+        retentionPolicyStatus:
+          type: integer
+          format: int32
+        retentionPolicyExpiry:
+          type: string
+          format: date-time
+        retentionPolicyLastChecked:
+          type: string
+          format: date-time
+        user:
+          $ref: "#/components/schemas/User"
+          deprecated: true
+        dataset:
+          $ref: "#/components/schemas/Dataset"
+        projectId:
+          type: string
+        snapshot:
+          type: string
+        affirmed:
+          type: boolean
+        notes:
+          type: string
+        estimate:
+          type: string
+          enum:
+          - UNDER_100GB
+          - UNDER_10TB
+          - OVER_10TB
+          - UNKNOWN
+        contact:
+          type: string
+        pureLink:
+          type: boolean
+        size:
+          type: integer
+          format: int64
+        mostRecentVaultReview:
+          $ref: "#/components/schemas/VaultReview"
+        dataCreator:
+          type: array
+          items:
+            $ref: "#/components/schemas/DataCreator"
+          writeOnly: true
+        vaultReviewUnderway:
+          type: boolean
+    VaultReview:
+      type: object
+      properties:
+        id:
+          type: string
+        creationTime:
+          type: string
+          format: date-time
+        vault:
+          $ref: "#/components/schemas/Vault"
+        newReviewDate:
+          type: string
+          format: date
+          deprecated: true
+          writeOnly: true
+        oldReviewDate:
+          type: string
+          format: date
+        actionedDate:
+          type: string
+          format: date-time
+        comment:
+          type: string
+    CreateDeposit:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name to briefly describe the purpose or contents of this deposit
+        description:
+          type: string
+          description: Detailed description of the purpose or contents of this deposit
+        hasPersonalData:
+          type: string
+          description: Whether the deposit contains personal data or not
+        personalDataStatement:
+          type: string
+          description: Description of the nature of the personal data
+        vaultID:
+          type: string
+          description: The vault which this deposit will be added to
+        depositPaths:
+          type: array
+          description: File paths of the data to deposit (including device ID)
+          items:
+            type: string
+        fileUploadHandle:
+          type: string
+          description: The temporary upload location for files
+    UunRequest:
+      type: object
+      properties:
+        uun:
+          type: string
+    VaultTransferRequest:
+      type: object
+      properties:
+        role:
+          type: integer
+          format: int64
+        user:
+          type: string
+        assigningRole:
+          type: boolean
+        orphaning:
+          type: boolean
+        reason:
+          type: string
+        userSelectionValid:
+          type: boolean
+        roleSelectionValid:
+          type: boolean
+      required:
+      - reason
+    CreateVaultForm:
+      type: object
+      properties:
+        pendingID:
+          type: string
+          description: An ID for the partially completed pending vault
+        loggedInAs:
+          type: string
+          description: The logged in user's UUN (used to pass to JS validation)
+        name:
+          type: string
+          description: A name for the new vault
+        description:
+          type: string
+          description: A description of the vault
+        notes:
+          type: string
+          description: Notes regarding data retention
+        estimate:
+          type: string
+          description: Estimate of vault size
+        billingType:
+          type: string
+          description: How we are billing
+        policyInfo:
+          type: string
+          description: The policy that will be applied to this vault the format of
+            the string is policyID-lengthofPolicy
+        groupID:
+          type: string
+          description: The group which is related to this vault
+        datasetID:
+          type: string
+          description: A reference to an external metadata record that describes this
+            vault
+        billingGrantEndDate:
+          type: string
+          format: date
+          description: Define the minimum of time the archive will be kept
+        grantEndDate:
+          type: string
+          format: date
+          description: Define the minimum of time the archive will be kept
+        reviewDate:
+          type: string
+          format: date
+          description: The date by which the vault should be reviewed for decision
+            as to whether it should be deleted or whether there are funds available
+            to support continued storage
+        confirmed:
+          type: boolean
+          description: Has the pending vault been confirmed
+        affirmed:
+          type: boolean
+          description: Did the user accept the various rules on the create vault intro
+            page
+        sliceID:
+          type: string
+          description: If the billng type is slice we will store an identifier for
+            the slice
+        grantAuthoriser:
+          type: string
+          description: If the billng type is grant or budget we will store an identifier
+            for authoriser
+        budgetAuthoriser:
+          type: string
+          description: If the billng type is grant or budget we will store an identifier
+            for authoriser
+        grantSchoolOrUnit:
+          type: string
+          description: If the billng type is grant or budget we will store an identifier
+            for school / unit
+        budgetSchoolOrUnit:
+          type: string
+          description: If the billng type is grant or budget we will store an identifier
+            for school / unit
+        grantSubunit:
+          type: string
+          description: If the billng type is grant or budget we will store an identifier
+            for subunit
+        budgetSubunit:
+          type: string
+          description: If the billng type is grant or budget we will store an identifier
+            for subunit
+        projectTitle:
+          type: string
+          description: If the billng type is grant we will store an identifier for
+            project title
+        isOwner:
+          type: boolean
+          description: Is the logged in user the vault owner
+        vaultOwner:
+          type: string
+          description: Prospective Owner of the vault (who can be different from who
+            is creating the pending vault)
+        vaultCreator:
+          type: string
+          description: Creator of the pending vault (who can be different from who
+            owns the pending vault)
+        nominatedDataManagers:
+          type: array
+          description: List of pending Nominated Data Managers
+          items:
+            type: string
+        depositors:
+          type: array
+          description: List of pending depositors
+          items:
+            type: string
+        contactPerson:
+          type: string
+          description: contact person for Pure
+        dataCreators:
+          type: array
+          description: List of creators of the dataset
+          items:
+            type: string
+        pureLink:
+          type: boolean
+          description: Agree to Pure Link
+        sliceQueryChoice:
+          type: string
+          description: The Billing page sliceQueryChoice radio button value
+        fundingQueryChoice:
+          type: string
+          description: The Billing page fundingQueryChoice radio button value
+        feewaiverQueryChoice:
+          type: string
+          description: The Billing page feewaiverQueryChoice radio button value
+        paymentDetails:
+          type: string
+          description: The Billing payment details.
+        action:
+          type: string
+          description: The action to perform on the form
+        dataCreatorsAsString:
+          type: string
+        depositorsAsString:
+          type: string
+        ndmsAsString:
+          type: string
+      required:
+      - action
+    RoleAssignmentRequest:
+      type: object
+      properties:
+        role:
+          type: integer
+          format: int64
+        user:
+          type: string
+      required:
+      - role
+      - user
+    UpdateRoleAssignmentRequest:
+      type: object
+      properties:
+        assignment:
+          type: integer
+          format: int64
+        role:
+          type: integer
+          format: int64
+    RemoveRoleAssignmentRequest:
+      type: object
+      properties:
+        assignment:
+          type: integer
+          format: int64
+    FileUploadRequest:
+      type: object
+      properties:
+        flowChunkNumber:
+          type: string
+          description: The current chunk number
+          examples:
+          - "1"
+        flowTotalChunks:
+          type: string
+          description: Total number of chunks
+          examples:
+          - "10"
+        flowChunkSize:
+          type: string
+          description: Size of each chunk in bytes
+        flowTotalSize:
+          type: string
+          description: Total file size in bytes
+        flowIdentifier:
+          type: string
+          description: Unique identifier for the file
+        flowFilename:
+          type: string
+          description: The name of the file
+        flowRelativePath:
+          type: string
+          description: The relative path (Base64 encoded)
+        fileUploadHandle:
+          type: string
+          description: The unique handle for this specific upload session
+    AddSFTPFilestoreRequest:
+      type: object
+      properties:
+        hostname:
+          type: string
+        port:
+          type: string
+        path:
+          type: string
+    AddLocalFileStoreRequest:
+      type: object
+      properties:
+        path:
+          type: string
+    DepositReviewModel:
+      type: object
+      properties:
+        depositReviewId:
+          type: string
+        toBeDeleted:
+          type: boolean
+          deprecated: true
+        deleteStatus:
+          type: integer
+          format: int32
+        comment:
+          type: string
+        depositId:
+          type: string
+        name:
+          type: string
+        statusName:
+          type: string
+        creationTime:
+          type: string
+          format: date-time
+    VaultReviewModelForm:
+      type: object
+      properties:
+        vaultReviewId:
+          type: string
+        actionedDate:
+          type: string
+          format: date-time
+        nextReviewDate:
+          type: string
+          format: date
+        comment:
+          type: string
+        depositReviewModels:
+          type: array
+          items:
+            $ref: "#/components/schemas/DepositReviewModel"
+        action:
+          type: string
+    UserForm:
+      type: object
+      properties:
+        id:
+          type: string
+        firstname:
+          type: string
+        lastname:
+          type: string
+        password:
+          type: string
+        email:
+          type: string
+        properties:
+          type: object
+          additionalProperties:
+            type: string
+        action:
+          type: string
+          description: The action to perform on the form
+      required:
+      - action
+    AddNewRoleAssignmentRequest:
+      type: object
+      properties:
+        user:
+          type: string
+          description: The Id of the user
+        role:
+          type: integer
+          format: int64
+          description: The Id of the role
+    UpdateExistingRoleAssignmentRequest:
+      type: object
+      properties:
+        assignment:
+          type: integer
+          format: int64
+          description: The Id of the role assignment
+        role:
+          type: integer
+          format: int64
+          description: The Id of the role
+    DeleteRoleAssignmentRequest:
+      type: object
+      properties:
+        assignment:
+          type: integer
+          format: int64
+          description: The Id of the role assignment
+    RoleSaveRequest:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: The unique ID of the role
+          examples:
+          - "101"
+        name:
+          type: string
+          description: The display name of the role
+          examples:
+          - Admin
+        type:
+          type: string
+          description: System type category
+          examples:
+          - INTERNAL
+        status:
+          type: string
+          description: Current activation status
+          enum:
+          - ACTIVE
+          - INACTIVE
+        description:
+          type: string
+          description: Detailed purpose of the role
+        permissions:
+          type: array
+          description: List of assigned permission keys
+          items:
+            type: string
+    SuperAdminRequest:
+      type: object
+      properties:
+        op-id:
+          type: string
+          description: The ID of the user to promote
+          examples:
+          - user-123
+    DeleteSuperAdminRequest:
+      type: object
+      properties:
+        deop-id:
+          type: string
+          description: The ID of the user to delete
+          examples:
+          - user-123
+    DeleteRoleRequest:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+    CreateRetentionPolicy:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+          description: Uh... the id
+        name:
+          type: string
+          description: A name for the new Retention Policy
+        description:
+          type: string
+          description: A description of Retention Policy
+        engine:
+          type: string
+          description: Engine for Retention Policy (deprecated
+        sort:
+          type: string
+          description: Sorting order for Retention Policy (deprecated)
+        url:
+          type: string
+          description: URL for Retention Policy
+        minRetentionPeriod:
+          type: integer
+          format: int32
+          description: Minimum retention period in years
+        extendUponRetrieval:
+          type: boolean
+          description: Extend the expiry date of a vault if a deposit is retrieved
+        minDataRetentionPeriod:
+          type: string
+          description: Minimum Date Retention Period (deprecated)
+        inEffectDate:
+          type: string
+          format: date
+          description: In Effect Date
+        endDate:
+          type: string
+          format: date
+          description: End Date
+        dataGuidanceReviewed:
+          type: string
+          format: date
+          description: Date Guidance Reviewed
+        action:
+          type: string
+          description: Form Action
+        policyInfo:
+          type: string
+    BillingInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique identifier for this vault
+        vaultID:
+          type: string
+          description: The vault ID
+        billingType:
+          type: string
+          description: The Billing type
+          enum:
+          - NA
+          - GRANT_FUNDING
+          - BUDGET_CODE
+          - SLICE
+          - ORIG
+          - FEEWAIVER
+          - WILL_PAY
+          - BUY_NEW_SLICE
+          - FUNDING_NO_OR_DO_NOT_KNOW
+        contactName:
+          type: string
+          description: Billing Details Contact Name
+        school:
+          type: string
+          description: Internal Customer Name
+        subUnit:
+          type: string
+          description: The Billing Subunit
+        projectTitle:
+          type: string
+          description: The Billing Project title
+        budgetCode:
+          type: boolean
+          description: To know if the user uses BudgetCode
+        sliceID:
+          type: string
+          description: The Billing SliceID
+        specialComments:
+          type: string
+          description: The comments entered by Admin
+        amountToBeBilled:
+          type: number
+          description: The value calculated for all deposits in the vault entered
+            by Admin
+        amountBilled:
+          type: number
+          description: The value calculated for all deposits in the vault entered
+            by Admin
+        projectSize:
+          type: integer
+          format: int64
+          description: Sum of vaults size for a projectId
+        vaultSize:
+          type: integer
+          format: int64
+          description: Sum of vaults size for a projectId
+        reviewDate:
+          type: string
+          format: date-time
+          description: The Date the vault was last reviewed
+        creationTime:
+          type: string
+          format: date-time
+          description: The creation Date of the vault
+        vaultName:
+          type: string
+          description: Name of the vault
+        projectId:
+          type: string
+          description: Project ID
+        userName:
+          type: string
+          description: Owner Name
+        paymentDetails:
+          type: string
+          description: The Billing payment details.
+        grantEndDate:
+          type: string
+          format: date
+          description: The grant end Date of the vault
+        projectSizeStr:
+          type: string
+        budgetCodeStr:
+          type: string
+    ArchiveStoredUpdateRequest:
+      type: object
+      properties:
+        properties:
+          type: string
+    ArchiveStoreRequest:
+      type: object
+      properties:
+        properties:
+          type: string
+          description: Store properties
+        label:
+          type: string
+          description: Store label
+          examples:
+          - MyLocalStore
+        type:
+          type: string
+          description: Storage type
+          examples:
+          - LOCAL
+        retrieve:
+          type: string
+          description: Enable retrieval
+      required:
+      - label
+      - type
+    Job:
+      type: object
+      properties:
+        id:
+          type: string
+        version:
+          type: integer
+          format: int64
+        timestamp:
+          type: string
+          format: date-time
+        taskClass:
+          type: string
+        states:
+          type: array
+          items:
+            type: string
+        state:
+          type: integer
+          format: int32
+        progress:
+          type: integer
+          format: int64
+        progressMax:
+          type: integer
+          format: int64
+        progressMessage:
+          type: string
+        error:
+          type: boolean
+        errorMessage:
+          type: string
+        retrieveJob:
+          type: boolean
+        depositJob:
+          type: boolean
+    FancytreeNode:
+      type: object
+      properties:
+        title:
+          type: string
+        key:
+          type: string
+        folder:
+          type: boolean
+        lazy:
+          type: boolean
+        unselectable:
+          type: boolean
+        checkbox:
+          type: boolean
+    CheckDepositSizeResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        max:
+          type: string
+    PermissionModel:
+      type: object
+      properties:
+        id:
+          type: string
+        permission:
+          type: string
+          enum:
+          - VIEW_DEPOSITS_AND_RETRIEVES
+          - VIEW_VAULT_METADATA
+          - VIEW_VAULT_ROLES
+          - ASSIGN_VAULT_ROLES
+          - VIEW_VAULT_HISTORY
+          - CAN_TRANSFER_VAULT_OWNERSHIP
+          - CAN_VIEW_VAULTS_SIZE
+          - CAN_VIEW_IN_PROGRESS
+          - CAN_VIEW_QUEUES
+          - CAN_MANAGE_VAULTS
+          - CAN_MANAGE_DEPOSITS
+          - CAN_VIEW_RETRIEVES
+          - CAN_VIEW_SCHOOL_ROLE_ASSIGNMENTS
+          - CAN_ORPHAN_SCHOOL_VAULTS
+          - MANAGE_SCHOOL_VAULT_DEPOSITS
+          - VIEW_SCHOOL_VAULT_METADATA
+          - VIEW_SCHOOL_VAULT_ROLES
+          - ASSIGN_SCHOOL_VAULT_ROLES
+          - VIEW_SCHOOL_VAULT_HISTORY
+          - TRANSFER_SCHOOL_VAULT_OWNERSHIP
+          - EDIT_SCHOOL_VAULT_METADATA
+          - DELETE_SCHOOL_VAULT_DEPOSITS
+          - CAN_RETRIEVE_DATA
+          - CAN_MANAGE_BILLING_DETAILS
+          - CAN_MANAGE_ROLES
+          - CAN_MANAGE_PENDING_VAULTS
+          - CAN_VIEW_EVENTS
+          - CAN_MANAGE_RETENTION_POLICIES
+          - CAN_MANAGE_ARCHIVE_STORES
+          - CAN_MANAGE_SCHOOL_ROLE_ASSIGNMENTS
+          - CAN_MANAGE_REVIEWS
+        label:
+          type: string
+        type:
+          type: string
+          enum:
+          - SCHOOL
+          - VAULT
+          - ADMIN
+        adminPermission:
+          type: boolean
+        schoolPermission:
+          type: boolean
+        vaultPermission:
+          type: boolean
+    RoleModel:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+          enum:
+          - SCHOOL
+          - VAULT
+          - ADMIN
+        status:
+          type: string
+        permissions:
+          type: array
+          items:
+            $ref: "#/components/schemas/PermissionModel"
+        assignedUserCount:
+          type: integer
+          format: int32
+        idAsString:
+          type: string
+    RoleViewModel:
+      type: object
+      properties:
+        role:
+          $ref: "#/components/schemas/RoleModel"
+        unsetPermissions:
+          type: array
+          items:
+            $ref: "#/components/schemas/PermissionModel"
+  securitySchemes:
+    SSOHeaderAuth:
+      type: apiKey
+      description: "SSO Auth: Please enter your User ID (e.g. jdoe123)"
+      name: uid
+      in: header

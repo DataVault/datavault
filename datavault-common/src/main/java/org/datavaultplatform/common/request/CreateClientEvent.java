@@ -5,19 +5,18 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.jsondoc.core.annotation.ApiObject;
-import org.jsondoc.core.annotation.ApiObjectField;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiObject(name = "CreateClientEvent")
+@Schema(name = "CreateClientEvent")
 public class CreateClientEvent {
     @JsonIgnore
     private String sessionId;
 
-    @ApiObjectField(description = "The remote IP address which triggered this event")
+    @Schema(description = "The remote IP address which triggered this event")
     private String remoteAddress;
     
-    @ApiObjectField(description = "The browser user agent (if applicable)")
+    @Schema(description = "The browser user agent (if applicable)")
     private String userAgent;
     
     public CreateClientEvent() { }

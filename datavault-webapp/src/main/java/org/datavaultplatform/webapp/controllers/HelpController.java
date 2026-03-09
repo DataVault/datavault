@@ -4,10 +4,10 @@ import org.datavaultplatform.webapp.services.RestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.GetMapping;
 
 /**
  * User: Stuart Lewis
@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
  */
 @Controller
 @ConditionalOnBean(RestService.class)
-public class HelpController {
+public class HelpController implements HelpControllerApi {
 
     public static final String SYSTEM = "system";
     public static final String LINK = "link";
@@ -30,7 +30,8 @@ public class HelpController {
         this.link = link;
     }
 
-    @RequestMapping(value = "/help", method = RequestMethod.GET)
+    @Override
+    @GetMapping(value = "/help", produces = MediaType.TEXT_HTML_VALUE)
     public String help(ModelMap model) {
 
         model.put(SYSTEM, system);

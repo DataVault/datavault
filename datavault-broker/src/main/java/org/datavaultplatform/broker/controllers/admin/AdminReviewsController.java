@@ -3,6 +3,10 @@ package org.datavaultplatform.broker.controllers.admin;
 import static org.datavaultplatform.common.util.Constants.HEADER_CLIENT_KEY;
 import static org.datavaultplatform.common.util.Constants.HEADER_USER_ID;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.common.event.vault.Review;
 import org.datavaultplatform.common.model.*;
@@ -10,11 +14,6 @@ import org.datavaultplatform.common.response.ReviewInfo;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.response.VaultsData;
 import org.datavaultplatform.common.util.Utils;
-import org.jsondoc.core.annotation.Api;
-import org.jsondoc.core.annotation.ApiHeader;
-import org.jsondoc.core.annotation.ApiHeaders;
-import org.jsondoc.core.annotation.ApiMethod;
-import org.jsondoc.core.pojo.ApiVerb;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -27,7 +26,7 @@ import java.util.Objects;
 
 @RestController
 //@CrossOrigin
-@Api(name="AdminReviews", description = "Administrator Review functions")
+@Tag(name="admin-reviews-controller", description = "Administrator Review functions")
 public class AdminReviewsController {
 
     private final VaultsService vaultsService;
@@ -50,18 +49,12 @@ public class AdminReviewsController {
     }
 
 
-    @ApiMethod(
-            path = "/admin/vaultsForReview",
-            verb = ApiVerb.GET,
-            description = "Gets a list of Vaults for Review",
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
+    @Operation(
+            summary = "Gets a list of Vaults for Review",
+            description = "Retrieves a list of all Vaults that are due for review."
     )
-    @ApiHeaders(headers={
-            @ApiHeader(name=HEADER_USER_ID, description="DataVault Broker User ID")
-    })
-    @GetMapping("/admin/vaultsForReview")
-    public VaultsData getVaultsForReview(@RequestHeader(HEADER_USER_ID) String userID) {
+    @GetMapping(value = "/admin/vaultsForReview", produces = MediaType.APPLICATION_JSON_VALUE)
+    public VaultsData getVaultsForReview( @RequestHeader(HEADER_USER_ID) String userId) {
 
         List<Vault> vaults = vaultsService.getVaults();
         List<Vault> vaultsForReview = vaultsReviewService.getVaultsForReview(vaults);
@@ -79,21 +72,15 @@ public class AdminReviewsController {
     }
 
 
-    @ApiMethod(
-            path = "/admin/vaults/{vaultid}/vaultreviews/current",
-            verb = ApiVerb.GET,
-            description = "Gets the current review for a Vault",
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
+    @Operation(
+            summary = "Gets the current review for a Vault",
+            description = "Retrieves the most recent review details for a specific Vault."
     )
-    @ApiHeaders(headers={
-            @ApiHeader(name=HEADER_USER_ID, description="DataVault Broker User ID")
-    })
-    @GetMapping("/admin/vaults/{vaultID}/vaultreviews/current")
-    public ReviewInfo getCurrentReview(@RequestHeader(HEADER_USER_ID) String userID,
+    @GetMapping(value = "/admin/vaults/{vaultID}/vaultreviews/current", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ReviewInfo getCurrentReview(@RequestHeader(HEADER_USER_ID) String userId,
                                        @PathVariable String vaultID) throws Exception {
 
-        User user = usersService.getUser(userID);
+        User user = usersService.getUser(userId);
         if (user == null) {
             return null;
         }
@@ -110,22 +97,24 @@ public class AdminReviewsController {
         return getReviewInfo(vaultReview);
     }
     
-    @ApiMethod(
-            path = "/admin/vaults/vaultreviews/current",
-            verb = ApiVerb.POST,
-            description = "Creates the current review for a Vault",
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
+    @Operation(
+            summary = "Creates the current review for a Vault",
+            description = "Initiates a new review process for a specified Vault.",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "The unique ID of the Vault",
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.TEXT_PLAIN_VALUE,
+                            schema = @Schema(type = "string", description = "Vault Identifier", examples = "v-123-abc")
+                    )
+            )
     )
-    @ApiHeaders(headers={
-            @ApiHeader(name=HEADER_USER_ID, description="DataVault Broker User ID")
-    })
-    @PostMapping("/admin/vaults/vaultreviews/current")
-    public ReviewInfo createCurrentReview(@RequestHeader(HEADER_USER_ID) String userID,
-                                       @RequestBody String vaultID) throws Exception {
+    @PostMapping(value = "/admin/vaults/vaultreviews/current", consumes = MediaType.TEXT_PLAIN_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ReviewInfo createCurrentReview(@RequestHeader(HEADER_USER_ID) String userId,
+                                          @RequestBody String vaultId) throws Exception {
 
-        User user = usersService.getUser(userID);
-        Vault vault = vaultsService.getUserVault(user, vaultID);
+        User user = usersService.getUser(userId);
+        Vault vault = vaultsService.getUserVault(user, vaultId);
 
         // if vault is not due - return null else create a vault if a pending review does not exist?
         // TODO DJH - we should create a review if one is due and does not exist already ?
@@ -139,19 +128,12 @@ public class AdminReviewsController {
     }
 
 
-    @ApiMethod(
-            path = "/admin/vaults/vaultreviews",
-            verb = ApiVerb.PUT,
-            description = "Edit a Vault Review",
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
+    @Operation(
+            summary = "Edit a Vault Review",
+            description = "Updates an existing Vault Review."
     )
-    @ApiHeaders(headers={
-            @ApiHeader(name=HEADER_USER_ID, description="DataVault Broker User ID"),
-            @ApiHeader(name=HEADER_CLIENT_KEY, description="DataVault API Client Key")
-    })
-    @PutMapping("/admin/vaults/vaultreviews")
-    public VaultReview editVaultReview(@RequestHeader(HEADER_USER_ID) String userID,
+    @PutMapping(value = "/admin/vaults/vaultreviews", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public VaultReview editVaultReview(@RequestHeader(HEADER_USER_ID) String userId,
                                        @RequestHeader(HEADER_CLIENT_KEY) String clientKey,
                                        @RequestBody VaultReview vaultReview) {
 
@@ -163,7 +145,7 @@ public class AdminReviewsController {
             Assert.state(vaultReview.getVault() != null, "The VaultReview cannot have null Vault");
             Review vaultEvent = new Review(vaultReview.getVault().getID());
             vaultEvent.setVault(vaultReview.getVault());
-            vaultEvent.setUser(usersService.getUser(userID));
+            vaultEvent.setUser(usersService.getUser(userId));
             vaultEvent.setAgentType(Agent.AgentType.BROKER);
             Client client = clientsService.getClientByApiKey(clientKey);
             String clientName = client == null ? null : client.getName();
@@ -176,20 +158,13 @@ public class AdminReviewsController {
 
 
 
-    @ApiMethod(
-            path = "/admin/vaultreviews/depositreviews",
-            verb = ApiVerb.PUT,
-            description = "Edit a Vault DepositReview",
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
+    @Operation(
+            summary = "Edit a Deposit Review",
+            description = "Updates an existing Deposit Review."
     )
-    @ApiHeaders(headers={
-            @ApiHeader(name=HEADER_USER_ID, description="DataVault Broker User ID"),
-            @ApiHeader(name=HEADER_CLIENT_KEY, description="DataVault API Client Key")
-    })
-    @PutMapping("/admin/vaultreviews/depositreviews")
-    public DepositReview editDepositReview(@RequestHeader(HEADER_USER_ID) String userID,
-                                       @RequestBody DepositReview depositReview) {
+    @PutMapping(value = "/admin/vaultreviews/depositreviews", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public DepositReview editDepositReview(@RequestHeader(HEADER_USER_ID) String userId,
+                                           @RequestBody DepositReview depositReview) {
 
 
         depositsReviewService.updateDepositReview(depositReview);

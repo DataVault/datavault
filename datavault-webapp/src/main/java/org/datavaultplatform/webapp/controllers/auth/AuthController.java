@@ -2,17 +2,18 @@ package org.datavaultplatform.webapp.controllers.auth;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import jakarta.servlet.http.HttpSession;
 
 @Controller
 @RequestMapping("/auth")
-public class AuthController {
+public class AuthController implements AuthControllerApi {
     
     private final static String DEFAULT_LOGOUT_URL = "/auth/login?logout";
     
@@ -29,11 +30,12 @@ public class AuthController {
         this.welcome = welcome;
         this.logoutUrl = logoutUrl;
     }
-    
-    @RequestMapping(value = "/login", method = RequestMethod.GET)
-    public String getLoginPage(@RequestParam(value="error", required=false) boolean error,
-                               @RequestParam(value="logout", required=false) String logout,
-                               @RequestParam(value="security", required=false) String security,
+
+    @Override
+    @GetMapping(value = "/login", produces = MediaType.TEXT_HTML_VALUE)
+    public String getLoginPage(@RequestParam(value = "error", required = false) boolean error,
+                               @RequestParam(value = "logout", required = false) String logout,
+                               @RequestParam(value = "security", required = false) String security,
                                ModelMap model) {
 
         model.put("success", "");
@@ -55,20 +57,23 @@ public class AuthController {
         return "auth/login";
     }
 
-    @RequestMapping(value = "/logout", method = RequestMethod.GET)
-    public String getDeniedPage(ModelMap model, HttpSession session) {
+    @Override
+    @GetMapping(value = "/logout")
+    public String getLogoutPath(ModelMap model, HttpSession session) {
 
         session.invalidate();
         return "redirect:"+logoutUrl;
     }
 
-    @RequestMapping(value = "/denied", method = RequestMethod.GET)
-    public String getDeniedPage() {
+    @Override
+    @GetMapping(value = "/denied")
+    public String getLogoutPath() {
 
         return "auth/denied";
     }
 
-    @RequestMapping(value = "/confirmation", method = RequestMethod.GET)
+    @Override
+    @GetMapping(value = "/confirmation", produces = MediaType.TEXT_HTML_VALUE)
     public String getConfirmationPage(ModelMap model) {
 
         model.put("logout", "");

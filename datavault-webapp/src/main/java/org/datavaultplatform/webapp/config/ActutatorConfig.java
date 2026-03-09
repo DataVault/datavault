@@ -2,8 +2,6 @@ package org.datavaultplatform.webapp.config;
 
 import java.time.Clock;
 
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.info.Info;
 import org.datavaultplatform.webapp.actuator.CurrentTimeEndpoint;
 import org.datavaultplatform.webapp.actuator.MemoryInfoEndpoint;
 import org.springframework.boot.SpringBootVersion;
@@ -33,12 +31,4 @@ public class ActutatorConfig {
   public InfoContributor springBootVersionInfoContributor() {
     return builder -> builder.withDetail("spring-boot.version", SpringBootVersion.getVersion());
   }
-
-  @Bean
-  public OpenAPI openAPI() {
-    return new OpenAPI().info(new Info().title("DataVault WebApp")
-            .description("webapp application")
-            .version("v0.0.1"));
-  }
-
 }

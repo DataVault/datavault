@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-//@CrossOrigin
 public class AdminArchiveStoreController {
 
     private final ArchiveStoreService archiveStoreService;
@@ -26,25 +25,26 @@ public class AdminArchiveStoreController {
     }
 
     @GetMapping("/admin/archivestores")
-    public ResponseEntity<List<ArchiveStore>> getArchiveStores(@RequestHeader(HEADER_USER_ID) String userID) {
+    public ResponseEntity<List<ArchiveStore>> getArchiveStores( @RequestHeader(HEADER_USER_ID) String userId) {
 
         List<ArchiveStore> archiveStores = archiveStoreService.getArchiveStores();
         return new ResponseEntity<>(archiveStores, HttpStatus.OK);
     }
 
-    @GetMapping("/admin/archivestores/{archivestoreid}")
-    public ResponseEntity<ArchiveStore> getArchiveStore(@RequestHeader(HEADER_USER_ID) String userID, @PathVariable("archivestoreid") String archivestoreid) {
+    @GetMapping("/admin/archivestores/{archiveStoreId}")
+    public ResponseEntity<ArchiveStore> getArchiveStore(@RequestHeader(HEADER_USER_ID) String userId,
+                                                        @PathVariable String archiveStoreId) {
 
-        return new ResponseEntity<>(archiveStoreService.getArchiveStore(archivestoreid), HttpStatus.OK);
+        return new ResponseEntity<>(archiveStoreService.getArchiveStore(archiveStoreId), HttpStatus.OK);
     }
 
     @PostMapping("/admin/archivestores")
-    public ResponseEntity<ArchiveStore> addArchiveStore(@RequestHeader(HEADER_USER_ID) String userID,
+    public ResponseEntity<ArchiveStore> addArchiveStore(@RequestHeader(HEADER_USER_ID) String userId,
                                                         @RequestBody ArchiveStore store) {
-        try{
+        try {
             archiveStoreService.addArchiveStore(store);
-        }catch(Exception e){
-            System.err.println("Couldn't add archive store: "+ e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Couldn't add archive store: " + e.getMessage());
             return new ResponseEntity<>(store, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
@@ -52,18 +52,18 @@ public class AdminArchiveStoreController {
     }
 
     @PutMapping("/admin/archivestores")
-    public ResponseEntity<ArchiveStore> editArchiveStore(@RequestHeader(HEADER_USER_ID) String userID,
+    public ResponseEntity<ArchiveStore> editArchiveStore(@RequestHeader(HEADER_USER_ID) String userId,
                                                          @RequestBody ArchiveStore store) {
 
         archiveStoreService.updateArchiveStore(store);
         return new ResponseEntity<>(store, HttpStatus.OK);
     }
 
-    @DeleteMapping("/admin/archivestores/{archivestoreid}")
-    public ResponseEntity<Void>  deleteArchiveStore(@RequestHeader(HEADER_USER_ID) String userID,
-                                                      @PathVariable("archivestoreid") String archivestoreid) {
+    @DeleteMapping("/admin/archivestores/{archiveStoreId}")
+    public ResponseEntity<Void> deleteArchiveStore(@RequestHeader(HEADER_USER_ID) String userId,
+                                                   @PathVariable String archiveStoreId) {
 
-        archiveStoreService.deleteArchiveStore(archivestoreid);
+        archiveStoreService.deleteArchiveStore(archiveStoreId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

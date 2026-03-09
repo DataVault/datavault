@@ -3,10 +3,10 @@ package org.datavaultplatform.webapp.controllers.admin;
 import org.datavaultplatform.common.model.Retrieve;
 import org.datavaultplatform.webapp.services.RestService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @ConditionalOnBean(RestService.class)
-public class AdminRetrievesController {
+public class AdminRetrievesController implements AdminRetrievesControllerApi {
 
     private final RestService restService;
     private static final int DEFAULT_RECORDS_PER_PAGE = 10;
@@ -25,7 +25,8 @@ public class AdminRetrievesController {
         this.restService = restService;
     }
 
-    @RequestMapping(value = "/admin/retrieves", method = RequestMethod.GET)
+    @Override
+    @GetMapping(value = "/admin/retrieves", produces = MediaType.TEXT_HTML_VALUE)
     public String getRetrievesListing(ModelMap model,
                                       @RequestParam(value = "query", required = false, defaultValue = "") String query,
                                       @RequestParam(value = "sort", required = false, defaultValue = "timestamp") String sort,

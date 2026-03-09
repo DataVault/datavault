@@ -66,8 +66,8 @@
     </dependency>
 
     <dependency>
-      <groupId>org.jsondoc</groupId>
-      <artifactId>jsondoc-core</artifactId>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
     </dependency>
 
     <dependency>

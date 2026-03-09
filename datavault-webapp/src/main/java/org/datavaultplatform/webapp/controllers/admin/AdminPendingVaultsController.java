@@ -18,18 +18,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 
 @Controller
 @ConditionalOnBean(RestService.class)
-public class AdminPendingVaultsController {
+public class AdminPendingVaultsController implements AdminPendingVaultsControllerApi {
 
 	private static final Logger logger = LoggerFactory.getLogger(AdminPendingVaultsController.class);
 
@@ -46,12 +43,13 @@ public class AdminPendingVaultsController {
         this.forceLogoutService = forceLogoutService;
     }
 
-    @RequestMapping(value = "/admin/pendingVaults", method = RequestMethod.GET)
+    @Override
+    @GetMapping(value = "/admin/pendingVaults", produces = MediaType.TEXT_HTML_VALUE)
     public String searchPendingVaults(ModelMap model,
-                               @RequestParam(value = "query", defaultValue = "") String query,
-                               @RequestParam(value = "sort", defaultValue = "creationTime") String sort,
-                               @RequestParam(value = "order", defaultValue = "desc") String order,
-                               @RequestParam(value = "pageId", defaultValue = "1") int pageId) {
+                                      @RequestParam(value = "query", defaultValue = "") String query,
+                                      @RequestParam(value = "sort", defaultValue = "creationTime") String sort,
+                                      @RequestParam(value = "order", defaultValue = "desc") String order,
+                                      @RequestParam(value = "pageId", defaultValue = "1") int pageId) {
 
         model.addAttribute("activePageId", pageId);
 
@@ -69,11 +67,12 @@ public class AdminPendingVaultsController {
     }
     
     // The Admin Edit PV page
-    @RequestMapping(value = "/admin/pendingVaults/edit/{vaultid}", method = RequestMethod.GET)
-    public String getPendingVault(ModelMap model, @PathVariable("vaultid") String vaultID) {
-        VaultInfo vault = restService.getPendingVault(vaultID);
-        logger.info("Passed in id: '" + vaultID);
-        model.addAttribute("vaultID", vaultID);
+    @Override
+    @GetMapping(value = "/admin/pendingVaults/edit/{vaultId}", produces = MediaType.TEXT_HTML_VALUE)
+    public String getPendingVault(ModelMap model, @PathVariable String vaultId) {
+        VaultInfo vault = restService.getPendingVault(vaultId);
+        logger.info("Passed in id: '" + vaultId);
+        model.addAttribute("vaultID", vaultId);
 
         CreateVault cv = vault.convertToCreate();
         model.addAttribute("vault", cv);
@@ -86,12 +85,13 @@ public class AdminPendingVaultsController {
         return "admin/pendingVaults/edit/editPendingVault";
     }
 
-    @RequestMapping(value = "/admin/pendingVaults/saved", method = RequestMethod.GET)
+    @Override
+    @GetMapping(value = "/admin/pendingVaults/saved", produces = MediaType.TEXT_HTML_VALUE)
     public String searchSavedPendingVaults(ModelMap model,
-                                      @RequestParam(value = "query", defaultValue = "") String query,
-                                      @RequestParam(value = "sort", defaultValue = "creationTime") String sort,
-                                      @RequestParam(value = "order", defaultValue = "desc") String order,
-                                      @RequestParam(value = "pageId", defaultValue = "1") int pageId) {
+                                           @RequestParam(value = "query", defaultValue = "") String query,
+                                           @RequestParam(value = "sort", defaultValue = "creationTime") String sort,
+                                           @RequestParam(value = "order", defaultValue = "desc") String order,
+                                           @RequestParam(value = "pageId", defaultValue = "1") int pageId) {
 
         model.addAttribute("activePageId", pageId);
 
@@ -105,12 +105,13 @@ public class AdminPendingVaultsController {
         return "admin/pendingVaults/saved";
     }
 
-    @RequestMapping(value = "/admin/pendingVaults/confirmed", method = RequestMethod.GET)
+    @Override
+    @GetMapping(value = "/admin/pendingVaults/confirmed", produces = MediaType.TEXT_HTML_VALUE)
     public String searchConfirmedPendingVaults(ModelMap model,
-                                      @RequestParam(value = "query", defaultValue = "") String query,
-                                      @RequestParam(value = "sort", defaultValue = "creationTime") String sort,
-                                      @RequestParam(value = "order", defaultValue = "desc") String order,
-                                      @RequestParam(value = "pageId", defaultValue = "1") int pageId) {
+                                               @RequestParam(value = "query", defaultValue = "") String query,
+                                               @RequestParam(value = "sort", defaultValue = "creationTime") String sort,
+                                               @RequestParam(value = "order", defaultValue = "desc") String order,
+                                               @RequestParam(value = "pageId", defaultValue = "1") int pageId) {
 
         model.addAttribute("activePageId", pageId);
 
@@ -145,18 +146,21 @@ public class AdminPendingVaultsController {
                 ) );
 
         // Pass the sort and order
-        if (sort == null) sort = "";
+        if (sort == null) {
+            sort = "";
+        }
         model.addAttribute("sort", sort);
         model.addAttribute("order", order);
 
-        String otherOrder = order.equals("asc")?"desc":"asc";
-        model.addAttribute("ordername", "name".equals(sort)?otherOrder:"asc");
+        String otherOrder = order.equals("asc") ? "desc" : "asc";
+        model.addAttribute("ordername", "name".equals(sort) ? otherOrder : "asc");
 
         return model;
     }
-    
-    
-    @RequestMapping(value = "/admin/pendingVaults/summary/{pendingVaultId}", method = RequestMethod.GET)
+
+
+    @Override
+    @GetMapping(value = "/admin/pendingVaults/summary/{pendingVaultId}", produces = MediaType.TEXT_HTML_VALUE)
     public String getVault(ModelMap model, @PathVariable("pendingVaultId") String vaultID, Principal principal) {
         logger.info("VaultID:'" + vaultID + "'");
         VaultInfo pendingVault = restService.getPendingVault(vaultID);
@@ -175,9 +179,10 @@ public class AdminPendingVaultsController {
         return "admin/pendingVaults/summary";
     }
 
-    @RequestMapping(value = "/admin/pendingVaults/upgrade/{pendingVaultId}", method = RequestMethod.GET)
+    @Override
+    @GetMapping(value = "/admin/pendingVaults/upgrade/{pendingVaultId}")
     public String upgradeVault(@PathVariable("pendingVaultId") String pendingVaultID,
-    		                   @RequestParam("reviewDate") String reviewDateString) {
+                               @RequestParam("reviewDate") String reviewDateString) {
         // need to either pass in create vault or get vaultnfo from the pending id param
         // and convert it to create vault object like in VaultController.getPendingVault
     	LocalDate reviewDate = null;
@@ -204,9 +209,10 @@ public class AdminPendingVaultsController {
     }
     
 	// Process the completed 'create new vault' page
-	@RequestMapping(value = "/admin/pendingVaults/edit", method = RequestMethod.POST)
-	public String editPendingVault(@ModelAttribute CreateVault vault, ModelMap model, @RequestParam String action,
-			Principal principal) {
+    @Override
+    @PostMapping(value = "/admin/pendingVaults/edit", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public String editPendingVault(@ModelAttribute CreateVault vault, ModelMap model, @RequestParam String action,
+                                   Principal principal) {
 		// if the confirm button has been clicked save what we have if everything isn't
 		// already saved and display the summary
 		logger.info("Action is:'" + action + "'");
@@ -227,10 +233,11 @@ public class AdminPendingVaultsController {
 		return "redirect:" + vaultUrl;
 	}
 
-    @RequestMapping(value = "/admin/pendingVaults/{pendingVaultID}", method = RequestMethod.GET)
-    public String deletePendingVault(ModelMap model, @PathVariable("pendingVaultID") String pendingVaultID) {
+    @Override
+    @GetMapping(value = "/admin/pendingVaults/{pendingVaultId}")
+    public String deletePendingVault(ModelMap model, @PathVariable String pendingVaultId) {
 
-        restService.deletePendingVault(pendingVaultID);
+        restService.deletePendingVault(pendingVaultId);
         return "redirect:/admin/pendingVaults";
     }
 

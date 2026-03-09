@@ -7,77 +7,76 @@ import java.util.Date;
 
 import lombok.Data;
 import org.datavaultplatform.common.model.PendingVault;
-import org.jsondoc.core.annotation.ApiObject;
-import org.jsondoc.core.annotation.ApiObjectField;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiObject(name = "BillingInfo")
+@Schema(name = "BillingInfo")
 @Data
 public class BillingInformation {
     
-    @ApiObjectField(description = "The unique identifier for this vault")
+    @Schema(description = "The unique identifier for this vault")
     private String id;
     
-    @ApiObjectField(description = "The vault ID")
+    @Schema(description = "The vault ID")
     private String vaultID;
 
-	@ApiObjectField(description = "The Billing type")
+	@Schema(description = "The Billing type")
 	private PendingVault.Billing_Type billingType;
 
-    @ApiObjectField(description = "Billing Details Contact Name")
+    @Schema(description = "Billing Details Contact Name")
     private String contactName;
         
-    @ApiObjectField(description = "Internal Customer Name")
+    @Schema(description = "Internal Customer Name")
     private String school;
 
-    @ApiObjectField(description = "The Billing Subunit")
+    @Schema(description = "The Billing Subunit")
     private String subUnit;
 
-	@ApiObjectField(description = "The Billing Project title")
+	@Schema(description = "The Billing Project title")
 	private String projectTitle;
     
-    @ApiObjectField(description = "To know if the user uses BudgetCode")
+    @Schema(description = "To know if the user uses BudgetCode")
     private Boolean budgetCode;
 
-	@ApiObjectField(description = "The Billing SliceID")
+	@Schema(description = "The Billing SliceID")
 	private String sliceID;
     
-    @ApiObjectField(description = "The comments entered by Admin")
+    @Schema(description = "The comments entered by Admin")
     private String specialComments;
     
-    @ApiObjectField(description = "The value calculated for all deposits in the vault entered by Admin")
+    @Schema(description = "The value calculated for all deposits in the vault entered by Admin")
     private BigDecimal amountToBeBilled;
     
-    @ApiObjectField(description = "The value calculated for all deposits in the vault entered by Admin")
+    @Schema(description = "The value calculated for all deposits in the vault entered by Admin")
     private BigDecimal amountBilled;
           
-    @ApiObjectField(description = "Sum of vaults size for a projectId")
+    @Schema(description = "Sum of vaults size for a projectId")
     private long projectSize;
    
-    @ApiObjectField(description = "Sum of vaults size for a projectId")
+    @Schema(description = "Sum of vaults size for a projectId")
 	private long vaultSize;
  
-	@ApiObjectField(description = "The Date the vault was last reviewed")
+	@Schema(description = "The Date the vault was last reviewed")
 	private Date reviewDate;
    
-    @ApiObjectField(description = "The creation Date of the vault")
+    @Schema(description = "The creation Date of the vault")
 	private Date creationTime;
     
-    @ApiObjectField(description = "Name of the vault")
+    @Schema(description = "Name of the vault")
 	private String vaultName;
 
-    @ApiObjectField(description = "Project ID")
+    @Schema(description = "Project ID")
 	private String projectId;
     
-    @ApiObjectField(description = "Owner Name")
+    @Schema(description = "Owner Name")
 	private String userName;
 
-	@ApiObjectField(description = "The Billing payment details.")
+	@Schema(description = "The Billing payment details.")
 	private String paymentDetails;
 
-	@ApiObjectField(description = "The grant end Date of the vault")
+	@Schema(description = "The grant end Date of the vault")
 	private LocalDate grantEndDate;
     
     public BillingInformation() {

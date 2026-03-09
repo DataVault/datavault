@@ -63,8 +63,8 @@ public class OpenApiWorkerTest {
                 .andExpect(jsonPath("$.info.title").value("DataVault Worker"))
                 .andExpect(jsonPath("$.info.description").value("worker application"))
                 .andExpect(jsonPath("$.info.version").value("v0.0.1"))
-                .andExpect(jsonPath("$.paths").isEmpty())
                 .andDo(print())
+                .andExpect(jsonPath("$.paths['/task/interrupt']").exists())
                 .andReturn();
 
     }

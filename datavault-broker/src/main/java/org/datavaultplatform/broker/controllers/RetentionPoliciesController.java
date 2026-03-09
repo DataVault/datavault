@@ -30,8 +30,8 @@ public class RetentionPoliciesController {
     }
 
     @GetMapping("/retentionpolicies")
-    public List<RetentionPolicy> getPolicies(@RequestHeader(HEADER_USER_ID) String userID,
-                                             @RequestHeader(HEADER_CLIENT_KEY) String clientKey) {
+    public List<RetentionPolicy> getPolicies( @RequestHeader(HEADER_USER_ID) String userId,
+                                              @RequestHeader(HEADER_CLIENT_KEY) String clientKey) {
         return retentionPoliciesService.getRetentionPolicies();
     }
 

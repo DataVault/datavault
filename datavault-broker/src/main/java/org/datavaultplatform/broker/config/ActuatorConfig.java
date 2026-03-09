@@ -56,11 +56,4 @@ public class ActuatorConfig {
   public LocalFileStoreEndpoint localFileStoreEndpoint(@Autowired ArchiveStoreService archiveStoreService) {
     return new LocalFileStoreEndpoint(archiveStoreService);
   }
-
-  @Bean
-  public OpenAPI openAPI() {
-    return new OpenAPI().info(new Info().title("DataVault Broker")
-            .description("broker application")
-            .version("v0.0.1"));
-  }
 }

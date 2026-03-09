@@ -3,17 +3,15 @@ package org.datavaultplatform.webapp.controllers.admin;
 
 import jakarta.servlet.http.HttpServletResponse;
 
-import org.datavaultplatform.common.response.DepositInfo;
-import org.datavaultplatform.common.response.DepositsData;
+import org.datavaultplatform.common.response.*;
 import org.datavaultplatform.common.model.Deposit;
 import org.datavaultplatform.common.model.DepositChunk;
-import org.datavaultplatform.common.response.AuditChunkStatusInfo;
-import org.datavaultplatform.common.response.AuditInfo;
 import org.datavaultplatform.webapp.services.RestService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.supercsv.io.CsvBeanWriter;
@@ -30,7 +28,7 @@ import java.util.*;
 
 @ConditionalOnBean(RestService.class)
 @Controller
-public class AdminDepositsController {
+public class AdminDepositsController implements AdminDepositsControllerApi {
 
     private final RestService restService;
     private static final int DEFAULT_RECORDS_PER_PAGE = 10;
@@ -43,7 +41,8 @@ public class AdminDepositsController {
         this.restService = restService;
     }
 
-    @RequestMapping(value = "/admin/deposits", method = RequestMethod.GET)
+    @Override
+    @GetMapping(value = "/admin/deposits", produces = MediaType.TEXT_HTML_VALUE)
     public String getDepositsListing(ModelMap model,
                                      @RequestParam(value = "query", required = false, defaultValue = "") String query,
                                      @RequestParam(value = "sort", required = false, defaultValue = "creationTime") String sort,
@@ -87,7 +86,8 @@ public class AdminDepositsController {
         return "admin/deposits/index";
     }
 
-    @RequestMapping(value = "/admin/deposits/csv", method = RequestMethod.GET)
+    @Override
+    @GetMapping(value = "/admin/deposits/csv", produces = ResponseType.TEXT_CSV_VALUE)
     public void exportVaults(HttpServletResponse response,
                              @RequestParam(value = "query", required = false, defaultValue = "") String query,
                              @RequestParam(value = "sort", required = false, defaultValue = "creationTime") String sort,
@@ -98,7 +98,7 @@ public class AdminDepositsController {
         DepositsData depositData =restService.limitedSearchDepositsData(query, sort, order, 0, MAX_RESULTS_FOR_DEPOSITS_CSV);
         deposits = depositData.getData();
 
-        response.setContentType("text/csv");
+        response.setContentType(ResponseType.TEXT_CSV_VALUE);
         
 
         // creates mock data
@@ -132,27 +132,30 @@ public class AdminDepositsController {
      * <p>
      * This method coordinates with the administrative view at 
      * {@code WEB-INF/templates/admin/deposits/index.html}.
-     * @param depositID specifies the deposit to be removed.
+     * @param depositId specifies the deposit to be removed.
      * @param vaultId the id of the vault that contains this deposit.
      * required to construct the result.
      * @return a URL pointing back to the deposit page.
      */
-    @DeleteMapping("/admin/deposits/{depositID}")
+    @Override
+    @DeleteMapping(value = "/admin/deposits/{depositId}", produces = MediaType.TEXT_HTML_VALUE)
     @ResponseBody
-    public String deleteDeposit(@PathVariable String depositID, @RequestParam(value = "vaultId") String vaultId) {
-        restService.deleteDeposit(depositID);
-        return "vaults/" + vaultId + "/deposits/" + depositID;
+    public String deleteDeposit(@PathVariable String depositId, @RequestParam(value = "vaultId", required = false) String vaultId) {
+        restService.deleteDeposit(depositId);
+        return "vaults/" + vaultId + "/deposits/" + depositId;
     }
 
-    @RequestMapping(value = "/admin/deposits/audit", method = RequestMethod.GET)
-    public String runDepositAudit() throws Exception{
+    @Override
+    @GetMapping(value = "/admin/deposits/audit", produces = MediaType.TEXT_HTML_VALUE)
+    public String runDepositAudit() {
 
         String result = restService.auditDeposits();
 
         return "admin/deposits/index";
     }
 
-    @RequestMapping(value = "/admin/audits", method = RequestMethod.GET)
+    @Override
+    @GetMapping(value = "/admin/audits", produces = MediaType.TEXT_HTML_VALUE)
     public String getAuditsListing(ModelMap model) throws Exception {
         AuditInfo[] audits = restService.getAuditsListingAll();
 
@@ -161,7 +164,8 @@ public class AdminDepositsController {
         return "admin/audits/index";
     }
 
-    @RequestMapping(value = "/admin/depositsAudits", method = RequestMethod.GET)
+    @Override
+    @GetMapping(value = "/admin/depositsAudits", produces = MediaType.TEXT_HTML_VALUE)
     public String getDepositsAuditsListing(ModelMap model,
                                            @RequestParam(value = "sort", required = false) String sort)
             throws Exception {

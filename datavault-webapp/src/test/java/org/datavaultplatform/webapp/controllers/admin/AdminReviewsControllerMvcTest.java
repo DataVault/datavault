@@ -1,6 +1,5 @@
 package org.datavaultplatform.webapp.controllers.admin;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.request.CreateRetentionPolicy;
@@ -37,6 +36,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.ui.ModelMap;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -110,7 +110,7 @@ class AdminReviewsControllerMvcTest {
 
     @Mock
     Group mGroup;
-    
+
     @Mock
     ReviewInfo mReviewInfo;
 
@@ -143,17 +143,17 @@ class AdminReviewsControllerMvcTest {
 
     @Mock
     DepositReviewModel mDepositReviewModel2;
-    
+
     Date date1;
-    
+
     Date date2;
 
     final List<RoleAssignment>  roleAssignments = new ArrayList<>();
 
     final List<VaultInfo> vaultsInfo = new ArrayList<>();
-    
+
     ObjectMapper mapper = new ObjectMapper();
-    
+
     @BeforeEach
     void setup() {
         // VaultsInfo
@@ -238,7 +238,7 @@ class AdminReviewsControllerMvcTest {
     void testShowReview_WithNoReviewDateError() throws Exception {
         // Arrange
         mocksForShowAndProcessReviewTests();
-        
+
         RequestBuilder requestBuilder = MockMvcRequestBuilders.get("/admin/vaults/"+TEST_VAULT_ID_1+"/reviews")
                 .accept(MediaType.TEXT_HTML);
         // Act
@@ -356,8 +356,8 @@ class AdminReviewsControllerMvcTest {
 
             RequestBuilder requestBuilder = MockMvcRequestBuilders.post("/admin/vaults/" + TEST_VAULT_ID_1 + "/reviews/" + TEST_VAULT_REVIEW_ID)
                     .queryParam("action", "Cancel")
-                    .flashAttr("VaultReviewModel", mVaultReviewModel)
-                    .contentType(MediaType.APPLICATION_JSON)
+                    .flashAttr("vaultReviewModel", mVaultReviewModel)
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
                     .with(csrf());
             // Act
             MvcResult mvcResult = mockMvc.perform(requestBuilder).andReturn();
@@ -376,7 +376,7 @@ class AdminReviewsControllerMvcTest {
             RequestBuilder requestBuilder = MockMvcRequestBuilders.post("/admin/vaults/" + TEST_VAULT_ID_1 + "/reviews/" + TEST_VAULT_REVIEW_ID)
                     .queryParam("action", "Save")
                     .flashAttr("vaultReviewModel", mVaultReviewModel)
-                    .contentType(MediaType.APPLICATION_JSON)
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
                     .with(csrf());
             // Act
             MvcResult mvcResult = mockMvc.perform(requestBuilder).andReturn();
@@ -404,7 +404,7 @@ class AdminReviewsControllerMvcTest {
             RequestBuilder requestBuilder = MockMvcRequestBuilders.post("/admin/vaults/" + TEST_VAULT_ID_1 + "/reviews/" + TEST_VAULT_REVIEW_ID)
                     .queryParam("action", "Submit")
                     .flashAttr("vaultReviewModel", mVaultReviewModel)
-                    .contentType(MediaType.APPLICATION_JSON)
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
                     .with(csrf());
             // Act
             MvcResult mvcResult = mockMvc.perform(requestBuilder).andReturn();
@@ -429,7 +429,7 @@ class AdminReviewsControllerMvcTest {
             RequestBuilder requestBuilder = MockMvcRequestBuilders.post("/admin/vaults/" + TEST_VAULT_ID_1 + "/reviews/" + TEST_VAULT_REVIEW_ID)
                     .queryParam("action", "Submit")
                     .flashAttr("vaultReviewModel", mVaultReviewModel)
-                    .contentType(MediaType.APPLICATION_JSON)
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
                     .with(csrf());
             // Act
             MvcResult mvcResult = mockMvc.perform(requestBuilder).andReturn();
@@ -459,7 +459,7 @@ class AdminReviewsControllerMvcTest {
             RequestBuilder requestBuilder = MockMvcRequestBuilders.post("/admin/vaults/" + TEST_VAULT_ID_1 + "/reviews/" + TEST_VAULT_REVIEW_ID)
                     .queryParam("action", "Submit")
                     .flashAttr("vaultReviewModel", mVaultReviewModel)
-                    .contentType(MediaType.APPLICATION_JSON)
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
                     .with(csrf());
             // Act
             MvcResult mvcResult = mockMvc.perform(requestBuilder).andReturn();

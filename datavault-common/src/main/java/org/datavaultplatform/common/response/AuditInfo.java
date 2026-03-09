@@ -4,28 +4,27 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.datavaultplatform.common.model.Audit;
 import org.datavaultplatform.common.util.DateTimeUtils;
-import org.jsondoc.core.annotation.ApiObject;
-import org.jsondoc.core.annotation.ApiObjectField;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.Date;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiObject(name = "Audit")
+@Schema(name = "Audit")
 public class AuditInfo {
 
-    @ApiObjectField(description = "Universally Unique Identifier for the Audit", name="Audit")
+    @Schema(description = "Universally Unique Identifier for the Audit")
     private String id;
 
-    @ApiObjectField(description = "Date that the audit started")
+    @Schema(description = "Date that the audit started")
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern= DateTimeUtils.ISO_DATE_TIME_FORMAT)
     private Date creationTime;
 
-    @ApiObjectField(description = "Status of the Audit", allowedvalues={"FAILED", "IN_PROGRESS", "COMPLETE"})
+    @Schema(description = "Status of the Audit")
     private
     Audit.Status status;
 
-    @ApiObjectField(description = "Deposit chunks")
+    @Schema(description = "Deposit chunks")
     private List<AuditChunkStatusInfo> auditChunks;
 
     public AuditInfo() {}

@@ -93,7 +93,7 @@ class VaultsControllerTest {
             doReturn(false).when(controllerSpy).canAccessVault(vaultInfo, loggedInUser);
 
             var ex = assertThrows(ForbiddenException.class, () -> {
-                controllerSpy.getVault(modelMap, "vaultId", loggedInUser);
+                controllerSpy.getVaultByVaultId(modelMap, "vaultId", loggedInUser);
             });
             assertThat(ex).hasMessage("Access denied");
 
@@ -213,7 +213,7 @@ class VaultsControllerTest {
                 mockStatic.when(() -> RoleUtils.isDataOwner(any())).thenReturn(false);
                 mockStatic.when(() -> RoleUtils.getAssignableRoles(roleAssignmentsForUser, vaultRoles)).thenReturn(validRoles);
 
-                String result = controllerSpy.getVault(modelMap, "vaultId", loggedInUser);
+                String result = controllerSpy.getVaultByVaultId(modelMap, "vaultId", loggedInUser);
                 assertThat(result).isEqualTo(  "vaults/vault");
                 
                 mockStatic.verify(() -> RoleUtils.isDataOwner(any()), times(4));

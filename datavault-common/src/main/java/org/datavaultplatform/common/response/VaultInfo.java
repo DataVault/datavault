@@ -6,160 +6,158 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import org.datavaultplatform.common.model.PendingVault;
 import org.datavaultplatform.common.request.CreateVault;
 import org.datavaultplatform.common.retentionpolicy.RetentionPolicyStatus;
 import org.datavaultplatform.common.util.DateTimeUtils;
-import org.jsondoc.core.annotation.ApiObject;
-import org.jsondoc.core.annotation.ApiObjectField;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiObject(name = "VaultInfo")
+@Schema(name = "VaultInfo", description = "Information about a DataVault Vault")
 @Data
 public class VaultInfo {
     
-    @ApiObjectField(description = "The unique identifier for this vault")
+    @Schema(description = "The unique identifier for this vault")
     private String id;
     
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern=DateTimeUtils.ISO_DATE_TIME_FORMAT)
-    @ApiObjectField(description = "The date and time when this vault was created")
+    @Schema(description = "The date and time when this vault was created")
     private LocalDateTime creationTime;
 
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern=DateTimeUtils.ISO_DATE_TIME_FORMAT)
-    @ApiObjectField(description = "The date and time when the policy will expire")
+    @Schema(description = "The date and time when the policy will expire")
     private LocalDateTime policyExpiry;
 
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern=DateTimeUtils.ISO_DATE_TIME_FORMAT)
-    @ApiObjectField(description = "The date and time when the policy check was last carried out")
+    @Schema(description = "The date and time when the policy check was last carried out")
     private LocalDateTime policyLastChecked;
 
-    @ApiObjectField(description = "The name of this vault")
+    @Schema(description = "The name of this vault")
     private String name;
     
-    @ApiObjectField(description = "The date and time when this vault was created")
+    @Schema(description = "The description of this vault")
     private String description;
 
-    @ApiObjectField(description = "Estimate of vault size")
+    @Schema(description = "Estimate of vault size")
     private PendingVault.Estimate estimate;
 
-    @ApiObjectField(description = "How we are billing")
+    @Schema(description = "How we are billing")
     private PendingVault.Billing_Type billingType;
 
-    @ApiObjectField(description = "Notes regarding data retention")
+    @Schema(description = "Notes regarding data retention")
     private String notes;
     
-    @ApiObjectField(description = "The policy that applies to this vault")
+    @Schema(description = "The policy that applies to this vault")
     private String policyID;
 
-    @ApiObjectField(description = "The length of the policy that applies to this vault")
+    @Schema(description = "The length of the policy that applies to this vault")
     private String policyLength;
     
-    @ApiObjectField(description = "The group which is related to this vault")
+    @Schema(description = "The group which is related to this vault")
     private String groupID;
     
-    @ApiObjectField(description = "The user UUN who owns this vault")
+    @Schema(description = "The user UUN who owns this vault")
     private String userID;
     
-    @ApiObjectField(description = "The user name who owns this vault")
+    @Schema(description = "The user name who owns this vault")
     private String userName;
 
-    @ApiObjectField(description = "A reference to an external metadata record that describes this vault")
+    @Schema(description = "A reference to an external metadata record that describes this vault")
     private String datasetID;
 
-    @ApiObjectField(description = "Another reference to an external metadata record that describes this vault")
+    @Schema(description = "Another reference to an external metadata record that describes this vault")
     private String crisID;
 
-    @ApiObjectField(description = "The name of the external metadata record that describes this vault")
+    @Schema(description = "The name of the external metadata record that describes this vault")
     private String datasetName;
 
-    @ApiObjectField(description = "The size of this vault in bytes")
+    @Schema(description = "The size of this vault in bytes")
     private long vaultSize;
     
-    @ApiObjectField(description = "The status of the vault policy")
+    @Schema(description = "The status of the vault policy")
     private int policyStatus;
 
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern= DateTimeUtils.ISO_DATE_FORMAT)
-    @ApiObjectField(description = "Define the minimum of time the archive will be kept")
+    @Schema(description = "Define the minimum of time the archive will be kept")
     private LocalDate grantEndDate;
 
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern= DateTimeUtils.ISO_DATE_FORMAT)
-    @ApiObjectField(description = "The date by which the vault should be reviewed for decision as to whether it should be deleted or whether there are funds available to support continued storage")
+    @Schema(description = "The date by which the vault should be reviewed for decision as to whether it should be deleted or whether there are funds available to support continued storage")
     private LocalDate reviewDate;
     
-    @ApiObjectField(description = "Number of Deposits in a vault")
+    @Schema(description = "Number of Deposits in a vault")
     private long numberOfDeposits;
     
-    @ApiObjectField(description = "Project Id from Pure")
+    @Schema(description = "Project Id from Pure")
     private String projectId;
 
-    @ApiObjectField(description = "Slice ID from erm somewhere")
+    @Schema(description = "Slice ID from erm somewhere")
     private String sliceID;
 
-    @ApiObjectField(description = "Authoriser of the billing")
+    @Schema(description = "Authoriser of the billing")
     private String authoriser;
 
-    @ApiObjectField(description = "School / Unit to be billed")
+    @Schema(description = "School / Unit to be billed")
     private String schoolOrUnit;
 
-    @ApiObjectField(description = "Subunit to be billed")
+    @Schema(description = "Subunit to be billed")
     private String subunit;
 
-    @ApiObjectField(description = "Project Title (from Grant billing fieldset)")
+    @Schema(description = "Project Title (from Grant billing fieldset)")
     private String projectTitle;
     
-    @ApiObjectField(description = "Amount to be Billed")
+    @Schema(description = "Amount to be Billed")
     private BigDecimal amountToBeBilled;
     
-    @ApiObjectField(description = "Amount Billed")
+    @Schema(description = "Amount Billed")
     private BigDecimal amountBilled;
     
-    @ApiObjectField(description = "Sum of vaults size for a projectId")
+    @Schema(description = "Sum of vaults size for a projectId")
     private long projectSize;
 
-    @ApiObjectField(description = "Did the user accept the various rules on the create vault intro page")
+    @Schema(description = "Did the user accept the various rules on the create vault intro page")
     private Boolean affirmed = false;
 
-    @ApiObjectField(description = "Did the user accept the Pure Link rule on the summary page")
+    @Schema(description = "Did the user accept the Pure Link rule on the summary page")
     private Boolean pureLink = false;
 
-    @ApiObjectField(description = "Did the user confirm the pending vault yet")
+    @Schema(description = "Did the user confirm the pending vault yet")
     private Boolean confirmed = false;
 
-    @ApiObjectField(description = "Pure Contact")
+    @Schema(description = "Pure Contact")
     private String contact;
 
-    @ApiObjectField(description = "Pending / Vault Owner ID")
+    @Schema(description = "Pending / Vault Owner ID")
     private String ownerId;
 
-    @ApiObjectField(description = "Vault Owner Name")
+    @Schema(description = "Vault Owner Name")
     private String ownerName;
 
-    @ApiObjectField(description = "Pending Vault Creator ID")
+    @Schema(description = "Pending Vault Creator ID")
     private String vaultCreatorId;
     
-    @ApiObjectField(description = "Data Creators")
+    @Schema(description = "Data Creators")
     private List<String> creators;
 
-    @ApiObjectField(description = "Nominated Data Managers")
+    @Schema(description = "Nominated Data Managers")
     private List<String> nominatedDataManagerIds;
 
-    @ApiObjectField(description = "Depositors")
+    @Schema(description = "Depositors")
     private List<String> depositorIds;
 
-    @ApiObjectField(description = "The Billing page sliceQueryChoice radio button value")
+    @Schema(description = "The Billing page sliceQueryChoice radio button value")
 	private PendingVault.Slice_Query_Choice sliceQueryChoice;
 
-	@ApiObjectField(description = "The Billing page fundingQueryChoice radio button value")
+	@Schema(description = "The Billing page fundingQueryChoice radio button value")
 	private PendingVault.Funding_Query_Choice fundingQueryChoice;
 
-	@ApiObjectField(description = "The Billing page feewaiverQueryChoice radio button value")
+	@Schema(description = "The Billing page feewaiverQueryChoice radio button value")
 	private PendingVault.Feewaiver_Query_Choice feewaiverQueryChoice;
 
-    @ApiObjectField(description = "The Billing payment details.")
+    @Schema(description = "The Billing payment details.")
 	private String paymentDetails;
 
     public VaultInfo() { }

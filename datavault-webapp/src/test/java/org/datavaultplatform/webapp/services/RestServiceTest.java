@@ -138,12 +138,6 @@ class RestServiceTest extends BaseRestTemplateWithLoggingTest {
             assertThat(result).isTrue();
         }
 
-        @Test
-        @WithMockUser(username = "user1")
-        void testRestartRetrieve() {
-            boolean result = restService.restartRetrieve("retrieve456");
-            assertThat(result).isTrue();
-        }
     }
     
 }

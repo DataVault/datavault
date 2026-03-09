@@ -12,14 +12,14 @@ import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.util.DateTimeUtils;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.UuidGenerator;
-import org.jsondoc.core.annotation.ApiObject;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiObject(name = "PendingVault")
+@Schema(name = "PendingVault")
 @Entity
 @Table(name = "PendingVaults")
 @NamedEntityGraph(name = PendingVault.EG_PENDING_VAULT, attributeNodes = {

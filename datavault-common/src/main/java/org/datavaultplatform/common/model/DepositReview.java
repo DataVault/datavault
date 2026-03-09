@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.datavaultplatform.common.util.DateTimeUtils;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.UuidGenerator;
-import org.jsondoc.core.annotation.ApiObject;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import jakarta.persistence.*;
 
@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiObject(name = "DepositReview")
+@Schema(name = "DepositReview")
 @Entity
 @Table(name="DepositReviews")
 @NamedEntityGraph(

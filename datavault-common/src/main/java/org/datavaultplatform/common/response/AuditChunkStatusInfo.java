@@ -4,40 +4,39 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.util.DateTimeUtils;
-import org.jsondoc.core.annotation.ApiObject;
-import org.jsondoc.core.annotation.ApiObjectField;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.Date;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiObject(name = "AuditChunkStatus")
+@Schema(name = "AuditChunkStatus")
 public class AuditChunkStatusInfo {
 
-    @ApiObjectField(description = "Universally Unique Identifier for the Audit", name="Audit")
+    @Schema(description = "Universally Unique Identifier for the Audit")
     private String id;
 
-    @ApiObjectField(description = "Date that the audit started")
+    @Schema(description = "Date that the audit started")
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern=DateTimeUtils.ISO_DATE_TIME_FORMAT)
     private Date creationTime;
 
-    @ApiObjectField(description = "Date that the audit finished")
+    @Schema(description = "Date that the audit finished")
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern=DateTimeUtils.ISO_DATE_TIME_FORMAT)
     private Date completedTime;
 
-    @ApiObjectField(description = "Status of the Audit", allowedvalues={"FAILED", "IN_PROGRESS", "COMPLETE"})
+    @Schema(description = "Status of the Audit")
     private
     AuditChunkStatus.Status status;
 
-    @ApiObjectField(description = "Deposit chunks")
+    @Schema(description = "Deposit chunks")
     private DepositChunk depositChunk;
 
-    @ApiObjectField(description = "The chunk deposit")
+    @Schema(description = "The chunk deposit")
     private Deposit deposit;
 
-    @ApiObjectField(description = "The archive ID")
+    @Schema(description = "The archive ID")
     private String archiveId;
 
-    @ApiObjectField(description = "The error note if any")
+    @Schema(description = "The error note if any")
     private String note;
 
     public AuditChunkStatusInfo() {}

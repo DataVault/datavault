@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.hibernate.annotations.UuidGenerator;
 import org.datavaultplatform.common.util.DateTimeUtils;
-import org.jsondoc.core.annotation.ApiObject;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import jakarta.persistence.*;
 
@@ -19,7 +19,7 @@ import java.util.function.Predicate;
 import org.hibernate.Hibernate;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiObject(name = "VaultReview")
+@Schema(name = "VaultReview")
 @Entity
 @Table(name="VaultReviews")
 @NamedEntityGraph(

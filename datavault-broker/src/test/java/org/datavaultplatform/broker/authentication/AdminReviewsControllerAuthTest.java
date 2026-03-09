@@ -69,7 +69,7 @@ public class AdminReviewsControllerAuthTest extends BaseControllerAuthTest {
     checkWorksWhenAuthenticatedFailsOtherwise(
         post("/admin/vaults/vaultreviews/current")
             .content("vaultID1")
-            .contentType(MediaType.APPLICATION_JSON),
+            .contentType(MediaType.TEXT_PLAIN_VALUE),
         AuthTestData.REVIEW_INFO_1,
         Permission.CAN_MANAGE_VAULTS);
 
