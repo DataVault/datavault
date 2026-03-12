@@ -111,4 +111,68 @@ class VaultTest {
                     .contains(vaultReview2);
         }
     }
+    
+    
+    @Nested
+    @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+    class FindLatestVaultReviewIfStillUnderwayTests {
+
+        Vault vault = new Vault();
+
+        @Test
+        void testNoVaultReviews() {
+            assertThat(vault.findLatestVaultReviewIfStillUnderway()).isNotPresent();
+        }
+
+        @Test
+        void testLatestVaultReviewIsNotUnderway() {
+            VaultReview vaultReview = new VaultReview();
+            vaultReview.setCreationTime(NOW.minusDays(2));
+            vaultReview.setActionedDate(NOW.minusDays(1));
+            
+            vault.setVaultReviews(List.of(vaultReview));
+            assertThat(vault.findLatestVaultReviewIfStillUnderway()).isNotPresent();
+        }
+
+        @Test
+        void testLatestVaultReviewIsUnderway() {
+            VaultReview vaultReview = new VaultReview();
+            vaultReview.setCreationTime(NOW.minusDays(2));
+
+            vault.setVaultReviews(List.of(vaultReview));
+            assertThat(vault.findLatestVaultReviewIfStillUnderway()).isPresent().contains(vaultReview);
+        }
+    }
+
+    @Nested
+    @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+    class IsVaultReviewUnderwayTests {
+
+        Vault vault = new Vault();
+
+        @Test
+        void testNoVaultReviews() {
+            assertThat(vault.isVaultReviewUnderway()).isFalse();
+        }
+
+        @Test
+        void testLatestVaultReviewIsNotUnderway() {
+            VaultReview vaultReview = new VaultReview();
+            vaultReview.setCreationTime(NOW.minusDays(2));
+            vaultReview.setActionedDate(NOW.minusDays(1));
+
+            vault.setVaultReviews(List.of(vaultReview));
+            assertThat(vault.isVaultReviewUnderway()).isFalse();
+        }
+
+        @Test
+        void testLatestVaultReviewIsUnderway() {
+            VaultReview vaultReview = new VaultReview();
+            vaultReview.setCreationTime(NOW.minusDays(2));
+
+            vault.setVaultReviews(List.of(vaultReview));
+            assertThat(vault.isVaultReviewUnderway()).isTrue();
+        }
+    }
+
 }
