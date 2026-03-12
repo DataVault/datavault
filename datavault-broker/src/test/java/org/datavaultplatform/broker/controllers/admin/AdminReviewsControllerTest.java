@@ -1,9 +1,8 @@
 package org.datavaultplatform.broker.controllers.admin;
 
+import lombok.SneakyThrows;
 import org.datavaultplatform.broker.services.*;
-import org.datavaultplatform.common.model.Deposit;
-import org.datavaultplatform.common.model.DepositReview;
-import org.datavaultplatform.common.model.VaultReview;
+import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.response.ReviewInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -13,13 +12,17 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class AdminReviewsControllerTest {
@@ -110,6 +113,115 @@ class AdminReviewsControllerTest {
             };
             dr.setDeposit(d);
             return dr;
+        }
+    }
+
+    @Nested
+    class GetCurrentReviewTest {
+
+        @Test
+        @SneakyThrows
+        void testNullUserId() {
+            doThrow(IllegalArgumentException.class).when(mUsersService).getUser(null);
+
+            assertThrows(IllegalArgumentException.class, () -> {
+                controller.getCurrentReview(null, "vaultId");
+            });
+
+            verify(mUsersService).getUser(null);
+
+            verifyNoMoreInteractions(mClientsService, mEventService, mDepositsReviewService, mUsersService,
+                    mVaultsReviewService, mVaultsService);
+        }
+
+        @Test
+        @SneakyThrows
+        void testUserIdNotFound() {
+            doReturn(null).when(mUsersService).getUser("userId");
+
+            ReviewInfo reviewInfo = controller.getCurrentReview("userId", "vaultId");
+            assertThat(reviewInfo).isNull();
+
+            verify(mUsersService).getUser("userId");
+
+            verifyNoMoreInteractions(mClientsService, mEventService, mDepositsReviewService, mUsersService,
+                    mVaultsReviewService, mVaultsService);
+        }
+
+        @Test
+        @SneakyThrows
+        void testUserVaultNotFound() {
+            User user1 = new User();
+            doReturn(user1).when(mUsersService).getUser("userId");
+
+            when(mVaultsService.getUserVault(user1, "vaultId")).thenThrow(new Exception("VAULT NOT FOUND"));
+
+            Exception ex = assertThrows(Exception.class, () -> controller.getCurrentReview("userId", "vaultId"));
+            assertThat(ex).hasMessage("VAULT NOT FOUND");
+
+            verify(mUsersService).getUser("userId");
+            verify(mVaultsService).getUserVault(user1, "vaultId");
+
+            verifyNoMoreInteractions(mClientsService, mEventService, mDepositsReviewService, mUsersService,
+                    mVaultsReviewService, mVaultsService);
+        }
+
+        @Test
+        @SneakyThrows
+        void testVaultHasNoMostRecentVaultReview() {
+            User user1 = new User();
+            doReturn(user1).when(mUsersService).getUser("userId");
+
+            Vault vault = new Vault();
+            when(mVaultsService.getUserVault(user1, "vaultId")).thenReturn(vault);
+
+            ReviewInfo reviewInfo = controller.getCurrentReview("userId", "vaultId");
+            assertThat(reviewInfo).isNull();
+
+            verify(mUsersService).getUser("userId");
+            verify(mVaultsService).getUserVault(user1, "vaultId");
+
+            verifyNoMoreInteractions(mClientsService, mEventService, mDepositsReviewService, mUsersService,
+                    mVaultsReviewService, mVaultsService);
+        }
+
+        @Test
+        @SneakyThrows
+        void testVaultHasMostRecentVaultReview() {
+            User user1 = new User();
+            doReturn(user1).when(mUsersService).getUser("userId");
+
+            Vault mVault = mock(Vault.class);
+
+            VaultReview vaultReview = new VaultReview();
+            when(mVault.getMostRecentVaultReview()).thenReturn(Optional.of(vaultReview));
+
+            when(mVaultsService.getUserVault(user1, "vaultId")).thenReturn(mVault);
+
+            ReviewInfo reviewInfo1 = new ReviewInfo();
+
+            /*
+                we mock the part where getReviewInfo static method is called
+                we've got a separate test for that static method
+             */
+            try (MockedStatic<AdminReviewsController> mockStatic = Mockito.mockStatic(AdminReviewsController.class)) {
+                mockStatic.when(() -> AdminReviewsController.getReviewInfo(vaultReview))
+                        .thenReturn(reviewInfo1);
+
+                // When you call the static method here, it returns the mock value
+                ReviewInfo result = controller.getCurrentReview("userId", "vaultId");
+                assertThat(result).isEqualTo(reviewInfo1);
+
+                mockStatic.verify(() -> {
+                    AdminReviewsController.getReviewInfo(vaultReview);
+                });
+            }
+
+            verify(mUsersService).getUser("userId");
+            verify(mVaultsService).getUserVault(user1, "vaultId");
+
+            verifyNoMoreInteractions(mClientsService, mEventService, mDepositsReviewService, mUsersService,
+                    mVaultsReviewService, mVaultsService);
         }
     }
 }

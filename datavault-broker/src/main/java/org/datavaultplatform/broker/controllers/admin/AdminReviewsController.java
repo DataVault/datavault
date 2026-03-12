@@ -132,8 +132,8 @@ public class AdminReviewsController {
         
         VaultReview vaultReview = vaultsReviewService.createVaultReview(vault);
 
-        // If we pass back the Vault Review and Deposit Review we lose the links between the objects, so pass
-        // back a wee Transfer Object POJO that just contains the ids, and let the client then request whatever it needs.
+        // If we pass back the Vault Review and Deposit Review, we lose the links between the objects, so pass
+        // back a wee Transfer Object POJO that just contains the ids and let the client then request whatever it needs.
         ReviewInfo reviewInfo = getReviewInfo(vaultReview);
         return reviewInfo;
     }
@@ -158,7 +158,7 @@ public class AdminReviewsController {
 
         vaultsReviewService.updateVaultReview(vaultReview);
 
-        // If the Review has been actioned then create an Event. The Review should only be actioned once.
+        // If the Review has been actioned, then create an Event. The Review should only be actioned once.
         if (vaultReview.getActionedDate() != null) {
             Review vaultEvent = new Review(vaultReview.getVault().getID());
             vaultEvent.setVault(vaultReview.getVault());
