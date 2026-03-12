@@ -205,7 +205,9 @@ public class AdminReviewsController {
 
         Utils.getSafeStream(depositReviews)
                 .forEach(dr -> {
-                    depositIds.add(dr.getDeposit().getID());
+                    Deposit deposit = dr.getDeposit();
+                    String depositId = deposit == null ? null : deposit.getID();
+                    depositIds.add(depositId);
                     depositReviewIds.add(dr.getId());
                 });
 
