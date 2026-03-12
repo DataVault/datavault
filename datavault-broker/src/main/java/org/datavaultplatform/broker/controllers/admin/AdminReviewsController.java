@@ -160,11 +160,14 @@ public class AdminReviewsController {
 
         // If the Review has been actioned, then create an Event. The Review should only be actioned once.
         if (vaultReview.getActionedDate() != null) {
+            Assert.state(vaultReview.getVault() != null, "The VaultReview cannot have null Vault");
             Review vaultEvent = new Review(vaultReview.getVault().getID());
             vaultEvent.setVault(vaultReview.getVault());
             vaultEvent.setUser(usersService.getUser(userID));
             vaultEvent.setAgentType(Agent.AgentType.BROKER);
-            vaultEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
+            Client client = clientsService.getClientByApiKey(clientKey);
+            String clientName = client == null ? null : client.getName();
+            vaultEvent.setAgent(clientName);
             eventService.addEvent(vaultEvent);
         }
         

@@ -2,8 +2,11 @@ package org.datavaultplatform.broker.controllers.admin;
 
 import lombok.SneakyThrows;
 import org.datavaultplatform.broker.services.*;
+import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.response.ReviewInfo;
+import org.datavaultplatform.common.response.VaultInfo;
+import org.datavaultplatform.common.response.VaultsData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -11,17 +14,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -45,6 +47,8 @@ class AdminReviewsControllerTest {
 
     @Mock
     EventService mEventService;
+    
+    static final LocalDateTime NOW = LocalDateTime.now();
 
     @BeforeEach
     void setup() {
@@ -86,6 +90,7 @@ class AdminReviewsControllerTest {
 
             VaultReview vr = new VaultReview();
             vr.setId(vaultReviewId);
+            //noinspection ConstantValue
             vr.setDepositReviews(Arrays.asList(dr1, dr2, dr3, dr4, dr5, dr6, dr7));
 
             ReviewInfo info = AdminReviewsController.getReviewInfo(vr);
@@ -113,6 +118,61 @@ class AdminReviewsControllerTest {
             };
             dr.setDeposit(d);
             return dr;
+        }
+    }
+
+    @Nested
+    class GetVaultsForReviewTests {
+
+        @Test
+        void testNoVaultsForReview() {
+
+            List<Vault> vaults = List.of();
+            when(mVaultsService.getVaults()).thenReturn(vaults);
+
+            when(mVaultsReviewService.getVaultsForReview(vaults)).thenReturn(null);
+
+            IllegalStateException ex = assertThrows(IllegalStateException.class, () -> {
+                controller.getVaultsForReview("userId");
+            });
+            assertThat(ex).hasMessage("The vaultsForReview should not be null");
+
+            verify(mVaultsService).getVaults();
+            verify(mVaultsReviewService).getVaultsForReview(vaults);
+
+            verifyNoMoreInteractions(mClientsService, mEventService, mDepositsReviewService, mUsersService,
+                    mVaultsReviewService, mVaultsService);
+        }
+
+        @Test
+        void testVaultsForReview() {
+
+
+            List<Vault> vaults = List.of();
+            when(mVaultsService.getVaults()).thenReturn(vaults);
+
+            Vault mVault1 = mock(Vault.class);
+            Vault mVault2 = mock(Vault.class);
+
+            VaultInfo vaultInfo1 = new VaultInfo();
+            VaultInfo vaultInfo2 = new VaultInfo();
+            when(mVault1.convertToResponse()).thenReturn(vaultInfo1);
+            when(mVault2.convertToResponse()).thenReturn(vaultInfo2);
+
+            List<Vault> vaultsForReview = Arrays.asList(mVault1, null, mVault2);
+            when(mVaultsReviewService.getVaultsForReview(vaults)).thenReturn(vaultsForReview);
+
+            VaultsData result = controller.getVaultsForReview("userId");
+            assertThat(result.getData()).isEqualTo(List.of(vaultInfo1, vaultInfo2));
+
+            verify(mVaultsService).getVaults();
+            verify(mVaultsReviewService).getVaultsForReview(vaults);
+
+            verify(mVault1).convertToResponse();
+            verify(mVault2).convertToResponse();
+
+            verifyNoMoreInteractions(mClientsService, mEventService, mDepositsReviewService, mUsersService,
+                    mVaultsReviewService, mVaultsService);
         }
     }
 
@@ -222,6 +282,126 @@ class AdminReviewsControllerTest {
 
             verifyNoMoreInteractions(mClientsService, mEventService, mDepositsReviewService, mUsersService,
                     mVaultsReviewService, mVaultsService);
+        }
+    }
+    
+    @Nested
+    class CreateCurrentReviewTests {
+        
+        @Test
+        @SneakyThrows
+        void testCreateCurrentReview() {
+         
+            User user = new User();
+            Vault vault = new Vault();
+            when(mUsersService.getUser("userId")).thenReturn(user);
+            when(mVaultsService.getUserVault(user, "vaultId")).thenReturn(vault);
+            
+            VaultReview vaultReview = new VaultReview();
+            when(mVaultsReviewService.createVaultReview(vault)).thenReturn(vaultReview);
+
+            ReviewInfo reviewInfo1 = new ReviewInfo();
+            try (MockedStatic<AdminReviewsController> mockStatic = Mockito.mockStatic(AdminReviewsController.class)) {
+                mockStatic.when(() -> AdminReviewsController.getReviewInfo(vaultReview))
+                        .thenReturn(reviewInfo1);
+
+                // When you call the static method here, it returns the mock value
+                ReviewInfo result = controller.createCurrentReview("userId", "vaultId");
+                assertThat(result).isEqualTo(reviewInfo1);
+
+                mockStatic.verify(() -> {
+                    AdminReviewsController.getReviewInfo(vaultReview);
+                });
+            }
+
+            verify(mUsersService).getUser("userId");
+            verify(mVaultsService).getUserVault(user, "vaultId");
+            verify(mVaultsReviewService).createVaultReview(vault);
+
+            verifyNoMoreInteractions(mClientsService, mEventService, mDepositsReviewService, mUsersService,
+                    mVaultsReviewService, mVaultsService);
+        }
+    }
+    
+    @Nested
+    class EditVaultReviewTests {
+        
+        VaultReview vaultReview;
+        
+        @BeforeEach
+        void setup() {
+            vaultReview = new VaultReview();
+            doNothing().when(mVaultsReviewService).updateVaultReview(vaultReview);
+        }
+
+        @Test
+        void testVaultReviewWithNoActionedDate() {
+            vaultReview.setActionedDate(null);
+            
+            VaultReview result = controller.editVaultReview("userId", "clientKey", vaultReview);
+            assertThat(result).isEqualTo(vaultReview);
+            
+            verify(mVaultsReviewService).updateVaultReview(vaultReview);
+
+            verifyNoMoreInteractions(mClientsService, mEventService, mDepositsReviewService, mUsersService,
+                    mVaultsReviewService, mVaultsService);
+        }
+        
+        @Test
+        void testVaultReviewWithActionedDateButNullVault(){
+            vaultReview.setActionedDate(NOW);
+
+            IllegalStateException ex = assertThrows(IllegalStateException.class, () -> {
+                controller.editVaultReview("userId", "clientKey", vaultReview);
+            });
+            assertThat(ex).hasMessage("The VaultReview cannot have null Vault");
+
+            verify(mVaultsReviewService).updateVaultReview(vaultReview);
+
+            
+            verifyNoMoreInteractions(mClientsService, mEventService, mDepositsReviewService, mUsersService,
+                    mVaultsReviewService, mVaultsService);
+
+        }
+        @ParameterizedTest
+        @NullSource
+        @ValueSource(strings = {"client1", "client2"})
+        void testVaultReviewWithActionedDateAndVault(String clientName){
+            ArgumentCaptor<Event> argEvent = ArgumentCaptor.forClass(Event.class);
+            Vault vault = new Vault();
+            vaultReview.setActionedDate(NOW);
+            vaultReview.setVault(vault);
+            
+            User user = new User();
+            when(mUsersService.getUser("userId")).thenReturn(user);
+            Client client;
+            if (clientName == null) {
+                client = null;
+            } else {
+                client = new Client();
+                client.setName(clientName);
+            }
+            when(mClientsService.getClientByApiKey("clientKey")).thenReturn(client);
+
+            VaultReview result = controller.editVaultReview("userId", "clientKey", vaultReview);
+            
+            assertThat(result).isEqualTo(vaultReview);
+
+            verify(mVaultsReviewService).updateVaultReview(vaultReview);
+            verify(mUsersService).getUser("userId");
+            verify(mClientsService).getClientByApiKey("clientKey");
+
+            verify(mEventService).addEvent(argEvent.capture());
+            
+            Event event = argEvent.getValue();
+            assertThat(event.getAgent()).isEqualTo(clientName);
+            assertThat(event.getAgentType()).isEqualTo(Agent.AgentType.BROKER);
+            assertThat(event.getUser()).isEqualTo(user);
+            assertThat(event.getVault()).isEqualTo(vault);
+
+            verifyNoMoreInteractions(mClientsService, mEventService, mDepositsReviewService, mUsersService,
+                    mVaultsReviewService, mVaultsService);
+
         }
     }
 }
