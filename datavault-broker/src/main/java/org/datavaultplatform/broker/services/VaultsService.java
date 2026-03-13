@@ -68,8 +68,7 @@ public class VaultsService {
     }
 
     public List<Vault> getVaults() {
-        List<Vault> vaults = vaultDAO.list();
-        return vaults;
+        return vaultDAO.list();
     }
 
     public List<Vault> getVaults(String userId, String sort, String order, String offset, String maxResult) {
@@ -78,26 +77,32 @@ public class VaultsService {
 
     public void addVault(Vault vault) {
         Assert.notNull(vault, "The vault cannot be null");
-        LocalDateTime creationTime = LocalDateTime.now();
+        LocalDateTime creationTime = LocalDateTime.now(clock);
         vault.setCreationTime(creationTime);
         vaultDAO.save(vault);
     }
 
     public void addVaultEvent(Vault vault, String clientKey, String userID) {
+        Assert.notNull(vault, "The vault cannot be null");
         Create vaultEvent = new Create(vault.getID());
         vaultEvent.setVault(vault);
         vaultEvent.setUser(usersService.getUser(userID));
         vaultEvent.setAgentType(Agent.AgentType.BROKER);
-        vaultEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
+        Client client = clientsService.getClientByApiKey(clientKey);
+        String clientName = client == null ? "" : client.getName();
+        vaultEvent.setAgent(clientName);
         eventService.addEvent(vaultEvent);
     }
 
-    private void addRoleEvent(RoleAssignment ra, String assigneeId, String creatorId, String clientKey) {
+    protected void addRoleEvent(RoleAssignment ra, String assigneeId, String creatorId, String clientKey) {
+        Assert.notNull(ra, "The role assignment cannot be null");
         CreateRoleAssignment roleAssignmentEvent = new CreateRoleAssignment(ra, creatorId);
         roleAssignmentEvent.setVault(this.getVault(ra.getVaultId()));
         roleAssignmentEvent.setUser(usersService.getUser(creatorId));
         roleAssignmentEvent.setAgentType(Agent.AgentType.BROKER);
-        roleAssignmentEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
+        Client client = clientsService.getClientByApiKey(clientKey);
+        String clientName = client == null ? "" : client.getName();
+        roleAssignmentEvent.setAgent(clientName);
         roleAssignmentEvent.setAssignee(usersService.getUser(assigneeId));
         roleAssignmentEvent.setRole(ra.getRole());
 
@@ -105,26 +110,31 @@ public class VaultsService {
     }
 
     public void sendVaultOwnerEmail(Vault vault, String homePage, String helpPage, User user) {
+        Assert.notNull(user, "The user cannot be null");
         // send mail to owner
         this.sendEmail(vault, user.getEmail(), "A new vault you own has been created", "Owner",
                 EmailTemplate.USER_VAULT_CREATE, homePage, helpPage);
     }
 
     public void sendVaultDepositorsEmail(Vault vault, String homePage, String helpPage, User user) {
+        Assert.notNull(user, "The user cannot be null");
         // send mail to depositor
         this.sendEmail(vault, user.getEmail(), "A new vault you have a role on has been created", "Depositor",
                 EmailTemplate.USER_VAULT_CREATE, homePage, helpPage);
     }
 
     public void sendVaultNDMsEmail(Vault vault, String homePage, String helpPage, User user) {
+        Assert.notNull(user, "The user cannot be null");
         // send mail to ndm
         this.sendEmail(vault, user.getEmail(), "A new vault you have a role on has been created",
                 "Nominated Data Manager",
                 EmailTemplate.USER_VAULT_CREATE, homePage, helpPage);
     }
 
-    private void sendEmail(Vault vault, String email, String subject, String role, String template, String homePage,
+    protected void sendEmail(Vault vault, String email, String subject, String role, String template, String homePage,
             String helpPage) {
+        Assert.notNull(vault, "The vault cannot be null");
+        Assert.notNull(vault.getGroup(), "The vault group annot be null");
         HashMap<String, Object> model = new HashMap<>();
         model.put(EMAIL_HOME_PAGE, homePage);
         model.put(EMAIL_HELP_PAGE, helpPage);
@@ -171,7 +181,6 @@ public class VaultsService {
         return vaultDAO.getRetentionPolicyCount(status);
     }
 
-    
     public Vault checkRetentionPolicy(String vaultID) {
         // Get the vault
         Vault vault = getVault(vaultID);
