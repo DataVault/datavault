@@ -94,6 +94,9 @@ class AdminReviewsControllerTest {
             vr.setDepositReviews(Arrays.asList(dr1, dr2, dr3, dr4, dr5, dr6, dr7));
 
             ReviewInfo info = AdminReviewsController.getReviewInfo(vr);
+
+            assertThat(info.getVaultReviewId()).isEqualTo(vaultReviewId);
+
             assertThat(info).isNotNull();
             List<String> depositIds = info.getDepositIds();
             List<String> depositReviewIds = info.getDepositReviewIds();
@@ -401,7 +404,23 @@ class AdminReviewsControllerTest {
 
             verifyNoMoreInteractions(mClientsService, mEventService, mDepositsReviewService, mUsersService,
                     mVaultsReviewService, mVaultsService);
+        }
+    }
+    
+    @Nested
+    class EditDepositReviewTests {
+        
+        @Test
+        void testEditVaultReview() {
+            DepositReview depositReview = new DepositReview();
 
+            DepositReview result = controller.editDepositReview("userId", depositReview);
+            assertThat(result).isEqualTo(depositReview);
+
+            verify(mDepositsReviewService).updateDepositReview(depositReview);
+
+            verifyNoMoreInteractions(mClientsService, mEventService, mDepositsReviewService, mUsersService,
+                    mVaultsReviewService, mVaultsService);
         }
     }
 }
