@@ -7,6 +7,7 @@ import org.datavaultplatform.broker.controllers.admin.AdminReviewsController;
 import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.response.ReviewInfo;
+import org.datavaultplatform.common.util.Utils;
 import org.jsondoc.core.annotation.Api;
 import org.jsondoc.core.annotation.ApiHeader;
 import org.jsondoc.core.annotation.ApiHeaders;
@@ -64,13 +65,9 @@ public class ReviewsController {
         List<ReviewInfo> reviewinfos = new ArrayList<>();
 
         List<VaultReview> reviews = this.vaultsReviewService.findByVaultId(vault.getID());
-        for (VaultReview vr : reviews) {
-            if (vr == null) {
-                continue;
-            }
-            ReviewInfo reviewInfo = AdminReviewsController.getReviewInfo(vr);
-            reviewinfos.add(reviewInfo);
-        }
+        Utils.getSafeStream(reviews).forEach( vr -> {
+            reviewinfos.add(AdminReviewsController.getReviewInfo(vr));
+        });
 
         return reviewinfos;
     }

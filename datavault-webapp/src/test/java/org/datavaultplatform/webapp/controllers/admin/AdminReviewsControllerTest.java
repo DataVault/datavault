@@ -1,5 +1,6 @@
 package org.datavaultplatform.webapp.controllers.admin;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.request.CreateRetentionPolicy;
@@ -36,7 +37,6 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.ui.ModelMap;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -54,7 +54,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 @ProfileDatabase
 @TestPropertySource(properties = "logging.level.org.springframework.security=DEBUG")
 @AddTestProperties
-public class AdminReviewsControllerTest {
+class AdminReviewsControllerTest {
 
     static final String TEST_VAULT_REVIEW_ID = "test-vault-review-id";
     static final String TEST_GROUP_ID = "test-group-id";
