@@ -236,8 +236,9 @@ public class Vault implements Identified {
     }
 
     public List<Deposit> getDeposits() {
-        if (deposits == null)
+        if (deposits == null) {
             return new ArrayList<>();
+        }
         return deposits;
     }
 
@@ -246,8 +247,9 @@ public class Vault implements Identified {
     }
 
     public List<VaultReview> getVaultReviews() {
-        if (vaultReviews == null)
+        if (vaultReviews == null) {
             return new ArrayList<>();
+        }
         return vaultReviews;
     }
 
@@ -256,13 +258,20 @@ public class Vault implements Identified {
     }
 
     public List<DataManager> getDataManagers() {
-        if (dataManagers == null)
+        if (dataManagers == null) {
             return new ArrayList<>();
+        }
         return dataManagers;
     }
 
     public DataManager getDataManager(String uun) {
+        if (dataManagers == null) {
+            return null;
+        }
         for (DataManager dataManager : dataManagers) {
+            if (dataManager == null) {
+                continue;
+            }
             if (dataManager.getUUN().equals(uun)) {
                 return dataManager;
             }

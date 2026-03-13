@@ -39,6 +39,9 @@ public class DepositsReviewService {
     public List<DepositReview> addDepositReviews(Vault vault, VaultReview vaultReview) {
         List <DepositReview> result = new ArrayList<>();
 
+        if (vault == null) {
+            return result;
+        }
         for (Deposit deposit : vault.getDeposits()) {
             if (deposit == null) {
                 continue;
