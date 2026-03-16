@@ -134,7 +134,7 @@ public class VaultsService {
     protected void sendEmail(Vault vault, String email, String subject, String role, String template, String homePage,
             String helpPage) {
         Assert.notNull(vault, "The vault cannot be null");
-        Assert.notNull(vault.getGroup(), "The vault group annot be null");
+        Assert.notNull(vault.getGroup(), "The vault group cannot be null");
         HashMap<String, Object> model = new HashMap<>();
         model.put(EMAIL_HOME_PAGE, homePage);
         model.put(EMAIL_HELP_PAGE, helpPage);
@@ -147,6 +147,7 @@ public class VaultsService {
     }
 
     public void orphanVault(Vault vault) {
+        Assert.notNull(vault, "The vault cannot be null");
         vault.setUser(null);
         vaultDAO.update(vault);
 
@@ -223,15 +224,22 @@ public class VaultsService {
     public Map<String, Long> getAllProjectsSize() {
         Map<String, Long> projectSizeMap = new HashMap<>();
         List<Object[]> allProjectsSize = vaultDAO.getAllProjectsSize();
-        if (allProjectsSize != null) {
-            for (Object[] projectsizeArray : allProjectsSize) {
-                projectSizeMap.put((String) projectsizeArray[0], (Long) projectsizeArray[1]);
+        if (allProjectsSize == null) {
+            return projectSizeMap;
+        }
+        for (Object[] projectSizeArray : allProjectsSize) {
+            if (projectSizeArray == null || projectSizeArray.length < 2) {
+                continue;
             }
+            projectSizeMap.put((String) projectSizeArray[0], (Long) projectSizeArray[1]);
         }
         return projectSizeMap;
     }
 
     public void transferVault(Vault vault, User newOwner, String reason) {
+        Assert.notNull(vault, "The vault cannot be null");
+        Assert.notNull(newOwner, "The newOwner cannot be null");
+
         vault.setUser(newOwner);
         vaultDAO.update(vault);
 
@@ -251,25 +259,30 @@ public class VaultsService {
     public void addDepositorRoles(CreateVault createVault, Vault vault, String clientKey, String homePage,
             String helpPage) {
 
-        // if vault already has depositors delete them and readd
+        Assert.notNull(createVault, "The create vault cannot be null");
+
+        RoleModel depositorRole = rolesAndPermissionsService.getDepositor();
+        
+        // if vault already has depositors delete them and read
         List<String> depositors = createVault.getDepositors();
         if (depositors != null) {
-            for (String dep : depositors) {
-                if (dep != null && !dep.isEmpty()) {
+            for (String depositor : depositors) {
+                if (depositor != null && !depositor.isEmpty()) {
                     RoleAssignment ra = new RoleAssignment();
                     ra.setVaultId(vault.getID());
-                    ra.setRole(rolesAndPermissionsService.getDepositor());
-                    ra.setUserId(dep);
+                    ra.setRole(depositorRole);
+                    ra.setUserId(depositor);
                     rolesAndPermissionsService.createRoleAssignment(ra);
 
                     this.addRoleEvent(ra, createVault.getVaultOwner(), createVault.getVaultCreator(), clientKey);
-                    this.sendVaultDepositorsEmail(vault, homePage, helpPage, usersService.getUser(dep));
+                    this.sendVaultDepositorsEmail(vault, homePage, helpPage, usersService.getUser(depositor));
                 }
             }
         }
     }
 
     public void addOwnerRole(CreateVault createVault, Vault vault, String clientKey) {
+        Assert.notNull(createVault, "The create vault cannot be null");
         String ownerId = createVault.getVaultOwner();
         String creatorId = createVault.getVaultCreator();
 
@@ -287,6 +300,7 @@ public class VaultsService {
     }
 
     public Vault processDataCreatorParams(CreateVault createVault, Vault vault) {
+        Assert.notNull(createVault, "The create vault cannot be null");
         List<String> dcs = createVault.getDataCreators();
         if (dcs != null) {
             logger.debug("Data creator list is :'" + dcs + "'");
@@ -313,13 +327,17 @@ public class VaultsService {
     }
 
     public void addNDMRoles(CreateVault createVault, Vault vault, String clientKey, String homePage, String helpPage) {
+        Assert.notNull(createVault, "The create vault cannot be null");
+
+        RoleModel ndmRole = rolesAndPermissionsService.getNominatedDataManager();
+
         List<String> ndms = createVault.getNominatedDataManagers();
         if (ndms != null) {
             for (String ndm : ndms) {
                 if (ndm != null && !ndm.isEmpty()) {
                     RoleAssignment ra = new RoleAssignment();
                     ra.setVaultId(vault.getID());
-                    ra.setRole(rolesAndPermissionsService.getNominatedDataManager());
+                    ra.setRole(ndmRole);
                     ra.setUserId(ndm);
                     rolesAndPermissionsService.createRoleAssignment(ra);
                     this.addRoleEvent(ra, createVault.getVaultOwner(), createVault.getVaultCreator(), clientKey);
@@ -330,6 +348,7 @@ public class VaultsService {
     }
 
     public void addBillingInfo(CreateVault createVault, Vault vault) {
+        Assert.notNull(createVault, "The create vault cannot be null");
         String billingType = createVault.getBillingType();
         
         BillingInfo billinginfo = new BillingInfo();
