@@ -252,7 +252,6 @@ public class VaultsController {
         for (ReviewInfo reviewInfo : reviewInfos) {
 
             VaultReview currentReview = restService.getVaultReview(reviewInfo.getVaultReviewId());
-            VaultReviewModel vaultReviewModel = new VaultReviewModel(currentReview, vault.getReviewDate());
             List<DepositReviewModel> depositReviewModels = new ArrayList<>();
             for (int i = 0; i < reviewInfo.getDepositIds().size(); i++) {
                 DepositInfo depositInfo = restService.getDeposit(reviewInfo.getDepositIds().get(i));
@@ -265,7 +264,9 @@ public class VaultsController {
             }
 
             // the oldest DRM first, most recent DRM last
-            depositReviewModels.sort(Comparator.comparing(DepositReviewModel::getCreationTime));
+            depositReviewModels.sort(DepositReviewModel.BY_CREATION_TIME);
+
+            VaultReviewModel vaultReviewModel = new VaultReviewModel(currentReview, vault.getReviewDate());
             vaultReviewModel.setDepositReviewModels(depositReviewModels);
 
             vaultReviewModels.add(vaultReviewModel);
@@ -279,7 +280,7 @@ public class VaultsController {
         return "vaults/vault";
     }
 
-    private boolean canAccessVault(VaultInfo vault, Principal principal) {
+    protected boolean canAccessVault(VaultInfo vault, Principal principal) {
         return canAccessVault(vault, principal, false);
     }
 
@@ -287,7 +288,7 @@ public class VaultsController {
         return canAccessVault(vault, principal, true);
     }
 
-    private boolean canAccessVault(VaultInfo vault, Principal principal, Boolean pending) {
+    protected boolean canAccessVault(VaultInfo vault, Principal principal, Boolean pending) {
         List<RoleAssignment> roleAssignmentsForUser = restService.getRoleAssignmentsForUser(principal.getName());
         if (pending) {
             return roleAssignmentsForUser.stream().anyMatch(roleAssignment ->
@@ -302,7 +303,7 @@ public class VaultsController {
         }
     }
     @RequestMapping(value = "/vaults/{vaultid}/{userid}", method = RequestMethod.GET)
-    public String getVault(ModelMap model, @PathVariable("vaultid") String vaultID, @PathVariable("userid") String userID) {
+    public String getUserVaults(ModelMap model, @PathVariable("vaultid") String vaultID, @PathVariable("userid") String userID) {
     	model.addAttribute("vaults", restService.getVaultsListingAll(userID));
     	        
         return "vaults/userVaults";

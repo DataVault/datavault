@@ -8,10 +8,16 @@ import org.datavaultplatform.common.response.DepositInfo;
 import org.springframework.util.Assert;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 
 @Data
 @NoArgsConstructor
 public class DepositReviewModel {
+
+    public static final Comparator<DepositReviewModel> BY_CREATION_TIME =
+            Comparator.comparing(
+                    DepositReviewModel::getCreationTime,
+                    Comparator.nullsFirst(Comparator.naturalOrder()));
 
     // DepositReview Identifier
     private String depositReviewId;

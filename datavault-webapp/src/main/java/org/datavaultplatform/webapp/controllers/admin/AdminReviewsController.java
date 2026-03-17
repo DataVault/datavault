@@ -128,7 +128,7 @@ public class AdminReviewsController {
             result.add(drm);
         }
 
-        result.sort(Comparator.comparing(DepositReviewModel::getCreationTime));
+        result.sort(DepositReviewModel.BY_CREATION_TIME);
         return result;
     }
 
@@ -187,13 +187,9 @@ public class AdminReviewsController {
      * @param redirectAttributes
      * @return false if there's no NEW REVIEW DATE and at least 1 DRM with retain.
      */
-    private boolean validateNextReviewDate(VaultReviewModel vaultReviewModel, RedirectAttributes redirectAttributes) {
+    protected boolean validateNextReviewDate(VaultReviewModel vaultReviewModel, RedirectAttributes redirectAttributes) {
         
         if (vaultReviewModel.getNextReviewDate() != null) {
-            return true;
-        }
-
-        if (vaultReviewModel.getDepositReviewModels() == null) {
             return true;
         }
 
@@ -214,8 +210,10 @@ public class AdminReviewsController {
     }
 
 
-    private void updateVaultReviewAndVault(VaultReview originalVaultReview, VaultReviewModel vrm, String vaultID, LocalDateTime now, String action) {
-        
+    protected void updateVaultReviewAndVault(VaultReview originalVaultReview, VaultReviewModel vrm, String vaultID, LocalDateTime now, String action) {
+        Assert.notNull(originalVaultReview, "originalVaultReview cannot be null");
+        Assert.notNull(vrm, "vaultReviewModel cannot be null");
+
         originalVaultReview.setComment(vrm.getComment());
 
         if (ACTION_SUBMIT.equals(action)) {
@@ -240,7 +238,8 @@ public class AdminReviewsController {
         restService.editVaultReview(originalVaultReview);
     }
 
-    private void processSingleDepositReview(DepositReviewModel drm, LocalDateTime now, String action) {
+    protected void processSingleDepositReview(DepositReviewModel drm, LocalDateTime now, String action) {
+        Assert.notNull(drm, "The depositReviewModel cannot be null");
         DepositReview originalDepositReview = restService.getDepositReview(drm.getDepositReviewId());
         originalDepositReview.setDeleteStatus(drm.getDeleteStatus());
         originalDepositReview.setComment(drm.getComment());
