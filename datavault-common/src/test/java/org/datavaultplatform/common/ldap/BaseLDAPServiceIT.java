@@ -42,7 +42,7 @@ public abstract class BaseLDAPServiceIT {
    */
   public static final String LDAP_ADMIN_PASSWORD = "test-password";
 
-  private static final int LDAP_EXPOSED_PORT = 1389;
+  public static final int LDAP_EXPOSED_PORT = 1389;
 
   @Container
   private static final GenericContainer<?> LDAP_CONTAINER = new GenericContainer<>(DockerImage.LDAP_IMAGE)

@@ -1,9 +1,7 @@
-package org.datavaultplatform.broker.service;
+package org.datavaultplatform.broker.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.datavaultplatform.broker.queue.Sender;
-import org.datavaultplatform.broker.services.ArchiveStoreService;
-import org.datavaultplatform.broker.services.JobsService;
 import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.task.Task;
@@ -21,7 +19,7 @@ import java.util.Map;
 
 @Service
 @Transactional
-//@ConditionalOnBean(Sender.class)
+@ConditionalOnBean(Sender.class)
 public class AdminDepositService {
     
     private static final Logger LOG = LoggerFactory.getLogger(AdminDepositService.class);

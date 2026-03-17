@@ -1,12 +1,8 @@
 package org.datavaultplatform.broker.scheduled;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.datavaultplatform.broker.queue.Sender;
-import org.datavaultplatform.broker.service.AdminDepositService;
+import org.datavaultplatform.broker.services.AdminDepositService;
 import org.datavaultplatform.broker.services.*;
-import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.model.*;
-import org.datavaultplatform.common.task.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
