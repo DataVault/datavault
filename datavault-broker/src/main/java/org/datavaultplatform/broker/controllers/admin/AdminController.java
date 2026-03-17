@@ -9,7 +9,6 @@ import java.util.Map;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.datavaultplatform.broker.queue.TaskSender;
 import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.event.Event;
@@ -58,7 +57,6 @@ public class AdminController {
     private final AuditsService auditsService;
     private final RolesAndPermissionsService permissionsService;
     private final AdminDepositService adminDepositService;
-    private final TaskSender taskSender;
     private final String optionsDir;
     private final String tempDir;
     private final String bucketName;
@@ -72,7 +70,6 @@ public class AdminController {
         EventService eventService, ArchiveStoreService archiveStoreService, JobsService jobsService,
         ExternalMetadataService externalMetadataService, AuditsService auditsService,
         RolesAndPermissionsService permissionsService, AdminDepositService adminDepositService,
-        TaskSender taskSender,
         @Value("${optionsDir:#{null}}") String optionsDir,
         @Value("${tempDir:#{null}}") String tempDir,
         @Value("${s3.bucketName:#{null}}") String bucketName,
@@ -90,7 +87,6 @@ public class AdminController {
         this.auditsService = auditsService;
         this.permissionsService = permissionsService;
         this.adminDepositService = adminDepositService;
-        this.taskSender = taskSender;
         this.optionsDir = optionsDir;
         this.tempDir = tempDir;
         this.bucketName = bucketName;
