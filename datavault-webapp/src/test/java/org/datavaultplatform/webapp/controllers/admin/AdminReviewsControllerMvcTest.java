@@ -438,7 +438,7 @@ class AdminReviewsControllerMvcTest {
 
             verify(mRestService).getVaultReview(TEST_VAULT_REVIEW_ID);
             verify(mRestService).getVault(TEST_VAULT_ID_1);
-            verify(mRestService).updateVaultReviewDate(eq(TEST_VAULT_ID_1), any(LocalDate.class)); //could use clock
+            verify(mRestService).updateReviewDateOfVault(eq(TEST_VAULT_ID_1), any(LocalDate.class)); //could use clock
             verify(mRestService).editVaultReview(any(VaultReview.class)); //could use captor here
             verify(mRestService, times(2)).getDepositReview(null);//FIX THIS
             verify(mRestService, times(2)).editDepositReview(any(DepositReview.class)); //could use captor here

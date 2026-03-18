@@ -19,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -67,7 +68,6 @@ class CheckForReviewTest {
     private RolesAndPermissionsService mRolesAndPermissionsService;
     @Mock
     private UsersService mUsersService;
-    @Mock
     private Clock clock;
     private CheckForReview checkForReviewSpy;
     private Vault vault1;
@@ -92,7 +92,7 @@ class CheckForReviewTest {
         retentionPolicyExpiry1 = LocalDateTime.of(2026, 4, 4, 16, 42 , 42);
         
         // Initialize the clock for deterministic time
-        lenient().when(clock.millis()).thenReturn(Instant.parse("2023-01-01T10:00:00Z").toEpochMilli());
+        clock = Clock.fixed(Instant.parse("2023-01-01T10:00:00Z"), ZoneId.systemDefault());
 
         // Setup mock users
         ownerUser = createUser(VAULT_OWNER_USER_ID, "Owner", "Owner", VAULT_OWNER_EMAIL);
@@ -107,11 +107,11 @@ class CheckForReviewTest {
         group2.setName("group2name");
 
         // Setup mock vaults
-        vault1 = new Vault(VAULT_1_ID);
+        vault1 = new Vault(VAULT_1_ID, clock);
         vault1.setName(VAULT_1_NAME);
         vault1.setGroup(group1);
 
-        vault2 = new Vault(VAULT_2_ID);
+        vault2 = new Vault(VAULT_2_ID, clock);
         vault2.setName(VAULT_2_NAME);
         vault2.setGroup(group2);
 

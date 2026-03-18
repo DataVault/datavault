@@ -257,7 +257,7 @@ class AdminReviewsControllerTest {
             Vault mVault = mock(Vault.class);
 
             VaultReview vaultReview = new VaultReview();
-            when(mVault.getMostRecentVaultReview()).thenReturn(Optional.of(vaultReview));
+            when(mVault.findLatestVaultReviewIfStillUnderway()).thenReturn(Optional.of(vaultReview));
 
             when(mVaultsService.getUserVault(user1, "vaultId")).thenReturn(mVault);
 
@@ -282,9 +282,10 @@ class AdminReviewsControllerTest {
 
             verify(mUsersService).getUser("userId");
             verify(mVaultsService).getUserVault(user1, "vaultId");
+            verify(mVault).findLatestVaultReviewIfStillUnderway();
 
             verifyNoMoreInteractions(mClientsService, mEventService, mDepositsReviewService, mUsersService,
-                    mVaultsReviewService, mVaultsService);
+                    mVaultsReviewService, mVaultsService, mVault);
         }
     }
     

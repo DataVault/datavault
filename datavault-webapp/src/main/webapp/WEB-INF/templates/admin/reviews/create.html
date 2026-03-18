@@ -152,21 +152,25 @@
                                 <td>[[${#temporals.format(drm.getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */--></td>
 
                                 <td>
+                                    <!-- RETAIN -->
                                     <input type="radio" class="radio-inline" value="0"
                                            th:field="*{depositReviewModels[__${drmStatus.index}__].deleteStatus}"
                                     />
                                 </td>
                                 <td>
+                                    <!-- ONREVIEW -->
                                     <input type="radio" class="radio-inline" value="1"
                                            th:field="*{depositReviewModels[__${drmStatus.index}__].deleteStatus}"
                                     />
                                 </td>
                                 <td>
+                                    <!-- ONEXPIRY -->
                                     <input type="radio" class="radio-inline" value="2"
                                            th:field="*{depositReviewModels[__${drmStatus.index}__].deleteStatus}"
                                     />
                                 </td>
                                 <td>
+                                    <!-- NOW -->
                                     <input type="radio" class="radio-inline" value="3"
                                            th:field="*{depositReviewModels[__${drmStatus.index}__].deleteStatus}"
                                     />

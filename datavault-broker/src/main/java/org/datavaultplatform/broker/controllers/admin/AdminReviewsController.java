@@ -101,7 +101,8 @@ public class AdminReviewsController {
         // throws Exception if vault cannot be found
         Vault vault = vaultsService.getUserVault(user, vaultID);
 
-        VaultReview vaultReview = vault.getMostRecentVaultReview().orElse(null);
+        // If we find a record that has not been actioned then we know we have an active current record.
+        VaultReview vaultReview = vault.findLatestVaultReviewIfStillUnderway().orElse(null);
 
         if (vaultReview == null) {
            return null;

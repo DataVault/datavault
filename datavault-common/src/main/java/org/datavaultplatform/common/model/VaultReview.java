@@ -69,7 +69,7 @@ public class VaultReview {
     //@JsonFormat(shape=JsonFormat.Shape.STRING, pattern=DateTimeUtils.ISO_DATE_FORMAT)
     //@Temporal(TemporalType.DATE)
     @Column(name = "newReviewDate", nullable = true, columnDefinition = "DATE")
-    private LocalDate newReviewDate; //we will get java.sql.Date - a sublass of java.util.Date but without time part.
+    private LocalDate newReviewDate;
     
     // Serialise date in ISO 8601 format
     //@JsonFormat(shape=JsonFormat.Shape.STRING, pattern=DateTimeUtils.ISO_DATE_FORMAT)

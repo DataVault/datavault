@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -173,9 +174,9 @@ public class Vault implements Identified {
     public Vault() {
     }
 
-    public Vault(String name) {
+    public Vault(String name, Clock clock) {
         this.name = name;
-        this.creationTime = LocalDateTime.now();
+        this.creationTime = LocalDateTime.now(clock);
         retentionPolicyStatus = RetentionPolicyStatus.UNCHECKED;
     }
 

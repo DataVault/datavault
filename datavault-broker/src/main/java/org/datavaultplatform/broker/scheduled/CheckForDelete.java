@@ -124,6 +124,8 @@ public class CheckForDelete implements ScheduledTask {
         Assert.notNull(today, "The Date 'today' cannot be null");
 
         // we are only interested in DepositReviews that have not been actioned
+        // when we save a depositReview with RETAIN - we set the actionedDate.
+        // when we save a depositReivew with NOW - we set the actionedDate (and delete the deposit) 
         if (dr.getActionedDate() != null) {
             return;
         }

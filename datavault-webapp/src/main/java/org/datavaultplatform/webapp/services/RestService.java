@@ -727,7 +727,7 @@ public class RestService implements NotifyLogoutService, NotifyLoginService, Eva
         return response.getBody();
     }
 
-    public VaultInfo updateVaultReviewDate(String vaultId, LocalDate reviewDate) {
+    public VaultInfo updateReviewDateOfVault(String vaultId, LocalDate reviewDate) {
         String reviewDateString = DateTimeUtils.formatDate(reviewDate);
         ResponseEntity<VaultInfo> response = post(brokerURL + "/vaults/" + vaultId + "/updatereviewdate", VaultInfo.class, reviewDateString);
         return response.getBody();

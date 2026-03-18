@@ -439,7 +439,7 @@ class AdminReviewsControllerTest {
 
                 verify(mRestService).getVault("vaultId");
                 verify(mRestService).editVaultReview(originalVaultReview);
-                verify(mRestService).updateVaultReviewDate("vaultId", nextReviewDate);
+                verify(mRestService).updateReviewDateOfVault("vaultId", nextReviewDate);
                 verifyNoMoreInteractions(mRestService);
             }
         }

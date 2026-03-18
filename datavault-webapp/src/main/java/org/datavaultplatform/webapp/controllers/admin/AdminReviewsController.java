@@ -230,7 +230,7 @@ public class AdminReviewsController {
             if (nextReviewDate != null) {
                 LOG.info("Editing Review Date for Vault id {} with new Review Date {}", vaultID, nextReviewDate);
                 // the nextReviewDate is the used to update the Vault.reviewDate FOR THE NEXT REVIEW - not this one.
-                restService.updateVaultReviewDate(vaultID, nextReviewDate);
+                restService.updateReviewDateOfVault(vaultID, nextReviewDate);
             }
         }
 
