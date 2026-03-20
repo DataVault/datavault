@@ -1,5 +1,6 @@
 package org.datavaultplatform.broker.scheduled;
 
+import org.datavaultplatform.broker.services.RetentionPoliciesService;
 import org.datavaultplatform.broker.services.VaultsService;
 import org.datavaultplatform.common.model.RetentionPolicy;
 import org.datavaultplatform.common.model.Vault;
@@ -91,7 +92,7 @@ class CheckRetentionPoliciesTest {
         checkRetentionPolicies.execute();
 
         verify(mVaultsService).getVaults();
-        verify(mVaultsService, times(3)).checkRetentionPolicy(argVaultId1.capture());
+        verify(mVaultsService, times(3)).checkRetentionPolicy(argVaultId1.capture(), eq(RetentionPoliciesService.RetentionPolicyUpdateReason.TASK_UPDATE));
         verify(mVaultsService, times(3)).getVault(argVaultId2.capture());
 
         assertThat(argVaultId1.getAllValues()).containsExactly(VAULT_1_ID, VAULT_2_ID, VAULT_3_ID);
@@ -109,7 +110,7 @@ class CheckRetentionPoliciesTest {
 
         verify(mVaultsService).getVaults();
         // Verify that no calls to checkRetentionPolicy or getVault are made
-        verify(mVaultsService, never()).checkRetentionPolicy(anyString());
+        verify(mVaultsService, never()).checkRetentionPolicy(anyString(), eq(RetentionPoliciesService.RetentionPolicyUpdateReason.TASK_UPDATE));
         verify(mVaultsService, never()).getVault(anyString());
     }
 

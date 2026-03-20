@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Predicate;
 
 import org.hibernate.Hibernate;
 
@@ -33,14 +32,11 @@ import org.hibernate.Hibernate;
     }))
 public class VaultReview {
 
-    public static final Predicate<VaultReview> NO_ACTION_DATE =
-            vr -> vr.getActionedDate() == null;
-
     // handles VaultReviews with null creationTime
     public static final Comparator<VaultReview> BY_CREATION_TIME =
-            Comparator.comparing(
+            Comparator.nullsFirst(Comparator.comparing(
                     VaultReview::getCreationTime,
-                    Comparator.nullsFirst(Comparator.naturalOrder())); 
+                    Comparator.nullsFirst(Comparator.naturalOrder())));
 
     public static final String EG_VAULT_REVIEW = "eg.VaultReview.1";
 
@@ -52,7 +48,6 @@ public class VaultReview {
 
     // Serialise date in ISO 8601 format
     //@JsonFormat(shape=JsonFormat.Shape.STRING, pattern= DateTimeUtils.ISO_DATE_TIME_FORMAT)
-    //LTD @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "creationTime", nullable = false, columnDefinition = "TIMESTAMP")
     private LocalDateTime creationTime;
 
@@ -67,20 +62,17 @@ public class VaultReview {
 
     // Serialise date in ISO 8601 format
     //@JsonFormat(shape=JsonFormat.Shape.STRING, pattern=DateTimeUtils.ISO_DATE_FORMAT)
-    //@Temporal(TemporalType.DATE)
     @Column(name = "newReviewDate", nullable = true, columnDefinition = "DATE")
     private LocalDate newReviewDate;
     
     // Serialise date in ISO 8601 format
     //@JsonFormat(shape=JsonFormat.Shape.STRING, pattern=DateTimeUtils.ISO_DATE_FORMAT)
-    //@Temporal(TemporalType.DATE)
     @Column(name = "oldReviewDate", nullable = true, columnDefinition = "DATE")
     private LocalDate oldReviewDate;
 
     // The date this review was finally actioned.
     // Serialise date in ISO 8601 format
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern=DateTimeUtils.ISO_DATE_TIME_FORMAT)
-    //LTD @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "actionedDate", nullable = true, columnDefinition = "TIMESTAMP")
     private LocalDateTime actionedDate;
 
@@ -124,7 +116,7 @@ public class VaultReview {
     }
 
     @Deprecated
-    private LocalDate getNewReviewDate() {
+    LocalDate getNewReviewDate() {
         return newReviewDate;
     }
 
@@ -177,5 +169,13 @@ public class VaultReview {
     @Override
     public int hashCode() {
         return getClass().hashCode();
+    }
+    
+    public boolean isReviewUnderway() {
+        return actionedDate == null;
+    }
+
+    public boolean isReviewSubmitted() {
+        return !isReviewUnderway();
     }
 }

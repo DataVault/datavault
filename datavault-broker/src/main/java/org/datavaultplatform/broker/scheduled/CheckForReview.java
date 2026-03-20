@@ -110,7 +110,7 @@ public class CheckForReview implements ScheduledTask {
     }
 
     protected void checkVaultForReview(Vault vault) {
-        if (!vaultsReviewService.dueForReviewEmail(vault)) {
+        if (!vaultsReviewService.isDueForReviewEmail(vault)) {
             return;
         }
 

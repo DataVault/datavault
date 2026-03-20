@@ -171,7 +171,7 @@ public class DepositsController {
         this.runDeposit(archiveStores, deposit, createDeposit.getDepositPaths(), null);
 
         // Check the retention policy of the newly created vault
-        vaultsService.checkRetentionPolicy(vault.getID());
+        vaultsService.checkRetentionPolicy(vault.getID(), RetentionPoliciesService.RetentionPolicyUpdateReason.ADDED_DEPOSIT);
 
         return new ResponseEntity<>(deposit.convertToResponse(), HttpStatus.OK);
     }
@@ -352,7 +352,7 @@ public class DepositsController {
         }
 
         // Check the retention policy of the newly created vault
-        vaultsService.checkRetentionPolicy(deposit.getVault().getID());
+        vaultsService.checkRetentionPolicy(deposit.getVault().getID(), RetentionPoliciesService.RetentionPolicyUpdateReason.RETRIEVE_DEPOSIT);
 
         return true;
     }

@@ -91,13 +91,17 @@
         </div>
 
         <div class="form-group">
-            <label class="control-label">New Review Date</label>
+            <label class="control-label" for="newReviewDate">New Review Date</label>
             <input type="text" class="form-control" id="newReviewDate" th:field="*{nextReviewDate}" />
+            <!--
+            newReviewDate - enter a new/next review date here if you want to change the current review date (it will have to be at least 30 days from today. 
+            If you leave this field blank, the Current review date will remain unchanged.
+            -->
         </div>
 
         <div class="form-group">
             <label class="control-label">Comment</label>
-            <input type="text" class="form-control"th:field="*{comment}" />
+            <input type="text" class="form-control" th:field="*{comment}" />
         </div>
 
         <div th:if="${vaultReviewModel.depositReviewModels != null}" class="table-responsive">

@@ -49,7 +49,6 @@ public class DepositReview  {
 
     // Serialise date in ISO 8601 format
     //@JsonFormat(shape=JsonFormat.Shape.STRING, pattern= DateTimeUtils.ISO_DATE_TIME_FORMAT)
-    //LTD @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "creationTime", nullable = false, columnDefinition = "TIMESTAMP")
     private LocalDateTime creationTime;
 
@@ -70,7 +69,6 @@ public class DepositReview  {
     // The date this review was finally actioned.
     // Serialise date in ISO 8601 format
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern=DateTimeUtils.ISO_DATE_TIME_FORMAT)
-    //LTD @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "actionedDate", nullable = true, columnDefinition = "TIMESTAMP")
     private LocalDateTime actionedDate;
 
@@ -159,5 +157,9 @@ public class DepositReview  {
     @Override
     public int hashCode() {
         return getClass().hashCode();
+    }
+    
+    public boolean isReviewComplete() {
+        return this.actionedDate != null;
     }
 }

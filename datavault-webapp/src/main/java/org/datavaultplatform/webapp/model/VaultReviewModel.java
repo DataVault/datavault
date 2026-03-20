@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.model.VaultReview;
 
-
+// Used in AdminReviewsController and VaultsController
 @Slf4j
 @Data
 @NoArgsConstructor

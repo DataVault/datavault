@@ -24,7 +24,7 @@ import java.util.*;
 @Transactional
 public class RetentionPoliciesService {
 
-    private final Logger logger = LoggerFactory.getLogger(RetentionPoliciesService.class);
+    private static final Logger logger = LoggerFactory.getLogger(RetentionPoliciesService.class);
 
     private final RetentionPolicyDAO retentionPolicyDAO;
 
@@ -103,11 +103,21 @@ public class RetentionPoliciesService {
 
     }
 
+    public enum RetentionPolicyUpdateReason {
+        ADDED_VAULT,
+        ADDED_DEPOSIT,
+        RETRIEVE_DEPOSIT,
+        MANUAL_UPDATE,
+        TASK_UPDATE,
+        TEST
+    }
     /**
-     * Called from VaultsService and 
+     * Called from VaultsService. 
      */
-    public static void updateRetentionPolicyExpiryDate(Vault vault, Clock clock) {
-        
+    public static void updateRetentionPolicyExpiryDate(Vault vault, Clock clock, RetentionPolicyUpdateReason reason) {
+        Assert.notNull(vault, "The vault cannot be null");
+        logger.info("Updating RetentionPolicyExpiryDate for Vault[{}]reason[{}]", vault.getID(), reason);        
+
         final LocalDateTime retentionPolicyExpiryLocalDateTime;
         
         RetentionPolicy retentionPolicy = vault.getRetentionPolicy();
@@ -151,7 +161,7 @@ public class RetentionPoliciesService {
 
             // Get all the retrieve events
             // find the latest Timestamp and use that for the base
-            List<Retrieve> allRetrieves = getAllRetrieves(vault);
+            List<Retrieve> allRetrieves = getAllDepositRetrieveEvents(vault);
 
             if (allRetrieves.isEmpty()) {
                 result = grantEndDate;
@@ -178,14 +188,14 @@ public class RetentionPoliciesService {
                 .max(LocalDateTime::compareTo);
     }
 
-    private static List<Retrieve> getAllRetrieves(Vault vault) {
+    private static List<Retrieve> getAllDepositRetrieveEvents(Vault vault) {
         List<Deposit> deposits = vault.getDeposits();
         if (deposits == null) {
             return List.of();
         }
         return deposits.stream()
                 .filter(Objects::nonNull)   // Ignore null Deposits
-                .map(Deposit::getRetrieves)// we now have stream of List<Retrieve>
+                .map(Deposit::getRetrieves) // we now have a stream of List<Retrieve>
                 .filter(Objects::nonNull)   // filter out null List<Retrieve>
                 .flatMap(List::stream)      // Flatten Stream<List<Retrieve>> into Stream<Retrieve>
                 .filter(Objects::nonNull)   // Filter out null Retrieve elements from the stream

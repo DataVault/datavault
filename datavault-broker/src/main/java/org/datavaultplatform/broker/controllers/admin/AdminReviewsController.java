@@ -129,7 +129,6 @@ public class AdminReviewsController {
         Vault vault = vaultsService.getUserVault(user, vaultID);
 
         // if vault is not due - return null else create a vault if a pending review does not exist?
-        // TODO DJH - we should create a review if one is due and does not exist already ?
         
         VaultReview vaultReview = vaultsReviewService.createVaultReview(vault);
 
@@ -160,7 +159,7 @@ public class AdminReviewsController {
         vaultsReviewService.updateVaultReview(vaultReview);
 
         // If the Review has been actioned, then create an Event. The Review should only be actioned once.
-        if (vaultReview.getActionedDate() != null) {
+        if (vaultReview.isReviewSubmitted()) {
             Assert.state(vaultReview.getVault() != null, "The VaultReview cannot have null Vault");
             Review vaultEvent = new Review(vaultReview.getVault().getID());
             vaultEvent.setVault(vaultReview.getVault());

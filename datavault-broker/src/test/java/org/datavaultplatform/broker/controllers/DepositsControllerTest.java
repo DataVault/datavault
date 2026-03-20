@@ -582,7 +582,7 @@ public class DepositsControllerTest {
 
             when(mVault.getID()).thenReturn(TEST_VAULT_ID);
 
-            when(mVaultsService.checkRetentionPolicy(argVaultId.capture())).thenReturn(mVault);
+            when(mVaultsService.checkRetentionPolicy(argVaultId.capture(), eq(RetentionPoliciesService.RetentionPolicyUpdateReason.RETRIEVE_DEPOSIT))).thenReturn(mVault);
 
             doReturn(mVault).when(mDeposit).getVault();
 
@@ -637,7 +637,7 @@ public class DepositsControllerTest {
             verify(mUser).getID();
             verify(mUser).getFileStores();
 
-            verify(mVaultsService).checkRetentionPolicy(TEST_VAULT_ID);
+            verify(mVaultsService).checkRetentionPolicy(TEST_VAULT_ID, RetentionPoliciesService.RetentionPolicyUpdateReason.RETRIEVE_DEPOSIT);
         }
         
         private HashMap<String,String> hashMapOf(String k1, String p1, String k2, String p2){

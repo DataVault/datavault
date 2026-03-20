@@ -96,20 +96,20 @@ class VaultsReviewServiceTest {
                 review.setActionedDate(now.plusMonths(actionedOffsetMonths));
             }
 
-            boolean dueForReviewEmail = vaultsReviewService.dueForReviewEmail(vault);
+            boolean dueForReviewEmail = vaultsReviewService.isDueForReviewEmail(vault);
             assertThat(dueForReviewEmail).isEqualTo(expected);
         }
 
         @Test
         void testNullVault() {
-            boolean dueForReview = vaultsReviewService.dueForReviewEmail(null);
+            boolean dueForReview = vaultsReviewService.isDueForReviewEmail(null);
             assertThat(dueForReview).isFalse();
         }
 
         @Test
         void testVaultHasNoReviewDate() {
             Vault vault = new Vault();
-            boolean dueForReview = vaultsReviewService.dueForReviewEmail(vault);
+            boolean dueForReview = vaultsReviewService.isDueForReviewEmail(vault);
             assertThat(dueForReview).isFalse();
         }
 
@@ -118,7 +118,7 @@ class VaultsReviewServiceTest {
             Vault vault = new Vault();
             // this makes the today before the start of the 'review window' which is (review date -6 months)
             vault.setReviewDate(LocalDate.now(CLOCK).plusMonths(7));
-            boolean dueForReview = vaultsReviewService.dueForReviewEmail(vault);
+            boolean dueForReview = vaultsReviewService.isDueForReviewEmail(vault);
             assertThat(dueForReview).isFalse();
         }
 
@@ -127,7 +127,7 @@ class VaultsReviewServiceTest {
                 true, true, false
                 true, false, false
                 false, false, false
-                false, true, true 
+                false, true, true
                 """)
             // note: we only expectReview if no current review exists and reviewHasNotHappenedAfterReviewWindowStart is true
         void testTodayNotBeforeStartOfReviewWindow(boolean currentReviewExists, boolean reviewHasNotHappenedAfterReviewWindowStart, boolean reviewExpected) {
@@ -158,7 +158,7 @@ class VaultsReviewServiceTest {
             // this makes the today after the start of the 'review window' which is (review date -6 months)
             vault.setReviewDate(reviewDate);
 
-            boolean dueForReview = vaultsReviewService.dueForReviewEmail(vault);
+            boolean dueForReview = vaultsReviewService.isDueForReviewEmail(vault);
             assertThat(dueForReview).isEqualTo(reviewExpected);
 
         }
@@ -225,7 +225,7 @@ class VaultsReviewServiceTest {
         @ParameterizedTest
         @CsvSource(textBlock = """
                 false, false
-                true, true 
+                true, true
                 """)
             // note: we only expectReview if reviewHasNotHappenedAfterReviewWindowStart is true
         void testTodayNotBeforeStartOfReviewWindow(boolean reviewHasNotHappenedAfterReviewWindowStart, boolean reviewExpected) {

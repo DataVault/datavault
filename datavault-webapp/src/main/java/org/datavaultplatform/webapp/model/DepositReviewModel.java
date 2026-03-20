@@ -15,9 +15,9 @@ import java.util.Comparator;
 public class DepositReviewModel {
 
     public static final Comparator<DepositReviewModel> BY_CREATION_TIME =
-            Comparator.comparing(
+            Comparator.nullsFirst(Comparator.comparing(
                     DepositReviewModel::getCreationTime,
-                    Comparator.nullsFirst(Comparator.naturalOrder()));
+                    Comparator.nullsFirst(Comparator.naturalOrder())));
 
     // DepositReview Identifier
     private String depositReviewId;

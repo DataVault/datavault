@@ -96,10 +96,10 @@ public class CheckForDelete implements ScheduledTask {
         LOG.info("Processing most recent VaultReview with id {} for Vault {}/{}",
                 mostRecentVaultReview.getId(), vault.getID(), vault.getName());
 
-        // We only process VaultReviews that have been actioned (completed).
+        // We only process VaultReviews that have been actioned (submitted).
         // If a VaultReview is not actioned, it means it's still in progress and its associated DepositReviews
         // should not be considered for deletion by this scheduled task yet.
-        if (mostRecentVaultReview.getActionedDate() != null) {
+        if (mostRecentVaultReview.isReviewSubmitted()) {
             LOG.info("Vault {} has a completed review", vault.getName());
 
             List<DepositReview> depositReviews = mostRecentVaultReview.getDepositReviews();
@@ -126,7 +126,7 @@ public class CheckForDelete implements ScheduledTask {
         // we are only interested in DepositReviews that have not been actioned
         // when we save a depositReview with RETAIN - we set the actionedDate.
         // when we save a depositReivew with NOW - we set the actionedDate (and delete the deposit) 
-        if (dr.getActionedDate() != null) {
+        if (dr.isReviewComplete()) {
             return;
         }
         String depositId = dr.getDeposit().getID();
@@ -134,7 +134,7 @@ public class CheckForDelete implements ScheduledTask {
 
         var deleteStatus = dr.getDeleteStatus();
         switch (deleteStatus) {
-            case (DepositReviewDeleteStatus.ONREVIEW):
+            case DepositReviewDeleteStatus.ONREVIEW:
                 LocalDate oldReviewDate = vaultReview.getOldReviewDate();
                 if (oldReviewDate != null && today.isAfter(oldReviewDate)) {
                     LOG.info("Deleting Deposit [{}] because today is after OLD Review Date [{}]" , depositId, oldReviewDate);
@@ -142,15 +142,29 @@ public class CheckForDelete implements ScheduledTask {
                 }
                 break;
 
-            case (DepositReviewDeleteStatus.ONEXPIRY):
+            case DepositReviewDeleteStatus.ONEXPIRY:
                 LocalDate retentionPolicyExpiryDate = DateTimeUtils.toLocalDate(vault.getRetentionPolicyExpiry());
                 if (retentionPolicyExpiryDate != null && today.isAfter(retentionPolicyExpiryDate)) {
-                    LOG.info("Deleting Deposit [{}] because today is after Retention Policy Expiry [{}]", depositId, retentionPolicyExpiryDate);
+                    LOG.info("Deleting Deposit [{}] because today is after Retention Policy Expiry Date[{}]", depositId, retentionPolicyExpiryDate);
                     depositReviewDeleteDeposit(dr);
                 }
                 break;
+
+            case DepositReviewDeleteStatus.NOW, DepositReviewDeleteStatus.RETAIN:
+                // CONSISTENCY CHECK
+                // at this point, DepositReviews with RETAIN or NOW deleteStatus should have a non-null actionedDate
+                
+                if (dr.getActionedDate() == null) {
+                    String deleteStatusDesc = DepositReviewDeleteStatus.getDescription(dr.getDeleteStatus());
+                    LOG.warn("The DepositReview with Id[{}] and deleteStatus[{}] is unexpectedly an unexpected null actionedDate", dr.getId(), deleteStatusDesc);
+                }
+                break;
+
             default:
-                LOG.warn("unexpected DepositReview.deleteStatus [{}] for Deposit [{}]", deleteStatus, depositId);
+                // CONSISTENCY CHECK
+                // if we get here, we have an unexpected deleteStatus
+                String deleteStatusDesc = DepositReviewDeleteStatus.getDescription(dr.getDeleteStatus());
+                LOG.warn("The DepositReview with Id[{}] has unexpected deleteStatus[{}]", dr.getId(), deleteStatusDesc);
         }
     }
 

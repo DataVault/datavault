@@ -37,7 +37,6 @@ public class Retrieve {
 
     // Serialise date in ISO 8601 format
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern= DateTimeUtils.ISO_DATE_TIME_FORMAT)
-    //LTD @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "timestamp", nullable = false, columnDefinition = "TIMESTAMP")
     private LocalDateTime timestamp;
 

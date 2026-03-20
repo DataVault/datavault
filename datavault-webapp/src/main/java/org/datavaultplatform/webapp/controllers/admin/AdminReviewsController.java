@@ -214,6 +214,7 @@ public class AdminReviewsController {
         Assert.notNull(originalVaultReview, "originalVaultReview cannot be null");
         Assert.notNull(vrm, "vaultReviewModel cannot be null");
 
+        // WHEN YOU Save or Submit a VaultReivew - the comment is saved
         originalVaultReview.setComment(vrm.getComment());
 
         if (ACTION_SUBMIT.equals(action)) {

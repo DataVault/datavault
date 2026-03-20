@@ -107,8 +107,7 @@ public class VaultsReviewService {
      * 2) No review has already been completed (Actioned) within this window.
      */
     public boolean isVaultForReview(Vault vault) {
-        boolean vaultNeedsReview = isEligibleForReviewAction(vault);
-        return vaultNeedsReview;
+        return isEligibleForReviewAction(vault);
     }
 
     /*
@@ -118,11 +117,9 @@ public class VaultsReviewService {
      * 3) No review has already been completed (Actioned) within this window.
      * There is a chance the latest VaultReview was created a while ago and is still open - we won't send reminder emails.
      */
-    public boolean dueForReviewEmail(Vault vault) {
-        boolean vaultNeedsReviewEmail = vault != null
-                && !vault.isVaultReviewUnderway()
-                && isEligibleForReviewAction(vault);
-        return vaultNeedsReviewEmail;
+    public boolean isDueForReviewEmail(Vault vault) {
+        return vault != null && !vault.isVaultReviewUnderway()
+                 && isEligibleForReviewAction(vault);
     }
     
     private boolean reviewHasNotHappenedAfterReviewWindowStart(Vault vault, LocalDate reviewWindowStartDate){

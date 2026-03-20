@@ -156,7 +156,7 @@ class CheckForReviewTest {
         // Ensure nulls are skipped
         verify(checkForReviewSpy, never()).checkVaultForReview(null);
         verify(mVaultsService).getVaults();
-        verify(mVaultsReviewService, times(2)).dueForReviewEmail(argVault.capture());
+        verify(mVaultsReviewService, times(2)).isDueForReviewEmail(argVault.capture());
         assertThat(argVault.getAllValues()).containsExactly(vault1, vault2);
 
         verifyNoMoreInteractions(mVaultsService, mVaultsReviewService, mLdapService, mEmailService, mRolesAndPermissionsService, mUsersService);
@@ -187,7 +187,7 @@ class CheckForReviewTest {
     @Test
     @Order(4)
     void testCheckVaultForReviewWhenNotDueForReview() {
-        when(mVaultsReviewService.dueForReviewEmail(vault1)).thenReturn(false);
+        when(mVaultsReviewService.isDueForReviewEmail(vault1)).thenReturn(false);
 
         checkForReviewSpy.checkVaultForReview(vault1);
 
@@ -213,7 +213,7 @@ class CheckForReviewTest {
         when(mVault.getGroup()).thenReturn(group);
         when(mVault.getRetentionPolicyExpiry()).thenReturn(retentionPolicyExpiry1);
 
-        when(mVaultsReviewService.dueForReviewEmail(mVault)).thenReturn(true);
+        when(mVaultsReviewService.isDueForReviewEmail(mVault)).thenReturn(true);
         when(mRolesAndPermissionsService.getRoleAssignmentsForVault(VAULT_1_ID))
                 .thenReturn(List.of(ownerRoleAssignment));
         when(mLdapService.getLDAPAttributes(VAULT_OWNER_USER_ID)).thenReturn(Collections.singletonMap("uid", "owner"));
@@ -263,7 +263,7 @@ class CheckForReviewTest {
         when(mVault.getGroup()).thenReturn(group1);
         when(mVault.getRetentionPolicyExpiry()).thenReturn(retentionPolicyExpiry1);
 
-        when(mVaultsReviewService.dueForReviewEmail(mVault)).thenReturn(true);
+        when(mVaultsReviewService.isDueForReviewEmail(mVault)).thenReturn(true);
         when(mRolesAndPermissionsService.getRoleAssignmentsForVault(VAULT_1_ID))
                 .thenReturn(Arrays.asList(null, ndmRoleAssignment));
         when(mLdapService.getLDAPAttributes(NDM_USER_ID)).thenReturn(Collections.singletonMap("uid", "owner"));
@@ -313,7 +313,7 @@ class CheckForReviewTest {
         when(mVault.getGroup()).thenReturn(group1);
         when(mVault.getRetentionPolicyExpiry()).thenReturn(retentionPolicyExpiry1);
 
-        when(mVaultsReviewService.dueForReviewEmail(mVault)).thenReturn(true);
+        when(mVaultsReviewService.isDueForReviewEmail(mVault)).thenReturn(true);
         when(mRolesAndPermissionsService.getRoleAssignmentsForVault(VAULT_1_ID))
                 .thenReturn(Arrays.asList(null, ndmRoleAssignment));
         when(mLdapService.getLDAPAttributes(NDM_USER_ID)).thenReturn(Collections.singletonMap("uid", "owner"));
@@ -370,7 +370,7 @@ class CheckForReviewTest {
         when(mVault.getGroup()).thenReturn(group1);
         when(mVault.getRetentionPolicyExpiry()).thenReturn(retentionPolicyExpiry1);
 
-        when(mVaultsReviewService.dueForReviewEmail(mVault)).thenReturn(true);
+        when(mVaultsReviewService.isDueForReviewEmail(mVault)).thenReturn(true);
         when(mRolesAndPermissionsService.getRoleAssignmentsForVault(VAULT_1_ID))
                 .thenReturn(Arrays.asList(null, ndmRoleAssignment));
         when(mLdapService.getLDAPAttributes(NDM_USER_ID)).thenReturn(ldapAttributes);
@@ -422,7 +422,7 @@ class CheckForReviewTest {
         RoleAssignment ndmRoleAssignmentWithNullUserId = new RoleAssignment();
         ndmRoleAssignmentWithNullUserId.setRole(roleNominatedDataManager);
         
-        when(mVaultsReviewService.dueForReviewEmail(mVault)).thenReturn(true);
+        when(mVaultsReviewService.isDueForReviewEmail(mVault)).thenReturn(true);
         when(mRolesAndPermissionsService.getRoleAssignmentsForVault(VAULT_1_ID))
                 .thenReturn(Arrays.asList(null, ndmRoleAssignmentWithNullUserId));
 
@@ -466,7 +466,7 @@ class CheckForReviewTest {
         when(mVault.getName()).thenReturn(VAULT_1_NAME);
         when(mVault.isVaultReviewUnderway()).thenReturn(true);
 
-        when(mVaultsReviewService.dueForReviewEmail(mVault)).thenReturn(true);
+        when(mVaultsReviewService.isDueForReviewEmail(mVault)).thenReturn(true);
 
         // Expect an AssertionError because of the Assert.isTrue check
         var ex = assertThrows(IllegalArgumentException.class, () -> checkForReviewSpy.checkVaultForReview(mVault));

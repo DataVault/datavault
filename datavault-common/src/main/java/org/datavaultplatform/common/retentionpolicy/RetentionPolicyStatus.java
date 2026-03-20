@@ -17,7 +17,7 @@ public class RetentionPolicyStatus {
             case OK -> "OK";
             case REVIEW -> "REVIEW";
             case ERROR -> "ERROR";
-            default -> "UNKNOWN[" + retentionPolicyStatusCode + "]";
+            default -> "UNKNOWN[%s]".formatted(retentionPolicyStatusCode);
         };
     }
 }

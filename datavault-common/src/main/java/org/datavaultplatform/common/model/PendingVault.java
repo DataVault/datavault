@@ -76,7 +76,6 @@ public class PendingVault {
 
     // Serialise date in ISO 8601 format
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateTimeUtils.ISO_DATE_TIME_FORMAT)
-    //LTD @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "creationTime", nullable = false, columnDefinition = "TIMESTAMP")
     private LocalDateTime creationTime;
 
@@ -103,13 +102,11 @@ public class PendingVault {
     // it!
     // Serialise date in ISO 8601 format
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateTimeUtils.ISO_DATE_FORMAT)
-    //DD @Temporal(TemporalType.DATE)
     @Column(name = "grantEndDate", nullable = true, columnDefinition = "DATE")
     private LocalDate grantEndDate;
 
     // Serialise date in ISO 8601 format
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateTimeUtils.ISO_DATE_FORMAT)
-    //@Temporal(TemporalType.DATE)
     @Column(name = "reviewDate", nullable = true, columnDefinition = "DATE")
     private LocalDate reviewDate;
 

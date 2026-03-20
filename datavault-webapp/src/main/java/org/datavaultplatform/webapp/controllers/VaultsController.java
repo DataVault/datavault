@@ -249,6 +249,7 @@ public class VaultsController {
         ReviewInfo[] reviewInfos = restService.getReviewsListing(vaultID);
         List<VaultReviewModel> vaultReviewModels = new ArrayList<>();
 
+        
         for (ReviewInfo reviewInfo : reviewInfos) {
 
             VaultReview currentReview = restService.getVaultReview(reviewInfo.getVaultReviewId());
@@ -610,7 +611,7 @@ public class VaultsController {
 //        return retVal;
 //    }
 
-    private static class VaultTransferRequest {
+    public static class VaultTransferRequest {
         private Long role;
         private String user;
         private boolean assigningRole;

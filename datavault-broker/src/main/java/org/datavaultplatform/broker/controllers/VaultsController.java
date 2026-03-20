@@ -727,7 +727,7 @@ public class VaultsController {
 
         // Check the retention policy of the newly created vault
         try {
-            vaultsService.checkRetentionPolicy(vault.getID());
+            vaultsService.checkRetentionPolicy(vault.getID(), RetentionPoliciesService.RetentionPolicyUpdateReason.ADDED_VAULT);
         } catch (Exception e) {
             logger.error("Fail to check retention policy: ",e);
             throw e;
@@ -786,7 +786,7 @@ public class VaultsController {
     public Vault checkVaultRetentionPolicy(@RequestHeader(HEADER_USER_ID) String userID,
                                            @PathVariable("vaultid") String vaultID) {
 
-        return vaultsService.checkRetentionPolicy(vaultID);
+        return vaultsService.checkRetentionPolicy(vaultID, RetentionPoliciesService.RetentionPolicyUpdateReason.MANUAL_UPDATE);
     }
 
     @GetMapping("/vaults/{vaultid}/record")
