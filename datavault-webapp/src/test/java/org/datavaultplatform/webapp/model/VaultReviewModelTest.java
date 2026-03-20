@@ -38,7 +38,6 @@ class VaultReviewModelTest {
 
         assertThat(vrm.getVaultReviewId()).isNull();
         assertThat(vrm.getComment()).isNull();
-        assertThat(vrm.getActionedDate()).isNull();
     }
     
     @MethodSource("expiryDateSource")
@@ -58,7 +57,6 @@ class VaultReviewModelTest {
 
         assertThat(vrm.getVaultReviewId()).isEqualTo("vault-review-id");
         assertThat(vrm.getComment()).isEqualTo("comment");
-        assertThat(vrm.getActionedDate()).isEqualTo(actionedDate);
     }
     
     @Test

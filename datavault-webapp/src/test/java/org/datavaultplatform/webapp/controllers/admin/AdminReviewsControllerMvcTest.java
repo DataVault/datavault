@@ -256,18 +256,18 @@ class AdminReviewsControllerMvcTest {
         assertThat(drm1.getDeleteStatus()).isEqualTo(1);
         assertThat(drm1.getComment()).isEqualTo(TEST_DEPOSIT_REVIEW_1_COMMENT);
         assertThat(drm1.getDepositId()).isEqualTo(TEST_DEPOSIT_ID_1);
-        assertThat(drm1.getName()).isEqualTo(TEST_DEPOSIT_1_NAME);
-        assertThat(drm1.getStatusName()).isEqualTo(Audit.Status.IN_PROGRESS.name());
-        assertThat(drm1.getCreationTime()).isEqualTo(DateTimeUtils.toLocalDateTimeAtMidnight(date1));
+        assertThat(drm1.getDepositName()).isEqualTo(TEST_DEPOSIT_1_NAME);
+        assertThat(drm1.getDepositStatusName()).isEqualTo(Audit.Status.IN_PROGRESS.name());
+        assertThat(drm1.getDepositCreationTime()).isEqualTo(DateTimeUtils.toLocalDateTimeAtMidnight(date1));
 
         DepositReviewModel drm2 = drms.get(1);
         assertThat(drm2.getDepositReviewId()).isEqualTo(TEST_DEPOSIT_REVIEW_2_ID);
         assertThat(drm2.getDeleteStatus()).isEqualTo(2);
         assertThat(drm2.getComment()).isEqualTo(TEST_DEPOSIT_REVIEW_2_COMMENT);
         assertThat(drm2.getDepositId()).isEqualTo(TEST_DEPOSIT_ID_2);
-        assertThat(drm2.getName()).isEqualTo(TEST_DEPOSIT_2_NAME);
-        assertThat(drm2.getStatusName()).isEqualTo(Audit.Status.COMPLETE.name());
-        assertThat(drm2.getCreationTime()).isEqualTo(DateTimeUtils.toLocalDateTimeAtMidnight(date2));
+        assertThat(drm2.getDepositName()).isEqualTo(TEST_DEPOSIT_2_NAME);
+        assertThat(drm2.getDepositStatusName()).isEqualTo(Audit.Status.COMPLETE.name());
+        assertThat(drm2.getDepositCreationTime()).isEqualTo(DateTimeUtils.toLocalDateTimeAtMidnight(date2));
 
         // No error key in modelMap
         assertThat((String) modelMap.get("error")).isBlank();

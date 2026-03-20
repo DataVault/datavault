@@ -127,11 +127,11 @@
 
                             <tr class="tr">
                                 <td>
-                                    <a th:href="@{|/vaults/${vault.getID()}/deposits/${drm.depositId}|}">[[${drm.name}]]</a>
+                                    <a th:href="@{|/vaults/${vault.getID()}/deposits/${drm.depositId}|}">[[${drm.depositName}]]</a>
                                 </td>
 
                                 <td>
-                                    <div th:switch="${drm.statusName}" id="deposit-status" class="job-status">
+                                    <div th:switch="${drm.depositStatusName}" id="deposit-status" class="job-status">
                                         <th:block th:case="COMPLETE">
                                             <div class="text-success">
                                                 <i class="bi bi-check" aria-hidden="true"></i>&nbsp;Complete
@@ -148,12 +148,12 @@
                                             <i class="bi bi-arrow-repeat spin"></i>&nbsp;In progress
                                         </th:block>
                                         <th:block th:case="*">
-                                            [[${drm.statusName}]]
+                                            [[${drm.depositStatusName}]]
                                         </th:block>
                                     </div>
                                 </td>
 
-                                <td>[[${#temporals.format(drm.getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */--></td>
+                                <td>[[${#temporals.format(drm.getDepositCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */--></td>
 
                                 <td>
                                     <!-- RETAIN -->

@@ -8,9 +8,7 @@ import org.datavaultplatform.common.response.ReviewInfo;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.util.RoleUtils;
 import org.datavaultplatform.webapp.exception.ForbiddenException;
-import org.datavaultplatform.webapp.model.DepositReviewModel;
-import org.datavaultplatform.webapp.model.VaultReviewHistoryModel;
-import org.datavaultplatform.webapp.model.VaultReviewModel;
+import org.datavaultplatform.webapp.model.*;
 import org.datavaultplatform.webapp.services.ForceLogoutService;
 import org.datavaultplatform.webapp.services.RestService;
 import org.datavaultplatform.webapp.services.UserLookupService;
@@ -250,40 +248,40 @@ class VaultsControllerTest {
 
             VaultReviewHistoryModel vrhm = (VaultReviewHistoryModel) modelMap.getAttribute("vrhm");
             
-            List<VaultReviewModel> vaultReviewModels = vrhm.getVaultReviewModels();
-            assertThat(vaultReviewModels).hasSize(2);
+            List<VaultReviewViewModel> vaultReviewViewModels = vrhm.getVaultReviewViewModels();
+            assertThat(vaultReviewViewModels).hasSize(2);
 
             {
-                VaultReviewModel vrm1 = vaultReviewModels.get(0);
+                VaultReviewViewModel vrm1 = vaultReviewViewModels.get(0);
                 assertThat(vrm1.getVaultReviewId()).isEqualTo("vaultReviewId1");
                 assertThat(vrm1.getComment()).isEqualTo("comment4vaultReviewId1");
                 assertThat(vrm1.getActionedDate()).isEqualTo(LocalDateTime.now(clock));
-                assertThat(vrm1.getDepositReviewModels()).hasSize(2);
+                assertThat(vrm1.getDepositReviewViewModels()).hasSize(2);
 
-                DepositReviewModel drm1_1 = vrm1.getDepositReviewModels().get(0);
+                DepositReviewViewModel drm1_1 = vrm1.getDepositReviewViewModels().get(0);
                 assertThat(drm1_1.getDepositId()).isEqualTo("rev1depId1");
                 assertThat(drm1_1.getDepositReviewId()).isEqualTo("rev1depRevId1");
                 assertThat(drm1_1.getDeleteStatus()).isEqualTo(1);
 
-                DepositReviewModel drm1_2 = vrm1.getDepositReviewModels().get(1);
+                DepositReviewViewModel drm1_2 = vrm1.getDepositReviewViewModels().get(1);
                 assertThat(drm1_2.getDepositId()).isEqualTo("rev1depId2");
                 assertThat(drm1_2.getDepositReviewId()).isEqualTo("rev1depRevId2");
                 assertThat(drm1_2.getDeleteStatus()).isEqualTo(2);
 
             }
             {
-                VaultReviewModel vrm2 = vaultReviewModels.get(1);
+                VaultReviewViewModel vrm2 = vaultReviewViewModels.get(1);
                 assertThat(vrm2.getVaultReviewId()).isEqualTo("vaultReviewId2");
                 assertThat(vrm2.getComment()).isEqualTo("comment4vaultReviewId2");
                 assertThat(vrm2.getActionedDate()).isEqualTo(LocalDateTime.now(clock));
-                assertThat(vrm2.getDepositReviewModels()).hasSize(2);
+                assertThat(vrm2.getDepositReviewViewModels()).hasSize(2);
 
-                DepositReviewModel drm2_1 = vrm2.getDepositReviewModels().get(0);
+                DepositReviewViewModel drm2_1 = vrm2.getDepositReviewViewModels().get(0);
                 assertThat(drm2_1.getDepositId()).isEqualTo("rev2depId1");
                 assertThat(drm2_1.getDepositReviewId()).isEqualTo("rev2depRevId1");
                 assertThat(drm2_1.getDeleteStatus()).isEqualTo(3);
 
-                DepositReviewModel drm2_2 = vrm2.getDepositReviewModels().get(1);
+                DepositReviewViewModel drm2_2 = vrm2.getDepositReviewViewModels().get(1);
                 assertThat(drm2_2.getDepositId()).isEqualTo("rev2depId2");
                 assertThat(drm2_2.getDepositReviewId()).isEqualTo("rev2depRevId2");
                 assertThat(drm2_2.getDeleteStatus()).isEqualTo(4);

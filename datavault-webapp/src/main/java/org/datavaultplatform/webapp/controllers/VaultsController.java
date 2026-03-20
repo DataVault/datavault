@@ -15,9 +15,7 @@ import org.datavaultplatform.common.util.RoleUtils;
 import org.datavaultplatform.webapp.exception.EntityNotFoundException;
 import org.datavaultplatform.webapp.exception.ForbiddenException;
 import org.datavaultplatform.webapp.exception.InvalidUunException;
-import org.datavaultplatform.webapp.model.DepositReviewModel;
-import org.datavaultplatform.webapp.model.VaultReviewHistoryModel;
-import org.datavaultplatform.webapp.model.VaultReviewModel;
+import org.datavaultplatform.webapp.model.*;
 import org.datavaultplatform.webapp.services.ForceLogoutService;
 import org.datavaultplatform.webapp.services.RestService;
 import org.datavaultplatform.webapp.services.UserLookupService;
@@ -247,34 +245,40 @@ public class VaultsController {
         // todo: Get all the review history
 
         ReviewInfo[] reviewInfos = restService.getReviewsListing(vaultID);
-        List<VaultReviewModel> vaultReviewModels = new ArrayList<>();
+        List<VaultReviewViewModel> vaultReviewViewModels = new ArrayList<>();
 
-        
         for (ReviewInfo reviewInfo : reviewInfos) {
 
-            VaultReview currentReview = restService.getVaultReview(reviewInfo.getVaultReviewId());
-            List<DepositReviewModel> depositReviewModels = new ArrayList<>();
+            VaultReview vaultReview = restService.getVaultReview(reviewInfo.getVaultReviewId());
+            List<DepositReviewViewModel> depositReviewViewModels = new ArrayList<>();
             for (int i = 0; i < reviewInfo.getDepositIds().size(); i++) {
                 DepositInfo depositInfo = restService.getDeposit(reviewInfo.getDepositIds().get(i));
                 DepositReview depositReview = restService.getDepositReview(reviewInfo.getDepositReviewIds().get(i));
 
-                DepositReviewModel drm = new DepositReviewModel();
-                drm.updateFromDepositReviewAndDepositInfo(depositReview, depositInfo);
-                
-                depositReviewModels.add(drm);
+                DepositReviewViewModel depositReviewViewModel = new DepositReviewViewModel(depositReview, depositInfo);
+                depositReviewViewModels.add(depositReviewViewModel);
             }
+            depositReviewViewModels.sort(DepositReviewViewModel.BY_DEPOSIT_CREATION_TIME);
 
-            // the oldest DRM first, most recent DRM last
-            depositReviewModels.sort(DepositReviewModel.BY_CREATION_TIME);
+            // the oldest DRVM first, most recent DRVM last
 
-            VaultReviewModel vaultReviewModel = new VaultReviewModel(currentReview, vault.getReviewDate());
-            vaultReviewModel.setDepositReviewModels(depositReviewModels);
+            VaultReviewViewModel vaultReviewViewModel = new VaultReviewViewModel();
 
-            vaultReviewModels.add(vaultReviewModel);
+            vaultReviewViewModel.setVaultReviewId(vaultReview.getId());
+            vaultReviewViewModel.setComment(vaultReview.getComment());
+            vaultReviewViewModel.setActionedDate(vaultReview.getActionedDate());
+            vaultReviewViewModel.setCreationTime(vaultReview.getCreationTime());
+            vaultReviewViewModel.setOldReviewDate(vaultReview.getOldReviewDate());
+            vaultReviewViewModel.setNextReviewDate(vault.getReviewDate()); //only show this when there is no actioned date
+
+            vaultReviewViewModel.setDepositReviewViewModels(depositReviewViewModels);
+
+            vaultReviewViewModels.add(vaultReviewViewModel);
         }
+        vaultReviewViewModels.sort(VaultReviewViewModel.BY_CREATION_TIME);
 
         VaultReviewHistoryModel vrhm = new VaultReviewHistoryModel();
-        vrhm.setVaultReviewModels(vaultReviewModels);
+        vrhm.setVaultReviewViewModels(vaultReviewViewModels);
 
         model.addAttribute("vrhm", vrhm);
 

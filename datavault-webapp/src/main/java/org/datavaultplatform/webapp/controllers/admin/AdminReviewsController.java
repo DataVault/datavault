@@ -12,6 +12,7 @@ import org.datavaultplatform.common.response.VaultsData;
 import org.datavaultplatform.common.util.RoleUtils;
 import org.datavaultplatform.common.util.Utils;
 import org.datavaultplatform.webapp.model.DepositReviewModel;
+import org.datavaultplatform.webapp.model.DepositReviewViewModel;
 import org.datavaultplatform.webapp.model.VaultReviewModel;
 import org.datavaultplatform.webapp.services.RestService;
 import org.slf4j.Logger;
@@ -128,7 +129,7 @@ public class AdminReviewsController {
             result.add(drm);
         }
 
-        result.sort(DepositReviewModel.BY_CREATION_TIME);
+        result.sort(DepositReviewModel.BY_DEPOSIT_CREATION_TIME);
         return result;
     }
 

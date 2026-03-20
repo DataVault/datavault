@@ -167,13 +167,13 @@ class AdminReviewsControllerTest {
         DepositReviewModel drm1 = drms.get(0);
         assertThat(drm1.getDepositReviewId()).isEqualTo("depRevId1");
         assertThat(drm1.getDepositId()).isEqualTo("depId1");
-        assertThat(drm1.getName()).isEqualTo("depId1-name");
+        assertThat(drm1.getDepositName()).isEqualTo("depId1-name");
         assertThat(drm1.getComment()).isEqualTo("depRevId1-comment");
 
         DepositReviewModel drm2 = drms.get(1);
         assertThat(drm2.getDepositReviewId()).isEqualTo("depRevId2");
         assertThat(drm2.getDepositId()).isEqualTo("depId2");
-        assertThat(drm2.getName()).isEqualTo("depId2-name");
+        assertThat(drm2.getDepositName()).isEqualTo("depId2-name");
         assertThat(drm2.getComment()).isEqualTo("depRevId2-comment");
 
         if (hasCurrentReview) {
