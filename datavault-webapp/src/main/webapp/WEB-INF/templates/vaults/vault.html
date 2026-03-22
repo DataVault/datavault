@@ -450,7 +450,7 @@
                                             <td>Not marked for Delete</td>
                                         </th:block>
                                         <th:block th:if="${drvm.deleteStatus != 0 && drvm.actionedDate != null}">
-                                            <td>[[${#dates.format(drvm.actionedDate,dateFormatISO)}]]<!--/* date */--></td>
+                                            <td>[[${#temporals.format(drvm.actionedDate,dateFormatISO)}]]<!--/* date */--></td>
                                         </th:block>
                                         <th:block th:if="${drvm.deleteStatus != 0 && drvm.actionedDate == null}">
                                             <td>Delete Not Requested Yet</td>

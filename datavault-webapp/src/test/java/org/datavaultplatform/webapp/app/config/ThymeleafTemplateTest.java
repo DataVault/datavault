@@ -2080,7 +2080,8 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         DepositReviewViewModel drm1 = new DepositReviewViewModel();
         drm1.setComment("drm1-comment");
         drm1.setDepositName("drm1-name");
-        drm1.setDeleteStatus(1);
+        drm1.setDeleteStatus(0);
+        drm1.setActionedDate(null);
         drm1.setDepositCreationTime(LocalDateTime.now());
         drm1.setDepositStatusName("drm1-status-name");
         drm1.setDepositReviewId("drm1-deposit-review-id");
@@ -2090,17 +2091,28 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         drm2.setComment("drm2-comment");
         drm2.setDepositName("drm2-name");
         drm2.setDeleteStatus(1);
+        drm2.setActionedDate(LocalDateTime.now());
         drm2.setDepositCreationTime(LocalDateTime.now());
         drm2.setDepositStatusName("drm2-status-name");
         drm2.setDepositReviewId("drm2-deposit-review-id");
         drm2.setDepositId("drm2-deposit-id");
+
+        DepositReviewViewModel drm3 = new DepositReviewViewModel();
+        drm3.setComment("drm3-comment");
+        drm3.setDepositName("drm3-name");
+        drm3.setDeleteStatus(2);
+        drm3.setActionedDate(null);
+        drm3.setDepositCreationTime(LocalDateTime.now());
+        drm3.setDepositStatusName("drm3-status-name");
+        drm3.setDepositReviewId("drm3-deposit-review-id");
+        drm3.setDepositId("drm3-deposit-id");
 
         VaultReviewViewModel vrm1 = new VaultReviewViewModel();
         vrm1.setActionedDate(DateTimeUtils.toLocalDateTimeAtMidnight(now));
         vrm1.setComment("vrm1 - comment");
         vrm1.setVaultReviewId("vault-review-id-1");
         vrm1.setNextReviewDate(DateTimeUtils.toLocalDate(getNowValue()));
-        vrm1.setDepositReviewViewModels(Arrays.asList(drm1, drm2));
+        vrm1.setDepositReviewViewModels(Arrays.asList(drm1, drm2, drm3));
 
         VaultReviewViewModel vrm2 = new VaultReviewViewModel();
         vrm2.setActionedDate(DateTimeUtils.toLocalDateTimeAtMidnight(now));
