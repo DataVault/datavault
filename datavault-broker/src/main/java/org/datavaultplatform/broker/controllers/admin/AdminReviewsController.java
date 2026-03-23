@@ -156,13 +156,14 @@ public class AdminReviewsController {
                                        @RequestBody VaultReview vaultReview) {
 
 
-        vaultsReviewService.updateVaultReview(vaultReview);
+        VaultReview updatedVaultReview = vaultsReviewService.updateVaultReview(vaultReview);
 
         // If the Review has been actioned, then create an Event. The Review should only be actioned once.
-        if (vaultReview.isReviewSubmitted()) {
-            Assert.state(vaultReview.getVault() != null, "The VaultReview cannot have null Vault");
-            Review vaultEvent = new Review(vaultReview.getVault().getID());
-            vaultEvent.setVault(vaultReview.getVault());
+        if (updatedVaultReview.isReviewSubmitted()) {
+            Assert.state(updatedVaultReview.getVault() != null, "The VaultReview cannot have null Vault");
+            Vault vault = updatedVaultReview.getVault();
+            Review vaultEvent = new Review(vault.getID());
+            vaultEvent.setVault(vault);
             vaultEvent.setUser(usersService.getUser(userID));
             vaultEvent.setAgentType(Agent.AgentType.BROKER);
             Client client = clientsService.getClientByApiKey(clientKey);

@@ -15,10 +15,7 @@ import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertThrows;
@@ -64,14 +61,54 @@ class VaultsReviewServiceTest {
         verifyNoMoreInteractions(mVaultReviewDAO, mDepositReviewService);
     }
 
-    @Test
-    void testUpdateVaultReview() {
-        VaultReview vaultReview = new VaultReview();
-        doAnswer(invocation -> invocation.getArgument(0)).when(mVaultReviewDAO).update(any(VaultReview.class));
-        vaultsReviewService.updateVaultReview(vaultReview);
+    @Nested
+    class UpdateVaultReviewTests {
 
-        verify(mVaultReviewDAO).update(vaultReview);
-        verifyNoMoreInteractions(mVaultReviewDAO, mDepositReviewService);
+        @Test
+        void testUpdateNullVaultReview() {
+            IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
+                vaultsReviewService.updateVaultReview(null);
+            });
+            assertThat(ex).hasMessage("The vaultReview cannot be null");
+        }
+
+        @Test
+        void testUpdateNullVaultReviewId() {
+            VaultReview vaultReview = new VaultReview();
+            IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
+                vaultsReviewService.updateVaultReview(vaultReview);
+            });
+            assertThat(ex).hasMessage("The vaultReview.id cannot be null");
+        }
+
+        @Test
+        void testUpdateVaultReviewNotFound() {
+            VaultReview vaultReview = new VaultReview();
+            vaultReview.setId("vaultId");
+            
+            when(mVaultReviewDAO.findById("vaultId")).thenReturn(Optional.empty());
+
+            NoSuchElementException ex = assertThrows(NoSuchElementException.class, () -> {
+                vaultsReviewService.updateVaultReview(vaultReview);
+            });
+            assertThat(ex).hasMessage("No value present");
+        }
+
+        @Test
+        void testUpdateVaultReview() {
+            VaultReview originalVaultReview = new VaultReview();
+            
+            VaultReview vaultReview = new VaultReview();
+            vaultReview.setId("vaultId");
+            
+            when(mVaultReviewDAO.findById("vaultId")).thenReturn(Optional.of(originalVaultReview));
+            
+            vaultsReviewService.updateVaultReview(vaultReview);
+
+            verify(mVaultReviewDAO).findById("vaultId");
+            verify(mVaultReviewDAO).update(originalVaultReview);
+            verifyNoMoreInteractions(mVaultReviewDAO, mDepositReviewService);
+        }
     }
 
     @Nested

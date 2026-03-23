@@ -1,7 +1,11 @@
 <!DOCTYPE html><!--vaults/vault.html-->
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/defaultlayout(nav='home')}">
-<head><title>Vaults - Vault</title></head>
+<head><title>Vaults - Vault</title>
+    <style>
+        .zebra-highlight { background-color: #FAFAD2; }
+    </style>
+</head>
 <th:block layout:fragment="content">
 <div class="container">
 
@@ -409,31 +413,36 @@
                     <h4><strong>Reviews</strong></h4>
                     <div class="scrollable">
                         <table class="table table-bordered ">
-                             <th:block th:each="vrvm: ${vrhm.vaultReviewViewModels}">
-
+                            <th:block th:each="vrvm, iterStat : ${vrhm.vaultReviewViewModels}"
+                                      th:with="rowClass=${iterStat.odd ? 'zebra-highlight' : ''}">
                                  <thead>
-                                 <tr>
+                                 <tr th:class="${rowClass}">
                                      <th>Date Review Submitted</th>
-                                     <th>Next Review Date</th>
+                                     <th:block th:if="${vrvm.actionedDate != null}">
+                                         <th>Review Date</th>
+                                     </th:block>
+                                     <th:block th:if="${vrvm.actionedDate == null}">
+                                         <th>Next Review Date</th>
+                                     </th:block>
                                      <th colspan="2">Comment</th>
                                  </tr>
                                  </thead>
 
                                  <tbody>
-                                 <tr>
+                                 <tr th:class="${rowClass}">
                                      <th:block th:if="${vrvm.actionedDate != null}">
                                         <td>[[${#temporals.format(vrvm.actionedDate,dateFormatISO)}]]<!--/* date */--></td>
                                      </th:block>
                                      <th:block th:if="${vrvm.actionedDate == null}">
                                         <td>Review still in progress</td>
                                      </th:block>
-                                     <td>[[${vrvm.actionedDate == null ? vrvm.nextReviewDate : 'n/a'}]]</td>
+                                     <td>[[${vrvm.actionedDate == null ? vrvm.nextReviewDate : vrvm.oldReviewDate}]]</td>
                                      <td colspan="2">[[${vrvm.comment ?: ''}]]</td>
                                  </tr>
                                  </tbody>
 
                                  <thead>
-                                 <tr>
+                                 <tr th:class="${rowClass}">
                                      <th>Deposit Name</th>
                                      <th>Marked For Deletion ?</th>
                                      <th>Date Deposit Delete Requested</th>
@@ -443,7 +452,7 @@
 
                                  <tbody>
 
-                                    <tr th:each="drvm: ${vrvm.depositReviewViewModels}">
+                                    <tr th:class="${rowClass}" th:each="drvm: ${vrvm.depositReviewViewModels}">
                                         <td>[[${drvm.depositName}]]</td>
                                         <td>[[${drvm.deleteStatus == 0 ? 'No' : 'Yes'}]]</td>
                                         <th:block th:if="${drvm.deleteStatus == 0}">

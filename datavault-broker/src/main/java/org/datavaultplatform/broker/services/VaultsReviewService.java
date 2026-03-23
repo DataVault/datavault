@@ -61,8 +61,17 @@ public class VaultsReviewService {
         return this.vaultReviewDAO.search(query);
     }
 
-    public void updateVaultReview(VaultReview vaultReview) {
-        vaultReviewDAO.update(vaultReview);
+    public VaultReview updateVaultReview(VaultReview vaultReview) {
+        Assert.notNull(vaultReview, "The vaultReview cannot be null");
+        Assert.notNull(vaultReview.getId(), "The vaultReview.id cannot be null");
+        VaultReview originalVaultReview = vaultReviewDAO.findById(vaultReview.getId()).orElseThrow();
+
+        // by doing this - we don't lose the original vaultId on the VaultReview
+        originalVaultReview.setActionedDate(vaultReview.getActionedDate());
+        originalVaultReview.setComment(vaultReview.getComment());
+        originalVaultReview.setOldReviewDate(vaultReview.getOldReviewDate());
+
+        return vaultReviewDAO.update(originalVaultReview);
     }
 
     public List<Vault> getVaultsForReview(List<Vault> vaults) {

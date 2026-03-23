@@ -91,10 +91,10 @@
         </div>
 
         <div class="form-group">
-            <label class="control-label" for="newReviewDate">New Review Date</label>
-            <input type="text" class="form-control" id="newReviewDate" th:field="*{nextReviewDate}" />
+            <label class="control-label" for="nextReviewDate">Next Review Date</label>
+            <input type="text" class="form-control" id="nextReviewDate" th:field="*{nextReviewDate}" />
             <!--
-            newReviewDate - enter a new/next review date here if you want to change the current review date (it will have to be at least 30 days from today. 
+            nextReviewDate - enter a new/next review date here if you want to change the current review date (it will have to be at least 1 month from today. 
             If you leave this field blank, the Current review date will remain unchanged.
             -->
         </div>
@@ -215,6 +215,24 @@
         
 
 <script type="application/javascript">
+    function getMinReviewDate(todayDate) {
+        let now = new Date(todayDate);
+        let inAMonth = new Date(now.getTime());
+        inAMonth.setHours(0, 0, 0, 0);
+
+        let currentMonth = now.getMonth();
+        let targetMonth = currentMonth + 1;
+
+        // Move to next month
+        inAMonth.setMonth(targetMonth);
+
+        // If month overflowed (e.g., Jan 31 -> March 2), roll back to last day of target month
+        if (inAMonth.getMonth() !== (targetMonth % 12)) {
+            inAMonth.setDate(0);
+        }
+
+        return inAMonth;
+    }
     $(document).ready(function () {
 
         $.datepicker.setDefaults({
@@ -225,7 +243,7 @@
             selectOtherMonths: true
         });
 
-        $( "#newReviewDate" ).datepicker({
+        $( "#nextReviewDate" ).datepicker({
             minDate: '+1m'
         });
 
@@ -242,34 +260,36 @@
                 "Please enter a valid date in YYYY-MM-DD format."
         );
         $.validator.addMethod(
-                "newReviewDate",
+                "nextReviewDateMoreThanAMonthFromToday",
                 function(value, element) {
+                    if (!value) return true;
 
-                    if (value){
-                        var inAMonth = new Date();
-                        inAMonth.setMonth(inAMonth.getMonth() + 1);
-                        inAMonth.setHours( 0,0,0,0 );
+                    // Calculate the minimum required date based on "now"
+                    var minRequiredDate = getMinReviewDate(new Date());
 
-                        var selectedDate = new Date(value);
+                    // Parse the user's selected date
+                    var selectedDate = new Date(value);
+                    selectedDate.setHours(0, 0, 0, 0);
 
-                        return selectedDate >= inAMonth;
-                    } else {
-                        return true;
-                    }
+                    var result = selectedDate >= minRequiredDate;
+                    
+                    // console.log("Validation Check:", {
+                    //     selected: selectedDate.toDateString(),
+                    //     minimum: minRequiredDate.toDateString(),
+                    //     isValid: result
+                    // });
+
+                    return result;
                 },
                 "The review date must be at least one month in the future. The review date is the date at which a decision may be made about potentially deleting the data. If you believe you need the review date to be sooner, please contact the support team using the Contact button at the top of the page."
         );
 
-        $('button[type="submit"]').on("click", function() {
-            $('#submitAction').val($(this).attr('value'));
-        });
-
         $('#create-review').validate({
-            debug: true,
+            debug: false,
             rules: {
-                newReviewDate : {
+                nextReviewDate : {
                     date: true,
-                    newReviewDate: true
+                    nextReviewDateMoreThanAMonthFromToday: true
                 }
             },
             highlight: function (element) {
@@ -279,7 +299,15 @@
                 element.addClass('valid')
                         .closest('.form-group').removeClass('has-error').addClass('has-success');
             },
-            submitHandler: function (form) {
+            submitHandler: function (form, e) {
+                
+                var clickedButton = $(document.activeElement);
+                var name = clickedButton.attr('name');  // This should be "action"
+                var button = clickedButton.attr('value'); // This will be "Save", "Submit", or "Cancel"
+                
+                // console.log("form submitted", {name, button});
+                
+                // prevent double form submission
                 $('button[type="submit"]').prop('disabled', true);
                 form.submit();
             }
@@ -288,7 +316,8 @@
         $('[data-ds-toggle="tooltip"]').tooltip({
             'placement': 'right'
         });
-    }); $('[data-ds-toggle="popover"]').popover();
+        $('[data-ds-toggle="popover"]').popover();
+    });
 </script>
 
 </div>

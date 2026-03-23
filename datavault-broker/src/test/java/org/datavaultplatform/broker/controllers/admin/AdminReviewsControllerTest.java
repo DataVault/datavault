@@ -335,7 +335,7 @@ class AdminReviewsControllerTest {
         @BeforeEach
         void setup() {
             vaultReview = new VaultReview();
-            doNothing().when(mVaultsReviewService).updateVaultReview(vaultReview);
+            doReturn(vaultReview).when(mVaultsReviewService).updateVaultReview(vaultReview);
         }
 
         @Test
