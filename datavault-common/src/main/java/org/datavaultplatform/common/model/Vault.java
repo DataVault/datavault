@@ -248,6 +248,9 @@ public class Vault implements Identified {
     }
 
     public void addDeposit(Deposit deposit) {
+        if (deposits == null) {
+            deposits = new ArrayList<>();
+        }
         this.deposits.add(deposit);
     }
 
@@ -274,6 +277,9 @@ public class Vault implements Identified {
     }
 
     public void addDataManager(DataManager dataManager) {
+        if (dataManagers == null) {
+            dataManagers = new ArrayList<>();
+        }
         this.dataManagers.add(dataManager);
     }
 

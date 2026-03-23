@@ -51,6 +51,7 @@ public class VaultReview {
     @Column(name = "creationTime", nullable = false, columnDefinition = "TIMESTAMP")
     private LocalDateTime creationTime;
 
+    @JsonIgnore
     @ManyToOne
     private Vault vault;
 
@@ -170,11 +171,13 @@ public class VaultReview {
     public int hashCode() {
         return getClass().hashCode();
     }
-    
+
+    @JsonIgnore
     public boolean isReviewUnderway() {
         return actionedDate == null;
     }
 
+    @JsonIgnore
     public boolean isReviewSubmitted() {
         return !isReviewUnderway();
     }

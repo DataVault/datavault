@@ -1,6 +1,7 @@
 package org.datavaultplatform.common.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.datavaultplatform.common.util.DateTimeUtils;
 import org.hibernate.Hibernate;
@@ -159,6 +160,7 @@ public class DepositReview  {
         return getClass().hashCode();
     }
     
+    @JsonIgnore
     public boolean isReviewComplete() {
         return this.actionedDate != null;
     }
