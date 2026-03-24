@@ -73,7 +73,7 @@ class AdminReviewsControllerMvcTest {
     static final int TEST_RETENTION_POLICY_ID_1 = 123456;
     static final int TEST_RETENTION_POLICY_ID_2 = 98765;
 
-    static final String REVIEW_DATE_NOTIFICATION_MESSAGE = "If some deposits are to be retained then a new Review Date must be entered";
+    static final String REVIEW_DATE_NOTIFICATION_MESSAGE = "If some deposits are to be retained then a next Review Date must be entered";
 
     @Autowired
     MockMvc mockMvc;

@@ -70,7 +70,7 @@ public class AdminReviewsController {
 
         if (error != null) {
             if (error.equals("reviewdate")) {
-                model.addAttribute("error", "If some deposits are to be retained then a new Review Date must be entered");
+                model.addAttribute("error", "If some deposits are to be retained then a next Review Date must be entered");
             }
         }
 

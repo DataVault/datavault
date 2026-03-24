@@ -196,7 +196,7 @@ class AdminReviewsControllerTest {
         String actualError = (String) modelMap.getAttribute("error");
         String expectedError = null;
         if ("reviewdate".equals(errorMsg)) {
-            expectedError = "If some deposits are to be retained then a new Review Date must be entered";
+            expectedError = "If some deposits are to be retained then a next Review Date must be entered";
         }
         assertThat(actualError).isEqualTo(expectedError);
     }

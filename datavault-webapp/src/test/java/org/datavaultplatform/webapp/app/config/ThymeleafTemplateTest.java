@@ -697,7 +697,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         if (expectedFormId != null) {
             assertThat(formId).isEqualTo(expectedFormId);
         } else {
-            System.out.println("WE HAVE A FORM NOT EXPECTED WITT ID [" + formId  + "]");
+            System.out.println("WE HAVE A FORM NOT EXPECTED WITH ID [" + formId  + "]");
         }
         if(StringUtils.isNotBlank(formAction)){
             assertThat(formAction).startsWith("/dv");
@@ -1013,9 +1013,14 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("vaultReviewModel", vrModel);
         modelMap.put("group", group);
         modelMap.put("createRetentionPolicy", createRetentionPolicy);
+        modelMap.addAttribute("error","If some deposits are to be retained then a next Review Date must be entered");
 
         String html = getHtml("admin/reviews/create", modelMap);
         Document doc = getDocument(html);
+
+        Elements errorElements = doc.selectXpath("//div[@class='alert alert-danger' and @role='alert']");
+        assertThat(errorElements.size()).isEqualTo(1);
+        errorElements.get(0).text().contains("If some deposits are to be retained then a next Review Date must be entered");
 
         displayFormFields(doc, "create-review");
 
@@ -2115,7 +2120,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         vrm1.setDepositReviewViewModels(Arrays.asList(drm1, drm2, drm3));
 
         VaultReviewViewModel vrm2 = new VaultReviewViewModel();
-        vrm2.setActionedDate(DateTimeUtils.toLocalDateTimeAtMidnight(now));
+        vrm2.setActionedDate(null);
         vrm2.setComment("vrm2 - comment");
         vrm2.setVaultReviewId("vault-review-id-2");
         vrm2.setNextReviewDate(DateTimeUtils.toLocalDate(getNowValue()));

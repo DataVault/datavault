@@ -418,12 +418,7 @@
                                  <thead>
                                  <tr th:class="${rowClass}">
                                      <th>Date Review Submitted</th>
-                                     <th:block th:if="${vrvm.actionedDate != null}">
-                                         <th>Review Date</th>
-                                     </th:block>
-                                     <th:block th:if="${vrvm.actionedDate == null}">
-                                         <th>Next Review Date</th>
-                                     </th:block>
+                                     <th>Review Date</th>
                                      <th colspan="2">Comment</th>
                                  </tr>
                                  </thead>
@@ -436,7 +431,12 @@
                                      <th:block th:if="${vrvm.actionedDate == null}">
                                         <td>Review still in progress</td>
                                      </th:block>
-                                     <td>[[${vrvm.actionedDate == null ? vrvm.nextReviewDate : vrvm.oldReviewDate}]]</td>
+                                     <th:block th:if="${vrvm.actionedDate != null}">
+                                         <td>[[${#temporals.format(vrvm.oldReviewDate,dateFormatISO)}]]<!--/* date */--></td>
+                                     </th:block>
+                                     <th:block th:if="${vrvm.actionedDate == null}">
+                                         <td>[[${#temporals.format(vrvm.nextReviewDate,dateFormatISO)}]]<!--/* date */--></td>
+                                     </th:block>
                                      <td colspan="2">[[${vrvm.comment ?: ''}]]</td>
                                  </tr>
                                  </tbody>
@@ -445,7 +445,7 @@
                                  <tr th:class="${rowClass}">
                                      <th>Deposit Name</th>
                                      <th>Marked For Deletion ?</th>
-                                     <th>Date Deposit Delete Requested</th>
+                                     <th>Deposit Deletion Requested Date</th>
                                      <th>Comment</th>
                                  </tr>
                                  </thead>
@@ -462,7 +462,7 @@
                                             <td>[[${#temporals.format(drvm.actionedDate,dateFormatISO)}]]<!--/* date */--></td>
                                         </th:block>
                                         <th:block th:if="${drvm.deleteStatus != 0 && drvm.actionedDate == null}">
-                                            <td>Delete Not Requested Yet</td>
+                                            <td>Deletion Not Yet Requested</td>
                                         </th:block>
                                         <td>[[${drvm.comment ?: ""}]]</td>
                                     </tr>
