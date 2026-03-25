@@ -23,7 +23,7 @@
                                 <th>Deposit</th>
                                 <th>Owner Name</th>
                                 <th>Date Created</th>
-                                <th class="text-muted">Review Date</th>
+                                <th>Review Date</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -52,7 +52,7 @@
                                 </td>
                                 <td><th:block th:if="${vault.getOwnerId() != null}">[[${vault.getOwnerId()}]]</th:block></td>
                                 <td>[[${#temporals.format(vault.getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */--></td>
-                                <td class="text-muted">[[${#temporals.format(vault.getReviewDate(),dateFormatISO)}]]<!--/* date */--></td>
+                                <td>[[${#temporals.format(vault.getReviewDate(),dateFormatISO)}]]<!--/* date */--></td>
                             </tr>
                         </tbody>
                     </table>
