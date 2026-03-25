@@ -260,7 +260,7 @@
                 "Please enter a valid date in YYYY-MM-DD format."
         );
         $.validator.addMethod(
-                "nextReviewDateMoreThanAMonthFromToday",
+                "nextReviewDateAtLeastAMonthFromToday",
                 function(value, element) {
                     if (!value) return true;
 
@@ -289,7 +289,7 @@
             rules: {
                 nextReviewDate : {
                     date: true,
-                    nextReviewDateMoreThanAMonthFromToday: true
+                    nextReviewDateAtLeastAMonthFromToday: true
                 }
             },
             highlight: function (element) {
