@@ -73,7 +73,7 @@ public class AdminReviewsController implements AdminReviewsControllerApi {
 
         if (error != null) {
             if (error.equals("reviewdate")) {
-                model.addAttribute("error", "If some deposits are to be retained then a new Review Date must be entered");
+                model.addAttribute("error", "If some deposits are to be retained then a next Review Date must be entered");
             }
         }
 
@@ -132,7 +132,7 @@ public class AdminReviewsController implements AdminReviewsControllerApi {
             result.add(drm);
         }
 
-        result.sort(DepositReviewModel.BY_CREATION_TIME);
+        result.sort(DepositReviewModel.BY_DEPOSIT_CREATION_TIME);
         return result;
     }
 
@@ -220,6 +220,7 @@ public class AdminReviewsController implements AdminReviewsControllerApi {
         Assert.notNull(originalVaultReview, "originalVaultReview cannot be null");
         Assert.notNull(vrm, "vaultReviewModel cannot be null");
 
+        // WHEN YOU Save or Submit a VaultReivew - the comment is saved
         originalVaultReview.setComment(vrm.getComment());
 
         if (ACTION_SUBMIT.equals(action)) {
@@ -236,7 +237,7 @@ public class AdminReviewsController implements AdminReviewsControllerApi {
             if (nextReviewDate != null) {
                 LOG.info("Editing Review Date for Vault id {} with new Review Date {}", vaultID, nextReviewDate);
                 // the nextReviewDate is the used to update the Vault.reviewDate FOR THE NEXT REVIEW - not this one.
-                restService.updateVaultReviewDate(vaultID, nextReviewDate);
+                restService.updateReviewDateOfVault(vaultID, nextReviewDate);
             }
         }
 

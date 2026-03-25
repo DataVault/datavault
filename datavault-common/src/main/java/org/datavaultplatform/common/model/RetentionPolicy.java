@@ -52,19 +52,16 @@ public class RetentionPolicy {
 
     // Date policy in effect
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern= DateTimeUtils.ISO_DATE_FORMAT)
-    //LD @Temporal(TemporalType.DATE)
     @Column(name = "inEffectDate", nullable = true, columnDefinition = "DATE")
     private LocalDate inEffectDate;
 
     // Date policy in effect
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern=DateTimeUtils.ISO_DATE_FORMAT)
-    //LD @Temporal(TemporalType.DATE)
     @Column(name = "endDate", nullable = true, columnDefinition = "DATE")
     private LocalDate endDate;
 
     // Date policy in effect
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern=DateTimeUtils.ISO_DATE_FORMAT)
-    //LD @Temporal(TemporalType.DATE)
     @Column(name = "dataGuidanceReviewed", nullable = true, columnDefinition = "DATE")
     private LocalDate dataGuidanceReviewed;
 

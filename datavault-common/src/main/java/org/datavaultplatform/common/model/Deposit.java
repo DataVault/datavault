@@ -48,7 +48,6 @@ public class Deposit implements Identified {
     // Serialise date in ISO 8601 format
     @Schema(description = "Date that the vault was created")
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern= DateTimeUtils.ISO_DATE_TIME_FORMAT)
-    //LTD @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "creationTime", nullable = false, columnDefinition = "TIMESTAMP")
     private LocalDateTime creationTime;
     

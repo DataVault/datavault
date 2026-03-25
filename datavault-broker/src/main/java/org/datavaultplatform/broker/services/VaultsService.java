@@ -182,7 +182,7 @@ public class VaultsService {
         return vaultDAO.getRetentionPolicyCount(status);
     }
 
-    public Vault checkRetentionPolicy(String vaultID) {
+    public Vault checkRetentionPolicy(String vaultID, RetentionPoliciesService.RetentionPolicyUpdateReason reason) {
         // Get the vault
         Vault vault = getVault(vaultID);
         if (vault == null) {
@@ -190,7 +190,7 @@ public class VaultsService {
             return null;
         }
         
-        RetentionPoliciesService.updateRetentionPolicyExpiryDate(vault, clock);
+        RetentionPoliciesService.updateRetentionPolicyExpiryDate(vault, clock, reason);
 
         // Update and return the policy
         vaultDAO.update(vault);

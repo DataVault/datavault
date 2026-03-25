@@ -118,7 +118,7 @@ class RestServiceTest extends BaseRestTemplateWithLoggingTest {
         @WithMockUser(username = "user1")
         void testUpdateReviewDateIsOkay() {
             LocalDate localVaultReviewDate = LocalDate.of(2112, 12, 21);
-            VaultInfo vaultInfo = restService.updateVaultReviewDate("vault-abc",localVaultReviewDate);
+            VaultInfo vaultInfo = restService.updateReviewDateOfVault("vault-abc",localVaultReviewDate);
 
             assertThat(vaultInfo.getID()).isEqualTo("vault-abc-id");
             assertThat(vaultInfo.getName()).isEqualTo("test-vault-info");

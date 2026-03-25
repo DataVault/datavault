@@ -88,7 +88,8 @@ public class AdminReviewsController {
         // throws Exception if vault cannot be found
         Vault vault = vaultsService.getUserVault(user, vaultID);
 
-        VaultReview vaultReview = vault.getMostRecentVaultReview().orElse(null);
+        // If we find a record that has not been actioned then we know we have an active current record.
+        VaultReview vaultReview = vault.findLatestVaultReviewIfStillUnderway().orElse(null);
 
         if (vaultReview == null) {
            return null;
@@ -117,7 +118,6 @@ public class AdminReviewsController {
         Vault vault = vaultsService.getUserVault(user, vaultId);
 
         // if vault is not due - return null else create a vault if a pending review does not exist?
-        // TODO DJH - we should create a review if one is due and does not exist already ?
         
         VaultReview vaultReview = vaultsReviewService.createVaultReview(vault);
 
@@ -138,13 +138,14 @@ public class AdminReviewsController {
                                        @RequestBody VaultReview vaultReview) {
 
 
-        vaultsReviewService.updateVaultReview(vaultReview);
+        VaultReview updatedVaultReview = vaultsReviewService.updateVaultReview(vaultReview);
 
         // If the Review has been actioned, then create an Event. The Review should only be actioned once.
-        if (vaultReview.getActionedDate() != null) {
-            Assert.state(vaultReview.getVault() != null, "The VaultReview cannot have null Vault");
-            Review vaultEvent = new Review(vaultReview.getVault().getID());
-            vaultEvent.setVault(vaultReview.getVault());
+        if (updatedVaultReview.isReviewSubmitted()) {
+            Assert.state(updatedVaultReview.getVault() != null, "The VaultReview cannot have null Vault");
+            Vault vault = updatedVaultReview.getVault();
+            Review vaultEvent = new Review(vault.getID());
+            vaultEvent.setVault(vault);
             vaultEvent.setUser(usersService.getUser(userId));
             vaultEvent.setAgentType(Agent.AgentType.BROKER);
             Client client = clientsService.getClientByApiKey(clientKey);

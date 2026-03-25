@@ -105,7 +105,7 @@ class RetentionPoliciesServiceTest {
             vault.setGrantEndDate(null);
             vault.setCreationTime(vaultCreationTime);
 
-            RetentionPoliciesService.updateRetentionPolicyExpiryDate(vault, CLOCK);
+            RetentionPoliciesService.updateRetentionPolicyExpiryDate(vault, CLOCK, RetentionPoliciesService.RetentionPolicyUpdateReason.TEST);
             assertThat(vault.getRetentionPolicyExpiry()).isEqualTo(vaultCreationTime);
             assertThat(vault.getRetentionPolicyStatus()).isEqualTo(expectedRetentionPolicyStatus);
             assertThat(vault.getRetentionPolicyLastChecked()).isEqualTo(DATE_NOW_3);
@@ -141,7 +141,7 @@ class RetentionPoliciesServiceTest {
 
             lenient().doReturn(List.of()).when(vault).getDeposits();
 
-            RetentionPoliciesService.updateRetentionPolicyExpiryDate(vault, CLOCK);
+            RetentionPoliciesService.updateRetentionPolicyExpiryDate(vault, CLOCK, RetentionPoliciesService.RetentionPolicyUpdateReason.TEST);
 
             assertThat(vault.getRetentionPolicyStatus()).isEqualTo(expectedRetentionPolicyStatus);
             assertThat(vault.getRetentionPolicyLastChecked()).isEqualTo(DATE_NOW_3);
@@ -161,7 +161,7 @@ class RetentionPoliciesServiceTest {
 
             lenient().doReturn(getDeposit(lastestRetieveDate)).when(vault).getDeposits();
 
-            RetentionPoliciesService.updateRetentionPolicyExpiryDate(vault, CLOCK);
+            RetentionPoliciesService.updateRetentionPolicyExpiryDate(vault, CLOCK, RetentionPoliciesService.RetentionPolicyUpdateReason.TEST);
 
             assertThat(vault.getRetentionPolicyStatus()).isEqualTo(expectedRetentionPolicyStatus);
             assertThat(vault.getRetentionPolicyLastChecked()).isEqualTo(DATE_NOW_3);

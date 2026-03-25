@@ -73,7 +73,7 @@ class AdminReviewsControllerMvcTest {
     static final int TEST_RETENTION_POLICY_ID_1 = 123456;
     static final int TEST_RETENTION_POLICY_ID_2 = 98765;
 
-    static final String REVIEW_DATE_NOTIFICATION_MESSAGE = "If some deposits are to be retained then a new Review Date must be entered";
+    static final String REVIEW_DATE_NOTIFICATION_MESSAGE = "If some deposits are to be retained then a next Review Date must be entered";
 
     @Autowired
     MockMvc mockMvc;
@@ -256,18 +256,18 @@ class AdminReviewsControllerMvcTest {
         assertThat(drm1.getDeleteStatus()).isEqualTo(1);
         assertThat(drm1.getComment()).isEqualTo(TEST_DEPOSIT_REVIEW_1_COMMENT);
         assertThat(drm1.getDepositId()).isEqualTo(TEST_DEPOSIT_ID_1);
-        assertThat(drm1.getName()).isEqualTo(TEST_DEPOSIT_1_NAME);
-        assertThat(drm1.getStatusName()).isEqualTo(Audit.Status.IN_PROGRESS.name());
-        assertThat(drm1.getCreationTime()).isEqualTo(DateTimeUtils.toLocalDateTimeAtMidnight(date1));
+        assertThat(drm1.getDepositName()).isEqualTo(TEST_DEPOSIT_1_NAME);
+        assertThat(drm1.getDepositStatusName()).isEqualTo(Audit.Status.IN_PROGRESS.name());
+        assertThat(drm1.getDepositCreationTime()).isEqualTo(DateTimeUtils.toLocalDateTimeAtMidnight(date1));
 
         DepositReviewModel drm2 = drms.get(1);
         assertThat(drm2.getDepositReviewId()).isEqualTo(TEST_DEPOSIT_REVIEW_2_ID);
         assertThat(drm2.getDeleteStatus()).isEqualTo(2);
         assertThat(drm2.getComment()).isEqualTo(TEST_DEPOSIT_REVIEW_2_COMMENT);
         assertThat(drm2.getDepositId()).isEqualTo(TEST_DEPOSIT_ID_2);
-        assertThat(drm2.getName()).isEqualTo(TEST_DEPOSIT_2_NAME);
-        assertThat(drm2.getStatusName()).isEqualTo(Audit.Status.COMPLETE.name());
-        assertThat(drm2.getCreationTime()).isEqualTo(DateTimeUtils.toLocalDateTimeAtMidnight(date2));
+        assertThat(drm2.getDepositName()).isEqualTo(TEST_DEPOSIT_2_NAME);
+        assertThat(drm2.getDepositStatusName()).isEqualTo(Audit.Status.COMPLETE.name());
+        assertThat(drm2.getDepositCreationTime()).isEqualTo(DateTimeUtils.toLocalDateTimeAtMidnight(date2));
 
         // No error key in modelMap
         assertThat((String) modelMap.get("error")).isBlank();
@@ -438,7 +438,7 @@ class AdminReviewsControllerMvcTest {
 
             verify(mRestService).getVaultReview(TEST_VAULT_REVIEW_ID);
             verify(mRestService).getVault(TEST_VAULT_ID_1);
-            verify(mRestService).updateVaultReviewDate(eq(TEST_VAULT_ID_1), any(LocalDate.class)); //could use clock
+            verify(mRestService).updateReviewDateOfVault(eq(TEST_VAULT_ID_1), any(LocalDate.class)); //could use clock
             verify(mRestService).editVaultReview(any(VaultReview.class)); //could use captor here
             verify(mRestService, times(2)).getDepositReview(null);//FIX THIS
             verify(mRestService, times(2)).editDepositReview(any(DepositReview.class)); //could use captor here

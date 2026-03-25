@@ -9,9 +9,7 @@ import org.datavaultplatform.common.request.CreateVault;
 import org.datavaultplatform.common.response.*;
 import org.datavaultplatform.common.storage.impl.TivoliStorageManager;
 import org.datavaultplatform.common.util.DateTimeUtils;
-import org.datavaultplatform.webapp.model.DepositReviewModel;
-import org.datavaultplatform.webapp.model.VaultReviewHistoryModel;
-import org.datavaultplatform.webapp.model.VaultReviewModel;
+import org.datavaultplatform.webapp.model.*;
 import org.datavaultplatform.webapp.services.PermissionsService;
 import org.datavaultplatform.webapp.test.ProfileStandalone;
 import org.jetbrains.annotations.NotNull;
@@ -59,7 +57,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @TestMethodOrder(MethodOrderer.MethodName.class)
 @AutoConfigureMockMvc
 @TestPropertySource(properties = "logging.level.org.thymeleaf.spring6.expression=TRACE")
-public class ThymeleafTemplateTest extends BaseThymeleafTest {
+class ThymeleafTemplateTest extends BaseThymeleafTest {
 
     private static final ThreadLocal<ModelMap> TL_MODEL_MAP = ThreadLocal.withInitial(ModelMap::new);
 
@@ -111,7 +109,6 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         }).when(mEvaluator).hasPermission(any(), any(), any());
     }
 
-    @SuppressWarnings("UnnecessaryLocalVariable")
     private String getHtml(String template, ModelMap modelMap) throws Exception {
         TL_MODEL_MAP.set(modelMap);
         String html = mockMvc.perform(get("/dv/test/"+template).contextPath("/dv"))
@@ -700,7 +697,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         if (expectedFormId != null) {
             assertThat(formId).isEqualTo(expectedFormId);
         } else {
-            System.out.println("WE HAVE A FORM NOT EXPECTED WITT ID [" + formId  + "]");
+            System.out.println("WE HAVE A FORM NOT EXPECTED WITH ID [" + formId  + "]");
         }
         if(StringUtils.isNotBlank(formAction)){
             assertThat(formAction).startsWith("/dv");
@@ -963,23 +960,22 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         VaultReviewModel vrModel = new VaultReviewModel();
         vrModel.setVaultReviewId("vault-review-id-1");
         vrModel.setComment("comment-1");
-        vrModel.setActionedDate(DateTimeUtils.toLocalDateTimeAtMidnight(now));
 
         DepositReviewModel drm1 = new DepositReviewModel();
         drm1.setDepositId("drm1-depositId1");
         drm1.setDepositReviewId("drm1-reviewId1");
-        drm1.setName("drm1-name");
+        drm1.setDepositName("drm1-name");
         drm1.setComment("drm1-comment");
-        drm1.setCreationTime(LocalDateTime.now());
-        drm1.setStatusName("NOT_STARTED");
+        drm1.setDepositCreationTime(LocalDateTime.now());
+        drm1.setDepositStatusName("NOT_STARTED");
 
         DepositReviewModel drm2 = new DepositReviewModel();
         drm2.setDepositId("drm2-depositId2");
         drm2.setDepositReviewId("drm2-reviewId2");
-        drm2.setName("drm2-name");
+        drm2.setDepositName("drm2-name");
         drm2.setComment("drm2-comment");
-        drm2.setCreationTime(LocalDateTime.now());
-        drm2.setStatusName("IN_PROGRESS");
+        drm2.setDepositCreationTime(LocalDateTime.now());
+        drm2.setDepositStatusName("IN_PROGRESS");
 
         vrModel.setDepositReviewModels(Arrays.asList(drm1, drm2));
 
@@ -1017,9 +1013,14 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("vaultReviewModel", vrModel);
         modelMap.put("group", group);
         modelMap.put("createRetentionPolicy", createRetentionPolicy);
+        modelMap.addAttribute("error","If some deposits are to be retained then a next Review Date must be entered");
 
         String html = getHtml("admin/reviews/create", modelMap);
         Document doc = getDocument(html);
+
+        Elements errorElements = doc.selectXpath("//div[@class='alert alert-danger' and @role='alert']");
+        assertThat(errorElements.size()).isEqualTo(1);
+        errorElements.get(0).text().contains("If some deposits are to be retained then a next Review Date must be entered");
 
         displayFormFields(doc, "create-review");
 
@@ -2081,42 +2082,52 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
 
         modelMap.put("roleEvents", Arrays.asList(eventInfo1, eventInfo2));
 
-        DepositReviewModel drm1 = new DepositReviewModel();
+        DepositReviewViewModel drm1 = new DepositReviewViewModel();
         drm1.setComment("drm1-comment");
-        drm1.setName("drm1-name");
-        drm1.setDeleteStatus(1);
-        drm1.setCreationTime(LocalDateTime.now());
-        drm1.setStatusName("drm1-status-name");
+        drm1.setDepositName("drm1-name");
+        drm1.setDeleteStatus(0);
+        drm1.setActionedDate(null);
+        drm1.setDepositCreationTime(LocalDateTime.now());
+        drm1.setDepositStatusName("drm1-status-name");
         drm1.setDepositReviewId("drm1-deposit-review-id");
         drm1.setDepositId("drm1-deposit-id");
-        drm1.setToBeDeleted(true);
 
-        DepositReviewModel drm2 = new DepositReviewModel();
+        DepositReviewViewModel drm2 = new DepositReviewViewModel();
         drm2.setComment("drm2-comment");
-        drm2.setName("drm2-name");
+        drm2.setDepositName("drm2-name");
         drm2.setDeleteStatus(1);
-        drm2.setCreationTime(LocalDateTime.now());
-        drm2.setStatusName("drm2-status-name");
+        drm2.setActionedDate(LocalDateTime.now());
+        drm2.setDepositCreationTime(LocalDateTime.now());
+        drm2.setDepositStatusName("drm2-status-name");
         drm2.setDepositReviewId("drm2-deposit-review-id");
         drm2.setDepositId("drm2-deposit-id");
-        drm2.setToBeDeleted(true);
 
-        VaultReviewModel vrm1 = new VaultReviewModel();
+        DepositReviewViewModel drm3 = new DepositReviewViewModel();
+        drm3.setComment("drm3-comment");
+        drm3.setDepositName("drm3-name");
+        drm3.setDeleteStatus(2);
+        drm3.setActionedDate(null);
+        drm3.setDepositCreationTime(LocalDateTime.now());
+        drm3.setDepositStatusName("drm3-status-name");
+        drm3.setDepositReviewId("drm3-deposit-review-id");
+        drm3.setDepositId("drm3-deposit-id");
+
+        VaultReviewViewModel vrm1 = new VaultReviewViewModel();
         vrm1.setActionedDate(DateTimeUtils.toLocalDateTimeAtMidnight(now));
         vrm1.setComment("vrm1 - comment");
         vrm1.setVaultReviewId("vault-review-id-1");
         vrm1.setNextReviewDate(DateTimeUtils.toLocalDate(getNowValue()));
-        vrm1.setDepositReviewModels(Arrays.asList(drm1, drm2));
+        vrm1.setDepositReviewViewModels(Arrays.asList(drm1, drm2, drm3));
 
-        VaultReviewModel vrm2 = new VaultReviewModel();
-        vrm2.setActionedDate(DateTimeUtils.toLocalDateTimeAtMidnight(now));
+        VaultReviewViewModel vrm2 = new VaultReviewViewModel();
+        vrm2.setActionedDate(null);
         vrm2.setComment("vrm2 - comment");
         vrm2.setVaultReviewId("vault-review-id-2");
         vrm2.setNextReviewDate(DateTimeUtils.toLocalDate(getNowValue()));
-        vrm2.setDepositReviewModels(Arrays.asList(drm1, drm2));
+        vrm2.setDepositReviewViewModels(Arrays.asList(drm1, drm2));
 
         VaultReviewHistoryModel vrhm = new VaultReviewHistoryModel();
-        vrhm.setVaultReviewModels(Arrays.asList(vrm1, vrm2));
+        vrhm.setVaultReviewViewModels(Arrays.asList(vrm1, vrm2));
 
         modelMap.put("vrhm", vrhm);
         modelMap.put("deposits", Arrays.asList(deposit1, deposit2));

@@ -10,29 +10,27 @@ import org.springframework.util.Assert;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 
+// Used in AdminReviewsController when editing the latest Vault/Deposit Review that is underway
 @Data
 @NoArgsConstructor
 public class DepositReviewModel {
 
-    public static final Comparator<DepositReviewModel> BY_CREATION_TIME =
-            Comparator.comparing(
-                    DepositReviewModel::getCreationTime,
-                    Comparator.nullsFirst(Comparator.naturalOrder()));
+    public static final Comparator<DepositReviewModel> BY_DEPOSIT_CREATION_TIME =
+            Comparator.nullsFirst(Comparator.comparing(
+                    DepositReviewModel::getDepositCreationTime,
+                    Comparator.nullsFirst(Comparator.naturalOrder())));
 
     // DepositReview Identifier
     private String depositReviewId;
-    /*  DEPRECATED */
-    @Deprecated(since = "8/Jul/2020")
-    private boolean toBeDeleted;
     private int deleteStatus;
     private String comment;
 
     // Add in here any fields from the Deposit that we want to display
 
     private String depositId;
-    private String name;
-    private String statusName;
-    private LocalDateTime creationTime;
+    private String depositName;
+    private String depositStatusName;
+    private LocalDateTime depositCreationTime;
 
     /**
      * This common code was put here to avoid duplication.
@@ -42,6 +40,8 @@ public class DepositReviewModel {
     public void updateFromDepositReviewAndDepositInfo(DepositReview depositReview, DepositInfo depositInfo) {
         Assert.notNull(depositReview, "The depositReview cannot be null");
         Assert.notNull(depositInfo, "The depositInfo cannot be null");
+        Assert.notNull(depositReview.getId(), "The depositReview Id cannot be null");
+
         // Set DepositReview stuff
         this.setDepositReviewId(depositReview.getId());
         this.setDeleteStatus(depositReview.getDeleteStatus());
@@ -49,10 +49,9 @@ public class DepositReviewModel {
 
         // Set Deposit stuff
         this.setDepositId(depositInfo.getID());
-        this.setName(depositInfo.getName());
+        this.setDepositName(depositInfo.getName());
         Deposit.Status status = depositInfo.getStatus();
-        String statusNameStr = status == null ? "" : status.name();
-        this.setStatusName(statusNameStr);
-        this.setCreationTime(depositInfo.getCreationTime());
+        this.setDepositStatusName(status == null ? "" : status.name());
+        this.setDepositCreationTime(depositInfo.getCreationTime());
     }
 }

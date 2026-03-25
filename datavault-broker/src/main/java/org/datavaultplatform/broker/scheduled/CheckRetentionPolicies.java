@@ -1,5 +1,6 @@
 package org.datavaultplatform.broker.scheduled;
 
+import org.datavaultplatform.broker.services.RetentionPoliciesService;
 import org.datavaultplatform.broker.services.VaultsService;
 import org.datavaultplatform.common.model.RetentionPolicy;
 import org.datavaultplatform.common.model.Vault;
@@ -66,7 +67,7 @@ public class CheckRetentionPolicies implements ScheduledTask {
                 vault.getName(),
                 retentionPolicyDesc
         );
-        vaultsService.checkRetentionPolicy(vaultId);
+        vaultsService.checkRetentionPolicy(vaultId, RetentionPoliciesService.RetentionPolicyUpdateReason.TASK_UPDATE);
         Vault checkedVault = vaultsService.getVault(vaultId);
         if (checkedVault == null) {
             return;

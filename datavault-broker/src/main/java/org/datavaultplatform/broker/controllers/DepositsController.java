@@ -162,6 +162,7 @@ public class DepositsController {
 
         deposit.setUser(user);
 
+        // Add the file upload path
         DepositPath fileUploadPath = new DepositPath(deposit, createDeposit.getFileUploadHandle(), Path.PathType.USER_UPLOAD);
         deposit.getDepositPaths().add(fileUploadPath);
 
@@ -177,11 +178,13 @@ public class DepositsController {
             logger.info("\t- {}", dPath.getFilePath());
         }
 
+        // Add the deposit object
         depositsService.addDeposit(vault, deposit, "", "");
 
         this.runDeposit(archiveStores, deposit, createDeposit.getDepositPaths(), null);
 
-        vaultsService.checkRetentionPolicy(vault.getID());
+        // Check the retention policy of the newly created vault
+        vaultsService.checkRetentionPolicy(vault.getID(), RetentionPoliciesService.RetentionPolicyUpdateReason.ADDED_DEPOSIT);
 
         return new ResponseEntity<>(deposit.convertToResponse(), HttpStatus.OK);
     }
@@ -340,19 +343,23 @@ public class DepositsController {
         String storageID = storageIdAndRetrievePath.storageID();
         String retrievePath = storageIdAndRetrievePath.retrievePath();
         
+        // Fetch the ArchiveStore that is flagged for retrieval. We store it in a list as the Task parameters require a list.
         ArchiveStore archiveStore = archiveStoreService.getForRetrieval();
         Assert.isTrue(archiveStore != null, "NO ARCHIVE STORES CONFIGURED FOR RETRIEVAL");
         List<ArchiveStore> archiveStores = List.of(archiveStore);
         addArchiveSpecificOptions(archiveStores);
 
+        // Find the Archive that matches the ArchiveStore.
         String archiveID = getDepositArchive(deposit, archiveStore);
         
         FileStore userStore = getUserStore(user, storageID);
 
+        // Check the source file path is valid
         if (!filesService.validPath(retrievePath, userStore)) {
             throw new IllegalArgumentException("Path '" + retrievePath + "' is invalid");
         }
 
+        // Create a job to track this retrieve
         Job job = new Job(Job.TASK_CLASS_RETRIEVE);
         jobsService.addJob(deposit, job);
 
@@ -361,28 +368,35 @@ public class DepositsController {
         if (!isRestart) {
             deposit.setNonRestartJobId(job.getID());
             depositsService.updateDeposit(deposit);
+            // Add the retrieve object
             retrievesService.addRetrieve(retrieve, deposit, retrieve.getRetrievePath());
         }
 
+        // Ask the worker to process the data retrieve
         try {
             HashMap<String, String> retrieveProperties = getRetrieveProperties(user, deposit, retrieve, retrievePath, archiveID);
 
+            // Add a single entry for the user file storage
             Map<String, String> userFileStoreClasses = Map.of(storageID, userStore.getStorageClass());
             Map<String, Map<String, String>> userFileStoreProperties = Map.of(storageID, userStore.getProperties());
             
+            // get chunks checksums
             var chunksDigest = new HashMap<Integer,String>();
             deposit.getDepositChunks().forEach(dc -> chunksDigest.put(dc.getChunkNum(), dc.getArchiveDigest()));
             
+            // Get encryption IVs
             byte[] tarIVs = deposit.getEncIV();
             var chunksIVs = new HashMap<Integer,byte[]>();
             deposit.getDepositChunks().forEach(dc -> chunksIVs.put(dc.getChunkNum(), dc.getEncIV()));
             
+            // Get encrypted digests
             String encTarDigest = deposit.getEncArchiveDigest();
             var encChunksDigests = new HashMap<Integer, String>();
             deposit.getDepositChunks().forEach(dc -> encChunksDigests.put(dc.getChunkNum(), dc.getEcnArchiveDigest()));
 
             RetrievedChunks retrievedChunks = depositsService.getChunksRetrieved(deposit.getID(), retrieve.getID());
             String retrievedChunksJson = RetrievedChunks.toJson(retrievedChunks);
+            // for restarts
             retrieveProperties.put(PropNames.NON_RESTART_JOB_ID, deposit.getNonRestartJobId());
             retrieveProperties.put(PropNames.DEPOSIT_CHUNKS_RETRIEVED, retrievedChunksJson);
             
@@ -399,7 +413,8 @@ public class DepositsController {
             logger.error("unexpected exception", e);
         }
 
-        vaultsService.checkRetentionPolicy(deposit.getVault().getID());
+        // Check the retention policy of the newly created vault
+        vaultsService.checkRetentionPolicy(deposit.getVault().getID(), RetentionPoliciesService.RetentionPolicyUpdateReason.RETRIEVE_DEPOSIT);
 
         return true;
     }
@@ -416,6 +431,7 @@ public class DepositsController {
             }
         }
 
+        // Worth checking that we found a matching Archive for the ArchiveStore.
         if (archiveID == null) {
             throw new Exception("No valid archive for retrieval");
         }
@@ -428,6 +444,7 @@ public class DepositsController {
         }
         for (Job job : jobs) {
             if (!job.isError() && job.getState() != job.getStates().size() - 1) {
+                // There's an in-progress job for this deposit
                 throw new IllegalArgumentException("Job in-progress for this Deposit");
             }
         }
@@ -447,7 +464,7 @@ public class DepositsController {
         result.put(PropNames.DEPOSIT_CREATION_DATE, DateTimeUtils.formatLocalDateTimeBasicISO(deposit.getCreationTime()));
         result.put(PropNames.RETRIEVE_ID, retrieve.getID());
         result.put(PropNames.BAG_ID, deposit.getBagId());
-        result.put(PropNames.RETRIEVE_PATH, retrievePath);
+        result.put(PropNames.RETRIEVE_PATH, retrievePath); // No longer the absolute path
         result.put(PropNames.ARCHIVE_ID, archiveID);
         result.put(PropNames.ARCHIVE_SIZE, Long.toString(deposit.getArchiveSize()));
         result.put(PropNames.USER_ID, user.getID());
@@ -559,6 +576,7 @@ public class DepositsController {
         if (paths.isEmpty()) {
             throw new Exception("There are no file paths for restarted deposit - Exiting");
         }
+        // Get last Deposit Event
         Event lastEvent = depositsService.getLastNotFailedDepositEvent(deposit.getID());
         List<ArchiveStore> archiveStores = archiveStoreService.getArchiveStores();
         addArchiveSpecificOptions(archiveStores);
@@ -571,11 +589,14 @@ public class DepositsController {
         User user = deposit.getUser();
         Vault vault = deposit.getVault();
 
+        //String externalMetadata = externalMetadataService.getDatasetContent(vault.getDataset().getID());
+
         List<FileStore> userStores = user.getFileStores();
 
         Map<String, String> userFileStoreClasses = new HashMap<>();
         Map<String, Map<String, String>> userFileStoreProperties = new HashMap<>();
 
+        // Add any server-side filestore paths
         if (paths != null) {
             for (String path : paths) {
 
@@ -596,6 +617,7 @@ public class DepositsController {
                             throw new IllegalArgumentException("Storage ID '" + storageID + "' is invalid");
                         }
 
+                        // Check the source file path is valid
                         if (!filesService.validPath(storagePath, userStore)) {
                             throw new IllegalArgumentException("Path '" + storagePath + "' is invalid");
                         }
@@ -622,6 +644,7 @@ public class DepositsController {
             }
         }
 
+        // Create a job to track this deposit
         Job job = new Job(Job.TASK_CLASS_DEPOSIT);
         jobsService.addJob(deposit, job);
 
@@ -644,11 +667,18 @@ public class DepositsController {
             depositProperties.put(PropNames.ARCHIVE_DIGEST, deposit.getArchiveDigest());
         }
 
+        // Deposit and Vault metadata
+        // TODO: at the moment we're just serialising the objects to JSON.
+        // In future we'll need a more formal schema/representation (e.g. RDF or JSON-LD).
+
         DepositInfo depositInfo = deposit.convertToResponse();
         depositProperties.put(PropNames.DEPOSIT_METADATA, this.mapper.writeValueAsString(depositInfo));
 
         VaultInfo vaultInfo = vault.convertToResponse();
         depositProperties.put(PropNames.VAULT_METADATA, this.mapper.writeValueAsString(vaultInfo));
+
+        // External metadata is text from an external system - e.g. XML or JSON
+        //depositProperties.put("externalMetadata", externalMetadata);
 
         ArrayList<String> filestorePaths = new ArrayList<>();
         ArrayList<String> userUploadPaths = new ArrayList<>();
@@ -663,6 +693,9 @@ public class DepositsController {
             }
         }
 
+        // extra info from previous attempt for restart
+        // get chunks checksums
+        // Get encryption IVs
         byte[] tarIVs = (deposit.getEncIV() != null) ? deposit.getEncIV(): null;
         String encTarDigest = (deposit.getEncArchiveDigest() != null) ? deposit.getEncArchiveDigest() : null;
         HashMap<Integer, String> chunksDigest = null;
@@ -697,6 +730,7 @@ public class DepositsController {
 
         StoredChunks storedChunks = depositsService.getChunksStored(deposit.getID());
         String storedChunksJson = mapper.writeValueAsString(storedChunks);
+        // for restarts        
         depositProperties.put(PropNames.NON_RESTART_JOB_ID, deposit.getNonRestartJobId());
         depositProperties.put(PropNames.DEPOSIT_CHUNKS_STORED, storedChunksJson);
 

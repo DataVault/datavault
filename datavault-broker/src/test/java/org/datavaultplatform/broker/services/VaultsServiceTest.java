@@ -511,10 +511,10 @@ class VaultsServiceTest {
                 when(vaultDAO.update(vault)).thenReturn(vault);
 
                 // this is the method we are testing
-                serviceSpy.checkRetentionPolicy("vaultId");
+                serviceSpy.checkRetentionPolicy("vaultId", RetentionPoliciesService.RetentionPolicyUpdateReason.TEST);
 
                 // we just verify static invocation as updateRetentionPolicyExpiryDate does not return anything
-                mockStatic.verify(() -> RetentionPoliciesService.updateRetentionPolicyExpiryDate(vault, clock));
+                mockStatic.verify(() -> RetentionPoliciesService.updateRetentionPolicyExpiryDate(vault, clock, RetentionPoliciesService.RetentionPolicyUpdateReason.TEST));
                 mockStatic.verifyNoMoreInteractions();
 
                 //verify mocks
@@ -539,7 +539,7 @@ class VaultsServiceTest {
                 doReturn(null).when(serviceSpy).getVault("vaultId");
 
                 // this is the method we are testing
-                serviceSpy.checkRetentionPolicy("vaultId");
+                serviceSpy.checkRetentionPolicy("vaultId", RetentionPoliciesService.RetentionPolicyUpdateReason.TEST);
 
                 // we just verify static invocation as updateRetentionPolicyExpiryDate does not return anything
                 mockStatic.verifyNoMoreInteractions();

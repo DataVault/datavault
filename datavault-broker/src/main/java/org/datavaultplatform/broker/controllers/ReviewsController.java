@@ -55,6 +55,8 @@ public class ReviewsController {
         List<ReviewInfo> reviewinfos = new ArrayList<>();
 
         List<VaultReview> reviews = this.vaultsReviewService.findByVaultId(vault.getID());
+        reviews.sort(VaultReview.BY_CREATION_TIME);
+
         Utils.getSafeStream(reviews).forEach( vr -> {
             reviewinfos.add(AdminReviewsController.getReviewInfo(vr));
         });

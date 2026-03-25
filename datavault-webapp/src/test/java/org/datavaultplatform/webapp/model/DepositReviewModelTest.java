@@ -78,9 +78,9 @@ class DepositReviewModelTest {
             assertThat(drm.getComment()).isEqualTo("comment");
 
             assertThat(drm.getDepositId()).isEqualTo("deposit-id");
-            assertThat(drm.getName()).isEqualTo("deposit-name");
-            assertThat(drm.getStatusName()).isEqualTo(expectedStatus);
-            assertThat(drm.getCreationTime()).isEqualTo(NOW);
+            assertThat(drm.getDepositName()).isEqualTo("deposit-name");
+            assertThat(drm.getDepositStatusName()).isEqualTo(expectedStatus);
+            assertThat(drm.getDepositCreationTime()).isEqualTo(NOW);
         }
     }
 

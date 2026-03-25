@@ -202,6 +202,8 @@ public class VaultsController {
             }
         }
 
+        //User currentOwner = vault.getUser();
+
         if (transfer.isOrphaning()) {
             vaultsService.orphanVault(vault);
 
@@ -244,6 +246,9 @@ public class VaultsController {
 
             permissionsService.createRoleAssignment(assignment);
 
+            // Jira RSS212-099 - 'Don't email the old owners under any circumstances', so commenting out this email.
+            //sendEmails(EmailTemplate.TRANSFER_VAULT_OWNERSHIP, vault, userID, transfer.getUserId());
+
             CreateRoleAssignment roleAssignmentEvent = new CreateRoleAssignment(assignment, userId);
             roleAssignmentEvent.setVault(vaultsService.getVault(assignment.getVaultId()));
             roleAssignmentEvent.setUser(usersService.getUser(userId));
@@ -277,7 +282,9 @@ public class VaultsController {
             for (Vault vault : vaults) {
                 vaultResponses.add(vault.convertToResponse());
             }
+            //Map of project with its size
             Map<String, Long> projectSizeMap = vaultsService.getAllProjectsSize();
+            //update project Size in the response
             for(VaultInfo vault: vaultResponses) {
                 User owner = permissionsService.getVaultOwner(vault.getID());
                 if(owner != null) {
@@ -471,6 +478,8 @@ public class VaultsController {
         }
 
         DepositsData data = new DepositsData();
+        // data.setRecordsTotal(recordsTotal);
+        // data.setRecordsFiltered(recordsFiltered);
         data.setData(depositResponses);
         return data;
 
@@ -489,6 +498,7 @@ public class VaultsController {
 
         pendingVaultsService.addOrUpdatePendingVault(vault);
 
+        // delete all the previously assigned roles / creatores etc. and re-add (whether they have changed or not easier than working out what has changed)
         List<RoleAssignment> previousRoles = permissionsService.getRoleAssignmentsForPendingVault(vault.getId());
         if (previousRoles != null && ! previousRoles.isEmpty()) {
             for (RoleAssignment pr : previousRoles) {
@@ -504,11 +514,34 @@ public class VaultsController {
         }
 
         pendingVaultsService.addDepositorRoles(createVault, vault.getId());
+
+        // This should be present
         pendingVaultsService.addOwnerRole(createVault, vault.getId(), userId);
+
         vault = pendingVaultsService.processDataCreatorParams(createVault, vault);
+
         pendingVaultsService.addNDMRoles(createVault, vault.getId());
+
         pendingVaultsService.addCreator(createVault, userId, vault.getId());
 
+        //Create vaultEvent = new Create(vault.getId());
+        //vaultEvent.setVault(vault);
+        //vaultEvent.setUser(usersService.getUser(userID));
+        //vaultEvent.setAgentType(Agent.AgentType.BROKER);
+        //vaultEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
+
+        //eventService.addEvent(vaultEvent);
+
+        // Check the retention policy of the newly created vault
+        //try {
+        //    vaultsService.checkRetentionPolicy(vault.getId());
+        //} catch (Exception e) {
+        //    logger.error("Fail to check retention policy: "+e);
+        //    e.printStackTrace();
+        //    throw e;
+        //}
+        logger.info("createVault.getConfirmed(): " + createVault.getConfirmed());
+        // Send email if createVault confirmed
         if (createVault.getConfirmed()) {
             logger.info("Calling sendNewPendingVaultEmail().");
             pendingVaultsService.sendNewPendingVaultEmail(vault);
@@ -527,20 +560,30 @@ public class VaultsController {
                                       @RequestHeader(HEADER_CLIENT_KEY) String clientKey,
                                       @RequestBody CreateVault createVault) throws Exception {
         PendingVault vault = pendingVaultsService.getPendingVault(createVault.getPendingID());
-
+        
+        // Note whilst Data Owner may change, 
+        // the Vault Creator is set when the Pending Vault was created. 
+        // So will not be changed.
         User owner = vault.getOwner();
         logger.info("owner: " + owner);
         if(owner != null) {
         	logger.info("owner id:" + owner.getID());
         }
        
+        //Set affirmed = true as it is not set in Admin Edit UI
         createVault.setAffirmed(true);
+        //Set pureLink = true as it is not set in Admin Edit UI
         createVault.setPureLink(true);
         
         vault = pendingVaultsService.processVaultParams(vault, createVault, userId);
         
+        // Update all the data except Role Assignments and Data creators
         pendingVaultsService.addOrUpdatePendingVault(vault);
         
+        // Now update the Role Assignments and Data Creators, 
+        // except the Vault Creator.
+        
+        // Delete the previously assigned Data Owner
         List<RoleAssignment> previousRoles = permissionsService.getRoleAssignmentsForPendingVault(vault.getId());
         if (previousRoles != null && !previousRoles.isEmpty()) {
             for (RoleAssignment pr : previousRoles) {
@@ -567,9 +610,11 @@ public class VaultsController {
         logger.info("createVault.getDataCreatorsAsString(): " + createVault.getDataCreatorsAsString());
         vault = pendingVaultsService.processDataCreatorParams(createVault, vault);
 
+        // delete all the previously assigned Depositors
         previousRoles = permissionsService.getRoleAssignmentsForPendingVault(vault.getId());
         if (previousRoles != null && !previousRoles.isEmpty()) {
             for (RoleAssignment pr : previousRoles) {
+            	// Only delete Depositor roles
             	if(pr.getRole().getName().equals(ROLE_DEPOSITOR)) {
             		permissionsService.deleteRoleAssignment(pr.getId());
             	}
@@ -580,9 +625,11 @@ public class VaultsController {
         logger.info("createVault.getDepositorsAsString(): " + createVault.getDepositorsAsString());
         pendingVaultsService.addDepositorRoles(createVault, vault.getId());
          
+        // delete all the previously assigned Nominated Data Managers
         previousRoles = permissionsService.getRoleAssignmentsForPendingVault(vault.getId());
         if (previousRoles != null && !previousRoles.isEmpty()) {
             for (RoleAssignment pr : previousRoles) {
+            	// Only delete NDM roles
             	if(pr.getRole().getName().equals(ROLE_NDM)) {
             		permissionsService.deleteRoleAssignment(pr.getId());
             	}
@@ -610,11 +657,17 @@ public class VaultsController {
         pendingVaultsService.addOrUpdatePendingVault(vault);
 
         pendingVaultsService.addDepositorRoles(createVault, vault.getId());
+
         pendingVaultsService.addOwnerRole(createVault, vault.getId(), userId);
+
         vault = pendingVaultsService.processDataCreatorParams(createVault, vault);
+
         pendingVaultsService.addNDMRoles(createVault, vault.getId());
+
         pendingVaultsService.addCreator(createVault, userId, vault.getId());
 
+        logger.info("createVault.getConfirmed(): " + createVault.getConfirmed());
+        // Send email if createVault confirmed
         if (createVault.getConfirmed()) {
             logger.info("Calling sendNewPendingVaultEmail().");
             pendingVaultsService.sendNewPendingVaultEmail(vault);
@@ -682,16 +735,27 @@ public class VaultsController {
 
 
         vaultsService.addVault(vault);
+        // TODO: Add new Pending Vault created event that includes the creators name as that will be lost when the vault is upgraded
+        //Pending pendingEvent = new Pending(createVault.getPendingID());
+        //pendingEvent.setVault(vault);
+        //permissionsService.get
+        //pendingEvent.setUser(usersService.getUser(createVault.get);
+        //pendingEvent.setAgentType(Agent.AgentType.BROKER);
+        //pendingEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
         vaultsService.addVaultEvent(vault, clientKey, userId);
         vaultsService.addOwnerRole(createVault, vault, clientKey);
+        // send mail to owner
         vaultsService.sendVaultOwnerEmail(vault, homePage, helpPage, user);
         vaultsService.addDepositorRoles(createVault, vault, clientKey, homePage, helpPage);
+        // send mail to depositors
         vault = vaultsService.processDataCreatorParams(createVault, vault);
         vaultsService.addNDMRoles(createVault, vault, clientKey, homePage, helpPage);
+        // send mail to ndms
         vaultsService.addBillingInfo(createVault, vault);
 
+        // Check the retention policy of the newly created vault
         try {
-            vaultsService.checkRetentionPolicy(vault.getID());
+            vaultsService.checkRetentionPolicy(vault.getID(), RetentionPoliciesService.RetentionPolicyUpdateReason.ADDED_VAULT);
         } catch (Exception e) {
             logger.error("Fail to check retention policy: ",e);
             throw e;
@@ -766,7 +830,7 @@ public class VaultsController {
     public Vault checkVaultRetentionPolicy( @RequestHeader(HEADER_USER_ID) String userId,
                                            @PathVariable String vaultId) {
 
-        return vaultsService.checkRetentionPolicy(vaultId);
+        return vaultsService.checkRetentionPolicy(vaultId, RetentionPoliciesService.RetentionPolicyUpdateReason.MANUAL_UPDATE);
     }
 
     @Operation(
@@ -785,8 +849,8 @@ public class VaultsController {
             description = "Retrieves the full record for a specific Pending Vault."
     )
     @GetMapping(value = "/pendingVaults/{vaultId}/record", produces = MediaType.APPLICATION_JSON_VALUE)
-    public PendingVault getPendingVaultRecord( @RequestHeader(HEADER_USER_ID) String userId,
-                                              @PathVariable String vaultId) {
+    public PendingVault getPendingVaultRecord(@RequestHeader(HEADER_USER_ID) String userId,
+                                @PathVariable String vaultId) {
 
         return pendingVaultsService.getPendingVault(vaultId);
     }
@@ -795,11 +859,11 @@ public class VaultsController {
             summary = "Get a Vault's Deposits",
             description = "Retrieves a list of all Deposits for a specific Vault."
     )
-    @GetMapping(value = "/vaults/{vaultId}/deposits", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<DepositInfo> getDeposits( @RequestHeader(HEADER_USER_ID) String userId,
+    @GetMapping("/vaults/{vaultId}/deposits")
+    public List<DepositInfo> getDeposits(@RequestHeader(HEADER_USER_ID) String userID,
                                          @PathVariable String vaultId) throws Exception {
 
-        User user = usersService.getUser(userId);
+        User user = usersService.getUser(userID);
         Vault vault = vaultsService.getUserVault(user, vaultId);
 
         List<DepositInfo> depositResponses = new ArrayList<>();

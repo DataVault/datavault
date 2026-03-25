@@ -3,11 +3,10 @@ package org.datavaultplatform.common.model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -62,7 +61,6 @@ public class Vault implements Identified {
 
     // Serialise date in ISO 8601 format
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateTimeUtils.ISO_DATE_TIME_FORMAT)
-    //LTD @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "creationTime", nullable = false, columnDefinition = "TIMESTAMP")
     private LocalDateTime creationTime;
 
@@ -70,13 +68,11 @@ public class Vault implements Identified {
     // it!
     // Serialise date in ISO 8601 format
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateTimeUtils.ISO_DATE_FORMAT)
-    //@Temporal(TemporalType.DATE)
     @Column(name = "grantEndDate", nullable = true, columnDefinition = "DATE")
     private LocalDate grantEndDate;
 
     // Serialise date in ISO 8601 format
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateTimeUtils.ISO_DATE_FORMAT)
-    //@Temporal(TemporalType.DATE)
     @Column(name = "reviewDate", nullable = false, columnDefinition = "DATE")
     private LocalDate reviewDate;
 
@@ -121,13 +117,11 @@ public class Vault implements Identified {
 
     // Date retention policy will expire
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateTimeUtils.ISO_DATE_TIME_FORMAT)
-    //LTD @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "retentionPolicyExpiry", nullable = true, columnDefinition = "TIMESTAMP")
     private LocalDateTime retentionPolicyExpiry;
 
     // Date retention policy was last checked
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateTimeUtils.ISO_DATE_TIME_FORMAT)
-    //LTD @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "retentionPolicyLastChecked", nullable = true, columnDefinition = "TIMESTAMP")
     private LocalDateTime retentionPolicyLastChecked;
 
@@ -173,9 +167,9 @@ public class Vault implements Identified {
     public Vault() {
     }
 
-    public Vault(String name) {
+    public Vault(String name, Clock clock) {
         this.name = name;
-        this.creationTime = LocalDateTime.now();
+        this.creationTime = LocalDateTime.now(clock);
         retentionPolicyStatus = RetentionPolicyStatus.UNCHECKED;
     }
 
@@ -254,6 +248,9 @@ public class Vault implements Identified {
     }
 
     public void addDeposit(Deposit deposit) {
+        if (deposits == null) {
+            deposits = new ArrayList<>();
+        }
         this.deposits.add(deposit);
     }
 
@@ -280,6 +277,9 @@ public class Vault implements Identified {
     }
 
     public void addDataManager(DataManager dataManager) {
+        if (dataManagers == null) {
+            dataManagers = new ArrayList<>();
+        }
         this.dataManagers.add(dataManager);
     }
 
@@ -515,7 +515,7 @@ public class Vault implements Identified {
      */
     public Optional<VaultReview> findLatestVaultReviewIfStillUnderway() {
         return getMostRecentVaultReview()
-                .filter(VaultReview.NO_ACTION_DATE);
+                .filter(VaultReview::isReviewUnderway);
     }
 
     /**

@@ -15,10 +15,7 @@ import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertThrows;
@@ -64,14 +61,54 @@ class VaultsReviewServiceTest {
         verifyNoMoreInteractions(mVaultReviewDAO, mDepositReviewService);
     }
 
-    @Test
-    void testUpdateVaultReview() {
-        VaultReview vaultReview = new VaultReview();
-        doAnswer(invocation -> invocation.getArgument(0)).when(mVaultReviewDAO).update(any(VaultReview.class));
-        vaultsReviewService.updateVaultReview(vaultReview);
+    @Nested
+    class UpdateVaultReviewTests {
 
-        verify(mVaultReviewDAO).update(vaultReview);
-        verifyNoMoreInteractions(mVaultReviewDAO, mDepositReviewService);
+        @Test
+        void testUpdateNullVaultReview() {
+            IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
+                vaultsReviewService.updateVaultReview(null);
+            });
+            assertThat(ex).hasMessage("The vaultReview cannot be null");
+        }
+
+        @Test
+        void testUpdateNullVaultReviewId() {
+            VaultReview vaultReview = new VaultReview();
+            IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
+                vaultsReviewService.updateVaultReview(vaultReview);
+            });
+            assertThat(ex).hasMessage("The vaultReview.id cannot be null");
+        }
+
+        @Test
+        void testUpdateVaultReviewNotFound() {
+            VaultReview vaultReview = new VaultReview();
+            vaultReview.setId("vaultId");
+            
+            when(mVaultReviewDAO.findById("vaultId")).thenReturn(Optional.empty());
+
+            NoSuchElementException ex = assertThrows(NoSuchElementException.class, () -> {
+                vaultsReviewService.updateVaultReview(vaultReview);
+            });
+            assertThat(ex).hasMessage("No value present");
+        }
+
+        @Test
+        void testUpdateVaultReview() {
+            VaultReview originalVaultReview = new VaultReview();
+            
+            VaultReview vaultReview = new VaultReview();
+            vaultReview.setId("vaultId");
+            
+            when(mVaultReviewDAO.findById("vaultId")).thenReturn(Optional.of(originalVaultReview));
+            
+            vaultsReviewService.updateVaultReview(vaultReview);
+
+            verify(mVaultReviewDAO).findById("vaultId");
+            verify(mVaultReviewDAO).update(originalVaultReview);
+            verifyNoMoreInteractions(mVaultReviewDAO, mDepositReviewService);
+        }
     }
 
     @Nested
@@ -96,20 +133,20 @@ class VaultsReviewServiceTest {
                 review.setActionedDate(now.plusMonths(actionedOffsetMonths));
             }
 
-            boolean dueForReviewEmail = vaultsReviewService.dueForReviewEmail(vault);
+            boolean dueForReviewEmail = vaultsReviewService.isDueForReviewEmail(vault);
             assertThat(dueForReviewEmail).isEqualTo(expected);
         }
 
         @Test
         void testNullVault() {
-            boolean dueForReview = vaultsReviewService.dueForReviewEmail(null);
+            boolean dueForReview = vaultsReviewService.isDueForReviewEmail(null);
             assertThat(dueForReview).isFalse();
         }
 
         @Test
         void testVaultHasNoReviewDate() {
             Vault vault = new Vault();
-            boolean dueForReview = vaultsReviewService.dueForReviewEmail(vault);
+            boolean dueForReview = vaultsReviewService.isDueForReviewEmail(vault);
             assertThat(dueForReview).isFalse();
         }
 
@@ -118,7 +155,7 @@ class VaultsReviewServiceTest {
             Vault vault = new Vault();
             // this makes the today before the start of the 'review window' which is (review date -6 months)
             vault.setReviewDate(LocalDate.now(CLOCK).plusMonths(7));
-            boolean dueForReview = vaultsReviewService.dueForReviewEmail(vault);
+            boolean dueForReview = vaultsReviewService.isDueForReviewEmail(vault);
             assertThat(dueForReview).isFalse();
         }
 
@@ -127,7 +164,7 @@ class VaultsReviewServiceTest {
                 true, true, false
                 true, false, false
                 false, false, false
-                false, true, true 
+                false, true, true
                 """)
             // note: we only expectReview if no current review exists and reviewHasNotHappenedAfterReviewWindowStart is true
         void testTodayNotBeforeStartOfReviewWindow(boolean currentReviewExists, boolean reviewHasNotHappenedAfterReviewWindowStart, boolean reviewExpected) {
@@ -158,7 +195,7 @@ class VaultsReviewServiceTest {
             // this makes the today after the start of the 'review window' which is (review date -6 months)
             vault.setReviewDate(reviewDate);
 
-            boolean dueForReview = vaultsReviewService.dueForReviewEmail(vault);
+            boolean dueForReview = vaultsReviewService.isDueForReviewEmail(vault);
             assertThat(dueForReview).isEqualTo(reviewExpected);
 
         }
@@ -225,7 +262,7 @@ class VaultsReviewServiceTest {
         @ParameterizedTest
         @CsvSource(textBlock = """
                 false, false
-                true, true 
+                true, true
                 """)
             // note: we only expectReview if reviewHasNotHappenedAfterReviewWindowStart is true
         void testTodayNotBeforeStartOfReviewWindow(boolean reviewHasNotHappenedAfterReviewWindowStart, boolean reviewExpected) {

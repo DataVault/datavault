@@ -61,8 +61,17 @@ public class VaultsReviewService {
         return this.vaultReviewDAO.search(query);
     }
 
-    public void updateVaultReview(VaultReview vaultReview) {
-        vaultReviewDAO.update(vaultReview);
+    public VaultReview updateVaultReview(VaultReview vaultReview) {
+        Assert.notNull(vaultReview, "The vaultReview cannot be null");
+        Assert.notNull(vaultReview.getId(), "The vaultReview.id cannot be null");
+        VaultReview originalVaultReview = vaultReviewDAO.findById(vaultReview.getId()).orElseThrow();
+
+        // by doing this - we don't lose the original vaultId on the VaultReview
+        originalVaultReview.setActionedDate(vaultReview.getActionedDate());
+        originalVaultReview.setComment(vaultReview.getComment());
+        originalVaultReview.setOldReviewDate(vaultReview.getOldReviewDate());
+
+        return vaultReviewDAO.update(originalVaultReview);
     }
 
     public List<Vault> getVaultsForReview(List<Vault> vaults) {
@@ -107,8 +116,7 @@ public class VaultsReviewService {
      * 2) No review has already been completed (Actioned) within this window.
      */
     public boolean isVaultForReview(Vault vault) {
-        boolean vaultNeedsReview = isEligibleForReviewAction(vault);
-        return vaultNeedsReview;
+        return isEligibleForReviewAction(vault);
     }
 
     /*
@@ -118,11 +126,9 @@ public class VaultsReviewService {
      * 3) No review has already been completed (Actioned) within this window.
      * There is a chance the latest VaultReview was created a while ago and is still open - we won't send reminder emails.
      */
-    public boolean dueForReviewEmail(Vault vault) {
-        boolean vaultNeedsReviewEmail = vault != null
-                && !vault.isVaultReviewUnderway()
-                && isEligibleForReviewAction(vault);
-        return vaultNeedsReviewEmail;
+    public boolean isDueForReviewEmail(Vault vault) {
+        return vault != null && !vault.isVaultReviewUnderway()
+                 && isEligibleForReviewAction(vault);
     }
     
     private boolean reviewHasNotHappenedAfterReviewWindowStart(Vault vault, LocalDate reviewWindowStartDate){

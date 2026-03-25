@@ -43,6 +43,9 @@ public class AdminDepositService {
 
         List<Job> jobs = deposit.getJobs();
         for (Job job : jobs) {
+            if (job.getState() == null) {
+                continue;
+            }
             if (job.isError() == false && job.getState() != job.getStates().size() - 1) {
                 // There's an in-progress job for this deposit
                 throw new IllegalArgumentException("Job in-progress for this Deposit");
