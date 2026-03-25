@@ -161,7 +161,7 @@ public class DepositReview  {
     }
     
     @JsonIgnore
-    public boolean isReviewComplete() {
+    public boolean isReviewActioned() {
         return this.actionedDate != null;
     }
 }

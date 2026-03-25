@@ -126,7 +126,7 @@ public class CheckForDelete implements ScheduledTask {
         // we are only interested in DepositReviews that have not been actioned
         // when we save a depositReview with RETAIN - we set the actionedDate.
         // when we save a depositReivew with NOW - we set the actionedDate (and delete the deposit) 
-        if (dr.isReviewComplete()) {
+        if (dr.isReviewActioned()) {
             return;
         }
         String depositId = dr.getDeposit().getID();

@@ -57,7 +57,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @TestMethodOrder(MethodOrderer.MethodName.class)
 @AutoConfigureMockMvc
 @TestPropertySource(properties = "logging.level.org.thymeleaf.spring6.expression=TRACE")
-public class ThymeleafTemplateTest extends BaseThymeleafTest {
+class ThymeleafTemplateTest extends BaseThymeleafTest {
 
     private static final ThreadLocal<ModelMap> TL_MODEL_MAP = ThreadLocal.withInitial(ModelMap::new);
 
