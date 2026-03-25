@@ -2,8 +2,8 @@
     <div class="form-card">
         <h2 class="fs-title">Vault Information</h2>
 
-        <div class="form-group required">
-            <label for="vaultName" class="control-label">Vault Name</label>
+        <div class="form-group required mb-3">
+            <label for="vaultName" class="control-label"><Strong>Vault Name</strong></label>
             <i class="bi bi-info-circle" aria-hidden="true" data-bs-toggle="tooltip"
                title="Maximum 400 characters."></i>
             <input type="text"
@@ -14,8 +14,8 @@
             />
         </div>
 
-        <div class="form-group required">
-            <label for="description" class="control-label">Description</label>
+        <div class="form-group required mb-3">
+            <label for="description" class="control-label"><strong>Description</strong></label>
             <i class="bi bi-info-circle" aria-hidden="true" data-bs-toggle="tooltip"
                title="Maximum 6,000 characters."></i>
             <textarea type="text" class="form-control" 
@@ -25,7 +25,7 @@
             </textarea>
         </div>
 
-        <div class="form-group">
+        <div class="form-group mb-3">
             <label  for="grantEndDate" class="control-label">
                 <strong>Grant End Date</strong>
             </label>
@@ -45,8 +45,8 @@
             </p>
         </div>
 
-        <div class="form-group required">
-            <label for="policyInfo" class="control-label">Retention Policy (tell us how long we must keep the data)</label>
+        <div class="form-group required mb-3">
+            <label for="policyInfo" class="control-label"><strong>Retention Policy (tell us how long we must keep the data)</strong></label>
             <i class="bi bi-info-circle" aria-hidden="true" data-bs-toggle="tooltip"
                title="Tell us which funder's policy we must comply with. This tells us the minimum amount of time we must keep the data. This information is important when deciding on the Review Date. If there is no funder, choose the University of Edinburgh retention policy. If there are multiple funders, choose the one with the longest minimum retention period."></i>
             <a href="https://www.ed.ac.uk/information-services/research-support/research-data-service/planning-your-data/funder-requirements" target="_blank">
@@ -68,7 +68,7 @@
             </div>
         </div>
 
-        <div class="form-group required">
+        <div class="form-group required mb-3">
             <label for="reviewDate" class="control-label">
                 <strong>Review Date (the date before which we should not delete this data, typically ten years from now)</strong>
             </label>
@@ -81,8 +81,8 @@
                    <span id="invalid-review-date-span" style="font-size: 1.2em; font-weight: bold; color:  #AE0F0F; display: inline;"></span>
         </div>
 
-        <div class="form-group required">
-            <label for="groupID" class="control-label">School</label>
+        <div class="form-group required mb-3">
+            <label for="groupID" class="control-label"><strong>School</strong></label>
             <i class="bi bi-info-circle" aria-hidden="true" data-bs-toggle="tooltip"
                title="The School to which the vault belongs. In the absence of the vault Owner, School officers may be consulted on the management of the vault."></i>
             <div class="row">
@@ -111,8 +111,8 @@
             </div>
         </div>
 
-        <div class="form-group" required>
-            <label class="control-label">Rough estimate of the amount of data:</label>
+        <div class="form-group required mb-3">
+            <label class="control-label"><strong>Rough estimate of the amount of data:</strong></label>
             <div class="radio">
                 <label>
                     <input type="radio" name="estimate" value="UNDER_100GB"
@@ -143,8 +143,8 @@
             </div>
         </div>
 
-        <div class="form-group">
-            <label for="notes" class="control-label">Notes regarding data retention and possible sharing</label>
+        <div class="form-group mb-3">
+            <label for="notes" class="control-label"><strong>Notes regarding data retention and possible sharing</strong></label>
             <i class="bi bi-info-circle" aria-hidden="true" data-bs-toggle="tooltip"
                title="Information to assist you and any other colleagues who will be part of the review process when the vault retention period expires, in deciding whether the data should be retained or deleted. Please also use this field to explain whether requests for access to the data should be refused on a vault-wide basis, or whether certain criteria should be applied and/or any Data Sharing Agreement signed before any requests are granted. Please add a blank copy of the Data Sharing Agreement to your Vault as a separate deposit."></i>
             <textarea type="text" class="form-control" name="notes" id="notes"
