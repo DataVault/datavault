@@ -22,7 +22,7 @@ public class VaultReviewViewModel {
                     Comparator.nullsFirst(Comparator.naturalOrder())));
 
     private String vaultReviewId;
-    private LocalDate nextReviewDate;
+    private LocalDate currentVaultReviewDate;
     private String comment;
 
     private LocalDateTime actionedDate;

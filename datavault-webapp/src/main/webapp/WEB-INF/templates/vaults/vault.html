@@ -418,7 +418,15 @@
                                  <thead>
                                  <tr th:class="${rowClass}">
                                      <th>Date Review Submitted</th>
-                                     <th>Review Date</th>
+                                     <th:block th:if="${vrvm.actionedDate != null}">
+                                         <!--/* if there's an actionedDate - the (old) Vault ReviewDate at time of submission will be used */-->
+                                         <td>Review Date (when submitted)</td>
+                                     </th:block>
+                                     <th:block th:if="${vrvm.actionedDate == null}">
+                                         <!--/* if there's no actionedDate - we display the current Vault Review date */-->
+                                         <td>Review Date (current)</td>
+                                     </th:block>
+
                                      <th colspan="2">Comment</th>
                                  </tr>
                                  </thead>
@@ -432,10 +440,12 @@
                                         <td>Review still in progress</td>
                                      </th:block>
                                      <th:block th:if="${vrvm.actionedDate != null}">
+                                         <!--/* if there's an actionedDate - the oldReviewDate will be set */-->
                                          <td>[[${#temporals.format(vrvm.oldReviewDate,dateFormatISO)}]]<!--/* date */--></td>
                                      </th:block>
                                      <th:block th:if="${vrvm.actionedDate == null}">
-                                         <td>[[${#temporals.format(vrvm.nextReviewDate,dateFormatISO)}]]<!--/* date */--></td>
+                                         <!--/* if there's no actionedDate - we display the current Vault Review Date */-->
+                                         <td>[[${#temporals.format(vrvm.currentVaultReviewDate,dateFormatISO)}]]<!--/* date */--></td>
                                      </th:block>
                                      <td colspan="2">[[${vrvm.comment ?: ''}]]</td>
                                  </tr>
