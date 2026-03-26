@@ -33,7 +33,7 @@ class VaultReviewViewModelTest {
 
         vrvm.setDepositReviewViewModels(models);
 
-        vrvm.setNextReviewDate(now.plusMonths(1).toLocalDate());
+        vrvm.setCurrentVaultReviewDate(now.plusMonths(1).toLocalDate());
         vrvm.setOldReviewDate(now.plusHours(2).toLocalDate());
         vrvm.setVaultReviewId("vault-review-id");
 
@@ -45,7 +45,7 @@ class VaultReviewViewModelTest {
 
         assertThat(vrvm.getDepositReviewViewModels()).isEqualTo(expectedModels);
 
-        assertThat(vrvm.getNextReviewDate()).isEqualTo(now.plusMonths(1).toLocalDate());
+        assertThat(vrvm.getCurrentVaultReviewDate()).isEqualTo(now.plusMonths(1).toLocalDate());
         assertThat(vrvm.getOldReviewDate()).isEqualTo(now.plusHours(2).toLocalDate());
         assertThat(vrvm.getVaultReviewId()).isEqualTo("vault-review-id");
     }

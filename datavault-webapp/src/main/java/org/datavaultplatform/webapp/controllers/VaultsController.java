@@ -268,8 +268,8 @@ public class VaultsController {
             vaultReviewViewModel.setComment(vaultReview.getComment());
             vaultReviewViewModel.setActionedDate(vaultReview.getActionedDate());
             vaultReviewViewModel.setCreationTime(vaultReview.getCreationTime());
-            vaultReviewViewModel.setOldReviewDate(vaultReview.getOldReviewDate());
-            vaultReviewViewModel.setNextReviewDate(vault.getReviewDate()); //only show this when there is no actioned date
+            vaultReviewViewModel.setOldReviewDate(vaultReview.getOldReviewDate()); //only show this with there is an actioned date
+            vaultReviewViewModel.setCurrentVaultReviewDate(vault.getReviewDate()); //only show this when there is no actioned date
 
             vaultReviewViewModel.setDepositReviewViewModels(depositReviewViewModels);
 
