@@ -4,10 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.request.CreateRetentionPolicy;
-import org.datavaultplatform.common.response.DepositInfo;
-import org.datavaultplatform.common.response.ReviewInfo;
-import org.datavaultplatform.common.response.VaultInfo;
-import org.datavaultplatform.common.response.VaultsData;
+import org.datavaultplatform.common.response.*;
 import org.datavaultplatform.common.util.DateTimeUtils;
 import org.datavaultplatform.webapp.app.DataVaultWebApp;
 import org.datavaultplatform.webapp.model.DepositReviewModel;
@@ -62,6 +59,10 @@ class AdminReviewsControllerMvcTest {
     static final String TEST_VAULT_ID_2 = "vaultinfo-id-2";
     static final String TEST_VAULT_NAME_1 = "vaultinfo-name-1";
     static final String TEST_VAULT_NAME_2 = "vaultinfo-name-2";
+    static final String TEST_VAULT_ID_3 = "vaultinfo-id-3";
+    static final String TEST_VAULT_ID_4 = "vaultinfo-id-4";
+    static final String TEST_VAULT_NAME_3 = "vaultinfo-name-3";
+    static final String TEST_VAULT_NAME_4 = "vaultinfo-name-4";
     static final String TEST_DEPOSIT_ID_1 = "test-deposit-id-1";
     static final String TEST_DEPOSIT_ID_2 = "test-deposit-id-2";
     static final String TEST_DEPOSIT_REVIEW_1_ID = "test-deposit-review-1-id";
@@ -82,13 +83,22 @@ class AdminReviewsControllerMvcTest {
     RestService mRestService;
 
     @Mock
-    VaultsData mVaultsData;
+    VaultsData mVaultsDataDueIn6Months;
+
+    @Mock
+    VaultsData mVaultsDataAll;
 
     @Mock
     VaultInfo mVaultInfo1;
 
     @Mock
     VaultInfo mVaultInfo2;
+
+    @Mock
+    VaultInfo mVaultInfo3;
+
+    @Mock
+    VaultInfo mVaultInfo4;
 
     @Mock
     RoleAssignment mRoleAssignment1;
@@ -150,23 +160,53 @@ class AdminReviewsControllerMvcTest {
 
     final List<RoleAssignment>  roleAssignments = new ArrayList<>();
 
-    final List<VaultInfo> vaultsInfo = new ArrayList<>();
+    final List<VaultInfo> vaultsInfoDueIn6Months = new ArrayList<>();
+    final List<VaultInfo> vaultsInfoAll = new ArrayList<>();
+   
+    final VaultReviewStatusInfo vaultReviewStatusInfo1 = new VaultReviewStatusInfo();
+    final VaultReviewStatusInfo vaultReviewStatusInfo2 = new VaultReviewStatusInfo();
+    final VaultReviewStatusInfo vaultReviewStatusInfo3 = new VaultReviewStatusInfo();
+    final VaultReviewStatusInfo vaultReviewStatusInfo4 = new VaultReviewStatusInfo();
     
     ObjectMapper mapper = new ObjectMapper();
     
+    LocalDate today;
+    
     @BeforeEach
     void setup() {
+        today = LocalDate.now();
+        
         // VaultsInfo
-        vaultsInfo.add(mVaultInfo1);
-        vaultsInfo.add(mVaultInfo2);
+        vaultsInfoDueIn6Months.add(mVaultInfo1);
+        vaultsInfoDueIn6Months.add(mVaultInfo2);
 
-        when(mVaultsData.getData()).thenReturn(vaultsInfo);
+        vaultsInfoAll.add(mVaultInfo1);
+        vaultsInfoAll.add(mVaultInfo2);
+        vaultsInfoAll.add(mVaultInfo3);
+        vaultsInfoAll.add(mVaultInfo4);
+        
+        when(mVaultsDataDueIn6Months.getData()).thenReturn(vaultsInfoDueIn6Months);
+        when(mVaultsDataAll.getData()).thenReturn(vaultsInfoAll);
 
         lenient().when(mVaultInfo1.getID()).thenReturn(TEST_VAULT_ID_1);
         lenient().when(mVaultInfo1.getName()).thenReturn(TEST_VAULT_NAME_1);
+        lenient().when(mVaultInfo1.getReviewDate()).thenReturn(today.plusMonths(1));
+        lenient().when(mVaultInfo1.getVaultReviewStatusInfo()).thenReturn(vaultReviewStatusInfo1);
 
         lenient().when(mVaultInfo2.getID()).thenReturn(TEST_VAULT_ID_2);
         lenient().when(mVaultInfo2.getName()).thenReturn(TEST_VAULT_NAME_2);
+        lenient().when(mVaultInfo2.getReviewDate()).thenReturn(today.plusMonths(5));
+        lenient().when(mVaultInfo2.getVaultReviewStatusInfo()).thenReturn(vaultReviewStatusInfo2);
+
+        lenient().when(mVaultInfo3.getID()).thenReturn(TEST_VAULT_ID_3);
+        lenient().when(mVaultInfo3.getName()).thenReturn(TEST_VAULT_NAME_3);
+        lenient().when(mVaultInfo3.getReviewDate()).thenReturn(today.plusMonths(7));
+        lenient().when(mVaultInfo3.getVaultReviewStatusInfo()).thenReturn(vaultReviewStatusInfo3);
+
+        lenient().when(mVaultInfo4.getID()).thenReturn(TEST_VAULT_ID_4);
+        lenient().when(mVaultInfo4.getName()).thenReturn(TEST_VAULT_NAME_4);
+        lenient().when(mVaultInfo4.getReviewDate()).thenReturn(today.plusMonths(8));
+        lenient().when(mVaultInfo4.getVaultReviewStatusInfo()).thenReturn(vaultReviewStatusInfo4);
 
         // RoleAssignments
         roleAssignments.add(mRoleAssignment1);
@@ -185,10 +225,16 @@ class AdminReviewsControllerMvcTest {
         lenient().when(mCreateRetentionPolicy2.getMinRetentionPeriod()).thenReturn(5);
 
         // RestService
-        lenient().when(mRestService.getVaultsForReview()).thenReturn(mVaultsData);
+        lenient().when(mRestService.getVaultsForReview()).thenReturn(mVaultsDataDueIn6Months);
+        lenient().when(mRestService.getAllVaultsForReview()).thenReturn(mVaultsDataAll);
 
         lenient().when(mRestService.getVault(TEST_VAULT_ID_1)).thenReturn(mVaultInfo1);
         lenient().when(mRestService.getVault(TEST_VAULT_ID_2)).thenReturn(mVaultInfo2);
+
+        lenient().when(mRestService.getVaultReviewStatusInfo(TEST_VAULT_ID_1)).thenReturn(vaultReviewStatusInfo1);
+        lenient().when(mRestService.getVaultReviewStatusInfo(TEST_VAULT_ID_2)).thenReturn(vaultReviewStatusInfo2);
+        lenient().when(mRestService.getVaultReviewStatusInfo(TEST_VAULT_ID_3)).thenReturn(vaultReviewStatusInfo3);
+        lenient().when(mRestService.getVaultReviewStatusInfo(TEST_VAULT_ID_4)).thenReturn(vaultReviewStatusInfo4);
 
         lenient().when(mRestService.getRoleAssignmentsForVault(TEST_VAULT_ID_1)).thenReturn(roleAssignments);
         lenient().when(mRestService.getRoleAssignmentsForVault(TEST_VAULT_ID_2)).thenReturn(roleAssignments);
@@ -229,6 +275,11 @@ class AdminReviewsControllerMvcTest {
         assertThat(elem2.text()).isEqualTo("vaultinfo-name-2");
 
         verify(mRestService).getVaultsForReview();
+        verify(mRestService).getAllVaultsForReview();
+        verify(mRestService).getVaultReviewStatusInfo(TEST_VAULT_ID_1);
+        verify(mRestService).getVaultReviewStatusInfo(TEST_VAULT_ID_2);
+        verify(mRestService).getVaultReviewStatusInfo(TEST_VAULT_ID_3);
+        verify(mRestService).getVaultReviewStatusInfo(TEST_VAULT_ID_4);
         Mockito.verifyNoMoreInteractions(mRestService);
     }
 

@@ -5,14 +5,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.datavaultplatform.common.model.*;
 
 import org.datavaultplatform.common.request.CreateRetentionPolicy;
-import org.datavaultplatform.common.response.DepositInfo;
-import org.datavaultplatform.common.response.ReviewInfo;
-import org.datavaultplatform.common.response.VaultInfo;
-import org.datavaultplatform.common.response.VaultsData;
+import org.datavaultplatform.common.response.*;
 import org.datavaultplatform.common.util.RoleUtils;
 import org.datavaultplatform.common.util.Utils;
 import org.datavaultplatform.webapp.model.DepositReviewModel;
-import org.datavaultplatform.webapp.model.DepositReviewViewModel;
 import org.datavaultplatform.webapp.model.VaultReviewModel;
 import org.datavaultplatform.webapp.services.RestService;
 import org.slf4j.Logger;
@@ -29,6 +25,7 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.datavaultplatform.common.util.Utils.*;
 
@@ -54,15 +51,40 @@ public class AdminReviewsController {
     @GetMapping("/admin/reviews")
     public String getVaultsForReview(ModelMap model) {
 
+        Comparator<VaultInfo> byReviewDateAsc = Comparator.comparing(
+                VaultInfo::getReviewDate,
+                Comparator.nullsLast(Comparator.naturalOrder())
+        );
+
         VaultsData vaultsData = restService.getVaultsForReview();
-        List<VaultInfo> vaultsInfo = vaultsData.getData();
+        List<VaultInfo> vaultsInfo = Utils.getSafeStream(vaultsData.getData()).sorted(byReviewDateAsc).toList();
+        vaultsInfo.forEach(this::addVaultReviewStatusInfo);
+        
+        Set<String> vaultIds = vaultsInfo.stream()
+                .map(VaultInfo::getID)
+                .collect(Collectors.toSet());
+        
+        VaultsData allVaultsData = restService.getAllVaultsForReview();
+        List<VaultInfo> otherVaultsInfo = allVaultsData.getData()
+                .stream()
+                .filter(vault -> !vaultIds.contains(vault.getID()))
+                .sorted(byReviewDateAsc)
+                .toList();
+
+        otherVaultsInfo.forEach(this::addVaultReviewStatusInfo);
+
 
         model.addAttribute("vaults", vaultsInfo);
-
+        model.addAttribute("otherVaults", otherVaultsInfo);
         return "admin/reviews/index";
     }
 
-    // Return a review page
+    void addVaultReviewStatusInfo(VaultInfo info) {
+        VaultReviewStatusInfo statusInfo = restService.getVaultReviewStatusInfo(info.getID());
+        info.setVaultReviewStatusInfo(statusInfo);
+    }
+
+    // Return a review page for the Current Vault Review
     @GetMapping("/admin/vaults/{vaultid}/reviews")
     public String showReview(ModelMap model, 
                              @PathVariable("vaultid") String vaultID, 

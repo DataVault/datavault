@@ -8,6 +8,7 @@ import org.datavaultplatform.common.event.vault.Review;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.response.ReviewInfo;
 import org.datavaultplatform.common.response.VaultInfo;
+import org.datavaultplatform.common.response.VaultReviewStatusInfo;
 import org.datavaultplatform.common.response.VaultsData;
 import org.datavaultplatform.common.util.Utils;
 import org.jsondoc.core.annotation.Api;
@@ -78,6 +79,27 @@ public class AdminReviewsController {
         return result;
     }
 
+    @GetMapping("/admin/vaultsForReview/all")
+    public VaultsData getAllVaults(@RequestHeader(HEADER_USER_ID) String userID) {
+
+        List<Vault> vaults = vaultsService.getVaults();
+
+        Assert.state(vaults != null, "The vaults should not be null");
+
+        List<VaultInfo> vaultResponses = vaults.stream()
+                .filter(Objects::nonNull)
+                .map(Vault::convertToResponse)
+                .toList();
+
+        VaultsData result = new VaultsData();
+        result.setData(vaultResponses);
+        return result;
+    }
+
+    @GetMapping("/admin/vaults/{vaultId}/reviewstatus")
+    public VaultReviewStatusInfo getVaultReviewStatusInfo(@PathVariable String vaultId) {
+        return vaultsReviewService.getCurrentVaultReviewStatus(vaultId);
+    }
 
     @ApiMethod(
             path = "/admin/vaults/{vaultid}/vaultreviews/current",

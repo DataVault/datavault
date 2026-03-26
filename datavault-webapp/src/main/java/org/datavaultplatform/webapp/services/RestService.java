@@ -213,6 +213,16 @@ public class RestService implements NotifyLogoutService, NotifyLoginService, Eva
         return response.getBody();
     }
 
+    public VaultsData getAllVaultsForReview() {
+        ResponseEntity<VaultsData> response = get(brokerURL + "/admin/vaultsForReview/all", VaultsData.class);
+        return response.getBody();
+    }
+
+    public VaultReviewStatusInfo getVaultReviewStatusInfo(String vaultId) {
+        ResponseEntity<VaultReviewStatusInfo> response = get(brokerURL + "/admin/vaults/%s/reviewstatus".formatted(vaultId), VaultReviewStatusInfo.class);
+        return response.getBody();
+    }
+
     public ReviewInfo[] getReviewsListing(String vaultId) {
         ResponseEntity<ReviewInfo[]> response = get(brokerURL +"/vaults/" + vaultId + "/vaultreviews", ReviewInfo[].class);
         return response.getBody();

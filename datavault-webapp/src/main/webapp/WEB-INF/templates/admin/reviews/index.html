@@ -13,49 +13,176 @@
         </ol>
     </nav>
 
-    <th:block th:if="${vaults != null}">
+    <th:block th:if="${vaults != null}" th:with="today=${T(java.time.LocalDate).now()}">
 
         <div class="table-responsive" id="vaultsTable">
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 0;">
+                <input type="text" placeholder="Search by 3 chars..." size="20"
+                       style="width: 200px;">
+                <span style="font-weight: bold; flex-grow: 1; text-align: center;">Vaults Due For Review</span>
+                <div style="width: 200px;"></div>
+            </div>
             <table class="table table-light table-striped table-hover align-middle">
                 <thead>
-                    <tr class="tr">
-                       <th>Vault Name</th>
-                       <th>Deposits</th>
-                       <th>Vault Size</th>
-                       <th>Owner(UUN)</th>
-                       <th>School</th>
-                       <th>Review Date</th>
-                        <th>Date created</th>
-                        <th>Actions</th>
-                    </tr>
+                <tr class="tr">
+                    <th>Vault Name</th>
+                    <th>Deposits</th>
+                    <th>Vault Size</th>
+                    <th>Owner(UUN)</th>
+                    <th>School</th>
+                    <th>Last Reviewed Date</th>
+                    <th>Next Review Date</th>
+                    <th>Days Until Review Date</th>
+                    <th>Vault Created Date</th>
+                    <th>Actions</th>
+                </tr>
                 </thead>
-
                 <tbody>
-                        <tr th:each="vault: ${vaults}" class="tr">
-                            <td>
-                                <a th:href="@{|/vaults/${vault.getID()}/|}">[[${vault.name}]]</a>
-                            </td>
-                            <td>[[${vault.getNumberOfDeposits()}]]</td>
-                            <td>[[${vault.getSizeStr()}]]</td>
-                            <td>
-                                <th:block th:if="${vault.getUserID() != null}">
-                                <a th:href="@{|/vaults/${vault.getID()}/${vault.getUserID()}|}">[[${vault.getUserName()}]] ([[${vault.getUserID()}]])</a>
-                                </th:block>
-                            </td>
-                            
-                            <td>[[${vault.groupID}]]</td>
-                            <td>[[${#temporals.format(vault.reviewDate,dateFormatddMMyyyy)}]]<!--/* date */--></td>
-                            <td>[[${#temporals.format(vault.getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */--></td>
-                            <td>
-                                <a th:href="@{|/admin/vaults/${vault.getID()}/reviews|}">Review</a>
-                            </td>
-                        </tr>
+                <tr class="no-results" style="display: none;">
+                    <td colspan="10" style="text-align: center; color: #888;">
+                        No matching vaults found.
+                    </td>
+                </tr>
+                <tr th:each="vault: ${vaults}" class="tr">
+                    <td>
+                        <a th:href="@{|/vaults/${vault.getID()}/|}">[[${vault.name}]]</a>
+                    </td>
+                    <td>[[${vault.getNumberOfDeposits()}]]</td>
+                    <td>[[${vault.getSizeStr()}]]</td>
+                    <td>
+                        <th:block th:if="${vault.getUserID() != null}">
+                            <a th:href="@{|/vaults/${vault.getID()}/${vault.getUserID()}|}">[[${vault.getUserName()}]]
+                                ([[${vault.getUserID()}]])</a>
+                        </th:block>
+                    </td>
+
+                    <td>[[${vault.groupID}]]</td>
+                    <th:block th:if="${vault.vaultReviewStatusInfo.getLatestSubmittedReview != null}">
+                        <td>
+                            [[${#temporals.format(vault.vaultReviewStatusInfo.latestSubmittedReview.actionedDate,dateFormatddMMyyyy)}]]
+                            <!--/* date */--></td>
+                    </th:block>
+                    <th:block th:if="${vault.vaultReviewStatusInfo.getLatestSubmittedReview == null}">
+                        <td>n/a</td>
+                    </th:block>
+                    <td>[[${#temporals.format(vault.reviewDate,dateFormatddMMyyyy)}]]<!--/* date */--></td>
+                    <td th:with="daysDiff=${T(java.time.temporal.ChronoUnit).DAYS.between(today, vault.reviewDate)}">
+                        <!-- Days Until Review Date -->
+                        <span th:if="${daysDiff > 0}" th:text="|In ${daysDiff} days|">In 5 days</span>
+
+                        <span th:if="${daysDiff == 0}">Due Today!</span>
+
+                        <span th:if="${daysDiff < 0}"
+                              th:text="|Overdue by ${T(java.lang.Math).abs(daysDiff)} days|"
+                              style="color: red;">Overdue
+                                </span>
+                    </td>
+                    <td>[[${#temporals.format(vault.getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */--></td>
+                    <td>
+                        <a th:href="@{|/admin/vaults/${vault.getID()}/reviews|}">Review</a>
+                    </td>
+                </tr>
                 </tbody>
             </table>
         </div>
-
     </th:block>
+    <th:block th:if="${otherVaults != null}">
+        <div class="table-responsive" id="otherVaultsTable">
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 0;">
+                <input type="text" placeholder="Search by 3 chars..." size="20"
+                       style="width: 200px;">
+                <span style="font-weight: bold; flex-grow: 1; text-align: center;">Vaults Not Due For Review</span>
+                <div style="width: 200px;"></div>
+            </div>
+            <table class="table table-light table-striped table-hover align-middle">
+                <thead>
+                <tr class="tr">
+                    <th>Vault Name</th>
+                    <th>Deposits</th>
+                    <th>Vault Size</th>
+                    <th>Owner(UUN)</th>
+                    <th>School</th>
+                    <th>Last Review Date</th>
+                    <th>Next Review Due Date</th>
+                    <th>Vault Created Date</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr class="no-results" style="display: none;">
+                    <td colspan="9" style="text-align: center; color: #888;">
+                        No matching vaults found.
+                    </td>
+                </tr>
+                <tr th:each="vault: ${otherVaults}" class="tr">
+                    <td>
+                        <a th:href="@{|/vaults/${vault.getID()}/|}">[[${vault.name}]]</a>
+                    </td>
+                    <td>[[${vault.getNumberOfDeposits()}]]</td>
+                    <td>[[${vault.getSizeStr()}]]</td>
+                    <td>
+                        <th:block th:if="${vault.getUserID() != null}">
+                            <a th:href="@{|/vaults/${vault.getID()}/${vault.getUserID()}|}">[[${vault.getUserName()}]]
+                                ([[${vault.getUserID()}]])</a>
+                        </th:block>
+                    </td>
 
+                    <td>[[${vault.groupID}]]</td>
+                    <th:block th:if="${vault.vaultReviewStatusInfo.latestSubmittedReview != null}">
+                        <td>
+                            [[${#temporals.format(vault.vaultReviewStatusInfo.latestSubmittedReview.actionedDate,dateFormatddMMyyyy)}]]
+                            <!--/* date */--></td>
+                    </th:block>
+                    <th:block th:if="${vault.vaultReviewStatusInfo.getLatestSubmittedReview == null}">
+                        <td>n/a</td>
+                    </th:block>
+                    <td>[[${#temporals.format(vault.reviewDate,dateFormatddMMyyyy)}]]<!--/* date */--></td>
+                    <td>[[${#temporals.format(vault.getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */--></td>
+                    <td>
+                        <a th:href="@{|/admin/vaults/${vault.getID()}/reviews|}">Review</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </th:block>
+<script type="text/javascript">
+    function setupTableFilter($container) {
+        const $inputText = $container.find('input[type="text"]').first();
+        const $table = $container.find('table').first();
+        const $rows = $table.find('tbody tr').not('.no-results'); // Don't include the message row in the filter
+        const $noResultsRow = $table.find('.no-results');
+
+        $inputText.on('input', function() {
+            const searchVal = $(this).val().toLowerCase();
+
+            if (searchVal.length >= 3) {
+                let visibleCount = 0;
+
+                $rows.each(function() {
+                    const $row = $(this);
+                    const isMatch = $row.find("td:eq(0)").text().toLowerCase().includes(searchVal);
+
+                    $row.toggle(isMatch);
+                    if (isMatch) visibleCount++;
+                });
+
+                // If visibleCount is 0, show the "No results" row
+                $noResultsRow.toggle(visibleCount === 0);
+
+            } else {
+                $rows.show();
+                $noResultsRow.hide();
+            }
+        });
+    }
+    $(document).ready(function() {
+        const $vaultsTable = $('#vaultsTable');
+        const $otherVaultsTable = $('#otherVaultsTable');
+        setupTableFilter($vaultsTable)
+        setupTableFilter($otherVaultsTable);
+    });
+</script>
 </div>
 </th:block>
 </html>

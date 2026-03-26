@@ -42,6 +42,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -1035,9 +1036,32 @@ class ThymeleafTemplateTest extends BaseThymeleafTest {
         ModelMap modelMap = getModelMap();
 
         VaultInfo vault1 = getVaultInfo1();
-        VaultInfo vault2 = getVaultInfo2();
+        vault1.setReviewDate(LocalDate.now());
+        VaultReview vault1review = new VaultReview();
+        vault1review.setActionedDate(LocalDateTime.now().minusDays(1));
+        vault1.getVaultReviewStatusInfo().setLatestSubmittedReview(vault1review);
 
-        modelMap.put("vaults", Arrays.asList(vault1, vault2));
+        VaultInfo vault2 = getVaultInfo2();
+        vault2.setReviewDate(LocalDate.now().plusDays(-1));
+
+        VaultInfo vault3 = getVaultInfo3();
+        vault3.setReviewDate(LocalDate.now().plusDays(1));
+        VaultReview vault3review = new VaultReview();
+        vault3review.setActionedDate(LocalDateTime.now().minusMonths(3));
+        vault3.getVaultReviewStatusInfo().setLatestSubmittedReview(vault3review);
+
+        modelMap.put("vaults", Arrays.asList(vault1, vault2, vault3));
+        
+        VaultInfo vault4 = getVaultInfo4();
+        vault4.setReviewDate(LocalDate.now().plusMonths(5));
+        VaultReview vault4review = new VaultReview();
+        vault4review.setActionedDate(LocalDateTime.now().minusDays(1));
+        vault4.getVaultReviewStatusInfo().setLatestSubmittedReview(vault4review);
+
+        VaultInfo vault5 = getVaultInfo5();
+        vault5.setReviewDate(LocalDate.now().plusMonths(7));
+ 
+        modelMap.put("otherVaults", Arrays.asList(vault3, vault4, vault5));
 
         String html = getHtml("admin/reviews/index", modelMap);
         Document doc = getDocument(html);
@@ -2324,12 +2348,14 @@ class ThymeleafTemplateTest extends BaseThymeleafTest {
     }
 
     private VaultInfo getVaultInfo(String id) {
-        return new VaultInfo() {
+        VaultInfo result =  new VaultInfo() {
             @Override
             public String getID() {
                 return id;
             }
         };
+        result.setVaultReviewStatusInfo(new VaultReviewStatusInfo());
+        return result;
     }
 
     private Group getGroup(String groupId){
@@ -2442,6 +2468,80 @@ class ThymeleafTemplateTest extends BaseThymeleafTest {
         vault2.setGroupID("group-id-2");
         vault2.setOwnerName("vault-owner-name-2");
         return vault2;
+    }
+
+    private VaultInfo getVaultInfo3() {
+        VaultInfo vault3 = getVaultInfo("vault-info-3");
+        vault3.setAffirmed(true);
+        vault3.setAuthoriser("vault3-authoriser");
+        vault3.setBillingType(PendingVault.Billing_Type.GRANT_FUNDING);
+        vault3.setConfirmed(true);
+        vault3.setContact("vault3-contact");
+        vault3.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(now));
+        vault3.setDataCreators(Arrays.asList("Luke", "Leia", "Han"));
+        vault3.setDescription("vault3-description");
+        vault3.setEstimate(PendingVault.Estimate.UNDER_100GB);
+        vault3.setGrantEndDate(DateTimeUtils.toLocalDate(now));
+        vault3.setName("vault3-name");
+        vault3.setOwnerId("vault3-owner-id");
+        vault3.setProjectSize(3456);
+        vault3.setReviewDate(DateTimeUtils.toLocalDate(now).plusMonths(7));
+        vault3.setUserID("vault3-user-id");
+        vault3.setVaultCreatorId("vault3-creator-id");
+        vault3.setUserName("vault-username-3");
+        vault3.setPolicyID("policy-id-3");
+        vault3.setGroupID("group-id-3");
+        vault3.setOwnerName("vault-owner-name-3");
+        return vault3;
+    }
+    private VaultInfo getVaultInfo4() {
+        VaultInfo vault4 = getVaultInfo("vault-info-4");
+        vault4.setAffirmed(true);
+        vault4.setAuthoriser("vault4-authoriser");
+        vault4.setBillingType(PendingVault.Billing_Type.WILL_PAY);
+        vault4.setConfirmed(true);
+        vault4.setContact("vault4-contact");
+        vault4.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(now));
+        vault4.setDataCreators(Arrays.asList("Ferris", "Cameron", "Sloane"));
+        vault4.setDescription("vault4-description");
+        vault4.setEstimate(PendingVault.Estimate.UNKNOWN);
+        vault4.setGrantEndDate(DateTimeUtils.toLocalDate(now));
+        vault4.setName("vault4-name");
+        vault4.setOwnerId("vault4-owner-id");
+        vault4.setProjectSize(4567);
+        vault4.setReviewDate(DateTimeUtils.toLocalDate(now).plusMonths(12));
+        vault4.setUserID("vault4-user-id");
+        vault4.setVaultCreatorId("vault5-creator-id");
+        vault4.setUserName("vault-username-4");
+        vault4.setPolicyID("policy-id-4");
+        vault4.setGroupID("group-id-4");
+        vault4.setOwnerName("vault-owner-name-4");
+        return vault4;
+    }
+
+    private VaultInfo getVaultInfo5() {
+        VaultInfo vault5 = getVaultInfo("vault-info-5");
+        vault5.setAffirmed(true);
+        vault5.setAuthoriser("vault5-authoriser");
+        vault5.setBillingType(PendingVault.Billing_Type.WILL_PAY);
+        vault5.setConfirmed(true);
+        vault5.setContact("vault5-contact");
+        vault5.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(now));
+        vault5.setDataCreators(Arrays.asList("One", "Two", "Three"));
+        vault5.setDescription("vault5-description");
+        vault5.setEstimate(PendingVault.Estimate.UNKNOWN);
+        vault5.setGrantEndDate(DateTimeUtils.toLocalDate(now));
+        vault5.setName("vault5-name");
+        vault5.setOwnerId("vault5-owner-id");
+        vault5.setProjectSize(5678);
+        vault5.setReviewDate(DateTimeUtils.toLocalDate(now).plusMonths(12));
+        vault5.setUserID("vault5-user-id");
+        vault5.setVaultCreatorId("vault5-creator-id");
+        vault5.setUserName("vault-username-5");
+        vault5.setPolicyID("policy-id-5");
+        vault5.setGroupID("group-id-5");
+        vault5.setOwnerName("vault-owner-name-5");
+        return vault5;
     }
 
     private Dataset getDataset1() {
