@@ -10,6 +10,7 @@ import org.datavaultplatform.common.response.ReviewInfo;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.response.VaultReviewStatusInfo;
 import org.datavaultplatform.common.response.VaultsData;
+import org.datavaultplatform.common.util.PageDTO;
 import org.datavaultplatform.common.util.Utils;
 import org.jsondoc.core.annotation.Api;
 import org.jsondoc.core.annotation.ApiHeader;
@@ -17,6 +18,7 @@ import org.jsondoc.core.annotation.ApiHeaders;
 import org.jsondoc.core.annotation.ApiMethod;
 import org.jsondoc.core.pojo.ApiVerb;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
@@ -94,6 +96,13 @@ public class AdminReviewsController {
         VaultsData result = new VaultsData();
         result.setData(vaultResponses);
         return result;
+    }
+
+    @GetMapping("/admin/vaultsForReview/search")
+    public PageDTO<VaultInfo> getVaultsByPartialName(
+            @RequestParam(name = "q") String partialName) {
+        Page<Vault> vaults = vaultsService.getFirstFiftyVaultsWithNameContaining(partialName);
+        return new PageDTO<>(vaults.map(Vault::convertToResponse));
     }
 
     @GetMapping("/admin/vaults/{vaultId}/reviewstatus")

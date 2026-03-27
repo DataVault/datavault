@@ -10,14 +10,17 @@ import org.datavaultplatform.common.request.*;
 import org.datavaultplatform.common.response.*;
 import org.datavaultplatform.common.util.Constants;
 import org.datavaultplatform.common.util.DateTimeUtils;
+import org.datavaultplatform.common.util.PageDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -36,6 +39,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class RestService implements NotifyLogoutService, NotifyLoginService, EvaluatorService {
 
+    public static final ParameterizedTypeReference<PageDTO<VaultInfo>> PTR_PAGE_VAULTINFO = new ParameterizedTypeReference<>() {};
+    
     private final String brokerURL;
     private final String brokerApiKey;
 
@@ -55,7 +60,16 @@ public class RestService implements NotifyLogoutService, NotifyLoginService, Eva
         return exchangeWithAuth(auth, url, clazz, method, payload);
     }
 
-    private <T> ResponseEntity<T> exchangeWithAuth(Authentication auth, String url, Class<T> clazz, HttpMethod method, Object payload) {
+    private <T> ResponseEntity<T> exchange(String url, ParameterizedTypeReference<T> ptr, HttpMethod method, Object payload) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return exchangeWithAuth(auth, url, ptr, method, payload);
+    }
+
+    private <T> ResponseEntity<T> exchangeWithAuth(Authentication auth, String url, Class<T> ptr, HttpMethod method, Object payload) {
+        return exchangeWithAuth(auth, url, ParameterizedTypeReference.forType(ptr), method, payload);
+    }
+
+    private <T> ResponseEntity<T> exchangeWithAuth(Authentication auth, String url, ParameterizedTypeReference<T> ptr, HttpMethod method, Object payload) {
 
         HttpHeaders headers = new HttpHeaders();
 
@@ -84,8 +98,12 @@ public class RestService implements NotifyLogoutService, NotifyLoginService, Eva
         // todo : check the http status code before returning?
 
         log.info("broker.url [{}]",url);
-        return restTemplate.exchange(url, method, entity, clazz);
+        return restTemplate.exchange(url, method, entity, ptr);
 
+    }
+
+    public <T> ResponseEntity<T> get(String url, ParameterizedTypeReference<T> ptr) {
+        return exchange(url, ptr, HttpMethod.GET, null);
     }
 
     public <T> ResponseEntity<T> get(String url, Class<T> clazz) {
@@ -215,6 +233,15 @@ public class RestService implements NotifyLogoutService, NotifyLoginService, Eva
 
     public VaultsData getAllVaultsForReview() {
         ResponseEntity<VaultsData> response = get(brokerURL + "/admin/vaultsForReview/all", VaultsData.class);
+        return response.getBody();
+    }
+
+    public PageDTO<VaultInfo> searchVaultsForReview(String partialVaultName) {
+        String url = UriComponentsBuilder.fromHttpUrl(brokerURL + "/admin/vaultsForReview/search")
+                .queryParam("q", partialVaultName)
+                .encode() // This handles the spaces, slashes, etc.
+                .toUriString();
+        ResponseEntity<PageDTO<VaultInfo>> response = get(url, PTR_PAGE_VAULTINFO);
         return response.getBody();
     }
 

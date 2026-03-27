@@ -1,11 +1,14 @@
 package org.datavaultplatform.webapp.controllers.admin;
 
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import org.apache.commons.lang3.StringUtils;
 import org.datavaultplatform.common.model.*;
 
 import org.datavaultplatform.common.request.CreateRetentionPolicy;
 import org.datavaultplatform.common.response.*;
+import org.datavaultplatform.common.util.PageDTO;
 import org.datavaultplatform.common.util.RoleUtils;
 import org.datavaultplatform.common.util.Utils;
 import org.datavaultplatform.webapp.model.DepositReviewModel;
@@ -18,6 +21,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.Assert;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -32,7 +36,13 @@ import static org.datavaultplatform.common.util.Utils.*;
 
 @Controller
 @ConditionalOnBean(RestService.class)
+@Validated
 public class AdminReviewsController {
+
+    Comparator<VaultInfo> BY_REVIEW_DATE_ASC = Comparator.comparing(
+            VaultInfo::getReviewDate,
+            Comparator.nullsLast(Comparator.naturalOrder())
+    );
 
     private static final Logger LOG = LoggerFactory.getLogger(AdminReviewsController.class);
     public static final String ACTION_CANCEL = "Cancel";
@@ -50,32 +60,11 @@ public class AdminReviewsController {
 
     @GetMapping("/admin/reviews")
     public String getVaultsForReview(ModelMap model) {
-
-        Comparator<VaultInfo> byReviewDateAsc = Comparator.comparing(
-                VaultInfo::getReviewDate,
-                Comparator.nullsLast(Comparator.naturalOrder())
-        );
-
         VaultsData vaultsData = restService.getVaultsForReview();
-        List<VaultInfo> vaultsInfo = Utils.getSafeStream(vaultsData.getData()).sorted(byReviewDateAsc).toList();
+        List<VaultInfo> vaultsInfo = Utils.getSafeStream(vaultsData.getData()).sorted(BY_REVIEW_DATE_ASC).toList();
         vaultsInfo.forEach(this::addVaultReviewStatusInfo);
         
-        Set<String> vaultIds = vaultsInfo.stream()
-                .map(VaultInfo::getID)
-                .collect(Collectors.toSet());
-        
-        VaultsData allVaultsData = restService.getAllVaultsForReview();
-        List<VaultInfo> otherVaultsInfo = allVaultsData.getData()
-                .stream()
-                .filter(vault -> !vaultIds.contains(vault.getID()))
-                .sorted(byReviewDateAsc)
-                .toList();
-
-        otherVaultsInfo.forEach(this::addVaultReviewStatusInfo);
-
-
         model.addAttribute("vaults", vaultsInfo);
-        model.addAttribute("otherVaults", otherVaultsInfo);
         return "admin/reviews/index";
     }
 
@@ -208,7 +197,7 @@ public class AdminReviewsController {
      * You cannot have a DepositReviewModel:RETAIN without a non-null nextReviewDate
      * @param vaultReviewModel
      * @param redirectAttributes
-     * @return false if there's no NEW REVIEW DATE and at least 1 DRM with retain.
+     * @return false if there's no NEW REVIEW DATE and at least 1 DRM with "retain".
      */
     protected boolean validateNextReviewDate(VaultReviewModel vaultReviewModel, RedirectAttributes redirectAttributes) {
         
@@ -281,7 +270,21 @@ public class AdminReviewsController {
         LOG.info("Editing Deposit Review id {}", originalDepositReview.getId());
         restService.editDepositReview(originalDepositReview);
     }
+    
+    @GetMapping("/admin/vaults/reviews")
+    @ResponseBody
+    public PageDTO<VaultInfo> searchVaultsForReview(
+            @RequestParam("q")
+            @NotBlank(message = "Search term cannot be empty")
+            @Size(min = 3, message = "Please enter at least 3 characters")
+            String partialVaultName) {
 
+        PageDTO<VaultInfo> result = restService.searchVaultsForReview(partialVaultName);
+        result.getContent().sort(BY_REVIEW_DATE_ASC);
+        result.getContent().stream().filter(Objects::nonNull).forEach(this::addVaultReviewStatusInfo);
+        return result;
+    }   
+    
 }
 
 

@@ -14,6 +14,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.datavaultplatform.common.email.EmailTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -385,4 +388,14 @@ public class VaultsService {
         billingService.saveOrUpdateVault(billinginfo);
     }
 
+    public Page<Vault> getFirstFiftyVaultsWithNameContaining(String partialName) {
+        Assert.hasText(partialName, "The partial name cannot be null or empty");
+
+        String trimmedName = partialName.trim();
+
+        Assert.isTrue(trimmedName.length() >= 3, "The partial name must be at least 3 characters long");
+
+        Pageable pageable = PageRequest.of(0, 50);
+        return vaultDAO.findByNameContainingIgnoreCaseOrderByNameAsc(trimmedName, pageable);
+    }
 }

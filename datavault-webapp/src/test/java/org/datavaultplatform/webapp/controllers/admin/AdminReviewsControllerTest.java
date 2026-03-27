@@ -54,8 +54,6 @@ class AdminReviewsControllerTest {
 
         VaultReviewStatusInfo statusInfo1 = new VaultReviewStatusInfo();
         VaultReviewStatusInfo statusInfo2 = new VaultReviewStatusInfo();
-        VaultReviewStatusInfo statusInfo3 = new VaultReviewStatusInfo();
-        VaultReviewStatusInfo statusInfo4 = new VaultReviewStatusInfo();
         
         ModelMap modelMap = new ModelMap();
         VaultsData vaultsForReviewData = new VaultsData();
@@ -67,34 +65,18 @@ class AdminReviewsControllerTest {
         vaultInfo2.setReviewDate(today.plusMonths(5));
         vaultsForReviewData.setData(List.of(vaultInfo1, vaultInfo2));
         
-        VaultsData allVaultsData = new VaultsData();
-        VaultInfo vaultInfo3 = new VaultInfo();
-        vaultInfo3.setID("vaultId3");
-        vaultInfo3.setReviewDate(today.plusMonths(7));
-        VaultInfo vaultInfo4 = new VaultInfo();
-        vaultInfo4.setID("vaultId4");
-        vaultInfo4.setReviewDate(today.plusMonths(12));
-        
-        allVaultsData.setData(List.of(vaultInfo1, vaultInfo2, vaultInfo3, vaultInfo4));
         when(mRestService.getVaultsForReview()).thenReturn(vaultsForReviewData);
-        when(mRestService.getAllVaultsForReview()).thenReturn(allVaultsData);
         
         when(mRestService.getVaultReviewStatusInfo("vaultId1")).thenReturn(statusInfo1);
-        when(mRestService.getVaultReviewStatusInfo("vaultId2")).thenReturn(statusInfo1);
-        when(mRestService.getVaultReviewStatusInfo("vaultId3")).thenReturn(statusInfo1);
-        when(mRestService.getVaultReviewStatusInfo("vaultId4")).thenReturn(statusInfo1);
+        when(mRestService.getVaultReviewStatusInfo("vaultId2")).thenReturn(statusInfo2);
         
         String result = spyController.getVaultsForReview(modelMap);
         assertThat(result).isEqualTo("admin/reviews/index");
         verify(mRestService).getVaultsForReview();
-        verify(mRestService).getAllVaultsForReview();
         verify(mRestService).getVaultReviewStatusInfo("vaultId1");
         verify(mRestService).getVaultReviewStatusInfo("vaultId2");
-        verify(mRestService).getVaultReviewStatusInfo("vaultId3");
-        verify(mRestService).getVaultReviewStatusInfo("vaultId4");
         verifyNoMoreInteractions(mRestService);
         assertThat(modelMap.getAttribute("vaults")).isEqualTo(List.of(vaultInfo1, vaultInfo2));
-        assertThat(modelMap.getAttribute("otherVaults")).isEqualTo(List.of(vaultInfo3, vaultInfo4));
     }
 
     @ParameterizedTest

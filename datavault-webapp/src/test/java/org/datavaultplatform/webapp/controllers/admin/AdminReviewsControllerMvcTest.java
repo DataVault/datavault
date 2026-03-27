@@ -226,7 +226,6 @@ class AdminReviewsControllerMvcTest {
 
         // RestService
         lenient().when(mRestService.getVaultsForReview()).thenReturn(mVaultsDataDueIn6Months);
-        lenient().when(mRestService.getAllVaultsForReview()).thenReturn(mVaultsDataAll);
 
         lenient().when(mRestService.getVault(TEST_VAULT_ID_1)).thenReturn(mVaultInfo1);
         lenient().when(mRestService.getVault(TEST_VAULT_ID_2)).thenReturn(mVaultInfo2);
@@ -265,21 +264,18 @@ class AdminReviewsControllerMvcTest {
         Document doc = Jsoup.parse(html);
 
         Elements elems1 = doc.selectXpath("//a[@href='/vaults/vaultinfo-id-1/']");
-        assertThat(elems1.size()).isEqualTo(1);
+        assertThat(elems1).hasSize(1);
         Element elem1 = elems1.get(0);
         assertThat(elem1.text()).isEqualTo("vaultinfo-name-1");
 
         Elements elems2 = doc.selectXpath("//a[@href='/vaults/vaultinfo-id-2/']");
-        assertThat(elems2.size()).isEqualTo(1);
+        assertThat(elems2).hasSize(1);
         Element elem2 = elems2.get(0);
         assertThat(elem2.text()).isEqualTo("vaultinfo-name-2");
 
         verify(mRestService).getVaultsForReview();
-        verify(mRestService).getAllVaultsForReview();
         verify(mRestService).getVaultReviewStatusInfo(TEST_VAULT_ID_1);
         verify(mRestService).getVaultReviewStatusInfo(TEST_VAULT_ID_2);
-        verify(mRestService).getVaultReviewStatusInfo(TEST_VAULT_ID_3);
-        verify(mRestService).getVaultReviewStatusInfo(TEST_VAULT_ID_4);
         Mockito.verifyNoMoreInteractions(mRestService);
     }
 
