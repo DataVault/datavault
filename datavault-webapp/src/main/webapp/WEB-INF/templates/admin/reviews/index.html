@@ -188,7 +188,7 @@
             success: function (response) {
                 console.log("executeSearch: ", response);
                 // 'response' is the PageDTO<VaultInfo> object
-                renderResults(response.content);
+                renderResults(response);
                 $('#search-error-message').hide();
             },
             error: function (xhr, textStatus, errorThrown) {
@@ -207,7 +207,10 @@
 
     const $searchResults = $('#search-results');
 
-    function renderResults(vaults) {
+    function renderResults(pageDTO) {
+        
+        const vaults = pageDTO.content;
+        const limitedToFirst50 = pageDTO.totalElements > 50;
         
         $searchResults.empty();
 
@@ -217,6 +220,9 @@
         if (vaults.length === 0) {
             $searchResults.append('<tr class="no-results"><td colspan="9" style="text-align: center; color: #888;">No matching vaults were found.</td></tr>');
             return;
+        } else if (limitedToFirst50) {
+            const limitedToFirst50Msg = 'Showing the first 50 of ' + pageDTO.totalElements + ' results';
+            $searchResults.append('<tr class="no-results"><td colspan="9" style="text-align: center; color: #888;">'+limitedToFirst50Msg+'.</td></tr>');
         }
         vaults.forEach(vault => {
 
