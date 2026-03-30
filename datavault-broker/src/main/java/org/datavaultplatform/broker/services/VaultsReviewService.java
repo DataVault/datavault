@@ -3,6 +3,7 @@ package org.datavaultplatform.broker.services;
 import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.model.VaultReview;
 import org.datavaultplatform.common.model.dao.VaultReviewDAO;
+import org.datavaultplatform.common.response.VaultReviewStatusInfo;
 import org.datavaultplatform.common.util.DateTimeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -145,4 +146,15 @@ public class VaultsReviewService {
         return vaultReviewDAO.findByVaultId(vaultId);
     }
 
+    public VaultReviewStatusInfo getCurrentVaultReviewStatus(String vaultId) {
+        Assert.notNull(vaultId, "The vaultId cannot be null");
+
+        VaultReviewStatusInfo statusInfo = new VaultReviewStatusInfo();
+        VaultReview latestSubmitted = vaultReviewDAO.findLatestSubmittedVaultReview(vaultId).orElse(null);
+        VaultReview underwayReview = vaultReviewDAO.findUnderwayVaultReview(vaultId).orElse(null);
+
+        statusInfo.setUnderwayReview(underwayReview);
+        statusInfo.setLatestSubmittedReview(latestSubmitted);
+        return statusInfo;
+    }
 }

@@ -6,14 +6,22 @@ import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import org.datavaultplatform.common.response.VaultInfo;
+import org.datavaultplatform.common.util.PageDTO;
+import org.datavaultplatform.common.util.PageDTOVaultInfo;
 import org.datavaultplatform.webapp.controllers.OpenApiSupport;
 import org.datavaultplatform.webapp.model.VaultReviewModel;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 public interface AdminReviewsControllerApi {
+    
     @Operation(description = "returns the vault reviews HTML page")
     String getVaultsForReview(ModelMap model);
 
@@ -42,4 +50,18 @@ public interface AdminReviewsControllerApi {
                          @PathVariable String vaultId,
                          @PathVariable String reviewId,
                          @Parameter(hidden = true) @RequestParam String action);
+
+    @Operation(description = "searches for vaults that can be reviewed - used to support dynamic in-page searching of vaults. First 50 only")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "422", description = "Returns a comma seperated list of validation errors", content = {
+                    @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string"))
+            }),
+            @ApiResponse(responseCode = "200", description = "Returns a list of vaults where the name matches the search parameter", 
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PageDTOVaultInfo.class)))
+    })
+    PageDTOVaultInfo searchVaultsForReview(
+            @Schema(description = "search term - part of the vault name")
+            @NotBlank(message = "Search term cannot be empty")
+            @Size(min = 3, max = 400, message = "Please enter between 3 and 400 characters")
+            String partialVaultName);
 }

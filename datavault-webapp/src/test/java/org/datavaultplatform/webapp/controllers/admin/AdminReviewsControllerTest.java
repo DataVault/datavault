@@ -2,10 +2,7 @@ package org.datavaultplatform.webapp.controllers.admin;
 
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.request.CreateRetentionPolicy;
-import org.datavaultplatform.common.response.DepositInfo;
-import org.datavaultplatform.common.response.ReviewInfo;
-import org.datavaultplatform.common.response.VaultInfo;
-import org.datavaultplatform.common.response.VaultsData;
+import org.datavaultplatform.common.response.*;
 import org.datavaultplatform.webapp.model.DepositReviewModel;
 import org.datavaultplatform.webapp.model.VaultReviewModel;
 import org.datavaultplatform.webapp.services.RestService;
@@ -53,17 +50,33 @@ class AdminReviewsControllerTest {
 
     @Test
     void getVaultsForReview() {
+        LocalDate today = LocalDate.now(clock);
+
+        VaultReviewStatusInfo statusInfo1 = new VaultReviewStatusInfo();
+        VaultReviewStatusInfo statusInfo2 = new VaultReviewStatusInfo();
+        
         ModelMap modelMap = new ModelMap();
-        VaultsData vaultsData = new VaultsData();
+        VaultsData vaultsForReviewData = new VaultsData();
         VaultInfo vaultInfo1 = new VaultInfo();
+        vaultInfo1.setID("vaultId1");
+        vaultInfo1.setReviewDate(today.plusMonths(3));
         VaultInfo vaultInfo2 = new VaultInfo();
-        List<VaultInfo> vaultInfos = List.of(vaultInfo1, vaultInfo2);
-        vaultsData.setData(vaultInfos);
-        when(mRestService.getVaultsForReview()).thenReturn(vaultsData);
+        vaultInfo2.setID("vaultId2");
+        vaultInfo2.setReviewDate(today.plusMonths(5));
+        vaultsForReviewData.setData(List.of(vaultInfo1, vaultInfo2));
+        
+        when(mRestService.getVaultsForReview()).thenReturn(vaultsForReviewData);
+        
+        when(mRestService.getVaultReviewStatusInfo("vaultId1")).thenReturn(statusInfo1);
+        when(mRestService.getVaultReviewStatusInfo("vaultId2")).thenReturn(statusInfo2);
+        
         String result = spyController.getVaultsForReview(modelMap);
         assertThat(result).isEqualTo("admin/reviews/index");
         verify(mRestService).getVaultsForReview();
-        assertThat(modelMap.getAttribute("vaults")).isEqualTo(vaultInfos);
+        verify(mRestService).getVaultReviewStatusInfo("vaultId1");
+        verify(mRestService).getVaultReviewStatusInfo("vaultId2");
+        verifyNoMoreInteractions(mRestService);
+        assertThat(modelMap.getAttribute("vaults")).isEqualTo(List.of(vaultInfo1, vaultInfo2));
     }
 
     @ParameterizedTest

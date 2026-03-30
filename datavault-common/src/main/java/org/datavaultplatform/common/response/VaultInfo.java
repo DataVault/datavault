@@ -159,6 +159,8 @@ public class VaultInfo {
 
     @Schema(description = "The Billing payment details.")
 	private String paymentDetails;
+    
+    private VaultReviewStatusInfo vaultReviewStatusInfo;
 
     public VaultInfo() { }
 

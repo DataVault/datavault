@@ -4,12 +4,12 @@ info:
   description: |-
     API documentation for the DataVault Broker module.
     All endpoints require authentication via the X-UserID and X-Client-Key headers.
-  version: 0.0.0 (4b97dc0)
-  x-generated-at: 2026-03-12T10:56:37.585546
+  version: 0.0.0 (1e19122)
+  x-generated-at: 2026-03-30T15:30:53.740652
 servers:
 - url: http://localhost
   description: Generated server url
-security:
+ssecurity:
 - X-UserID-Header: []
 - X-Client-Key-Header: []
 tags:
@@ -3158,6 +3158,66 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/VaultsData"
+  /admin/vaultsForReview/search:
+    get:
+      tags:
+      - admin-reviews-controller
+      summary: searches vaults by partial vault name (returns 1st 50 only)
+      description: searches vaults by partial vault name (returns 1st 50 only)
+      operationId: getVaultsByPartialName
+      parameters:
+      - name: q
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PageDTOVaultInfo"
+  /admin/vaultsForReview/all:
+    get:
+      tags:
+      - admin-reviews-controller
+      summary: Gets all Vaults - supports Admin Reviews page
+      description: Gets all Vaults
+      operationId: getAllVaults
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VaultsData"
+  /admin/vaults/{vaultId}/reviewstatus:
+    get:
+      tags:
+      - admin-reviews-controller
+      summary: Gets the Review Status of a specific vault
+      description: Gets the Review Status of a specific vault
+      operationId: getVaultReviewStatusInfo
+      parameters:
+      - name: vaultId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VaultReviewStatusInfo"
   /admin/vaults/{vaultID}/vaultreviews/current:
     get:
       tags:
@@ -4024,6 +4084,27 @@ components:
         userAgent:
           type: string
           description: The browser user agent (if applicable)
+    VaultReview:
+      type: object
+      properties:
+        id:
+          type: string
+        creationTime:
+          type: string
+          format: date-time
+        newReviewDate:
+          type: string
+          format: date
+          deprecated: true
+          writeOnly: true
+        oldReviewDate:
+          type: string
+          format: date
+        actionedDate:
+          type: string
+          format: date-time
+        comment:
+          type: string
     DataCreator:
       type: object
       properties:
@@ -4044,152 +4125,6 @@ components:
         visible:
           type: boolean
         crisId:
-          type: string
-    RetentionPolicy:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int32
-        name:
-          type: string
-        description:
-          type: string
-        url:
-          type: string
-        minRetentionPeriod:
-          type: integer
-          format: int32
-        extendUponRetrieval:
-          type: boolean
-        inEffectDate:
-          type: string
-          format: date
-        endDate:
-          type: string
-          format: date
-        dataGuidanceReviewed:
-          type: string
-          format: date
-        engine:
-          type: string
-          deprecated: true
-        sort:
-          type: integer
-          format: int32
-          deprecated: true
-        minDataRetentionPeriod:
-          type: string
-          deprecated: true
-        policyInfo:
-          type: string
-    User:
-      type: object
-      properties:
-        id:
-          type: string
-        firstname:
-          type: string
-        lastname:
-          type: string
-        password:
-          type: string
-        email:
-          type: string
-        properties:
-          type: object
-          additionalProperties:
-            type: string
-    Vault:
-      type: object
-      properties:
-        id:
-          type: string
-        version:
-          type: integer
-          format: int64
-        creationTime:
-          type: string
-          format: date-time
-        grantEndDate:
-          type: string
-          format: date
-        reviewDate:
-          type: string
-          format: date
-        name:
-          type: string
-        description:
-          type: string
-        retentionPolicy:
-          $ref: "#/components/schemas/RetentionPolicy"
-        retentionPolicyStatus:
-          type: integer
-          format: int32
-        retentionPolicyExpiry:
-          type: string
-          format: date-time
-        retentionPolicyLastChecked:
-          type: string
-          format: date-time
-        user:
-          $ref: "#/components/schemas/User"
-          deprecated: true
-        dataset:
-          $ref: "#/components/schemas/Dataset"
-        projectId:
-          type: string
-        snapshot:
-          type: string
-        affirmed:
-          type: boolean
-        notes:
-          type: string
-        estimate:
-          type: string
-          enum:
-          - UNDER_100GB
-          - UNDER_10TB
-          - OVER_10TB
-          - UNKNOWN
-        contact:
-          type: string
-        pureLink:
-          type: boolean
-        size:
-          type: integer
-          format: int64
-        vaultReviewUnderway:
-          type: boolean
-        mostRecentVaultReview:
-          $ref: "#/components/schemas/VaultReview"
-        dataCreator:
-          type: array
-          items:
-            $ref: "#/components/schemas/DataCreator"
-          writeOnly: true
-    VaultReview:
-      type: object
-      properties:
-        id:
-          type: string
-        creationTime:
-          type: string
-          format: date-time
-        vault:
-          $ref: "#/components/schemas/Vault"
-        newReviewDate:
-          type: string
-          format: date
-          deprecated: true
-          writeOnly: true
-        oldReviewDate:
-          type: string
-          format: date
-        actionedDate:
-          type: string
-          format: date-time
-        comment:
           type: string
     Deposit:
       type: object
@@ -4327,6 +4262,129 @@ components:
           $ref: "#/components/schemas/VaultReview"
         deposit:
           $ref: "#/components/schemas/Deposit"
+    RetentionPolicy:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        name:
+          type: string
+        description:
+          type: string
+        url:
+          type: string
+        minRetentionPeriod:
+          type: integer
+          format: int32
+        extendUponRetrieval:
+          type: boolean
+        inEffectDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        dataGuidanceReviewed:
+          type: string
+          format: date
+        engine:
+          type: string
+          deprecated: true
+        sort:
+          type: integer
+          format: int32
+          deprecated: true
+        minDataRetentionPeriod:
+          type: string
+          deprecated: true
+        policyInfo:
+          type: string
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        firstname:
+          type: string
+        lastname:
+          type: string
+        password:
+          type: string
+        email:
+          type: string
+        properties:
+          type: object
+          additionalProperties:
+            type: string
+    Vault:
+      type: object
+      properties:
+        id:
+          type: string
+        version:
+          type: integer
+          format: int64
+        creationTime:
+          type: string
+          format: date-time
+        grantEndDate:
+          type: string
+          format: date
+        reviewDate:
+          type: string
+          format: date
+        name:
+          type: string
+        description:
+          type: string
+        retentionPolicy:
+          $ref: "#/components/schemas/RetentionPolicy"
+        retentionPolicyStatus:
+          type: integer
+          format: int32
+        retentionPolicyExpiry:
+          type: string
+          format: date-time
+        retentionPolicyLastChecked:
+          type: string
+          format: date-time
+        user:
+          $ref: "#/components/schemas/User"
+          deprecated: true
+        dataset:
+          $ref: "#/components/schemas/Dataset"
+        projectId:
+          type: string
+        snapshot:
+          type: string
+        affirmed:
+          type: boolean
+        notes:
+          type: string
+        estimate:
+          type: string
+          enum:
+          - UNDER_100GB
+          - UNDER_10TB
+          - OVER_10TB
+          - UNKNOWN
+        contact:
+          type: string
+        pureLink:
+          type: boolean
+        size:
+          type: integer
+          format: int64
+        mostRecentVaultReview:
+          $ref: "#/components/schemas/VaultReview"
+        dataCreator:
+          type: array
+          items:
+            $ref: "#/components/schemas/DataCreator"
+          writeOnly: true
+        vaultReviewUnderway:
+          type: boolean
     CreateRetentionPolicy:
       type: object
       properties:
@@ -4714,16 +4772,25 @@ components:
         paymentDetails:
           type: string
           description: The Billing payment details.
-        projectSizeStr:
-          type: string
-        policyStatusStr:
-          type: string
+        vaultReviewStatusInfo:
+          $ref: "#/components/schemas/VaultReviewStatusInfo"
         dataCreators:
           type: array
           items:
             type: string
+        policyStatusStr:
+          type: string
+        projectSizeStr:
+          type: string
         sizeStr:
           type: string
+    VaultReviewStatusInfo:
+      type: object
+      properties:
+        latestSubmittedReview:
+          $ref: "#/components/schemas/VaultReview"
+        underwayReview:
+          $ref: "#/components/schemas/VaultReview"
     TransferVault:
       type: object
       properties:
@@ -5188,6 +5255,19 @@ components:
         sizeWithUnits:
           type: string
           description: The size of deposit as string with units.
+    PageDTOVaultInfo:
+      type: object
+      properties:
+        totalPages:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/VaultInfo"
     PausedRetrieveStateDTO:
       type: object
       properties:

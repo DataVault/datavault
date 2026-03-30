@@ -3,7 +3,7 @@ info:
   title: DataVault WebApp API
   description: API documentation for the DataVault WebApp module.
   version: 0.0.0 (a16f01e)
-  x-generated-at: 2026-03-13T12:04:59.608241
+  x-generated-at: 2026-03-30T15:33:17.705253
 servers:
 - url: http://localhost
   description: Generated server url
@@ -1573,6 +1573,37 @@ paths:
             text/html:
               schema:
                 type: string
+  /admin/vaults/reviews:
+    get:
+      tags:
+      - admin-reviews-controller
+      description: searches for vaults that can be reviewed - used to support dynamic
+        in-page searching of vaults. First 50 only
+      operationId: searchVaultsForReview
+      parameters:
+      - name: q
+        in: query
+        description: search term - part of the vault name
+        required: true
+        schema:
+          type: string
+          description: search term - part of the vault name
+          maxLength: 400
+          minLength: 3
+      responses:
+        "422":
+          description: Returns a comma seperated list of validation errors
+          content:
+            text/plain:
+              schema:
+                type: string
+        "200":
+          description: Returns a list of vaults where the name matches the search
+            parameter
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PageDTOVaultInfo"
   /admin/vaults/csv:
     get:
       tags:
@@ -2676,8 +2707,6 @@ components:
         size:
           type: integer
           format: int64
-        mostRecentVaultReview:
-          $ref: "#/components/schemas/VaultReview"
         dataCreator:
           type: array
           items:
@@ -2685,6 +2714,8 @@ components:
           writeOnly: true
         vaultReviewUnderway:
           type: boolean
+        mostRecentVaultReview:
+          $ref: "#/components/schemas/VaultReview"
     VaultReview:
       type: object
       properties:
@@ -2693,8 +2724,6 @@ components:
         creationTime:
           type: string
           format: date-time
-        vault:
-          $ref: "#/components/schemas/Vault"
         newReviewDate:
           type: string
           format: date
@@ -2978,9 +3007,6 @@ components:
       properties:
         depositReviewId:
           type: string
-        toBeDeleted:
-          type: boolean
-          deprecated: true
         deleteStatus:
           type: integer
           format: int32
@@ -2988,11 +3014,11 @@ components:
           type: string
         depositId:
           type: string
-        name:
+        depositName:
           type: string
-        statusName:
+        depositStatusName:
           type: string
-        creationTime:
+        depositCreationTime:
           type: string
           format: date-time
     VaultReviewModelForm:
@@ -3000,9 +3026,6 @@ components:
       properties:
         vaultReviewId:
           type: string
-        actionedDate:
-          type: string
-          format: date-time
         nextReviewDate:
           type: string
           format: date
@@ -3314,9 +3337,9 @@ components:
           type: boolean
         errorMessage:
           type: string
-        retrieveJob:
-          type: boolean
         depositJob:
+          type: boolean
+        retrieveJob:
           type: boolean
     FancytreeNode:
       type: object
@@ -3340,6 +3363,223 @@ components:
           type: boolean
         max:
           type: string
+    PageDTOVaultInfo:
+      type: object
+      properties:
+        totalPages:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/VaultInfo"
+    VaultInfo:
+      type: object
+      description: Information about a DataVault Vault
+      properties:
+        id:
+          type: string
+          description: The unique identifier for this vault
+        creationTime:
+          type: string
+          format: date-time
+          description: The date and time when this vault was created
+        policyExpiry:
+          type: string
+          format: date-time
+          description: The date and time when the policy will expire
+        policyLastChecked:
+          type: string
+          format: date-time
+          description: The date and time when the policy check was last carried out
+        name:
+          type: string
+          description: The name of this vault
+        description:
+          type: string
+          description: The description of this vault
+        estimate:
+          type: string
+          description: Estimate of vault size
+          enum:
+          - UNDER_100GB
+          - UNDER_10TB
+          - OVER_10TB
+          - UNKNOWN
+        billingType:
+          type: string
+          description: How we are billing
+          enum:
+          - NA
+          - GRANT_FUNDING
+          - BUDGET_CODE
+          - SLICE
+          - ORIG
+          - FEEWAIVER
+          - WILL_PAY
+          - BUY_NEW_SLICE
+          - FUNDING_NO_OR_DO_NOT_KNOW
+        notes:
+          type: string
+          description: Notes regarding data retention
+        policyID:
+          type: string
+          description: The policy that applies to this vault
+        policyLength:
+          type: string
+          description: The length of the policy that applies to this vault
+        groupID:
+          type: string
+          description: The group which is related to this vault
+        userID:
+          type: string
+          description: The user UUN who owns this vault
+        userName:
+          type: string
+          description: The user name who owns this vault
+        datasetID:
+          type: string
+          description: A reference to an external metadata record that describes this
+            vault
+        crisID:
+          type: string
+          description: Another reference to an external metadata record that describes
+            this vault
+        datasetName:
+          type: string
+          description: The name of the external metadata record that describes this
+            vault
+        vaultSize:
+          type: integer
+          format: int64
+          description: The size of this vault in bytes
+        policyStatus:
+          type: integer
+          format: int32
+          description: The status of the vault policy
+        grantEndDate:
+          type: string
+          format: date
+          description: Define the minimum of time the archive will be kept
+        reviewDate:
+          type: string
+          format: date
+          description: The date by which the vault should be reviewed for decision
+            as to whether it should be deleted or whether there are funds available
+            to support continued storage
+        numberOfDeposits:
+          type: integer
+          format: int64
+          description: Number of Deposits in a vault
+        projectId:
+          type: string
+          description: Project Id from Pure
+        sliceID:
+          type: string
+          description: Slice ID from erm somewhere
+        authoriser:
+          type: string
+          description: Authoriser of the billing
+        schoolOrUnit:
+          type: string
+          description: School / Unit to be billed
+        subunit:
+          type: string
+          description: Subunit to be billed
+        projectTitle:
+          type: string
+          description: Project Title (from Grant billing fieldset)
+        amountToBeBilled:
+          type: number
+          description: Amount to be Billed
+        amountBilled:
+          type: number
+          description: Amount Billed
+        projectSize:
+          type: integer
+          format: int64
+          description: Sum of vaults size for a projectId
+        affirmed:
+          type: boolean
+          description: Did the user accept the various rules on the create vault intro
+            page
+        pureLink:
+          type: boolean
+          description: Did the user accept the Pure Link rule on the summary page
+        confirmed:
+          type: boolean
+          description: Did the user confirm the pending vault yet
+        contact:
+          type: string
+          description: Pure Contact
+        ownerId:
+          type: string
+          description: Pending / Vault Owner ID
+        ownerName:
+          type: string
+          description: Vault Owner Name
+        vaultCreatorId:
+          type: string
+          description: Pending Vault Creator ID
+        creators:
+          type: array
+          description: Data Creators
+          items:
+            type: string
+        nominatedDataManagerIds:
+          type: array
+          description: Nominated Data Managers
+          items:
+            type: string
+        depositorIds:
+          type: array
+          description: Depositors
+          items:
+            type: string
+        sliceQueryChoice:
+          type: string
+          description: The Billing page sliceQueryChoice radio button value
+          enum:
+          - "YES"
+          - NO_OR_DO_NOT_KNOW
+          - BUY_NEW_SLICE
+        fundingQueryChoice:
+          type: string
+          description: The Billing page fundingQueryChoice radio button value
+          enum:
+          - "YES"
+          - FUNDING_NO_OR_DO_NOT_KNOW
+        feewaiverQueryChoice:
+          type: string
+          description: The Billing page feewaiverQueryChoice radio button value
+          enum:
+          - "YES"
+          - NO_OR_DO_NOT_KNOW
+        paymentDetails:
+          type: string
+          description: The Billing payment details.
+        vaultReviewStatusInfo:
+          $ref: "#/components/schemas/VaultReviewStatusInfo"
+        dataCreators:
+          type: array
+          items:
+            type: string
+        policyStatusStr:
+          type: string
+        projectSizeStr:
+          type: string
+        sizeStr:
+          type: string
+    VaultReviewStatusInfo:
+      type: object
+      properties:
+        latestSubmittedReview:
+          $ref: "#/components/schemas/VaultReview"
+        underwayReview:
+          $ref: "#/components/schemas/VaultReview"
     PermissionModel:
       type: object
       properties:

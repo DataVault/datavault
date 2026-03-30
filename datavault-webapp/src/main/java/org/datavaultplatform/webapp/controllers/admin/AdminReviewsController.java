@@ -5,10 +5,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.datavaultplatform.common.model.*;
 
 import org.datavaultplatform.common.request.CreateRetentionPolicy;
-import org.datavaultplatform.common.response.DepositInfo;
-import org.datavaultplatform.common.response.ReviewInfo;
-import org.datavaultplatform.common.response.VaultInfo;
-import org.datavaultplatform.common.response.VaultsData;
+import org.datavaultplatform.common.response.*;
+import org.datavaultplatform.common.util.PageDTOVaultInfo;
 import org.datavaultplatform.common.util.RoleUtils;
 import org.datavaultplatform.common.util.Utils;
 import org.datavaultplatform.webapp.model.DepositReviewModel;
@@ -22,6 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.Assert;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -32,11 +31,16 @@ import java.util.*;
 
 import static org.datavaultplatform.common.util.Utils.*;
 
-
 @SuppressWarnings("CodeBlock2Expr")
 @Controller
 @ConditionalOnBean(RestService.class)
+@Validated
 public class AdminReviewsController implements AdminReviewsControllerApi {
+
+    Comparator<VaultInfo> BY_REVIEW_DATE_ASC = Comparator.comparing(
+            VaultInfo::getReviewDate,
+            Comparator.nullsLast(Comparator.naturalOrder())
+    );
 
     private static final Logger LOG = LoggerFactory.getLogger(AdminReviewsController.class);
     public static final String ACTION_CANCEL = "Cancel";
@@ -55,13 +59,17 @@ public class AdminReviewsController implements AdminReviewsControllerApi {
     @Override
     @GetMapping(value = "/admin/reviews", produces = MediaType.TEXT_HTML_VALUE)
     public String getVaultsForReview(ModelMap model) {
-
         VaultsData vaultsData = restService.getVaultsForReview();
-        List<VaultInfo> vaultsInfo = vaultsData.getData();
-
+        List<VaultInfo> vaultsInfo = Utils.getSafeStream(vaultsData.getData()).sorted(BY_REVIEW_DATE_ASC).toList();
+        vaultsInfo.forEach(this::addVaultReviewStatusInfo);
+        
         model.addAttribute("vaults", vaultsInfo);
-
         return "admin/reviews/index";
+    }
+
+    void addVaultReviewStatusInfo(VaultInfo info) {
+        VaultReviewStatusInfo statusInfo = restService.getVaultReviewStatusInfo(info.getID());
+        info.setVaultReviewStatusInfo(statusInfo);
     }
 
     // Return a review page
@@ -191,7 +199,7 @@ public class AdminReviewsController implements AdminReviewsControllerApi {
      * You cannot have a DepositReviewModel:RETAIN without a non-null nextReviewDate
      * @param vaultReviewModel
      * @param redirectAttributes
-     * @return false if there's no NEW REVIEW DATE and at least 1 DRM with retain.
+     * @return false if there's no NEW REVIEW DATE and at least 1 DRM with "retain".
      */
     protected boolean validateNextReviewDate(VaultReviewModel vaultReviewModel, RedirectAttributes redirectAttributes) {
         
@@ -264,7 +272,20 @@ public class AdminReviewsController implements AdminReviewsControllerApi {
         LOG.info("Editing Deposit Review id {}", originalDepositReview.getId());
         restService.editDepositReview(originalDepositReview);
     }
+    
+    @GetMapping("/admin/reviews/vaults/search")
+    @ResponseBody
+    @Override
+    public PageDTOVaultInfo searchVaultsForReview(
+            @RequestParam("q")
+            String partialVaultName) {
 
+        PageDTOVaultInfo result = restService.searchVaultsForReview(partialVaultName);
+        result.getContent().sort(BY_REVIEW_DATE_ASC);
+        result.getContent().stream().filter(Objects::nonNull).forEach(this::addVaultReviewStatusInfo);
+        return result;
+    }   
+    
 }
 
 

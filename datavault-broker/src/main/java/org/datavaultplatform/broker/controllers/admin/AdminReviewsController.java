@@ -12,9 +12,12 @@ import org.datavaultplatform.common.event.vault.Review;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.response.ReviewInfo;
 import org.datavaultplatform.common.response.VaultInfo;
+import org.datavaultplatform.common.response.VaultReviewStatusInfo;
 import org.datavaultplatform.common.response.VaultsData;
+import org.datavaultplatform.common.util.PageDTO;
 import org.datavaultplatform.common.util.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
@@ -71,6 +74,46 @@ public class AdminReviewsController {
         return result;
     }
 
+    @Operation(
+            summary = "Gets all Vaults - supports Admin Reviews page",
+            description = "Gets all Vaults"
+    )
+    @GetMapping("/admin/vaultsForReview/all")
+    public VaultsData getAllVaults(@RequestHeader(HEADER_USER_ID) String userID) {
+
+        List<Vault> vaults = vaultsService.getVaults();
+
+        Assert.state(vaults != null, "The vaults should not be null");
+
+        List<VaultInfo> vaultResponses = vaults.stream()
+                .filter(Objects::nonNull)
+                .map(Vault::convertToResponse)
+                .toList();
+
+        VaultsData result = new VaultsData();
+        result.setData(vaultResponses);
+        return result;
+    }
+
+    @Operation(
+            summary = "searches vaults by partial vault name (returns 1st 50 only)",
+            description = "searches vaults by partial vault name (returns 1st 50 only)"
+    )
+    @GetMapping("/admin/vaultsForReview/search")
+    public PageDTO<VaultInfo> getVaultsByPartialName(
+            @RequestParam(name = "q") String partialName) {
+        Page<Vault> vaults = vaultsService.getFirstFiftyVaultsWithNameContaining(partialName);
+        return new PageDTO<>(vaults.map(Vault::convertToResponse));
+    }
+
+    @Operation(
+            summary = "Gets the Review Status of a specific vault",
+            description = "Gets the Review Status of a specific vault"
+    )
+    @GetMapping("/admin/vaults/{vaultId}/reviewstatus")
+    public VaultReviewStatusInfo getVaultReviewStatusInfo(@PathVariable String vaultId) {
+        return vaultsReviewService.getCurrentVaultReviewStatus(vaultId);
+    }
 
     @Operation(
             summary = "Gets the current review for a Vault",
