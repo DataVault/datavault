@@ -271,7 +271,7 @@ public class AdminReviewsController {
         restService.editDepositReview(originalDepositReview);
     }
     
-    @GetMapping("/admin/vaults/reviews")
+    @GetMapping("/admin/reviews/vaults/search")
     @ResponseBody
     public PageDTO<VaultInfo> searchVaultsForReview(
             @RequestParam("q")

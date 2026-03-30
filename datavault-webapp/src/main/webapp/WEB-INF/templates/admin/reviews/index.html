@@ -182,7 +182,7 @@
     
     function executeSearch(searchTerm) {
         return $.ajax({
-            url: '/admin/vaults/reviews',
+            url: '/admin/reviews/vaults/search',
             method: 'GET',
             data: {q: searchTerm}, // Spring maps this to @RequestParam("q")
             success: function (response) {
