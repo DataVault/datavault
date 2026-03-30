@@ -3,7 +3,7 @@ info:
   title: DataVault WebApp API
   description: API documentation for the DataVault WebApp module.
   version: 0.0.0 (a16f01e)
-  x-generated-at: 2026-03-30T15:33:17.705253
+  x-generated-at: 2026-03-30T16:09:07.486919
 servers:
 - url: http://localhost
   description: Generated server url
@@ -1573,37 +1573,6 @@ paths:
             text/html:
               schema:
                 type: string
-  /admin/vaults/reviews:
-    get:
-      tags:
-      - admin-reviews-controller
-      description: searches for vaults that can be reviewed - used to support dynamic
-        in-page searching of vaults. First 50 only
-      operationId: searchVaultsForReview
-      parameters:
-      - name: q
-        in: query
-        description: search term - part of the vault name
-        required: true
-        schema:
-          type: string
-          description: search term - part of the vault name
-          maxLength: 400
-          minLength: 3
-      responses:
-        "422":
-          description: Returns a comma seperated list of validation errors
-          content:
-            text/plain:
-              schema:
-                type: string
-        "200":
-          description: Returns a list of vaults where the name matches the search
-            parameter
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/PageDTOVaultInfo"
   /admin/vaults/csv:
     get:
       tags:
@@ -1791,6 +1760,37 @@ paths:
             text/html:
               schema:
                 type: string
+  /admin/reviews/vaults/search:
+    get:
+      tags:
+      - admin-reviews-controller
+      description: searches for vaults that can be reviewed - used to support dynamic
+        in-page searching of vaults. First 50 only
+      operationId: searchVaultsForReview
+      parameters:
+      - name: q
+        in: query
+        description: search term - part of the vault name
+        required: true
+        schema:
+          type: string
+          description: search term - part of the vault name
+          maxLength: 400
+          minLength: 3
+      responses:
+        "422":
+          description: Returns a comma seperated list of validation errors
+          content:
+            text/plain:
+              schema:
+                type: string
+        "200":
+          description: Returns a list of vaults where the name matches the search
+            parameter
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PageDTOVaultInfo"
   /admin/retrieves:
     get:
       tags:
@@ -2707,6 +2707,8 @@ components:
         size:
           type: integer
           format: int64
+        mostRecentVaultReview:
+          $ref: "#/components/schemas/VaultReview"
         dataCreator:
           type: array
           items:
@@ -2714,8 +2716,6 @@ components:
           writeOnly: true
         vaultReviewUnderway:
           type: boolean
-        mostRecentVaultReview:
-          $ref: "#/components/schemas/VaultReview"
     VaultReview:
       type: object
       properties:
@@ -3274,9 +3274,9 @@ components:
           type: string
           format: date
           description: The grant end Date of the vault
-        projectSizeStr:
-          type: string
         budgetCodeStr:
+          type: string
+        projectSizeStr:
           type: string
     ArchiveStoredUpdateRequest:
       type: object
@@ -3363,6 +3363,95 @@ components:
           type: boolean
         max:
           type: string
+    PermissionModel:
+      type: object
+      properties:
+        id:
+          type: string
+        permission:
+          type: string
+          enum:
+          - VIEW_DEPOSITS_AND_RETRIEVES
+          - VIEW_VAULT_METADATA
+          - VIEW_VAULT_ROLES
+          - ASSIGN_VAULT_ROLES
+          - VIEW_VAULT_HISTORY
+          - CAN_TRANSFER_VAULT_OWNERSHIP
+          - CAN_VIEW_VAULTS_SIZE
+          - CAN_VIEW_IN_PROGRESS
+          - CAN_VIEW_QUEUES
+          - CAN_MANAGE_VAULTS
+          - CAN_MANAGE_DEPOSITS
+          - CAN_VIEW_RETRIEVES
+          - CAN_VIEW_SCHOOL_ROLE_ASSIGNMENTS
+          - CAN_ORPHAN_SCHOOL_VAULTS
+          - MANAGE_SCHOOL_VAULT_DEPOSITS
+          - VIEW_SCHOOL_VAULT_METADATA
+          - VIEW_SCHOOL_VAULT_ROLES
+          - ASSIGN_SCHOOL_VAULT_ROLES
+          - VIEW_SCHOOL_VAULT_HISTORY
+          - TRANSFER_SCHOOL_VAULT_OWNERSHIP
+          - EDIT_SCHOOL_VAULT_METADATA
+          - DELETE_SCHOOL_VAULT_DEPOSITS
+          - CAN_RETRIEVE_DATA
+          - CAN_MANAGE_BILLING_DETAILS
+          - CAN_MANAGE_ROLES
+          - CAN_MANAGE_PENDING_VAULTS
+          - CAN_VIEW_EVENTS
+          - CAN_MANAGE_RETENTION_POLICIES
+          - CAN_MANAGE_ARCHIVE_STORES
+          - CAN_MANAGE_SCHOOL_ROLE_ASSIGNMENTS
+          - CAN_MANAGE_REVIEWS
+        label:
+          type: string
+        type:
+          type: string
+          enum:
+          - SCHOOL
+          - VAULT
+          - ADMIN
+        adminPermission:
+          type: boolean
+        schoolPermission:
+          type: boolean
+        vaultPermission:
+          type: boolean
+    RoleModel:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+          enum:
+          - SCHOOL
+          - VAULT
+          - ADMIN
+        status:
+          type: string
+        permissions:
+          type: array
+          items:
+            $ref: "#/components/schemas/PermissionModel"
+        assignedUserCount:
+          type: integer
+          format: int32
+        idAsString:
+          type: string
+    RoleViewModel:
+      type: object
+      properties:
+        role:
+          $ref: "#/components/schemas/RoleModel"
+        unsetPermissions:
+          type: array
+          items:
+            $ref: "#/components/schemas/PermissionModel"
     PageDTOVaultInfo:
       type: object
       properties:
@@ -3580,95 +3669,6 @@ components:
           $ref: "#/components/schemas/VaultReview"
         underwayReview:
           $ref: "#/components/schemas/VaultReview"
-    PermissionModel:
-      type: object
-      properties:
-        id:
-          type: string
-        permission:
-          type: string
-          enum:
-          - VIEW_DEPOSITS_AND_RETRIEVES
-          - VIEW_VAULT_METADATA
-          - VIEW_VAULT_ROLES
-          - ASSIGN_VAULT_ROLES
-          - VIEW_VAULT_HISTORY
-          - CAN_TRANSFER_VAULT_OWNERSHIP
-          - CAN_VIEW_VAULTS_SIZE
-          - CAN_VIEW_IN_PROGRESS
-          - CAN_VIEW_QUEUES
-          - CAN_MANAGE_VAULTS
-          - CAN_MANAGE_DEPOSITS
-          - CAN_VIEW_RETRIEVES
-          - CAN_VIEW_SCHOOL_ROLE_ASSIGNMENTS
-          - CAN_ORPHAN_SCHOOL_VAULTS
-          - MANAGE_SCHOOL_VAULT_DEPOSITS
-          - VIEW_SCHOOL_VAULT_METADATA
-          - VIEW_SCHOOL_VAULT_ROLES
-          - ASSIGN_SCHOOL_VAULT_ROLES
-          - VIEW_SCHOOL_VAULT_HISTORY
-          - TRANSFER_SCHOOL_VAULT_OWNERSHIP
-          - EDIT_SCHOOL_VAULT_METADATA
-          - DELETE_SCHOOL_VAULT_DEPOSITS
-          - CAN_RETRIEVE_DATA
-          - CAN_MANAGE_BILLING_DETAILS
-          - CAN_MANAGE_ROLES
-          - CAN_MANAGE_PENDING_VAULTS
-          - CAN_VIEW_EVENTS
-          - CAN_MANAGE_RETENTION_POLICIES
-          - CAN_MANAGE_ARCHIVE_STORES
-          - CAN_MANAGE_SCHOOL_ROLE_ASSIGNMENTS
-          - CAN_MANAGE_REVIEWS
-        label:
-          type: string
-        type:
-          type: string
-          enum:
-          - SCHOOL
-          - VAULT
-          - ADMIN
-        adminPermission:
-          type: boolean
-        schoolPermission:
-          type: boolean
-        vaultPermission:
-          type: boolean
-    RoleModel:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-        name:
-          type: string
-        description:
-          type: string
-        type:
-          type: string
-          enum:
-          - SCHOOL
-          - VAULT
-          - ADMIN
-        status:
-          type: string
-        permissions:
-          type: array
-          items:
-            $ref: "#/components/schemas/PermissionModel"
-        assignedUserCount:
-          type: integer
-          format: int32
-        idAsString:
-          type: string
-    RoleViewModel:
-      type: object
-      properties:
-        role:
-          $ref: "#/components/schemas/RoleModel"
-        unsetPermissions:
-          type: array
-          items:
-            $ref: "#/components/schemas/PermissionModel"
   securitySchemes:
     SSOHeaderAuth:
       type: apiKey

@@ -4,12 +4,12 @@ info:
   description: |-
     API documentation for the DataVault Broker module.
     All endpoints require authentication via the X-UserID and X-Client-Key headers.
-  version: 0.0.0 (1e19122)
-  x-generated-at: 2026-03-30T15:30:53.740652
+  version: 0.0.0 (0.0.0)
+  x-generated-at: 2026-03-30T16:09:37.048839
 servers:
 - url: http://localhost
   description: Generated server url
-ssecurity:
+security:
 - X-UserID-Header: []
 - X-Client-Key-Header: []
 tags:
@@ -4026,11 +4026,11 @@ components:
           - SCHOOL
           - VAULT
           - ADMIN
+        adminPermission:
+          type: boolean
         schoolPermission:
           type: boolean
         vaultPermission:
-          type: boolean
-        adminPermission:
           type: boolean
     RoleModel:
       type: object
@@ -4376,8 +4376,6 @@ components:
         size:
           type: integer
           format: int64
-        mostRecentVaultReview:
-          $ref: "#/components/schemas/VaultReview"
         dataCreator:
           type: array
           items:
@@ -4385,6 +4383,8 @@ components:
           writeOnly: true
         vaultReviewUnderway:
           type: boolean
+        mostRecentVaultReview:
+          $ref: "#/components/schemas/VaultReview"
     CreateRetentionPolicy:
       type: object
       properties:
@@ -4778,9 +4778,9 @@ components:
           type: array
           items:
             type: string
-        policyStatusStr:
-          type: string
         projectSizeStr:
+          type: string
+        policyStatusStr:
           type: string
         sizeStr:
           type: string
@@ -5001,9 +5001,9 @@ components:
           type: string
           format: date
           description: The grant end Date of the vault
-        projectSizeStr:
-          type: string
         budgetCodeStr:
+          type: string
+        projectSizeStr:
           type: string
     EventInfo:
       type: object
