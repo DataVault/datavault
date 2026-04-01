@@ -19,6 +19,7 @@ import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -237,12 +238,18 @@ public class RestService implements NotifyLogoutService, NotifyLoginService, Eva
     }
 
     public PageDTO<VaultInfo> searchVaultsForReview(String partialVaultName) {
-        String url = UriComponentsBuilder.fromHttpUrl(brokerURL + "/admin/vaultsForReview/search")
+        String url = UriComponentsBuilder.fromUriString(brokerURL + "/admin/vaultsForReview/search")
                 .queryParam("q", partialVaultName)
                 .encode() // This handles the spaces, slashes, etc.
                 .toUriString();
         ResponseEntity<PageDTO<VaultInfo>> response = get(url, PTR_PAGE_VAULTINFO);
         return response.getBody();
+    }
+    
+    public boolean refreshUnderwayVaultReview(String vaultId) {
+        ResponseEntity<Boolean> response = post(brokerURL + "/admin/vaults/vaultreviews/%s/refresh".formatted(vaultId), Boolean.class, null);
+        Assert.isTrue(response.getStatusCode().is2xxSuccessful(), "Failed to refresh underway vault review for vaultId [%s]".formatted(vaultId));
+        return Boolean.TRUE.equals(response.getBody());
     }
 
     public VaultReviewStatusInfo getVaultReviewStatusInfo(String vaultId) {

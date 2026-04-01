@@ -8,9 +8,11 @@ import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.webapp.app.DataVaultWebApp;
 import org.datavaultplatform.webapp.app.services.BaseRestTemplateWithLoggingTest;
 import org.datavaultplatform.webapp.test.ProfileDatabase;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -43,7 +45,9 @@ class RestServiceTest extends BaseRestTemplateWithLoggingTest {
         @Test
         @WithMockUser(username = "user1")
         void testTogglePausedState() {
-            restService.toggleDepositPausedState();
+            assertDoesNotThrow(() -> {
+                restService.toggleDepositPausedState();
+            });
         }
 
         @Test
@@ -80,7 +84,9 @@ class RestServiceTest extends BaseRestTemplateWithLoggingTest {
         @Test
         @WithMockUser(username = "user1")
         void testTogglePausedState() {
-            restService.toggleRetrievePausedState();
+            assertDoesNotThrow(() -> {
+                restService.toggleRetrievePausedState();
+            });
         }
 
         @Test
@@ -146,4 +152,20 @@ class RestServiceTest extends BaseRestTemplateWithLoggingTest {
         }
     }
     
+    
+    @Nested
+    class RefreshVaultReviewTests {
+
+        @Test
+        void testVaultId123AndDepositReviewsAdded() {
+            boolean depositReviewsAdded = restService.refreshUnderwayVaultReview("vault-id-123");
+            assertThat(depositReviewsAdded).isTrue();
+        }
+
+        @Test
+        void testVaultId234AndDepositReviewsNotAdded() {
+            boolean depositReviewsAdded = restService.refreshUnderwayVaultReview("vault-id-234");
+            assertThat(depositReviewsAdded).isFalse();
+        }
+    }
 }

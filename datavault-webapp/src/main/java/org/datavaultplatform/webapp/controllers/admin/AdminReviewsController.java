@@ -39,7 +39,7 @@ import static org.datavaultplatform.common.util.Utils.*;
 @Validated
 public class AdminReviewsController {
 
-    Comparator<VaultInfo> BY_REVIEW_DATE_ASC = Comparator.comparing(
+    public static final Comparator<VaultInfo> BY_REVIEW_DATE_ASC = Comparator.comparing(
             VaultInfo::getReviewDate,
             Comparator.nullsLast(Comparator.naturalOrder())
     );
@@ -106,11 +106,16 @@ public class AdminReviewsController {
         model.addAttribute("createRetentionPolicy", retentionPolicy);
         model.addAttribute(restService.getGroup(vault.getGroupID()));
 
+        // for existing 'underway' VaultReview - makes sure it has a DepositReview for each of the Vault's Deposits
+        boolean depositReviewsAdded = restService.refreshUnderwayVaultReview(vaultID);
+        LOG.info("POST REFRESH FOR VAULT[{}] depositReviewsAdded is [{}]", vault.getName(), depositReviewsAdded);
+
         ReviewInfo reviewInfo = restService.getCurrentReview(vaultID);
         if (reviewInfo == null) {
             // There isn't a current review, so create one.
             reviewInfo = restService.createCurrentReview(vaultID);
         }
+        
         VaultReview currentReview = restService.getVaultReview(reviewInfo.getVaultReviewId());
         VaultReviewModel vaultReviewModel = new VaultReviewModel(currentReview, vault.getReviewDate());
 

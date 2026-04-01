@@ -17,6 +17,7 @@ import org.jsondoc.core.annotation.ApiHeader;
 import org.jsondoc.core.annotation.ApiHeaders;
 import org.jsondoc.core.annotation.ApiMethod;
 import org.jsondoc.core.pojo.ApiVerb;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 @RestController
@@ -33,6 +35,7 @@ import java.util.Objects;
 @Api(name="AdminReviews", description = "Administrator Review functions")
 public class AdminReviewsController {
 
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(AdminReviewsController.class);
     private final VaultsService vaultsService;
     private final VaultsReviewService vaultsReviewService;
     private final DepositsReviewService depositsReviewService;
@@ -233,7 +236,8 @@ public class AdminReviewsController {
     public static ReviewInfo getReviewInfo(VaultReview vaultReview) {
         Assert.notNull(vaultReview, "The vaultReview cannot be null");
         List<DepositReview> depositReviews = vaultReview.getDepositReviews();
-
+        int depositReviewCount = depositReviews == null ? 0 : depositReviews.size();
+        LOG.info("VaultReview[{}] has [{}] DepositReviews", vaultReview.getId(), depositReviewCount);
         // Create Lists of Deposit and DepositReview ids
         List<String> depositIds = new ArrayList<>();
         List<String> depositReviewIds = new ArrayList<>();
@@ -251,5 +255,28 @@ public class AdminReviewsController {
         reviewInfo.setDepositIds(depositIds);
         reviewInfo.setDepositReviewIds(depositReviewIds);
         return reviewInfo;
+    }
+
+    @PostMapping(value = "/admin/vaults/vaultreviews/{vaultId}/refresh", produces = MediaType.APPLICATION_JSON_VALUE)
+    public boolean refreshDepositsOnUnderwayVaultReview(@PathVariable String vaultId) {
+        
+        Assert.notNull(vaultId, "The vaultId cannot be null");
+
+        RefreshedVaultReview refreshed = vaultsReviewService.refreshDepositsOnUnderwayVaultReview(vaultId).orElse(null);
+        if (refreshed == null) {
+            LOG.debug("No underway VaultReview found for Vault {}", vaultId);
+            return false;
+        }
+        VaultReview underway = refreshed.underway();
+        Vault vault = underway.getVault();
+        List<DepositReview> depositReviewsAdded = refreshed.depositReviewsAdded();
+        int size = depositReviewsAdded.size();
+        AtomicInteger counter = new AtomicInteger(1);
+        depositReviewsAdded.forEach(dr -> {
+            LOG.info("[{}/{}] Added DepositReviewId[{}] for DepositId[{}] to VaultReviewId[{}] for VaultId[{}]",
+                    counter.getAndIncrement(), size, dr.getId(), dr.getDeposit().getID(), underway.getId(), vault.getID());
+        });
+        LOG.info("Added [{}] DepositReviews to VaultReviewId[{}] for VaultId[{}]", size, underway.getId(), vault.getID());
+        return size > 0;
     }
 }

@@ -4,6 +4,7 @@ import org.datavaultplatform.common.model.Deposit;
 import org.datavaultplatform.common.model.DepositReview;
 import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.model.VaultReview;
+import org.datavaultplatform.common.model.dao.DepositDAO;
 import org.datavaultplatform.common.model.dao.DepositReviewDAO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -15,11 +16,13 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -28,8 +31,11 @@ class DepositsReviewServiceTest {
     Clock clock;
     
     @Mock
-    DepositReviewDAO mDao;
-    
+    DepositReviewDAO mDepositReviewDAO;
+
+    @Mock
+    DepositDAO mDepositDAO;
+
     DepositsReviewService serviceSpy;
     
     LocalDateTime timestamp;
@@ -39,7 +45,7 @@ class DepositsReviewServiceTest {
         Instant fixedInstant = Instant.parse("2023-10-01T10:00:00Z");
         ZoneId zone = ZoneId.of("UTC");
         clock = Clock.fixed(fixedInstant, zone);
-        serviceSpy = Mockito.spy(new DepositsReviewService(mDao, clock));
+        serviceSpy = Mockito.spy(new DepositsReviewService(mDepositReviewDAO, mDepositDAO, clock));
         timestamp = LocalDateTime.now(clock);
     }
 
@@ -51,10 +57,10 @@ class DepositsReviewServiceTest {
 
         serviceSpy.saveDepositReview(depositReview);
 
-        verify(mDao).save(depositReview);
+        verify(mDepositReviewDAO).save(depositReview);
         assertThat(depositReview.getCreationTime()).isEqualTo(timestamp);
         
-        verifyNoMoreInteractions(mDao);
+        verifyNoMoreInteractions(mDepositReviewDAO);
     }
 
     @Nested
@@ -104,7 +110,7 @@ class DepositsReviewServiceTest {
             
             assertThat(argDepositReview.getAllValues().get(0)).isEqualTo(dr1);
             assertThat(argDepositReview.getAllValues().get(1)).isEqualTo(dr2);
-            verifyNoMoreInteractions(mDao);
+            verifyNoMoreInteractions(mDepositReviewDAO);
             
         }
     }
@@ -112,12 +118,12 @@ class DepositsReviewServiceTest {
     @Test
     void testGetDepositReviews() {
         List<DepositReview> reviews = List.of(new DepositReview(), new DepositReview());
-        when(mDao.list()).thenReturn(reviews);
+        when(mDepositReviewDAO.list()).thenReturn(reviews);
 
         assertThat(serviceSpy.getDepositReviews()).isEqualTo(reviews);
 
-        verify(mDao).list();
-        verifyNoMoreInteractions(mDao);
+        verify(mDepositReviewDAO).list();
+        verifyNoMoreInteractions(mDepositReviewDAO);
     }
 
     @Nested
@@ -127,30 +133,30 @@ class DepositsReviewServiceTest {
         void testGetDepositReviewFound(){
 
             DepositReview depositReview = new DepositReview();
-            when(mDao.findById("depositReviewId")).thenReturn(Optional.of(depositReview));
+            when(mDepositReviewDAO.findById("depositReviewId")).thenReturn(Optional.of(depositReview));
 
             String depositReviewId = "depositReviewId";
 
             DepositReview result = serviceSpy.getDepositReview(depositReviewId);
             assertThat(result).isEqualTo(depositReview);
             
-            verify(mDao).findById("depositReviewId");
+            verify(mDepositReviewDAO).findById("depositReviewId");
             
-            verifyNoMoreInteractions(mDao);         
+            verifyNoMoreInteractions(mDepositReviewDAO);         
         }
         @Test
         void testGetDepositReviewNotFound(){
 
-            when(mDao.findById("depositReviewId")).thenReturn(Optional.empty());
+            when(mDepositReviewDAO.findById("depositReviewId")).thenReturn(Optional.empty());
 
             String depositReviewId = "depositReviewId";
 
             DepositReview result = serviceSpy.getDepositReview(depositReviewId);
             assertThat(result).isNull();
 
-            verify(mDao).findById("depositReviewId");
+            verify(mDepositReviewDAO).findById("depositReviewId");
 
-            verifyNoMoreInteractions(mDao);
+            verifyNoMoreInteractions(mDepositReviewDAO);
         }
     }
     
@@ -162,9 +168,9 @@ class DepositsReviewServiceTest {
         
         serviceSpy.search(query);
 
-        verify(mDao).search(query);
+        verify(mDepositReviewDAO).search(query);
         
-        verifyNoMoreInteractions(mDao);
+        verifyNoMoreInteractions(mDepositReviewDAO);
     }
 
     @Test
@@ -174,19 +180,171 @@ class DepositsReviewServiceTest {
 
         serviceSpy.updateDepositReview(depositReview);
 
-        verify(mDao).update(depositReview);
+        verify(mDepositReviewDAO).update(depositReview);
         
-        verifyNoMoreInteractions(mDao);
+        verifyNoMoreInteractions(mDepositReviewDAO);
     }
 
     @Test
     void testCount(){
         
-        when(mDao.count()).thenReturn(2112L);
+        when(mDepositReviewDAO.count()).thenReturn(2112L);
         
         assertThat(serviceSpy.count()).isEqualTo(2112L);
         
-        verify(mDao).count();
-        verifyNoMoreInteractions(mDao);
+        verify(mDepositReviewDAO).count();
+        verifyNoMoreInteractions(mDepositReviewDAO);
     }
+    
+    @Nested
+    class RefreshDepositReviewsTests {
+        Vault vault;
+        Deposit deposit1;
+        Deposit deposit2;
+        Deposit deposit3;
+        Deposit deposit4;
+
+        @BeforeEach
+        void setup() {
+            vault = new Vault() {
+                @Override
+                public String getID() {
+                    return "vaultId123";
+                }
+            };
+            deposit1 = new Deposit() {
+                @Override
+                public String getID() {
+                    return "depositId1";
+                }
+            };
+            deposit2 = new Deposit() {
+                @Override
+                public String getID() {
+                    return "depositId2";
+                }
+            };
+            deposit3 = new Deposit() {
+                @Override
+                public String getID() {
+                    return "depositId3";
+                }
+            };
+            deposit4 = new Deposit() {
+                @Override
+                public String getID() {
+                    return "depositId4";
+                }
+            };
+        }
+
+        @Nested
+        class RefreshDepositReviewsBadArgTests {
+            @Test
+            void testNullVault() {
+                IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
+                    serviceSpy.refreshDepositReviews(null, new VaultReview());
+                });
+                assertThat(ex).hasMessage("The vault cannot be null");
+            }
+            
+            @Test
+            void testNoVaultId() {
+                IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
+                    serviceSpy.refreshDepositReviews(new Vault(), new VaultReview());
+                });
+                assertThat(ex).hasMessage("The vault must have an id");
+            }
+
+            @Test
+            void testNullVaultReview() {
+                IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
+                    serviceSpy.refreshDepositReviews(vault, null);
+                });
+                assertThat(ex).hasMessage("The vault review cannot be null");
+            }
+
+            @Test
+            void testVaultReviewIsNotUnderway() {
+                VaultReview vaultReview = new VaultReview();
+                vaultReview.setActionedDate(LocalDateTime.now(clock));
+                IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
+                    serviceSpy.refreshDepositReviews(vault, vaultReview);
+                });
+                assertThat(ex).hasMessage("The vault review must be underway");
+            }
+        }
+
+
+        @Test
+        void testRefreshNoDepositReviewsAdded() {
+            VaultReview vaultReview = new VaultReview();
+            vaultReview.setId("vaultReviewId123");
+            vaultReview.setVault(vault);
+            
+            DepositReview depositReview1 = new DepositReview();
+            depositReview1.setVaultReview(vaultReview);
+            depositReview1.setDeposit(deposit1);
+            
+            DepositReview depositReview2 = new DepositReview();
+            depositReview2.setVaultReview(vaultReview);
+            depositReview2.setDeposit(deposit2);
+            
+            vaultReview.setDepositReviews(new ArrayList<>(List.of(depositReview1, depositReview2)));
+            
+            when(mDepositDAO.getDepositsByVaultId("vaultId123")).thenReturn(Arrays.asList(deposit2, null, deposit1));
+            
+            List<DepositReview> result = serviceSpy.refreshDepositReviews(vault, vaultReview);
+            
+            assertThat(result).isEmpty();
+            
+            verify(mDepositDAO).getDepositsByVaultId("vaultId123");
+            verifyNoMoreInteractions(mDepositDAO);
+        }
+        
+        @Test
+        void testRefreshTwoDepositReviewsAdded() {
+            ArgumentCaptor<DepositReview> argDepositReview = ArgumentCaptor.forClass(DepositReview.class);
+            doNothing().when(serviceSpy).saveDepositReview(argDepositReview.capture());
+
+            VaultReview vaultReview = new VaultReview();
+            vaultReview.setId("vaultReviewId123");
+            vaultReview.setVault(vault);
+
+            DepositReview depositReview1 = new DepositReview();
+            depositReview1.setId("depositReviewId1");
+            depositReview1.setVaultReview(vaultReview);
+            depositReview1.setDeposit(deposit1);
+
+            DepositReview depositReview2 = new DepositReview();
+            depositReview2.setId("depositReviewId2");
+            depositReview2.setVaultReview(vaultReview);
+            depositReview2.setDeposit(deposit2);
+
+            vaultReview.setDepositReviews(new ArrayList<>(List.of(depositReview1, depositReview2)));
+
+            when(mDepositDAO.getDepositsByVaultId("vaultId123")).thenReturn(Arrays.asList(deposit2, null, deposit1, null, deposit3, deposit4));
+
+            List<DepositReview> result = serviceSpy.refreshDepositReviews(vault, vaultReview);
+
+            assertThat(result).hasSize(2);
+            DepositReview depositReviewFor3 = result.stream().filter(dr -> dr.getDeposit().getID().equals("depositId3")).findFirst().orElseThrow();
+            DepositReview depositReviewFor4 = result.stream().filter(dr -> dr.getDeposit().getID().equals("depositId4")).findFirst().orElseThrow();
+
+            assertThat(depositReviewFor3.getVaultReview()).isEqualTo(vaultReview);
+            assertThat(depositReviewFor3.getDeposit()).isEqualTo(deposit3);
+
+            assertThat(depositReviewFor4.getVaultReview()).isEqualTo(vaultReview);
+            assertThat(depositReviewFor4.getDeposit()).isEqualTo(deposit4);
+            
+            assertThat(vaultReview.getDepositReviews()).contains(depositReview1, depositReview2, depositReviewFor3, depositReviewFor4);
+
+            verify(mDepositDAO).getDepositsByVaultId("vaultId123");
+            verify(serviceSpy, times(2)).saveDepositReview(any(DepositReview.class));
+
+            assertThat(argDepositReview.getAllValues()).containsExactlyInAnyOrder(depositReviewFor3, depositReviewFor4);
+
+            verifyNoMoreInteractions(mDepositDAO);
+        }
+    }   
 }

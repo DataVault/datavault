@@ -1,5 +1,6 @@
 package org.datavaultplatform.broker.controllers.admin;
 
+import ch.qos.logback.classic.spi.ILoggingEvent;
 import lombok.SneakyThrows;
 import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.common.event.Event;
@@ -7,6 +8,7 @@ import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.response.ReviewInfo;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.response.VaultsData;
+import org.datavaultplatform.common.util.TestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -422,6 +424,107 @@ class AdminReviewsControllerTest {
 
             verifyNoMoreInteractions(mClientsService, mEventService, mDepositsReviewService, mUsersService,
                     mVaultsReviewService, mVaultsService);
+        }
+        
+        @Nested
+        class RefreshVaultReviewTests {
+
+            @Test
+            void testNullVaultId() {
+                IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
+                    controller.refreshDepositsOnUnderwayVaultReview(null);
+                });
+                assertThat(ex).hasMessage("The vaultId cannot be null");
+            }
+
+            @Test
+            void testNullVaultNotFound() {
+                when(mVaultsReviewService.refreshDepositsOnUnderwayVaultReview("notFound")).thenReturn(Optional.empty());
+
+                boolean depositReviewsAdded = controller.refreshDepositsOnUnderwayVaultReview("notFound");
+                assertThat(depositReviewsAdded).isFalse();
+
+                verify(mVaultsReviewService).refreshDepositsOnUnderwayVaultReview("notFound");
+                verifyNoMoreInteractions(mClientsService, mEventService, mDepositsReviewService, mUsersService,
+                        mVaultsReviewService, mVaultsService);
+            }
+
+            @Test
+            @SneakyThrows
+            void testNoneAdded() {
+
+                List<ILoggingEvent> loggingEvents = TestUtils.captureLogging(AdminReviewsController.class, () -> {
+                    VaultReview underway = new VaultReview();
+                    underway.setId("vaultReviewId123");
+                    Vault vault = new Vault() {
+                        @Override
+                        public String getID() {
+                            return "vaultId123";
+                        }
+                    };
+                    underway.setVault(vault);
+                    RefreshedVaultReview refreshed = new RefreshedVaultReview(underway, List.of());
+                    when(mVaultsReviewService.refreshDepositsOnUnderwayVaultReview("vaultId123")).thenReturn(Optional.of(refreshed));
+                    
+                    boolean depositReviewsAdded = controller.refreshDepositsOnUnderwayVaultReview("vaultId123");
+                    assertThat(depositReviewsAdded).isFalse();
+
+                    verify(mVaultsReviewService).refreshDepositsOnUnderwayVaultReview("vaultId123");
+                    verifyNoMoreInteractions(mClientsService, mEventService, mDepositsReviewService, mUsersService,
+                            mVaultsReviewService, mVaultsService);
+
+                });
+                assertThat(loggingEvents).hasSize(1);
+                assertThat(loggingEvents.get(0).getFormattedMessage()).isEqualTo("Added [0] DepositReviews to VaultReviewId[vaultReviewId123] for VaultId[vaultId123]");
+            }
+
+            @Test
+            @SneakyThrows
+            void testTwoAdded() {
+
+                List<ILoggingEvent> loggingEvents = TestUtils.captureLogging(AdminReviewsController.class, () -> {
+                    VaultReview underway = new VaultReview();
+                    underway.setId("vaultReviewId123");
+                    Vault vault = new Vault() {
+                        @Override
+                        public String getID() {
+                            return "vaultId123";
+                        }
+                    };
+                    underway.setVault(vault);
+                    DepositReview depositReview1 = new DepositReview();
+                    depositReview1.setId("depositReviewId1");
+                    Deposit deposit1 = new Deposit(){
+                        public String getID() {
+                            return "depositId1";
+                        }
+                    };
+                    depositReview1.setDeposit(deposit1);
+                    
+                    DepositReview depositReview2 = new DepositReview();
+                    depositReview2.setId("depositReviewId2");
+                    Deposit deposit2 = new Deposit(){
+                      public String getID() {
+                          return "depositId2";
+                      }  
+                    };
+                    depositReview2.setDeposit(deposit2);
+                    RefreshedVaultReview refreshed = new RefreshedVaultReview(underway, List.of(depositReview1, depositReview2));
+                    when(mVaultsReviewService.refreshDepositsOnUnderwayVaultReview("vaultId123")).thenReturn(Optional.of(refreshed));
+
+                    boolean depositReviewsAdded = controller.refreshDepositsOnUnderwayVaultReview("vaultId123");
+                    assertThat(depositReviewsAdded).isTrue();
+
+                    verify(mVaultsReviewService).refreshDepositsOnUnderwayVaultReview("vaultId123");
+                    verifyNoMoreInteractions(mClientsService, mEventService, mDepositsReviewService, mUsersService,
+                            mVaultsReviewService, mVaultsService);
+
+                });
+                assertThat(loggingEvents).hasSize(3);
+                assertThat(loggingEvents.get(0).getFormattedMessage()).isEqualTo("[1/2] Added DepositReviewId[depositReviewId1] for DepositId[depositId1] to VaultReviewId[vaultReviewId123] for VaultId[vaultId123]");
+                assertThat(loggingEvents.get(1).getFormattedMessage()).isEqualTo("[2/2] Added DepositReviewId[depositReviewId2] for DepositId[depositId2] to VaultReviewId[vaultReviewId123] for VaultId[vaultId123]");
+                assertThat(loggingEvents.get(2).getFormattedMessage()).isEqualTo("Added [2] DepositReviews to VaultReviewId[vaultReviewId123] for VaultId[vaultId123]");
+            }
         }
     }
 }
