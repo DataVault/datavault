@@ -29,7 +29,6 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.datavaultplatform.common.util.Utils.*;
 
@@ -39,7 +38,7 @@ import static org.datavaultplatform.common.util.Utils.*;
 @Validated
 public class AdminReviewsController {
 
-    Comparator<VaultInfo> BY_REVIEW_DATE_ASC = Comparator.comparing(
+    public static final Comparator<VaultInfo> BY_REVIEW_DATE_ASC = Comparator.comparing(
             VaultInfo::getReviewDate,
             Comparator.nullsLast(Comparator.naturalOrder())
     );
@@ -111,6 +110,10 @@ public class AdminReviewsController {
             // There isn't a current review, so create one.
             reviewInfo = restService.createCurrentReview(vaultID);
         }
+        
+        // makes sure the VaultReview has a DepositReview for each of the Vault's Deposits
+        restService.refreshUnderwayVaultReview(vaultID);
+        
         VaultReview currentReview = restService.getVaultReview(reviewInfo.getVaultReviewId());
         VaultReviewModel vaultReviewModel = new VaultReviewModel(currentReview, vault.getReviewDate());
 

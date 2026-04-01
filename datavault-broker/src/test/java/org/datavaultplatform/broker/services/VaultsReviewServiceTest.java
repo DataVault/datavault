@@ -1,5 +1,6 @@
 package org.datavaultplatform.broker.services;
 
+import org.datavaultplatform.common.model.DepositReview;
 import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.model.VaultReview;
 import org.datavaultplatform.common.model.dao.VaultReviewDAO;
@@ -422,5 +423,58 @@ class VaultsReviewServiceTest {
             assertThat(result).isEmpty();
         }
     }
+    
+    @Nested
+    class GetVaultsForReviewByVaultIdTests {
+        
+        @Test
+        void testNullVaultId(){
+            IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
+                vaultsReviewService.refreshDepositsOnUnderwayVaultReview(null);
+            });
+            assertThat(ex).hasMessage("The vaultId cannot be null");
+            verifyNoMoreInteractions(mVaultReviewDAO, mDepositReviewService);
+        }
+        
+        @Test
+        void testVaultHasNotUnderwayReview(){
+            when(mVaultReviewDAO.findUnderwayVaultReview("vaultId123")).thenReturn(Optional.empty());
+            
+            Optional<RefreshedVaultReview> result = vaultsReviewService.refreshDepositsOnUnderwayVaultReview("vaultId123");
+            assertThat(result).isEmpty();
+            
+            verify(mVaultReviewDAO).findUnderwayVaultReview("vaultId123");
+            verifyNoMoreInteractions(mVaultReviewDAO, mDepositReviewService);
+        }
+
+        @Test
+        void testVaultHasUnderwayReview(){
+            VaultReview vaultReview = new VaultReview();
+            Vault vault = new Vault() {
+                @Override
+                public String getID() {
+                    return "vaultId123";
+                }
+            };
+            vaultReview.setVault(vault);
+            vaultReview.setId("vaultReviewId123");
+            List<DepositReview> depositReviewList = new ArrayList<>();
+            when(mVaultReviewDAO.findUnderwayVaultReview("vaultId123")).thenReturn(Optional.of(vaultReview));
+            
+            when(mDepositReviewService.refreshDepositReviews(vault, vaultReview)).thenReturn(depositReviewList);
+
+            Optional<RefreshedVaultReview> result = vaultsReviewService.refreshDepositsOnUnderwayVaultReview("vaultId123");
+            assertThat(result).isPresent();
+            
+            RefreshedVaultReview refreshedVaultReview = result.get();
+            assertThat(refreshedVaultReview.underway()).isEqualTo(vaultReview);
+            assertThat(refreshedVaultReview.depositReviewsAdded()).isEqualTo(depositReviewList);
+
+            verify(mVaultReviewDAO).findUnderwayVaultReview("vaultId123");
+            verify(mDepositReviewService).refreshDepositReviews(vault, vaultReview);
+            verifyNoMoreInteractions(mVaultReviewDAO, mDepositReviewService);
+        }
+    }
+    
 
 }

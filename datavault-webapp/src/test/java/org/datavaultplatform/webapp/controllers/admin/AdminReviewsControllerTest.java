@@ -124,7 +124,7 @@ class AdminReviewsControllerTest {
         currentReviewInfo.setDepositReviewIds(List.of("depRevId1", "depRevId2"));
         currentReviewInfo.setDepositIds(List.of("depId1", "depId2"));
         currentReviewInfo.setVaultReviewId("vaultReviewId");
-
+        
         if (hasCurrentReview) {
             when(mRestService.getCurrentReview("vaultId")).thenReturn(currentReviewInfo);
         } else {
@@ -189,6 +189,8 @@ class AdminReviewsControllerTest {
         assertThat(drm2.getDepositName()).isEqualTo("depId2-name");
         assertThat(drm2.getComment()).isEqualTo("depRevId2-comment");
 
+        verify(mRestService).refreshUnderwayVaultReview("vaultId");
+        
         if (hasCurrentReview) {
             verify(mRestService, never()).createCurrentReview(anyString());
         } else {
@@ -212,6 +214,7 @@ class AdminReviewsControllerTest {
             expectedError = "If some deposits are to be retained then a next Review Date must be entered";
         }
         assertThat(actualError).isEqualTo(expectedError);
+        verifyNoMoreInteractions(mRestService);
     }
 
     @Nested
