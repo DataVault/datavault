@@ -1,8 +1,7 @@
 package org.datavaultplatform.broker.authentication;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -18,7 +17,7 @@ import org.mockito.Captor;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 
-public class AdminReviewsControllerAuthTest extends BaseControllerAuthTest {
+class AdminReviewsControllerAuthTest extends BaseControllerAuthTest {
 
   @MockBean
   AdminReviewsController controller;
@@ -115,6 +114,20 @@ public class AdminReviewsControllerAuthTest extends BaseControllerAuthTest {
 
     verify(controller).editDepositReview(USER_ID_1, argDepositReview.getValue());
     assertEquals(AuthTestData.DEPOSIT_REVIEW_1.getId(), argDepositReview.getValue().getId());
+  }
+
+  @Test
+  void testPostRefreshDepositsOnUnderwayVaultReview() {
+    doNothing().when(controller).refreshDepositsOnUnderwayVaultReview(
+            "vaultId123");
+    
+    checkWorksWhenAuthenticatedFailsOtherwise(
+            post("/admin/vaults/vaultreviews/{vaultId}/refresh", "vaultId123"),
+            null,
+            Permission.CAN_MANAGE_VAULTS);
+
+    verify(controller).refreshDepositsOnUnderwayVaultReview("vaultId123");
+    verifyNoMoreInteractions(controller);
   }
 
   @AfterEach

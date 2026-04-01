@@ -420,11 +420,11 @@
                                      <th>Date Review Submitted</th>
                                      <th:block th:if="${vrvm.actionedDate != null}">
                                          <!--/* if there's an actionedDate - the (old) Vault ReviewDate at time of submission will be used */-->
-                                         <td>Review Date (when submitted)</td>
+                                         <th>Review Date (when submitted)</th>
                                      </th:block>
                                      <th:block th:if="${vrvm.actionedDate == null}">
                                          <!--/* if there's no actionedDate - we display the current Vault Review date */-->
-                                         <td>Review Date (current)</td>
+                                         <th>Review Date (current)</th>
                                      </th:block>
 
                                      <th colspan="2">Comment</th>

@@ -1,5 +1,6 @@
 package org.datavaultplatform.broker.services;
 
+import org.datavaultplatform.common.model.DepositReview;
 import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.model.VaultReview;
 import org.datavaultplatform.common.model.dao.VaultReviewDAO;
@@ -156,5 +157,15 @@ public class VaultsReviewService {
         statusInfo.setUnderwayReview(underwayReview);
         statusInfo.setLatestSubmittedReview(latestSubmitted);
         return statusInfo;
+    }
+
+    public Optional<RefreshedVaultReview> refreshDepositsOnUnderwayVaultReview(String vaultId) {
+        Assert.notNull(vaultId, "The vaultId cannot be null");
+        return vaultReviewDAO.findUnderwayVaultReview(vaultId).map( underwayReview -> {
+            Vault vault = underwayReview.getVault();
+            Assert.notNull(vault, "The vault cannot be null");
+            List<DepositReview> depositReviewsAdded = depositsReviewService.refreshDepositReviews(vault, underwayReview);
+            return new RefreshedVaultReview(underwayReview, depositReviewsAdded);
+        });
     }
 }

@@ -19,4 +19,7 @@ public interface DepositDAO extends BaseDAO<Deposit>, DepositCustomDAO {
   @Override
   @EntityGraph(Deposit.EG_DEPOSIT)
   List<Deposit> findAll();
+
+  @EntityGraph(Deposit.EG_DEPOSIT)
+  List<Deposit> getDepositsByVaultId(String vaultId);
 }

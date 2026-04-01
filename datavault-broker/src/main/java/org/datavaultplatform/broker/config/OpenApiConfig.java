@@ -2,21 +2,23 @@ package org.datavaultplatform.broker.config;
 
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
+import org.springdoc.core.customizers.GlobalOpenApiCustomizer;
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springframework.boot.info.GitProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 
 import java.time.Clock;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.datavaultplatform.common.util.Constants.HEADER_CLIENT_KEY;
 import static org.datavaultplatform.common.util.Constants.HEADER_USER_ID;
@@ -78,5 +80,42 @@ public class OpenApiConfig {
         return new OpenAPI()
                 .info(info)
                 .security(List.of(req1, req2));
+    }
+
+    @Bean
+    @Order(1)
+    public GlobalOpenApiCustomizer duplicateOperationIdFixer() {
+        return openApi -> {
+            Map<String, Integer> idCounts = new HashMap<>();
+            openApi.getPaths().values().forEach(pathItem ->
+                    pathItem.readOperations().forEach(operation -> {
+                        String id = operation.getOperationId();
+                        if (id != null) {
+                            int count = idCounts.getOrDefault(id, 0);
+                            if (count > 0) {
+                                operation.setOperationId(id + "_" + count);
+                            }
+                            idCounts.put(id, count + 1);
+                        }
+                    })
+            );
+        };
+    }
+
+    @Bean
+    @Order(2)
+    public GlobalOpenApiCustomizer sortSchemaPropertiesCustomizer() {
+        return openApi -> {
+
+            if (openApi.getComponents() != null && openApi.getComponents().getSchemas() != null) {
+                openApi.getComponents().getSchemas().values().forEach(schema -> {
+                    if (schema.getProperties() != null) {
+                        // Replace the properties map with a sorted TreeMap
+                        Map<String, Schema> sortedProperties = new TreeMap<>(schema.getProperties());
+                        schema.setProperties(sortedProperties);
+                    }
+                });
+            }
+        };
     }
 }

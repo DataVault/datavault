@@ -181,4 +181,12 @@ public class VaultReview {
     public boolean isReviewSubmitted() {
         return !isReviewUnderway();
     }
+
+    public void addDepositReview(DepositReview deposit) {
+        if (this.depositReviews == null) {
+            this.depositReviews = new java.util.ArrayList<>();
+        }
+        depositReviews.add(deposit);
+        deposit.setVaultReview(this);
+    }
 }

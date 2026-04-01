@@ -37,7 +37,7 @@ import static org.datavaultplatform.common.util.Utils.*;
 @Validated
 public class AdminReviewsController implements AdminReviewsControllerApi {
 
-    Comparator<VaultInfo> BY_REVIEW_DATE_ASC = Comparator.comparing(
+    public static final Comparator<VaultInfo> BY_REVIEW_DATE_ASC = Comparator.comparing(
             VaultInfo::getReviewDate,
             Comparator.nullsLast(Comparator.naturalOrder())
     );
@@ -111,6 +111,10 @@ public class AdminReviewsController implements AdminReviewsControllerApi {
             // There isn't a current review, so create one.
             reviewInfo = restService.createCurrentReview(vaultId);
         }
+        
+        // makes sure the VaultReview has a DepositReview for each of the Vault's Deposits
+        restService.refreshUnderwayVaultReview(vaultId);
+        
         VaultReview currentReview = restService.getVaultReview(reviewInfo.getVaultReviewId());
         VaultReviewModel vaultReviewModel = new VaultReviewModel(currentReview, vault.getReviewDate());
 

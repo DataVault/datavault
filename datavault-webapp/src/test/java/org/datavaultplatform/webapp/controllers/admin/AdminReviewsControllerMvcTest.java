@@ -330,6 +330,7 @@ class AdminReviewsControllerMvcTest {
         verify(mRestService).getRoleAssignmentsForVault(TEST_VAULT_ID_1);
         verify(mRestService).getRetentionPolicy(null);//FIX
         verify(mRestService).getGroup(TEST_GROUP_ID);
+        verify(mRestService).refreshUnderwayVaultReview(TEST_VAULT_ID_1);
         verify(mRestService).getCurrentReview(TEST_VAULT_ID_1);
         verify(mRestService).getVaultReview(TEST_VAULT_REVIEW_ID);
         verify(mRestService).getDeposit(TEST_DEPOSIT_ID_1);
@@ -379,6 +380,7 @@ class AdminReviewsControllerMvcTest {
         verify(mRestService).getRetentionPolicy(null); //should fix this
 
         verify(mRestService).getGroup(TEST_GROUP_ID); //should fix this
+        verify(mRestService).refreshUnderwayVaultReview(TEST_VAULT_ID_1);
         verify(mRestService).getCurrentReview(TEST_VAULT_ID_1);
         verify(mRestService).getVaultReview(TEST_VAULT_REVIEW_ID);
 

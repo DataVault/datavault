@@ -16,6 +16,7 @@ import org.datavaultplatform.common.response.VaultReviewStatusInfo;
 import org.datavaultplatform.common.response.VaultsData;
 import org.datavaultplatform.common.util.PageDTO;
 import org.datavaultplatform.common.util.Utils;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 @RestController
@@ -32,6 +34,7 @@ import java.util.Objects;
 @Tag(name="admin-reviews-controller", description = "Administrator Review functions")
 public class AdminReviewsController {
 
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(AdminReviewsController.class);
     private final VaultsService vaultsService;
     private final VaultsReviewService vaultsReviewService;
     private final DepositsReviewService depositsReviewService;
@@ -202,10 +205,6 @@ public class AdminReviewsController {
 
 
 
-    @Operation(
-            summary = "Edit a Deposit Review",
-            description = "Updates an existing Deposit Review."
-    )
     @PutMapping(value = "/admin/vaultreviews/depositreviews", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public DepositReview editDepositReview(@RequestHeader(HEADER_USER_ID) String userId,
                                            @RequestBody DepositReview depositReview) {
@@ -238,5 +237,33 @@ public class AdminReviewsController {
         reviewInfo.setDepositIds(depositIds);
         reviewInfo.setDepositReviewIds(depositReviewIds);
         return reviewInfo;
+    }
+
+    @Operation(
+            description = """
+                    refreshes the underway VaultReview associated with the specified vault by ensuring there is a DepositReview for each of the Vault's Deposits
+                    """,
+            summary = "refreshes the underway VaultReview associated with the specified vault"
+    )
+    @PostMapping("/admin/vaults/vaultreviews/{vaultId}/refresh")
+    public void refreshDepositsOnUnderwayVaultReview(@PathVariable String vaultId) {
+        
+        Assert.notNull(vaultId, "The vaultId cannot be null");
+
+        RefreshedVaultReview refreshed = vaultsReviewService.refreshDepositsOnUnderwayVaultReview(vaultId).orElse(null);
+        if (refreshed == null) {
+            LOG.debug("No underway VaultReview found for Vault {}", vaultId);
+            return;
+        }
+        VaultReview underway = refreshed.underway();
+        Vault vault = underway.getVault();
+        List<DepositReview> depositReviewsAdded = refreshed.depositReviewsAdded();
+        int size = depositReviewsAdded.size();
+        AtomicInteger counter = new AtomicInteger(1);
+        depositReviewsAdded.forEach(dr -> {
+            LOG.info("[{}/{}] Added DepositReviewId[{}] for DepositId[{}] to VaultReviewId[{}] for VaultId[{}]",
+                    counter.getAndIncrement(), size, dr.getId(), dr.getDeposit().getID(), underway.getId(), vault.getID());
+        });
+        LOG.info("Added [{}] DepositReviews to VaultReviewId[{}] for VaultId[{}]", size, underway.getId(), vault.getID());
     }
 }
