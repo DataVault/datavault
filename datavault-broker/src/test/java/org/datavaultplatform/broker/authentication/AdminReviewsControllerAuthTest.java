@@ -12,6 +12,8 @@ import org.datavaultplatform.common.model.Permission;
 import org.datavaultplatform.common.model.VaultReview;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -116,14 +118,15 @@ class AdminReviewsControllerAuthTest extends BaseControllerAuthTest {
     assertEquals(AuthTestData.DEPOSIT_REVIEW_1.getId(), argDepositReview.getValue().getId());
   }
 
-  @Test
-  void testPostRefreshDepositsOnUnderwayVaultReview() {
-    doNothing().when(controller).refreshDepositsOnUnderwayVaultReview(
-            "vaultId123");
+  @ParameterizedTest
+  @ValueSource(booleans = {true, false})
+  void testPostRefreshDepositsOnUnderwayVaultReview(boolean depositReviewsAdded) {
+    when(controller.refreshDepositsOnUnderwayVaultReview(
+            "vaultId123")).thenReturn(depositReviewsAdded);
     
     checkWorksWhenAuthenticatedFailsOtherwise(
             post("/admin/vaults/vaultreviews/{vaultId}/refresh", "vaultId123"),
-            null,
+            depositReviewsAdded,
             Permission.CAN_MANAGE_VAULTS);
 
     verify(controller).refreshDepositsOnUnderwayVaultReview("vaultId123");

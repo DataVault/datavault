@@ -246,9 +246,10 @@ public class RestService implements NotifyLogoutService, NotifyLoginService, Eva
         return response.getBody();
     }
     
-    public void refreshUnderwayVaultReview(String vaultId) {
-        ResponseEntity<Void> response = post(brokerURL + "/admin/vaults/reviews/%s/refresh".formatted(vaultId), Void.class, null);
+    public boolean refreshUnderwayVaultReview(String vaultId) {
+        ResponseEntity<Boolean> response = post(brokerURL + "/admin/vaults/vaultreviews/%s/refresh".formatted(vaultId), Boolean.class, null);
         Assert.isTrue(response.getStatusCode().is2xxSuccessful(), "Failed to refresh underway vault review for vaultId [%s]".formatted(vaultId));
+        return Boolean.TRUE.equals(response.getBody());
     }
 
     public VaultReviewStatusInfo getVaultReviewStatusInfo(String vaultId) {

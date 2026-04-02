@@ -219,7 +219,8 @@ public class AdminReviewsController {
     public static ReviewInfo getReviewInfo(VaultReview vaultReview) {
         Assert.notNull(vaultReview, "The vaultReview cannot be null");
         List<DepositReview> depositReviews = vaultReview.getDepositReviews();
-
+        int depositReviewCount = depositReviews == null ? 0 : depositReviews.size();
+        LOG.info("VaultReview[{}] has [{}] DepositReviews", vaultReview.getId(), depositReviewCount);
         // Create Lists of Deposit and DepositReview ids
         List<String> depositIds = new ArrayList<>();
         List<String> depositReviewIds = new ArrayList<>();
@@ -245,15 +246,15 @@ public class AdminReviewsController {
                     """,
             summary = "refreshes the underway VaultReview associated with the specified vault"
     )
-    @PostMapping("/admin/vaults/vaultreviews/{vaultId}/refresh")
-    public void refreshDepositsOnUnderwayVaultReview(@PathVariable String vaultId) {
+    @PostMapping(value = "/admin/vaults/vaultreviews/{vaultId}/refresh", produces = MediaType.APPLICATION_JSON_VALUE)
+    public boolean refreshDepositsOnUnderwayVaultReview(@PathVariable String vaultId) {
         
         Assert.notNull(vaultId, "The vaultId cannot be null");
 
         RefreshedVaultReview refreshed = vaultsReviewService.refreshDepositsOnUnderwayVaultReview(vaultId).orElse(null);
         if (refreshed == null) {
             LOG.debug("No underway VaultReview found for Vault {}", vaultId);
-            return;
+            return false;
         }
         VaultReview underway = refreshed.underway();
         Vault vault = underway.getVault();
@@ -265,5 +266,6 @@ public class AdminReviewsController {
                     counter.getAndIncrement(), size, dr.getId(), dr.getDeposit().getID(), underway.getId(), vault.getID());
         });
         LOG.info("Added [{}] DepositReviews to VaultReviewId[{}] for VaultId[{}]", size, underway.getId(), vault.getID());
+        return size > 0;
     }
 }

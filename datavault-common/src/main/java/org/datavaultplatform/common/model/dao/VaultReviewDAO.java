@@ -28,8 +28,8 @@ public interface VaultReviewDAO extends BaseDAO<VaultReview>, VaultReviewCustomD
 
   // should be the latest where actioned date is not null
   @Query("""
-          SELECT vr FROM VaultReview vr WHERE vr.vault.id = :vaultId
-          AND vr.creationTime  = (
+          SELECT vr1 FROM VaultReview vr1 WHERE vr1.vault.id = :vaultId
+          AND vr1.creationTime  = (
                     select max(vr2.creationTime) from VaultReview vr2
                     where vr2.vault.id = :vaultId
                     and   vr2.actionedDate IS NOT NULL
@@ -37,13 +37,14 @@ public interface VaultReviewDAO extends BaseDAO<VaultReview>, VaultReviewCustomD
           """)
   Optional<VaultReview> findLatestSubmittedVaultReview(@Param("vaultId") String vaultId);
 
-  // should be the latest AND also have null actioned date
+  // should be the latest (that also has null actioned date)
   @Query("""
-          SELECT vr FROM VaultReview vr WHERE vr.vault.id = :vaultId
-          AND vr.creationTime = (
+          SELECT vr1 FROM VaultReview vr1
+          WHERE vr1.vault.id = :vaultId
+          AND vr1.creationTime = (
                        select max(vr2.creationTime) from VaultReview vr2
                        where vr2.vault.id = :vaultId)
-          AND vr.actionedDate IS NULL
+          AND vr1.actionedDate IS NULL
           """)
   Optional<VaultReview> findUnderwayVaultReview(@Param("vaultId") String vaultId);
 }

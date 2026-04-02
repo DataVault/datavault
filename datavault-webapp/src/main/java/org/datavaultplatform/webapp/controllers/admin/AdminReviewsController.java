@@ -106,14 +106,15 @@ public class AdminReviewsController implements AdminReviewsControllerApi {
         model.addAttribute("createRetentionPolicy", retentionPolicy);
         model.addAttribute(restService.getGroup(vault.getGroupID()));
 
+        // for existing 'underway' VaultReview - makes sure it has a DepositReview for each of the Vault's Deposits
+        boolean depositReviewsAdded = restService.refreshUnderwayVaultReview(vaultId);
+        LOG.info("POST REFRESH FOR VAULT[{}] depositReviewsAdded is [{}]", vault.getName(), depositReviewsAdded);
+
         ReviewInfo reviewInfo = restService.getCurrentReview(vaultId);
         if (reviewInfo == null) {
             // There isn't a current review, so create one.
             reviewInfo = restService.createCurrentReview(vaultId);
         }
-        
-        // makes sure the VaultReview has a DepositReview for each of the Vault's Deposits
-        restService.refreshUnderwayVaultReview(vaultId);
         
         VaultReview currentReview = restService.getVaultReview(reviewInfo.getVaultReviewId());
         VaultReviewModel vaultReviewModel = new VaultReviewModel(currentReview, vault.getReviewDate());

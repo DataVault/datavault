@@ -78,11 +78,17 @@ public class DepositsReviewService {
                 .map(Deposit::getID)
                 .collect(java.util.stream.Collectors.toSet());
 
-        return depositDAO.getDepositsByVaultId(vault.getID()).stream()
+        List<Deposit> fromDbDeposits = depositDAO.getDepositsByVaultId(vault.getID());
+        LOG.info("Vault[{}] : number of existing deposits reviews: {}", vault.getName(), existingDepositReviewIds.size());
+        LOG.info("Vault[{}] : number of existing deposits: {}", vault.getName(), fromDbDeposits.size());
+        List<DepositReview> result = fromDbDeposits.stream()
                 .filter(Objects::nonNull)
                 .filter(deposit -> !existingDepositReviewIds.contains(deposit.getID()))
                 .map(deposit -> getDepositReview(vaultReview, deposit))
                 .toList();
+        LOG.info("Vault[{}] : number of new deposit reviews: {}", vault.getName(), result.size());
+
+        return result;
     }
     
     private DepositReview getDepositReview(VaultReview vaultReview, Deposit deposit) {

@@ -1,0 +1,14 @@
+{
+  "priority": 1,
+  "request": {
+    "urlPathPattern": "/admin/vaults/vaultreviews/vault-id-234/refresh",
+    "method": "POST"
+  },
+  "response": {
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "status": 200,
+    "body": "false"
+  }
+}

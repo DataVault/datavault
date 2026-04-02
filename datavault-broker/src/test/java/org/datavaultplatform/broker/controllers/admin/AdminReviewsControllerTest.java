@@ -441,7 +441,8 @@ class AdminReviewsControllerTest {
             void testNullVaultNotFound() {
                 when(mVaultsReviewService.refreshDepositsOnUnderwayVaultReview("notFound")).thenReturn(Optional.empty());
 
-                controller.refreshDepositsOnUnderwayVaultReview("notFound");
+                boolean depositReviewsAdded = controller.refreshDepositsOnUnderwayVaultReview("notFound");
+                assertThat(depositReviewsAdded).isFalse();
 
                 verify(mVaultsReviewService).refreshDepositsOnUnderwayVaultReview("notFound");
                 verifyNoMoreInteractions(mClientsService, mEventService, mDepositsReviewService, mUsersService,
@@ -465,7 +466,8 @@ class AdminReviewsControllerTest {
                     RefreshedVaultReview refreshed = new RefreshedVaultReview(underway, List.of());
                     when(mVaultsReviewService.refreshDepositsOnUnderwayVaultReview("vaultId123")).thenReturn(Optional.of(refreshed));
                     
-                    controller.refreshDepositsOnUnderwayVaultReview("vaultId123");
+                    boolean depositReviewsAdded = controller.refreshDepositsOnUnderwayVaultReview("vaultId123");
+                    assertThat(depositReviewsAdded).isFalse();
 
                     verify(mVaultsReviewService).refreshDepositsOnUnderwayVaultReview("vaultId123");
                     verifyNoMoreInteractions(mClientsService, mEventService, mDepositsReviewService, mUsersService,
@@ -510,7 +512,8 @@ class AdminReviewsControllerTest {
                     RefreshedVaultReview refreshed = new RefreshedVaultReview(underway, List.of(depositReview1, depositReview2));
                     when(mVaultsReviewService.refreshDepositsOnUnderwayVaultReview("vaultId123")).thenReturn(Optional.of(refreshed));
 
-                    controller.refreshDepositsOnUnderwayVaultReview("vaultId123");
+                    boolean depositReviewsAdded = controller.refreshDepositsOnUnderwayVaultReview("vaultId123");
+                    assertThat(depositReviewsAdded).isTrue();
 
                     verify(mVaultsReviewService).refreshDepositsOnUnderwayVaultReview("vaultId123");
                     verifyNoMoreInteractions(mClientsService, mEventService, mDepositsReviewService, mUsersService,

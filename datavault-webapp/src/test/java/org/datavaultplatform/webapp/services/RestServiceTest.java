@@ -149,12 +149,17 @@ class RestServiceTest extends BaseRestTemplateWithLoggingTest {
     
     @Nested
     class RefreshVaultReviewTests {
-        
+
         @Test
-        void testVaultId123() {
-            assertDoesNotThrow(() -> {
-                restService.refreshUnderwayVaultReview("vault-id-123");
-            });
+        void testVaultId123AndDepositReviewsAdded() {
+            boolean depositReviewsAdded = restService.refreshUnderwayVaultReview("vault-id-123");
+            assertThat(depositReviewsAdded).isTrue();
+        }
+
+        @Test
+        void testVaultId234AndDepositReviewsNotAdded() {
+            boolean depositReviewsAdded = restService.refreshUnderwayVaultReview("vault-id-234");
+            assertThat(depositReviewsAdded).isFalse();
         }
     }
 }

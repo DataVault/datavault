@@ -109,6 +109,9 @@ public class VaultReview {
 
 
     public List<DepositReview> getDepositReviews() {
+        if (depositReviews == null) {
+            this.depositReviews = new java.util.ArrayList<>();
+        }
         return depositReviews;
     }
 
