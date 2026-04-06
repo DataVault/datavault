@@ -149,7 +149,7 @@ class ValidateServiceTest {
                 checkFieldset2(vault, Arrays.asList("Authoriser missing",
                         "School / Unit missing",
                         "Review Date missing"));
-                vault.setReviewDate(LocalDate.now());
+                vault.setReviewDate(LocalDate.now(testClock));
                 checkFieldset2(vault, Arrays.asList("Authoriser missing",
                         "School / Unit missing"));
                 vault.setGrantAuthoriser("grant-authoriser");
@@ -232,7 +232,7 @@ class ValidateServiceTest {
                 vault.setDescription("description");
                 vault.setPolicyInfo("policyInfo");
                 vault.setGroupID("groupId");
-                vault.setReviewDate(LocalDate.now().plusYears(4));
+                vault.setReviewDate(LocalDate.now(testClock).plusYears(4));
 
             }
 
@@ -281,13 +281,13 @@ class ValidateServiceTest {
 
             @Test
             void testFieldset3_ReviewDateTooSoon() {
-                vault.setReviewDate(LocalDate.now().plusYears(1));
+                vault.setReviewDate(LocalDate.now(testClock).plusYears(1));
                 checkFieldset3(vault, Arrays.asList("Review Date for selected policy is required to be at least 3 years"));
             }
 
             @Test
             void testFieldset3_ReviewDateTooLate() {
-                vault.setReviewDate(LocalDate.now().plusYears(31));
+                vault.setReviewDate(LocalDate.now(testClock).plusYears(31));
                 checkFieldset3(vault, Arrays.asList("Review Date for selected policy is required to be less than 30 years in the future"));
             }
 
