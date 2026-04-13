@@ -410,13 +410,20 @@
                         </table>
                     </div>
 
-                    <h4><strong>Reviews</strong></h4>
+                    <th:block th:with="reviewCount=${vrhm.vaultReviewViewModels?.size() ?: 0}">
+                        <h4>
+                            <strong>
+                                [[${reviewCount}]] Review[[${reviewCount == 1 ? '' : 's'}]]
+                            </strong>
+                        </h4>
+                    </th:block>                    
                     <div class="scrollable">
                         <table class="table table-bordered ">
                             <th:block th:each="vrvm, iterStat : ${vrhm.vaultReviewViewModels}"
                                       th:with="rowClass=${iterStat.odd ? 'zebra-highlight' : ''}">
                                  <thead>
                                  <tr th:class="${rowClass}">
+                                     <th>#</th>
                                      <th>Date Review Submitted</th>
                                      <th:block th:if="${vrvm.actionedDate != null}">
                                          <!--/* if there's an actionedDate - the (old) Vault ReviewDate at time of submission will be used */-->
@@ -433,6 +440,7 @@
 
                                  <tbody>
                                  <tr th:class="${rowClass}">
+                                     <td>[[${iterStat.count}]]</td>
                                      <th:block th:if="${vrvm.actionedDate != null}">
                                         <td>[[${#temporals.format(vrvm.actionedDate,dateFormatISO)}]]<!--/* date */--></td>
                                      </th:block>
@@ -453,6 +461,7 @@
 
                                  <thead>
                                  <tr th:class="${rowClass}">
+                                     <th>[[${iterStat.count}]]</th>
                                      <th>Deposit Name</th>
                                      <th>Marked For Deletion ?</th>
                                      <th>Deposit Deletion Requested Date</th>
@@ -463,6 +472,7 @@
                                  <tbody>
 
                                     <tr th:class="${rowClass}" th:each="drvm: ${vrvm.depositReviewViewModels}">
+                                        <td>[[${iterStat.count}]]</td>
                                         <td>[[${drvm.depositName}]]</td>
                                         <td>[[${drvm.deleteStatus == 0 ? 'No' : 'Yes'}]]</td>
                                         <th:block th:if="${drvm.deleteStatus == 0}">
