@@ -49,9 +49,6 @@ public class CreateRetentionPolicy {
     @Schema(description = "Date Guidance Reviewed")
     private LocalDate dataGuidanceReviewed;
 
-    @Schema(description = "Form Action")
-    private String action;
-
     public CreateRetentionPolicy() { }
 
     @JsonGetter
@@ -158,13 +155,5 @@ public class CreateRetentionPolicy {
     public String getPolicyInfo() {
         String retVal = this.id + "-" + this.minRetentionPeriod;
         return retVal;
-    }
-
-    public String getAction() {
-        return action;
-    }
-
-    public void setAction(String action) {
-        this.action = action;
     }
 }

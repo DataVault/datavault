@@ -5,6 +5,10 @@ import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.datavaultplatform.common.request.CreateRetentionPolicy;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +29,7 @@ public interface AdminRetentionPoliciesControllerApi {
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     content = @Content(
                             mediaType = MediaType.APPLICATION_FORM_URLENCODED_VALUE,
-                            schema = @Schema(implementation = CreateRetentionPolicy.class))),
+                            schema = @Schema(implementation = CreateRetentionPolicyForm.class))),
             responses = {
                     @ApiResponse(
                             responseCode = "302",
@@ -42,7 +46,7 @@ public interface AdminRetentionPoliciesControllerApi {
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     content = @Content(
                             mediaType = MediaType.APPLICATION_FORM_URLENCODED_VALUE,
-                            schema = @Schema(implementation = CreateRetentionPolicy.class))),
+                            schema = @Schema(implementation = CreateRetentionPolicyForm.class))),
             responses = {
                     @ApiResponse(
                             responseCode = "302",
@@ -51,4 +55,13 @@ public interface AdminRetentionPoliciesControllerApi {
                     ),
                     @ApiResponse(responseCode = "400", description = "Invalid date format or ID")})
     String editRetentionPolicy(@ModelAttribute CreateRetentionPolicy createRetentionPolicy, ModelMap model, @PathVariable String retentionPolicyId, @RequestParam String action) throws Exception;
+    
+    @Data
+    @ToString(callSuper = true)
+    @EqualsAndHashCode(callSuper = true)
+    @NoArgsConstructor
+    class CreateRetentionPolicyForm extends CreateRetentionPolicy {
+        @Schema(description = "The action to perform on the form", requiredMode = Schema.RequiredMode.REQUIRED)
+        private String action;
+    }
 }
