@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.request.CreateVault;
@@ -18,8 +19,9 @@ public class OpenApiSupport {
     }
 
     @Data
-    @EqualsAndHashCode(callSuper = true)
     @ToString(callSuper = true)
+    @EqualsAndHashCode(callSuper = true)
+    @NoArgsConstructor
     public static class CreateVaultForm extends CreateVault {
         @Schema(description = "The action to perform on the form", requiredMode = Schema.RequiredMode.REQUIRED)
         private String action;
@@ -48,16 +50,19 @@ public class OpenApiSupport {
     }
 
     @Data
-    @EqualsAndHashCode(callSuper = true)
     @ToString(callSuper = true)
+    @EqualsAndHashCode(callSuper = true)
+    @NoArgsConstructor
     public static class VaultReviewModelForm extends VaultReviewModel {
+        @Schema(description = "The action to perform on the form", requiredMode = Schema.RequiredMode.REQUIRED)
         private String action;
     }
 
 
     @Data
-    @EqualsAndHashCode(callSuper = true)
     @ToString(callSuper = true)
+    @EqualsAndHashCode(callSuper = true)
+    @NoArgsConstructor
     public static class UserForm extends User {
         @Schema(description = "The action to perform on the form", requiredMode = Schema.RequiredMode.REQUIRED)
         private String action;
