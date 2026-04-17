@@ -1,10 +1,5 @@
 package org.datavaultplatform.webapp.config;
 
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import io.swagger.v3.core.converter.ModelConverter;
-import io.swagger.v3.core.jackson.ModelResolver;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -12,21 +7,23 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springdoc.core.customizers.GlobalOpenApiCustomizer;
+import org.springdoc.core.customizers.OperationCustomizer;
 import org.springdoc.core.utils.SpringDocUtils;
 import org.springframework.boot.info.GitProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
+import org.springframework.util.AntPathMatcher; // Added import
 
 import java.time.Clock;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.TreeMap;
+import java.util.*;
+
+import static org.datavaultplatform.webapp.config.HttpSecurityUtils.SECURITY_PATH_MAP;
 
 @Configuration
 public class OpenApiConfig {
@@ -100,5 +97,48 @@ public class OpenApiConfig {
         };
     }
 
+    @Order(3)
+    @Bean
+    public OperationCustomizer customizeSecurityDescriptions() {
+        return (operation, handlerMethod) -> {
+            PreAuthorize preAuth = handlerMethod.getMethodAnnotation(PreAuthorize.class);
+            if (preAuth != null) {
+                String currentDesc = operation.getDescription() != null ? operation.getDescription() : "";
+                // Append the SpEL expression to the description
+                operation.setDescription(currentDesc + "\n\n**Security Expression (PreAuthorize):** `" + preAuth.value() + "`");
+            }
+            return operation;
+        };
+    }
+
+    @Bean
+    @Order(4) // Ensure this runs after other customizers
+    public GlobalOpenApiCustomizer httpSecurityRulesCustomizer() {
+        AntPathMatcher pathMatcher = new AntPathMatcher();
+        return openApi -> {
+            openApi.getPaths().forEach((path, pathItem) -> {
+                String matchedSecurityExpression = null;
+                // Iterate through the map to find the most specific match
+                for (Map.Entry<String, String> entry : SECURITY_PATH_MAP.entrySet()) {
+                    String securityPattern = entry.getKey();
+                    String expression = entry.getValue();
+
+                    if (pathMatcher.match(securityPattern, path)) {
+                        matchedSecurityExpression = expression;
+                        break; // Found the most specific match due to LinkedHashMap order
+                    }
+                }
+
+                if (matchedSecurityExpression != null && !matchedSecurityExpression.equals("permitAll")) {
+                    final String finalExpression = matchedSecurityExpression; // For lambda capture
+                    pathItem.readOperations().forEach(operation -> {
+                        String currentDesc = operation.getDescription() != null ? operation.getDescription() : "";
+                        // Append the HttpSecurity rule to the description
+                        operation.setDescription(currentDesc + "\n\n**HttpSecurity Rule:** `" + finalExpression + "`");
+                    });
+                }
+            });
+        };
+    }
 }
     
