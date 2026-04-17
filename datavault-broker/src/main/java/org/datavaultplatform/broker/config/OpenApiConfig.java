@@ -29,18 +29,18 @@ import static org.datavaultplatform.common.util.Constants.HEADER_USER_ID;
 
 @Configuration
 @SecurityScheme(
-        name = "X-UserID-Header",
-        type = SecuritySchemeType.APIKEY,
-        in = SecuritySchemeIn.HEADER,
-        paramName = HEADER_USER_ID,
-        description = "User ID header, corresponds to `org.datavaultplatform.common.util.Constants.HEADER_USER_ID`."
+    name = "X-UserID-Header",
+    type = SecuritySchemeType.APIKEY,
+    in = SecuritySchemeIn.HEADER,
+    paramName = HEADER_USER_ID,
+    description = "User ID header, corresponds to `org.datavaultplatform.common.util.Constants.HEADER_USER_ID`."
 )
 @SecurityScheme(
-        name = "X-Client-Key-Header",
-        type = SecuritySchemeType.APIKEY,
-        in = SecuritySchemeIn.HEADER,
-        paramName = HEADER_CLIENT_KEY,
-        description = "Client Key header, corresponds to `org.datavaultplatform.common.util.Constants.HEADER_CLIENT_KEY`."
+    name = "X-Client-Key-Header",
+    type = SecuritySchemeType.APIKEY,
+    in = SecuritySchemeIn.HEADER,
+    paramName = HEADER_CLIENT_KEY,
+    description = "Client Key header, corresponds to `org.datavaultplatform.common.util.Constants.HEADER_CLIENT_KEY`."
 )
 public class OpenApiConfig {
 

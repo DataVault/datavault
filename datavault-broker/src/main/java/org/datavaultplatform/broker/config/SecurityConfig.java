@@ -61,7 +61,6 @@ public class SecurityConfig {
   WebSecurityCustomizer webSecurityCustomizer() {
     return web -> {
       web.debug(securityDebug);
-      web.ignoring().requestMatchers("/retrieve/**");
     };
   }
 
