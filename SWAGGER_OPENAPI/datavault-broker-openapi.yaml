@@ -4,8 +4,8 @@ info:
   description: |-
     API documentation for the DataVault Broker module.
     All endpoints require authentication via the X-UserID and X-Client-Key headers.
-  version: 0.0.0 (0.0.0)
-  x-generated-at: 2026-04-01T16:56:48.911081
+  version: 0.0.0 (1e9556f)
+  x-generated-at: 2026-04-20T10:14:34.243262
 servers:
 - url: http://localhost
   description: Generated server url
@@ -304,7 +304,10 @@ paths:
       tags:
       - admin-reviews-controller
       summary: Edit a Vault Review
-      description: Updates an existing Vault Review.
+      description: |-
+        Updates an existing Vault Review.
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_VAULTS')`
       operationId: editVaultReview
       parameters:
       - name: X-UserID
@@ -359,7 +362,10 @@ paths:
       tags:
       - admin-users-controller
       summary: Edit a DataVault User
-      description: Updates an existing user in the DataVault system.
+      description: |-
+        Updates an existing user in the DataVault system.
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN')`
       operationId: editUser
       parameters:
       - name: X-UserID
@@ -384,7 +390,10 @@ paths:
       tags:
       - admin-users-controller
       summary: Create a new DataVault User
-      description: Creates a new user in the DataVault system.
+      description: |-
+        Creates a new user in the DataVault system.
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN')`
       operationId: addUser
       parameters:
       - name: X-UserID
@@ -470,6 +479,10 @@ paths:
     get:
       tags:
       - admin-archive-store-controller
+      description: |2-
+
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_ARCHIVESTORES')`
       operationId: getArchiveStores
       parameters:
       - name: X-UserID
@@ -489,6 +502,10 @@ paths:
     put:
       tags:
       - admin-archive-store-controller
+      description: |2-
+
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_ARCHIVESTORES')`
       operationId: editArchiveStore
       parameters:
       - name: X-UserID
@@ -512,6 +529,10 @@ paths:
     post:
       tags:
       - admin-archive-store-controller
+      description: |2-
+
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_ARCHIVESTORES')`
       operationId: addArchiveStore
       parameters:
       - name: X-UserID
@@ -1283,8 +1304,11 @@ paths:
       tags:
       - admin-reviews-controller
       summary: refreshes the underway VaultReview associated with the specified vault
-      description: |
+      description: |-
         refreshes the underway VaultReview associated with the specified vault by ensuring there is a DepositReview for each of the Vault's Deposits
+
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_VAULTS')`
       operationId: refreshDepositsOnUnderwayVaultReview
       parameters:
       - name: vaultId
@@ -1295,12 +1319,19 @@ paths:
       responses:
         "200":
           description: OK
+          content:
+            application/json:
+              schema:
+                type: boolean
   /admin/vaults/vaultreviews/current:
     post:
       tags:
       - admin-reviews-controller
       summary: Creates the current review for a Vault
-      description: Initiates a new review process for a specified Vault.
+      description: |-
+        Initiates a new review process for a specified Vault.
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_VAULTS')`
       operationId: createCurrentReview
       parameters:
       - name: X-UserID
@@ -1330,7 +1361,10 @@ paths:
       tags:
       - vaults-controller
       summary: Edit a Pending Vault (Admin)
-      description: Updates an existing Pending Vault as an administrator.
+      description: |-
+        Updates an existing Pending Vault as an administrator.
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_PENDING_VAULTS')`
       operationId: editPendingVault
       parameters:
       - name: X-UserID
@@ -1360,6 +1394,10 @@ paths:
     post:
       tags:
       - paused-retrieve-state-controller
+      description: |2-
+
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN')`
       operationId: togglePaused
       responses:
         "200":
@@ -1368,6 +1406,10 @@ paths:
     post:
       tags:
       - paused-deposit-state-controller
+      description: |2-
+
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN')`
       operationId: togglePaused_1
       responses:
         "200":
@@ -1377,7 +1419,10 @@ paths:
       tags:
       - billing-controller
       summary: Update a Vault's billing details
-      description: Updates the billing details for a specific Vault.
+      description: |-
+        Updates the billing details for a specific Vault.
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_BILLING')`
       operationId: updateBillingDetails
       parameters:
       - name: X-UserID
@@ -3100,8 +3145,10 @@ paths:
       tags:
       - admin-controller
       summary: Gets a list of all Vaults
-      description: "Retrieves a list of all Vaults in the system, with optional sorting\
-        \ and filtering."
+      description: |-
+        Retrieves a list of all Vaults in the system, with optional sorting and filtering.
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_VAULTS')`
       operationId: getVaultsAll
       parameters:
       - name: X-UserID
@@ -3218,7 +3265,10 @@ paths:
       tags:
       - admin-reviews-controller
       summary: Gets the Review Status of a specific vault
-      description: Gets the Review Status of a specific vault
+      description: |-
+        Gets the Review Status of a specific vault
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_VAULTS')`
       operationId: getVaultReviewStatusInfo
       parameters:
       - name: vaultId
@@ -3238,7 +3288,10 @@ paths:
       tags:
       - admin-reviews-controller
       summary: Gets the current review for a Vault
-      description: Retrieves the most recent review details for a specific Vault.
+      description: |-
+        Retrieves the most recent review details for a specific Vault.
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_VAULTS')`
       operationId: getCurrentReview
       parameters:
       - name: X-UserID
@@ -3263,7 +3316,10 @@ paths:
       tags:
       - admin-users-controller
       summary: Search Users
-      description: Searches for users based on a query string.
+      description: |-
+        Searches for users based on a query string.
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN')`
       operationId: getUsers_1
       parameters:
       - name: X-UserID
@@ -3290,7 +3346,10 @@ paths:
       tags:
       - admin-users-controller
       summary: Get the number of Users
-      description: Gets the total number of Users in the DataVault system.
+      description: |-
+        Gets the total number of Users in the DataVault system.
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN')`
       operationId: getUsersCount
       parameters:
       - name: X-UserID
@@ -3311,8 +3370,10 @@ paths:
       tags:
       - admin-controller
       summary: Get a list of all Retrieves
-      description: "Retrieves a list of all Retrieves in the system, with optional\
-        \ sorting and filtering."
+      description: |-
+        Retrieves a list of all Retrieves in the system, with optional sorting and filtering.
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_RETRIEVES')`
       operationId: getRetrievesAll
       parameters:
       - name: X-UserID
@@ -3375,8 +3436,10 @@ paths:
       tags:
       - admin-controller
       summary: Get the total count of Retrieves
-      description: "Retrieves the total number of Retrieves in the system, with an\
-        \ optional query filter."
+      description: |-
+        Retrieves the total number of Retrieves in the system, with an optional query filter.
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_RETRIEVES')`
       operationId: getRetrievesCount_1
       parameters:
       - name: X-UserID
@@ -3530,7 +3593,10 @@ paths:
       tags:
       - admin-controller
       summary: Get a list of all Events
-      description: "Retrieves a list of all Events in the system, with optional sorting."
+      description: |-
+        Retrieves a list of all Events in the system, with optional sorting.
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_EVENTS')`
       operationId: getEventsAll
       parameters:
       - name: X-UserID
@@ -3559,8 +3625,10 @@ paths:
       tags:
       - admin-controller
       summary: Get a list of all Deposits
-      description: "Retrieves a list of all Deposits in the system, with optional\
-        \ sorting and filtering."
+      description: |-
+        Retrieves a list of all Deposits in the system, with optional sorting and filtering.
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_DEPOSITS')`
       operationId: getDepositsAll
       parameters:
       - name: X-UserID
@@ -3634,7 +3702,10 @@ paths:
       tags:
       - admin-controller
       summary: Gets a list of all Vaults
-      description: "Retrieves a list of all Vaults in the system, with optional sorting."
+      description: |-
+        Retrieves a list of all Vaults in the system, with optional sorting.
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_DEPOSITS')`
       operationId: getDepositsAllData
       parameters:
       - name: X-UserID
@@ -3661,8 +3732,10 @@ paths:
       tags:
       - admin-controller
       summary: Get the total count of Deposits
-      description: "Retrieves the total number of Deposits in the system, with an\
-        \ optional query filter."
+      description: |-
+        Retrieves the total number of Deposits in the system, with an optional query filter.
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_DEPOSITS')`
       operationId: getDepositsCount_1
       parameters:
       - name: X-UserID
@@ -3690,7 +3763,10 @@ paths:
       tags:
       - admin-controller
       summary: Run a Deposit audit
-      description: Triggers a Deposit audit process.
+      description: |-
+        Triggers a Deposit audit process.
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_DEPOSITS')`
       operationId: runDepositAudit
       parameters:
       - name: X-UserID
@@ -3711,7 +3787,10 @@ paths:
       tags:
       - billing-controller
       summary: Get a Vault's billing information
-      description: Retrieves the billing information for a specific Vault.
+      description: |-
+        Retrieves the billing information for a specific Vault.
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_BILLING')`
       operationId: getVaultBillingInfo
       parameters:
       - name: X-UserID
@@ -3736,8 +3815,10 @@ paths:
       tags:
       - billing-controller
       summary: Search all Billing Vaults
-      description: Searches for Vaults with billing information based on a query string
-        and other parameters.
+      description: |-
+        Searches for Vaults with billing information based on a query string and other parameters.
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_BILLING')`
       operationId: searchAllBillingVaults
       parameters:
       - name: X-UserID
@@ -3815,6 +3896,10 @@ paths:
     get:
       tags:
       - admin-archive-store-controller
+      description: |2-
+
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_ARCHIVESTORES')`
       operationId: getArchiveStore
       parameters:
       - name: X-UserID
@@ -3837,6 +3922,10 @@ paths:
     delete:
       tags:
       - admin-archive-store-controller
+      description: |2-
+
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_ARCHIVESTORES')`
       operationId: deleteArchiveStore
       parameters:
       - name: X-UserID
@@ -3954,7 +4043,10 @@ paths:
       tags:
       - admin-pending-vaults-controller
       summary: Delete a Pending Vault
-      description: Deletes a Pending Vault from the system.
+      description: |-
+        Deletes a Pending Vault from the system.
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_PENDING_VAULTS')`
       operationId: delete
       parameters:
       - name: X-UserID
@@ -3975,7 +4067,10 @@ paths:
       tags:
       - admin-controller
       summary: Delete a Deposit
-      description: Deletes a Deposit from the system.
+      description: |-
+        Deletes a Deposit from the system.
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_DEPOSITS')`
       operationId: deleteDeposit
       parameters:
       - name: X-UserID
@@ -4403,9 +4498,6 @@ components:
     CreateRetentionPolicy:
       type: object
       properties:
-        action:
-          type: string
-          description: Form Action
         dataGuidanceReviewed:
           type: string
           format: date

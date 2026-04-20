@@ -3,7 +3,7 @@ info:
   title: DataVault WebApp API
   description: API documentation for the DataVault WebApp module.
   version: 0.0.0 (a16f01e)
-  x-generated-at: 2026-04-01T16:52:36.779805
+  x-generated-at: 2026-04-20T10:14:11.163549
 servers:
 - url: http://localhost
   description: Generated server url
@@ -17,7 +17,10 @@ paths:
     post:
       tags:
       - vaults-controller
-      description: updates the vault name then redirects to vault page
+      description: |-
+        updates the vault name then redirects to vault page
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: updateVaultName
       parameters:
       - name: vaultId
@@ -42,7 +45,10 @@ paths:
     post:
       tags:
       - vaults-controller
-      description: updates the vault description then redirects to vault page
+      description: |-
+        updates the vault description then redirects to vault page
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: updateVaultDescription
       parameters:
       - name: vaultId
@@ -67,7 +73,12 @@ paths:
     get:
       tags:
       - deposits-controller
-      description: shows to the retrieves page
+      description: |-
+        shows to the retrieves page
+
+        **Security Expression (PreAuthorize):** `hasPermission(#vaultId, 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') or hasPermission(#vaultId, 'GROUP_VAULT', 'CAN_RETRIEVE_DATA')`
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: retrieveDeposit
       parameters:
       - name: retrieve
@@ -95,7 +106,12 @@ paths:
     post:
       tags:
       - deposits-controller
-      description: starts a deposit retrieval then redirects to show deposit page
+      description: |-
+        starts a deposit retrieval then redirects to show deposit page
+
+        **Security Expression (PreAuthorize):** `(hasPermission(#vaultId, 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') or hasPermission(#vaultId, 'GROUP_VAULT', 'CAN_RETRIEVE_DATA'))            and (hasRole('IS_ADMIN') or (!@permissionsService.retrievesPaused()))`
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: processRetrieve
       parameters:
       - name: vaultId
@@ -130,7 +146,12 @@ paths:
     get:
       tags:
       - deposits-controller
-      description: returns the deposit creation HTML page
+      description: |-
+        returns the deposit creation HTML page
+
+        **Security Expression (PreAuthorize):** `hasPermission(#vaultId, 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') or hasPermission(#vaultId, 'GROUP_VAULT', 'MANAGE_SCHOOL_VAULT_DEPOSITS')`
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: createDeposit
       parameters:
       - name: vaultId
@@ -148,7 +169,12 @@ paths:
     post:
       tags:
       - deposits-controller
-      description: adds a deposit then redirects to show new vault deposit page
+      description: |-
+        adds a deposit then redirects to show new vault deposit page
+
+        **Security Expression (PreAuthorize):** `(hasPermission(#vaultId, 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') or hasPermission(#vaultId, 'GROUP_VAULT', 'MANAGE_SCHOOL_VAULT_DEPOSITS')) and (hasRole('IS_ADMIN') or (!@permissionsService.depositsPaused()))`
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: createAndAddDeposit
       parameters:
       - name: vaultId
@@ -180,8 +206,10 @@ paths:
     post:
       tags:
       - vaults-controller
-      description: deletes 'uun' as dataManager from specified vault then redirects
-        to vault page
+      description: |-
+        deletes 'uun' as dataManager from specified vault then redirects to vault page
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: deleteDataManager
       parameters:
       - name: vaultId
@@ -211,7 +239,12 @@ paths:
     post:
       tags:
       - vaults-controller
-      description: updates the vault ownership
+      description: |-
+        updates the vault ownership
+
+        **Security Expression (PreAuthorize):** `hasPermission(#vaultId, 'VAULT', 'CAN_TRANSFER_VAULT_OWNERSHIP') or hasPermission(#vaultId, 'GROUP_VAULT', 'TRANSFER_SCHOOL_VAULT_OWNERSHIP')`
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: transferOwnership
       parameters:
       - name: vaultId
@@ -236,7 +269,10 @@ paths:
     post:
       tags:
       - vaults-controller
-      description: adds 'uun' as dataManager to specified vault then redirects
+      description: |-
+        adds 'uun' as dataManager to specified vault then redirects
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: addDataManager
       parameters:
       - name: vaultId
@@ -261,8 +297,10 @@ paths:
     post:
       tags:
       - vaults-controller
-      description: Process the completed 'create new vault' page - based on action
-        - return the appropriate HTML or redirect
+      description: |-
+        Process the completed 'create new vault' page - based on action - return the appropriate HTML or redirect
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: addVault
       requestBody:
         content:
@@ -280,7 +318,12 @@ paths:
     post:
       tags:
       - role-assignment-controller
-      description: creates a new role assignment
+      description: |-
+        creates a new role assignment
+
+        **Security Expression (PreAuthorize):** `hasPermission(#targetId, #roleType, 'ASSIGN_VAULT_ROLES') or hasPermission(#targetId, 'GROUP_VAULT', 'ASSIGN_SCHOOL_VAULT_ROLES')`
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: createRoleAssignment
       parameters:
       - name: roleType
@@ -309,7 +352,12 @@ paths:
     post:
       tags:
       - role-assignment-controller
-      description: updates the role assignment
+      description: |-
+        updates the role assignment
+
+        **Security Expression (PreAuthorize):** `hasPermission(#targetId, #roleType, 'ASSIGN_VAULT_ROLES') or hasPermission(#targetId, 'GROUP_VAULT', 'ASSIGN_SCHOOL_VAULT_ROLES')`
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: updateRoleAssignment
       parameters:
       - name: roleType
@@ -335,7 +383,12 @@ paths:
     post:
       tags:
       - role-assignment-controller
-      description: removes a role assignment
+      description: |-
+        removes a role assignment
+
+        **Security Expression (PreAuthorize):** `hasPermission(#targetId, #roleType, 'ASSIGN_VAULT_ROLES') or hasPermission(#targetId, 'GROUP_VAULT', 'ASSIGN_SCHOOL_VAULT_ROLES')`
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: removeRoleAssignment
       parameters:
       - name: roleType
@@ -361,6 +414,10 @@ paths:
       tags:
       - files-controller
       summary: Upload a file chunk
+      description: |2-
+
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: fileUpload
       requestBody:
         content:
@@ -383,6 +440,10 @@ paths:
       tags:
       - file-store-controller
       summary: Add SFTP Filestore
+      description: |2-
+
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: addSFTPFilestore
       requestBody:
         content:
@@ -397,6 +458,10 @@ paths:
       tags:
       - file-store-controller
       summary: Add local filestore
+      description: |2-
+
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: addLocalFilestore
       requestBody:
         content:
@@ -410,7 +475,10 @@ paths:
     post:
       tags:
       - admin-reviews-controller
-      description: processes the updated vault review
+      description: |-
+        processes the updated vault review
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_VAULTS')`
       operationId: processReview
       parameters:
       - name: vaultId
@@ -448,8 +516,10 @@ paths:
     post:
       tags:
       - admin-vaults-controller
-      description: redirects to vaults HTML page for the specified vault after checking
-        vault retention policy
+      description: |-
+        redirects to vaults HTML page for the specified vault after checking vault retention policy
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_VAULTS')`
       operationId: checkPolicy
       parameters:
       - name: vaultId
@@ -474,7 +544,10 @@ paths:
     get:
       tags:
       - admin-users-controller
-      description: returns the edit user HTML page
+      description: |-
+        returns the edit user HTML page
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: editUser
       parameters:
       - name: userId
@@ -492,7 +565,10 @@ paths:
     post:
       tags:
       - admin-users-controller
-      description: processes the edit user HTML page then shows vaults
+      description: |-
+        processes the edit user HTML page then shows vaults
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: editUser_1
       parameters:
       - name: userId
@@ -526,7 +602,10 @@ paths:
     get:
       tags:
       - admin-users-controller
-      description: returns the create user HTML page
+      description: |-
+        returns the create user HTML page
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: createUserPage
       responses:
         "200":
@@ -538,7 +617,10 @@ paths:
     post:
       tags:
       - admin-users-controller
-      description: processes the create user HTML page
+      description: |-
+        processes the create user HTML page
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: addUser
       requestBody:
         content:
@@ -567,8 +649,12 @@ paths:
     post:
       tags:
       - admin-schools-controller
-      description: adds a new role assignment for the specified userId and role if
-        the user has permission
+      description: |-
+        adds a new role assignment for the specified userId and role if the user has permission
+
+        **Security Expression (PreAuthorize):** `hasPermission(#schoolId, 'GROUP', 'CAN_MANAGE_SCHOOL_ROLE_ASSIGNMENTS')`
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_SCHOOLS')`
       operationId: addNewRoleAssignment
       parameters:
       - name: schoolId
@@ -592,8 +678,12 @@ paths:
     post:
       tags:
       - admin-schools-controller
-      description: updates role assignment with the specified role if the user has
-        permission
+      description: |-
+        updates role assignment with the specified role if the user has permission
+
+        **Security Expression (PreAuthorize):** `hasPermission(#schoolId, 'GROUP', 'CAN_MANAGE_SCHOOL_ROLE_ASSIGNMENTS')`
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_SCHOOLS')`
       operationId: updateExistingRoleAssignment
       parameters:
       - name: schoolId
@@ -617,7 +707,12 @@ paths:
     post:
       tags:
       - admin-schools-controller
-      description: deletes the specified role assignment if the user has permission
+      description: |-
+        deletes the specified role assignment if the user has permission
+
+        **Security Expression (PreAuthorize):** `hasPermission(#schoolId, 'GROUP', 'CAN_MANAGE_SCHOOL_ROLE_ASSIGNMENTS')`
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_SCHOOLS')`
       operationId: deleteRoleAssignment
       parameters:
       - name: schoolId
@@ -641,7 +736,10 @@ paths:
     post:
       tags:
       - admin-roles-controller
-      description: Saves a Role that has been edited
+      description: |-
+        Saves a Role that has been edited
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_ROLES')`
       operationId: save
       requestBody:
         content:
@@ -659,7 +757,10 @@ paths:
     post:
       tags:
       - admin-roles-controller
-      description: assigns the specified user the SuperAdmin(IS) Role
+      description: |-
+        assigns the specified user the SuperAdmin(IS) Role
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_ROLES')`
       operationId: addSuperAdmin
       requestBody:
         content:
@@ -677,7 +778,10 @@ paths:
     post:
       tags:
       - admin-roles-controller
-      description: removes the specified user from the SuperAdmin(IS) Role
+      description: |-
+        removes the specified user from the SuperAdmin(IS) Role
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_ROLES')`
       operationId: deleteSuperAdmin
       requestBody:
         content:
@@ -695,7 +799,10 @@ paths:
     post:
       tags:
       - admin-roles-controller
-      description: Deletes the specified role as long as it is not assigned
+      description: |-
+        Deletes the specified role as long as it is not assigned
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_ROLES')`
       operationId: deleteRole
       requestBody:
         content:
@@ -713,7 +820,10 @@ paths:
     get:
       tags:
       - admin-retention-policies-controller
-      description: returns an HTML page to allow a retentionpolicy to be edited
+      description: |-
+        returns an HTML page to allow a retentionpolicy to be edited
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_RETENTIONPOLICIES')`
       operationId: editRetentionPolicyPage
       parameters:
       - name: retentionPolicyId
@@ -731,8 +841,10 @@ paths:
     post:
       tags:
       - admin-retention-policies-controller
-      description: edits a retention policy and then redirects to show all retention
-        policies
+      description: |-
+        edits a retention policy and then redirects to show all retention policies
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_RETENTIONPOLICIES')`
       operationId: editRetentionPolicy
       parameters:
       - name: retentionPolicyId
@@ -744,7 +856,7 @@ paths:
         content:
           application/x-www-form-urlencoded:
             schema:
-              $ref: "#/components/schemas/CreateRetentionPolicy"
+              $ref: "#/components/schemas/CreateRetentionPolicyForm"
       responses:
         "302":
           description: Redirects to /admin/retentionpolicies
@@ -767,7 +879,10 @@ paths:
     get:
       tags:
       - admin-retention-policies-controller
-      description: returns an HTML page to allow a new retentionpolicy to be added
+      description: |-
+        returns an HTML page to allow a new retentionpolicy to be added
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_RETENTIONPOLICIES')`
       operationId: addRetentionPolicyPage
       responses:
         "200":
@@ -779,13 +894,16 @@ paths:
     post:
       tags:
       - admin-retention-policies-controller
-      description: add a new retention policy
+      description: |-
+        add a new retention policy
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_RETENTIONPOLICIES')`
       operationId: addRetentionPolicy
       requestBody:
         content:
           application/x-www-form-urlencoded:
             schema:
-              $ref: "#/components/schemas/CreateRetentionPolicy"
+              $ref: "#/components/schemas/CreateRetentionPolicyForm"
       responses:
         "302":
           description: Redirects to /admin/retentionpolicies
@@ -808,8 +926,10 @@ paths:
     post:
       tags:
       - admin-pending-vaults-controller
-      description: updates pending vault then return a redirect to continue edit of
-        a pending vault
+      description: |-
+        updates pending vault then return a redirect to continue edit of a pending vault
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: editPendingVault
       requestBody:
         content:
@@ -832,8 +952,12 @@ paths:
     post:
       tags:
       - admin-paused-retrieve-state-controller
-      description: toggles the 'pause retrieve state' and returns the paused retrieve
-        state HTML page
+      description: |-
+        toggles the 'pause retrieve state' and returns the paused retrieve state HTML page
+
+        **Security Expression (PreAuthorize):** `hasRole('IS_ADMIN')`
+
+        **HttpSecurity Rule:** `hasRole('IS_ADMIN')`
       operationId: toggleRetrievePause
       responses:
         "302":
@@ -857,8 +981,12 @@ paths:
     post:
       tags:
       - admin-paused-deposit-state-controller
-      description: toggles the 'pause deposits state' and returns the paused deposit
-        state HTML page
+      description: |-
+        toggles the 'pause deposits state' and returns the paused deposit state HTML page
+
+        **Security Expression (PreAuthorize):** `hasRole('IS_ADMIN')`
+
+        **HttpSecurity Rule:** `hasRole('IS_ADMIN')`
       operationId: toggleDepositPause
       responses:
         "302":
@@ -882,8 +1010,10 @@ paths:
     post:
       tags:
       - admin-billing-controller
-      description: updates billing details and returns HTML page based on billing
-        type
+      description: |-
+        updates billing details and returns HTML page based on billing type
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_BILLING')`
       operationId: updateBillingDetails
       requestBody:
         content:
@@ -902,6 +1032,10 @@ paths:
       tags:
       - admin-archive-store-controller
       summary: Update store properties
+      description: |2-
+
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_ARCHIVESTORES')`
       operationId: updateArchiveStore
       parameters:
       - name: archiveStoreId
@@ -921,6 +1055,10 @@ paths:
     post:
       tags:
       - admin-archive-store-controller
+      description: |2-
+
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_ARCHIVESTORES')`
       operationId: enableRetrieve
       parameters:
       - name: archiveStoreId
@@ -935,6 +1073,10 @@ paths:
     post:
       tags:
       - admin-archive-store-controller
+      description: |2-
+
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_ARCHIVESTORES')`
       operationId: disableRetrieve
       parameters:
       - name: archiveStoreId
@@ -950,6 +1092,10 @@ paths:
       tags:
       - admin-archive-store-controller
       summary: Add local Archive Store
+      description: |2-
+
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_ARCHIVESTORES')`
       operationId: addLocalArchiveStore
       requestBody:
         content:
@@ -963,7 +1109,10 @@ paths:
     get:
       tags:
       - welcome-controller
-      description: displays the welcome HTML page
+      description: |-
+        displays the welcome HTML page
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: welcome
       responses:
         "200":
@@ -976,7 +1125,10 @@ paths:
     get:
       tags:
       - vaults-controller
-      description: returns HTML page listing vaults
+      description: |-
+        returns HTML page listing vaults
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: getVaultsListing
       responses:
         "200":
@@ -989,7 +1141,10 @@ paths:
     get:
       tags:
       - vaults-controller
-      description: returns HTML page for specific vault
+      description: |-
+        returns HTML page for specific vault
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: getVaultByVaultId
       parameters:
       - name: vaultId
@@ -1008,7 +1163,10 @@ paths:
     get:
       tags:
       - vaults-controller
-      description: returns HTML page for showing all vaults associated with a user
+      description: |-
+        returns HTML page for showing all vaults associated with a user
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: getUserVaults
       parameters:
       - name: vaultId
@@ -1032,7 +1190,12 @@ paths:
     get:
       tags:
       - deposits-controller
-      description: returns the deposit HTML page
+      description: |-
+        returns the deposit HTML page
+
+        **Security Expression (PreAuthorize):** `hasPermission(#vaultId, 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') or hasPermission(#vaultId, 'GROUP_VAULT', 'CAN_RETRIEVE_DATA') or hasPermission(#vaultId,'GROUP_VAULT','CAN_MANAGE_DEPOSITS')`
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: getDeposit
       parameters:
       - name: vaultId
@@ -1056,7 +1219,10 @@ paths:
     get:
       tags:
       - deposits-controller
-      description: re-starts a deposit retrieval then redirects to show deposit page
+      description: |-
+        re-starts a deposit retrieval then redirects to show deposit page
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: restartRetrieve
       parameters:
       - name: vaultId
@@ -1091,7 +1257,10 @@ paths:
     get:
       tags:
       - deposits-controller
-      description: re-starts a deposit then redirects to show deposit page
+      description: |-
+        re-starts a deposit then redirects to show deposit page
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: restartDeposit
       parameters:
       - name: vaultId
@@ -1121,7 +1290,10 @@ paths:
     get:
       tags:
       - deposits-controller
-      description: returns the deposit information as json
+      description: |-
+        returns the deposit information as json
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: getDepositJson
       parameters:
       - name: vaultId
@@ -1145,7 +1317,10 @@ paths:
     get:
       tags:
       - deposits-controller
-      description: returns the deposit jobs as json
+      description: |-
+        returns the deposit jobs as json
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: getDepositJobsJson
       parameters:
       - name: vaultId
@@ -1171,7 +1346,10 @@ paths:
     get:
       tags:
       - vaults-controller
-      description: returns true if the 'uun' is a valid UUN
+      description: |-
+        returns true if the 'uun' is a valid UUN
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: isUUN
       parameters:
       - name: uun
@@ -1190,7 +1368,10 @@ paths:
     get:
       tags:
       - vaults-controller
-      description: returns HTML page for confirming a pending vault
+      description: |-
+        returns HTML page for confirming a pending vault
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: confirmPendingVault
       responses:
         "200":
@@ -1203,7 +1384,10 @@ paths:
     get:
       tags:
       - vaults-controller
-      description: returns HTML page for building a new vault
+      description: |-
+        returns HTML page for building a new vault
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: buildVault
       responses:
         "200":
@@ -1216,7 +1400,10 @@ paths:
     get:
       tags:
       - vaults-controller
-      description: get autocomplete on a partial 'uun'
+      description: |-
+        get autocomplete on a partial 'uun'
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: autocompleteUUN
       parameters:
       - name: term
@@ -1235,7 +1422,10 @@ paths:
     get:
       tags:
       - vaults-controller
-      description: returns HTML page for showing details of a specific pending vault
+      description: |-
+        returns HTML page for showing details of a specific pending vault
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: getPendingVault
       parameters:
       - name: vaultId
@@ -1254,7 +1444,10 @@ paths:
     get:
       tags:
       - help-controller
-      description: displays the help HTML page
+      description: |-
+        displays the help HTML page
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: help
       responses:
         "200":
@@ -1267,7 +1460,10 @@ paths:
     get:
       tags:
       - group-vaults-controller
-      description: returns the groups listing HTML page
+      description: |-
+        returns the groups listing HTML page
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: getGroupVaultsListing
       responses:
         "200":
@@ -1280,7 +1476,10 @@ paths:
     get:
       tags:
       - file-store-controller
-      description: returns HTML for listing filestores
+      description: |-
+        returns HTML for listing filestores
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: listFilestores
       responses:
         "200":
@@ -1293,7 +1492,10 @@ paths:
     get:
       tags:
       - files-controller
-      description: Get the filesize as text
+      description: |-
+        Get the filesize as text
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: getFilesize
       parameters:
       - name: filepath
@@ -1317,7 +1519,10 @@ paths:
     get:
       tags:
       - files-controller
-      description: Get the files listing as JSON
+      description: |-
+        Get the files listing as JSON
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: getFilesListing
       parameters:
       - name: mode
@@ -1347,7 +1552,10 @@ paths:
     get:
       tags:
       - System
-      description: returns the favicon
+      description: |-
+        returns the favicon
+
+        **HttpSecurity Rule:** `permitAll()`
       operationId: favicon
       responses:
         "200":
@@ -1361,7 +1569,10 @@ paths:
     get:
       tags:
       - files-controller
-      description: Get the directory listing as JSON
+      description: |-
+        Get the directory listing as JSON
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: getDirListing
       parameters:
       - name: mode
@@ -1391,7 +1602,10 @@ paths:
     get:
       tags:
       - files-controller
-      description: Checks Deposit Size returns JSON
+      description: |-
+        Checks Deposit Size returns JSON
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: checkDepositSize
       parameters:
       - name: "filepath[]"
@@ -1414,7 +1628,10 @@ paths:
     get:
       tags:
       - auth-controller
-      description: returns the denied page
+      description: |-
+        returns the denied page
+
+        **HttpSecurity Rule:** `permitAll()`
       operationId: getLogoutPath
       responses:
         "200":
@@ -1423,11 +1640,15 @@ paths:
             '*/*':
               schema:
                 type: string
+      security: []
   /auth/login:
     get:
       tags:
       - auth-controller
-      description: returns the login page
+      description: |-
+        returns the login page
+
+        **HttpSecurity Rule:** `permitAll()`
       operationId: getLoginPage
       parameters:
       - name: error
@@ -1452,11 +1673,15 @@ paths:
             text/html:
               schema:
                 type: string
+      security: []
   /auth/denied:
     get:
       tags:
       - auth-controller
-      description: returns the logout page
+      description: |-
+        returns the logout page
+
+        **HttpSecurity Rule:** `permitAll()`
       operationId: getLogoutPath_1
       responses:
         "200":
@@ -1465,11 +1690,15 @@ paths:
             '*/*':
               schema:
                 type: string
+      security: []
   /auth/confirmation:
     get:
       tags:
       - auth-controller
-      description: returns the confirmation page
+      description: |-
+        returns the confirmation page
+
+        **HttpSecurity Rule:** `permitAll()`
       operationId: getConfirmationPage
       responses:
         "200":
@@ -1478,11 +1707,15 @@ paths:
             text/html:
               schema:
                 type: string
+      security: []
   /admin:
     get:
       tags:
       - admin-controller
-      description: returns the admin dashboard HTML page
+      description: |-
+        returns the admin dashboard HTML page
+
+        **HttpSecurity Rule:** `hasRole('ADMIN')`
       operationId: adminIndex
       responses:
         "200":
@@ -1495,7 +1728,10 @@ paths:
     get:
       tags:
       - admin-vaults-controller
-      description: returns the vaults listing HTML page
+      description: |-
+        returns the vaults listing HTML page
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_VAULTS')`
       operationId: searchVaults
       parameters:
       - name: query
@@ -1534,7 +1770,10 @@ paths:
     get:
       tags:
       - admin-vaults-controller
-      description: returns the vaults HTML page for the specified vault
+      description: |-
+        returns the vaults HTML page for the specified vault
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_VAULTS')`
       operationId: showVault
       parameters:
       - name: vaultId
@@ -1553,7 +1792,10 @@ paths:
     get:
       tags:
       - admin-reviews-controller
-      description: returns the reviews HTML page for the specified vault
+      description: |-
+        returns the reviews HTML page for the specified vault
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_VAULTS')`
       operationId: showReview
       parameters:
       - name: vaultId
@@ -1577,7 +1819,10 @@ paths:
     get:
       tags:
       - admin-vaults-controller
-      description: returns the vaults listing CSV file
+      description: |-
+        returns the vaults listing CSV file
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_VAULTS')`
       operationId: exportVaults
       parameters:
       - name: query
@@ -1607,7 +1852,10 @@ paths:
     get:
       tags:
       - admin-users-controller
-      description: returns the users listing HTML page
+      description: |-
+        returns the users listing HTML page
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: getUsersListing
       parameters:
       - name: query
@@ -1626,8 +1874,10 @@ paths:
     get:
       tags:
       - admin-schools-controller
-      description: if there is 1 manageble school redirects to show that otherwise
-        displays page showing all manageable schools
+      description: |-
+        if there is 1 manageble school redirects to show that otherwise displays page showing all manageable schools
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_SCHOOLS')`
       operationId: getSchoolsListingPage
       responses:
         "403":
@@ -1656,7 +1906,12 @@ paths:
     get:
       tags:
       - admin-schools-controller
-      description: shows the roles for the specified school if the user has permission
+      description: |-
+        shows the roles for the specified school if the user has permission
+
+        **Security Expression (PreAuthorize):** `hasPermission(#schoolId, 'GROUP', 'CAN_VIEW_SCHOOL_ROLE_ASSIGNMENTS')`
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_SCHOOLS')`
       operationId: getSchoolRoleAssignmentsPage
       parameters:
       - name: schoolId
@@ -1675,7 +1930,10 @@ paths:
     get:
       tags:
       - admin-roles-controller
-      description: returns the roles listing HTML page
+      description: |-
+        returns the roles listing HTML page
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_ROLES')`
       operationId: getRolesListing
       responses:
         "200":
@@ -1688,7 +1946,10 @@ paths:
     get:
       tags:
       - admin-roles-controller
-      description: gets the RoleModelView for the specified roleId
+      description: |-
+        gets the RoleModelView for the specified roleId
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_ROLES')`
       operationId: getRole
       parameters:
       - name: roleId
@@ -1708,7 +1969,10 @@ paths:
     get:
       tags:
       - admin-roles-controller
-      description: returns the HTML page showing Super(IS) Admins
+      description: |-
+        returns the HTML page showing Super(IS) Admins
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_ROLES')`
       operationId: getSuperAdminUsersListing
       responses:
         "200":
@@ -1721,7 +1985,10 @@ paths:
     get:
       tags:
       - admin-roles-controller
-      description: returns a list of PermissionModels for all Vault permissions
+      description: |-
+        returns a list of PermissionModels for all Vault permissions
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_ROLES')`
       operationId: getAllVaultPermissions
       responses:
         "200":
@@ -1736,7 +2003,10 @@ paths:
     get:
       tags:
       - admin-roles-controller
-      description: returns a list of PermissionModels for all School permissions
+      description: |-
+        returns a list of PermissionModels for all School permissions
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_ROLES')`
       operationId: getAllSchoolPermissions
       responses:
         "200":
@@ -1751,7 +2021,10 @@ paths:
     get:
       tags:
       - admin-reviews-controller
-      description: returns the vault reviews HTML page
+      description: |-
+        returns the vault reviews HTML page
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_REVIEWS')`
       operationId: getVaultsForReview
       responses:
         "200":
@@ -1764,8 +2037,10 @@ paths:
     get:
       tags:
       - admin-reviews-controller
-      description: searches for vaults that can be reviewed - used to support dynamic
-        in-page searching of vaults. First 50 only
+      description: |-
+        searches for vaults that can be reviewed - used to support dynamic in-page searching of vaults. First 50 only
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_REVIEWS')`
       operationId: searchVaultsForReview
       parameters:
       - name: q
@@ -1795,7 +2070,10 @@ paths:
     get:
       tags:
       - admin-retrieves-controller
-      description: returns the retrieves listing HTML page
+      description: |-
+        returns the retrieves listing HTML page
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_RETRIEVES')`
       operationId: getRetrievesListing
       parameters:
       - name: query
@@ -1834,7 +2112,10 @@ paths:
     get:
       tags:
       - admin-retention-policies-controller
-      description: returns the retention policies listing HTML page
+      description: |-
+        returns the retention policies listing HTML page
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_RETENTIONPOLICIES')`
       operationId: getRetentionPoliciesListing
       responses:
         "200":
@@ -1847,7 +2128,10 @@ paths:
     get:
       tags:
       - admin-pending-vaults-controller
-      description: returns the pending vaults listing HTML page
+      description: |-
+        returns the pending vaults listing HTML page
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: searchPendingVaults
       parameters:
       - name: query
@@ -1886,7 +2170,10 @@ paths:
     get:
       tags:
       - admin-pending-vaults-controller
-      description: Deletes a pending vault and returns redirect to show pending vaults
+      description: |-
+        Deletes a pending vault and returns redirect to show pending vaults
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: deletePendingVault
       parameters:
       - name: pendingVaultId
@@ -1910,7 +2197,10 @@ paths:
     get:
       tags:
       - admin-pending-vaults-controller
-      description: returns redirect to show vault after pending vault has been upgraded
+      description: |-
+        returns redirect to show vault after pending vault has been upgraded
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: upgradeVault
       parameters:
       - name: pendingVaultId
@@ -1941,8 +2231,10 @@ paths:
     get:
       tags:
       - admin-pending-vaults-controller
-      description: returns an HTML page which shows summary of pending vault specified
-        via pendingVaultId
+      description: |-
+        returns an HTML page which shows summary of pending vault specified via pendingVaultId
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: getVault
       parameters:
       - name: pendingVaultId
@@ -1961,8 +2253,10 @@ paths:
     get:
       tags:
       - admin-pending-vaults-controller
-      description: returns an HTML page of saved PendingVaults that match the query/pageId
-        parameters sorted using 'sort and order' parameters
+      description: |-
+        returns an HTML page of saved PendingVaults that match the query/pageId parameters sorted using 'sort and order' parameters
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: searchSavedPendingVaults
       parameters:
       - name: query
@@ -2001,7 +2295,10 @@ paths:
     get:
       tags:
       - admin-pending-vaults-controller
-      description: returns the HTML page to edit pending vault specified by vaultId
+      description: |-
+        returns the HTML page to edit pending vault specified by vaultId
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: getPendingVault_1
       parameters:
       - name: vaultId
@@ -2020,8 +2317,10 @@ paths:
     get:
       tags:
       - admin-pending-vaults-controller
-      description: returns an HTML page of confirmed PendingVaults that match the
-        query/pageId parameters sorted using 'sort and order' parameters
+      description: |-
+        returns an HTML page of confirmed PendingVaults that match the query/pageId parameters sorted using 'sort and order' parameters
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: searchConfirmedPendingVaults
       parameters:
       - name: query
@@ -2060,7 +2359,12 @@ paths:
     get:
       tags:
       - admin-paused-retrieve-state-controller
-      description: returns the paused retrieve state HTML page
+      description: |-
+        returns the paused retrieve state HTML page
+
+        **Security Expression (PreAuthorize):** `hasRole('USER')`
+
+        **HttpSecurity Rule:** `hasRole('USER')`
       operationId: showPausedRetrieveHistory
       responses:
         "200":
@@ -2071,7 +2375,12 @@ paths:
     get:
       tags:
       - admin-paused-deposit-state-controller
-      description: returns the paused deposit state HTML page
+      description: |-
+        returns the paused deposit state HTML page
+
+        **Security Expression (PreAuthorize):** `hasRole('USER')`
+
+        **HttpSecurity Rule:** `hasRole('USER')`
       operationId: showPausedDepositHistory
       responses:
         "200":
@@ -2082,7 +2391,10 @@ paths:
     get:
       tags:
       - admin-events-controller
-      description: returns the events listing HTML page
+      description: |-
+        returns the events listing HTML page
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_EVENTS')`
       operationId: getEventsListing
       parameters:
       - name: query
@@ -2106,7 +2418,10 @@ paths:
     get:
       tags:
       - admin-deposits-controller
-      description: returns the deposits listing HTML page
+      description: |-
+        returns the deposits listing HTML page
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_DEPOSITS')`
       operationId: getDepositsListing
       parameters:
       - name: query
@@ -2145,7 +2460,10 @@ paths:
     get:
       tags:
       - admin-deposits-controller
-      description: returns an HTML page for deposit audits
+      description: |-
+        returns an HTML page for deposit audits
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: getDepositsAuditsListing
       parameters:
       - name: sort
@@ -2164,7 +2482,10 @@ paths:
     get:
       tags:
       - admin-deposits-controller
-      description: returns DEPOSITS report as CSV
+      description: |-
+        returns DEPOSITS report as CSV
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_DEPOSITS')`
       operationId: exportVaults_1
       parameters:
       - name: query
@@ -2197,7 +2518,10 @@ paths:
     get:
       tags:
       - admin-deposits-controller
-      description: returns an HTML page for running a deposit audit
+      description: |-
+        returns an HTML page for running a deposit audit
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_DEPOSITS')`
       operationId: runDepositAudit
       responses:
         "200":
@@ -2210,7 +2534,10 @@ paths:
     get:
       tags:
       - admin-billing-controller
-      description: returns BILLING report as HTML page
+      description: |-
+        returns BILLING report as HTML page
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_BILLING')`
       operationId: billingByVaults
       parameters:
       - name: query
@@ -2249,7 +2576,10 @@ paths:
     get:
       tags:
       - admin-billing-controller
-      description: returns HTML page for billing details for specified vaultId
+      description: |-
+        returns HTML page for billing details for specified vaultId
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_BILLING')`
       operationId: retrieveBillingInfo
       parameters:
       - name: vaultId
@@ -2268,7 +2598,10 @@ paths:
     get:
       tags:
       - admin-billing-controller
-      description: returns BILLING report as CSV
+      description: |-
+        returns BILLING report as CSV
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_BILLING')`
       operationId: exportBillingVaults
       parameters:
       - name: query
@@ -2301,7 +2634,10 @@ paths:
     get:
       tags:
       - admin-deposits-controller
-      description: returns an HTML for all Audits
+      description: |-
+        returns an HTML for all Audits
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: getAuditsListing
       responses:
         "200":
@@ -2314,7 +2650,10 @@ paths:
     get:
       tags:
       - admin-archive-store-controller
-      description: returns HTML for listing archive stores
+      description: |-
+        returns HTML for listing archive stores
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_ARCHIVESTORES')`
       operationId: listArchivestores
       responses:
         "200":
@@ -2327,7 +2666,10 @@ paths:
     get:
       tags:
       - accessibility-controller
-      description: returns the accessibility HTML page
+      description: |-
+        returns the accessibility HTML page
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: accessibility
       responses:
         "200":
@@ -2340,7 +2682,10 @@ paths:
     get:
       tags:
       - welcome-controller
-      description: redirects / to /vaults
+      description: |-
+        redirects / to /vaults
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: getVaultsListing_1
       responses:
         "302":
@@ -2358,7 +2703,10 @@ paths:
     delete:
       tags:
       - file-store-controller
-      description: Deletes the specified filestore
+      description: |-
+        Deletes the specified filestore
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_USER')`
       operationId: deleteFileStore
       parameters:
       - name: fileStoreId
@@ -2373,7 +2721,10 @@ paths:
     delete:
       tags:
       - admin-retention-policies-controller
-      description: deletes a retention policy
+      description: |-
+        deletes a retention policy
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_RETENTIONPOLICIES')`
       operationId: deleteRetentionPoliciesListing
       parameters:
       - name: policyId
@@ -2388,7 +2739,10 @@ paths:
     delete:
       tags:
       - admin-deposits-controller
-      description: deletes the specified deposit
+      description: |-
+        deletes the specified deposit
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_DEPOSITS')`
       operationId: deleteDeposit
       parameters:
       - name: depositId
@@ -2412,6 +2766,10 @@ paths:
     delete:
       tags:
       - admin-archive-store-controller
+      description: |2-
+
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_ARCHIVESTORES')`
       operationId: deleteArchiveStore
       parameters:
       - name: archiveStoreId
@@ -3026,6 +3384,7 @@ components:
       properties:
         action:
           type: string
+          description: The action to perform on the form
         comment:
           type: string
         depositReviewModels:
@@ -3037,6 +3396,8 @@ components:
           format: date
         vaultReviewId:
           type: string
+      required:
+      - action
     UserForm:
       type: object
       properties:
@@ -3142,12 +3503,12 @@ components:
         id:
           type: integer
           format: int64
-    CreateRetentionPolicy:
+    CreateRetentionPolicyForm:
       type: object
       properties:
         action:
           type: string
-          description: Form Action
+          description: The action to perform on the form
         dataGuidanceReviewed:
           type: string
           format: date
@@ -3191,6 +3552,8 @@ components:
         url:
           type: string
           description: URL for Retention Policy
+      required:
+      - action
     BillingInfo:
       type: object
       properties:

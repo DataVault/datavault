@@ -7,6 +7,7 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springdoc.core.customizers.GlobalOpenApiCustomizer;
+import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springdoc.core.customizers.OperationCustomizer;
 import org.springdoc.core.utils.SpringDocUtils;
 import org.springframework.boot.info.GitProperties;
@@ -140,5 +141,25 @@ public class OpenApiConfig {
             });
         };
     }
+
+    @Bean
+    @Order(5)
+    public OpenApiCustomizer publicEndpointCustomizer() {
+        return openApi -> {
+            if (openApi.getPaths() != null) {
+                openApi.getPaths().forEach((path, pathItem) -> {
+                    // Match the pattern you used in requestMatchers
+                    if (path.startsWith("/auth/")) {
+                        // This clears any global security (like the 'uun' header) 
+                        // for every HTTP method (GET, POST, etc.) under this path
+                        pathItem.readOperations().forEach(operation ->
+                                operation.setSecurity(Collections.emptyList())
+                        );
+                    }
+                });
+            }
+        };
+    }
+
 }
     
