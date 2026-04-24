@@ -756,7 +756,7 @@ class DeleteTest {
             // deleted chunks
             assertThat(deletedChunkEvents).hasSize(1);
             DeletedChunk dc1 = deletedChunkEvents.get(0);
-            checkDeletedChunk(dc1, location1, 0, "Deleted Chunk [0/0] from (MultiLocationsArchiveStoreFailureImpl/TEST-ARCHIVE-STORE-ID//private/tmp/delete/location-one)");
+            checkDeletedChunk(dc1, location1, 0, "Deleted Chunk [0/0] from (MultiLocationsArchiveStoreFailureImpl/TEST-ARCHIVE-STORE-ID/%s)".formatted(location1));
 
             // verify
             verify(mEventSender, times(5)).send(any(Event.class));
