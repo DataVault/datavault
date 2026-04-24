@@ -61,7 +61,12 @@ public class RestrictURLAccessViaRolesTest extends BaseControllerAuthTest{
 
     verify(adminUsersController).getUsers(USER_ID_1, "");
 
-    checkSecurityRoles(RoleName.ROLE_CLIENT_USER, RoleName.ROLE_ADMIN);
+    //'IS Admin' pulls in ADMIN_ roles via Permissions associated with 'IS Admin' Role which are then filtered via RestAuthenticationProvider
+    checkSecurityRoles(RoleName.ROLE_CLIENT_USER, RoleName.ROLE_ADMIN,
+            RoleName.ROLE_ADMIN_DEPOSITS, RoleName.ROLE_ADMIN_EVENTS,
+            RoleName.ROLE_ADMIN_RETRIEVES, RoleName.ROLE_ADMIN_ARCHIVESTORES,
+            RoleName.ROLE_ADMIN_BILLING, RoleName.ROLE_ADMIN_PENDING_VAULTS,
+            RoleName.ROLE_ADMIN_VAULTS);
   }
 
   @Test
