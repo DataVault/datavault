@@ -4,7 +4,6 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
-import org.apache.commons.lang3.SystemUtils;
 import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.event.Error;
 import org.datavaultplatform.common.event.Event;
@@ -760,8 +759,7 @@ class DeleteTest {
             // deleted chunks
             assertThat(deletedChunkEvents).hasSize(1);
             DeletedChunk dc1 = deletedChunkEvents.get(0);
-            String tmpPrefix = SystemUtils.IS_OS_MAC ? "/private" : "";
-            checkDeletedChunk(dc1, location1, 0, "Deleted Chunk [0/0] from (MultiLocationsArchiveStoreFailureImpl/TEST-ARCHIVE-STORE-ID/" + tmpPrefix + "/tmp/delete/location-one)");
+            checkDeletedChunk(dc1, location1, 0, "Deleted Chunk [0/0] from (MultiLocationsArchiveStoreFailureImpl/TEST-ARCHIVE-STORE-ID/%s)".formatted(location1));
 
             // verify
             verify(mEventSender, times(5)).send(any(Event.class));
