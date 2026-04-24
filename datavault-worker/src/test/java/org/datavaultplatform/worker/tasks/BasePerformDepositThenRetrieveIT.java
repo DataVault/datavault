@@ -3,8 +3,6 @@ package org.datavaultplatform.worker.tasks;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 
 import org.datavaultplatform.common.event.deposit.Complete;
 import org.datavaultplatform.common.event.deposit.CompleteCopyUpload;
@@ -16,15 +14,12 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.datavaultplatform.worker.tasks.retrieve.RetrieveUtils.DATA_VAULT_HIDDEN_FILE_NAME;
@@ -37,7 +32,7 @@ public abstract class BasePerformDepositThenRetrieveIT extends BaseDepositIT {
   @Override
   void taskSpecificSetup() throws IOException {
     Path baseTemp = Paths.get(this.tempDir);
-    retrieveBaseDir = baseTemp.resolve("retrieve").toFile();
+    retrieveBaseDir = baseTemp.resolve("user-to").toFile();
     retrieveDir = retrieveBaseDir.toPath().resolve("ret-folder").toFile();
     Files.createDirectories(retrieveBaseDir.toPath());
     Files.createDirectories(retrieveDir.toPath());
@@ -125,6 +120,7 @@ public abstract class BasePerformDepositThenRetrieveIT extends BaseDepositIT {
             .anyMatch(e -> e.getClass().equals(RetrieveComplete.class));
   }
 
+  @Override
   boolean foundComplete() {
     return events.stream()
             .anyMatch(e -> e.getClass().equals(Complete.class));

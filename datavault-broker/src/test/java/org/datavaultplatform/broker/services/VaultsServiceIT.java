@@ -14,6 +14,7 @@ import org.datavaultplatform.common.model.Vault;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 
@@ -31,6 +32,9 @@ public class VaultsServiceIT extends BaseReuseDatabaseTest {
 
     @Autowired
     private RolesAndPermissionsService rolesAndPermissionsService;
+
+    @MockBean
+    AdminDepositService adminDepositService;
 
     @Test
     public void checkVaultCount() {

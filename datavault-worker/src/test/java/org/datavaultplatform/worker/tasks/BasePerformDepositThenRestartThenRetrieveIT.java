@@ -17,9 +17,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.util.Assert;
 
 import java.io.File;
@@ -41,7 +41,7 @@ public abstract class BasePerformDepositThenRestartThenRetrieveIT extends BaseDe
   @Autowired
   RabbitMessageSelectorScheduler scheduler;
 
-  @MockBean
+  @MockitoBean
   TaskStageEventListener taskStageEventListener;
 
   List<TaskStageEvent> taskStageEvents;
@@ -115,7 +115,7 @@ public abstract class BasePerformDepositThenRestartThenRetrieveIT extends BaseDe
       log.info("-----------------------------------------------------");
       log.info("ITERATION[{}][{}]-------------------------------------------", ++count, interruptAtEventClass.getSimpleName());
       log.info("-----------------------------------------------------");
-      scheduler.setChecker(new TaskInterrupter.Checker(event -> interruptAtEventClass.getName().equals(event.getClass().getName()), interruptAtEventClass.getSimpleName()));
+      scheduler.setChecker(new TaskInterrupter.Checker(interruptAtEventClass::isInstance, interruptAtEventClass.getSimpleName()));
       Event lastEvent = nextLastEvent;
       depositMessage = mapper.writeValueAsString(deposit);
       log.info("depositMessage {}", depositMessage);
@@ -235,6 +235,7 @@ public abstract class BasePerformDepositThenRestartThenRetrieveIT extends BaseDe
             .anyMatch(e -> e.getClass().equals(eventClass));
   }
 
+  @Override
   boolean foundComplete() {
     return foundEvent(Complete.class);
   }

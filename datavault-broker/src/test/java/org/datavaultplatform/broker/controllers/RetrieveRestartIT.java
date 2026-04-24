@@ -6,6 +6,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.app.DataVaultBrokerApp;
+import org.datavaultplatform.broker.services.AdminDepositService;
 import org.datavaultplatform.broker.email.EmailBodyGenerator;
 import org.datavaultplatform.broker.queue.MessageIdProcessedListener;
 import org.datavaultplatform.broker.services.*;
@@ -151,6 +152,9 @@ class RetrieveRestartIT extends BaseDatabaseTest {
     
     @MockBean
     MessageIdProcessedListener mMessageIdProcessedListener;
+    
+    @MockBean
+    AdminDepositService mAdminDepositService;        
     
     List<String> processedMessageIds;
     

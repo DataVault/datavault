@@ -68,7 +68,7 @@
     <owasp.dependency.check.version>12.1.0</owasp.dependency.check.version>
 
     <!-- https://mvnrepository.com/artifact/org.testcontainers/testcontainers -->
-    <testcontainers.version>1.20.6</testcontainers.version>
+    <testcontainers.version>1.21.4</testcontainers.version>
 
     <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core -->
     <jackson.version>2.18.3</jackson.version>

@@ -26,6 +26,7 @@ import org.datavaultplatform.common.storage.StorageConstants;
 import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.worker.tasks.Audit;
 import org.datavaultplatform.common.util.DateTimeUtils;
+import org.datavaultplatform.worker.tasks.Delete;
 import org.datavaultplatform.worker.tasks.Deposit;
 import org.datavaultplatform.worker.tasks.Retrieve;
 import org.springframework.util.Assert;
@@ -71,7 +72,7 @@ public class DepositEvents {
 
     retrieve.setProperties(topLevelProps);
     retrieve.setTarIV(info.tarIV);
-    retrieve.setArchiveFileStores(List.of(getArchiveStoreForRetrieve()));
+    retrieve.setArchiveFileStores(getArchiveStoresForRetrieve());
     //CHUNKS
     retrieve.setChunkFilesDigest(info.chunkDigests);
     retrieve.setEncChunksDigest(info.chunkEncDigests);
@@ -94,6 +95,63 @@ public class DepositEvents {
     return result;
   }
 
+  @SneakyThrows
+  public String generateDeleteMessage() {
+
+    TaskInfo info = getTaskInfo(null, null);
+
+    Delete delete = new Delete();
+    delete.setJobID(UUID.randomUUID().toString());
+    delete.setTaskClass(Delete.class.getName());
+    Map<String, String> topLevelProps = new HashMap<>();
+    topLevelProps.put(PropNames.DEPOSIT_ID, "test-deposit-id");
+    topLevelProps.put(PropNames.ARCHIVE_DIGEST_ALGORITHM, Verify.SHA_1_ALGORITHM);
+    topLevelProps.put(PropNames.BAG_ID, info.bagitId);
+    topLevelProps.put(PropNames.NUM_OF_CHUNKS, String.valueOf(info.numChunks));
+    topLevelProps.put(PropNames.ARCHIVE_SIZE, String.valueOf(info.archiveSize));
+    topLevelProps.put(PropNames.ARCHIVE_DIGEST, info.archiveDigest);
+    topLevelProps.put(PropNames.ARCHIVE_ID, info.archiveId);
+    topLevelProps.put(PropNames.DEPOSIT_CREATION_DATE, "20240111");
+    topLevelProps.put(PropNames.USER_FS_RETRY_MAX_ATTEMPTS, "10");
+    topLevelProps.put(PropNames.USER_FS_RETRY_DELAY_MS_1, "60000");
+    topLevelProps.put(PropNames.USER_FS_RETRY_DELAY_MS_2, "300000");
+    topLevelProps.put(PropNames.WORKERS_SEND_DELETED_CHUNK_EVENTS, "true");
+    Instant testInstant = LocalDate.of(2024, 1, 11)
+            .atStartOfDay(ZoneOffset.UTC)
+            .toInstant();
+    Date testDate = Date.from(testInstant);
+    topLevelProps.put(PropNames.DEPOSIT_CREATION_DATE, DateTimeUtils.formatDateBasicISO(testDate));
+
+    delete.setProperties(topLevelProps);
+    delete.setTarIV(info.tarIV);
+    delete.setArchiveFileStores(getArchiveStoresForRetrieve());
+    //TEMP? - trying to fix problem
+    for(var as : delete.getArchiveFileStores()){
+      topLevelProps.put(as.getID(), info.archiveId);
+    }
+    //TEMP? - trying to fix problem
+    
+    //CHUNKS
+    delete.setChunkFilesDigest(info.chunkDigests);
+    delete.setEncChunksDigest(info.chunkEncDigests);
+    delete.setChunksIVs(info.chunkIVsAsBytes);
+
+    delete.setIsRedeliver(false);
+    Map<String, String> userFileStoreClasses = new HashMap<>();
+
+    Map<String,String> propsInner = new HashMap<>();
+    propsInner.put(PropNames.ROOT_PATH, null);
+    Map<String, Map<String, String>> propsOuter = new HashMap<>();
+    propsOuter.put(FILE_STORE_SRC_ID, propsInner);
+    delete.setUserFileStoreProperties(propsOuter);
+    userFileStoreClasses.put(FILE_STORE_SRC_ID, StorageConstants.LOCAL_FILE_SYSTEM);
+    delete.setUserFileStoreClasses(userFileStoreClasses);
+
+    ObjectMapper mapper = new ObjectMapper();
+    mapper.setSerializationInclusion(Include.NON_NULL);
+    String result = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(delete);
+    return result;
+  }
   /**
    * By using multiple DepositEvents - we can audit multiple deposits
    * @param allDepositEvents - information about the deposits to audit
@@ -114,7 +172,7 @@ public class DepositEvents {
     Map<String, String> topLevelProps = new HashMap<>();
     topLevelProps.put(PropNames.AUDIT_ID, "test-audit-id");
     audit.setProperties(topLevelProps);
-    audit.setArchiveFileStores(Collections.singletonList(depositEvents1.getArchiveStoreForRetrieve()));
+    audit.setArchiveFileStores(depositEvents1.getArchiveStoresForRetrieve());
     audit.setIsRedeliver(false);
 
     TaskInfo info = depositEvents1.getTaskInfo(null, null);
@@ -159,19 +217,16 @@ public class DepositEvents {
     ObjectMapper mapper = new ObjectMapper();
     mapper.setSerializationInclusion(Include.NON_NULL);
     String result = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(audit);
-    System.out.println(result);
-
-
     return result;
   }
 
 
-  @SuppressWarnings("UnnecessaryLocalVariable")
-  public ArchiveStore getArchiveStoreForRetrieve() {
-    ArchiveStore result = deposit.getArchiveFileStores().stream()
-        .filter(ArchiveStore::isRetrieveEnabled)
-        .findFirst()
-        .orElse(null);
+  public List<ArchiveStore> getArchiveStoresForRetrieve() {
+    List<ArchiveStore> result = deposit.getArchiveFileStores().stream()
+            .filter(Objects::nonNull)
+            .filter(ArchiveStore::isRetrieveEnabled)
+            .toList();
+    Assert.isTrue(!result.isEmpty(), "must have at least 1 ArchiveStore");
     return result;
   }
 
@@ -213,9 +268,9 @@ public class DepositEvents {
 
     long archiveSize = getComplete().getArchiveSize();
 
-    String archiveDigest = getComputedDigest().getDigest();
-
-    String archiveId = getUploadComplete().getArchiveIds().get(getArchiveStoreForRetrieve().getID());
+    ArchiveStore firstArchiveStore  = getArchiveStoresForRetrieve().get(0);
+    String archiveId = getUploadComplete().getArchiveIds().get(firstArchiveStore.getID());
+    Assert.notNull(archiveId, String.format("Cannot find archiveId for archiveStoreId[%s]", firstArchiveStore.getID()));
 
     Map<Integer,String> chunkIVs = new HashMap<>();
     Map<Integer,byte[]> chunkIVsAsBytes = new HashMap<>();
@@ -239,7 +294,15 @@ public class DepositEvents {
           computedEncryption.getEncChunkDigests().get(chunkNumber));
     }
 
-    String rootPathArchiveStore = getArchiveStoreForRetrieve().getProperties().get(PropNames.ROOT_PATH);
+    List<String> rootPathArchiveStores = getArchiveStoresForRetrieve().stream()
+            .map(ArchiveStore::getProperties)
+            .map(hm -> hm.get(PropNames.ROOT_PATH))
+            .filter(Objects::nonNull)
+            .toList();
+
+    if (rootPathArchiveStores.isEmpty()) {
+      log.warn("empty list of rootPathArchiveStores");
+    }
     String rootPathRetrieve = null;
     if (retrieveBaseDir != null) {
       rootPathRetrieve = retrieveBaseDir.getCanonicalPath();
@@ -249,7 +312,7 @@ public class DepositEvents {
             .numChunks(numChunks)
             .archiveSize(archiveSize)
             .archiveId(archiveId)
-            .rootPathArchiveStore(rootPathArchiveStore)
+            .rootPathArchiveStores(rootPathArchiveStores)
             .rootPathRetrieve(rootPathRetrieve)
             .retrievePath(retrievePath)
             .tarIV(tarIV)
@@ -279,7 +342,7 @@ public class DepositEvents {
     private final Map<Integer,String> chunkIVs;
     private final Map<Integer,byte[]> chunkIVsAsBytes;
 
-    private final String rootPathArchiveStore;
+    private final List<String> rootPathArchiveStores;
     private final String rootPathRetrieve;
     private final String retrievePath;
 
@@ -309,19 +372,6 @@ public class DepositEvents {
       Collections.sort(result);
       return result;
     }
-
-    private <T> HashMap<Integer,T> zeroBased(Map<Integer,T> source){
-      HashMap<Integer,T> result = new HashMap<>();
-
-      source.entrySet().forEach(entry -> {
-        Integer key = entry.getKey();
-        T value = entry.getValue();
-        result.put(key - 1, value);
-      });
-
-      return result;
-    }
-
   }
 
   private static String base64Encode(byte[] data) {
@@ -333,7 +383,7 @@ public class DepositEvents {
   public static class ChunkInfo implements Comparable<ChunkInfo> {
     private final int chunkNum;
     private final String bagitId;
-    private final String archiveId;
+    private final String archiveId; // there is only archiveId - even if we have multiple archive stores.
     private final String chunkDigest;
     private final String chunkEncDigest;
     private final String chunkIVAsString;

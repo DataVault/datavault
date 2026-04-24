@@ -10,6 +10,7 @@ import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.datavaultplatform.broker.queue.Sender;
+import org.datavaultplatform.broker.services.AdminDepositService;
 import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.event.Event;
@@ -17,7 +18,6 @@ import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.response.*;
 
-import org.datavaultplatform.common.task.Task;
 import org.jsondoc.core.annotation.Api;
 import org.jsondoc.core.annotation.ApiHeader;
 import org.jsondoc.core.annotation.ApiHeaders;
@@ -32,8 +32,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -60,6 +58,7 @@ public class AdminController {
     private final ExternalMetadataService externalMetadataService;
     private final AuditsService auditsService;
     private final RolesAndPermissionsService permissionsService;
+    private final AdminDepositService adminDepositService;
     private final Sender sender;
     private final String optionsDir;
     private final String tempDir;
@@ -73,7 +72,8 @@ public class AdminController {
         DepositsService depositsService, RetrievesService retrievesService,
         EventService eventService, ArchiveStoreService archiveStoreService, JobsService jobsService,
         ExternalMetadataService externalMetadataService, AuditsService auditsService,
-        RolesAndPermissionsService permissionsService, Sender sender,
+        RolesAndPermissionsService permissionsService, AdminDepositService adminDepositService,
+        Sender sender,
         @Value("${optionsDir:#{null}}") String optionsDir,
         @Value("${tempDir:#{null}}") String tempDir,
         @Value("${s3.bucketName:#{null}}") String bucketName,
@@ -90,6 +90,7 @@ public class AdminController {
         this.externalMetadataService = externalMetadataService;
         this.auditsService = auditsService;
         this.permissionsService = permissionsService;
+        this.adminDepositService = adminDepositService;
         this.sender = sender;
         this.optionsDir = optionsDir;
         this.tempDir = tempDir;
@@ -356,61 +357,10 @@ public class AdminController {
         if (user == null) {
             throw new Exception("User '" + userID + "' does not exist");
         }
-
-        List<Job> jobs = deposit.getJobs();
-        for (Job job : jobs) {
-            if (job.isError() == false && job.getState() != job.getStates().size() - 1) {
-                // There's an in-progress job for this deposit
-                throw new IllegalArgumentException("Job in-progress for this Deposit");
-            }
-        }
-
-        List<ArchiveStore> archiveStores = archiveStoreService.getArchiveStores();
-        if (archiveStores.isEmpty()) {
-            throw new Exception("No configured archive storage");
-        }
-        LOGGER.info("Delete deposit archiveStores : {}", archiveStores);
-        archiveStores = this.addArchiveSpecificOptions(archiveStores);
-
-        // Create a job to track this delete
-        Job job = new Job("org.datavaultplatform.worker.tasks.Delete");
-        jobsService.addJob(deposit, job);
-
-        // Ask the worker to process the data delete
-        try {
-            HashMap<String, String> deleteProperties = new HashMap<>();
-            deleteProperties.put(PropNames.DEPOSIT_ID, deposit.getID());
-            deleteProperties.put(PropNames.BAG_ID, deposit.getBagId());
-            deleteProperties.put(PropNames.ARCHIVE_SIZE, Long.toString(deposit.getArchiveSize()));
-            deleteProperties.put(PropNames.USER_ID, user.getID());
-            deleteProperties.put(PropNames.NUM_OF_CHUNKS, Integer.toString(deposit.getNumOfChunks()));
-            for (Archive archive : deposit.getArchives()) {
-                deleteProperties.put(archive.getArchiveStore().getID(), archive.getArchiveId());
-            }
-
-            // Add a single entry for the user file storage
-            Map<String, String> userFileStoreClasses = new HashMap<>();
-            Map<String, Map<String, String>> userFileStoreProperties = new HashMap<>();
-            //userFileStoreClasses.put(storageID, userStore.getStorageClass());
-            //userFileStoreProperties.put(storageID, userStore.getProperties());
-
-
-            Task deleteTask = new Task(
-                    job, deleteProperties, archiveStores,
-                    userFileStoreProperties, userFileStoreClasses,
-                    null, null,
-                    null,
-                    null, null,
-                    null, null, null);
-            ObjectMapper mapper = new ObjectMapper();
-            String jsonDelete = mapper.writeValueAsString(deleteTask);
-            sender.send(jsonDelete);
-        } catch (Exception e) {
-            LOGGER.error("Exception while deleting a deposit", e);
-        }
+        adminDepositService.deleteDeposit(deposit, user);
         return new ResponseEntity<>(HttpStatus.OK);
-
     }
+    
     private List<ArchiveStore> addArchiveSpecificOptions(List<ArchiveStore> archiveStores) {
         if (archiveStores != null && ! archiveStores.isEmpty()) {
             for (ArchiveStore archiveStore : archiveStores) {

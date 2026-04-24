@@ -55,9 +55,9 @@ import org.springframework.core.env.Environment;
     JacksonConfig.class, PropertiesConfig.class, EncryptionConfig.class, ActuatorConfig.class,
     ScheduleConfig.class, InitialiseConfig.class,
     SecurityActuatorConfig.class, SecurityConfig.class, ControllerConfig.class,
-    ServiceConfig.class,  DatabaseConfig.class,
+    DatabaseConfig.class,
     LdapConfig.class, EmailConfig.class, EmailLocalConfig.class, RabbitConfig.class,
-    StorageClassNameResolverConfig.class, WebConfig.class
+    StorageClassNameResolverConfig.class, WebConfig.class, ServiceConfig.class
 })
 @Slf4j
 //@EnableJSONDoc

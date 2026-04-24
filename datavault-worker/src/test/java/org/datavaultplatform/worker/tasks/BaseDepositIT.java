@@ -14,6 +14,7 @@ import org.datavaultplatform.common.event.deposit.Complete;
 import org.datavaultplatform.common.event.deposit.ComputedDigest;
 import org.datavaultplatform.common.event.deposit.ComputedEncryption;
 import org.datavaultplatform.common.storage.Verify;
+import org.datavaultplatform.common.storage.impl.LocalFileSystem;
 import org.datavaultplatform.common.task.Context.AESMode;
 import org.datavaultplatform.common.util.TestUtils;
 import org.datavaultplatform.worker.rabbit.BaseRabbitIT;
@@ -47,6 +48,7 @@ import java.nio.file.StandardCopyOption;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.Callable;
+import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -116,6 +118,8 @@ public abstract class BaseDepositIT extends BaseRabbitIT {
     @SneakyThrows
     static void setupProperties(DynamicPropertyRegistry registry) {
         File baseTemp = Files.createTempDirectory("test").toFile();
+        FileUtils.cleanDirectory(baseTemp);
+                
         File tempDir = new File(baseTemp, "temp");
         assertTrue(tempDir.mkdir());
 
@@ -173,19 +177,25 @@ public abstract class BaseDepositIT extends BaseRabbitIT {
         assertThat(baseTemp).exists();
         assertThat(baseTemp).isDirectory();
 
-        sourceDir = baseTemp.resolve("source").toFile();
+        sourceDir = baseTemp.resolve("user-from").toFile();
         assertTrue(sourceDir.mkdir());
-        destDir = baseTemp.resolve("dest").toFile();
-        assertTrue(destDir.mkdir());
-        retrieveBaseDir = baseTemp.resolve("retrieve").toFile();
+        retrieveBaseDir = baseTemp.resolve("user-to").toFile();
         assertTrue(retrieveBaseDir.mkdir());
         retrieveDir = retrieveBaseDir.toPath().resolve("ret-folder").toFile();
         assertTrue(retrieveDir.mkdir());
         log.info("meta.dir   [{}]", metaDir);
         log.info("temp.dir   [{}]", tempDir);
         log.info("source dir [{}]", sourceDir);
+        setupDestDirs();
+    }
+    @SneakyThrows
+    void setupDestDirs() {
+        assertThat(this.destDir).isNull();
+        Path baseTemp = Paths.get(this.tempDir);
+        destDir = baseTemp.resolve("worker-store").toFile();
+        assertTrue(destDir.mkdir());
         log.info("dest   dir [{}]", destDir);
-
+        assertThat(this.destDir).exists();
     }
 
     final void setupSourceDirectory(String srcPath) throws Exception{
@@ -245,18 +255,18 @@ public abstract class BaseDepositIT extends BaseRabbitIT {
 
     abstract Optional<Integer> getExpectedNumberChunksPerDeposit();
 
-    final void checkDepositWorkedOkay(String depositMessage, DepositEvents depositEvents){
-        checkDepositWorkedOkay(SRC_PATH_DEFAULT, depositMessage, depositEvents);
+    void checkDepositWorkedOkay(String depositMessage, DepositEvents depositEvents){
+        checkDepositWorkedOkayInternal(destDir, SRC_PATH_DEFAULT, depositMessage, depositEvents);
     }
 
     @SneakyThrows
-    final void checkDepositWorkedOkay(String srcPath, String depositMessage, DepositEvents depositEvents) {
+    final void checkDepositWorkedOkayInternal(File destDirectory, String srcPath, String depositMessage, DepositEvents depositEvents) {
         Deposit deposit = mapper.readValue(depositMessage, Deposit.class);
         String bagId = deposit.getProperties().get("bagId");
 
         log.info("BROKER MSG COUNT {}", events.size());
-        String[] depositFileNames = destDir.list((dir, name) -> dir.equals(destDir) && name.startsWith(bagId));
-        File[] destFiles = Arrays.stream(depositFileNames).map(fn -> new File(destDir, fn)).sorted().toArray(File[]::new);
+        String[] depositFileNames = destDirectory.list((dir, name) -> dir.equals(destDirectory) && name.startsWith(bagId));
+        File[] destFiles = Arrays.stream(depositFileNames).map(fn -> new File(destDirectory, fn)).sorted(new ChunkFileComparator()).toArray(File[]::new);
 
         int expectedNumDepositFiles = getExpectedNumberChunksPerDeposit().isPresent() ? getExpectedNumberChunksPerDeposit().get() : 1;
         assertEquals(expectedNumDepositFiles, depositFileNames.length);
@@ -277,7 +287,7 @@ public abstract class BaseDepositIT extends BaseRabbitIT {
             int expectedNumberChunks = getExpectedNumberChunksPerDeposit().get();
 
             for (int chunkNum = 1; chunkNum <= expectedNumberChunks; chunkNum++) {
-                File expectedEncChunk = destDir.toPath().resolve(bagId + ".tar." + chunkNum).toFile();
+                File expectedEncChunk = destDirectory.toPath().resolve(bagId + ".tar." + chunkNum).toFile();
                 assertEquals(expectedEncChunk, destFiles[chunkNum - 1]);
                 chunkNumToEncChunk.put(chunkNum, expectedEncChunk);
             }
@@ -297,7 +307,7 @@ public abstract class BaseDepositIT extends BaseRabbitIT {
                 FileUtils.copyFile(expectedEncChunk, decryptedChunkFile);
                 Encryption.decryptFile(aesMode, decryptedChunkFile, iv);
                 assertTrue(decryptedChunkFile.length() > 0);
-                assertTrue(decryptedChunkFile.length() != expectedEncChunk.length());
+                assertNotEquals(decryptedChunkFile.length(), expectedEncChunk.length());
             }
 
             decryptedTarFile = Files.createTempFile("decryptedTar", ".plain").toFile();
@@ -310,7 +320,7 @@ public abstract class BaseDepositIT extends BaseRabbitIT {
             }
 
         } else {
-            File expectedEncTar = destDir.toPath().resolve(bagId + ".tar").toFile();
+            File expectedEncTar = destDirectory.toPath().resolve(bagId + ".tar").toFile();
             assertEquals(expectedEncTar, destFiles[0]);
 
             String encTarHash = computedEncryption.getEncTarDigest();
@@ -322,7 +332,7 @@ public abstract class BaseDepositIT extends BaseRabbitIT {
             FileUtils.copyFile(destFiles[0], decryptedTarFile);
             Encryption.decryptFile(aesMode, decryptedTarFile, iv);
             assertTrue(decryptedTarFile.length() > 0);
-            assertTrue(decryptedTarFile.length() != expectedEncTar.length());
+            assertNotEquals(decryptedTarFile.length(), expectedEncTar.length());
         }
 
         Set<Path> tarEntryPaths = getPathsWithinTarFile(decryptedTarFile);
@@ -348,18 +358,28 @@ public abstract class BaseDepositIT extends BaseRabbitIT {
         return getSampleDepositMessage(SRC_PATH_DEFAULT, BAG_ID_DEFAULT);
     }
 
+    @SneakyThrows
+    String getArchiveStoreRootPath() {
+        return destDir.getCanonicalPath();
+    }
+
+    String getArchiveStoreClassName() {
+        return LocalFileSystem.class.getName();
+    }
+
     @SuppressWarnings("UnnecessaryLocalVariable")
     @SneakyThrows
-    final String getSampleDepositMessage(String srcPath, String bagId) {
+    String getSampleDepositMessage(String srcPath, String bagId) {
         String temp1 = FileUtils.readFileToString(this.depositMessage.getFile(),
                 StandardCharsets.UTF_8);
         String temp2 = temp1.replaceAll("/tmp/dv/src", sourceDir.getCanonicalPath());
-        String temp3 =  temp2.replaceAll("/tmp/dv/dest", destDir.getCanonicalPath());
+        String temp3 =  temp2.replaceAll("/tmp/dv/dest", getArchiveStoreRootPath());
         String temp4 = temp3.replaceAll("src-path-1", srcPath);
         String temp5 = temp4.replaceAll("bf73a7f5-42d1-4c3f-864a-a171af8373d4", bagId);
-        return temp5;
+        String temp6 = temp5.replaceFirst(Pattern.quote(LocalFileSystem.class.getName()), getArchiveStoreClassName());
+        return temp6;
     }
-
+    
     @RabbitListener(queues = BaseQueueConfig.BROKER_QUEUE_NAME)
     @SneakyThrows
     final void receiveBrokerMessage(Message message, Channel channel,

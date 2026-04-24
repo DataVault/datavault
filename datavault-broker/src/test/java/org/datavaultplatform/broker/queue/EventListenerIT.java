@@ -6,9 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.LocalDate;
-import java.util.Base64;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Stream;
+
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.app.DataVaultBrokerApp;
@@ -25,6 +25,7 @@ import org.datavaultplatform.common.event.audit.ChunkAuditComplete;
 import org.datavaultplatform.common.event.audit.ChunkAuditStarted;
 import org.datavaultplatform.common.event.delete.DeleteComplete;
 import org.datavaultplatform.common.event.delete.DeleteStart;
+import org.datavaultplatform.common.event.delete.DeletedChunk;
 import org.datavaultplatform.common.event.deposit.Complete;
 import org.datavaultplatform.common.event.deposit.CompleteCopyUpload;
 import org.datavaultplatform.common.event.deposit.ComputedChunks;
@@ -45,7 +46,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.amqp.rabbit.listener.RabbitListenerEndpointRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
@@ -65,8 +65,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Import({EventListener.class, TaskTimerSupport.class})
 @Slf4j
 @TestMethodOrder(MethodOrderer.MethodName.class)
-public class EventListenerIT extends BaseDatabaseTest {
+class EventListenerIT extends BaseDatabaseTest {
 
+  private static final String TEST_ARCHIVE_ID = "TEST-ARCHIVE_ID";
+  
   @MockBean
   EmailService emailService;
 
@@ -100,6 +102,15 @@ public class EventListenerIT extends BaseDatabaseTest {
   @Autowired
   AuditsService auditsService;
 
+  @Autowired
+  EventService eventService;
+  
+  @Autowired
+  ArchivesService archivesService;
+
+  @Autowired
+  ArchiveStoreService archiveStoreService;
+
   @MockBean
   RabbitListenerEndpointRegistry registry;
   private final String userId = "user123";
@@ -124,8 +135,6 @@ public class EventListenerIT extends BaseDatabaseTest {
   Audit audit;
 
   Group group;
-    @Autowired
-    private EventService eventService;
 
   @BeforeEach
   void setup(){
@@ -208,6 +217,16 @@ public class EventListenerIT extends BaseDatabaseTest {
     assertThat(retrieve.getID()).isNotNull();
   }
 
+  Optional<Event> getLastJobEvent(String jobID) {
+    List<Event> allEvents = eventService.getEvents();
+    Stream<Event> jobEvents = allEvents.stream()
+            .filter(ev -> jobID.equals(ev.getJob().getID()));
+    Optional<Event> lastJobEvent = jobEvents
+            .sorted(Comparator.comparing(Event::getSequence)) //sort by sequence number ascending
+            .reduce((first, second) -> second); //this is a trick to get the last event
+    return lastJobEvent;
+  }
+
   @Test
   void test00EventListener() {
     assertNotNull(eventListener);
@@ -274,6 +293,7 @@ public class EventListenerIT extends BaseDatabaseTest {
         + "      \"agentType\": \"WORKER\""
         + "    }";
     Event event = eventListener.onMessageInternal(message);
+    assertThat(event).isInstanceOf(UpdateProgress.class);
   }
 
   @SneakyThrows
@@ -521,6 +541,8 @@ public class EventListenerIT extends BaseDatabaseTest {
         + "      \"timestamp\": \"2022-09-16T15:12:40.152Z\","
         + "      \"sequence\": 36,"
         + "      \"persistent\": true,"
+        + "      \"chunkNumber\": 123,"
+        + "      \"message\": \"the error message\","
         + "      \"depositId\": \"" + depositId + "\","
         + "      \"vaultId\"  : \"" + vaultId + "\","
         + "      \"jobId\"    : \"" + jobGenericId + "\","
@@ -530,6 +552,20 @@ public class EventListenerIT extends BaseDatabaseTest {
         + "    }";
     Event event = eventListener.onMessageInternal(message);
     assertEquals(org.datavaultplatform.common.event.Error.class, event.getClass());
+
+    // double check that we have saved the Error event to the database by fetching it and checking it
+
+    org.datavaultplatform.common.event.Error error = (org.datavaultplatform.common.event.Error) event;
+    assertEquals(123, error.getChunkNumber());
+    assertEquals("the error message", error.getMessage());
+
+    Optional<Event> lastDepositJobEventOpt = getLastJobEvent(jobGenericId);
+    Event lastDepositEvent = lastDepositJobEventOpt.orElseThrow();
+    assertThat(lastDepositEvent).isEqualTo(event);
+    assertThat(lastDepositEvent.getJob()).isEqualTo(event.getJob());
+    assertThat(lastDepositEvent.getDeposit()).isEqualTo(event.getDeposit());
+    assertThat(lastDepositEvent.getMessage()).isEqualTo(event.getMessage());
+    assertThat(lastDepositEvent.getChunkNumber()).isEqualTo(event.getChunkNumber());
   }
 
   @Nested
@@ -736,8 +772,8 @@ public class EventListenerIT extends BaseDatabaseTest {
     })
     @SneakyThrows
     void testRetrieveError(String eventClass) {
-      Class clazz = Class.forName(eventClass);
-      assertThat(Event.class.isAssignableFrom(clazz));
+      Class<?> clazz = Class.forName(eventClass);
+      assertThat(Event.class).isAssignableFrom(clazz);
       String message = "{"
               + "      \"message\": \"CUSTOM ERROR MESSAGE\","
               + "      \"eventClass\": \"" + eventClass + "\","
@@ -1064,5 +1100,90 @@ public class EventListenerIT extends BaseDatabaseTest {
         + "    }";
     Event event = eventListener.onMessageInternal(message);
     assertEquals(ValidationComplete.class, event.getClass());
+  }
+
+  @Test
+  @SneakyThrows
+  void test30DeletedChunk() {
+    ArchiveStore archiveStore = new ArchiveStore();
+    archiveStoreService.addArchiveStore(archiveStore);
+
+    archivesService.addArchive(this.deposit, archiveStore, TEST_ARCHIVE_ID);
+
+    assertThat(archivesService.getArchiveByArchiveId(TEST_ARCHIVE_ID)).isNotNull();
+    String message = "{" +
+            "  \"message\" : \"Deleted Chunk [7/10] from (MultiLocationsArchiveStoreSuccessImpl/TEST-ARCHIVE-STORE-ID//private/tmp/delete/location-one)\"," +
+            "  \"eventClass\" : \"org.datavaultplatform.common.event.delete.DeletedChunk\"," +
+            "  \"timestamp\" : \"2026-02-03T15:05:08.385Z\"," +
+            "  \"sequence\" : 123," +
+            "  \"persistent\" : true," +
+            "  \"depositId\" : \"" + depositId + "\"," +
+            "  \"jobId\" : \"" + jobDepositId + "\"," +
+            "  \"userId\" : \"" + userId + "\"," +
+            "  \"agent\" : \"datavault-worker-1\"," +
+            "  \"agentType\" : \"WORKER\"," +
+            "  \"archiveId\" : \"" + TEST_ARCHIVE_ID + "\"," +
+            "  \"location\" : \"/private/tmp/delete/location-one\"," +
+            "  \"assigneeId\" : null," +
+            "  \"chunkNumber\" : 123," +
+            "  \"archiveStoreId\" : \"TEST-ARCHIVE-STORE-ID\"" +
+            "}";
+
+    Event event = eventListener.onMessageInternal(message);
+    assertEquals(DeletedChunk.class, event.getClass());
+    DeletedChunk dc = (DeletedChunk) event;
+    assertThat(dc.getID())
+            .withFailMessage("ID is null")
+            .isNotNull();
+    // DEPOSIT
+    assertThat(dc.getDeposit())
+            .withFailMessage("Deposit is null")
+            .isNotNull();
+    assertThat(dc.getDepositId())
+            .withFailMessage("DepositId is null")
+            .isNotNull();
+    assertThat(dc.getJob())
+            .withFailMessage("Job is null")
+            .isNotNull();
+    assertThat(dc.getJobId())
+            .withFailMessage("JobId is null")
+            .isNotNull();
+    // USER
+    assertThat(dc.getUser())
+            .withFailMessage("User is null")
+            .isNotNull();
+    assertThat(dc.getUserId())
+            .withFailMessage("UserId is null")
+            .isNotNull();
+    // AGENT
+    assertThat(dc.getAgent())
+            .withFailMessage("Agent is null")
+            .isNotNull();
+    // Archive
+    assertThat(dc.getArchive())
+            .withFailMessage("Archive is null")
+            .isNotNull();
+    assertThat(dc.getArchiveId())
+            .withFailMessage("ArchiveId is null")
+            .isNotNull();
+    // ArchiveStoreId
+    assertThat(dc.getArchiveStoreId())
+            .withFailMessage("ArchiveStoreId is null")
+            .isEqualTo("TEST-ARCHIVE-STORE-ID");
+    // AgentType
+    assertThat(dc.getAgentType())
+            .withFailMessage("AgentType is null")
+            .isNotNull();
+    // VAULT
+    assertThat(dc.getVault())
+            .withFailMessage("Vault is NOT NULL")
+            .isNull();
+    assertThat(dc.getVaultId())
+            .withFailMessage("VaultId is NOT NULL")
+            .isNull();
+    assertThat(dc.getChunkNumber())
+            .isEqualTo(123);
+    assertThat(dc.getLocation())
+            .isEqualTo("/private/tmp/delete/location-one");
   }
 }

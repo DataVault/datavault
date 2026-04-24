@@ -33,6 +33,7 @@ import org.datavaultplatform.common.response.EventInfo;
 
         @JsonSubTypes.Type(value = DeleteStart.class, name = "org.datavaultplatform.common.event.delete.DeleteStart"),
         @JsonSubTypes.Type(value = DeleteComplete.class, name = "org.datavaultplatform.common.event.delete.DeleteComplete"),
+        @JsonSubTypes.Type(value = DeletedChunk.class, name = "org.datavaultplatform.common.event.delete.DeletedChunk"),
 
         @JsonSubTypes.Type(value = ValidationComplete.class, name = "org.datavaultplatform.common.event.deposit.ValidationComplete"),
         @JsonSubTypes.Type(value = ComputedSize.class,       name = "org.datavaultplatform.common.event.deposit.ComputedSize"),
@@ -81,7 +82,7 @@ import org.datavaultplatform.common.response.EventInfo;
         @JsonSubTypes.Type(value = Event.class,            name = "org.datavaultplatform.common.event.Event"),
         @JsonSubTypes.Type(value = Error.class,            name = "org.datavaultplatform.common.event.Error"),
         @JsonSubTypes.Type(value = InitStates.class,       name = "org.datavaultplatform.common.event.InitStates"),
-        @JsonSubTypes.Type(value = UpdateProgress.class,   name = "org.datavaultplatform.common.event.UpdateProgress")
+        @JsonSubTypes.Type(value = UpdateProgress.class,   name = "org.datavaultplatform.common.event.UpdateProgress"),
 })
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity

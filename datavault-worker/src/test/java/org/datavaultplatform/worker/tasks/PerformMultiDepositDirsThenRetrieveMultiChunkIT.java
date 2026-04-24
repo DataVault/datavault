@@ -44,8 +44,9 @@ public class PerformMultiDepositDirsThenRetrieveMultiChunkIT extends BaseMultiPe
   @Override
   protected void checkDepositEvents() {
     List<CompleteCopyUpload> storedChunksEvents = getCopyUploadCompleteEvents();
-    assertThat(storedChunksEvents.size()).isEqualTo(8);
+    assertThat(storedChunksEvents).hasSize(8);
   }
+  
   @TestConfiguration
   static class TestConfig {
     @Bean
