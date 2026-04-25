@@ -1,5 +1,6 @@
 package org.datavaultplatform.common.storage;
 
+import java.nio.file.Path;
 import java.util.Map;
 import lombok.SneakyThrows;
 import org.datavaultplatform.common.PropNames;
@@ -15,7 +16,7 @@ public abstract class BaseSFTPFileSystemUsernamePasswordIT extends BaseSFTPFileS
   static final String ENV_PASSWORD_ACCESS = "PASSWORD_ACCESS";
 
 
-  static GenericContainer<?> initialiseContainer(String tcName) {
+  static GenericContainer<?> initialiseContainer(String tcName, Path tempLocalPath) {
 
     return new GenericContainer<>(DockerImage.OPEN_SSH_9pt0_IMAGE_NAME)
         .withEnv("TC_NAME", tcName)

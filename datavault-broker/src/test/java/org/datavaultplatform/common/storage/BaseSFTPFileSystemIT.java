@@ -60,12 +60,10 @@ public abstract class BaseSFTPFileSystemIT {
   static final String TEMP_PREFIX = "dvSftpTempDir";
   static final long EXPECTED_SPACE_AVAILABLE_ON_SFTP_SERVER = 100_000;
   private static final int FREE_SPACE_FACTOR = 10;
-
-  static final Path tempLocalPath;
-
-  static {
+  
+  public static Path createTempLocalDir() {
     try {
-      tempLocalPath = Files.createTempDirectory("sftpTestFilesDir");
+      Path tempLocalPath = Files.createTempDirectory("sftpTestFilesDir");
       for (int i = 0; i < 1000; i++) {
         Path tempFile = tempLocalPath.resolve(String.format("temp-%s.txt", i));
         try (PrintWriter pw = new PrintWriter(new FileWriter(tempFile.toFile()))) {
@@ -73,6 +71,7 @@ public abstract class BaseSFTPFileSystemIT {
 
         }
       }
+      return tempLocalPath;
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
