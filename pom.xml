@@ -552,6 +552,7 @@
           <artifactId>maven-failsafe-plugin</artifactId>
           <version>${failsafe.plugin.version}</version>
           <configuration>
+            <argLine>-Duser.timezone=Europe/London</argLine>
             <skipITs>${skip.integration.tests}</skipITs>
             <systemPropertyVariables>
               <junit.jupiter.execution.timeout.default>300 s</junit.jupiter.execution.timeout.default>
@@ -564,6 +565,7 @@
           <artifactId>maven-surefire-plugin</artifactId>
           <version>${surefire.plugin.version}</version>
           <configuration>
+            <argLine>-Duser.timezone=Europe/London</argLine>
             <skipTests>${skip.unit.tests}</skipTests>
             <excludedGroups>slow,org.datavaultplatform.test.TSMTest</excludedGroups>
             <systemPropertyVariables>
