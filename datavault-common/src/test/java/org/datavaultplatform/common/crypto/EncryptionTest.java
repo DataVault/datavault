@@ -29,13 +29,14 @@ import org.apache.commons.io.FileUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
 import org.datavaultplatform.test.SlowTest;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 @Slf4j
-public class EncryptionTest {
+class EncryptionTest {
 
     private static File bigdataResourcesDir;
     private static File testDir;
@@ -62,6 +63,17 @@ public class EncryptionTest {
             testDir.mkdir();
         } catch (SecurityException se) {
             fail(se.getMessage());
+        }
+    }
+
+    @AfterEach
+    public void tearDown() {
+        try {
+            if (testDir != null && testDir.exists()) {
+                FileUtils.deleteDirectory(testDir);
+            }
+        } catch (IOException e) {
+            log.warn("Could not delete temporary test directory: " + testDir.getAbsolutePath(), e);
         }
     }
 
