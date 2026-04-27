@@ -191,6 +191,8 @@
                 <include>**/EventTest*</include>
                 <include>**/TestUtils*</include>
                 <include>**/UsesTestContainers*</include>
+                <include>**/TempFileCleaner*</include>
+                <include>**/TempFileCleanerExtension*</include>
               </includes>
             </configuration>
           </execution>

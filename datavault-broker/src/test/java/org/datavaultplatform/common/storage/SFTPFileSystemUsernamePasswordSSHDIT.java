@@ -1,5 +1,6 @@
 package org.datavaultplatform.common.storage;
 
+import java.nio.file.Path;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.storage.impl.SFTPFileSystemSSHD;
@@ -17,8 +18,10 @@ import org.testcontainers.junit.jupiter.Container;
 @Slf4j
 public class SFTPFileSystemUsernamePasswordSSHDIT extends BaseSFTPFileSystemUsernamePasswordIT {
 
+  static final Path tempFilePath = createTempLocalDir();
+
   @Container
-  static final GenericContainer<?> container = initialiseContainer("SftpUsernamePasswordSSHDIT");
+  static final GenericContainer<?> container = initialiseContainer("SftpUsernamePasswordSSHDIT", tempFilePath);
 
   @Override
   public SFTPFileSystemDriver getSftpDriver() {
