@@ -33,6 +33,7 @@ public class HttpSecurityUtils {
 
             authz.requestMatchers("/admin/paused/retrieve/history").hasRole("USER");
             authz.requestMatchers("/admin/paused/retrieve/toggle").hasRole("IS_ADMIN");
+            authz.requestMatchers("/admin/pendingVaults/**").hasRole("IS_ADMIN");
 
             authz.requestMatchers("/admin/archivestores/**").hasAuthority("ROLE_ADMIN_ARCHIVESTORES");
             authz.requestMatchers("/admin/billing/**").hasAuthority("ROLE_ADMIN_BILLING");
