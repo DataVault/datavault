@@ -5,6 +5,8 @@ import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.webapp.services.RestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +27,7 @@ public class AdminUsersController {
         this.restService = restService;
     }
 
+    @PreAuthorize("hasRole('IS_ADMIN')")
     @RequestMapping(value = "/admin/users", method = RequestMethod.GET)
     public String getUsersListing(ModelMap model,
                                   @RequestParam(value = "query", required = false) String query) throws Exception {
@@ -40,7 +43,8 @@ public class AdminUsersController {
     }
 
     // Return an empty 'create new user' page
-    @RequestMapping(value = "/admin/users/create", method = RequestMethod.GET)
+    @PreAuthorize("hasRole('IS_ADMIN') and !@environment.acceptsProfiles('shib')")
+    @GetMapping(value = "/admin/users/create", produces = MediaType.TEXT_HTML_VALUE)
     public String createUser(ModelMap model) throws Exception {
         // pass the view an empty User since the form expects it
         model.addAttribute("user", new User());
@@ -49,7 +53,8 @@ public class AdminUsersController {
     }
 
     // Process the completed 'create new user' page
-    @RequestMapping(value = "/admin/users/create", method = RequestMethod.POST)
+    @PreAuthorize("hasRole('IS_ADMIN') and !@environment.acceptsProfiles('shib')")
+    @PostMapping(value = "/admin/users/create", produces = MediaType.TEXT_HTML_VALUE)
     public String addUser(@ModelAttribute User user, ModelMap model, @RequestParam String action) throws Exception {
         // Was the cancel button pressed?
         if ("cancel".equals(action)) {
@@ -68,6 +73,7 @@ public class AdminUsersController {
     }
 
     // Return an 'edit user' page
+    @PreAuthorize("hasRole('IS_ADMIN') or #userID == authentication.name")
     @RequestMapping(value = "/admin/users/edit/{userid}", method = RequestMethod.GET)
     public String editUser(ModelMap model, @PathVariable("userid") String userID) throws Exception {
 
@@ -76,6 +82,7 @@ public class AdminUsersController {
     }
 
     // Process the completed 'edit user' page
+    @PreAuthorize("hasRole('IS_ADMIN') or #userID == authentication.name")
     @RequestMapping(value = "/admin/users/edit/{userid}", method = RequestMethod.POST)
     public String editUser(@ModelAttribute User user, ModelMap model, @PathVariable("userid") String userID, @RequestParam String action) throws Exception {
         // Was the cancel button pressed?
