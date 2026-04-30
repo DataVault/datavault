@@ -31,11 +31,9 @@ public class TempFileCleanerExtension implements BeforeAllCallback, AfterAllCall
             Instant startTime = context.getStore(ExtensionContext.Namespace.create(getClass(), context.getRequiredTestClass()))
                                        .get("testStartTime", Instant.class);
             if (startTime != null) {
-                log.info("XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX");
                 TempFileCleaner.cleanTempTestFiles(startTime);
             } else {
-                // Fallback if beforeAll wasn't called for some reason (e.g., test failed before beforeAll completed)
-                TempFileCleaner.cleanTempTestFiles(Instant.EPOCH);
+                log.error("No test start time found for test class {}", context.getRequiredTestClass().getName());
             }
         }
     }
