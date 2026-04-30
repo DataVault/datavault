@@ -23,7 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @TestPropertySource(properties = "logging.level.org.springframework.security=DEBUG")
 @AddTestProperties
 @AutoConfigureMockMvc
-class AdminUsersControllerShibProfileTest extends baseAdminUsersControllerTest {
+class AdminUsersControllerShibProfileTest extends BaseAdminUsersControllerTest {
 
     @Override
     String getExpectedProfile() {

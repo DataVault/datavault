@@ -23,7 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SuppressWarnings("DefaultAnnotationParam")
-abstract class baseAdminUsersControllerTest {
+abstract class BaseAdminUsersControllerTest {
 
     @Autowired
     Environment env;

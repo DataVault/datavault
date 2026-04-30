@@ -24,7 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AddTestProperties
 @AutoConfigureMockMvc
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class AdminUsersControllerNonShibProfileTest extends baseAdminUsersControllerTest {
+class AdminUsersControllerNonShibProfileTest extends BaseAdminUsersControllerTest {
     
     @Override
     String getExpectedProfile() {
