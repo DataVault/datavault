@@ -57,12 +57,9 @@ public class TempFileCleaner {
             }
             try {
                 FileUtils.deleteDirectory(dir);
-                log.info("Deleted temp test directory: {}", dir.getAbsolutePath());
+                log.debug("Deleted temp test directory: {}", dir.getAbsolutePath());
             } catch (Exception ex) {
                 log.warn("Failed to delete directory: " + dir.getAbsolutePath(), ex);
-            } finally {
-                log.info("-");
-                
             }
         }
     }
@@ -76,12 +73,9 @@ public class TempFileCleaner {
             }
             try {
                 var deleted = Files.deleteIfExists(file.toPath());
-                log.info("Deleted temp test file?: {} /  {}", file.getAbsolutePath(), deleted);
+                log.debug("Deleted temp test file?: {} /  {}", file.getAbsolutePath(), deleted);
             } catch (Exception ex) {
-                log.warn("Failed to delete file: " + file.getAbsolutePath(), ex);
-            } finally {
-                log.info("-");
-                
+                log.warn("Failed to delete file: {}", file.getAbsolutePath(), ex);
             }
         }
     }
@@ -101,7 +95,7 @@ public class TempFileCleaner {
         }
         
         dirsToDelete.forEach(path -> {
-            log.info("XX Deleting directory: {}", path);
+            log.debug("XX Deleting directory: {}", path);
         });
         return dirsToDelete;
     }
@@ -121,7 +115,7 @@ public class TempFileCleaner {
         }
 
         filesToDelete.forEach(path -> {
-            log.info("XX Deleting file: {}", path);
+            log.debug("XX Deleting file: {}", path);
         });
 
         return filesToDelete;
@@ -156,7 +150,7 @@ public class TempFileCleaner {
             // touched during the test rather than freshly created)
             boolean result =  !created.isBefore(threshold) || !modified.isBefore(threshold);
             if(result) {
-                log.info("XX {} isEligibleForDeletion? {}", path, result);
+                log.debug("XX {} isEligibleForDeletion? {}", path, result);
             }
             return result;
         } catch (IOException e) {
