@@ -33,7 +33,7 @@ public class AdminPendingVaultsController {
 
 	private static final Logger logger = LoggerFactory.getLogger(AdminPendingVaultsController.class);
 
-	private static final int MAX_RECORDS_PER_PAGE = 10;
+	protected static final int MAX_RECORDS_PER_PAGE = 10;
 
     private final RestService restService;
     private final UserLookupService userLookupService;
@@ -70,7 +70,7 @@ public class AdminPendingVaultsController {
     
     // The Admin Edit PV page
     @RequestMapping(value = "/admin/pendingVaults/edit/{vaultid}", method = RequestMethod.GET)
-    public String getPendingVault(ModelMap model, @PathVariable("vaultid") String vaultID) {
+    public String getPendingVaultForm(ModelMap model, @PathVariable("vaultid") String vaultID) {
         VaultInfo vault = restService.getPendingVault(vaultID);
         logger.info("Passed in id: '" + vaultID);
         model.addAttribute("vaultID", vaultID);
@@ -157,7 +157,7 @@ public class AdminPendingVaultsController {
     
     
     @RequestMapping(value = "/admin/pendingVaults/summary/{pendingVaultId}", method = RequestMethod.GET)
-    public String getVault(ModelMap model, @PathVariable("pendingVaultId") String vaultID, Principal principal) {
+    public String getVaultSummary(ModelMap model, @PathVariable("pendingVaultId") String vaultID, Principal principal) {
         logger.info("VaultID:'" + vaultID + "'");
         VaultInfo pendingVault = restService.getPendingVault(vaultID);
         logger.info("pendingVault.id:'" + pendingVault.getID() + "'");
@@ -205,7 +205,7 @@ public class AdminPendingVaultsController {
     
 	// Process the completed 'create new vault' page
 	@RequestMapping(value = "/admin/pendingVaults/edit", method = RequestMethod.POST)
-	public String editPendingVault(@ModelAttribute CreateVault vault, ModelMap model, @RequestParam String action,
+	public String submitEditPendingVault(@ModelAttribute CreateVault vault, ModelMap model, @RequestParam String action,
 			Principal principal) {
 		// if the confirm button has been clicked save what we have if everything isn't
 		// already saved and display the summary
