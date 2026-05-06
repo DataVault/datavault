@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -308,10 +309,18 @@ public class VaultsController {
                             || (RoleUtils.isRoleInSchool(roleAssignment, vault.getGroupID()) && RoleUtils.hasPermission(roleAssignment, Permission.CAN_MANAGE_VAULTS)));
         }
     }
-    @RequestMapping(value = "/vaults/{vaultid}/{userid}", method = RequestMethod.GET)
-    public String getVault(ModelMap model, @PathVariable("vaultid") String vaultID, @PathVariable("userid") String userID) {
-    	model.addAttribute("vaults", restService.getVaultsListingAll(userID));
-    	        
+    
+    @PreAuthorize("hasRole('IS_ADMIN') or #userId == authentication.name")
+    @GetMapping(value = "/vaults/{vaultId}/{userId}", produces = MediaType.TEXT_HTML_VALUE)
+    public String getVault(ModelMap model, @PathVariable String vaultId, @PathVariable String userId, Principal principal) {
+        VaultInfo vault = restService.getVault(vaultId);
+        if (vault == null) {
+            throw new EntityNotFoundException(Vault.class, vaultId);
+        }
+        if (!canAccessVault(vault, principal)) {
+            throw new ForbiddenException();
+        }
+        model.addAttribute("vaults", restService.getVaultsListingAll(userId));
         return "vaults/userVaults";
     }
 
@@ -525,6 +534,7 @@ public class VaultsController {
         return "redirect:" + vaultUrl;
     }
 
+    @PreAuthorize("hasRole('IS_ADMIN')")
     @RequestMapping(value = "/vaults/autocompleteuun/{term}", method = RequestMethod.GET)
     @ResponseBody
     public String autocompleteUUN(@PathVariable("term") String term) {
@@ -533,6 +543,7 @@ public class VaultsController {
         return gson.toJson(result);
     }
     
+    @PreAuthorize("hasRole('IS_ADMIN')")
     @RequestMapping(value = "/vaults/isuun/{uun}", method = RequestMethod.GET)
     @ResponseBody
     public String isUUN(@PathVariable("uun") String uun) {
