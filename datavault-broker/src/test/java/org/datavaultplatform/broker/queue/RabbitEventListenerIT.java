@@ -8,6 +8,8 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.UUID;
 
+import io.micrometer.tracing.Tracer;
+import io.micrometer.tracing.propagation.Propagator;
 import org.datavaultplatform.common.util.TestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,7 +25,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 
-public class RabbitEventListenerIT extends BaseRabbitTCIT {
+class RabbitEventListenerIT extends BaseRabbitTCIT {
 
   @SpyBean
   EventListener eventListener;
@@ -44,6 +46,12 @@ public class RabbitEventListenerIT extends BaseRabbitTCIT {
   @Autowired
   RabbitAdmin admin;
 
+  @Autowired
+  Tracer tracer;
+  
+  @Autowired
+  Propagator propagator;
+  
   @BeforeEach
   void checkRecvQueueIsEmptyBeforeTest() {
     QueueInformation info = admin.getQueueInfo(expectedQueueName);
@@ -57,7 +65,7 @@ public class RabbitEventListenerIT extends BaseRabbitTCIT {
 
     String rand = UUID.randomUUID().toString();
     //send message direct to 'events queue' and check that we can receive it via Listener
-    RabbitUtils.sendDirectToQueue(template, eventQueue.getActualName(), rand);
+    RabbitUtils.sendDirectToQueue(template, eventQueue.getActualName(), rand, tracer, propagator);
 
     TestUtils.waitUntil(
             Duration.ofSeconds(10),

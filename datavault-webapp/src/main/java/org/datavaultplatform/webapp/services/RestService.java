@@ -10,6 +10,7 @@ import org.datavaultplatform.common.request.*;
 import org.datavaultplatform.common.response.*;
 import org.datavaultplatform.common.util.Constants;
 import org.datavaultplatform.common.util.DateTimeUtils;
+import org.datavaultplatform.common.util.TraceInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
@@ -918,5 +919,21 @@ public class RestService implements NotifyLogoutService, NotifyLoginService, Eva
             log.error(msg);
             throw new RuntimeException(msg);
         }
+    }
+
+    public TraceInfo getTraceFromBroker(String brokerActuatorUserName, String brokerActuatorPassword) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBasicAuth(brokerActuatorUserName, brokerActuatorPassword);
+        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+        ResponseEntity<TraceInfo> response = restTemplate.exchange(brokerURL + "/trace/info", HttpMethod.GET, new HttpEntity<>(headers), TraceInfo.class);
+        return response.getBody();
+    }
+
+    public TraceInfo getTraceFromBrokerAndSendToWorker(String brokerActuatorUserName, String brokerActuatorPassword) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBasicAuth(brokerActuatorUserName, brokerActuatorPassword);
+        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+        ResponseEntity<TraceInfo> response = restTemplate.exchange(brokerURL + "/trace/worker", HttpMethod.GET, new HttpEntity<>(headers), TraceInfo.class);
+        return response.getBody();
     }
 }

@@ -20,15 +20,10 @@ import org.datavaultplatform.common.util.TestUtils;
 import org.datavaultplatform.worker.rabbit.BaseRabbitIT;
 import org.datavaultplatform.worker.utils.DepositEvents;
 import org.junit.jupiter.api.BeforeEach;
-import org.springframework.amqp.core.AmqpAdmin;
 import org.springframework.amqp.core.Message;
-import org.springframework.amqp.core.MessageProperties;
-import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.AmqpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -69,13 +64,6 @@ public abstract class BaseDepositIT extends BaseRabbitIT {
 
     final Resource depositMessage = new ClassPathResource("sampleMessages/sampleDepositMessage.json");
     final List<Event> events = new ArrayList<>();
-    @Autowired
-    protected AmqpAdmin rabbitAdmin;
-    @Autowired
-    protected RabbitTemplate template;
-    @Autowired
-    @Qualifier("workerQueue") //the name of the bean, not the Q
-    protected Queue workerQueue;
     String keyStorePath;
 
     @Value("${tempDir}")
@@ -136,15 +124,6 @@ public abstract class BaseDepositIT extends BaseRabbitIT {
         registry.add("metaDir", () -> metaDirValue);
     }
 
-    @SuppressWarnings("UnusedReturnValue")
-    final String sendNormalMessage(String msgBody) {
-        MessageProperties props = new MessageProperties();
-        props.setMessageId(UUID.randomUUID().toString());
-        props.setPriority(NORMAL_PRIORITY);
-        Message msg = new Message(msgBody.getBytes(StandardCharsets.UTF_8), props);
-        template.send(workerQueue.getActualName(), msg);
-        return props.getMessageId();
-    }
 
     @BeforeEach
     @SneakyThrows
@@ -155,6 +134,7 @@ public abstract class BaseDepositIT extends BaseRabbitIT {
         setupDirectoriesAndFiles();
         setupSourceDirectories();
         taskSpecificSetup();
+        setupTestTraceId(getTestTraceId());
     }
 
     final void setupSourceDirectories() throws Exception {

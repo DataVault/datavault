@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -18,6 +19,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+
+import static org.springframework.security.config.Customizer.withDefaults;
 
 @ConditionalOnExpression("${broker.security.enabled:true}")
 @Configuration
@@ -43,6 +46,20 @@ public class SecurityActuatorConfig {
     DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
     provider.setUserDetailsService(uds);
     return provider;
+  }
+
+  @Bean
+  @Order(0)
+  @Profile("database")
+  public SecurityFilterChain traceApiFilterChain(HttpSecurity http, AuthenticationProvider actuatorAuthenticationProvider) throws Exception {
+    return http
+            .securityMatcher("/trace/**")
+            .csrf(AbstractHttpConfigurer::disable)
+            .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+            .authenticationProvider(actuatorAuthenticationProvider)
+            .httpBasic(withDefaults())
+            .build();
   }
 
   @Bean

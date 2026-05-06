@@ -1,18 +1,32 @@
 package org.datavaultplatform.webapp.config;
 
 import org.datavaultplatform.webapp.authentication.AuthenticationSuccess;
+import org.datavaultplatform.webapp.config.trace.TraceLoggingFilter;
+import org.datavaultplatform.webapp.config.trace.MdcRequestFilter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.context.SecurityContextHolderFilter;
+import org.springframework.security.web.context.SecurityContextPersistenceFilter;
 
 public class HttpSecurityUtils {
 
     public static void authorizeRequests(
-            HttpSecurity http) throws Exception {
-        authorizeRequests(http, false);
+            HttpSecurity http,
+            TraceLoggingFilter traceLoggingFilter,
+            MdcRequestFilter userMdcFilter) throws Exception {
+        authorizeRequests(http, false, traceLoggingFilter, userMdcFilter);
     }
 
     public static void authorizeRequests(
-            HttpSecurity http, boolean includeStandaloneOnly) throws Exception {
+            HttpSecurity http,
+            boolean includeStandaloneOnly,
+            TraceLoggingFilter tracingFilter,
+            MdcRequestFilter userMdcFilter) throws Exception {
+        
+        http.addFilterBefore(tracingFilter, SecurityContextPersistenceFilter.class);
+        http.addFilterAfter(userMdcFilter, SecurityContextHolderFilter.class);
+        
         http.authorizeHttpRequests(authz -> {
 
             authz.requestMatchers("/favicon.ico").permitAll(); //OKAY
@@ -60,7 +74,8 @@ public class HttpSecurityUtils {
         });
     }
 
-    public static void formLogin(HttpSecurity http, AuthenticationSuccess authenticationSuccess) throws Exception {
+    public static void formLogin(HttpSecurity http, AuthenticationSuccess authenticationSuccess,
+                                 AccessDeniedHandler accessDeniedHandler ) throws Exception {
         http.formLogin(fmLogin -> {
             fmLogin.loginPage("/auth/login")
                     .loginProcessingUrl("/auth/security_check")
@@ -74,6 +89,10 @@ public class HttpSecurityUtils {
                     .logoutSuccessUrl("/auth/login?logout");
         });
 
-        http.exceptionHandling(exh -> exh.accessDeniedPage("/auth/denied"));
+        if (accessDeniedHandler != null) {
+            http.exceptionHandling(exh -> exh.accessDeniedHandler(accessDeniedHandler));
+        } else {
+            http.exceptionHandling(exh -> exh.accessDeniedPage("/auth/denied"));
+        }
     }
 }

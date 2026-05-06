@@ -10,6 +10,7 @@ import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.webapp.app.DataVaultWebApp;
 import org.datavaultplatform.webapp.services.RestService;
 import org.datavaultplatform.webapp.test.AddTestProperties;
+import org.datavaultplatform.webapp.test.MvcUtils;
 import org.datavaultplatform.webapp.test.ProfileDatabase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -201,7 +202,6 @@ class DepositsControllerTest {
 
 
     private void checkDenied(MvcResult result) {
-        assertThat(result.getResponse().getForwardedUrl()).isEqualTo("/auth/denied");
         assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.FORBIDDEN.value());
     }
 
@@ -210,7 +210,7 @@ class DepositsControllerTest {
         Retrieve retrieve = new Retrieve();
         retrieve.setNote("test retrieve");
 
-        return mockMvc.perform(
+        return MvcUtils.performWithForward(mockMvc,
                         post("/vaults/2112/deposits/1234/retrieve")
                                 .content(mapper.writeValueAsString(retrieve))
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -225,7 +225,7 @@ class DepositsControllerTest {
         createDeposit.setName("DEPOSIT 1");
         createDeposit.setVaultID("2112");
 
-        return mockMvc.perform(
+        return MvcUtils.performWithForward(mockMvc,
                         post("/vaults/2112/deposits/create")
                                 .content(mapper.writeValueAsString(createDeposit))
                                 .contentType(MediaType.APPLICATION_JSON)

@@ -167,6 +167,15 @@
       <groupId>net.i2p.crypto</groupId>
       <artifactId>eddsa</artifactId>
     </dependency> -->
+    <dependency>
+      <groupId>io.micrometer</groupId>
+      <artifactId>micrometer-tracing-bridge-otel</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.micrometer</groupId>
+      <artifactId>micrometer-tracing-test</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
@@ -194,6 +203,7 @@
                 <include>**/UsesTestContainers*</include>
                 <include>**/TempFileCleaner*</include>
                 <include>**/TempFileCleanerExtension*</include>
+                <include>**/TraceIdWrapper*</include>
               </includes>
             </configuration>
           </execution>

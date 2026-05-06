@@ -1,0 +1,24 @@
+{
+  "priority": 2,
+  "request": {
+    "urlPath": "/trace/info",
+    "method": "GET",
+    "headers": {
+      "Accept": {
+        "equalTo": "application/json"
+      },
+      "Authorization" : {
+        "contains": "Basic dXNlcjpwYXNzd29yZA=="
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "traceId": "aaaabbbbccccddddaaaabbbbccccdddd"
+    }
+  }
+}

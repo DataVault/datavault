@@ -9,6 +9,7 @@ import org.datavaultplatform.webapp.app.DataVaultWebApp;
 import org.datavaultplatform.webapp.services.RestService;
 import org.datavaultplatform.webapp.services.UserLookupService;
 import org.datavaultplatform.webapp.test.AddTestProperties;
+import org.datavaultplatform.webapp.test.MvcUtils;
 import org.datavaultplatform.webapp.test.ProfileDatabase;
 import org.junit.jupiter.api.*;
 import org.mockito.ArgumentCaptor;
@@ -73,7 +74,7 @@ class AdminPendingVaultsControllerTest {
     @WithMockUser(username = "vanilla-user", roles = {"USER"})
     void testSearchdPendingVaults_ForbiddenForNonAdmins() {
 
-        mockMvc.perform(get("/admin/pendingVaults")).andDo(print())
+        MvcUtils.performWithForward(mockMvc, get("/admin/pendingVaults")).andDo(print())
                 .andExpect(status().isForbidden())
                 .andReturn();
 
@@ -92,7 +93,7 @@ class AdminPendingVaultsControllerTest {
         confirmedVaultsData.setData(List.of());
 
         when(restService.searchPendingVaults(anyString(), anyString(), anyString(), anyInt(), anyInt(), anyBoolean())).thenReturn(savedVaultsData, confirmedVaultsData);
-        mockMvc.perform(get("/admin/pendingVaults")).andDo(print())
+        MvcUtils.performWithForward(mockMvc, get("/admin/pendingVaults")).andDo(print())
                 .andExpect(view().name("admin/pendingVaults/index"))
                 .andReturn();
 
@@ -106,7 +107,7 @@ class AdminPendingVaultsControllerTest {
     @WithMockUser(username = "vanilla-user", roles = {"USER"})
     void testGetPendingVaultForm_ForbiddenForNonAdmins() {
 
-        mockMvc.perform(get("/admin/pendingVaults/edit/pendingVaultId123")).andDo(print())
+        MvcUtils.performWithForward(mockMvc, get("/admin/pendingVaults/edit/pendingVaultId123")).andDo(print())
                 .andExpect(status().isForbidden())
                 .andReturn();
 
@@ -143,7 +144,7 @@ class AdminPendingVaultsControllerTest {
     @WithMockUser(username = "vanilla-user", roles = {"USER"})
     void testSearchSavedPendingVaults_ForbiddenForNonAdmins() {
 
-        mockMvc.perform(get("/admin/pendingVaults/saved")).andDo(print())
+        MvcUtils.performWithForward(mockMvc, get("/admin/pendingVaults/saved")).andDo(print())
                 .andExpect(status().isForbidden())
                 .andReturn();
 
@@ -173,7 +174,7 @@ class AdminPendingVaultsControllerTest {
     @WithMockUser(username = "vanilla-user", roles = {"USER"})
     void testSearchConfirmedPendingVaults_ForbiddenForNonAdmins() {
 
-        mockMvc.perform(get("/admin/pendingVaults/confirmed")).andDo(print())
+        MvcUtils.performWithForward(mockMvc, get("/admin/pendingVaults/confirmed")).andDo(print())
                 .andExpect(status().isForbidden())
                 .andReturn();
 
@@ -204,7 +205,7 @@ class AdminPendingVaultsControllerTest {
     @WithMockUser(username = "vanilla-user", roles = {"USER"})
     void getGetVaultSummary_ForbiddenForNonAdmins() {
 
-        mockMvc.perform(get("/admin/pendingVaults/summary/pendingVault123")).andDo(print())
+        MvcUtils.performWithForward(mockMvc, get("/admin/pendingVaults/summary/pendingVault123")).andDo(print())
                 .andExpect(status().isForbidden())
                 .andReturn();
 
@@ -244,7 +245,7 @@ class AdminPendingVaultsControllerTest {
     @WithMockUser(username = "vanilla-user", roles = {"USER"})
     void testUpgradeVault_ForbiddenForNonAdmins() {
 
-        mockMvc.perform(get("/admin/pendingVaults/upgrade/pendingVault123")).andDo(print())
+        MvcUtils.performWithForward(mockMvc, get("/admin/pendingVaults/upgrade/pendingVault123")).andDo(print())
                 .andExpect(status().isForbidden())
                 .andReturn();
 
@@ -283,7 +284,7 @@ class AdminPendingVaultsControllerTest {
     @SneakyThrows
     @WithMockUser(username = "vanilla-user", roles = {"USER"})
     void testSubmitEditPendingVault_ForbiddenForNonAdmins() {
-        mockMvc.perform(post("/admin/pendingVaults/edit").with(csrf()))
+        MvcUtils.performWithForward(mockMvc, get("/admin/pendingVaults/edit").with(csrf()))
                 .andDo(print())
                 .andExpect(status().isForbidden())
                 .andReturn();
@@ -329,7 +330,7 @@ class AdminPendingVaultsControllerTest {
     void testDeletePendingVaultForbiddenForNonAdmins() {
 
         // Yes, delete pending vault users GET method
-        mockMvc.perform(get("/admin/pendingVaults/pendingVault123")).andDo(print())
+        MvcUtils.performWithForward(mockMvc, get("/admin/pendingVaults/pendingVault123")).andDo(print())
                 .andExpect(status().isForbidden())
                 .andReturn();
 

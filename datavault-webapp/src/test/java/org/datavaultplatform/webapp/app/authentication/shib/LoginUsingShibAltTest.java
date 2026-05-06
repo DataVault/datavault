@@ -23,7 +23,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, properties = "output.traceid.on.error=false")
 @ProfileShib
 @Slf4j
 public class LoginUsingShibAltTest {
@@ -39,7 +39,7 @@ public class LoginUsingShibAltTest {
    * If we try and access a page without 'uid' request header, we should get error.
    */
   @Test
-  void testErrorOnMissingReqestHeader() {
+  void testErrorOnMissingRequestHeader() {
     ResponseEntity<String> response = template.getForEntity("/", String.class);
     log.info("status {}", response.getStatusCode());
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());

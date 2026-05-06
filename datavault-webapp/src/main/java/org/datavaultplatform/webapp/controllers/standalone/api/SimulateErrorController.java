@@ -1,5 +1,6 @@
 package org.datavaultplatform.webapp.controllers.standalone.api;
 
+import io.micrometer.tracing.Tracer;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.webapp.controllers.auth.ValidationExceptionHandler;
@@ -18,10 +19,19 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/test")
 @Profile("standalone")
 public class SimulateErrorController {
+  
+  private final Tracer tracer;
+
+    public SimulateErrorController(Tracer tracer) {
+        this.tracer = tracer;
+    }
 
   @RequestMapping("/oops")
   public String throwError(){
-      throw new RuntimeException("SimulatedError");
+      String traceId = tracer.currentSpan().context().traceId();
+      String msg = "SimulatedError - traceId: [%s]".formatted(traceId);
+      log.error(msg);
+      throw new RuntimeException(msg);
   }
 
   @RequestMapping("/forbidden")

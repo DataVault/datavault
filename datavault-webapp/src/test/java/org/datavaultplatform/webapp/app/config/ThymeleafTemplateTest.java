@@ -23,6 +23,7 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -56,9 +57,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ProfileStandalone
 @TestMethodOrder(MethodOrderer.MethodName.class)
 @AutoConfigureMockMvc
-@TestPropertySource(properties = "logging.level.org.thymeleaf.spring6.expression=TRACE")
+@TestPropertySource(properties = {
+        "logging.level.org.thymeleaf.spring6.expression=TRACE"
+})
 public class ThymeleafTemplateTest extends BaseThymeleafTest {
-
+    
     private static final ThreadLocal<ModelMap> TL_MODEL_MAP = ThreadLocal.withInitial(ModelMap::new);
 
     @Autowired
@@ -1156,8 +1159,6 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
 
         RoleModel roleModel2 = new RoleModel();
         roleModel2.setId(2222L);
-        roleModel2.setAssignedUserCount(222);
-        roleModel2.setStatus("Status-2");
         roleModel2.setName("rm2-name");
         roleModel2.setDescription("rm2-description");
         

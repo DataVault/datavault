@@ -1,8 +1,11 @@
 package org.datavaultplatform.worker.rabbit;
 
 import com.rabbitmq.client.*;
+import io.micrometer.tracing.Tracer;
+import io.micrometer.tracing.propagation.Propagator;
 import lombok.SneakyThrows;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -22,6 +25,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
+@Slf4j
 @ExtendWith(MockitoExtension.class)
 public class RabbitMessageSelectorTest {
 
@@ -37,8 +41,8 @@ public class RabbitMessageSelectorTest {
 
     RabbitMessageSelector selector;
 
-    String loPriorityQueueName = "loPriorityQueue";
-    String hiPriorityQueueName = "hiPriorityQueue";
+    public static final String LO_PRIORITY_QUEUE_NAME = "loPriorityQueue";
+    public static final String HI_PRIORITY_QUEUE_NAME = "hiPriorityQueue";
     
     GetResponse hiGetResponse;
     GetResponse loGetResponse;
@@ -48,8 +52,8 @@ public class RabbitMessageSelectorTest {
     @Mock
     Channel mLoChannel;
     
-    public static String HI_MESSAGE = "HI_MESSAGE";
-    public static String LO_MESSAGE = "LO_MESSAGE";
+    public static final String HI_MESSAGE = "HI_MESSAGE";
+    public static final String LO_MESSAGE = "LO_MESSAGE";
     
     byte[] bytesLo;
     byte[] bytesHi;
@@ -65,6 +69,9 @@ public class RabbitMessageSelectorTest {
     @Mock
     ApplicationReadyEvent mReadyEvent;
     
+    final Tracer tracer = Tracer.NOOP;
+    final Propagator propagator = Propagator.NOOP;
+    
     @BeforeEach
     void setup() {
         lenient().when(mReadyEvent.getTimeTaken()).thenReturn(Duration.ofSeconds(1));
@@ -77,7 +84,7 @@ public class RabbitMessageSelectorTest {
         bytesLo = LO_MESSAGE.getBytes(StandardCharsets.UTF_8);
         envelopeLo = new Envelope(101, true, "exLO", "rkLO");
         
-        selector = spy(new RabbitMessageSelector(hiPriorityQueueName, loPriorityQueueName, mConnectionFactory, mProcessor));
+        selector = spy(new RabbitMessageSelector(HI_PRIORITY_QUEUE_NAME, LO_PRIORITY_QUEUE_NAME, mConnectionFactory, mProcessor, tracer, propagator));
         selector.onReady(mReadyEvent);
 
         lenient().doNothing().when(mProcessor).onMessage(argRabbitMessageInfo.capture());
@@ -92,13 +99,13 @@ public class RabbitMessageSelectorTest {
     @SneakyThrows
     void testNoMessagesWhenPolled() {
         
-        when(mHiChannel.basicGet(hiPriorityQueueName, false)).thenReturn(null);
-        when(mLoChannel.basicGet(loPriorityQueueName, false)).thenReturn(null);
+        when(mHiChannel.basicGet(HI_PRIORITY_QUEUE_NAME, false)).thenReturn(null);
+        when(mLoChannel.basicGet(LO_PRIORITY_QUEUE_NAME, false)).thenReturn(null);
         
         selector.selectAndProcessNextMessage();
 
-        Mockito.verify(mHiChannel).basicGet(hiPriorityQueueName, false);
-        Mockito.verify(mLoChannel).basicGet(loPriorityQueueName, false);
+        Mockito.verify(mHiChannel).basicGet(HI_PRIORITY_QUEUE_NAME, false);
+        Mockito.verify(mLoChannel).basicGet(LO_PRIORITY_QUEUE_NAME, false);
         
         Mockito.verify(mLoChannel).close();
         Mockito.verify(mHiChannel).close();
@@ -110,12 +117,12 @@ public class RabbitMessageSelectorTest {
     @SneakyThrows
     void testHiPriorityMessagesWhenPolled() {
 
-        when(mHiChannel.basicGet(hiPriorityQueueName, false)).thenReturn(hiGetResponse);
+        when(mHiChannel.basicGet(HI_PRIORITY_QUEUE_NAME, false)).thenReturn(hiGetResponse);
 
         doNothing().when(mProcessor).onMessage(argRabbitMessageInfo.capture());
         selector.selectAndProcessNextMessage();
 
-        Mockito.verify(mHiChannel).basicGet(hiPriorityQueueName, false);
+        Mockito.verify(mHiChannel).basicGet(HI_PRIORITY_QUEUE_NAME, false);
         Mockito.verify(mLoChannel, never()).basicGet(any(String.class), any(Boolean.class));
 
         RabbitMessageInfo actualInfo = argRabbitMessageInfo.getValue();
@@ -129,7 +136,7 @@ public class RabbitMessageSelectorTest {
     private void checkHi(RabbitMessageInfo info){
         assertThat(info.message().getBody()).isEqualTo(bytesHi);
         assertThat(info.channel()).isEqualTo(mHiChannel);
-        assertThat(info.queueName()).isEqualTo(hiPriorityQueueName);
+        assertThat(info.queueName()).isEqualTo(HI_PRIORITY_QUEUE_NAME);
         assertThat(info.getMessageBody()).isEqualTo(HI_MESSAGE);
         assertThat(info.deliveryTag()).isEqualTo(1234);
     }
@@ -137,7 +144,7 @@ public class RabbitMessageSelectorTest {
     private void checkLo(RabbitMessageInfo info){
         assertThat(info.message().getBody()).isEqualTo(bytesLo);
         assertThat(info.channel()).isEqualTo(mLoChannel);
-        assertThat(info.queueName()).isEqualTo(loPriorityQueueName);
+        assertThat(info.queueName()).isEqualTo(LO_PRIORITY_QUEUE_NAME);
         assertThat(info.getMessageBody()).isEqualTo(LO_MESSAGE);
         assertThat(info.deliveryTag()).isEqualTo(101);
     }
@@ -146,14 +153,14 @@ public class RabbitMessageSelectorTest {
     @SneakyThrows
     void testLoPriorityMessagesWhenPolled() {
 
-        when(mHiChannel.basicGet(hiPriorityQueueName, false)).thenReturn(null);
-        when(mLoChannel.basicGet(loPriorityQueueName, false)).thenReturn(loGetResponse);
+        when(mHiChannel.basicGet(HI_PRIORITY_QUEUE_NAME, false)).thenReturn(null);
+        when(mLoChannel.basicGet(LO_PRIORITY_QUEUE_NAME, false)).thenReturn(loGetResponse);
 
         doNothing().when(mProcessor).onMessage(argRabbitMessageInfo.capture());
         selector.selectAndProcessNextMessage();
 
-        Mockito.verify(mLoChannel).basicGet(loPriorityQueueName, false);
-        Mockito.verify(mHiChannel).basicGet(hiPriorityQueueName, false);
+        Mockito.verify(mLoChannel).basicGet(LO_PRIORITY_QUEUE_NAME, false);
+        Mockito.verify(mHiChannel).basicGet(HI_PRIORITY_QUEUE_NAME, false);
         
         RabbitMessageInfo actualMessageInfo = argRabbitMessageInfo.getValue();
         checkLo(actualMessageInfo);
@@ -183,12 +190,12 @@ public class RabbitMessageSelectorTest {
         }
 
         Optional<String> returnSome(String message) {
-            System.out.printf("generating optional for [%s]%n", message);
+            log.info("generating optional for [{}]", message);
             return Optional.of(message);
         }
 
         Optional<String> returnEmpty() {
-            System.out.printf("generating EMPTY %n");
+            log.info("generating EMPTY");
             return Optional.empty();
         }
     }

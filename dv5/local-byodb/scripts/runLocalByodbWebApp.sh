@@ -12,6 +12,7 @@ cd $PROJECT_ROOT
  SPRING_SECURITY_DEBUG=true \
  LDAP_CONNECTION_TEST_SEARCH_TERM=Bond \
  DATAVAULT_HOME="$PROJECT_ROOT/dv5/local-byodb/props/webapp" \
+ LOGGING_PATTERN_CONSOLE='%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %clr([trace=%X{traceId:-} span=%X{spanId:-} user=%X{user:-}]){yellow} %m%n${LOG_EXCEPTION_CONVERSION_WORD:%rEx}' \
  ./mvnw spring-boot:run  \
  -Dspring-boot.run.jvmArguments="-Xdebug \
  -Xms1024M -Xmx2024M \

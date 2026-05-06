@@ -8,6 +8,7 @@ import org.datavaultplatform.webapp.app.DataVaultWebApp;
 import org.datavaultplatform.webapp.services.RestService;
 import org.datavaultplatform.webapp.services.UserLookupService;
 import org.datavaultplatform.webapp.test.AddTestProperties;
+import org.datavaultplatform.webapp.test.MvcUtils;
 import org.datavaultplatform.webapp.test.ProfileDatabase;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -200,7 +201,7 @@ class VaultsControllerMvcTest {
     @SneakyThrows
     @WithMockUser(username = "vanilla-user", roles = {"USER"})
     void testIsUUN_ForbiddenAsVanillaUser() {
-        mockMvc.perform(get("/vaults/isuun/v1dhay3")).andExpect(status().isForbidden());
+        MvcUtils.performWithForward(mockMvc, get("/vaults/isuun/v1dhay3")).andExpect(status().isForbidden());
         verifyNoMoreInteractions(restService, userLookupService);
 
     }
@@ -226,7 +227,7 @@ class VaultsControllerMvcTest {
     @SneakyThrows
     @WithMockUser(username = "vanilla-user", roles = {"USER"})
     void testAutocompleteUUN_ForbiddenAsVanillaUser() {
-        mockMvc.perform(get("/vaults/autocompleteuun/blah")).andExpect(status().isForbidden());
+        MvcUtils.performWithForward(mockMvc, get("/vaults/autocompleteuun/blah")).andExpect(status().isForbidden());
         verifyNoMoreInteractions(restService, userLookupService);
     }
 

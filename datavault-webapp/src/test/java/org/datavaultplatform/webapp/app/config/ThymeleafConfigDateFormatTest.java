@@ -6,6 +6,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -29,6 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
  * @see GlobalDateTimeFormatInterceptor
  */
 @WebMvcTest
+@AutoConfigureObservability
 @ProfileStandalone
 public class ThymeleafConfigDateFormatTest extends BaseThymeleafTest{
 

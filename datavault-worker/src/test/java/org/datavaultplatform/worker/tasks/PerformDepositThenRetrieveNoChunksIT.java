@@ -27,6 +27,12 @@ import org.springframework.test.context.TestPropertySource;
 public class PerformDepositThenRetrieveNoChunksIT extends BasePerformDepositThenRetrieveIT {
 
   @Override
+  public String getTestTraceId() {
+      //noinspection GrazieInspectionRunner
+      return "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
+  }
+  
+  @Override
   void checkChunkingProps(boolean chunkingEnabled, String chunkingByteSize) {
     assertFalse(chunkingEnabled);
     assertEquals("0", chunkingByteSize);
@@ -40,7 +46,7 @@ public class PerformDepositThenRetrieveNoChunksIT extends BasePerformDepositThen
   @Override
   protected void checkDepositEvents() {
     List<CompleteCopyUpload> storedChunksEvents = getCopyUploadCompleteEvents();
-    assertThat(storedChunksEvents.size()).isEqualTo(1);
+    assertThat(storedChunksEvents).hasSize(1);
     assertThat(storedChunksEvents.get(0).getChunkNumber()).isNull();
   }
   

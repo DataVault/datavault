@@ -1,12 +1,13 @@
 package org.datavaultplatform.worker.rabbit;
 
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.ConnectionFactory;
-import com.rabbitmq.client.GetResponse;
+import com.rabbitmq.client.*;
+import io.micrometer.tracing.Span;
+import io.micrometer.tracing.Tracer;
+import io.micrometer.tracing.propagation.Propagator;
 import jakarta.annotation.PostConstruct;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.datavaultplatform.common.util.TraceUtils;
 import org.datavaultplatform.worker.utils.SocketUtils;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
@@ -17,15 +18,28 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.event.EventListener;
+import org.springframework.util.Assert;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+
 @Slf4j
 public class RabbitMessageSelector implements DisposableBean, ApplicationContextAware {
+
+    public static final Set<String> EXPECTED_KEYS = Set.of(TraceUtils.TRACE_PARENT, TraceUtils.TRACE_STATE);
+    
+    public static final Propagator.Getter<Message> GETTER = (Message carrier, String key) -> {
+        Assert.isTrue(EXPECTED_KEYS.contains(key), "unexpected key [%s]".formatted(key));
+        Object header = carrier.getMessageProperties().getHeader(key);
+        String result = header != null ? header.toString() : null;
+        log.info("trace header[{}]: {}", key, result);
+        return result;
+    };
 
     private final DefaultMessagePropertiesConverter converter = new DefaultMessagePropertiesConverter();
 
@@ -34,15 +48,19 @@ public class RabbitMessageSelector implements DisposableBean, ApplicationContext
     private final String hiPriorityQueueName;
     private final String loPriorityQueueName;
     private final AtomicBoolean ready = new AtomicBoolean(false);
+    private final Tracer tracer;
+    private final Propagator propagator;
 
     private ApplicationContext ctx;
     private Connection connection;
 
-    public RabbitMessageSelector(String hiPriorityQueueName, String loPriorityQueueName, ConnectionFactory connectionFactory, RabbitMessageProcessor processor) {
+    public RabbitMessageSelector(String hiPriorityQueueName, String loPriorityQueueName, ConnectionFactory connectionFactory, RabbitMessageProcessor processor, Tracer tracer, Propagator propagator) {
         this.hiPriorityQueueName = hiPriorityQueueName;
         this.loPriorityQueueName = loPriorityQueueName;
         this.connectionFactory = connectionFactory;
         this.processor = processor;
+        this.tracer = tracer;
+        this.propagator = propagator;
     }
     
     public static <T> Optional<T> getFirst(Supplier<Optional<T>> hi, Supplier<Optional<T>> lo) {
@@ -73,16 +91,30 @@ public class RabbitMessageSelector implements DisposableBean, ApplicationContext
         Optional<RabbitMessageInfo> selected = getFirst(pollHiPriority, pollLoPriority);
 
         // max 1 selected message
-        selected.ifPresent(messageinfo -> {
-            try {
+        selected.ifPresent(this::processMessageInfo);
+    }
+    
+    void processMessageInfo(RabbitMessageInfo messageInfo){
+        try {
+            Span nextSpan = getSpanWithTraceIdFromMessage(propagator, messageInfo.message(), "process-rabbit-message");
+            try (Tracer.SpanInScope ws = tracer.withSpan(nextSpan)) {
+                
+                // Now you can grab the Trace ID!
+                String traceId1 = nextSpan.context().traceId();
+                log.info("Trace ID1: {}", traceId1);
+
+                String traceId2 = tracer.currentSpan().context().traceId();
+                log.info("Trace ID2: {}", traceId2);
                 // process the selected message
-                processor.onMessage(messageinfo);
+                processor.onMessage(messageInfo);
                 // ack the selected message
-                messageinfo.acknowledge();
+                messageInfo.acknowledge();
             } finally {
-                messageinfo.closeChannel();
+                nextSpan.end();
             }
-        });
+        } finally {
+            messageInfo.closeChannel();
+        }
     }
 
     private Optional<RabbitMessageInfo> pollRabbit(boolean isHiPriority, Supplier<Channel> channelSupplier, String queueName) {
@@ -93,7 +125,8 @@ public class RabbitMessageSelector implements DisposableBean, ApplicationContext
                 channel.close();
                 return Optional.empty();
             } else {
-                MessageProperties messageProperties = converter.toMessageProperties(pollResult.getProps(), pollResult.getEnvelope(), StandardCharsets.UTF_8.name());
+                AMQP.BasicProperties basicProperties = pollResult.getProps();
+                MessageProperties messageProperties = converter.toMessageProperties(basicProperties, pollResult.getEnvelope(), StandardCharsets.UTF_8.name());
                 Message message = new Message(pollResult.getBody(), messageProperties);
                 long deliveryTag = pollResult.getEnvelope().getDeliveryTag();
                 RabbitMessageInfo rabbitMessageInfo = new RabbitMessageInfo(isHiPriority, message, queueName, channel, deliveryTag);
@@ -110,11 +143,11 @@ public class RabbitMessageSelector implements DisposableBean, ApplicationContext
             log.warn("No Application Context Set!");
             return;
         }
-        String appName = ctx.getEnvironment().getProperty("spring.application.name","spring.application.name not set!");
+        String appName = ctx.getEnvironment().getProperty("spring.application.name", "spring.application.name not set!");
         log.info("Worker [{}] Restart Queue [{}]", appName, this.hiPriorityQueueName);
         log.info("Worker [{}] Worker  Queue [{}]", appName, this.loPriorityQueueName);
     }
-    
+
     @SneakyThrows
     protected Channel createChannel() {
         Channel channel = connection.createChannel();
@@ -148,5 +181,11 @@ public class RabbitMessageSelector implements DisposableBean, ApplicationContext
     @Override
     public void setApplicationContext(ApplicationContext ctx) throws BeansException {
         this.ctx = ctx;
+    }
+
+    public static Span getSpanWithTraceIdFromMessage(Propagator propagator, Message message, String spanName) {
+        Span.Builder spanBuilder = propagator.extract(message, RabbitMessageSelector.GETTER);
+        Span nextSpan = spanBuilder.name(spanName).start();
+        return nextSpan;
     }
 }
