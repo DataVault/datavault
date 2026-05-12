@@ -6,7 +6,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.MDC;
+import org.datavaultplatform.common.util.MdcUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -34,16 +34,12 @@ public class MdcRequestFilter extends BaseMdcFilter {
 
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-            final String username;
+            String username = null;
             if (auth != null && auth.isAuthenticated()) {
                 username = auth.getName();
-            } else {
-                username = ANONYMOUS;
             }
-
-            // Put into MDC for logging
-            MDC.put(MDC_USER, username);
-            log.info("MDC[user] now [{}]", username);
+            username = MdcUtils.getMdcUserName(username);
+            MdcUtils.addUserNameToMdc(username);
 
             // Store in request so it survives ERROR dispatch
             request.setAttribute(REQUEST_USER, username);
@@ -53,7 +49,7 @@ public class MdcRequestFilter extends BaseMdcFilter {
         try {
             filterChain.doFilter(request, response);
         } finally {
-            MDC.remove(MDC_USER);
+            MdcUtils.removeMdcUserName();
         }
     }
 }

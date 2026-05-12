@@ -4,7 +4,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.slf4j.MDC;
+import org.datavaultplatform.common.util.MdcUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.core.Authentication;
@@ -27,14 +27,17 @@ public class UserMdcFilter extends OncePerRequestFilter {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
+        String username = null;
         if (auth != null && auth.isAuthenticated()) {
-            MDC.put("user", auth.getName());
+            username = auth.getName();
         }
+        username = MdcUtils.getMdcUserName(username);
+        MdcUtils.addUserNameToMdc(username);
 
         try {
             filterChain.doFilter(request, response);
         } finally {
-            MDC.remove("user");
+            MdcUtils.removeMdcUserName();
         }
     }
 }

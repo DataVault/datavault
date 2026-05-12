@@ -5,8 +5,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.util.StringUtils;
-import org.slf4j.MDC;
+import org.datavaultplatform.common.util.MdcUtils;
 
 import java.io.IOException;
 
@@ -23,16 +22,14 @@ public class MdcRestorationFilter extends BaseMdcFilter {
 
         if (request.getDispatcherType() != DispatcherType.REQUEST) {
             String user = (String) request.getAttribute(REQUEST_USER);
-            if (!StringUtils.hasText(user)) {
-                user = ANONYMOUS;
-            }
-            MDC.put(MDC_USER, user);
+            String username = MdcUtils.getMdcUserName(user);
+            MdcUtils.addUserNameToMdc(username);
         }
 
         try {
             filterChain.doFilter(request, response);
         } finally {
-            MDC.remove(MDC_USER);
+            MdcUtils.removeMdcUserName();
         }
     }
 }

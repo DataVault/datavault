@@ -7,9 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 public abstract class BaseMdcFilter implements Filter {
-    public static final String MDC_USER = "user";
     public static final String REQUEST_USER = "req-user";
-    public static final String ANONYMOUS = "anonymous";
 
     @Override
     public void doFilter(ServletRequest req,
