@@ -12,6 +12,9 @@ import org.datavaultplatform.broker.actuator.MemoryInfoEndpoint;
 import org.datavaultplatform.broker.actuator.SftpFileStoreEndpoint;
 import org.datavaultplatform.broker.services.ArchiveStoreService;
 import org.datavaultplatform.broker.services.FileStoreService;
+import org.datavaultplatform.common.actuator.ActuatorHealthSecurityAdvice;
+import org.datavaultplatform.common.actuator.ActuatorInfoSecurityAdvice;
+import org.datavaultplatform.common.actuator.ActuatorSecurityAdvice;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +23,21 @@ import org.springframework.boot.actuate.info.InfoContributor;
 import org.springframework.context.annotation.Bean;
 
 public class ActuatorConfig {
+
+  @Bean
+  ActuatorInfoSecurityAdvice actuatorInfoSecurityAdvice() {
+    return new ActuatorInfoSecurityAdvice();
+  }
+
+  @Bean
+  ActuatorHealthSecurityAdvice actuatorHealthSecurityAdvice() {
+    return new ActuatorHealthSecurityAdvice();
+  }
+  
+  @Bean
+  ActuatorSecurityAdvice actuatorSecurityAdvice() {
+    return new ActuatorSecurityAdvice();
+  }
 
   @Bean
   Clock clock() {

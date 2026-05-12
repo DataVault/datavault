@@ -9,12 +9,14 @@ import org.datavaultplatform.broker.services.FileStoreService;
 import org.datavaultplatform.broker.test.AddTestProperties;
 import org.datavaultplatform.broker.test.BaseDatabaseTest;
 import org.datavaultplatform.broker.test.TestClockConfig;
+import org.datavaultplatform.common.actuator.WithMockActuatorUser;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -61,6 +63,7 @@ public class OpenApiBrokerTest extends BaseDatabaseTest {
     }
 
     @Test
+    @WithMockActuatorUser
     void testOpenApiAsJson() throws Exception {
         MvcResult mvcResult = mvc.perform(
                         get("http://localhost:8080/v3/api-docs"))
@@ -76,6 +79,7 @@ public class OpenApiBrokerTest extends BaseDatabaseTest {
     }
 
     @Test
+    @WithMockActuatorUser
     void testOpenApiAsSwaggerUI() throws Exception {
         MvcResult mvcResult = mvc.perform(
                         get("http://localhost:8080/swagger-ui/index.html"))

@@ -30,7 +30,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@SpringBootTest
+@SpringBootTest(properties = "management.endpoints.web.exposure.include=*")
 @ProfileStandalone
 @AutoConfigureMockMvc
 @Slf4j
@@ -42,7 +42,7 @@ class ProtectedPathsTest {
 
   private static final String ROLE_XXX = "XXX";
   private static final AtomicInteger COUNTER = new AtomicInteger();
-  private static final int EXPECTED_TESTS = 19;
+  private static final int EXPECTED_TESTS = 20;
 
   @Autowired
   MockMvc mvc;
@@ -54,7 +54,7 @@ class ProtectedPathsTest {
 
   @AfterAll
   static void tearDown() {
-    //assertEquals(EXPECTED_TESTS, COUNTER.intValue());
+    assertEquals(EXPECTED_TESTS, COUNTER.intValue());
   }
 
   /**

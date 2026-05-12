@@ -176,8 +176,24 @@
       <artifactId>micrometer-tracing-test</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-actuator</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
+    </dependency>
   </dependencies>
-
   <build>
     <plugins>
       <plugin>
@@ -204,6 +220,7 @@
                 <include>**/TempFileCleaner*</include>
                 <include>**/TempFileCleanerExtension*</include>
                 <include>**/TraceIdWrapper*</include>
+                <include>**/WithMockActuatorUser*</include>
               </includes>
             </configuration>
           </execution>

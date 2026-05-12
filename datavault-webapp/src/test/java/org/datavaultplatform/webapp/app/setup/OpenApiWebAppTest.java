@@ -2,6 +2,7 @@ package org.datavaultplatform.webapp.app.setup;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import lombok.extern.slf4j.Slf4j;
+import org.datavaultplatform.common.actuator.WithMockActuatorUser;
 import org.datavaultplatform.webapp.test.ProfileDatabase;
 import org.datavaultplatform.webapp.test.ProfileStandalone;
 import org.datavaultplatform.webapp.test.TestClockConfig;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -40,6 +42,7 @@ public class OpenApiWebAppTest {
     }
 
     @Test
+    @WithMockActuatorUser
     void testOpenApiAsJson() throws Exception {
         MvcResult mvcResult = mvc.perform(
                         get("http://localhost:8080/v3/api-docs"))
@@ -55,6 +58,7 @@ public class OpenApiWebAppTest {
     }
 
     @Test
+    @WithMockUser(username = "actuator-user", roles = {"ACTUATOR"})
     void testOpenApiAsSwaggerUI() throws Exception {
         MvcResult mvcResult = mvc.perform(
                         get("http://localhost:8080/swagger-ui/index.html"))
