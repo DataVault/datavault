@@ -534,7 +534,7 @@ public class VaultsController {
         return "redirect:" + vaultUrl;
     }
 
-    @PreAuthorize("hasRole('IS_ADMIN')")
+    //@PreAuthorize("hasRole('IS_ADMIN')")
     @RequestMapping(value = "/vaults/autocompleteuun/{term}", method = RequestMethod.GET)
     @ResponseBody
     public String autocompleteUUN(@PathVariable("term") String term) {
@@ -543,7 +543,7 @@ public class VaultsController {
         return gson.toJson(result);
     }
     
-    @PreAuthorize("hasRole('IS_ADMIN')")
+    //@PreAuthorize("hasRole('IS_ADMIN')")
     @RequestMapping(value = "/vaults/isuun/{uun}", method = RequestMethod.GET)
     @ResponseBody
     public String isUUN(@PathVariable("uun") String uun) {
