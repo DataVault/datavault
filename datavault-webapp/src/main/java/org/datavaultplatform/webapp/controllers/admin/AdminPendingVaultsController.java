@@ -31,9 +31,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 @ConditionalOnBean(RestService.class)
 public class AdminPendingVaultsController {
 
-	private static final Logger logger = LoggerFactory.getLogger(AdminPendingVaultsController.class);
+    private static final Logger logger = LoggerFactory.getLogger(AdminPendingVaultsController.class);
 
-	private static final int MAX_RECORDS_PER_PAGE = 10;
+    protected static final int MAX_RECORDS_PER_PAGE = 10;
 
     private final RestService restService;
     private final UserLookupService userLookupService;
@@ -48,10 +48,10 @@ public class AdminPendingVaultsController {
 
     @RequestMapping(value = "/admin/pendingVaults", method = RequestMethod.GET)
     public String searchPendingVaults(ModelMap model,
-                               @RequestParam(value = "query", defaultValue = "") String query,
-                               @RequestParam(value = "sort", defaultValue = "creationTime") String sort,
-                               @RequestParam(value = "order", defaultValue = "desc") String order,
-                               @RequestParam(value = "pageId", defaultValue = "1") int pageId) {
+                                      @RequestParam(value = "query", defaultValue = "") String query,
+                                      @RequestParam(value = "sort", defaultValue = "creationTime") String sort,
+                                      @RequestParam(value = "order", defaultValue = "desc") String order,
+                                      @RequestParam(value = "pageId", defaultValue = "1") int pageId) {
 
         model.addAttribute("activePageId", pageId);
 
@@ -67,10 +67,10 @@ public class AdminPendingVaultsController {
 
         return "admin/pendingVaults/index";
     }
-    
+
     // The Admin Edit PV page
     @RequestMapping(value = "/admin/pendingVaults/edit/{vaultid}", method = RequestMethod.GET)
-    public String getPendingVault(ModelMap model, @PathVariable("vaultid") String vaultID) {
+    public String getPendingVaultForm(ModelMap model, @PathVariable("vaultid") String vaultID) {
         VaultInfo vault = restService.getPendingVault(vaultID);
         logger.info("Passed in id: '" + vaultID);
         model.addAttribute("vaultID", vaultID);
@@ -88,10 +88,10 @@ public class AdminPendingVaultsController {
 
     @RequestMapping(value = "/admin/pendingVaults/saved", method = RequestMethod.GET)
     public String searchSavedPendingVaults(ModelMap model,
-                                      @RequestParam(value = "query", defaultValue = "") String query,
-                                      @RequestParam(value = "sort", defaultValue = "creationTime") String sort,
-                                      @RequestParam(value = "order", defaultValue = "desc") String order,
-                                      @RequestParam(value = "pageId", defaultValue = "1") int pageId) {
+                                           @RequestParam(value = "query", defaultValue = "") String query,
+                                           @RequestParam(value = "sort", defaultValue = "creationTime") String sort,
+                                           @RequestParam(value = "order", defaultValue = "desc") String order,
+                                           @RequestParam(value = "pageId", defaultValue = "1") int pageId) {
 
         model.addAttribute("activePageId", pageId);
 
@@ -107,10 +107,10 @@ public class AdminPendingVaultsController {
 
     @RequestMapping(value = "/admin/pendingVaults/confirmed", method = RequestMethod.GET)
     public String searchConfirmedPendingVaults(ModelMap model,
-                                      @RequestParam(value = "query", defaultValue = "") String query,
-                                      @RequestParam(value = "sort", defaultValue = "creationTime") String sort,
-                                      @RequestParam(value = "order", defaultValue = "desc") String order,
-                                      @RequestParam(value = "pageId", defaultValue = "1") int pageId) {
+                                               @RequestParam(value = "query", defaultValue = "") String query,
+                                               @RequestParam(value = "sort", defaultValue = "creationTime") String sort,
+                                               @RequestParam(value = "order", defaultValue = "desc") String order,
+                                               @RequestParam(value = "pageId", defaultValue = "1") int pageId) {
 
         model.addAttribute("activePageId", pageId);
 
@@ -154,21 +154,21 @@ public class AdminPendingVaultsController {
 
         return model;
     }
-    
-    
+
+
     @RequestMapping(value = "/admin/pendingVaults/summary/{pendingVaultId}", method = RequestMethod.GET)
-    public String getVault(ModelMap model, @PathVariable("pendingVaultId") String vaultID, Principal principal) {
+    public String getVaultSummary(ModelMap model, @PathVariable("pendingVaultId") String vaultID, Principal principal) {
         logger.info("VaultID:'" + vaultID + "'");
         VaultInfo pendingVault = restService.getPendingVault(vaultID);
         logger.info("pendingVault.id:'" + pendingVault.getID() + "'");
         model.addAttribute("pendingVault", pendingVault);
-        
+
         CreateRetentionPolicy createRetentionPolicy = null;
         if (pendingVault.getPolicyID() != null) {
             createRetentionPolicy = restService.getRetentionPolicy(pendingVault.getPolicyID());
         }
         model.addAttribute("createRetentionPolicy", createRetentionPolicy);
-        
+
         Group group = restService.getGroup(pendingVault.getGroupID());
         model.addAttribute("group", group);
 
@@ -177,16 +177,16 @@ public class AdminPendingVaultsController {
 
     @RequestMapping(value = "/admin/pendingVaults/upgrade/{pendingVaultId}", method = RequestMethod.GET)
     public String upgradeVault(@PathVariable("pendingVaultId") String pendingVaultID,
-    		                   @RequestParam("reviewDate") String reviewDateString) {
+                               @RequestParam("reviewDate") String reviewDateString) {
         // need to either pass in create vault or get vaultnfo from the pending id param
         // and convert it to create vault object like in VaultController.getPendingVault
-    	Date reviewDate = null;
-		try {
-			reviewDate = DateTimeUtils.parseDate(reviewDateString);
-		} catch(ParseException pe ) {
-			logger.info("Parse error: " + pe);
-		}
-		VaultInfo pendingVault = restService.getPendingVault(pendingVaultID);
+        Date reviewDate = null;
+        try {
+            reviewDate = DateTimeUtils.parseDate(reviewDateString);
+        } catch(ParseException pe ) {
+            logger.info("Parse error: " + pe);
+        }
+        VaultInfo pendingVault = restService.getPendingVault(pendingVaultID);
         if(reviewDate != null && !DateTimeUtils.isSameDay(reviewDate, pendingVault.getReviewDate())) {
             pendingVault.setReviewDate(reviewDate);
         }
@@ -202,30 +202,30 @@ public class AdminPendingVaultsController {
         String vaultUrl = "/vaults/" + newVault.getID() + "/";
         return "redirect:" + vaultUrl;
     }
-    
-	// Process the completed 'create new vault' page
-	@RequestMapping(value = "/admin/pendingVaults/edit", method = RequestMethod.POST)
-	public String editPendingVault(@ModelAttribute CreateVault vault, ModelMap model, @RequestParam String action,
-			Principal principal) {
-		// if the confirm button has been clicked save what we have if everything isn't
-		// already saved and display the summary
-		logger.info("Action is:'" + action + "'");
-		logger.info("PendingID is:'" + vault.getPendingID() + "'");
-		
-		// We use checkNewRolesUserExists() to ensure users with uuns are added to the Users table
-		// if they don't exist. We ignore result.
-		// TBD: This is not ideal, we need better error management here.
-		String pVUrl = "/admin/pendingVaults/";
-		String result = userLookupService.checkNewRolesUserExists(vault, pVUrl);
-		
-		// Save the pending vault
-		VaultInfo newVault;
-		newVault = restService.editPendingVault(vault);
-        
-		// Redirect back to edit page
-		String vaultUrl = "/admin/pendingVaults/edit/" + newVault.getID();
-		return "redirect:" + vaultUrl;
-	}
+
+    // Process the completed 'create new vault' page
+    @RequestMapping(value = "/admin/pendingVaults/edit", method = RequestMethod.POST)
+    public String submitEditPendingVault(@ModelAttribute CreateVault vault, ModelMap model, @RequestParam String action,
+                                         Principal principal) {
+        // if the confirm button has been clicked save what we have if everything isn't
+        // already saved and display the summary
+        logger.info("Action is:'" + action + "'");
+        logger.info("PendingID is:'" + vault.getPendingID() + "'");
+
+        // We use checkNewRolesUserExists() to ensure users with uuns are added to the Users table
+        // if they don't exist. We ignore result.
+        // TBD: This is not ideal, we need better error management here.
+        String pVUrl = "/admin/pendingVaults/";
+        String result = userLookupService.checkNewRolesUserExists(vault, pVUrl);
+
+        // Save the pending vault
+        VaultInfo newVault;
+        newVault = restService.editPendingVault(vault);
+
+        // Redirect back to edit page
+        String vaultUrl = "/admin/pendingVaults/edit/" + newVault.getID();
+        return "redirect:" + vaultUrl;
+    }
 
     @RequestMapping(value = "/admin/pendingVaults/{pendingVaultID}", method = RequestMethod.GET)
     public String deletePendingVault(ModelMap model, @PathVariable("pendingVaultID") String pendingVaultID) {
@@ -235,17 +235,17 @@ public class AdminPendingVaultsController {
     }
 
     private String constructTableRecordsInfo(int offset, int recordsTotal, int filteredRecords, int numberOfRecordsOnPage, boolean isFiltered) {
-		StringBuilder recordsInfo = new StringBuilder();
-		recordsInfo.append("Showing ").append(offset + 1).append(" - ").append(offset + numberOfRecordsOnPage);
-		if(isFiltered) {
-			recordsInfo.append(" pending vaults of ").append(filteredRecords)
+        StringBuilder recordsInfo = new StringBuilder();
+        recordsInfo.append("Showing ").append(offset + 1).append(" - ").append(offset + numberOfRecordsOnPage);
+        if(isFiltered) {
+            recordsInfo.append(" pending vaults of ").append(filteredRecords)
                     .append(" (").append("filtered from ").append(recordsTotal).append(" total pending vaults)");
-		} else {
-			recordsInfo.append(" pending vaults of ").append(recordsTotal);
-		}
-		return recordsInfo.toString();
-	}
-    
+        } else {
+            recordsInfo.append(" pending vaults of ").append(recordsTotal);
+        }
+        return recordsInfo.toString();
+    }
+
 }
 
 
