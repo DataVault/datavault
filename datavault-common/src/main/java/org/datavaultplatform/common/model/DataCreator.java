@@ -5,12 +5,12 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.Objects;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.UuidGenerator;
-import org.jsondoc.core.annotation.ApiObject;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import jakarta.persistence.*;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiObject(name = "DataCreator")
+@Schema(name = "DataCreator")
 @Entity
 @Table(name="DataCreators")
 @NamedEntityGraph(

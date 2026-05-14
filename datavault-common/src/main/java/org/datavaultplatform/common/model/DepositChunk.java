@@ -7,11 +7,10 @@ import jakarta.persistence.*;
 
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.UuidGenerator;
-import org.jsondoc.core.annotation.ApiObject;
-import org.jsondoc.core.annotation.ApiObjectField;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiObject(name = "DepositChunk")
+@Schema(name = "DepositChunk")
 @Entity
 @Table(name="DepositChunks")
 @NamedEntityGraph(
@@ -29,7 +28,7 @@ public class DepositChunk {
     public static final String EG_DEPOSIT_CHUNK = "eg.DepositChunk.1";
     // Deposit Identifier
     @Id
-    @ApiObjectField(description = "Universally Unique Identifier for the Deposit Path", name="Deposit Path")
+    @Schema(description = "Universally Unique Identifier for the Deposit Path")
     @UuidGenerator
     @Column(name = "id", unique = true, length = 36)
     private String id;
@@ -39,7 +38,7 @@ public class DepositChunk {
     private Deposit deposit;
     
     // Record the file path that the user selected for this deposit.
-    @ApiObjectField(description = "Filepath of the origin deposit")
+    @Schema(description = "Filepath of the origin deposit")
     @Column(columnDefinition = "INT")
     private int chunkNum;
     

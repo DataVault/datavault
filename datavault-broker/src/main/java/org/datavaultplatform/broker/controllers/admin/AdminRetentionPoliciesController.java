@@ -3,14 +3,11 @@ package org.datavaultplatform.broker.controllers.admin;
 import static org.datavaultplatform.common.util.Constants.HEADER_CLIENT_KEY;
 import static org.datavaultplatform.common.util.Constants.HEADER_USER_ID;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.datavaultplatform.broker.services.RetentionPoliciesService;
 import org.datavaultplatform.common.model.RetentionPolicy;
 import org.datavaultplatform.common.request.CreateRetentionPolicy;
-import org.jsondoc.core.annotation.Api;
-import org.jsondoc.core.annotation.ApiHeader;
-import org.jsondoc.core.annotation.ApiHeaders;
-import org.jsondoc.core.annotation.ApiMethod;
-import org.jsondoc.core.pojo.ApiVerb;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -20,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 //@CrossOrigin
-@Api(name="AdminRetentionPolicies", description = "Administrator RetentionPolicies functions")
+@Tag(name="admin-retention-policies-controller", description = "Administrator RetentionPolicies functions")
 public class AdminRetentionPoliciesController {
 
     private final Logger logger = LoggerFactory.getLogger(AdminRetentionPoliciesController.class);
@@ -31,21 +28,14 @@ public class AdminRetentionPoliciesController {
         this.retentionPoliciesService = retentionPoliciesService;
     }
 
-    @ApiMethod(
-            path = "/admin/retentionpolicies}",
-            verb = ApiVerb.POST,
-            description = "Create a new Retention Policy",
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
+    @Operation(
+            summary = "Create a new Retention Policy",
+            description = "Creates a new Retention Policy in the DataVault system."
     )
-    @ApiHeaders(headers={
-            @ApiHeader(name=HEADER_USER_ID, description="DataVault Broker User ID"),
-            @ApiHeader(name=HEADER_CLIENT_KEY, description="DataVault API Client Key")
-    })
-    @PostMapping("/admin/retentionpolicies")
-    public ResponseEntity<CreateRetentionPolicy> addRetentionPolicy(@RequestHeader(HEADER_USER_ID) String userID,
+    @PostMapping(value = "/admin/retentionpolicies", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<CreateRetentionPolicy> addRetentionPolicy(@RequestHeader(HEADER_USER_ID) String userId,
                                                                     @RequestHeader(HEADER_CLIENT_KEY) String clientKey,
-                                                              @RequestBody CreateRetentionPolicy createRetentionPolicy) {
+                                                                    @RequestBody CreateRetentionPolicy createRetentionPolicy) {
 
         logger.info("Adding new RetentionPolicy with name = " + createRetentionPolicy.getName());
 
@@ -63,48 +53,33 @@ public class AdminRetentionPoliciesController {
     }
 
 
-    @ApiMethod(
-            path = "/admin/retentionpolicies/{policyid}",
-            verb = ApiVerb.GET,
-            description = "Get a Retention Policy",
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
-    )
-    @ApiHeaders(headers={
-            @ApiHeader(name=HEADER_USER_ID, description="DataVault Broker User ID"),
-            @ApiHeader(name=HEADER_CLIENT_KEY, description="DataVault API Client Key")
-    })
-    @GetMapping("/admin/retentionpolicies/{policyid}")
-    public ResponseEntity<CreateRetentionPolicy> getRetentionPolicy(@RequestHeader(HEADER_USER_ID) String userID,
+    @Operation(
+            summary = "Get a Retention Policy",
+            description = "Retrieves a specific Retention Policy by its ID."    )
+    @GetMapping(value = "/admin/retentionpolicies/{policyId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<CreateRetentionPolicy> getRetentionPolicy(@RequestHeader(HEADER_USER_ID) String userId,
                                                                     @RequestHeader(HEADER_CLIENT_KEY) String clientKey,
-                                                                    @PathVariable("policyid") String policyid) {
+                                                                    @PathVariable String policyId) {
 
-        logger.info("Getting RetentionPolicy with id = " + policyid) ;
+        logger.info("Getting RetentionPolicy with id = " + policyId) ;
 
         // Build a transfer object from the real one. We do this to avoid problems with dates, although I am sure there
         // is a better way to do it.
 
-        RetentionPolicy rp = retentionPoliciesService.getPolicy(policyid);
+        RetentionPolicy rp = retentionPoliciesService.getPolicy(policyId);
         CreateRetentionPolicy crp = retentionPoliciesService.buildCreateRetentionPolicy(rp);
 
         return new ResponseEntity<>(crp, HttpStatus.OK);
     }
 
-    @ApiMethod(
-            path = "/admin/retentionpolicies}",
-            verb = ApiVerb.PUT,
-            description = "Edit a Retention Policy",
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
+    @Operation(
+            summary = "Edit a Retention Policy",
+            description = "Updates an existing Retention Policy."
     )
-    @ApiHeaders(headers={
-            @ApiHeader(name=HEADER_USER_ID, description="DataVault Broker User ID"),
-            @ApiHeader(name=HEADER_CLIENT_KEY, description="DataVault API Client Key")
-    })
-    @PutMapping("/admin/retentionpolicies")
-    public ResponseEntity<CreateRetentionPolicy> editRetentionPolicy(@RequestHeader(HEADER_USER_ID) String userID,
+    @PutMapping(value = "/admin/retentionpolicies", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<CreateRetentionPolicy> editRetentionPolicy(@RequestHeader(HEADER_USER_ID) String userId,
                                                                      @RequestHeader(HEADER_CLIENT_KEY) String clientKey,
-                                                                    @RequestBody CreateRetentionPolicy crp) {
+                                                                     @RequestBody CreateRetentionPolicy crp) {
 
         RetentionPolicy rp = retentionPoliciesService.buildRetentionPolicy(crp);
         retentionPoliciesService.updateRetentionPolicy(rp);
@@ -112,15 +87,14 @@ public class AdminRetentionPoliciesController {
         return new ResponseEntity<>(crp, HttpStatus.OK);
     }
 
-    @DeleteMapping("/admin/retentionpolicies/delete/{id}")
-    public void deleteRetentionPolicy(@RequestHeader(HEADER_USER_ID) String userID,
-                                      @PathVariable("id") String policyID) {
+    @Operation(
+            summary = "Delete a Retention Policy",
+            description = "Deletes a Retention Policy by its ID."
+    )
+    @DeleteMapping("/admin/retentionpolicies/delete/{policyId}")
+    public void deleteRetentionPolicy(@RequestHeader(HEADER_USER_ID) String userId,
+                                      @PathVariable String policyId) {
 
-        retentionPoliciesService.delete(policyID);
+        retentionPoliciesService.delete(policyId);
     }
-
-
-
-
-
 }

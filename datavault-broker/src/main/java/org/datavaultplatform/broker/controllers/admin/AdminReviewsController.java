@@ -3,31 +3,38 @@ package org.datavaultplatform.broker.controllers.admin;
 import static org.datavaultplatform.common.util.Constants.HEADER_CLIENT_KEY;
 import static org.datavaultplatform.common.util.Constants.HEADER_USER_ID;
 
-import org.apache.commons.collections4.CollectionUtils;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.common.event.vault.Review;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.response.ReviewInfo;
 import org.datavaultplatform.common.response.VaultInfo;
+import org.datavaultplatform.common.response.VaultReviewStatusInfo;
 import org.datavaultplatform.common.response.VaultsData;
-import org.jsondoc.core.annotation.Api;
-import org.jsondoc.core.annotation.ApiHeader;
-import org.jsondoc.core.annotation.ApiHeaders;
-import org.jsondoc.core.annotation.ApiMethod;
-import org.jsondoc.core.pojo.ApiVerb;
+import org.datavaultplatform.common.util.PageDTO;
+import org.datavaultplatform.common.util.Utils;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 @RestController
 //@CrossOrigin
-@Api(name="AdminReviews", description = "Administrator Review functions")
+@Tag(name="admin-reviews-controller", description = "Administrator Review functions")
 public class AdminReviewsController {
 
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(AdminReviewsController.class);
     private final VaultsService vaultsService;
     private final VaultsReviewService vaultsReviewService;
     private final DepositsReviewService depositsReviewService;
@@ -48,154 +55,148 @@ public class AdminReviewsController {
     }
 
 
-    @ApiMethod(
-            path = "/admin/vaultsForReview",
-            verb = ApiVerb.GET,
-            description = "Gets a list of Vaults for Review",
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
+    @Operation(
+            summary = "Gets a list of Vaults for Review",
+            description = "Retrieves a list of all Vaults that are due for review."
     )
-    @ApiHeaders(headers={
-            @ApiHeader(name=HEADER_USER_ID, description="DataVault Broker User ID")
-    })
-    @GetMapping("/admin/vaultsForReview")
-    public VaultsData getVaultsForReview(@RequestHeader(HEADER_USER_ID) String userID) {
+    @GetMapping(value = "/admin/vaultsForReview", produces = MediaType.APPLICATION_JSON_VALUE)
+    public VaultsData getVaultsForReview( @RequestHeader(HEADER_USER_ID) String userId) {
 
-        List<VaultInfo> vaultResponses = new ArrayList<>();
         List<Vault> vaults = vaultsService.getVaults();
         List<Vault> vaultsForReview = vaultsReviewService.getVaultsForReview(vaults);
+        
+        Assert.state(vaultsForReview != null, "The vaultsForReview should not be null");
 
-        if(CollectionUtils.isNotEmpty(vaultsForReview)) {
-            for (Vault vault : vaultsForReview) {
-                vaultResponses.add(vault.convertToResponse());
-            }
-        }
+        List<VaultInfo> vaultResponses = vaultsForReview.stream()
+                .filter(Objects::nonNull)
+                .map(Vault::convertToResponse)
+                .toList();
 
-        VaultsData vaultsData = new VaultsData();
-        vaultsData.setData(vaultResponses);
-        return vaultsData;
+        VaultsData result = new VaultsData();
+        result.setData(vaultResponses);
+        return result;
     }
 
-
-    @ApiMethod(
-            path = "/admin/vaults/{vaultid}/vaultreviews/current",
-            verb = ApiVerb.GET,
-            description = "Gets the current review for a Vault",
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
+    @Operation(
+            summary = "Gets all Vaults - supports Admin Reviews page",
+            description = "Gets all Vaults"
     )
-    @ApiHeaders(headers={
-            @ApiHeader(name=HEADER_USER_ID, description="DataVault Broker User ID")
-    })
-    @GetMapping("/admin/vaults/{vaultid}/vaultreviews/current")
-    public ReviewInfo getCurrentReview(@RequestHeader(HEADER_USER_ID) String userID,
-                                             @PathVariable("vaultid") String vaultID) throws Exception {
+    @GetMapping("/admin/vaultsForReview/all")
+    public VaultsData getAllVaults(@RequestHeader(HEADER_USER_ID) String userID) {
 
-        User user = usersService.getUser(userID);
+        List<Vault> vaults = vaultsService.getVaults();
+
+        Assert.state(vaults != null, "The vaults should not be null");
+
+        List<VaultInfo> vaultResponses = vaults.stream()
+                .filter(Objects::nonNull)
+                .map(Vault::convertToResponse)
+                .toList();
+
+        VaultsData result = new VaultsData();
+        result.setData(vaultResponses);
+        return result;
+    }
+
+    @Operation(
+            summary = "searches vaults by partial vault name (returns 1st 50 only)",
+            description = "searches vaults by partial vault name (returns 1st 50 only)"
+    )
+    @GetMapping("/admin/vaultsForReview/search")
+    public PageDTO<VaultInfo> getVaultsByPartialName(
+            @RequestParam(name = "q") String partialName) {
+        Page<Vault> vaults = vaultsService.getFirstFiftyVaultsWithNameContaining(partialName);
+        return new PageDTO<>(vaults.map(Vault::convertToResponse));
+    }
+
+    @Operation(
+            summary = "Gets the Review Status of a specific vault",
+            description = "Gets the Review Status of a specific vault"
+    )
+    @GetMapping("/admin/vaults/{vaultId}/reviewstatus")
+    public VaultReviewStatusInfo getVaultReviewStatusInfo(@PathVariable String vaultId) {
+        return vaultsReviewService.getCurrentVaultReviewStatus(vaultId);
+    }
+
+    @Operation(
+            summary = "Gets the current review for a Vault",
+            description = "Retrieves the most recent review details for a specific Vault."
+    )
+    @GetMapping(value = "/admin/vaults/{vaultID}/vaultreviews/current", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ReviewInfo getCurrentReview(@RequestHeader(HEADER_USER_ID) String userId,
+                                       @PathVariable String vaultID) throws Exception {
+
+        User user = usersService.getUser(userId);
+        if (user == null) {
+            return null;
+        }
+
+        // throws Exception if vault cannot be found
         Vault vault = vaultsService.getUserVault(user, vaultID);
-        List<Deposit> deposits = vault.getDeposits();
-
-        VaultReview vaultReview = null;
-        List <DepositReview> depositReviews = null;
 
         // If we find a record that has not been actioned then we know we have an active current record.
-        for (VaultReview vr : vault.getVaultReviews()) {
-            if (vr.getActionedDate() == null) {
-                vaultReview = vr;
-                depositReviews = vr.getDepositReviews();
-            }
-        }
+        VaultReview vaultReview = vault.findLatestVaultReviewIfStillUnderway().orElse(null);
 
         if (vaultReview == null) {
            return null;
-        } else {
-            // If we pass back the Vault Review and Deposit Review we lose the links between the objects, so pass
-            // back a wee Transfer Object POJO that just contains the ids, and let the client then request whatever it needs.
-
-            // Create Lists of Deposit and DepositReview ids
-            List<String> depositIds = new ArrayList<>();
-            List<String> depositReviewIds = new ArrayList<>();
-
-            for (DepositReview depositReview : depositReviews) {
-                depositIds.add(depositReview.getDeposit().getID());
-                depositReviewIds.add(depositReview.getId());
-            }
-
-            ReviewInfo reviewInfo = new ReviewInfo();
-            reviewInfo.setVaultReviewId(vaultReview.getId());
-            reviewInfo.setDepositIds(depositIds);
-            reviewInfo.setDepositReviewIds(depositReviewIds);
-
-            return reviewInfo;
         }
+
+        return getReviewInfo(vaultReview);
     }
-
-    @ApiMethod(
-            path = "/admin/vaults/vaultreviews/current",
-            verb = ApiVerb.POST,
-            description = "Creates the current review for a Vault",
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
+    
+    @Operation(
+            summary = "Creates the current review for a Vault",
+            description = "Initiates a new review process for a specified Vault.",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "The unique ID of the Vault",
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.TEXT_PLAIN_VALUE,
+                            schema = @Schema(type = "string", description = "Vault Identifier", examples = "v-123-abc")
+                    )
+            )
     )
-    @ApiHeaders(headers={
-            @ApiHeader(name=HEADER_USER_ID, description="DataVault Broker User ID")
-    })
-    @PostMapping("/admin/vaults/vaultreviews/current")
-    public ReviewInfo createCurrentReview(@RequestHeader(HEADER_USER_ID) String userID,
-                                       @RequestBody String vaultID) throws Exception {
+    @PostMapping(value = "/admin/vaults/vaultreviews/current", consumes = MediaType.TEXT_PLAIN_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ReviewInfo createCurrentReview(@RequestHeader(HEADER_USER_ID) String userId,
+                                          @RequestBody String vaultId) throws Exception {
 
-        User user = usersService.getUser(userID);
-        Vault vault = vaultsService.getUserVault(user, vaultID);
+        User user = usersService.getUser(userId);
+        Vault vault = vaultsService.getUserVault(user, vaultId);
 
+        // if vault is not due - return null else create a vault if a pending review does not exist?
+        
         VaultReview vaultReview = vaultsReviewService.createVaultReview(vault);
-        List <DepositReview> depositReviews = depositsReviewService.addDepositReviews(vault, vaultReview);
 
-        // If we pass back the Vault Review and Deposit Review we lose the links between the objects, so pass
-        // back a wee Transfer Object POJO that just contains the ids, and let the client then request whatever it needs.
-
-        List<String> depositIds = new ArrayList<>();
-        List<String> depositReviewIds = new ArrayList<>();
-
-        for (DepositReview depositReview : depositReviews) {
-            depositIds.add(depositReview.getDeposit().getID());
-            depositReviewIds.add(depositReview.getId());
-        }
-
-        ReviewInfo reviewInfo = new ReviewInfo();
-        reviewInfo.setVaultReviewId(vaultReview.getId());
-        reviewInfo.setDepositIds(depositIds);
-        reviewInfo.setDepositReviewIds(depositReviewIds);
-
+        // If we pass back the Vault Review and Deposit Review, we lose the links between the objects, so pass
+        // back a wee Transfer Object POJO that just contains the ids and let the client then request whatever it needs.
+        ReviewInfo reviewInfo = getReviewInfo(vaultReview);
         return reviewInfo;
     }
 
 
-    @ApiMethod(
-            path = "/admin/vaults/vaultreviews",
-            verb = ApiVerb.PUT,
-            description = "Edit a Vault Review",
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
+    @Operation(
+            summary = "Edit a Vault Review",
+            description = "Updates an existing Vault Review."
     )
-    @ApiHeaders(headers={
-            @ApiHeader(name=HEADER_USER_ID, description="DataVault Broker User ID"),
-            @ApiHeader(name=HEADER_CLIENT_KEY, description="DataVault API Client Key")
-    })
-    @PutMapping("/admin/vaults/vaultreviews")
-    public VaultReview editVaultReview(@RequestHeader(HEADER_USER_ID) String userID,
+    @PutMapping(value = "/admin/vaults/vaultreviews", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public VaultReview editVaultReview(@RequestHeader(HEADER_USER_ID) String userId,
                                        @RequestHeader(HEADER_CLIENT_KEY) String clientKey,
                                        @RequestBody VaultReview vaultReview) {
 
 
-        vaultsReviewService.updateVaultReview(vaultReview);
+        VaultReview updatedVaultReview = vaultsReviewService.updateVaultReview(vaultReview);
 
-        // If the Review has been actioned then create an Event. The Review should only be actioned once.
-        if (vaultReview.getActionedDate() != null) {
-            Review vaultEvent = new Review(vaultReview.getVault().getID());
-            vaultEvent.setVault(vaultReview.getVault());
-            vaultEvent.setUser(usersService.getUser(userID));
+        // If the Review has been actioned, then create an Event. The Review should only be actioned once.
+        if (updatedVaultReview.isReviewSubmitted()) {
+            Assert.state(updatedVaultReview.getVault() != null, "The VaultReview cannot have null Vault");
+            Vault vault = updatedVaultReview.getVault();
+            Review vaultEvent = new Review(vault.getID());
+            vaultEvent.setVault(vault);
+            vaultEvent.setUser(usersService.getUser(userId));
             vaultEvent.setAgentType(Agent.AgentType.BROKER);
-            vaultEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
+            Client client = clientsService.getClientByApiKey(clientKey);
+            String clientName = client == null ? null : client.getName();
+            vaultEvent.setAgent(clientName);
             eventService.addEvent(vaultEvent);
         }
         
@@ -204,20 +205,9 @@ public class AdminReviewsController {
 
 
 
-    @ApiMethod(
-            path = "/admin/vaultreviews/depositreviews",
-            verb = ApiVerb.PUT,
-            description = "Edit a Vault DepositReview",
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
-    )
-    @ApiHeaders(headers={
-            @ApiHeader(name=HEADER_USER_ID, description="DataVault Broker User ID"),
-            @ApiHeader(name=HEADER_CLIENT_KEY, description="DataVault API Client Key")
-    })
-    @PutMapping("/admin/vaultreviews/depositreviews")
-    public DepositReview editDepositReview(@RequestHeader(HEADER_USER_ID) String userID,
-                                       @RequestBody DepositReview depositReview) {
+    @PutMapping(value = "/admin/vaultreviews/depositreviews", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public DepositReview editDepositReview(@RequestHeader(HEADER_USER_ID) String userId,
+                                           @RequestBody DepositReview depositReview) {
 
 
         depositsReviewService.updateDepositReview(depositReview);
@@ -226,4 +216,56 @@ public class AdminReviewsController {
     }
 
 
+    public static ReviewInfo getReviewInfo(VaultReview vaultReview) {
+        Assert.notNull(vaultReview, "The vaultReview cannot be null");
+        List<DepositReview> depositReviews = vaultReview.getDepositReviews();
+        int depositReviewCount = depositReviews == null ? 0 : depositReviews.size();
+        LOG.info("VaultReview[{}] has [{}] DepositReviews", vaultReview.getId(), depositReviewCount);
+        // Create Lists of Deposit and DepositReview ids
+        List<String> depositIds = new ArrayList<>();
+        List<String> depositReviewIds = new ArrayList<>();
+
+        Utils.getSafeStream(depositReviews)
+                .forEach(dr -> {
+                    Deposit deposit = dr.getDeposit();
+                    String depositId = deposit == null ? null : deposit.getID();
+                    depositIds.add(depositId);
+                    depositReviewIds.add(dr.getId());
+                });
+
+        ReviewInfo reviewInfo = new ReviewInfo();
+        reviewInfo.setVaultReviewId(vaultReview.getId());
+        reviewInfo.setDepositIds(depositIds);
+        reviewInfo.setDepositReviewIds(depositReviewIds);
+        return reviewInfo;
+    }
+
+    @Operation(
+            description = """
+                    refreshes the underway VaultReview associated with the specified vault by ensuring there is a DepositReview for each of the Vault's Deposits
+                    """,
+            summary = "refreshes the underway VaultReview associated with the specified vault"
+    )
+    @PostMapping(value = "/admin/vaults/vaultreviews/{vaultId}/refresh", produces = MediaType.APPLICATION_JSON_VALUE)
+    public boolean refreshDepositsOnUnderwayVaultReview(@PathVariable String vaultId) {
+        
+        Assert.notNull(vaultId, "The vaultId cannot be null");
+
+        RefreshedVaultReview refreshed = vaultsReviewService.refreshDepositsOnUnderwayVaultReview(vaultId).orElse(null);
+        if (refreshed == null) {
+            LOG.debug("No underway VaultReview found for Vault {}", vaultId);
+            return false;
+        }
+        VaultReview underway = refreshed.underway();
+        Vault vault = underway.getVault();
+        List<DepositReview> depositReviewsAdded = refreshed.depositReviewsAdded();
+        int size = depositReviewsAdded.size();
+        AtomicInteger counter = new AtomicInteger(1);
+        depositReviewsAdded.forEach(dr -> {
+            LOG.info("[{}/{}] Added DepositReviewId[{}] for DepositId[{}] to VaultReviewId[{}] for VaultId[{}]",
+                    counter.getAndIncrement(), size, dr.getId(), dr.getDeposit().getID(), underway.getId(), vault.getID());
+        });
+        LOG.info("Added [{}] DepositReviews to VaultReviewId[{}] for VaultId[{}]", size, underway.getId(), vault.getID());
+        return size > 0;
+    }
 }

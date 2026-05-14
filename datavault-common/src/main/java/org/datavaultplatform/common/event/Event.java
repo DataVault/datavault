@@ -5,8 +5,6 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
 import org.datavaultplatform.common.event.audit.*;
 import org.datavaultplatform.common.event.client.*;
 import org.datavaultplatform.common.event.delete.*;
@@ -238,13 +236,9 @@ public class Event {
     @Transient
     protected String roleId;
 
-    @Getter
-    @Setter
     @Column(name = "chunkNumber", columnDefinition = "INT DEFAULT NULL")
     private Integer chunkNumber;
 
-    @Getter
-    @Setter
     @Column(name = "archive_store_id", columnDefinition = "VARCHAR(256) DEFAULT NULL")
     private String archiveStoreId;
     
@@ -288,6 +282,11 @@ public class Event {
         return eventClass;
     }
 
+    /**
+     * This is the name of a class.
+     * We can't use Class.forName to check if it's valid because it might be the name of a class in another module.
+     * @param eventClass the name of java Event class.
+     */
     public void setEventClass(String eventClass) {
         this.eventClass = eventClass;
     }

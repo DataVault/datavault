@@ -8,15 +8,15 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import org.datavaultplatform.common.util.DateTimeUtils;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.UuidGenerator;
-import org.jsondoc.core.annotation.ApiObject;
-import org.jsondoc.core.annotation.ApiObjectField;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiObject(name = "Deposit")
+@Schema(name = "Deposit")
 @Entity
 @Table(name="Deposits")
 @NamedEntityGraph(
@@ -36,7 +36,7 @@ public class Deposit implements Identified {
     public static final String EG_DEPOSIT = "eg.Deposit.1";
     // Deposit Identifier
     @Id
-    @ApiObjectField(description = "Universally Unique Identifier for the Deposit", name="Deposit")
+    @Schema(description = "Universally Unique Identifier for the Deposit")
     @UuidGenerator
     @Column(name = "id", unique = true, length = 36)
     private String id;
@@ -46,10 +46,10 @@ public class Deposit implements Identified {
     private long version;
     
     // Serialise date in ISO 8601 format
-    @ApiObjectField(description = "Date that the vault was created")
+    @Schema(description = "Date that the vault was created")
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern= DateTimeUtils.ISO_DATE_TIME_FORMAT)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date creationTime;
+    @Column(name = "creationTime", nullable = false, columnDefinition = "TIMESTAMP")
+    private LocalDateTime creationTime;
     
     @ManyToOne
     private Vault vault;
@@ -88,12 +88,12 @@ public class Deposit implements Identified {
 
     // A Deposit can have a number of reviews
     @JsonIgnore
-    @OneToMany(targetEntity=DepositReview.class, mappedBy="deposit", fetch=FetchType.LAZY)
+    @OneToMany(targetEntity=DepositReview.class, mappedBy="deposit", fetch=FetchType.LAZY, cascade = CascadeType.ALL)
     @OrderBy("creationTime")
     private List<DepositReview> depositReviews = new ArrayList<>();
 
 
-    @ApiObjectField(description = "Status of the Deposit", allowedvalues={"NOT_STARTED", "IN_PROGRESS", "COMPLETE"})
+    @Schema(description = "Status of the Deposit", allowableValues = {"NOT_STARTED", "IN_PROGRESS", "COMPLETE", "FAILED", "DELETE_IN_PROGRESS", "DELETED", "DELETE_FAILED"})
     @Column(columnDefinition = "INT(11)")
     private Status status;
 
@@ -108,24 +108,24 @@ public class Deposit implements Identified {
         DELETE_FAILED
     }
 
-    @ApiObjectField(description = "Deposit name to briefly describe the Deposit")
+    @Schema(description = "Deposit name to briefly describe the Deposit")
     @Column(columnDefinition = "TEXT", nullable = false, length = 400)
     private String name;
 
-    @ApiObjectField(description = "Deposit description to provide more information about the Deposit")
+    @Schema(description = "Deposit description to provide more information about the Deposit")
     @Column(columnDefinition = "TEXT", length = 6000)
     private String description;
     
-    @ApiObjectField(description = "Whether the deposit contains personal data or not")
+    @Schema(description = "Whether the deposit contains personal data or not")
     @Column(nullable = false)
     private Boolean hasPersonalData;
     
-    @ApiObjectField(description = "Description of the nature of the personal data")
+    @Schema(description = "Description of the nature of the personal data")
     @Column(columnDefinition = "TEXT", length = 6000)
     private String personalDataStatement;
 
     // For now, a deposit relates to a single bag.
-    @ApiObjectField(description = "ID of the bag associated with this Deposit")
+    @Schema(description = "ID of the bag associated with this Deposit")
     @Column(columnDefinition = "TEXT")
     private String bagId;
 
@@ -151,18 +151,18 @@ public class Deposit implements Identified {
     private byte[] encIV;
 
     // Record the file path that the user selected for this deposit.
-    @ApiObjectField(description = "Origin of the deposited filepath")
+    @Schema(description = "Origin of the deposited filepath")
     @Column(columnDefinition = "TEXT")
     private String fileOrigin;
-    @ApiObjectField(description = "Short version of the origin of the deposited filepath")
+    @Schema(description = "Short version of the origin of the deposited filepath")
     @Column(columnDefinition = "TEXT")
     private String shortFilePath;
-    @ApiObjectField(description = "Filepath of the origin deposit")
+    @Schema(description = "Filepath of the origin deposit")
     @Column(columnDefinition = "TEXT")
     private String filePath;
     
     // Size of the deposit (in bytes)
-    @ApiObjectField(description = "Size of the deposit (in bytes)")
+    @Schema(description = "Size of the deposit (in bytes)")
     private long depositSize;
     
     @ManyToOne
@@ -183,11 +183,11 @@ public class Deposit implements Identified {
 
     public long getVersion() { return version; }
 
-    public void setCreationTime(Date creationTime) {
+    public void setCreationTime(LocalDateTime creationTime) {
         this.creationTime = creationTime;
     }
 
-    public Date getCreationTime() {
+    public LocalDateTime getCreationTime() {
         return creationTime;
     }
     

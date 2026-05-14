@@ -12,19 +12,20 @@ import org.datavaultplatform.webapp.services.UserLookupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.NotEmpty;
+import org.springframework.web.bind.annotation.RequestParam;
+
 @Controller
 @ConditionalOnBean(RestService.class)
-public class RoleAssignmentController {
+public class RoleAssignmentController implements RoleAssignmentControllerApi {
 
     private final RestService rest;
 
@@ -39,11 +40,12 @@ public class RoleAssignmentController {
         this.userLookupService = userLookupService;
     }
 
-    @PostMapping("/security/roles/{roleType}/{target}/user/update")
-    @PreAuthorize("hasPermission(#targetId, #type, 'ASSIGN_VAULT_ROLES') or hasPermission(#targetId, 'GROUP_VAULT', 'ASSIGN_SCHOOL_VAULT_ROLES')")
-    public ResponseEntity<?> updateRoleAssignment(
-            @PathVariable("roleType") String type,
-            @PathVariable("target") String targetId,
+    @Override
+    @PostMapping(value = "/security/roles/{roleType}/{targetId}/user/update", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    @PreAuthorize("hasPermission(#targetId, #roleType, 'ASSIGN_VAULT_ROLES') or hasPermission(#targetId, 'GROUP_VAULT', 'ASSIGN_SCHOOL_VAULT_ROLES')")
+    public ResponseEntity<Void> updateRoleAssignment(
+            @PathVariable String roleType,
+            @PathVariable String targetId,
             @Valid @NotNull @RequestParam("assignment") Long assignmentId,
             @Valid @NotNull(message = "Please specify a role") @RequestParam("role") Long roleId) {
 
@@ -67,10 +69,11 @@ public class RoleAssignmentController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/security/roles/{roleType}/{target}/user/delete")
-    @PreAuthorize("hasPermission(#targetId, #type, 'ASSIGN_VAULT_ROLES') or hasPermission(#targetId, 'GROUP_VAULT', 'ASSIGN_SCHOOL_VAULT_ROLES')")
-    public ResponseEntity<?> removeRoleAssignment(@PathVariable("roleType") String type,
-                                               @PathVariable("target") String targetId,
+    @Override
+    @PostMapping("/security/roles/{roleType}/{targetId}/user/delete")
+    @PreAuthorize("hasPermission(#targetId, #roleType, 'ASSIGN_VAULT_ROLES') or hasPermission(#targetId, 'GROUP_VAULT', 'ASSIGN_SCHOOL_VAULT_ROLES')")
+    public ResponseEntity<Void> removeRoleAssignment(@PathVariable String roleType,
+                                               @PathVariable String targetId,
                                                @RequestParam("assignment") long assignmentId) {
 
         RoleAssignment assignment = rest.getRoleAssignment(assignmentId)
@@ -89,12 +92,13 @@ public class RoleAssignmentController {
         return ResponseEntity.ok().build();
     }
 
-    @PreAuthorize("hasPermission(#targetId, #type, 'ASSIGN_VAULT_ROLES') or hasPermission(#targetId, 'GROUP_VAULT', 'ASSIGN_SCHOOL_VAULT_ROLES')")
-    @PostMapping("/security/roles/{roleType}/{target}/user")
+    @Override
+    @PreAuthorize("hasPermission(#targetId, #roleType, 'ASSIGN_VAULT_ROLES') or hasPermission(#targetId, 'GROUP_VAULT', 'ASSIGN_SCHOOL_VAULT_ROLES')")
+    @PostMapping(value = "/security/roles/{roleType}/{targetId}/user", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public ResponseEntity<?> createRoleAssignment(
-            @PathVariable("roleType") String type,
-            @PathVariable("target") String targetId,
-            @Valid  RoleAssignmentRequest request) {
+            @PathVariable String roleType,
+            @PathVariable String targetId,
+            @Valid RoleAssignmentRequest request) {
 
         RoleAssignment assignment = new RoleAssignment();
         User user = rest.getUser(request.user);
@@ -106,8 +110,8 @@ public class RoleAssignmentController {
             }
         }
 
-        RoleType roleType = RoleType.valueOf(type.toUpperCase());
-        switch (roleType) {
+        RoleType actualRoleObject = RoleType.valueOf(roleType.toUpperCase());
+        switch (actualRoleObject) {
             case SCHOOL:
                 assignment.setSchoolId(targetId);
                 break;
@@ -138,29 +142,4 @@ public class RoleAssignmentController {
         return ResponseEntity.ok().build();
     }
 
-
-    public static class RoleAssignmentRequest {
-        @NotNull(message = "Please specify a role")
-        Long role;
-
-        @NotNull
-        @NotEmpty(message = "Please specify a user")
-        String user;
-
-        public Long getRole() {
-            return role;
-        }
-
-        public void setRole(Long role) {
-            this.role = role;
-        }
-
-        public String getUser() {
-            return user;
-        }
-
-        public void setUser(String user) {
-            this.user = user;
-        }
-    }
 }

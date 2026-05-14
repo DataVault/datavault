@@ -11,6 +11,7 @@ import org.datavaultplatform.webapp.security.UsesRetrievesPaused;
 import org.datavaultplatform.webapp.services.RestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -27,10 +28,10 @@ import java.util.UUID;
 @Slf4j
 @Controller
 @ConditionalOnBean(RestService.class)
-public class DepositsController {
+public class DepositsController implements DepositsControllerApi {
 
-    private static final String HAS_PERMISSION_TO_RETRIEVE = "(hasPermission(#vaultID, 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') or hasPermission(#vaultID, 'GROUP_VAULT', 'CAN_RETRIEVE_DATA'))            and (hasRole('IS_ADMIN') or (!@permissionsService.retrievesPaused()))";
-    private static final String HAS_PERMISSION_TO_DEPOSIT  = "(hasPermission(#vaultID, 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') or hasPermission(#vaultID, 'GROUP_VAULT', 'MANAGE_SCHOOL_VAULT_DEPOSITS')) and (hasRole('IS_ADMIN') or (!@permissionsService.depositsPaused()))";
+    private static final String HAS_PERMISSION_TO_RETRIEVE = "(hasPermission(#vaultId, 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') or hasPermission(#vaultId, 'GROUP_VAULT', 'CAN_RETRIEVE_DATA'))            and (hasRole('IS_ADMIN') or (!@permissionsService.retrievesPaused()))";
+    private static final String HAS_PERMISSION_TO_DEPOSIT  = "(hasPermission(#vaultId, 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') or hasPermission(#vaultId, 'GROUP_VAULT', 'MANAGE_SCHOOL_VAULT_DEPOSITS')) and (hasRole('IS_ADMIN') or (!@permissionsService.depositsPaused()))";
     private final RestService restService;
 
     @Autowired
@@ -39,9 +40,10 @@ public class DepositsController {
     }
 
     // Return an 'create new deposit' page
-    @RequestMapping(value = "/vaults/{vaultid}/deposits/create", method = RequestMethod.GET)
-    @PreAuthorize("hasPermission(#vaultID, 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') or hasPermission(#vaultID, 'GROUP_VAULT', 'MANAGE_SCHOOL_VAULT_DEPOSITS')")
-    public String createDeposit(ModelMap model, @PathVariable("vaultid") String vaultID) throws Exception {
+    @Override
+    @GetMapping(value = "/vaults/{vaultId}/deposits/create", produces = MediaType.TEXT_HTML_VALUE)
+    @PreAuthorize("hasPermission(#vaultId, 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') or hasPermission(#vaultId, 'GROUP_VAULT', 'MANAGE_SCHOOL_VAULT_DEPOSITS')")
+    public String createDeposit(ModelMap model, @PathVariable String vaultId) throws Exception {
         
         // pass the view an empty Deposit since the form expects it
         CreateDeposit deposit = new CreateDeposit();
@@ -50,20 +52,21 @@ public class DepositsController {
         deposit.setFileUploadHandle(UUID.randomUUID().toString());
         
         model.addAttribute("deposit", deposit);
-        model.addAttribute("vault", restService.getVault(vaultID));
+        model.addAttribute("vault", restService.getVault(vaultId));
         return "deposits/create";
     }
 
     // Process the completed 'create new deposit' page
     // templates/deposits/create.html
+    @Override
     @UsesDepositsPaused
-    @PostMapping("/vaults/{vaultid}/deposits/create")
+    @PostMapping(value = "/vaults/{vaultId}/deposits/create", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     @PreAuthorize(HAS_PERMISSION_TO_DEPOSIT)
     public String createAndAddDeposit(@ModelAttribute CreateDeposit deposit,
-                                      @PathVariable("vaultid") String vaultID) {
-        
+                                      @PathVariable String vaultId) {
+
         // Set the Vault ID for the new deposit
-        deposit.setVaultID(vaultID);
+        deposit.setVaultID(vaultId);
         
         // Remove personal statement if has personalstatement is false
         if("No".equalsIgnoreCase(deposit.getHasPersonalData())) {
@@ -71,84 +74,104 @@ public class DepositsController {
         }
         
         DepositInfo newDeposit = restService.addDeposit(deposit);
-        String depositUrl = "/vaults/" + vaultID + "/deposits/" + newDeposit.getID() + "/";
-        return "redirect:" + depositUrl;
+        return  getDepositRedirectUrl(vaultId, newDeposit.getID());
     }
 
     // View properties of a single deposit
-    @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}", method = RequestMethod.GET)
-    @PreAuthorize("hasPermission(#vaultID, 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') or hasPermission(#vaultID, 'GROUP_VAULT', 'CAN_RETRIEVE_DATA') or hasPermission(#vaultID,'GROUP_VAULT','CAN_MANAGE_DEPOSITS')")
-    public String getDeposit(ModelMap model, @PathVariable("vaultid") String vaultID, @PathVariable("depositid") String depositID) throws Exception {
-        model.addAttribute("vault", restService.getVault(vaultID));
-        model.addAttribute("deposit", restService.getDeposit(depositID));
-        model.addAttribute("events", restService.getDepositEvents(depositID));
-        model.addAttribute("retrieves", restService.getDepositRetrieves(depositID));
+    @Override
+    @GetMapping(value = "/vaults/{vaultId}/deposits/{depositId}", produces = MediaType.TEXT_HTML_VALUE)
+    @PreAuthorize("hasPermission(#vaultId, 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') or hasPermission(#vaultId, 'GROUP_VAULT', 'CAN_RETRIEVE_DATA') or hasPermission(#vaultId,'GROUP_VAULT','CAN_MANAGE_DEPOSITS')")
+    public String getDeposit(ModelMap model,
+                             @PathVariable String vaultId,
+                             @PathVariable String depositId) throws Exception {
+        model.addAttribute("vault", restService.getVault(vaultId));
+        model.addAttribute("deposit", restService.getDeposit(depositId));
+        model.addAttribute("events", restService.getDepositEvents(depositId));
+        model.addAttribute("retrieves", restService.getDepositRetrieves(depositId));
         
         return "deposits/deposit";
     }
     
     // View properties of a single deposit as a JSON object
-    @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}/json", method = RequestMethod.GET)
-    public @ResponseBody DepositInfo getDepositJson(@PathVariable("vaultid") String vaultID, @PathVariable("depositid") String depositID) throws Exception {
-        return restService.getDeposit(depositID);
+    @Override
+    @GetMapping(value = "/vaults/{vaultId}/deposits/{depositId}/json", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public DepositInfo getDepositJson(
+            @PathVariable String vaultId,
+            @PathVariable String depositId) throws Exception {
+        return restService.getDeposit(depositId);
     }
     
     // View jobs related to a single deposit as a JSON object
-    @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}/jobs", method = RequestMethod.GET)
-    public @ResponseBody Job[] getDepositJobsJson(@PathVariable("vaultid") String vaultID, @PathVariable("depositid") String depositID) throws Exception {
-        return restService.getDepositJobs(depositID);
+    @Override
+    @GetMapping(value = "/vaults/{vaultId}/deposits/{depositId}/jobs", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Job[] getDepositJobsJson(@PathVariable String vaultId, @PathVariable String depositId) throws Exception {
+        return restService.getDepositJobs(depositId);
     }
     
     // Return a 'retrieve deposit' page
-    @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}/retrieve", method = RequestMethod.GET)
-    @PreAuthorize("hasPermission(#vaultID, 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') or hasPermission(#vaultID, 'GROUP_VAULT', 'CAN_RETRIEVE_DATA')")
-    public String retrieveDeposit(@ModelAttribute Retrieve retrieve, ModelMap model, @PathVariable("vaultid") String vaultID, @PathVariable("depositid") String depositID) throws Exception {
+    @Override
+    @GetMapping(value = "/vaults/{vaultId}/deposits/{depositId}/retrieve", produces = MediaType.TEXT_HTML_VALUE)
+    @PreAuthorize("hasPermission(#vaultId, 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') or hasPermission(#vaultId, 'GROUP_VAULT', 'CAN_RETRIEVE_DATA')")
+    public String retrieveDeposit(
+            @ModelAttribute Retrieve retrieve,
+            ModelMap model,
+            @PathVariable String vaultId,
+            @PathVariable String depositId) throws Exception {
         model.addAttribute("retrieve", new Retrieve());
-        model.addAttribute("vault", restService.getVault(vaultID));
-        model.addAttribute("deposit", restService.getDeposit(depositID));
+        model.addAttribute("vault", restService.getVault(vaultId));
+        model.addAttribute("deposit", restService.getDeposit(depositId));
         return "deposits/retrieve";
     }
     
     // Process the completed 'retrieve deposit' page
     // templates/deposits/retrieve.html
+    @Override
     @UsesRetrievesPaused
-    @PostMapping("/vaults/{vaultid}/deposits/{depositid}/retrieve")
+    @PostMapping(value = "/vaults/{vaultId}/deposits/{depositId}/retrieve", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     @PreAuthorize(HAS_PERMISSION_TO_RETRIEVE)
     public String processRetrieve(@ModelAttribute Retrieve retrieve,
-                                 @PathVariable("vaultid") String vaultID,
-                                 @PathVariable("depositid") String depositID
+                                  @PathVariable String vaultId,
+                                  @PathVariable String depositId
     ) {
 
-        Boolean result = restService.retrieveDeposit(depositID, retrieve);
+        Boolean result = restService.retrieveDeposit(depositId, retrieve);
         if (Boolean.TRUE != result) {
-            log.warn("Failed to retrieve deposit depositID[{}]", depositID);
+            log.warn("Failed to retrieve deposit depositID[{}]", depositId);
         }
 
-        String depositUrl = "/vaults/" + vaultID + "/deposits/" + depositID + "/";
-        return "redirect:" + depositUrl;
+        return getDepositRedirectUrl(vaultId, depositId);
     }
 
 
     // Process the completed 'restart retrieve' page
-    @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositId}/retrieves/{retrieveId}/restart", method = RequestMethod.GET)
+    @Override
+    @GetMapping(value = "/vaults/{vaultId}/deposits/{depositId}/retrieves/{retrieveId}/restart")
     public String restartRetrieve(ModelMap model,
-                                 @PathVariable("vaultid") String vaultID, @PathVariable("depositId") String depositID,
-                                 @PathVariable("retrieveId") String retrieveID) throws Exception {
+                                  @PathVariable String vaultId,
+                                  @PathVariable String depositId,
+                                  @PathVariable String retrieveId) throws Exception {
 
-        restService.restartRetrieve(depositID, retrieveID);
+        restService.restartRetrieve(depositId, retrieveId);
 
-        String depositUrl = "/vaults/" + vaultID + "/deposits/" + depositID + "/";
-        return "redirect:" + depositUrl;
+        return getDepositRedirectUrl(vaultId, depositId);
     }
 
     // Process the completed 'restart deposit' page
-    @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositId}/restart", method = RequestMethod.GET)
+    @Override
+    @GetMapping(value = "/vaults/{vaultId}/deposits/{depositId}/restart")
     public String restartDeposit(ModelMap model,
-                                  @PathVariable("vaultid") String vaultID, @PathVariable("depositId") String depositID) throws Exception {
+                                 @PathVariable String vaultId,
+                                 @PathVariable String depositId) throws Exception {
 
-        restService.restartDeposit(depositID);
+        restService.restartDeposit(depositId);
 
-        String depositUrl = "/vaults/" + vaultID + "/deposits/" + depositID + "/";
+        return getDepositRedirectUrl(vaultId, depositId);
+    }
+
+    public String getDepositRedirectUrl(String vaultId, String depositId) {
+        String depositUrl = "/vaults/" + vaultId + "/deposits/" + depositId + "/";
         return "redirect:" + depositUrl;
     }
 }

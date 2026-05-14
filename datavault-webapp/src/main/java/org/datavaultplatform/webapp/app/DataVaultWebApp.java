@@ -6,16 +6,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.monitor.MemoryStats;
 import org.datavaultplatform.common.services.LDAPService;
-import org.datavaultplatform.webapp.config.ActutatorConfig;
-import org.datavaultplatform.webapp.config.LdapConfig;
-import org.datavaultplatform.webapp.config.MailConfig;
-import org.datavaultplatform.webapp.config.MvcConfig;
-import org.datavaultplatform.webapp.config.PropertiesConfig;
-import org.datavaultplatform.webapp.config.RestTemplateConfig;
-import org.datavaultplatform.webapp.config.SecurityActuatorConfig;
-import org.datavaultplatform.webapp.config.SecurityConfig;
-import org.datavaultplatform.webapp.config.TomcatAjpConfig;
-import org.datavaultplatform.webapp.config.WebConfig;
+import org.datavaultplatform.webapp.config.*;
 import org.datavaultplatform.webapp.config.database.DatabaseProfileConfig;
 import org.datavaultplatform.webapp.config.shib.ShibProfileConfig;
 import org.datavaultplatform.webapp.config.standalone.StandaloneProfileConfig;
@@ -40,7 +31,7 @@ import org.springframework.core.env.Environment;
 @Import({PropertiesConfig.class, ActutatorConfig.class, WebConfig.class, MvcConfig.class,
     SecurityActuatorConfig.class, SecurityConfig.class, MailConfig.class, LdapConfig.class,
         StandaloneProfileConfig.class, DatabaseProfileConfig.class,
-    ShibProfileConfig.class, RestTemplateConfig.class, TomcatAjpConfig.class})
+    ShibProfileConfig.class, RestTemplateConfig.class, TomcatAjpConfig.class, OpenApiConfig.class})
 @Slf4j
 public class DataVaultWebApp implements CommandLineRunner {
 

@@ -8,7 +8,8 @@ import org.hibernate.Hibernate;
 import org.hibernate.annotations.UuidGenerator;
 
 import jakarta.persistence.*;
-import java.util.Date;
+
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -36,23 +37,11 @@ public class Retrieve {
 
     // Serialise date in ISO 8601 format
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern= DateTimeUtils.ISO_DATE_TIME_FORMAT)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date timestamp;
+    @Column(name = "timestamp", nullable = false, columnDefinition = "TIMESTAMP")
+    private LocalDateTime timestamp;
 
     @ManyToOne
     private Deposit deposit;
-
-    // A Retrieve can have a number of events
-    //@JsonIgnore
-    //@OneToMany(targetEntity=Event.class, mappedBy="retrieve", fetch=FetchType.LAZY)
-    //@OrderBy("timestamp, sequence")
-    //private List<Event> events;
-
-    // A Retrieve can have a number of active jobs
-    //@JsonIgnore
-    //@OneToMany(targetEntity=Job.class, mappedBy="retrieve", fetch=FetchType.LAZY)
-    //@OrderBy("timestamp")
-    //private List<Job> jobs;
 
     public enum Status {
         NOT_STARTED,
@@ -90,11 +79,11 @@ public class Retrieve {
         this.retrievePath = retrievePath;
     }
 
-    public void setTimestamp(Date timestamp) {
+    public void setTimestamp(LocalDateTime timestamp) {
         this.timestamp = timestamp;
     }
 
-    public Date getTimestamp() {
+    public LocalDateTime getTimestamp() {
         return timestamp;
     }
 
@@ -129,15 +118,6 @@ public class Retrieve {
     public void setUser(User user) {
         this.user = user;
     }
-
-//    public List<Event> getEvents() {
-//        return events;
-//    }
-
-//    public List<Job> getJobs() {
-//        return jobs;
-//    }
-
 
     @Override
     public boolean equals(Object o) {

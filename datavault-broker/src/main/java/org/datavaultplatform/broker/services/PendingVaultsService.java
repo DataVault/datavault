@@ -1,8 +1,8 @@
 package org.datavaultplatform.broker.services;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import org.datavaultplatform.common.email.EmailTemplate;
@@ -67,9 +67,9 @@ public class PendingVaultsService {
   }
 
   public void addOrUpdatePendingVault(PendingVault vault) {
-    Date d = new Date();
-    vault.setCreationTime(d);
+    LocalDateTime now = LocalDateTime.now();
     if (vault != null) {
+      vault.setCreationTime(now);
       if (vault.getId() == null || vault.getId().isEmpty()) {
         logger.info("Saving a new pending vault");
         pendingVaultDAO.save(vault);
@@ -221,6 +221,7 @@ public class PendingVaultsService {
       permissionsService.createRoleAssignment(ownerRoleAssignment);
     } else {
       // error!
+      logger.error("unexpected null owner!");
     }
   }
 
@@ -421,7 +422,7 @@ public class PendingVaultsService {
     }
     vault.setUser(user);
 
-    Date grantEndDate = createVault.getBillingGrantEndDate();
+    LocalDate grantEndDate = createVault.getBillingGrantEndDate();
 
     if (grantEndDate == null) {
       grantEndDate = createVault.getGrantEndDate();
@@ -434,7 +435,7 @@ public class PendingVaultsService {
       vault.setGrantEndDate(null);
     }
 
-    Date reviewDate = createVault.getReviewDate();
+    LocalDate reviewDate = createVault.getReviewDate();
     if (reviewDate != null) {
       try {
         vault.setReviewDate(reviewDate);

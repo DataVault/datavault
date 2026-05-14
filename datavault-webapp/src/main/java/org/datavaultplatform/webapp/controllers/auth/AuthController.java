@@ -7,23 +7,24 @@ import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.webapp.controllers.trace.BaseErrorController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import jakarta.servlet.http.HttpSession;
 
 import java.text.MessageFormat;
 
+@Slf4j
 @Controller
 @RequestMapping("/auth")
-@Slf4j
-public class AuthController extends BaseErrorController {
+public class AuthController extends BaseErrorController implements AuthControllerApi {
     
     private final static String DEFAULT_LOGOUT_URL = "/auth/login?logout";
     
@@ -44,11 +45,12 @@ public class AuthController extends BaseErrorController {
         this.logoutUrl = logoutUrl;
         this.outputTraceIdOnError = outputTraceIdOnError;
     }
-    
-    @RequestMapping(value = "/login", method = RequestMethod.GET)
-    public String getLoginPage(@RequestParam(value="error", required=false) boolean error,
-                               @RequestParam(value="logout", required=false) String logout,
-                               @RequestParam(value="security", required=false) String security,
+
+    @Override
+    @GetMapping(value = "/login", produces = MediaType.TEXT_HTML_VALUE)
+    public String getLoginPage(@RequestParam(value = "error", required = false) boolean error,
+                               @RequestParam(value = "logout", required = false) String logout,
+                               @RequestParam(value = "security", required = false) String security,
                                ModelMap model) {
 
         model.put("success", "");
@@ -70,14 +72,16 @@ public class AuthController extends BaseErrorController {
         return "auth/login";
     }
 
-    @RequestMapping(value = "/logout", method = RequestMethod.GET)
-    public String getDeniedPage(ModelMap model, HttpSession session) {
+    @Override
+    @GetMapping(value = "/logout")
+    public String redirectToLogout(ModelMap model, HttpSession session) {
 
         session.invalidate();
         return "redirect:"+logoutUrl;
     }
 
-    @RequestMapping(value = "/denied", method = RequestMethod.GET)
+    @Override
+    @GetMapping(value = "/denied")
     public String getDeniedPage(HttpServletRequest request, HttpServletResponse response, Model model) {
 
         // Retrieve some useful information from the request
@@ -108,7 +112,8 @@ public class AuthController extends BaseErrorController {
         });
     }
 
-    @RequestMapping(value = "/confirmation", method = RequestMethod.GET)
+    @Override
+    @GetMapping(value = "/confirmation", produces = MediaType.TEXT_HTML_VALUE)
     public String getConfirmationPage(ModelMap model) {
 
         model.put("logout", "");

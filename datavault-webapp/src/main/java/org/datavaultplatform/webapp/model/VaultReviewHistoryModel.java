@@ -1,16 +1,20 @@
 package org.datavaultplatform.webapp.model;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.List;
 
+@Data
+@NoArgsConstructor
 public class VaultReviewHistoryModel {
 
-    private List<VaultReviewModel> vaultReviewModels;
-
-    public List<VaultReviewModel> getVaultReviewModels() {
-        return vaultReviewModels;
-    }
-
-    public void setVaultReviewModels(List<VaultReviewModel> vaultReviewModels) {
-        this.vaultReviewModels = vaultReviewModels;
+    private List<VaultReviewViewModel> vaultReviewViewModels;
+    
+    public final void setVaultReviewViewModels(List<VaultReviewViewModel> vaultReviewViewModels) {
+        this.vaultReviewViewModels = vaultReviewViewModels;
+        if (this.vaultReviewViewModels == null) {
+            this.vaultReviewViewModels = List.of();
+        }
     }
 }

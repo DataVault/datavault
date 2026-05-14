@@ -13,7 +13,7 @@ import org.springframework.stereotype.Controller;
  */
 @Controller
 @ConditionalOnBean(RestService.class)
-public class FeedbackController {
+public class FeedbackController implements FeedbackControllerApi {
 
     private final MailSender mailSender;
     private final MessageCreator messageCreator;

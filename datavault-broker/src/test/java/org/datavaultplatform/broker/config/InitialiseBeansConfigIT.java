@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.app.DataVaultBrokerApp;
 import org.datavaultplatform.broker.controllers.admin.AdminController;
 import org.datavaultplatform.broker.queue.Sender;
+import org.datavaultplatform.broker.queue.TaskSender;
 import org.datavaultplatform.broker.services.AdminDepositService;
 import org.datavaultplatform.broker.test.AddTestProperties;
 import org.datavaultplatform.common.docker.DockerImage;
@@ -102,6 +103,9 @@ class InitialiseBeansConfigIT {
     AdminDepositService adminDepositService;
     
     @Autowired
+    TaskSender taskSender;
+    
+    @Autowired
     AdminController adminController;
     
     @Autowired
@@ -110,6 +114,7 @@ class InitialiseBeansConfigIT {
     @Test
     void testBeans() {
         assertThat(adminDepositService).isNotNull();
+        assertThat(taskSender).isNotNull();
         assertThat(adminController).isNotNull();
         assertThat(sender).isNotNull();
     }

@@ -214,7 +214,7 @@ class VaultsControllerMvcTest {
         mockMvc.perform(get("/vaults/isuun/v1dhay3"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(String.valueOf(isUUN)))
-                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN));
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
 
         verify(userLookupService).isUUN("v1dhay3");
         verifyNoMoreInteractions(restService, userLookupService);
@@ -242,7 +242,7 @@ class VaultsControllerMvcTest {
                 .andExpect(content().string(
                         """
                         ["blah1","blah2","blah3"]"""))
-                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN));
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
 
         verify(userLookupService).getSuggestedUuns("blah");
         verifyNoMoreInteractions(restService, userLookupService);

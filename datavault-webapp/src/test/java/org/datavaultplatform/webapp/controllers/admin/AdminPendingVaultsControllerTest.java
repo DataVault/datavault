@@ -305,6 +305,7 @@ class AdminPendingVaultsControllerTest {
         when(restService.editPendingVault(any(CreateVault.class))).thenReturn(vaultInfo);
 
         mockMvc.perform(post("/admin/pendingVaults/edit").with(csrf())
+                        .contentType(org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED)
                         .param("action", "the-action")
                         .param("pendingID", "pendingID123"))
                 .andDo(print())

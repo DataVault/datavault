@@ -55,8 +55,8 @@ public class FileStoreController {
 
 
     @GetMapping("/filestores")
-    public ResponseEntity<List<FileStore>> getFileStores(@RequestHeader(HEADER_USER_ID) String userID) {
-        User user = usersService.getUser(userID);
+    public ResponseEntity<List<FileStore>> getFileStores( @RequestHeader(HEADER_USER_ID) String userId) {
+        User user = usersService.getUser(userId);
         
         List<FileStore> userStores = user.getFileStores();
         for (FileStore store : userStores) {
@@ -68,36 +68,35 @@ public class FileStoreController {
     }
 
 
-
     @PostMapping("/filestores")
-    public ResponseEntity<FileStore> addFileStore(@RequestHeader(HEADER_USER_ID) String userID,
-                                  @RequestBody FileStore store) {
+    public ResponseEntity<FileStore> addFileStore(@RequestHeader(HEADER_USER_ID) String userId,
+                                                  @RequestBody FileStore store) {
 
-        User user = usersService.getUser(userID);
+        User user = usersService.getUser(userId);
         store.setUser(user);
         fileStoreService.addFileStore(store);
         return new ResponseEntity<>(store, HttpStatus.CREATED);
     }
 
-    @GetMapping("/filestores/{filestoreid}")
-    public ResponseEntity<FileStore> getFileStore(@RequestHeader(HEADER_USER_ID) String userID,
-                               @PathVariable("filestoreid") String filestoreid) {
+    @GetMapping("/filestores/{fileStoreId}")
+    public ResponseEntity<FileStore> getFileStore(@RequestHeader(HEADER_USER_ID) String userId,
+                                                  @PathVariable String fileStoreId) {
 
-        FileStore store = fileStoreService.getFileStore(filestoreid);
+        FileStore store = fileStoreService.getFileStore(fileStoreId);
         return new ResponseEntity<>(store, HttpStatus.OK);
     }
 
     @DeleteMapping("/filestores/{filestoreid}")
-    public ResponseEntity<Void>  deleteFileStore(@RequestHeader(HEADER_USER_ID) String userID,
-                                               @PathVariable("filestoreid") String filestoreid) {
+    public ResponseEntity<Void>  deleteFileStore(@RequestHeader(HEADER_USER_ID) String userId,
+                                                 @PathVariable String filestoreid) {
 
         fileStoreService.deleteFileStore(filestoreid);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @GetMapping("/filestores/local")
-    public ResponseEntity<List<FileStore>> getFileStoresLocal(@RequestHeader(HEADER_USER_ID) String userID) {
-        User user = usersService.getUser(userID);
+    public ResponseEntity<List<FileStore>> getFileStoresLocal( @RequestHeader(HEADER_USER_ID) String userId) {
+        User user = usersService.getUser(userId);
 
         List<FileStore> userStores = user.getFileStores();
         List<FileStore> localStores = new ArrayList<>();
@@ -113,12 +112,11 @@ public class FileStoreController {
     }
 
 
-
     @PostMapping("/filestores/sftp")
-    public ResponseEntity<FileStore> addFileStoreSFTP(@RequestHeader(HEADER_USER_ID) String userID,
-                                      @RequestBody FileStore store) {
+    public ResponseEntity<FileStore> addFileStoreSFTP(@RequestHeader(HEADER_USER_ID) String userId,
+                                                      @RequestBody FileStore store) {
 
-        User user = usersService.getUser(userID);
+        User user = usersService.getUser(userId);
 
         KeyPairInfo keypair = userKeyPairService.generateNewKeyPair();
 
@@ -156,8 +154,8 @@ public class FileStoreController {
     }
 
     @GetMapping("/filestores/sftp")
-    public ResponseEntity<List<FileStore>> getFileStoresSFTP(@RequestHeader(HEADER_USER_ID) String userID) {
-        User user = usersService.getUser(userID);
+    public ResponseEntity<List<FileStore>> getFileStoresSFTP( @RequestHeader(HEADER_USER_ID) String userId) {
+        User user = usersService.getUser(userId);
 
         List<FileStore> userStores = user.getFileStores();
         List<FileStore> localStores = new ArrayList<>();
@@ -172,8 +170,8 @@ public class FileStoreController {
     }
 
     @GetMapping("/filestores/sftp/{filestoreid}")
-    public ResponseEntity<FileStore> getFilestoreSFTP(@RequestHeader(HEADER_USER_ID) String userID,
-                                   @PathVariable("filestoreid") String filestoreid) {
+    public ResponseEntity<FileStore> getFilestoreSFTP( @RequestHeader(HEADER_USER_ID) String userId,
+                                                      @PathVariable String filestoreid) {
 
         FileStore store = fileStoreService.getFileStore(filestoreid);
 

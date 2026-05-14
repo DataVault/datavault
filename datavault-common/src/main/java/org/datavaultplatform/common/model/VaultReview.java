@@ -5,16 +5,20 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.hibernate.annotations.UuidGenerator;
 import org.datavaultplatform.common.util.DateTimeUtils;
-import org.jsondoc.core.annotation.ApiObject;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import jakarta.persistence.*;
-import java.util.Date;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+
 import org.hibernate.Hibernate;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiObject(name = "VaultReview")
+@Schema(name = "VaultReview")
 @Entity
 @Table(name="VaultReviews")
 @NamedEntityGraph(
@@ -28,6 +32,12 @@ import org.hibernate.Hibernate;
     }))
 public class VaultReview {
 
+    // handles VaultReviews with null creationTime
+    public static final Comparator<VaultReview> BY_CREATION_TIME =
+            Comparator.nullsFirst(Comparator.comparing(
+                    VaultReview::getCreationTime,
+                    Comparator.nullsFirst(Comparator.naturalOrder())));
+
     public static final String EG_VAULT_REVIEW = "eg.VaultReview.1";
 
     // VaultReview Identifier
@@ -38,10 +48,10 @@ public class VaultReview {
 
     // Serialise date in ISO 8601 format
     //@JsonFormat(shape=JsonFormat.Shape.STRING, pattern= DateTimeUtils.ISO_DATE_TIME_FORMAT)
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "creationTime", nullable = false)
-    private Date creationTime;
+    @Column(name = "creationTime", nullable = false, columnDefinition = "TIMESTAMP")
+    private LocalDateTime creationTime;
 
+    @JsonIgnore
     @ManyToOne
     private Vault vault;
 
@@ -53,29 +63,26 @@ public class VaultReview {
 
     // Serialise date in ISO 8601 format
     //@JsonFormat(shape=JsonFormat.Shape.STRING, pattern=DateTimeUtils.ISO_DATE_FORMAT)
-    @Temporal(TemporalType.DATE)
-    @Column(name = "newReviewDate", nullable = true)
-    private Date newReviewDate;
-
+    @Column(name = "newReviewDate", nullable = true, columnDefinition = "DATE")
+    private LocalDate newReviewDate;
+    
     // Serialise date in ISO 8601 format
     //@JsonFormat(shape=JsonFormat.Shape.STRING, pattern=DateTimeUtils.ISO_DATE_FORMAT)
-    @Temporal(TemporalType.DATE)
-    @Column(name = "oldReviewDate", nullable = true)
-    private Date oldReviewDate;
+    @Column(name = "oldReviewDate", nullable = true, columnDefinition = "DATE")
+    private LocalDate oldReviewDate;
 
     // The date this review was finally actioned.
     // Serialise date in ISO 8601 format
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern=DateTimeUtils.ISO_DATE_TIME_FORMAT)
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "actionedDate", nullable = true)
-    private Date actionedDate;
+    @Column(name = "actionedDate", nullable = true, columnDefinition = "TIMESTAMP")
+    private LocalDateTime actionedDate;
 
     // A comment, what more can I say
     @Column(name = "comment", nullable = true, columnDefinition = "TEXT")
     private String comment;
 
     public VaultReview() {
-
+        // Default Constructor
     }
 
     public String getId() {
@@ -86,11 +93,11 @@ public class VaultReview {
         this.id = id;
     }
 
-    public Date getCreationTime() {
+    public LocalDateTime getCreationTime() {
         return creationTime;
     }
 
-    public void setCreationTime(Date creationTime) {
+    public void setCreationTime(LocalDateTime creationTime) {
         this.creationTime = creationTime;
     }
 
@@ -102,6 +109,9 @@ public class VaultReview {
 
 
     public List<DepositReview> getDepositReviews() {
+        if (depositReviews == null) {
+            this.depositReviews = new java.util.ArrayList<>();
+        }
         return depositReviews;
     }
 
@@ -109,27 +119,34 @@ public class VaultReview {
         this.depositReviews = depositReviews;
     }
 
-    public Date getNewReviewDate() {
+    @Deprecated
+    LocalDate getNewReviewDate() {
         return newReviewDate;
     }
 
-    public void setNewReviewDate(Date newReviewDate) {
+    @Deprecated
+    private void setNewReviewDate(LocalDate newReviewDate) {
         this.newReviewDate = newReviewDate;
     }
 
-    public Date getOldReviewDate() {
+    public LocalDate getOldReviewDate() {
         return oldReviewDate;
     }
 
-    public void setOldReviewDate(Date oldReviewDate) {
+    /**
+     * Just after this VaultReview is actioned - the Vault's reviewDate can be updated for the next review.
+     * @param oldReviewDate - the Vault.reviewDate at the time the VaultReview is actioned.
+     * @see org.datavaultplatform.broker.scheduled.CheckForDelete
+     */
+    public void setOldReviewDate(LocalDate oldReviewDate) {
         this.oldReviewDate = oldReviewDate;
     }
 
-    public Date getActionedDate() {
+    public LocalDateTime getActionedDate() {
         return actionedDate;
     }
 
-    public void setActionedDate(Date actionedDate) {
+    public void setActionedDate(LocalDateTime actionedDate) {
         this.actionedDate = actionedDate;
     }
 
@@ -156,5 +173,23 @@ public class VaultReview {
     @Override
     public int hashCode() {
         return getClass().hashCode();
+    }
+
+    @JsonIgnore
+    public boolean isReviewUnderway() {
+        return actionedDate == null;
+    }
+
+    @JsonIgnore
+    public boolean isReviewSubmitted() {
+        return !isReviewUnderway();
+    }
+
+    public void addDepositReview(DepositReview deposit) {
+        if (this.depositReviews == null) {
+            this.depositReviews = new java.util.ArrayList<>();
+        }
+        depositReviews.add(deposit);
+        deposit.setVaultReview(this);
     }
 }

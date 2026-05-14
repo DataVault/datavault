@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @Profile("trace")
-class TraceTestController {
+class TraceTestController implements TraceTestControllerApi {
 
     private final Tracer tracer;
 

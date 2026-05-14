@@ -31,12 +31,22 @@ public abstract class BaseReuseDatabaseTest  {
 
   // This container is once per class - not once per method. Methods can 'dirty' the database.
 
-  static final MariaDBContainer<?> mariadb = new MariaDBContainer<>(DockerImage.MARIADB_IMAGE).withReuse(true);
+  static final MariaDBContainer<?> mariadb = new MariaDBContainer<>(DockerImage.MARIADB_IMAGE)
+          .withEnv("TZ", "Europe/London")
+          .withReuse(true);
+
   @Autowired
   InitialiseDatabase initialiseDatabase;
 
   @Autowired
   protected JdbcTemplate template;
+
+  @DynamicPropertySource
+  static void configureProperties(DynamicPropertyRegistry registry) {
+    // We "steal" the host/port from the container but append our timezone
+    String customUrl = mariadb.getJdbcUrl() + "?serverTimezone=Europe/London";
+    registry.add("spring.datasource.url", () -> customUrl);
+  }
 
   @BeforeAll
   public static void beforeAll() {

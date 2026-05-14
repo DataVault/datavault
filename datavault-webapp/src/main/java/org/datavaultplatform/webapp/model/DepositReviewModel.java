@@ -1,85 +1,57 @@
 package org.datavaultplatform.webapp.model;
 
-import java.util.Date;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.datavaultplatform.common.model.Deposit;
+import org.datavaultplatform.common.model.DepositReview;
+import org.datavaultplatform.common.response.DepositInfo;
+import org.springframework.util.Assert;
 
+import java.time.LocalDateTime;
+import java.util.Comparator;
+
+// Used in AdminReviewsController when editing the latest Vault/Deposit Review that is underway
+@Data
+@NoArgsConstructor
 public class DepositReviewModel {
+
+    public static final Comparator<DepositReviewModel> BY_DEPOSIT_CREATION_TIME =
+            Comparator.nullsFirst(Comparator.comparing(
+                    DepositReviewModel::getDepositCreationTime,
+                    Comparator.nullsFirst(Comparator.naturalOrder())));
 
     // DepositReview Identifier
     private String depositReviewId;
-    /*  DEPRECATED */
-    @Deprecated
-    private boolean toBeDeleted;
     private int deleteStatus;
     private String comment;
 
-    ////// Add in here any fields from the Deposit that we want to display
+    // Add in here any fields from the Deposit that we want to display
 
     private String depositId;
-    private String name;
-    private String statusName;
-    private Date creationTime;
+    private String depositName;
+    private String depositStatusName;
+    private LocalDateTime depositCreationTime;
 
-    public String getDepositReviewId() {
-        return depositReviewId;
-    }
+    /**
+     * This common code was put here to avoid duplication.
+     * @param depositReview the deposit review from where to get data from
+     * @param depositInfo the deposit info from where to get data from
+     */
+    public void updateFromDepositReviewAndDepositInfo(DepositReview depositReview, DepositInfo depositInfo) {
+        Assert.notNull(depositReview, "The depositReview cannot be null");
+        Assert.notNull(depositInfo, "The depositInfo cannot be null");
+        Assert.notNull(depositReview.getId(), "The depositReview Id cannot be null");
 
-    public void setDepositReviewId(String depositReviewId) {
-        this.depositReviewId = depositReviewId;
-    }
+        // Set DepositReview stuff
+        this.setDepositReviewId(depositReview.getId());
+        this.setDeleteStatus(depositReview.getDeleteStatus());
+        this.setComment(depositReview.getComment());
 
-    public boolean isToBeDeleted() {
-        return toBeDeleted;
-    }
-
-    public void setToBeDeleted(boolean toBeDeleted) {
-        this.toBeDeleted = toBeDeleted;
-    }
-
-    public int getDeleteStatus() {
-        return deleteStatus;
-    }
-
-    public void setDeleteStatus(int deleteStatus) {
-        this.deleteStatus = deleteStatus;
-    }
-
-    public String getComment() {
-        return comment;
-    }
-
-    public void setComment(String comment) {
-        this.comment = comment;
-    }
-
-    public String getDepositId() {
-        return depositId;
-    }
-
-    public void setDepositId(String depositId) {
-        this.depositId = depositId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getStatusName() {
-        return statusName;
-    }
-
-    public void setStatusName(String statusName) {
-        this.statusName = statusName;
-    }
-
-    public Date getCreationTime() {
-        return creationTime;
-    }
-
-    public void setCreationTime(Date creationTime) {
-        this.creationTime = creationTime;
+        // Set Deposit stuff
+        this.setDepositId(depositInfo.getID());
+        this.setDepositName(depositInfo.getName());
+        Deposit.Status status = depositInfo.getStatus();
+        this.setDepositStatusName(status == null ? "" : status.name());
+        this.setDepositCreationTime(depositInfo.getCreationTime());
     }
 }

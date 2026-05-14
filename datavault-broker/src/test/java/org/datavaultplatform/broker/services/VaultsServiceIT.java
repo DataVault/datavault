@@ -3,7 +3,9 @@ package org.datavaultplatform.broker.services;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Date;
+import java.time.Clock;
+import java.time.LocalDate;
+
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.app.DataVaultBrokerApp;
 import org.datavaultplatform.broker.config.MockRabbitConfig;
@@ -35,6 +37,9 @@ public class VaultsServiceIT extends BaseReuseDatabaseTest {
 
     @MockBean
     AdminDepositService adminDepositService;
+    
+    @Autowired
+    Clock clock;
 
     @Test
     public void checkVaultCount() {
@@ -45,11 +50,11 @@ public class VaultsServiceIT extends BaseReuseDatabaseTest {
 
         int prevVaultCount = vaultsService.count("admin1");
         
-        Vault vault = new Vault("Vault Test");
+        Vault vault = new Vault("Vault Test", clock);
         vault.setContact("vault contact");
         vault.setDescription("Vault for test");
-        vault.setGrantEndDate(new Date());
-        vault.setReviewDate(new Date());
+        vault.setGrantEndDate(LocalDate.now());
+        vault.setReviewDate(LocalDate.now(clock));
         vault.setSnapshot("This is a dummy snapshot");
         vaultsService.addVault(vault);
         

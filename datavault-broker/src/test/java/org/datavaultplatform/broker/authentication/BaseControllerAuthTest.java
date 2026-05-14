@@ -142,6 +142,27 @@ public abstract class BaseControllerAuthTest {
 
   }
 
+  
+  @SneakyThrows
+  protected void checkFailureWhenNotAuthorized(MockHttpServletRequestBuilder builder,
+                                                HttpStatus expectedSuccessStatus, boolean isAdminUser,
+                                                Permission... permissions){
+
+    when(mClientService.getClientByApiKey(API_KEY_1)).thenReturn(clientForIp(IP_ADDRESS));
+    when(mUserService.getUser(USER_ID_1)).thenReturn(mLoginUser);
+    when(mAdminService.isAdminUser(mLoginUser)).thenReturn(isAdminUser);
+    when(mLoginUser.getID()).thenReturn(USER_ID_1);
+    if (isAdminUser) {
+      permissions = Permission.values();
+    }
+    when(mRolesAndPermissionService.getUserPermissions(USER_ID_1)).thenReturn(
+            Set.of(permissions));
+
+    ResultActions resultActions = mvc.perform(setupAuthentication(builder))
+            .andDo(print())
+            .andExpect(status().is(expectedSuccessStatus.value()));
+  }
+  
   @SneakyThrows
   protected void checkSuccessWhenAuthenticated(MockHttpServletRequestBuilder builder,
       Object expectedSuccessResponse, HttpStatus expectedSuccessStatus, boolean isAdminUser,
@@ -151,6 +172,9 @@ public abstract class BaseControllerAuthTest {
     when(mUserService.getUser(USER_ID_1)).thenReturn(mLoginUser);
     when(mAdminService.isAdminUser(mLoginUser)).thenReturn(isAdminUser);
     when(mLoginUser.getID()).thenReturn(USER_ID_1);
+    if (isAdminUser) {
+      permissions = Permission.values();
+    }
     when(mRolesAndPermissionService.getUserPermissions(USER_ID_1)).thenReturn(
         Set.of(permissions));
 

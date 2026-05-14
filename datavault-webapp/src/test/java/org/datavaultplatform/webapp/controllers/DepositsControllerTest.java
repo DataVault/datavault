@@ -1,5 +1,6 @@
 package org.datavaultplatform.webapp.controllers;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.datavaultplatform.common.dto.PausedDepositStateDTO;
@@ -30,9 +31,12 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 
 import java.io.Serializable;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
@@ -210,10 +214,18 @@ class DepositsControllerTest {
         Retrieve retrieve = new Retrieve();
         retrieve.setNote("test retrieve");
 
+        // 1. Convert POJO to a Map
+        Map<String, String> fieldMap =  mapper.convertValue(retrieve, new TypeReference<>() {
+        });
+
+        // 2. Convert Map to MockMvc parameters
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.setAll(fieldMap);
+
         return MvcUtils.performWithForward(mockMvc,
                         post("/vaults/2112/deposits/1234/retrieve")
-                                .content(mapper.writeValueAsString(retrieve))
-                                .contentType(MediaType.APPLICATION_JSON)
+                                .params(params)
+                                .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
                                 .with(csrf())
                 )
                 .andDo(print()).andReturn();
@@ -225,10 +237,18 @@ class DepositsControllerTest {
         createDeposit.setName("DEPOSIT 1");
         createDeposit.setVaultID("2112");
 
+        // 1. Convert POJO to a Map
+        Map<String, String> fieldMap =  mapper.convertValue(createDeposit, new TypeReference<>() {
+        });
+
+        // 2. Convert Map to MockMvc parameters
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.setAll(fieldMap);
+
         return MvcUtils.performWithForward(mockMvc,
                         post("/vaults/2112/deposits/create")
-                                .content(mapper.writeValueAsString(createDeposit))
-                                .contentType(MediaType.APPLICATION_JSON)
+                                .params(params)
+                                .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
                                 .with(csrf())
                 )
                 .andDo(print())

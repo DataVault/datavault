@@ -1,6 +1,6 @@
 package org.datavaultplatform.common.util;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -11,9 +11,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -29,7 +27,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 @Slf4j
-public class UtilsTest {
+class UtilsTest {
 
   @Nested
   class ExecutionExceptionHandlerTests {
@@ -105,12 +103,12 @@ public class UtilsTest {
 
     @Test
     void testNull() {
-      assertThat(Utils.toCommaSeparatedString(null)).isEqualTo("");
+      assertThat(Utils.toCommaSeparatedString(null)).isEmpty();
     }
 
     @Test
     void testEmpty() {
-      assertThat(Utils.toCommaSeparatedString(Collections.emptyList())).isEqualTo("");
+      assertThat(Utils.toCommaSeparatedString(Collections.emptyList())).isEmpty();
     }
 
     @Test
@@ -168,5 +166,13 @@ public class UtilsTest {
       } finally {
         logback.setLevel(initLevel);
       }
+    }
+    
+    @Test
+    void testGetSafeStream() {
+      assertThat(Utils.getSafeStream(null)).isEmpty();
+      assertThat(Utils.getSafeStream(List.of())).isEmpty();
+      assertThat(Utils.getSafeStream(List.of(1,2,3)).toList()).isEqualTo(List.of(1,2,3));
+      assertThat(Utils.getSafeStream(Arrays.asList(null, 1, null, 2, null, 3, null)).toList()).isEqualTo(List.of(1,2,3));
     }
 }

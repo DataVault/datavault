@@ -1,7 +1,6 @@
 package org.datavaultplatform.broker.config;
 
 
-import org.datavaultplatform.broker.services.AdminDepositService;
 import org.datavaultplatform.broker.services.*;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;

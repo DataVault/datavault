@@ -76,6 +76,11 @@ public class Task {
         return taskClass;
     }
 
+    /**
+     * This is the name of a class.
+     * We can't use Class.forName to check if it's valid because it might be the name of a class in another module.
+     * @param taskClass the name of java Task class.
+     */
     public void setTaskClass(String taskClass) {
         this.taskClass = taskClass;
     }

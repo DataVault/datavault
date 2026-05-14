@@ -18,6 +18,7 @@ import org.datavaultplatform.common.model.Permission;
 import org.datavaultplatform.common.model.Retrieve;
 import org.datavaultplatform.common.model.Retrieve.Status;
 import org.datavaultplatform.common.model.Vault;
+import org.datavaultplatform.common.util.DateTimeUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -150,7 +151,7 @@ public class RetrieveDAOIT extends BaseReuseDatabaseTest {
     result.setHasExternalRecipients(false);
     result.setNote("note-1");
     result.setStatus(Status.NOT_STARTED);
-    result.setTimestamp(TestUtils.TWO_YEARS_AGO);
+    result.setTimestamp(DateTimeUtils.toLocalDateTimeAtMidnight(TestUtils.TWO_YEARS_AGO));
      return result;
   }
 
@@ -159,7 +160,7 @@ public class RetrieveDAOIT extends BaseReuseDatabaseTest {
     result.setHasExternalRecipients(false);
     result.setNote("note-2");
     result.setStatus(Status.IN_PROGRESS);
-    result.setTimestamp(TestUtils.TWO_YEARS_AGO);
+    result.setTimestamp(DateTimeUtils.toLocalDateTimeAtMidnight(TestUtils.TWO_YEARS_AGO));
     return result;
   }
 
@@ -168,7 +169,7 @@ public class RetrieveDAOIT extends BaseReuseDatabaseTest {
     result.setHasExternalRecipients(false);
     result.setNote("note-3");
     result.setStatus(Status.COMPLETE);
-    result.setTimestamp(TestUtils.NOW);
+    result.setTimestamp(DateTimeUtils.toLocalDateTimeAtMidnight(TestUtils.NOW));
     return result;
   }
 
@@ -177,7 +178,7 @@ public class RetrieveDAOIT extends BaseReuseDatabaseTest {
     result.setHasExternalRecipients(false);
     result.setNote("note-4");
     result.setStatus(Status.IN_PROGRESS);
-    result.setTimestamp(TestUtils.THREE_YEARS_AGO);
+    result.setTimestamp(DateTimeUtils.toLocalDateTimeAtMidnight(TestUtils.THREE_YEARS_AGO));
     return result;
   }
 
@@ -203,7 +204,7 @@ public class RetrieveDAOIT extends BaseReuseDatabaseTest {
     vault.setName("vault-1");
     vault.setGroup(group);
     vault.setContact("James Bond");
-    vault.setReviewDate(TestUtils.NOW);
+    vault.setReviewDate(DateTimeUtils.toLocalDate(TestUtils.NOW));
     vaultDAO.save(vault);
 
     Deposit deposit = new Deposit();
@@ -246,7 +247,7 @@ public class RetrieveDAOIT extends BaseReuseDatabaseTest {
     vault.setName("vault-1");
     vault.setGroup(group);
     vault.setContact("James Bond");
-    vault.setReviewDate(TestUtils.NOW);
+    vault.setReviewDate(DateTimeUtils.toLocalDate(TestUtils.NOW));
     vaultDAO.save(vault);
 
     Deposit deposit = new Deposit();
@@ -257,13 +258,13 @@ public class RetrieveDAOIT extends BaseReuseDatabaseTest {
 
     Retrieve ret1 = getRetrieve1();
     ret1.setDeposit(deposit);
-    ret1.setTimestamp(TestUtils.NOW);
+    ret1.setTimestamp(DateTimeUtils.toLocalDateTimeAtMidnight(TestUtils.NOW));
     Retrieve ret2 = getRetrieve2();
     ret2.setDeposit(deposit);
-    ret2.setTimestamp(TestUtils.TWO_YEARS_AGO);
+    ret2.setTimestamp(DateTimeUtils.toLocalDateTimeAtMidnight(TestUtils.TWO_YEARS_AGO));
     Retrieve ret3 = getRetrieve3();
     ret3.setDeposit(deposit);
-    ret3.setTimestamp(TestUtils.ONE_YEAR_AGO);
+    ret3.setTimestamp(DateTimeUtils.toLocalDateTimeAtMidnight(TestUtils.ONE_YEAR_AGO));
 
     dao.save(ret1);
     dao.save(ret2);
@@ -296,7 +297,7 @@ public class RetrieveDAOIT extends BaseReuseDatabaseTest {
     vault.setName("vault-1");
     vault.setGroup(group);
     vault.setContact("James Bond");
-    vault.setReviewDate(TestUtils.NOW);
+    vault.setReviewDate(DateTimeUtils.toLocalDate(TestUtils.NOW));
     vaultDAO.save(vault);
 
     Deposit deposit = new Deposit();
@@ -346,7 +347,7 @@ public class RetrieveDAOIT extends BaseReuseDatabaseTest {
     vault.setName("vault-1");
     vault.setGroup(group);
     vault.setContact("James Bond");
-    vault.setReviewDate(TestUtils.NOW);
+    vault.setReviewDate(DateTimeUtils.toLocalDate(TestUtils.NOW));
     vaultDAO.save(vault);
 
     Deposit deposit = new Deposit();
@@ -402,7 +403,7 @@ public class RetrieveDAOIT extends BaseReuseDatabaseTest {
     vault.setName("vault-1");
     vault.setGroup(group);
     vault.setContact("James Bond");
-    vault.setReviewDate(TestUtils.NOW);
+    vault.setReviewDate(DateTimeUtils.toLocalDate(TestUtils.NOW));
     vaultDAO.save(vault);
 
     Deposit deposit = new Deposit();

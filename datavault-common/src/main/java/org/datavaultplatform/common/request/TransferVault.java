@@ -3,27 +3,26 @@ package org.datavaultplatform.common.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
-import org.jsondoc.core.annotation.ApiObject;
-import org.jsondoc.core.annotation.ApiObjectField;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiObject(name = "TransferVault")
+@Schema(name = "TransferVault")
 @Data
 public class TransferVault {
 
-    @ApiObjectField(description = "The reason for the vault transfer", required = true)
+    @Schema(description = "The reason for the vault transfer", required = true)
     private String reason;
 
-    @ApiObjectField(description = "The ID of the user to transfer the vault to", required = true)
+    @Schema(description = "The ID of the user to transfer the vault to", required = true)
     private String userId;
 
-    @ApiObjectField(description = "The ID of the role to associate with the previous vault owner")
+    @Schema(description = "The ID of the role to associate with the previous vault owner")
     private Long roleId;
 
-    @ApiObjectField(description = "If the previous data owner is changing to a new role as part of this transfer")
+    @Schema(description = "If the previous data owner is changing to a new role as part of this transfer")
     private boolean changingRoles;
 
-    @ApiObjectField(description = "If the vault is being orphaned. Only possible to do so if the user is an administrator. Mutually exclusive with `changingRolse`")
+    @Schema(description = "If the vault is being orphaned. Only possible to do so if the user is an administrator. Mutually exclusive with `changingRolse`")
     private boolean orphaning;
 
     public Long getRoleId() {

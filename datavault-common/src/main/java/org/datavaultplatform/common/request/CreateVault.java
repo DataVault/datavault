@@ -3,127 +3,125 @@ package org.datavaultplatform.common.request;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
-import org.jsondoc.core.annotation.ApiObject;
-import org.jsondoc.core.annotation.ApiObjectField;
+import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiObject(name = "CreateVault")
-@Data
+@Schema(name = "CreateVault")
 public class CreateVault {
 
     /*
      * TODO: Make a base Vault class and move everything that is shared between
      * Vault and Pending vault into it
      */
-    @ApiObjectField(description = "An ID for the partially completed pending vault")
+    @Schema(description = "An ID for the partially completed pending vault")
     private String pendingID;
 
-    @ApiObjectField(description = "The logged in user's UUN (used to pass to JS validation)")
+    @Schema(description = "The logged in user's UUN (used to pass to JS validation)")
     private String loggedInAs;
 
-    @ApiObjectField(description = "A name for the new vault")
+    @Schema(description = "A name for the new vault")
     private String name;
 
-    @ApiObjectField(description = "A description of the vault")
+    @Schema(description = "A description of the vault")
     private String description;
 
-    @ApiObjectField(description = "Notes regarding data retention")
+    @Schema(description = "Notes regarding data retention")
     private String notes;
 
-    @ApiObjectField(description = "Estimate of vault size")
+    @Schema(description = "Estimate of vault size")
     private String estimate;
 
-    @ApiObjectField(description = "How we are billing")
+    @Schema(description = "How we are billing")
     private String billingType;
 
-    @ApiObjectField(description = "The policy that will be applied to this vault the format of the string is policyID-lengthofPolicy")
+    @Schema(description = "The policy that will be applied to this vault the format of the string is policyID-lengthofPolicy")
     private String policyInfo;
 
-    @ApiObjectField(description = "The group which is related to this vault")
+    @Schema(description = "The group which is related to this vault")
     private String groupID;
 
-    @ApiObjectField(description = "A reference to an external metadata record that describes this vault")
+    @Schema(description = "A reference to an external metadata record that describes this vault")
     private String datasetID;
 
-    @ApiObjectField(description = "Define the minimum of time the archive will be kept")
-    private Date billingGrantEndDate;
+    @Schema(description = "Define the minimum of time the archive will be kept")
+    private LocalDate billingGrantEndDate;
 
-    @ApiObjectField(description = "Define the minimum of time the archive will be kept")
-    private Date grantEndDate;
+    @Schema(description = "Define the minimum of time the archive will be kept")
+    private LocalDate grantEndDate;
 
-    @ApiObjectField(description = "The date by which the vault should be reviewed for decision as to whether it should be deleted or whether there are funds available to support continued storage")
-    private Date reviewDate;
+    @Schema(description = "The date by which the vault should be reviewed for decision as to whether it should be deleted or whether there are funds available to support continued storage")
+    private LocalDate reviewDate;
 
-    @ApiObjectField(description = "Has the pending vault been confirmed")
+    @Schema(description = "Has the pending vault been confirmed")
     private Boolean confirmed = false;
 
-    @ApiObjectField(description = "Did the user accept the various rules on the create vault intro page")
+    @Schema(description = "Did the user accept the various rules on the create vault intro page")
     private Boolean affirmed = false;
 
-    @ApiObjectField(description = "If the billng type is slice we will store an identifier for the slice")
+    @Schema(description = "If the billng type is slice we will store an identifier for the slice")
     private String sliceID;
 
-    @ApiObjectField(description = "If the billng type is grant or budget we will store an identifier for authoriser")
+    @Schema(description = "If the billng type is grant or budget we will store an identifier for authoriser")
     private String grantAuthoriser;
-    @ApiObjectField(description = "If the billng type is grant or budget we will store an identifier for authoriser")
+    @Schema(description = "If the billng type is grant or budget we will store an identifier for authoriser")
     private String budgetAuthoriser;
 
-    @ApiObjectField(description = "If the billng type is grant or budget we will store an identifier for school / unit")
+    @Schema(description = "If the billng type is grant or budget we will store an identifier for school / unit")
     private String grantSchoolOrUnit;
 
-    @ApiObjectField(description = "If the billng type is grant or budget we will store an identifier for school / unit")
+    @Schema(description = "If the billng type is grant or budget we will store an identifier for school / unit")
     private String budgetSchoolOrUnit;
 
-    @ApiObjectField(description = "If the billng type is grant or budget we will store an identifier for subunit")
+    @Schema(description = "If the billng type is grant or budget we will store an identifier for subunit")
     private String grantSubunit;
 
-    @ApiObjectField(description = "If the billng type is grant or budget we will store an identifier for subunit")
+    @Schema(description = "If the billng type is grant or budget we will store an identifier for subunit")
     private String budgetSubunit;
 
-    @ApiObjectField(description = "If the billng type is grant we will store an identifier for project title")
+    @Schema(description = "If the billng type is grant we will store an identifier for project title")
     private String projectTitle;
 
-    @ApiObjectField(description = "Is the logged in user the vault owner")
+    @Schema(description = "Is the logged in user the vault owner")
     private Boolean isOwner;
 
-    @ApiObjectField(description = "Prospective Owner of the vault (who can be different from who is creating the pending vault)")
+    @Schema(description = "Prospective Owner of the vault (who can be different from who is creating the pending vault)")
     private String vaultOwner;
 
-    @ApiObjectField(description = "Creator of the pending vault (who can be different from who owns the pending vault)")
+    @Schema(description = "Creator of the pending vault (who can be different from who owns the pending vault)")
     private String vaultCreator;
 
-    @ApiObjectField(description = "List of pending Nominated Data Managers")
+    @Schema(description = "List of pending Nominated Data Managers")
     private List<String> nominatedDataManagers;
 
-    @ApiObjectField(description = "List of pending depositors")
+    @Schema(description = "List of pending depositors")
     private List<String> depositors;
 
-    @ApiObjectField(description = "contact person for Pure")
+    @Schema(description = "contact person for Pure")
     private String contactPerson;
 
-    @ApiObjectField(description = "List of creators of the dataset")
+    @Schema(description = "List of creators of the dataset")
     private List<String> dataCreators;
 
-    @ApiObjectField(description = "Agree to Pure Link")
+    @Schema(description = "Agree to Pure Link")
     private Boolean pureLink;
 
-    @ApiObjectField(description = "The Billing page sliceQueryChoice radio button value")
+    @Schema(description = "The Billing page sliceQueryChoice radio button value")
     private String sliceQueryChoice;
 
-    @ApiObjectField(description = "The Billing page fundingQueryChoice radio button value")
+    @Schema(description = "The Billing page fundingQueryChoice radio button value")
     private String fundingQueryChoice;
 
-    @ApiObjectField(description = "The Billing page feewaiverQueryChoice radio button value")
+    @Schema(description = "The Billing page feewaiverQueryChoice radio button value")
     private String feewaiverQueryChoice;
 
-    @ApiObjectField(description = "The Billing payment details.")
+    @Schema(description = "The Billing payment details.")
 	private String paymentDetails;
 
     public CreateVault() {
@@ -226,27 +224,27 @@ public class CreateVault {
         this.datasetID = datasetID;
     }
 
-    public Date getGrantEndDate() {
+    public LocalDate getGrantEndDate() {
         return grantEndDate;
     }
 
-    public void setGrantEndDate(Date grantEndDate) {
+    public void setGrantEndDate(LocalDate grantEndDate) {
         this.grantEndDate = grantEndDate;
     }
 
-    public Date getBillingGrantEndDate() {
+    public LocalDate getBillingGrantEndDate() {
         return billingGrantEndDate ;
     }
 
-    public void setBillingGrantEndDate(Date billingGrantEndDate) {
+    public void setBillingGrantEndDate(LocalDate billingGrantEndDate) {
         this.billingGrantEndDate = billingGrantEndDate;
     }
 
-    public Date getReviewDate() {
+    public LocalDate getReviewDate() {
         return reviewDate;
     }
 
-    public void setReviewDate(Date reviewDate) {
+    public void setReviewDate(LocalDate reviewDate) {
         this.reviewDate = reviewDate;
     }
 

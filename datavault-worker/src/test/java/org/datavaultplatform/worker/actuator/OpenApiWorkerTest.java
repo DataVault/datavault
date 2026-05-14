@@ -2,6 +2,7 @@ package org.datavaultplatform.worker.actuator;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import lombok.extern.slf4j.Slf4j;
+import org.datavaultplatform.common.actuator.WithMockActuatorUser;
 import org.datavaultplatform.common.event.RecordingEventSender;
 import org.datavaultplatform.worker.app.DataVaultWorkerInstanceApp;
 import org.datavaultplatform.worker.rabbit.RabbitMessageSelectorScheduler;
@@ -30,11 +31,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         "management.endpoints.web.exposure.include=*",
         "worker.security.enabled=true",
         "management.endpoints.web.base-path=/actuator",
-        "management.endpoints.enabled-by-default=true",
+        "management.endpoints.access.default=read_only",
         "management.health.rabbit.enabled=false"})
 @AutoConfigureMockMvc
 @Import(TestClockConfig.class)
-public class OpenApiWorkerTest {
+class OpenApiWorkerTest {
 
     @Autowired
     MockMvc mvc;
@@ -55,6 +56,7 @@ public class OpenApiWorkerTest {
     }
 
     @Test
+    @WithMockActuatorUser
     void testOpenApiAsJson() throws Exception {
         MvcResult mvcResult = mvc.perform(
                         get("http://localhost:8080/v3/api-docs"))
@@ -63,13 +65,14 @@ public class OpenApiWorkerTest {
                 .andExpect(jsonPath("$.info.title").value("DataVault Worker"))
                 .andExpect(jsonPath("$.info.description").value("worker application"))
                 .andExpect(jsonPath("$.info.version").value("v0.0.1"))
-                .andExpect(jsonPath("$.paths").isEmpty())
+                .andExpect(jsonPath("$.paths").isNotEmpty())
                 .andDo(print())
                 .andReturn();
 
     }
 
     @Test
+    @WithMockActuatorUser
     void testOpenApiAsSwaggerUI() throws Exception {
         MvcResult mvcResult = mvc.perform(
                         get("http://localhost:8080/swagger-ui/index.html"))

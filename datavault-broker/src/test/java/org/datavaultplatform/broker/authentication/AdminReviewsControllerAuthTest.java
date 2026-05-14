@@ -1,8 +1,7 @@
 package org.datavaultplatform.broker.authentication;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -13,12 +12,14 @@ import org.datavaultplatform.common.model.Permission;
 import org.datavaultplatform.common.model.VaultReview;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 
-public class AdminReviewsControllerAuthTest extends BaseControllerAuthTest {
+class AdminReviewsControllerAuthTest extends BaseControllerAuthTest {
 
   @MockBean
   AdminReviewsController controller;
@@ -69,7 +70,7 @@ public class AdminReviewsControllerAuthTest extends BaseControllerAuthTest {
     checkWorksWhenAuthenticatedFailsOtherwise(
         post("/admin/vaults/vaultreviews/current")
             .content("vaultID1")
-            .contentType(MediaType.APPLICATION_JSON),
+            .contentType(MediaType.TEXT_PLAIN_VALUE),
         AuthTestData.REVIEW_INFO_1,
         Permission.CAN_MANAGE_VAULTS);
 
@@ -115,6 +116,21 @@ public class AdminReviewsControllerAuthTest extends BaseControllerAuthTest {
 
     verify(controller).editDepositReview(USER_ID_1, argDepositReview.getValue());
     assertEquals(AuthTestData.DEPOSIT_REVIEW_1.getId(), argDepositReview.getValue().getId());
+  }
+
+  @ParameterizedTest
+  @ValueSource(booleans = {true, false})
+  void testPostRefreshDepositsOnUnderwayVaultReview(boolean depositReviewsAdded) {
+    when(controller.refreshDepositsOnUnderwayVaultReview(
+            "vaultId123")).thenReturn(depositReviewsAdded);
+    
+    checkWorksWhenAuthenticatedFailsOtherwise(
+            post("/admin/vaults/vaultreviews/{vaultId}/refresh", "vaultId123"),
+            depositReviewsAdded,
+            Permission.CAN_MANAGE_VAULTS);
+
+    verify(controller).refreshDepositsOnUnderwayVaultReview("vaultId123");
+    verifyNoMoreInteractions(controller);
   }
 
   @AfterEach

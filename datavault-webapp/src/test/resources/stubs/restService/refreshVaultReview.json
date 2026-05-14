@@ -1,0 +1,10 @@
+{
+  "priority": 1,
+  "request": {
+    "urlPathPattern": "/admin/vaults/reviews/(?<vaultId>[^/]+)/refresh",
+    "method": "POST"
+  },
+  "response": {
+    "status": 200
+  }
+}

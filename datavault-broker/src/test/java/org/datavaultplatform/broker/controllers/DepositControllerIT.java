@@ -3,7 +3,6 @@ package org.datavaultplatform.broker.controllers;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.app.DataVaultBrokerApp;
 import org.datavaultplatform.broker.config.MockRabbitConfig;
-import org.datavaultplatform.broker.services.AdminDepositService;
 import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.broker.test.AddTestProperties;
 import org.datavaultplatform.broker.test.BaseDatabaseTest;
@@ -27,7 +26,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.Assert.assertThrows;
@@ -113,7 +112,7 @@ class DepositControllerIT extends BaseDatabaseTest {
         vault.setDescription("test-vault");
         vault.setContact("test-contact");
         vault.setName("test-vault-name");
-        vault.setReviewDate(new Date());
+        vault.setReviewDate(LocalDate.now());
         vaultDAO.save(vault);
         vaultDAO.flush();
         

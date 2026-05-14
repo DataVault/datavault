@@ -43,7 +43,7 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 @Import(WaitForLogoutNotificationConfig.class)
 @ProfileStandalone
-public class SessionRegistryUsageTest {
+class SessionRegistryUsageTest {
 
   @MockBean
   NotifyLoginService mNotifyLoginService;

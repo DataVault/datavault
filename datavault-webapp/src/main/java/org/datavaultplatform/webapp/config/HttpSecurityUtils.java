@@ -1,5 +1,6 @@
 package org.datavaultplatform.webapp.config;
 
+import org.datavaultplatform.common.config.SecurityMethod;
 import org.datavaultplatform.webapp.authentication.AuthenticationSuccess;
 import org.datavaultplatform.webapp.config.trace.TraceLoggingFilter;
 import org.datavaultplatform.webapp.config.trace.MdcRequestFilter;
@@ -9,6 +10,9 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.context.SecurityContextHolderFilter;
 import org.springframework.security.web.context.SecurityContextPersistenceFilter;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 public class HttpSecurityUtils {
 
     public static void authorizeRequests(
@@ -16,6 +20,47 @@ public class HttpSecurityUtils {
             TraceLoggingFilter traceLoggingFilter,
             MdcRequestFilter userMdcFilter) throws Exception {
         authorizeRequests(http, false, traceLoggingFilter, userMdcFilter);
+    }
+
+    // Map to store URL patterns and their corresponding HttpSecurity rules
+    // Order matters: more specific paths should come before more general paths.
+    public static final Map<String, String> SECURITY_PATH_MAP = new LinkedHashMap<>();
+
+    static {
+        // Populate this map based on HttpSecurityUtils.authorizeRequests
+        // Example entries based on your HttpSecurityUtils.java:
+        SECURITY_PATH_MAP.put("/favicon.ico", "permitAll()");
+        SECURITY_PATH_MAP.put("/resources/**", "permitAll()");
+        SECURITY_PATH_MAP.put("/error", "permitAll()");
+        SECURITY_PATH_MAP.put("/auth/**", "permitAll()");
+
+        // Specific admin paths
+        SECURITY_PATH_MAP.put("/admin/paused/deposit/toggle", "hasRole('IS_ADMIN')");
+        SECURITY_PATH_MAP.put("/admin/paused/retrieve/toggle", "hasRole('IS_ADMIN')");
+
+        SECURITY_PATH_MAP.put("/admin/paused/deposit/history", "hasRole('USER')");
+        SECURITY_PATH_MAP.put("/admin/paused/retrieve/history", "hasRole('USER')");
+
+        SECURITY_PATH_MAP.put("/admin/archivestores/**", "hasAuthority('ROLE_ADMIN_ARCHIVESTORES')");
+        SECURITY_PATH_MAP.put("/admin/billing/**", "hasAuthority('ROLE_ADMIN_BILLING')");
+
+        SECURITY_PATH_MAP.put("/admin/deposits/**", "hasAuthority('ROLE_ADMIN_DEPOSITS')");
+        SECURITY_PATH_MAP.put("/admin/events/**", "hasAuthority('ROLE_ADMIN_EVENTS')");
+        SECURITY_PATH_MAP.put("/admin/retentionpolicies/**", "hasAuthority('ROLE_ADMIN_RETENTIONPOLICIES')");
+        SECURITY_PATH_MAP.put("/admin/retrieves/**", "hasAuthority('ROLE_ADMIN_RETRIEVES')");
+        SECURITY_PATH_MAP.put("/admin/roles/**", "hasAuthority('ROLE_ADMIN_ROLES')");
+
+        SECURITY_PATH_MAP.put("/admin/schools/**", "hasAuthority('ROLE_ADMIN_SCHOOLS')");
+        SECURITY_PATH_MAP.put("/admin/vaults/**", "hasAuthority('ROLE_ADMIN_VAULTS')");
+        SECURITY_PATH_MAP.put("/admin/reviews/**", "hasAuthority('ROLE_ADMIN_REVIEWS')");
+        SECURITY_PATH_MAP.put("/admin/pendingVaults/**", "hasRole('IS_ADMIN')");
+
+        // General admin paths (more specific than /**)
+        SECURITY_PATH_MAP.put("/admin/", "hasAuthority('ROLE_ADMIN')");
+        SECURITY_PATH_MAP.put("/admin", "hasRole('ADMIN')");
+
+        // Most general matcher - must be last
+        SECURITY_PATH_MAP.put("/**", "hasAuthority('ROLE_USER')");
     }
 
     public static void authorizeRequests(
@@ -29,11 +74,28 @@ public class HttpSecurityUtils {
         
         http.authorizeHttpRequests(authz -> {
 
-            authz.requestMatchers("/favicon.ico").permitAll(); //OKAY
-
             if (includeStandaloneOnly) {
                 authz.requestMatchers("/test/**", "/index").permitAll();
             }
+
+            for(Map.Entry<String, String> entry : SECURITY_PATH_MAP.entrySet()) {
+                var matchers = authz.requestMatchers(entry.getKey());
+                SecurityMethod sm = SecurityMethod.from(entry.getValue());
+                if (sm.isPermitAll()) {
+                    matchers.permitAll();
+
+                } else if (sm.isHasRole()) {
+                    matchers.hasRole(sm.arg());
+
+                } else if (sm.isHasAuthority()) {
+                    matchers.hasAuthority(sm.arg());
+
+                } else {
+                    throw new RuntimeException("Unknown security method: " + sm.method());
+                }
+            }
+
+            /*
 
             authz.requestMatchers("/resources/**").permitAll(); //OKAY
             authz.requestMatchers("/error").permitAll();      //OKAY
@@ -62,13 +124,14 @@ public class HttpSecurityUtils {
 
             // most general matcher - has to go last
             authz.requestMatchers("/**").hasAuthority("ROLE_USER"); //OKAY
+             */
         });
     }
 
 
     public static void sessionManagement(HttpSecurity http, SessionRegistry sessionRegistry) throws Exception {
         http.sessionManagement(sm -> {
-                sm.maximumSessions(1)
+            sm.maximumSessions(1)
                     .expiredUrl("/auth/login?security")
                     .sessionRegistry(sessionRegistry);
         });

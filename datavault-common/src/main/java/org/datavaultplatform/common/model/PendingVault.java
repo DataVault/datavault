@@ -3,21 +3,23 @@ package org.datavaultplatform.common.model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.util.DateTimeUtils;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.UuidGenerator;
-import org.jsondoc.core.annotation.ApiObject;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import jakarta.persistence.*;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiObject(name = "PendingVault")
+@Schema(name = "PendingVault")
 @Entity
 @Table(name = "PendingVaults")
 @NamedEntityGraph(name = PendingVault.EG_PENDING_VAULT, attributeNodes = {
@@ -74,8 +76,8 @@ public class PendingVault {
 
     // Serialise date in ISO 8601 format
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateTimeUtils.ISO_DATE_TIME_FORMAT)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date creationTime;
+    @Column(name = "creationTime", nullable = false, columnDefinition = "TIMESTAMP")
+    private LocalDateTime creationTime;
 
     // Hibernate version
     @Version
@@ -100,15 +102,13 @@ public class PendingVault {
     // it!
     // Serialise date in ISO 8601 format
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateTimeUtils.ISO_DATE_FORMAT)
-    @Temporal(TemporalType.DATE)
-    @Column(name = "grantEndDate", nullable = true)
-    private Date grantEndDate;
+    @Column(name = "grantEndDate", nullable = true, columnDefinition = "DATE")
+    private LocalDate grantEndDate;
 
     // Serialise date in ISO 8601 format
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateTimeUtils.ISO_DATE_FORMAT)
-    @Temporal(TemporalType.DATE)
-    @Column(name = "reviewDate", nullable = true)
-    private Date reviewDate;
+    @Column(name = "reviewDate", nullable = true, columnDefinition = "DATE")
+    private LocalDate reviewDate;
 
     // Estimate of Vault size
     @Column(name = "estimate", nullable = true, columnDefinition = "TEXT")
@@ -250,15 +250,15 @@ public class PendingVault {
         this.retentionPolicy = retentionPolicy;
     }
 
-    public void setGrantEndDate(Date grantEndDate) {
+    public void setGrantEndDate(LocalDate grantEndDate) {
         this.grantEndDate = grantEndDate;
     }
 
-    public Date getGrantEndDate() {
+    public LocalDate getGrantEndDate() {
         return this.grantEndDate;
     }
 
-    public void setReviewDate(Date reviewDate) {
+    public void setReviewDate(LocalDate reviewDate) {
         this.reviewDate = reviewDate;
     }
 
@@ -270,7 +270,7 @@ public class PendingVault {
         return this.estimate;
     }
 
-    public Date getReviewDate() {
+    public LocalDate getReviewDate() {
         return this.reviewDate;
     }
 
@@ -290,11 +290,11 @@ public class PendingVault {
         this.sliceID = sliceID;
     }
 
-    public void setCreationTime(Date creationTime) {
+    public void setCreationTime(LocalDateTime creationTime) {
         this.creationTime = creationTime;
     }
 
-    public Date getCreationTime() {
+    public LocalDateTime getCreationTime() {
         return creationTime;
     }
 

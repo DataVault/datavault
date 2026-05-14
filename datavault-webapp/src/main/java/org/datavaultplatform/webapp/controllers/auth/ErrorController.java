@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.webapp.controllers.trace.BaseErrorController;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,7 +26,7 @@ public class ErrorController extends BaseErrorController implements org.springfr
         this.outputTraceIdOnError = outputTraceIdOnError;
     }
 
-    @RequestMapping("/error")
+    @RequestMapping(value = "/error", produces = MediaType.TEXT_HTML_VALUE)
     public String customError(HttpServletRequest request, HttpServletResponse response, Model model) {
 
         // Retrieve some useful information from the request

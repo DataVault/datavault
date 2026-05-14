@@ -4,11 +4,10 @@ package org.datavaultplatform.common.task;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -126,4 +125,22 @@ class TaskExecutorTest {
     };
   }
 
+  @Test
+  void testTaskExecutorTimeout() {
+    TaskConfigTL.get().setExecutorProperShutdownEnabled(true);
+    TimeoutException te = assertThrows(TimeoutException.class, () -> {
+
+      TaskExecutor<String> executor = new TaskExecutor<>(1, "executorTimeoutTest");
+      for (int i = 0; i < 10; i++) {
+        String label = "" + i;
+        executor.add(() -> {
+          Thread.sleep(20_000);
+          return label;
+        });
+      }
+      executor.execute(null, Duration.ofSeconds(3));
+    });
+    assertThat(te.getMessage()).isEqualTo("The executor [executorTimeoutTest] has timed out after [PT3S]");
+    assertThat(te).hasCauseInstanceOf(CancellationException.class);
+  }
 }

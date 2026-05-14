@@ -38,8 +38,8 @@
                                 <td>[[${vault.getUserName()}]] ([[${vault.getUserID()}]])</td>
                                 <td></td>
                                 <td>[[${vault.getVaultSize()}]]</td>
-                                <td>[[${#dates.format(vault.getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */--></td>
-                                <td class="text-muted">[[${#dates.format(vault.getReviewDate(),dateFormatddMMyyyy)}]]<!--/* date */--></td>
+                                <td>[[${#temporals.format(vault.getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */--></td>
+                                <td class="text-muted">[[${#temporals.format(vault.getReviewDate(),dateFormatddMMyyyy)}]]<!--/* date */--></td>
                             </tr>
                         </tbody>
                     </table>

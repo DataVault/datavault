@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 
 @Profile("trace")
 @Controller
-public class TraceIdDemoController {
+public class TraceIdDemoController implements TraceIdDemoControllerApi {
 
     private static final Logger log = LoggerFactory.getLogger(TraceIdDemoController.class);
 
@@ -33,7 +33,7 @@ public class TraceIdDemoController {
     }
 
     @GetMapping("/page1")
-    String getPageOne(HttpServletRequest request, HttpServletResponse response, ModelMap model){
+    public String getPageOne(HttpServletRequest request, HttpServletResponse response, ModelMap model){
 
         model.addAttribute("time", Instant.now());
         model.addAttribute("message", "the is page 1");
@@ -49,7 +49,7 @@ public class TraceIdDemoController {
     }
 
     @GetMapping("/oops")
-    String getErrorPage(HttpServletRequest request, HttpServletResponse response, ModelMap model){
+    public String getErrorPage(HttpServletRequest request, HttpServletResponse response, ModelMap model){
         // Add current trace ID to the model
         String traceId = Optional.ofNullable(tracer.currentSpan())
                 .map(span -> span.context().traceId())

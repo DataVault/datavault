@@ -1,6 +1,6 @@
 package org.datavaultplatform.common.model;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import jakarta.persistence.Column;
@@ -13,8 +13,6 @@ import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 
 import com.fasterxml.jackson.annotation.*;
 import org.datavaultplatform.common.util.DateTimeUtils;
@@ -54,21 +52,18 @@ public class RetentionPolicy {
 
     // Date policy in effect
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern= DateTimeUtils.ISO_DATE_FORMAT)
-    @Temporal(TemporalType.DATE)
-    @Column(name = "inEffectDate", nullable = true)
-    private Date inEffectDate;
+    @Column(name = "inEffectDate", nullable = true, columnDefinition = "DATE")
+    private LocalDate inEffectDate;
 
     // Date policy in effect
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern=DateTimeUtils.ISO_DATE_FORMAT)
-    @Temporal(TemporalType.DATE)
-    @Column(name = "endDate", nullable = true)
-    private Date endDate;
+    @Column(name = "endDate", nullable = true, columnDefinition = "DATE")
+    private LocalDate endDate;
 
     // Date policy in effect
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern=DateTimeUtils.ISO_DATE_FORMAT)
-    @Temporal(TemporalType.DATE)
-    @Column(name = "dataGuidanceReviewed", nullable = true)
-    private Date dataGuidanceReviewed;
+    @Column(name = "dataGuidanceReviewed", nullable = true, columnDefinition = "DATE")
+    private LocalDate dataGuidanceReviewed;
 
     // A policy is related to a number of vaults
     @JsonIgnore
@@ -157,27 +152,27 @@ public class RetentionPolicy {
         this.extendUponRetrieval = extendUponRetrieval;
     }
 
-    public Date getInEffectDate() {
+    public LocalDate getInEffectDate() {
         return inEffectDate;
     }
     
-    public void setInEffectDate(Date inEffectDate) {
+    public void setInEffectDate(LocalDate inEffectDate) {
         this.inEffectDate = inEffectDate;
     }
     
-    public Date getEndDate() {
+    public LocalDate getEndDate() {
         return endDate;
     }
     
-    public void setEndDate(Date endDate) {
+    public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
     }
     
-    public Date getDataGuidanceReviewed() {
+    public LocalDate getDataGuidanceReviewed() {
         return dataGuidanceReviewed;
     }
     
-    public void setDataGuidanceReviewed(Date dataGuidanceReviewed) {
+    public void setDataGuidanceReviewed(LocalDate dataGuidanceReviewed) {
         this.dataGuidanceReviewed = dataGuidanceReviewed;
     }
 

@@ -12,7 +12,6 @@
 
   <artifactId>datavault-common</artifactId>
   <name>datavault-common</name>
-  <version>0.0.1-SNAPSHOT</version>
 
   <dependencies>
 
@@ -67,8 +66,8 @@
     </dependency>
 
     <dependency>
-      <groupId>org.jsondoc</groupId>
-      <artifactId>jsondoc-core</artifactId>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
     </dependency>
 
     <dependency>
@@ -229,6 +228,7 @@
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
+        <version>${jacoco.plugin.version}</version>
         <executions>
           <execution>
             <id>prepare-agent-integration</id>

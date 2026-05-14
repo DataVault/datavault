@@ -17,6 +17,7 @@ import org.datavaultplatform.common.storage.impl.LocalFileSystem;
 import org.datavaultplatform.common.storage.impl.MultiLocalFileSystem;
 import org.datavaultplatform.common.task.Context;
 import org.datavaultplatform.common.task.Task;
+import org.datavaultplatform.common.task.TaskConfigTL;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -96,11 +97,13 @@ class DeleteTest {
     void tearDown() {
         deletedFiles.clear();
         deletedFilesByLocation.clear();
+        TaskConfigTL.reset();
     }
 
     @BeforeEach
     @SneakyThrows
     void setup() {
+        TaskConfigTL.get().setExecutorProperShutdownEnabled(true);
         Files.createDirectories(archiveStoreRoot);
 
         this.startTimestamp = new Date();
@@ -750,7 +753,7 @@ class DeleteTest {
 
             // the single delete chunk that was attempted failed for location2
             assertThat(deletedFilesByLocation).hasSize(1);
-            File noChunkFile = new File("/tmp/delete/tempDir/TEST-BAG-ID.tar");
+            File noChunkFile = new File("/tmp/delete/tempDir/TEST-BAG-ID.tar"); //this resolves to /private/tmp/delete/tempDir/TEST-BAG-ID.tar on mac
             assertThat(deletedFilesByLocation.get(location1)).contains(noChunkFile);
 
             // deleted chunks

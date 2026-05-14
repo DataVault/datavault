@@ -14,7 +14,6 @@ import org.mockito.Mockito;
 import java.time.*;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,8 +34,7 @@ class ValidateServiceTest {
 
     @Test
     void testGetDefaultReviewDate() {
-        Date defaultReviewDate = validateService.getDefaultReviewDate();
-        LocalDate defaultReviewLocalDate = convertDateToLocalDate(defaultReviewDate);
+        LocalDate defaultReviewLocalDate = validateService.getDefaultReviewDate();
 
         LocalDate todayPlusThreeYears = today.plusYears(3);
         assertThat(defaultReviewLocalDate).isEqualTo(todayPlusThreeYears);
@@ -45,8 +43,7 @@ class ValidateServiceTest {
 
     @Test
     void testGetMaxReviewDate() {
-        Date defaultReviewDate = validateService.getMaxReviewDate();
-        LocalDate defaultReviewLocalDate = convertDateToLocalDate(defaultReviewDate);
+        LocalDate defaultReviewLocalDate = validateService.getMaxReviewDate();
 
         LocalDate todayPlusThirtyYears = today.plusYears(30);
         assertThat(defaultReviewLocalDate).isEqualTo(todayPlusThirtyYears);
@@ -55,19 +52,12 @@ class ValidateServiceTest {
     @ParameterizedTest
     @ValueSource(ints = {-1, 0, 1})
     void testGetMaxReviewDate(int years) {
-        Date defaultReviewDate = validateService.getDefaultReviewDate(years);
-        LocalDate defaultReviewLocalDate = convertDateToLocalDate(defaultReviewDate);
+        LocalDate defaultReviewLocalDate = validateService.getDefaultReviewDate(years);
 
         LocalDate expectedLocalDate = today.plusYears(years);
         assertThat(defaultReviewLocalDate).isEqualTo(expectedLocalDate);
     }
-
-    private LocalDate convertDateToLocalDate(Date date) {
-        return Instant.ofEpochMilli(date.getTime())
-                .atZone(ZoneOffset.UTC)
-                .toLocalDate();
-    }
-
+    
     @Nested
     class WithSpyTests {
 
@@ -159,13 +149,13 @@ class ValidateServiceTest {
                 checkFieldset2(vault, Arrays.asList("Authoriser missing",
                         "School / Unit missing",
                         "Review Date missing"));
-                vault.setReviewDate(new Date(testClock.millis()));
+                vault.setReviewDate(LocalDate.now(testClock));
                 checkFieldset2(vault, Arrays.asList("Authoriser missing",
                         "School / Unit missing"));
                 vault.setGrantAuthoriser("grant-authoriser");
-                checkFieldset2(vault, Arrays.asList("School / Unit missing"));
+                checkFieldset2(vault, List.of("School / Unit missing"));
                 vault.setGrantSchoolOrUnit("grant-school");
-                checkFieldset2(vault, Collections.EMPTY_LIST);
+                checkFieldset2(vault, List.of());
 
             }
 
@@ -242,13 +232,13 @@ class ValidateServiceTest {
                 vault.setDescription("description");
                 vault.setPolicyInfo("policyInfo");
                 vault.setGroupID("groupId");
-                vault.setReviewDate(new Date(ZonedDateTime.now(testClock).plusYears(4).toInstant().toEpochMilli()));
+                vault.setReviewDate(LocalDate.now(testClock).plusYears(4));
 
             }
 
             @Test
             void testFieldset3() {
-                checkFieldset3(vault, Collections.EMPTY_LIST);
+                checkFieldset3(vault, List.of());
             }
 
             @ParameterizedTest
@@ -256,7 +246,7 @@ class ValidateServiceTest {
             @NullSource
             void testFieldset3_Name(String name) {
                 vault.setName(name);
-                checkFieldset3(vault, Arrays.asList("Name missing"));
+                checkFieldset3(vault, List.of("Name missing"));
             }
 
             @ParameterizedTest
@@ -264,7 +254,7 @@ class ValidateServiceTest {
             @NullSource
             void testFieldset3_Description(String description) {
                 vault.setDescription(description);
-                checkFieldset3(vault, Arrays.asList("Description missing"));
+                checkFieldset3(vault, List.of("Description missing"));
             }
 
             @ParameterizedTest
@@ -291,13 +281,13 @@ class ValidateServiceTest {
 
             @Test
             void testFieldset3_ReviewDateTooSoon() {
-                vault.setReviewDate(new Date(ZonedDateTime.now(testClock).plusYears(1).toInstant().toEpochMilli()));
+                vault.setReviewDate(LocalDate.now(testClock).plusYears(1));
                 checkFieldset3(vault, Arrays.asList("Review Date for selected policy is required to be at least 3 years"));
             }
 
             @Test
             void testFieldset3_ReviewDateTooLate() {
-                vault.setReviewDate(new Date(ZonedDateTime.now(testClock).plusYears(31).toInstant().toEpochMilli()));
+                vault.setReviewDate(LocalDate.now(testClock).plusYears(31));
                 checkFieldset3(vault, Arrays.asList("Review Date for selected policy is required to be less than 30 years in the future"));
             }
 

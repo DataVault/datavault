@@ -52,7 +52,7 @@ public class SecurityActuatorConfig {
 
   @Bean
   SecurityFilterChain springFilterChain(HttpSecurity http) throws Exception {
-    http.securityMatcher("/actuator/**", "/task/interrupt", "/task/interrupt/*")
+    http.securityMatcher("/actuator/**", "/v3/**", "/swagger-ui/**", "/task/interrupt", "/task/interrupt/*")
             .userDetailsService(userDetailsService())
             .csrf(AbstractHttpConfigurer::disable)
             .httpBasic(Customizer.withDefaults())

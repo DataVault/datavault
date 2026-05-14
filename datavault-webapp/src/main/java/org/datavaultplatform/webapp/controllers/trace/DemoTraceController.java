@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Profile("database")
 @RequestMapping("/demo/trace")
-public class DemoTraceController {
+public class DemoTraceController implements DemoTraceControllerApi {
 
     @Autowired
     Tracer tracer;

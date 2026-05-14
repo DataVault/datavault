@@ -2,6 +2,7 @@ package org.datavaultplatform.broker.test;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.TimeZone;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -17,11 +18,16 @@ import org.datavaultplatform.common.model.dao.RoleAssignmentDAO;
 import org.datavaultplatform.common.model.dao.RoleDAO;
 import org.datavaultplatform.common.model.dao.UserDAO;
 import org.datavaultplatform.common.util.UsesTestContainers;
+import org.junit.jupiter.api.BeforeAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.MariaDBContainer;
 import org.testcontainers.junit.jupiter.Container;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @UsesTestContainers
 public abstract class BaseDatabaseTest {
@@ -47,8 +53,21 @@ public abstract class BaseDatabaseTest {
   @Container
   @ServiceConnection
   // This container is once per class - not once per method. Methods can 'dirty' the database.
-  static final MariaDBContainer<?> mariadb = new MariaDBContainer<>(DockerImage.MARIADB_IMAGE);
-
+  static final MariaDBContainer<?> mariadb = new MariaDBContainer<>(DockerImage.MARIADB_IMAGE)
+          .withEnv("TZ", "Europe/London");
+  
+  @DynamicPropertySource
+  static void configureProperties(DynamicPropertyRegistry registry) {
+    // We "steal" the host/port from the container but append our timezone
+    String customUrl = mariadb.getJdbcUrl() + "?serverTimezone=Europe/London";
+    registry.add("spring.datasource.url", () -> customUrl);
+  }
+  
+  @BeforeAll
+  static void beforeAll(){
+    assertThat(TimeZone.getDefault()).isEqualTo(TimeZone.getTimeZone("Europe/London"));
+  }
+  
   protected User createTestUser(String userId, String schoolId, Permission... permissions){
     return createUserWithPermissions(userDAO, permissionDAO, roleDAO, roleAssignmentDAO,  userId, schoolId, permissions);
   }

@@ -101,7 +101,7 @@ public class StoredChunks {
                 .toString();
     }
     
-    public static StoredChunks fromJsop(String storedChunksJson) throws JsonProcessingException {
+    public static StoredChunks fromJson(String storedChunksJson) throws JsonProcessingException {
         if (StringUtils.isBlank(storedChunksJson)) {
             return new StoredChunks();
         } else {

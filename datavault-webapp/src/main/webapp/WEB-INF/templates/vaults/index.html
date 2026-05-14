@@ -51,8 +51,8 @@
                                     </th:block>
                                 </td>
                                 <td><th:block th:if="${vault.getOwnerId() != null}">[[${vault.getOwnerId()}]]</th:block></td>
-                                <td>[[${#dates.format(vault.getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */--></td>
-                                <td>[[${#dates.format(vault.getReviewDate(),dateFormatISO)}]]<!--/* date */--></td>
+                                <td>[[${#temporals.format(vault.getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */--></td>
+                                <td>[[${#temporals.format(vault.getReviewDate(),dateFormatISO)}]]<!--/* date */--></td>
                             </tr>
                         </tbody>
                     </table>
@@ -88,7 +88,7 @@
                                         </a>
                                     </td>
                                     <td><th:block th:if="${pendingVault.getOwnerId() != null}">[[${pendingVault.getOwnerId()}]]</th:block></td>
-                                    <td>[[${#dates.format(pendingVault.getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */--></td>
+                                    <td>[[${#temporals.format(pendingVault.getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */--></td>
                                 </tr>
                             </tbody>
                         </table>

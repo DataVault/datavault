@@ -32,7 +32,7 @@ import org.springframework.security.core.session.SessionRegistry;
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 @ProfileDatabase
-public class LoginUsingDatabaseTest {
+class LoginUsingDatabaseTest {
 
   @LocalServerPort
   int localServerPort;
