@@ -19,6 +19,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.http.client.ClientHttpRequestFactorySettings;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -75,6 +76,7 @@ class SessionRegistryUsageTest {
 
   @BeforeEach
   void setup() {
+    template = template.withRedirects(ClientHttpRequestFactorySettings.Redirects.DONT_FOLLOW);
     Mockito.when(mNotifyLoginService.getGroups()).thenReturn(new Group[0]);
     TestUtils.cleanRegistry(sessionRegistry);
   }

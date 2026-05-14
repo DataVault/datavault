@@ -1,5 +1,6 @@
 package org.datavaultplatform.broker.scheduled;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.time.Clock;
@@ -148,6 +149,9 @@ public class ScheduledTasksWithDbIT extends BaseReuseDatabaseTest {
 
     @BeforeEach
     void setup() {
+        long vrCount = vaultReviewDAO.count();
+        assertThat(vrCount).isZero();
+        
         RetentionPolicy rp1 = new RetentionPolicy();
         rp1.setName("rp-1");
         rp1.setEngine("engine-1");
@@ -175,16 +179,18 @@ public class ScheduledTasksWithDbIT extends BaseReuseDatabaseTest {
         vault.setCreationTime(todayAtMidnight);
         vault.setReviewDate(todayPlus1Year);
         vault.setRetentionPolicy(rp);
-        vaultDAO.save(vault);
+        Vault vault2 = vaultDAO.save(vault);
+        assertThat(vault2.getID()).isNotNull();
+        assertThat(vault2.getID()).isEqualTo(vault.getID());
 
         VaultReview vr1 = new VaultReview();
         vr1.setVault(vault);
-        vr1.setId("vr-1");
+        vr1.setComment("vr-1");
         vr1.setCreationTime(todayAtMidnight);
 
         VaultReview vr2 = new VaultReview();
         vr2.setVault(vault);
-        vr2.setId("vr-2");
+        vr2.setComment("vr-2");
         vr2.setCreationTime(todayAtMidnight);
 
         vaultReviewDAO.save(vr1);
