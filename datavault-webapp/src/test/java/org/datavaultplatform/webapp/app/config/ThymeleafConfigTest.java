@@ -1,5 +1,6 @@
 package org.datavaultplatform.webapp.app.config;
 
+import io.micrometer.tracing.propagation.Propagator;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.webapp.test.ProfileStandalone;
 import org.jsoup.Jsoup;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.ClassPathResource;
@@ -39,6 +41,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 
 @WebMvcTest
+@AutoConfigureObservability
 @ProfileStandalone
 @TestMethodOrder(MethodOrderer.MethodName.class)
 @Slf4j

@@ -14,7 +14,7 @@
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
     <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot -->
-    <version>3.4.4</version>
+    <version>3.5.14</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
 
@@ -31,18 +31,19 @@
   <properties>
     <!-- general -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <java.version>17</java.version>
     <skip.git.commit>false</skip.git.commit>
     <skip.unit.tests>false</skip.unit.tests>
     <skip.integration.tests>false</skip.integration.tests>
 
     <!-- https://mvnrepository.com/artifact/org.jacoco/jacoco-maven-plugin -->
-    <jacoco.plugin.version>0.8.13</jacoco.plugin.version>
+    <jacoco.plugin.version>0.8.14</jacoco.plugin.version>
 
     <!-- I've changed as I was able to test on my local deploy.  I could see the uploaded file in the
     Oracle gui -->
     <!-- DON'T CHANGE! - had problems with this - we have no integration test for Oracle Device/Archive -->
     <!-- https://mvnrepository.com/artifact/com.oracle.oci.sdk/oci-java-sdk-bom -->
-    <oci.java.sdk.bom.version>3.62.0</oci.java.sdk.bom.version>
+    <oci.java.sdk.bom.version>3.86.2</oci.java.sdk.bom.version>
 
     <!-- https://mvnrepository.com/artifact/net.i2p.crypto/eddsa -->
     <!-- <eddsa.version>0.3.0</eddsa.version> -->
@@ -50,87 +51,76 @@
     <!-- https://mvnrepository.com/artifact/org.apache.tika/tika-core -->
     <!-- DON'T CHANGE not sure why this was marked don't change all tests pass and nothing bad seen
     (so far) when I deploy locally -->
-    <tika.version>3.2.2</tika.version>
+    <tika.version>3.3.0</tika.version>
 
     <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-surefire-plugin -->
-    <surefire.plugin.version>3.5.2</surefire.plugin.version>
+    <surefire.plugin.version>3.5.5</surefire.plugin.version>
 
     <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-failsafe-plugin -->
-    <failsafe.plugin.version>3.5.2</failsafe.plugin.version>
+    <failsafe.plugin.version>3.5.5</failsafe.plugin.version>
 
     <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-bom -->
-    <aws.java.sdk.bom.version>1.12.782</aws.java.sdk.bom.version>
+    <aws.java.sdk.bom.version>1.12.797</aws.java.sdk.bom.version>
 
     <!-- https://mvnrepository.com/artifact/org.springframework.retry/spring-retry -->
-    <spring.retry.version>2.0.11</spring.retry.version>
+    <spring.retry.version>2.0.12</spring.retry.version>
 
     <!-- https://mvnrepository.com/artifact/org.owasp/dependency-check-maven -->
-    <owasp.dependency.check.version>12.1.0</owasp.dependency.check.version>
-
-    <!-- https://mvnrepository.com/artifact/org.testcontainers/testcontainers -->
-    <testcontainers.version>1.21.4</testcontainers.version>
-
-    <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core -->
-    <jackson.version>2.18.3</jackson.version>
+    <owasp.dependency.check.version>12.2.2</owasp.dependency.check.version>
 
     <!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-contract-stub-runner -->
-    <spring.cloud.version>4.2.1</spring.cloud.version>
+    <spring.cloud.version>4.3.3</spring.cloud.version>
 
     <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-collections4 -->
-    <commons.collections4.version>4.5.0-M3</commons.collections4.version>
+    <commons.collections4.version>4.5.0</commons.collections4.version>
 
     <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
-    <commons.compress.version>1.27.1</commons.compress.version>
+    <commons.compress.version>1.28.0</commons.compress.version>
 
     <!-- https://mvnrepository.com/artifact/org.apache.sshd/sshd-sftp -->
-    <sshd.sftp.version>2.15.0</sshd.sftp.version>
+    <sshd.sftp.version>2.17.1</sshd.sftp.version>
 
     <!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
-    <jsoup.version>1.19.1</jsoup.version>
+    <jsoup.version>1.22.2</jsoup.version>
 
     <!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
-    <mockito.version>5.16.1</mockito.version>
+    <mockito.version>5.23.0</mockito.version>
 
     <!-- https://mvnrepository.com/artifact/org.testng/testng -->
-    <testng.version>7.11.0</testng.version>
+    <testng.version>7.12.0</testng.version>
 
     <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on -->
-    <bouncy.castle.version>1.80</bouncy.castle.version>
+    <bouncy.castle.version>1.84</bouncy.castle.version>
 
     <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-text -->
-    <commons.text.version>1.13.0</commons.text.version>
+    <commons.text.version>1.15.0</commons.text.version>
 
     <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
-    <commons.io.version>2.18.0</commons.io.version>
+    <commons.io.version>2.22.0</commons.io.version>
 
     <!-- https://mvnrepository.com/artifact/org.thymeleaf.extras/thymeleaf-extras-springsecurity6 -->
-    <thymeleaf.extras.version>3.1.3.RELEASE</thymeleaf.extras.version>
+    <thymeleaf.extras.version>3.1.5.RELEASE</thymeleaf.extras.version>
 
     <!-- https://mvnrepository.com/artifact/nz.net.ultraq.thymeleaf/thymeleaf-layout-dialect -->
-    <thymeleaf.layout.version>3.4.0</thymeleaf.layout.version>
+    <thymeleaf.layout.version>4.0.1</thymeleaf.layout.version>
 
     <!-- https://mvnrepository.com/artifact/org.apache.directory.api/api-all -->
     <apache.directory.api.version>2.1.7</apache.directory.api.version>
 
     <!-- https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-starter-webmvc-ui -->
-    <springdoc.openapi.version>2.8.4</springdoc.openapi.version>
+    <springdoc.openapi.version>2.8.17</springdoc.openapi.version>
 
     <!-- https://mvnrepository.com/artifact/org.apache.velocity/velocity-engine-core -->
     <velocity.version>2.4.1</velocity.version>
     <!-- above here, updated 03April2025 -->
     
-    <!-- dependency versions -->
-
     <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
-    <guava.version>33.3.1-jre</guava.version>
+    <guava.version>33.6.0-jre</guava.version>
 
     <!-- https://mvnrepository.com/artifact/io.github.git-commit-id/git-commit-id-maven-plugin -->
-    <git.commit.id.maven.plugin.version>9.0.1</git.commit.id.maven.plugin.version>
+    <git.commit.id.maven.plugin.version>10.0.0</git.commit.id.maven.plugin.version>
 
     <!-- above here, updated 18jul2024 -->
-
-    <!-- https://mvnrepository.com/artifact/org.hibernate.orm/hibernate-core -->
-    <hibernate.version>6.5.3.Final</hibernate.version>
 
     <!-- above here, updated 06may2024 -->
 
@@ -140,20 +130,17 @@
     <!-- above here, updated 19Apr2024 -->
 
     <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-exec -->
-    <commons.exec.version>1.4.0</commons.exec.version>
+    <commons.exec.version>1.6.0</commons.exec.version>
 
     <!-- above here, updated 22Mar2024 -->
 
     <!-- https://mvnrepository.com/artifact/com.jayway.jsonpath/json-path -->
-    <json-path.version>2.9.0</json-path.version>
+    <json-path.version>3.0.0</json-path.version>
 
     <!-- above here, updated 21Feb2024-->
 
     <!-- https://mvnrepository.com/artifact/com.bettercloud/vault-java-driver -->
     <vault.java.driver.version>5.1.0</vault.java.driver.version>
-
-    <!-- https://mvnrepository.com/artifact/org.jsondoc/jsondoc-core -->
-    <jsondoc.core.version>1.2.23</jsondoc.core.version>
 
     <!-- https://mvnrepository.com/artifact/net.sf.supercsv/super-csv -->
     <super.csv.version>2.4.0</super.csv.version>
@@ -169,10 +156,36 @@
 
     <!-- https://mvnrepository.com/artifact/oro/oro -->
     <!-- <oro.version>2.0.8</oro.version> -->
+    
+    <!-- https://mvnrepository.com/artifact/com.tngtech.archunit/archunit-junit5 -->
+    <arch.unit.version>1.4.2</arch.unit.version>
+
+    <!-- Source: https://mvnrepository.com/artifact/jakarta.xml.bind/jakarta.xml.bind-api -->
+    <jakarta-xml-bind-api.version>4.0.5</jakarta-xml-bind-api.version>
+
+    <!-- Source: https://mvnrepository.com/artifact/io.micrometer/micrometer-tracing-bridge-brave -->
+    <micrometer.io.version>1.6.5</micrometer.io.version>
+
+    <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-site-plugin -->
+    <maven.site.plugin.version>3.21.0</maven.site.plugin.version>
+    
+    <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-enforcer-plugin -->
+    <maven.enforcer.plugin.version>3.6.2</maven.enforcer.plugin.version>
   </properties>
+  
 
   <dependencyManagement>
     <dependencies>
+      <dependency>
+        <groupId>jakarta.xml.bind</groupId>
+        <artifactId>jakarta.xml.bind-api</artifactId>
+        <version>${jakarta-xml-bind-api.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.micrometer</groupId>
+        <artifactId>micrometer-tracing-bridge-otel</artifactId>
+        <version>${micrometer.io.version}</version>
+      </dependency>
       <dependency>
         <groupId>datavault</groupId>
         <artifactId>datavault-common</artifactId>
@@ -246,12 +259,6 @@
         <version>${mockito.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.testcontainers</groupId>
-        <artifactId>testcontainers-bom</artifactId>
-        <version>${testcontainers.version}</version>
-        <type>pom</type>
-      </dependency>
-      <dependency>
         <groupId>com.amazonaws</groupId>
         <artifactId>aws-java-sdk-bom</artifactId>
         <version>${aws.java.sdk.bom.version}</version>
@@ -286,11 +293,6 @@
         <groupId>commons-io</groupId>
         <artifactId>commons-io</artifactId>
         <version>${commons.io.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.jsondoc</groupId>
-        <artifactId>jsondoc-core</artifactId>
-        <version>${jsondoc.core.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.directory.api</groupId>
@@ -380,32 +382,6 @@
         <version>${cron.expr.desc.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-annotations</artifactId>
-        <version>${jackson.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-databind</artifactId>
-        <version>${jackson.version}</version>
-        <exclusions>
-          <exclusion>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
-          </exclusion>
-        </exclusions>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-core</artifactId>
-        <version>${jackson.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>jakarta.xml.bind</groupId>
-        <artifactId>jakarta.xml.bind-api</artifactId>
-        <version>${jakarta-xml-bind.version}</version>
-      </dependency>
-      <dependency>
         <groupId>org.apache.tika</groupId>
         <artifactId>tika-core</artifactId>
         <version>${tika.version}</version>
@@ -419,6 +395,12 @@
         <groupId>nz.net.ultraq.thymeleaf</groupId>
         <artifactId>thymeleaf-layout-dialect</artifactId>
         <version>${thymeleaf.layout.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.tngtech.archunit</groupId>
+        <artifactId>archunit-junit5</artifactId>
+        <version>${arch.unit.version}</version>
+        <scope>test</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -501,9 +483,14 @@
     <pluginManagement>
       <plugins>
         <plugin>
+          <groupId>org.jacoco</groupId>
+          <artifactId>jacoco-maven-plugin</artifactId>
+          <version>${jacoco.plugin.version}</version>
+        </plugin>
+        <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-site-plugin</artifactId>
-          <version>3.12.1</version>
+          <version>${maven.site.plugin.version}</version>
         </plugin>
         <plugin>
           <groupId>io.github.git-commit-id</groupId>
@@ -537,8 +524,6 @@
                 <additionalProperties>
                   <encoding.source>UTF-8</encoding.source>
                   <encoding.reporting>UTF-8</encoding.reporting>
-                  <java.source>17</java.source>
-                  <java.target>17</java.target>
                   <!--suppress UnresolvedMavenProperty -->
                   <!--<git.commit.id>${git.commit.id}</git.commit.id>-->
                 </additionalProperties>
@@ -592,6 +577,29 @@
       </plugins>
     </pluginManagement>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>${maven.enforcer.plugin.version}</version>
+        <executions>
+          <execution>
+            <id>enforce-java</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireJavaVersion>
+                  <!-- Allow all Java 17.x versions, but block Java 18+ -->
+                  <!-- Code may run on newer JDKs, but tests depend on Java 17 behaviour -->
+                  <version>17,18)</version>
+                  <message>Invalid Java version! This project requires JDK 17.</message>
+                </requireJavaVersion>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <artifactId>maven-failsafe-plugin</artifactId>
       </plugin>
@@ -654,7 +662,6 @@
           <plugin>
             <groupId>org.jacoco</groupId>
             <artifactId>jacoco-maven-plugin</artifactId>
-            <version>${jacoco.plugin.version}</version>
             <executions>
               <execution>
                 <id>prepare-agent</id>
@@ -668,9 +675,6 @@
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-compiler-plugin</artifactId>
             <configuration>
-              <source>17</source>
-              <target>17</target>
-              <release>17</release>
               <testExcludes>
                 <testExclude>**/*FT.java</testExclude>
               </testExcludes>

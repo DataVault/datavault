@@ -146,7 +146,7 @@ public class Deposit extends Task {
     @SneakyThrows
     private StoredChunks getStoredChunks() {
         String storedChunksJson = getProperties().get(PropNames.DEPOSIT_CHUNKS_STORED);
-        return StoredChunks.fromJsop(storedChunksJson);
+        return StoredChunks.fromJson(storedChunksJson);
     }
 
     private void sendError(String message) {

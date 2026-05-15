@@ -47,28 +47,25 @@ public class SecurityActuatorConfig  {
   @Bean
   @Order(1)
   public SecurityFilterChain actuatorSecurityFilterChain(HttpSecurity http,
-          @Qualifier("actuatorAuthenticationProvider") AuthenticationProvider authenticationProvider) throws Exception {
+                                                         @Qualifier("actuatorAuthenticationProvider") AuthenticationProvider authenticationProvider) throws Exception {
+    http.securityMatcher("/actuator/**", "/v3/**", "/swagger-ui/**")
+            .authenticationProvider(authenticationProvider)
+            .csrf(AbstractHttpConfigurer::disable)
+            .httpBasic(Customizer.withDefaults())
+            .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(authz -> authz
+                    // 1. Allow these specific endpoints without login
+                    .requestMatchers(
+                            "/actuator",
+                            "/actuator/info",
+                            "/actuator/health"
+                    ).permitAll()
 
-    http.securityMatcher("/actuator/**","/v3/**","/swagger-ui/**")
-        .authenticationProvider(authenticationProvider)
-        .csrf(AbstractHttpConfigurer::disable)
-        .httpBasic(Customizer.withDefaults())
-        .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .authorizeHttpRequests(authz -> authz.requestMatchers(
-            "/v3/**",
-            "/swagger-ui/**",
-            "/actuator",
-            "/actuator/info",
-            "/actuator/health",
-            "/actuator/brokerstatus",
-            "/actuator/customtime",
-            "/actuator/metrics",
-            "/actuator/mappings",
-            "/actuator/metrics/*",
-            "/actuator/memoryinfo").permitAll()
-        .anyRequest().authenticated());
+                    // 2. Require authentication for everything else covered by the securityMatcher
+                    // (This includes Swagger, V3 docs, and the rest of the actuator endpoints)
+                    .anyRequest().authenticated()
+            );
 
     return http.build();
   }
-
 }

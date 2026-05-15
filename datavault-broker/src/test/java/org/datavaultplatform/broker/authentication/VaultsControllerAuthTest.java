@@ -19,7 +19,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
-public class VaultsControllerAuthTest extends BaseControllerAuthTest {
+class VaultsControllerAuthTest extends BaseControllerAuthTest {
 
 
   @Captor
@@ -248,9 +248,10 @@ public class VaultsControllerAuthTest extends BaseControllerAuthTest {
         AuthTestData.VAULT_INFO_1);
 
     checkWorksWhenAuthenticatedFailsOtherwise(
-        post("/vaults/vault-id-1/addDataManager")
-            .content("uun-001"),
-        AuthTestData.VAULT_INFO_1);
+            post("/vaults/vault-id-1/addDataManager")
+                    .content("uun-001")
+                    .contentType(MediaType.TEXT_PLAIN_VALUE),
+            AuthTestData.VAULT_INFO_1);
 
     verify(controller).addDataManager(USER_ID_1, "vault-id-1", "uun-001");
   }
@@ -339,7 +340,7 @@ public class VaultsControllerAuthTest extends BaseControllerAuthTest {
         "description-1")).thenReturn(AuthTestData.VAULT_INFO_1);
 
     checkWorksWhenAuthenticatedFailsOtherwise(
-        post("/vaults/vault-id-1/updateVaultDescription")
+        post("/vaults/vault-id-1/updateVaultDescription").contentType(MediaType.TEXT_PLAIN_VALUE)
             .content("description-1"),
         AuthTestData.VAULT_INFO_1);
 
@@ -352,9 +353,10 @@ public class VaultsControllerAuthTest extends BaseControllerAuthTest {
         AuthTestData.VAULT_INFO_1);
 
     checkWorksWhenAuthenticatedFailsOtherwise(
-        post("/vaults/vault-id-1/updateVaultName")
-            .content("name-1"),
-        AuthTestData.VAULT_INFO_1);
+            post("/vaults/vault-id-1/updateVaultName")
+                    .content("name-1")
+                    .contentType(MediaType.TEXT_PLAIN_VALUE),
+            AuthTestData.VAULT_INFO_1);
 
     verify(controller).updateVaultName(USER_ID_1, API_KEY_1, "vault-id-1", "name-1");
   }
@@ -367,7 +369,7 @@ public class VaultsControllerAuthTest extends BaseControllerAuthTest {
         AuthTestData.VAULT_INFO_1);
 
     checkWorksWhenAuthenticatedFailsOtherwise(
-        post("/vaults/vault-id-1/updatereviewdate")
+        post("/vaults/vault-id-1/updatereviewdate").contentType(MediaType.TEXT_PLAIN_VALUE)
             .content(reviewDateString),
         AuthTestData.VAULT_INFO_1);
 

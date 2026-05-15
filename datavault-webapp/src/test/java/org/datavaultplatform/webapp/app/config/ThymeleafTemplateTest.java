@@ -8,9 +8,8 @@ import org.datavaultplatform.common.request.CreateRetentionPolicy;
 import org.datavaultplatform.common.request.CreateVault;
 import org.datavaultplatform.common.response.*;
 import org.datavaultplatform.common.storage.impl.TivoliStorageManager;
-import org.datavaultplatform.webapp.model.DepositReviewModel;
-import org.datavaultplatform.webapp.model.VaultReviewHistoryModel;
-import org.datavaultplatform.webapp.model.VaultReviewModel;
+import org.datavaultplatform.common.util.DateTimeUtils;
+import org.datavaultplatform.webapp.model.*;
 import org.datavaultplatform.webapp.services.PermissionsService;
 import org.datavaultplatform.webapp.test.ProfileStandalone;
 import org.jetbrains.annotations.NotNull;
@@ -23,6 +22,7 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -43,6 +43,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -57,8 +59,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @TestMethodOrder(MethodOrderer.MethodName.class)
 @AutoConfigureMockMvc
 @TestPropertySource(properties = "logging.level.org.thymeleaf.spring6.expression=TRACE")
-public class ThymeleafTemplateTest extends BaseThymeleafTest {
+class ThymeleafTemplateTest extends BaseThymeleafTest {
 
+    
     private static final ThreadLocal<ModelMap> TL_MODEL_MAP = ThreadLocal.withInitial(ModelMap::new);
 
     @Autowired
@@ -89,6 +92,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
 
 
     @BeforeEach
+    @Override
     void setup() {
 
         lenient().doAnswer(invocation -> {
@@ -108,7 +112,6 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         }).when(mEvaluator).hasPermission(any(), any(), any());
     }
 
-    @SuppressWarnings("UnnecessaryLocalVariable")
     private String getHtml(String template, ModelMap modelMap) throws Exception {
         TL_MODEL_MAP.set(modelMap);
         String html = mockMvc.perform(get("/dv/test/"+template).contextPath("/dv"))
@@ -544,7 +547,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         info1.setCrisID("CRIS-ID-1");
         info1.setVaultReviewDate(now.toString());
         info1.setDescription("DepositOneDescription");
-        info1.setCreationTime(now);
+        info1.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(now));
         info1.setDepositPaths(Collections.emptyList());
         info1.setDepositSize(1234);
         info1.setPersonalDataStatement("personalDataStatement1");
@@ -568,7 +571,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         info2.setCrisID("CRIS-ID-2");
         info2.setVaultReviewDate(now.toString());
         info2.setDescription("DepositTwoDescription");
-        info2.setCreationTime(now);
+        info2.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(now));
         info2.setDepositPaths(Collections.emptyList());
         info2.setDepositSize(4567);
         info2.setPersonalDataStatement("personalDataStatement2");
@@ -687,7 +690,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         Elements forms = doc.selectXpath("//form[1]");
 
         if(forms.isEmpty()){
-            assertThat(expectedFormId.equals(""));
+            assertThat(expectedFormId).isEmpty();
             return;
         }
         Element form = forms.get(0);
@@ -697,7 +700,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         if (expectedFormId != null) {
             assertThat(formId).isEqualTo(expectedFormId);
         } else {
-            System.out.println("WE HAVE A FORM NOT EXPECTED WITT ID [" + formId  + "]");
+            System.out.println("WE HAVE A FORM NOT EXPECTED WITH ID [" + formId  + "]");
         }
         if(StringUtils.isNotBlank(formAction)){
             assertThat(formAction).startsWith("/dv");
@@ -834,7 +837,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         createRetentionPolicy.setDescription("crp-desc");
         createRetentionPolicy.setId(123);
         createRetentionPolicy.setName("crp-name");
-        createRetentionPolicy.setEndDate(getNowValue());
+        createRetentionPolicy.setEndDate(DateTimeUtils.toLocalDate(getNowValue()));
 
         Group group = getGroup("group-id-1");
         group.setName("group-name-1");
@@ -923,7 +926,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         Deposit dep1 = getDeposit("deposit-id-1");
         dep1.setVault(getDepositVault("vault-id-1"));
         ret1.setDeposit(dep1);
-        ret1.setTimestamp(now);
+        ret1.setTimestamp(DateTimeUtils.toLocalDateTimeAtMidnight(now));
         ret1.setNote("note-1");
         ret1.setRetrievePath("/a/b/c");
 
@@ -932,7 +935,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         Deposit dep2 = getDeposit("deposit-id-2");
         dep2.setVault(getDepositVault("vault-id-2"));
         ret2.setDeposit(dep2);
-        ret2.setTimestamp(now);
+        ret2.setTimestamp(DateTimeUtils.toLocalDateTimeAtMidnight(now));
         ret2.setNote("note-2");
         ret2.setRetrievePath("/d/e/f");
 
@@ -959,25 +962,23 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
 
         VaultReviewModel vrModel = new VaultReviewModel();
         vrModel.setVaultReviewId("vault-review-id-1");
-        vrModel.setNewReviewDate(getNowValue());
         vrModel.setComment("comment-1");
-        vrModel.setActionedDate(now);
 
         DepositReviewModel drm1 = new DepositReviewModel();
         drm1.setDepositId("drm1-depositId1");
         drm1.setDepositReviewId("drm1-reviewId1");
-        drm1.setName("drm1-name");
+        drm1.setDepositName("drm1-name");
         drm1.setComment("drm1-comment");
-        drm1.setCreationTime(new Date());
-        drm1.setStatusName("NOT_STARTED");
+        drm1.setDepositCreationTime(LocalDateTime.now());
+        drm1.setDepositStatusName("NOT_STARTED");
 
         DepositReviewModel drm2 = new DepositReviewModel();
         drm2.setDepositId("drm2-depositId2");
         drm2.setDepositReviewId("drm2-reviewId2");
-        drm2.setName("drm2-name");
+        drm2.setDepositName("drm2-name");
         drm2.setComment("drm2-comment");
-        drm2.setCreationTime(new Date());
-        drm2.setStatusName("IN_PROGRESS");
+        drm2.setDepositCreationTime(LocalDateTime.now());
+        drm2.setDepositStatusName("IN_PROGRESS");
 
         vrModel.setDepositReviewModels(Arrays.asList(drm1, drm2));
 
@@ -1015,9 +1016,14 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.put("vaultReviewModel", vrModel);
         modelMap.put("group", group);
         modelMap.put("createRetentionPolicy", createRetentionPolicy);
+        modelMap.addAttribute("error","If some deposits are to be retained then a next Review Date must be entered");
 
         String html = getHtml("admin/reviews/create", modelMap);
         Document doc = getDocument(html);
+
+        Elements errorElements = doc.selectXpath("//div[@class='alert alert-danger' and @role='alert']");
+        assertThat(errorElements.size()).isEqualTo(1);
+        errorElements.get(0).text().contains("If some deposits are to be retained then a next Review Date must be entered");
 
         displayFormFields(doc, "create-review");
 
@@ -1032,9 +1038,32 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         ModelMap modelMap = getModelMap();
 
         VaultInfo vault1 = getVaultInfo1();
-        VaultInfo vault2 = getVaultInfo2();
+        vault1.setReviewDate(LocalDate.now());
+        VaultReview vault1review = new VaultReview();
+        vault1review.setActionedDate(LocalDateTime.now().minusDays(1));
+        vault1.getVaultReviewStatusInfo().setLatestSubmittedReview(vault1review);
 
-        modelMap.put("vaults", Arrays.asList(vault1, vault2));
+        VaultInfo vault2 = getVaultInfo2();
+        vault2.setReviewDate(LocalDate.now().plusDays(-1));
+
+        VaultInfo vault3 = getVaultInfo3();
+        vault3.setReviewDate(LocalDate.now().plusDays(1));
+        VaultReview vault3review = new VaultReview();
+        vault3review.setActionedDate(LocalDateTime.now().minusMonths(3));
+        vault3.getVaultReviewStatusInfo().setLatestSubmittedReview(vault3review);
+
+        modelMap.put("vaults", Arrays.asList(vault1, vault2, vault3));
+        
+        VaultInfo vault4 = getVaultInfo4();
+        vault4.setReviewDate(LocalDate.now().plusMonths(5));
+        VaultReview vault4review = new VaultReview();
+        vault4review.setActionedDate(LocalDateTime.now().minusDays(1));
+        vault4.getVaultReviewStatusInfo().setLatestSubmittedReview(vault4review);
+
+        VaultInfo vault5 = getVaultInfo5();
+        vault5.setReviewDate(LocalDate.now().plusMonths(7));
+ 
+        modelMap.put("otherVaults", Arrays.asList(vault3, vault4, vault5));
 
         String html = getHtml("admin/reviews/index", modelMap);
         Document doc = getDocument(html);
@@ -1156,8 +1185,6 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
 
         RoleModel roleModel2 = new RoleModel();
         roleModel2.setId(2222L);
-        roleModel2.setAssignedUserCount(222);
-        roleModel2.setStatus("Status-2");
         roleModel2.setName("rm2-name");
         roleModel2.setDescription("rm2-description");
         
@@ -1353,7 +1380,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         info1.setCrisID("CRIS-ID-1");
         info1.setVaultReviewDate(now.toString());
         info1.setDescription("DepositOneDescription");
-        info1.setCreationTime(now);
+        info1.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(now));
         info1.setDepositPaths(Collections.emptyList());
         info1.setDepositSize(1234);
         info1.setPersonalDataStatement("personalDataStatement1");
@@ -1376,7 +1403,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         info2.setCrisID("CRIS-ID-2");
         info2.setVaultReviewDate(now.toString());
         info2.setDescription("DepositTwoDescription");
-        info2.setCreationTime(now);
+        info2.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(now));
         info2.setDepositPaths(Collections.emptyList());
         info2.setDepositSize(4567);
         info2.setPersonalDataStatement("personalDataStatement2");
@@ -1389,7 +1416,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         createRetentionPolicy.setDescription("crp-desc");
         createRetentionPolicy.setId(123);
         createRetentionPolicy.setName("crp-name");
-        createRetentionPolicy.setEndDate(getNowValue());
+        createRetentionPolicy.setEndDate(DateTimeUtils.toLocalDate(getNowValue()));
 
         Group group = getGroup("group-id-1");
         group.setName("group-name-1");
@@ -1563,7 +1590,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         info1.setCrisID("CRIS-ID-1");
         info1.setVaultReviewDate(now.toString());
         info1.setDescription("DepositOneDescription");
-        info1.setCreationTime(now);
+        info1.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(now));
         info1.setDepositPaths(Collections.emptyList());
         info1.setDepositSize(1234);
         info1.setPersonalDataStatement("personalDataStatement1");
@@ -1577,7 +1604,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         Retrieve ret1 = getRetrieve("ret-id-1");
         ret1.setStatus(Retrieve.Status.IN_PROGRESS);
         ret1.setDeposit(getDeposit("deposit-id-1"));
-        ret1.setTimestamp(now);
+        ret1.setTimestamp(DateTimeUtils.toLocalDateTimeAtMidnight(now));
         ret1.setNote("note-1");
         ret1.setRetrievePath("/a/b/c");
         ret1.setUser(user1);
@@ -1586,7 +1613,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         Retrieve ret2 = getRetrieve("ret-id-2");
         ret2.setStatus(Retrieve.Status.COMPLETE);
         ret2.setDeposit(getDeposit("deposit-id-2"));
-        ret2.setTimestamp(now);
+        ret2.setTimestamp(DateTimeUtils.toLocalDateTimeAtMidnight(now));
         ret2.setNote("note-2");
         ret2.setRetrievePath("/d/e/f");
         ret2.setUser(user1);
@@ -1638,7 +1665,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         info1.setCrisID("CRIS-ID-1");
         info1.setVaultReviewDate(now.toString());
         info1.setDescription("DepositOneDescription");
-        info1.setCreationTime(now);
+        info1.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(now));
         info1.setDepositPaths(Collections.emptyList());
         info1.setDepositSize(1234);
         info1.setPersonalDataStatement("personalDataStatement1");
@@ -1651,7 +1678,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         Retrieve ret1 = getRetrieve("ret-id-1");
         ret1.setStatus(Retrieve.Status.IN_PROGRESS);
         ret1.setDeposit(getDeposit("deposit-id-1"));
-        ret1.setTimestamp(now);
+        ret1.setTimestamp(DateTimeUtils.toLocalDateTimeAtMidnight(now));
         ret1.setNote("note-1");
         ret1.setRetrievePath("/a/b/c");
         ret1.setUser(user1);
@@ -2049,7 +2076,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         modelMap.addAttribute("group", group);
 
         DepositInfo deposit1 = getDepositInfo("deposit-id-1");
-        deposit1.setCreationTime(new Date());
+        deposit1.setCreationTime(LocalDateTime.now());
         deposit1.setUserID("deposit1-user-id");
         deposit1.setStatus(Deposit.Status.IN_PROGRESS);
         deposit1.setHasPersonalData(false);
@@ -2058,7 +2085,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         Retrieve deposit2Retrieve = getRetrieve("deposit1-ret-2");
 
         DepositInfo deposit2 = getDepositInfo("deposit-id-2");
-        deposit2.setCreationTime(new Date());
+        deposit2.setCreationTime(LocalDateTime.now());
         deposit2.setUserID("deposit2-user-id");
         deposit2.setStatus(Deposit.Status.COMPLETE);
         deposit2.setHasPersonalData(true);
@@ -2079,42 +2106,52 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
 
         modelMap.put("roleEvents", Arrays.asList(eventInfo1, eventInfo2));
 
-        DepositReviewModel drm1 = new DepositReviewModel();
+        DepositReviewViewModel drm1 = new DepositReviewViewModel();
         drm1.setComment("drm1-comment");
-        drm1.setName("drm1-name");
-        drm1.setDeleteStatus(1);
-        drm1.setCreationTime(now);
-        drm1.setStatusName("drm1-status-name");
+        drm1.setDepositName("drm1-name");
+        drm1.setDeleteStatus(0);
+        drm1.setActionedDate(null);
+        drm1.setDepositCreationTime(LocalDateTime.now());
+        drm1.setDepositStatusName("drm1-status-name");
         drm1.setDepositReviewId("drm1-deposit-review-id");
         drm1.setDepositId("drm1-deposit-id");
-        drm1.setToBeDeleted(true);
 
-        DepositReviewModel drm2 = new DepositReviewModel();
+        DepositReviewViewModel drm2 = new DepositReviewViewModel();
         drm2.setComment("drm2-comment");
-        drm2.setName("drm2-name");
+        drm2.setDepositName("drm2-name");
         drm2.setDeleteStatus(1);
-        drm2.setCreationTime(now);
-        drm2.setStatusName("drm2-status-name");
+        drm2.setActionedDate(LocalDateTime.now());
+        drm2.setDepositCreationTime(LocalDateTime.now());
+        drm2.setDepositStatusName("drm2-status-name");
         drm2.setDepositReviewId("drm2-deposit-review-id");
         drm2.setDepositId("drm2-deposit-id");
-        drm2.setToBeDeleted(true);
 
-        VaultReviewModel vrm1 = new VaultReviewModel();
-        vrm1.setActionedDate(now);
+        DepositReviewViewModel drm3 = new DepositReviewViewModel();
+        drm3.setComment("drm3-comment");
+        drm3.setDepositName("drm3-name");
+        drm3.setDeleteStatus(2);
+        drm3.setActionedDate(null);
+        drm3.setDepositCreationTime(LocalDateTime.now());
+        drm3.setDepositStatusName("drm3-status-name");
+        drm3.setDepositReviewId("drm3-deposit-review-id");
+        drm3.setDepositId("drm3-deposit-id");
+
+        VaultReviewViewModel vrm1 = new VaultReviewViewModel();
+        vrm1.setActionedDate(DateTimeUtils.toLocalDateTimeAtMidnight(now));
         vrm1.setComment("vrm1 - comment");
         vrm1.setVaultReviewId("vault-review-id-1");
-        vrm1.setNewReviewDate(getNowValue());
-        vrm1.setDepositReviewModels(Arrays.asList(drm1, drm2));
+        vrm1.setCurrentVaultReviewDate(DateTimeUtils.toLocalDate(getNowValue()));
+        vrm1.setDepositReviewViewModels(Arrays.asList(drm1, drm2, drm3));
 
-        VaultReviewModel vrm2 = new VaultReviewModel();
-        vrm2.setActionedDate(now);
+        VaultReviewViewModel vrm2 = new VaultReviewViewModel();
+        vrm2.setActionedDate(null);
         vrm2.setComment("vrm2 - comment");
         vrm2.setVaultReviewId("vault-review-id-2");
-        vrm2.setNewReviewDate(getNowValue());
-        vrm2.setDepositReviewModels(Arrays.asList(drm1, drm2));
+        vrm2.setCurrentVaultReviewDate(DateTimeUtils.toLocalDate(getNowValue()));
+        vrm2.setDepositReviewViewModels(Arrays.asList(drm1, drm2));
 
         VaultReviewHistoryModel vrhm = new VaultReviewHistoryModel();
-        vrhm.setVaultReviewModels(Arrays.asList(vrm1, vrm2));
+        vrhm.setVaultReviewViewModels(Arrays.asList(vrm1, vrm2));
 
         modelMap.put("vrhm", vrhm);
         modelMap.put("deposits", Arrays.asList(deposit1, deposit2));
@@ -2210,7 +2247,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         info.setContactName("James Bond");
         info.setCreationTime(now);
 
-        info.setGrantEndDate(now);
+        info.setGrantEndDate(DateTimeUtils.toLocalDate(now));
         info.setId("billing-id-123");
 
         info.setPaymentDetails("some-payment-details");
@@ -2311,12 +2348,14 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
     }
 
     private VaultInfo getVaultInfo(String id) {
-        return new VaultInfo() {
+        VaultInfo result =  new VaultInfo() {
             @Override
             public String getID() {
                 return id;
             }
         };
+        result.setVaultReviewStatusInfo(new VaultReviewStatusInfo());
+        return result;
     }
 
     private Group getGroup(String groupId){
@@ -2339,7 +2378,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         result.setUser(getUser("ret-user-"+id));
         result.setNote("ret-note-"+id);
         result.setRetrievePath("retrieve-path-"+id);
-        result.setTimestamp(new Date());
+        result.setTimestamp(LocalDateTime.now());
         result.setStatus(Retrieve.Status.COMPLETE);
         result.setDeposit(getDeposit("ret-"+id));
         return result;
@@ -2385,21 +2424,21 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         vault1.setBillingType(PendingVault.Billing_Type.GRANT_FUNDING);
         vault1.setConfirmed(true);
         vault1.setContact("vault1-contact");
-        vault1.setCreationTime(now);
+        vault1.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(now));
         vault1.setDataCreators(Arrays.asList("Tom", "Dick", "Harry"));
         vault1.setDescription("vault1-description");
         vault1.setEstimate(PendingVault.Estimate.UNDER_10TB);
-        vault1.setGrantEndDate(now);
+        vault1.setGrantEndDate(DateTimeUtils.toLocalDate(now));
         vault1.setName("vault1-name");
         vault1.setOwnerId("vault1-owner-id");
         vault1.setProjectSize(1234);
-        vault1.setReviewDate(now);
+        vault1.setReviewDate(DateTimeUtils.toLocalDate(now));
         vault1.setUserID("vault1-user-id");
         vault1.setVaultCreatorId("vault1-creator-id");
         vault1.setUserName("vault-username-1");
         vault1.setPolicyID("policy-id-1");
-        vault1.setPolicyExpiry(now);
-        vault1.setPolicyLastChecked(now);
+        vault1.setPolicyExpiry(DateTimeUtils.toLocalDateTimeAtMidnight(now));
+        vault1.setPolicyLastChecked(DateTimeUtils.toLocalDateTimeAtMidnight(now));
         vault1.setGroupID("group-id-1");
         vault1.setOwnerName("vault-owner-name-1");
         vault1.setDatasetName("vault-data-set-name-1");
@@ -2413,15 +2452,15 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         vault2.setBillingType(PendingVault.Billing_Type.FEEWAIVER);
         vault2.setConfirmed(true);
         vault2.setContact("vault2-contact");
-        vault2.setCreationTime(now);
+        vault2.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(now));
         vault2.setDataCreators(Arrays.asList("Geddy", "Neil", "Alex"));
         vault2.setDescription("vault2-description");
         vault2.setEstimate(PendingVault.Estimate.OVER_10TB);
-        vault2.setGrantEndDate(now);
+        vault2.setGrantEndDate(DateTimeUtils.toLocalDate(now));
         vault2.setName("vault2-name");
         vault2.setOwnerId("vault2-owner-id");
         vault2.setProjectSize(2345);
-        vault2.setReviewDate(now);
+        vault2.setReviewDate(DateTimeUtils.toLocalDate(now));
         vault2.setUserID("vault2-user-id");
         vault2.setVaultCreatorId("vault2-creator-id");
         vault2.setUserName("vault-username-2");
@@ -2429,6 +2468,80 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         vault2.setGroupID("group-id-2");
         vault2.setOwnerName("vault-owner-name-2");
         return vault2;
+    }
+
+    private VaultInfo getVaultInfo3() {
+        VaultInfo vault3 = getVaultInfo("vault-info-3");
+        vault3.setAffirmed(true);
+        vault3.setAuthoriser("vault3-authoriser");
+        vault3.setBillingType(PendingVault.Billing_Type.GRANT_FUNDING);
+        vault3.setConfirmed(true);
+        vault3.setContact("vault3-contact");
+        vault3.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(now));
+        vault3.setDataCreators(Arrays.asList("Luke", "Leia", "Han"));
+        vault3.setDescription("vault3-description");
+        vault3.setEstimate(PendingVault.Estimate.UNDER_100GB);
+        vault3.setGrantEndDate(DateTimeUtils.toLocalDate(now));
+        vault3.setName("vault3-name");
+        vault3.setOwnerId("vault3-owner-id");
+        vault3.setProjectSize(3456);
+        vault3.setReviewDate(DateTimeUtils.toLocalDate(now).plusMonths(7));
+        vault3.setUserID("vault3-user-id");
+        vault3.setVaultCreatorId("vault3-creator-id");
+        vault3.setUserName("vault-username-3");
+        vault3.setPolicyID("policy-id-3");
+        vault3.setGroupID("group-id-3");
+        vault3.setOwnerName("vault-owner-name-3");
+        return vault3;
+    }
+    private VaultInfo getVaultInfo4() {
+        VaultInfo vault4 = getVaultInfo("vault-info-4");
+        vault4.setAffirmed(true);
+        vault4.setAuthoriser("vault4-authoriser");
+        vault4.setBillingType(PendingVault.Billing_Type.WILL_PAY);
+        vault4.setConfirmed(true);
+        vault4.setContact("vault4-contact");
+        vault4.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(now));
+        vault4.setDataCreators(Arrays.asList("Ferris", "Cameron", "Sloane"));
+        vault4.setDescription("vault4-description");
+        vault4.setEstimate(PendingVault.Estimate.UNKNOWN);
+        vault4.setGrantEndDate(DateTimeUtils.toLocalDate(now));
+        vault4.setName("vault4-name");
+        vault4.setOwnerId("vault4-owner-id");
+        vault4.setProjectSize(4567);
+        vault4.setReviewDate(DateTimeUtils.toLocalDate(now).plusMonths(12));
+        vault4.setUserID("vault4-user-id");
+        vault4.setVaultCreatorId("vault5-creator-id");
+        vault4.setUserName("vault-username-4");
+        vault4.setPolicyID("policy-id-4");
+        vault4.setGroupID("group-id-4");
+        vault4.setOwnerName("vault-owner-name-4");
+        return vault4;
+    }
+
+    private VaultInfo getVaultInfo5() {
+        VaultInfo vault5 = getVaultInfo("vault-info-5");
+        vault5.setAffirmed(true);
+        vault5.setAuthoriser("vault5-authoriser");
+        vault5.setBillingType(PendingVault.Billing_Type.WILL_PAY);
+        vault5.setConfirmed(true);
+        vault5.setContact("vault5-contact");
+        vault5.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(now));
+        vault5.setDataCreators(Arrays.asList("One", "Two", "Three"));
+        vault5.setDescription("vault5-description");
+        vault5.setEstimate(PendingVault.Estimate.UNKNOWN);
+        vault5.setGrantEndDate(DateTimeUtils.toLocalDate(now));
+        vault5.setName("vault5-name");
+        vault5.setOwnerId("vault5-owner-id");
+        vault5.setProjectSize(5678);
+        vault5.setReviewDate(DateTimeUtils.toLocalDate(now).plusMonths(12));
+        vault5.setUserID("vault5-user-id");
+        vault5.setVaultCreatorId("vault5-creator-id");
+        vault5.setUserName("vault-username-5");
+        vault5.setPolicyID("policy-id-5");
+        vault5.setGroupID("group-id-5");
+        vault5.setOwnerName("vault-owner-name-5");
+        return vault5;
     }
 
     private Dataset getDataset1() {
@@ -2520,9 +2633,9 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         policy1.setMinDataRetentionPeriod("123");
         policy1.setMinRetentionPeriod(123);
         policy1.setExtendUponRetrieval(true);
-        policy1.setInEffectDate(now);
-        policy1.setEndDate(now);
-        policy1.setDataGuidanceReviewed(now);
+        policy1.setInEffectDate(DateTimeUtils.toLocalDate(now));
+        policy1.setEndDate(DateTimeUtils.toLocalDate(now));
+        policy1.setDataGuidanceReviewed(DateTimeUtils.toLocalDate(now));
         assertThat(policy1.getPolicyInfo()).isEqualTo("111-123");
         return policy1;
     }
@@ -2535,9 +2648,9 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         policy1.setMinDataRetentionPeriod("123");
         policy1.setMinRetentionPeriod(123);
         policy1.setExtendUponRetrieval(true);
-        policy1.setInEffectDate(now);
-        policy1.setEndDate(now);
-        policy1.setDataGuidanceReviewed(now);
+        policy1.setInEffectDate(DateTimeUtils.toLocalDate(now));
+        policy1.setEndDate(DateTimeUtils.toLocalDate(now));
+        policy1.setDataGuidanceReviewed(DateTimeUtils.toLocalDate(now));
         assertThat(policy1.getPolicyInfo()).isEqualTo("111-123");
         return policy1;
     }
@@ -2551,9 +2664,9 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         policy2.setMinDataRetentionPeriod("234");
         policy2.setMinRetentionPeriod(234);
         policy2.setExtendUponRetrieval(true);
-        policy2.setInEffectDate(now);
-        policy2.setEndDate(now);
-        policy2.setDataGuidanceReviewed(now);
+        policy2.setInEffectDate(DateTimeUtils.toLocalDate(now));
+        policy2.setEndDate(DateTimeUtils.toLocalDate(now));
+        policy2.setDataGuidanceReviewed(DateTimeUtils.toLocalDate(now));
         assertThat(policy2.getPolicyInfo()).isEqualTo("222-234");
         return policy2;
     }
@@ -2567,9 +2680,9 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         policy2.setMinDataRetentionPeriod("234");
         policy2.setMinRetentionPeriod(234);
         policy2.setExtendUponRetrieval(true);
-        policy2.setInEffectDate(now);
-        policy2.setEndDate(now);
-        policy2.setDataGuidanceReviewed(now);
+        policy2.setInEffectDate(DateTimeUtils.toLocalDate(now));
+        policy2.setEndDate(DateTimeUtils.toLocalDate(now));
+        policy2.setDataGuidanceReviewed(DateTimeUtils.toLocalDate(now));
         assertThat(policy2.getPolicyInfo()).isEqualTo("222-234");
         return policy2;
     }
@@ -2577,7 +2690,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
     private CreateVault getCreateVault() {
         CreateVault vault = new CreateVault();
         vault.setAffirmed(true);
-        vault.setBillingGrantEndDate(getNowValue());
+        vault.setBillingGrantEndDate(DateTimeUtils.toLocalDate(getNowValue()));
         vault.setBillingType(PendingVault.Billing_Type.GRANT_FUNDING.name());
         vault.setBudgetAuthoriser("budget-authoriser-1");
         vault.setBudgetSchoolOrUnit("Informatics");
@@ -2599,7 +2712,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         vault.setDescription("description-1");
         vault.setEstimate("estimate-1");
 
-        vault.setGrantEndDate(getNowValue());
+        vault.setGrantEndDate(DateTimeUtils.toLocalDate(getNowValue()));
         vault.setGroupID("group-id-one");
         vault.setGrantSubunit("GrantSubUnit-1");
         vault.setGrantAuthoriser("grant-authorizer-1");
@@ -2620,7 +2733,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         vault.setPolicyInfo("111-123");
         vault.setProjectTitle("project-title");
         vault.setPureLink(true);
-        vault.setReviewDate(getNowValue());
+        vault.setReviewDate(DateTimeUtils.toLocalDate(getNowValue()));
         vault.setSliceID("slice-id-1");
         vault.setSliceQueryChoice(PendingVault.Slice_Query_Choice.NO_OR_DO_NOT_KNOW.name());
         vault.setVaultCreator("vault-creator-1");

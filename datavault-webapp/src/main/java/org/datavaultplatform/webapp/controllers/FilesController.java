@@ -7,18 +7,18 @@ import org.datavaultplatform.common.response.DepositSize;
 import org.datavaultplatform.webapp.model.FancytreeNode;
 import org.datavaultplatform.webapp.services.RestService;
 import java.util.ArrayList;
-import jakarta.servlet.http.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.stereotype.Controller;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.*;
 import org.apache.commons.codec.binary.Base64;
 
-@Controller
+@RestController
 @ConditionalOnBean(RestService.class)
 @Slf4j
-public class FilesController {
+public class FilesController implements FilesControllerApi {
 
     private final RestService restService;
 
@@ -27,7 +27,8 @@ public class FilesController {
         this.restService = restService;
     }
 
-    public ArrayList<FancytreeNode> getNodes(String parent, boolean directoryOnly) throws Exception{
+    @Override
+    public ArrayList<FancytreeNode> getNodes(String parent, boolean directoryOnly) throws Exception {
 
         String filePath = "";
         
@@ -59,39 +60,41 @@ public class FilesController {
         
         return nodes;
     }
-    
-    @RequestMapping("/files")
-    public @ResponseBody ArrayList<FancytreeNode> getFilesListing(HttpServletRequest request) throws Exception{
 
-        // Fancytree parameters
-        String mode = request.getParameter("mode");
-        String parent = request.getParameter("parent");
+    @Override
+    @GetMapping(value = "/files", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ArrayList<FancytreeNode> getFilesListing(
+            @RequestParam(value = "mode", required = false) String mode,
+            @RequestParam(value = "parent", required = false) String parent) throws Exception {
+
+        // The 'mode' parameter is currently not used in the getNodes method,
+        // but it's included here for completeness if Fancytree requires it.
+        log.debug("Fancytree mode: {}", mode);
         
         return getNodes(parent, false);
     }
     
-    @RequestMapping("/dir")
-    public @ResponseBody ArrayList<FancytreeNode> getDirListing(HttpServletRequest request) throws Exception{
+    @Override
+    @GetMapping(value = "/dir", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ArrayList<FancytreeNode> getDirListing(String mode, String parent) throws Exception{
 
-        // Fancytree parameters
-        String mode = request.getParameter("mode");
-        String parent = request.getParameter("parent");
+        // The 'mode' parameter is currently not used in the getNodes method,
+        // but it's included here for completeness if Fancytree requires it.
+        log.debug("Fancytree mode: {}", mode);
         
         return getNodes(parent, true);
     }
-    
-    @RequestMapping("/filesize")
-    public @ResponseBody String getFilesize(HttpServletRequest request) throws Exception{
 
-        String filepath = request.getParameter("filepath");
+    @Override
+    @GetMapping(value = "/filesize", produces = MediaType.TEXT_PLAIN_VALUE)
+    public String getFilesize(@RequestParam("filepath") String filepath) {
         
         return restService.getFilesize(filepath);
     }
 
-    @RequestMapping("/checkdepositsize")
-    public @ResponseBody String checkDepositSize(HttpServletRequest request) throws Exception{
-
-        String[] filePaths = request.getParameterValues("filepath[]");
+    @Override
+    @GetMapping(value = "/checkdepositsize", produces = MediaType.APPLICATION_JSON_VALUE)
+    public CheckDepositSizeResponse checkDepositSize(@RequestParam(value = "filepath[]") String[] filePaths) {
 
         for(String filePath : filePaths){
             log.info("filePaths: " + filePath);
@@ -100,44 +103,29 @@ public class FilesController {
         DepositSize result = restService.checkDepositSize(filePaths);
         Boolean success = result.getResult();
         String max = DataVaultFileUtils.getGibibyteSizeStr(result.getMax());
-        log.info("Max deposit (web): " + max);
-        return "{ \"success\":\"" + success + "\", \"max\":\"" + max + "\"}";
+        log.info("Max deposit (web): {}", max);
+        return new CheckDepositSizeResponse(success, max);
     }
-    
-    @RequestMapping(value = "/fileupload", method = RequestMethod.POST)
-    public void fileUpload(MultipartHttpServletRequest request, HttpServletResponse response) throws Exception {
-        
-        String flowChunkNumber = request.getParameter("flowChunkNumber");
-        String flowTotalChunks = request.getParameter("flowTotalChunks");
-        String flowChunkSize = request.getParameter("flowChunkSize");
-        String flowTotalSize = request.getParameter("flowTotalSize");
-        String flowIdentifier = request.getParameter("flowIdentifier");
-        String flowFilename = request.getParameter("flowFilename");
-        String flowRelativePath = request.getParameter("flowRelativePath");
-        String fileUploadHandle = request.getParameter("fileUploadHandle");
-        
-        /*
-        logger.info("webapp fileupload:" +
-                " flowChunkNumber=" + flowChunkNumber +
-                " flowTotalChunks=" + flowTotalChunks +
-                " flowChunkSize=" + flowChunkSize +
-                " flowTotalSize=" + flowTotalSize +
-                " flowIdentifier=" + flowIdentifier +
-                " flowFilename=" + flowFilename +
-                " flowRelativePath=" + flowRelativePath +
-                " fileUploadHandle=" + fileUploadHandle);
-        */
-        
-        MultipartFile file = request.getFile("file");
-        
-        // Send this chunk to the broker
-        String encodedRelativePath = new String(Base64.encodeBase64(flowRelativePath.getBytes()));
-        restService.addFileChunk(fileUploadHandle, flowFilename, encodedRelativePath, flowChunkNumber, flowTotalChunks, flowChunkSize, flowTotalSize, file.getBytes());
-        
-        // Send a response to the client
-        java.io.PrintWriter wr = response.getWriter();
-        response.setStatus(HttpServletResponse.SC_OK);
-        wr.flush();
-        wr.close();
+
+    @Override
+    @PostMapping(value = "/fileupload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Void> fileUpload(
+            @ModelAttribute FileUploadRequest metadata,
+            @RequestPart("file") MultipartFile file) throws Exception {
+
+        String encodedRelativePath = new String(Base64.encodeBase64(metadata.getFlowRelativePath().getBytes()));
+
+        restService.addFileChunk(
+                metadata.getFileUploadHandle(),
+                metadata.getFlowFilename(),
+                encodedRelativePath,
+                metadata.getFlowChunkNumber(),
+                metadata.getFlowTotalChunks(),
+                metadata.getFlowChunkSize(),
+                metadata.getFlowTotalSize(),
+                file.getBytes()
+        );
+
+        return ResponseEntity.ok().build();
     }
 }

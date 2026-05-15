@@ -2,16 +2,15 @@ package org.datavaultplatform.common.response;
 
 import java.util.List;
 
-import org.jsondoc.core.annotation.ApiObject;
-import org.jsondoc.core.annotation.ApiObjectField;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiObject(name = "DepositsData")
+@Schema(name = "DepositsData")
 public class DepositsData {
 
-    @ApiObjectField(description = "Total records, before filtering")
+    @Schema(description = "Total records, before filtering")
     private long recordsTotal;
 
     /**
@@ -19,13 +18,13 @@ public class DepositsData {
      * filtering has been applied - not just the number of records being returned
      * for this page of data).
      */
-    @ApiObjectField(description = "Total records, after filtering")
+    @Schema(description = "Total records, after filtering")
     private long recordsFiltered;
 
     /**
      * The data to be displayed in the table.
      */
-    @ApiObjectField(description = "The Vaults information to be displayed in the table")
+    @Schema(description = "The Vaults information to be displayed in the table")
     private List<DepositInfo> data;
 
     public DepositsData() {

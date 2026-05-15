@@ -1,5 +1,6 @@
 package org.datavaultplatform.broker.services;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 import org.datavaultplatform.common.event.Event;
@@ -86,8 +87,8 @@ public class DepositsService {
                            Deposit deposit,
                            String shortPath,
                            String origin) {
-        
-        Date d = new Date();
+
+        LocalDateTime d = LocalDateTime.now();
         deposit.setCreationTime(d);
         
         deposit.setVault(vault);

@@ -2,6 +2,10 @@ package org.datavaultplatform.broker.scheduled;
 
 public abstract class ScheduledUtils {
 
+  private ScheduledUtils() {
+    /* This utility class should not be instantiated */
+  }
+
   public static final String SCHEDULE_1_AUDIT_DEPOSIT_NAME = "auditdeposit.schedule";
 
   public static final String SCHEDULE_2_ENCRYPTION_CHECK_NAME = "encryptioncheck.schedule";

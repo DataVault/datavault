@@ -4,12 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.app.DataVaultBrokerApp;
+import org.datavaultplatform.broker.queue.TaskSender;
 import org.datavaultplatform.broker.services.AdminDepositService;
-import org.datavaultplatform.broker.queue.Sender;
 import org.datavaultplatform.broker.services.FileStoreService;
 import org.datavaultplatform.broker.test.AddTestProperties;
 import org.datavaultplatform.broker.test.BaseDatabaseTest;
 import org.datavaultplatform.broker.test.TestClockConfig;
+import org.datavaultplatform.common.actuator.WithMockActuatorUser;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -18,6 +19,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -52,7 +54,7 @@ public class ActuatorTest extends BaseDatabaseTest {
   MockMvc mvc;
 
   @MockBean
-  Sender sender;
+  TaskSender taskSender;
 
   @Autowired
   ObjectMapper mapper;
@@ -69,23 +71,27 @@ public class ActuatorTest extends BaseDatabaseTest {
   }
 
   @ParameterizedTest
-  @ValueSource(strings = {"/actuator/info", "/actuator/health",
-          "/actuator/metrics", "/actuator/memoryinfo", "/actuator/mappings"})
+  @ValueSource(strings = {"/actuator", "/actuator/", "/actuator/info", "/actuator/health"})
   @SneakyThrows
   void testActuatorPublicAccess(String url) {
     checkPublic(url);
   }
 
   @ParameterizedTest
-  @ValueSource(strings={"/actuator", "/actuator/", "/actuator/env", "/users", "/actuator/loggers"})
+  @ValueSource(strings = {"/actuator/env", "/actuator/customtime",
+          "/actuator/sftpfilestores", "/actuator/localfilestores",
+          "/actuator/env", "/actuator/loggers",
+          "/actuator/metrics", "/actuator/memoryinfo", "/actuator/mappings"})
   @SneakyThrows
   void testActuatorUnauthorized(String url) {
     checkUnauthorized(url);
   }
 
   @ParameterizedTest
-  @ValueSource(strings = {"/actuator", "/actuator/", "/actuator/env", "/actuator/customtime",
-          "/actuator/sftpfilestores", "/actuator/localfilestores"})
+  @ValueSource(strings = {"/actuator/env", "/actuator/customtime",
+          "/actuator/sftpfilestores", "/actuator/localfilestores",
+          "/actuator/env", "/actuator/loggers",
+          "/actuator/metrics", "/actuator/memoryinfo", "/actuator/mappings"})
   @SneakyThrows
   void testActuatorAuthorized(String url) {
     checkAuthorized(url, "bactor", "bactorpass");
@@ -127,6 +133,7 @@ public class ActuatorTest extends BaseDatabaseTest {
   }
 
   @Test
+  @WithMockActuatorUser
   void testMemoryInfo() throws Exception {
     MvcResult mvcResult = mvc.perform(
                     get("/actuator/memoryinfo"))

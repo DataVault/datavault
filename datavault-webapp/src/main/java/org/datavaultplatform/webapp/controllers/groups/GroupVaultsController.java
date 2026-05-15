@@ -6,6 +6,7 @@ import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.webapp.services.RestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -20,7 +21,7 @@ import java.util.ArrayList;
 
 @Controller
 @ConditionalOnBean(RestService.class)
-public class GroupVaultsController {
+public class GroupVaultsController implements GroupVaultsControllerApi {
 
     private final RestService restService;
 
@@ -29,8 +30,9 @@ public class GroupVaultsController {
         this.restService = restService;
     }
 
-    @RequestMapping(value = "/groups", method = RequestMethod.GET)
-    public String getGroupVaultsListing(ModelMap model) throws Exception {
+    @Override
+    @GetMapping(value = "/groups", produces = MediaType.TEXT_HTML_VALUE)
+    public String getGroupVaultsListing(ModelMap model) {
         // Which groups is this user an owner of
         Group[] groups = restService.getGroups();
         ArrayList<Group> members = new ArrayList<>();

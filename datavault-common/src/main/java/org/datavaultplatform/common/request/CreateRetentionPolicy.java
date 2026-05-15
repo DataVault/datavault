@@ -4,53 +4,50 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import lombok.Data;
-import org.jsondoc.core.annotation.ApiObject;
-import org.jsondoc.core.annotation.ApiObjectField;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiObject(name = "CreateRetentionPolicy")
+@Schema(name = "CreateRetentionPolicy")
 @Data
 public class CreateRetentionPolicy {
 
-    @ApiObjectField(description = "Uh... the id")
+    @Schema(description = "Uh... the id")
     private int id;
 
-    @ApiObjectField(description = "A name for the new Retention Policy")
+    @Schema(description = "A name for the new Retention Policy")
     private String name;
 
-    @ApiObjectField(description = "A description of Retention Policy")
+    @Schema(description = "A description of Retention Policy")
     private String description;
 
-    @ApiObjectField(description = "Engine for Retention Policy (deprecated")
+    @Schema(description = "Engine for Retention Policy (deprecated")
     private String engine;
 
-    @ApiObjectField(description = "Sorting order for Retention Policy (deprecated)")
+    @Schema(description = "Sorting order for Retention Policy (deprecated)")
     private String sort;
 
-    @ApiObjectField(description = "URL for Retention Policy")
+    @Schema(description = "URL for Retention Policy")
     private String url;
 
-    @ApiObjectField(description = "Minimum retention period in years")
+    @Schema(description = "Minimum retention period in years")
     private int minRetentionPeriod;
 
-    @ApiObjectField(description = "Extend the expiry date of a vault if a deposit is retrieved")
+    @Schema(description = "Extend the expiry date of a vault if a deposit is retrieved")
     private boolean extendUponRetrieval;
 
-    @ApiObjectField(description = "Minimum Date Retention Period (deprecated)")
+    @Schema(description = "Minimum Date Retention Period (deprecated)")
     private String minDataRetentionPeriod;
 
-    @ApiObjectField(description = "In Effect Date")
-    private Date inEffectDate;
+    @Schema(description = "In Effect Date")
+    private LocalDate inEffectDate;
 
-    @ApiObjectField(description = "End Date")
-    private Date endDate;
+    @Schema(description = "End Date")
+    private LocalDate endDate;
 
-    @ApiObjectField(description = "Date Guidance Reviewed")
-    private Date dataGuidanceReviewed;
-
-
+    @Schema(description = "Date Guidance Reviewed")
+    private LocalDate dataGuidanceReviewed;
 
     public CreateRetentionPolicy() { }
 
@@ -131,27 +128,27 @@ public class CreateRetentionPolicy {
         this.minDataRetentionPeriod = minDataRetentionPeriod;
     }
 
-    public Date getInEffectDate() {
+    public LocalDate getInEffectDate() {
         return inEffectDate;
     }
 
-    public void setInEffectDate(Date inEffectDate) {
+    public void setInEffectDate(LocalDate inEffectDate) {
         this.inEffectDate = inEffectDate;
     }
 
-    public Date getEndDate() {
+    public LocalDate getEndDate() {
         return endDate;
     }
 
-    public void setEndDate(Date endDate) {
+    public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
     }
 
-    public Date getDataGuidanceReviewed() {
+    public LocalDate getDataGuidanceReviewed() {
         return dataGuidanceReviewed;
     }
 
-    public void setDataGuidanceReviewed(Date dataGuidanceReviewed) {
+    public void setDataGuidanceReviewed(LocalDate dataGuidanceReviewed) {
         this.dataGuidanceReviewed = dataGuidanceReviewed;
     }
 
@@ -159,5 +156,4 @@ public class CreateRetentionPolicy {
         String retVal = this.id + "-" + this.minRetentionPeriod;
         return retVal;
     }
-
 }

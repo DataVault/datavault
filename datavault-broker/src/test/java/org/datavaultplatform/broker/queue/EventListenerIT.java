@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -154,7 +155,7 @@ class EventListenerIT extends BaseDatabaseTest {
     vault.setName("test-vault");
     vault.setContact("contact name");
     vault.setGroup(group);
-    Date nowPlus1Year = java.sql.Date.valueOf(LocalDate.now().plusYears(1));
+    LocalDate nowPlus1Year = LocalDate.now().plusYears(1);
     vault.setReviewDate(nowPlus1Year);
     vaultsService.addVault(vault);
     this.vaultId = vault.getID();
@@ -209,7 +210,7 @@ class EventListenerIT extends BaseDatabaseTest {
 
     Retrieve retrieve = new Retrieve();
     retrieve.setHasExternalRecipients(false);
-    retrieve.setTimestamp(new Date());
+    retrieve.setTimestamp(LocalDateTime.now());
     retrieve.setDeposit(deposit);
 
     retrievesService.addRetrieve(retrieve, deposit, "/path");

@@ -1,520 +1,584 @@
 package org.datavaultplatform.webapp.controllers.admin;
 
-import lombok.SneakyThrows;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.request.CreateRetentionPolicy;
-import org.datavaultplatform.common.response.DepositInfo;
-import org.datavaultplatform.common.response.ReviewInfo;
-import org.datavaultplatform.common.response.VaultInfo;
-import org.datavaultplatform.common.response.VaultsData;
-import org.datavaultplatform.webapp.app.DataVaultWebApp;
+import org.datavaultplatform.common.response.*;
 import org.datavaultplatform.webapp.model.DepositReviewModel;
 import org.datavaultplatform.webapp.model.VaultReviewModel;
 import org.datavaultplatform.webapp.services.RestService;
-import org.datavaultplatform.webapp.test.AddTestProperties;
-import org.datavaultplatform.webapp.test.ProfileDatabase;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.RequestBuilder;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.ui.ModelMap;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.*;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.datavaultplatform.webapp.controllers.admin.AdminReviewsController.ACTION_SUBMIT;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.*;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
+@ExtendWith(MockitoExtension.class)
+class AdminReviewsControllerTest {
 
-@SpringBootTest(classes = DataVaultWebApp.class)
-@AutoConfigureMockMvc
-@ProfileDatabase
-@TestPropertySource(properties = "logging.level.org.springframework.security=DEBUG")
-@AddTestProperties
-public class AdminReviewsControllerTest {
+    AdminReviewsController spyController;
 
-    static final String TEST_VAULT_REVIEW_ID = "test-vault-review-id";
-    static final String TEST_GROUP_ID = "test-group-id";
-    static final String TEST_VAULT_ID_1 = "vaultinfo-id-1";
-    static final String TEST_VAULT_ID_2 = "vaultinfo-id-2";
-    static final String TEST_VAULT_NAME_1 = "vaultinfo-name-1";
-    static final String TEST_VAULT_NAME_2 = "vaultinfo-name-2";
-    static final String TEST_DEPOSIT_ID_1 = "test-deposit-id-1";
-    static final String TEST_DEPOSIT_ID_2 = "test-deposit-id-2";
-    static final String TEST_DEPOSIT_REVIEW_1_ID = "test-deposit-review-1-id";
-    static final String TEST_DEPOSIT_REVIEW_1_COMMENT = "test-deposit-review-1-comment";
-    static final String TEST_DEPOSIT_REVIEW_2_ID = "test-deposit-review-2-id";
-    static final String TEST_DEPOSIT_REVIEW_2_COMMENT = "test-deposit-review-2-comment";
-    static final String TEST_DEPOSIT_1_NAME = "test-deposit-1-name";
-    static final String TEST_DEPOSIT_2_NAME = "test-deposit-2-name";
-    static final int TEST_RETENTION_POLICY_ID_1 = 123456;
-    static final int TEST_RETENTION_POLICY_ID_2 = 98765;
-
-    static final String REVIEW_DATE_NOTIFICATION_MESSAGE = "If some deposits are to be retained then a new Review Date must be entered";
-
-    @Autowired
-    MockMvc mockMvc;
-
-    @MockBean
+    @Mock
     RestService mRestService;
 
-    @Mock
-    VaultsData mVaultsData;
+    Clock clock;
 
-    @Mock
-    VaultInfo mVaultInfo1;
-
-    @Mock
-    VaultInfo mVaultInfo2;
-
-    @Mock
-    RoleAssignment mRoleAssignment1;
-
-    @Mock
-    RoleAssignment mRoleAssignment2;
-
-    @Mock
-    RoleModel mRoleModel1;
-
-    @Mock
-    RoleModel mRoleModel2;
-
-    @Mock
-    CreateRetentionPolicy mCreateRetentionPolicy1;
-
-    @Mock
-    CreateRetentionPolicy mCreateRetentionPolicy2;
-
-    @Mock
-    Group mGroup;
-    
-    @Mock
-    ReviewInfo mReviewInfo;
-
-    @Mock
-    VaultReview mVaultReview;
-
-    @Mock
-    VaultReviewModel mVaultReviewModel;
-
-    @Mock
-    DepositInfo mDepositInfo1;
-
-    @Mock
-    DepositReview mDepositReview1;
-
-    @Mock
-    DepositReview mOriginalDepositReview1;
-
-    @Mock
-    DepositReviewModel mDepositReviewModel1;
-
-    @Mock
-    DepositInfo mDepositInfo2;
-
-    @Mock
-    DepositReview mDepositReview2;
-
-    @Mock
-    DepositReview mOriginalDepositReview2;
-
-    @Mock
-    DepositReviewModel mDepositReviewModel2;
-    
-    @Mock
-    Date mDate1;
-    
-    @Mock
-    Date mDate2;
-    
-    List<RoleAssignment>  roleAssignments = new ArrayList<>();
-
-    List<VaultInfo> vaultsInfo = new ArrayList<>();
-    
-    ObjectMapper mapper = new ObjectMapper();
-    
     @BeforeEach
     void setup() {
-        // VaultsInfo
-        vaultsInfo.add(mVaultInfo1);
-        vaultsInfo.add(mVaultInfo2);
-
-        when(mVaultsData.getData()).thenReturn(vaultsInfo);
-
-        lenient().when(mVaultInfo1.getID()).thenReturn(TEST_VAULT_ID_1);
-        lenient().when(mVaultInfo1.getName()).thenReturn(TEST_VAULT_NAME_1);
-
-        lenient().when(mVaultInfo2.getID()).thenReturn(TEST_VAULT_ID_2);
-        lenient().when(mVaultInfo2.getName()).thenReturn(TEST_VAULT_NAME_2);
-
-        // RoleAssignments
-        roleAssignments.add(mRoleAssignment1);
-        roleAssignments.add(mRoleAssignment2);
-
-        lenient().when(mRoleModel1.getName()).thenReturn("Nominated Data Manager");
-        lenient().when(mRoleModel1.getName()).thenReturn("Data Owner");
-
-        lenient().when(mRoleAssignment1.getRole()).thenReturn(mRoleModel1);
-        lenient().when(mRoleAssignment2.getRole()).thenReturn(mRoleModel2);
-
-        lenient().when(mCreateRetentionPolicy1.getID()).thenReturn(TEST_RETENTION_POLICY_ID_1);
-        lenient().when(mCreateRetentionPolicy2.getID()).thenReturn(TEST_RETENTION_POLICY_ID_2);
-
-        lenient().when(mCreateRetentionPolicy1.getMinRetentionPeriod()).thenReturn(10);
-        lenient().when(mCreateRetentionPolicy2.getMinRetentionPeriod()).thenReturn(5);
-
-        // RestService
-        lenient().when(mRestService.getVaultsForReview()).thenReturn(mVaultsData);
-
-        lenient().when(mRestService.getVault(TEST_VAULT_ID_1)).thenReturn(mVaultInfo1);
-        lenient().when(mRestService.getVault(TEST_VAULT_ID_2)).thenReturn(mVaultInfo2);
-
-        lenient().when(mRestService.getRoleAssignmentsForVault(TEST_VAULT_ID_1)).thenReturn(roleAssignments);
-        lenient().when(mRestService.getRoleAssignmentsForVault(TEST_VAULT_ID_2)).thenReturn(roleAssignments);
-
-        lenient().when(mRestService.getRetentionPolicy(String.valueOf(TEST_RETENTION_POLICY_ID_1))).thenReturn(mCreateRetentionPolicy1);
-        lenient().when(mRestService.getRetentionPolicy(String.valueOf(TEST_RETENTION_POLICY_ID_2))).thenReturn(mCreateRetentionPolicy1);
-        mapper = new ObjectMapper();
+        clock = Clock.fixed(Instant.parse("2007-12-03T10:15:30.00Z"), ZoneId.systemDefault());
+        spyController = Mockito.spy(new AdminReviewsController(mRestService, clock));
     }
 
-
-    @DisplayName("Test getVaultsForReview() and expect no error.")
     @Test
-    @WithMockUser(roles = {"ADMIN_REVIEWS"})
-    void testGetVaultsForReview() throws Exception {
-        // Act
-        RequestBuilder requestBuilder = MockMvcRequestBuilders.get("/admin/reviews")
-                .accept(MediaType.TEXT_HTML);
-        // Act
-        MvcResult mvcResult = mockMvc.perform(requestBuilder).andReturn();
-        String html = mvcResult.getResponse().getContentAsString();
+    void getVaultsForReview() {
+        LocalDate today = LocalDate.now(clock);
 
-        // Assert
-        assertThat(mvcResult.getModelAndView().getViewName()).isEqualTo("admin/reviews/index");
-
-        Document doc = Jsoup.parse(html);
-
-        Elements elems1 = doc.selectXpath("//a[@href='/vaults/vaultinfo-id-1/']");
-        assertThat(elems1.size()).isEqualTo(1);
-        Element elem1 = elems1.get(0);
-        assertThat(elem1.text()).isEqualTo("vaultinfo-name-1");
-
-        Elements elems2 = doc.selectXpath("//a[@href='/vaults/vaultinfo-id-2/']");
-        assertThat(elems2.size()).isEqualTo(1);
-        Element elem2 = elems2.get(0);
-        assertThat(elem2.text()).isEqualTo("vaultinfo-name-2");
-
-        verify(mRestService).getVaultsForReview();
-        Mockito.verifyNoMoreInteractions(mRestService);
-    }
-
-    @DisplayName("Test showReview() with no Review Date errors.")
-    @Test
-    @WithMockUser(roles = {"ADMIN_VAULTS"})
-    void testShowReview_WithNoReviewDateError() throws Exception {
-        // Arrange
-        mocksForShowAndProcessReviewTests();
+        VaultReviewStatusInfo statusInfo1 = new VaultReviewStatusInfo();
+        VaultReviewStatusInfo statusInfo2 = new VaultReviewStatusInfo();
         
-        RequestBuilder requestBuilder = MockMvcRequestBuilders.get("/admin/vaults/"+TEST_VAULT_ID_1+"/reviews")
-                .accept(MediaType.TEXT_HTML);
-        // Act
-        MvcResult mvcResult = mockMvc.perform(requestBuilder).andReturn();
+        ModelMap modelMap = new ModelMap();
+        VaultsData vaultsForReviewData = new VaultsData();
+        VaultInfo vaultInfo1 = new VaultInfo();
+        vaultInfo1.setID("vaultId1");
+        vaultInfo1.setReviewDate(today.plusMonths(3));
+        VaultInfo vaultInfo2 = new VaultInfo();
+        vaultInfo2.setID("vaultId2");
+        vaultInfo2.setReviewDate(today.plusMonths(5));
+        vaultsForReviewData.setData(List.of(vaultInfo1, vaultInfo2));
+        
+        when(mRestService.getVaultsForReview()).thenReturn(vaultsForReviewData);
+        
+        when(mRestService.getVaultReviewStatusInfo("vaultId1")).thenReturn(statusInfo1);
+        when(mRestService.getVaultReviewStatusInfo("vaultId2")).thenReturn(statusInfo2);
+        
+        String result = spyController.getVaultsForReview(modelMap);
+        assertThat(result).isEqualTo("admin/reviews/index");
+        verify(mRestService).getVaultsForReview();
+        verify(mRestService).getVaultReviewStatusInfo("vaultId1");
+        verify(mRestService).getVaultReviewStatusInfo("vaultId2");
+        verifyNoMoreInteractions(mRestService);
+        assertThat(modelMap.getAttribute("vaults")).isEqualTo(List.of(vaultInfo1, vaultInfo2));
+    }
 
-        // Assert
-        assertThat(mvcResult.getModelAndView().getViewName()).isEqualTo("admin/reviews/create");
-        ModelMap modelMap = mvcResult.getModelAndView().getModelMap();
-        VaultReviewModel vrm = (VaultReviewModel) modelMap.get("vaultReviewModel");
+    @ParameterizedTest
+    @CsvSource(nullValues = "null", textBlock = """
+            errorMsg, false, true,
+            null, false, true,
+            reviewdate, true, true,
+            null, true, true,
+            errorMsg, false, false,
+            null, false, false,
+            reviewdate, true, false,
+            null, true, false
+            """)
+    void testShowReview(String errorMsg, boolean hasDataOwner, boolean hasCurrentReview) {
+        ModelMap modelMap = new ModelMap();
+
+        Group vaultGroup = new Group() {
+            @Override
+            public String getID() {
+                return "vaultGroupId";
+            }
+        };
+        RoleModel ndmRole = new RoleModel();
+        ndmRole.setName("Nominated Data Manager");
+
+        RoleModel dataOwnerRole = new RoleModel();
+        dataOwnerRole.setName("Data Owner");
+
+        RoleAssignment ndmRA1 = new RoleAssignment();
+        ndmRA1.setRole(ndmRole);
+
+        RoleAssignment ndmRA2 = new RoleAssignment();
+        ndmRA2.setRole(ndmRole);
+
+        RoleAssignment dataOwnerRA = new RoleAssignment();
+        dataOwnerRA.setRole(dataOwnerRole);
+
+        VaultInfo vaultInfo = new VaultInfo();
+        vaultInfo.setPolicyID("vaultPolicyId");
+        vaultInfo.setGroupID("vaultGroupId");
+        vaultInfo.setReviewDate(LocalDate.now().plusYears(4));
+        when(mRestService.getVault("vaultId")).thenReturn(vaultInfo);
+
+        ReviewInfo currentReviewInfo = new ReviewInfo();
+        currentReviewInfo.setDepositReviewIds(List.of("depRevId1", "depRevId2"));
+        currentReviewInfo.setDepositIds(List.of("depId1", "depId2"));
+        currentReviewInfo.setVaultReviewId("vaultReviewId");
+        
+        if (hasCurrentReview) {
+            when(mRestService.getCurrentReview("vaultId")).thenReturn(currentReviewInfo);
+        } else {
+            when(mRestService.getCurrentReview("vaultId")).thenReturn(null);
+            when(mRestService.createCurrentReview("vaultId")).thenReturn(currentReviewInfo);
+        }
+        VaultReview currentVaultReview = new VaultReview();
+        when(mRestService.getVaultReview("vaultReviewId")).thenReturn(currentVaultReview);
+
+
+        List<RoleAssignment> roleAssignments = new ArrayList<>(List.of(ndmRA1, ndmRA2));
+        if (hasDataOwner) {
+            roleAssignments.add(dataOwnerRA);
+        }
+        when(mRestService.getRoleAssignmentsForVault("vaultId")).thenReturn(roleAssignments);
+
+        CreateRetentionPolicy exitingRetentionPolicy = new CreateRetentionPolicy();
+        exitingRetentionPolicy.setId(123);
+
+        when(mRestService.getRetentionPolicy("vaultPolicyId")).thenReturn(exitingRetentionPolicy);
+        when(mRestService.getGroup("vaultGroupId")).thenReturn(vaultGroup);
+
+        when(mRestService.getDeposit(anyString())).thenAnswer(invocation -> {
+            String depositId = invocation.getArgument(0);
+            DepositInfo result = new DepositInfo();
+            result.setID(depositId);
+            result.setName(depositId + "-name");
+            return result;
+        });
+
+        when(mRestService.getDepositReview(anyString())).thenAnswer(invocation -> {
+            String depositReviewId = invocation.getArgument(0);
+            DepositReview result = new DepositReview();
+            result.setId(depositReviewId);
+            result.setComment(depositReviewId + "-comment");
+            return result;
+        });
+        String result = spyController.showReview(modelMap, "vaultId", errorMsg);
+
+        assertThat(result).isEqualTo("admin/reviews/create");
+
+        CreateRetentionPolicy retentionPolicy = (CreateRetentionPolicy) modelMap.getAttribute("createRetentionPolicy");
+        assertThat(retentionPolicy).isNotEqualTo(exitingRetentionPolicy);
+
+        assertThat(modelMap.getAttribute("vault")).isEqualTo(vaultInfo);
+
+        VaultReviewModel vrm = (VaultReviewModel) modelMap.getAttribute("vaultReviewModel");
+        assertThat(vrm).isNotNull();
+
         List<DepositReviewModel> drms = vrm.getDepositReviewModels();
-        assertThat(drms.size()).isEqualTo(2);
-        DepositReviewModel drm1 = drms.get(0);
+        assertThat(drms).hasSize(2);
 
-        assertThat(drm1.getDepositReviewId()).isEqualTo(TEST_DEPOSIT_REVIEW_1_ID);
-        assertThat(drm1.getDeleteStatus()).isEqualTo(1);
-        assertThat(drm1.getComment()).isEqualTo(TEST_DEPOSIT_REVIEW_1_COMMENT);
-        assertThat(drm1.getDepositId()).isEqualTo(TEST_DEPOSIT_ID_1);
-        assertThat(drm1.getName()).isEqualTo(TEST_DEPOSIT_1_NAME);
-        assertThat(drm1.getStatusName()).isEqualTo(Audit.Status.IN_PROGRESS.name());
-        assertThat(drm1.getCreationTime()).isEqualTo(mDate1);
+        DepositReviewModel drm1 = drms.get(0);
+        assertThat(drm1.getDepositReviewId()).isEqualTo("depRevId1");
+        assertThat(drm1.getDepositId()).isEqualTo("depId1");
+        assertThat(drm1.getDepositName()).isEqualTo("depId1-name");
+        assertThat(drm1.getComment()).isEqualTo("depRevId1-comment");
 
         DepositReviewModel drm2 = drms.get(1);
-        assertThat(drm2.getDepositReviewId()).isEqualTo(TEST_DEPOSIT_REVIEW_2_ID);
-        assertThat(drm2.getDeleteStatus()).isEqualTo(2);
-        assertThat(drm2.getComment()).isEqualTo(TEST_DEPOSIT_REVIEW_2_COMMENT);
-        assertThat(drm2.getDepositId()).isEqualTo(TEST_DEPOSIT_ID_2);
-        assertThat(drm2.getName()).isEqualTo(TEST_DEPOSIT_2_NAME);
-        assertThat(drm2.getStatusName()).isEqualTo(Audit.Status.COMPLETE.name());
-        assertThat(drm2.getCreationTime()).isEqualTo(mDate2);
+        assertThat(drm2.getDepositReviewId()).isEqualTo("depRevId2");
+        assertThat(drm2.getDepositId()).isEqualTo("depId2");
+        assertThat(drm2.getDepositName()).isEqualTo("depId2-name");
+        assertThat(drm2.getComment()).isEqualTo("depRevId2-comment");
 
-        // No error key in modelMap
-        assertThat((String) modelMap.get("error")).isBlank();
+        verify(mRestService).refreshUnderwayVaultReview("vaultId");
+        
+        if (hasCurrentReview) {
+            verify(mRestService, never()).createCurrentReview(anyString());
+        } else {
+            verify(mRestService).createCurrentReview(anyString());
+        }
 
-        System.out.println("mvcResult: " + mvcResult);
-        String html = mvcResult.getResponse().getContentAsString();
-        Document doc = Jsoup.parse(html);
-        // No error alert on page
-        Elements elems1 = doc.selectXpath("//div[@role='alert']");
-        assertThat(elems1.size()).isEqualTo(0);
+        List<RoleAssignment> dataManagers = (List<RoleAssignment>) modelMap.getAttribute("dataManagers");
+        assertThat(dataManagers).hasSize(2);
+        assertThat(dataManagers.get(0)).isEqualTo(ndmRA1);
+        assertThat(dataManagers.get(1)).isEqualTo(ndmRA2);
 
-        verify(mRestService).getVault(TEST_VAULT_ID_1);
-        verify(mRestService).getRoleAssignmentsForVault(TEST_VAULT_ID_1);
-        verify(mRestService).getRetentionPolicy(null);//FIX
-        verify(mRestService).getGroup(TEST_GROUP_ID);
-        verify(mRestService).getCurrentReview(TEST_VAULT_ID_1);
-        verify(mRestService).getVaultReview(TEST_VAULT_REVIEW_ID);
-        verify(mRestService).getDeposit(TEST_DEPOSIT_ID_1);
-
-        verify(mRestService).getDeposit(TEST_DEPOSIT_ID_1);
-        verify(mRestService).getDepositReview(TEST_DEPOSIT_REVIEW_1_ID);
-
-        verify(mRestService).getDeposit(TEST_DEPOSIT_ID_2);
-        verify(mRestService).getDepositReview(TEST_DEPOSIT_REVIEW_2_ID);
-
-        Mockito.verifyNoMoreInteractions(mRestService);
-    }
-
-
-    @DisplayName("Test showReview() with Review Date error.")
-    @Test
-    @WithMockUser(roles = {"ADMIN_VAULTS"})
-    void testShowReview_WithReviewDateError_ThenNotificationDisplaysError() throws Exception {
-        // Arrange
-        mocksForShowAndProcessReviewTests();
-
-        RequestBuilder requestBuilder = MockMvcRequestBuilders.get("/admin/vaults/"+TEST_VAULT_ID_1+"/reviews")
-                .queryParam("error", "reviewdate")
-                .accept(MediaType.TEXT_HTML);
-        // Act
-        MvcResult mvcResult = mockMvc.perform(requestBuilder).andReturn();
-
-        // Assert
-        assertThat(mvcResult.getModelAndView().getViewName()).isEqualTo("admin/reviews/create");
-
-        ModelMap modelMap = mvcResult.getModelAndView().getModelMap();
-
-        // Error key in modelMap
-        assertThat((String) modelMap.get("error")).isEqualTo(REVIEW_DATE_NOTIFICATION_MESSAGE);
-
-        String html = mvcResult.getResponse().getContentAsString();
-        Document doc = Jsoup.parse(html);
-
-        // Error alert on page
-        Elements elems1 = doc.selectXpath("//div[@role='alert']");
-        assertThat(elems1.size()).isEqualTo(1);
-        Element elem1 = elems1.get(0);
-        assertThat(elem1.text()).isEqualTo(REVIEW_DATE_NOTIFICATION_MESSAGE);
-
-        verify(mRestService).getVault(TEST_VAULT_ID_1);
-        verify(mRestService).getRoleAssignmentsForVault(TEST_VAULT_ID_1);
-        verify(mRestService).getRetentionPolicy(null); //should fix this
-
-        verify(mRestService).getGroup(TEST_GROUP_ID); //should fix this
-        verify(mRestService).getCurrentReview(TEST_VAULT_ID_1);
-        verify(mRestService).getVaultReview(TEST_VAULT_REVIEW_ID);
-
-        verify(mRestService).getDeposit(TEST_DEPOSIT_ID_1);
-        verify(mRestService).getDepositReview(TEST_DEPOSIT_REVIEW_1_ID);
-
-        verify(mRestService).getDeposit(TEST_DEPOSIT_ID_2);
-        verify(mRestService).getDepositReview(TEST_DEPOSIT_REVIEW_2_ID);
-
-        Mockito.verifyNoMoreInteractions(mRestService);
-    }
-
-    @DisplayName("Test processReview() with action Cancel.")
-    @Test
-    @WithMockUser(roles = {"ADMIN_VAULTS"})
-    void testProcessReview_ActionCancel() throws Exception {
-
-        // Arrange
-        mocksForShowAndProcessReviewTests();
-
-        RequestBuilder requestBuilder = MockMvcRequestBuilders.post("/admin/vaults/"+TEST_VAULT_ID_1+"/reviews/" + TEST_VAULT_REVIEW_ID)
-                .queryParam("action", "Cancel")
-                .flashAttr("VaultReviewModel", mVaultReviewModel)
-                .contentType(MediaType.APPLICATION_JSON)
-                .with(csrf());
-        // Act
-        MvcResult mvcResult = mockMvc.perform(requestBuilder).andReturn();
-        //Assert
-        assertThat(mvcResult.getModelAndView().getViewName()).isEqualTo("redirect:/admin/reviews");
-        Mockito.verifyNoMoreInteractions(mRestService);
-    }
-
-    @DisplayName("Test processReview() with action Save.")
-    @Test
-    @WithMockUser(roles = {"ADMIN_VAULTS"})
-    void testProcessReview_ActionSave() throws Exception {
-        // Arrange
-        mocksForShowAndProcessReviewTests();
-
-        RequestBuilder requestBuilder = MockMvcRequestBuilders.post("/admin/vaults/"+TEST_VAULT_ID_1+"/reviews/" + TEST_VAULT_REVIEW_ID)
-                .queryParam("action", "Save")
-                .flashAttr("vaultReviewModel", mVaultReviewModel)
-                .contentType(MediaType.APPLICATION_JSON)
-                .with(csrf());
-        // Act
-        MvcResult mvcResult = mockMvc.perform(requestBuilder).andReturn();
-        // Assert
-        assertThat(mvcResult.getModelAndView().getViewName()).isEqualTo("redirect:/admin/reviews");
-
-        verify(mRestService).getVaultReview(TEST_VAULT_REVIEW_ID);
-
-        verify(mRestService).editVaultReview(mVaultReview);
-        verify(mRestService, times(2)).getDepositReview(null); //FIX THIS
-        verify(mRestService, times(2)).editDepositReview(any(DepositReview.class));
+        RoleAssignment dataOwner = (RoleAssignment) modelMap.getAttribute("dataOwner");
+        if (hasDataOwner) {
+            assertThat(dataOwner).isEqualTo(dataOwnerRA);
+        } else {
+            assertThat(dataOwner).isNull();
+        }
+        String actualError = (String) modelMap.getAttribute("error");
+        String expectedError = null;
+        if ("reviewdate".equals(errorMsg)) {
+            expectedError = "If some deposits are to be retained then a next Review Date must be entered";
+        }
+        assertThat(actualError).isEqualTo(expectedError);
         verifyNoMoreInteractions(mRestService);
     }
 
+    @Nested
+    class ProcessReviewTests {
 
-    @DisplayName("Test processReview() with action Submit with no retained deposits and no review date.")
-    @Test
-    @WithMockUser(roles = "ADMIN_VAULTS")
-    void testProcessReview_Submit_WithNoReviewDate_AndNoRetainedDeposits() throws Exception {
-        // Arrange
-        mocksForShowAndProcessReviewTests();
-        // ReviewDate not set
-        when(mVaultReviewModel.getNewReviewDate()).thenReturn(null);
+        @Test
+        void processReview_NullVaultReviewModel() {
+            IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
+                RedirectAttributes mRedirectAttrs = mock(RedirectAttributes.class);
+                spyController.processReview(null, mRedirectAttrs, "vaultId", "reviewId", AdminReviewsController.ACTION_CANCEL);
+            });
+            assertThat(ex).hasMessage("VaultReviewModel must not be null");
+            verifyNoMoreInteractions(mRestService);
+        }
 
-        RequestBuilder requestBuilder = MockMvcRequestBuilders.post("/admin/vaults/"+TEST_VAULT_ID_1+"/reviews/" + TEST_VAULT_REVIEW_ID)
-                .queryParam("action", "Submit")
-                .flashAttr("vaultReviewModel", mVaultReviewModel)
-                .contentType(MediaType.APPLICATION_JSON)
-                .with(csrf());
-        // Act
-        MvcResult mvcResult = mockMvc.perform(requestBuilder).andReturn();
-        //Assert
-        assertThat(mvcResult.getModelAndView().getViewName()).isEqualTo("redirect:/admin/reviews");
+        @Test
+        void processReview_ActionCancel() {
+            VaultReviewModel vrm = new VaultReviewModel();
+            RedirectAttributes mRedirectAttrs = mock(RedirectAttributes.class);
+            String result = spyController.processReview(vrm, mRedirectAttrs, "vaultId", "reviewId", AdminReviewsController.ACTION_CANCEL);
+            assertThat(result).isEqualTo("redirect:/admin/reviews");
+            verifyNoMoreInteractions(mRestService);
+        }
+        
+        @Test
+        void processReview_ActionSubmit_InvalidNextReviewDate() {
+            VaultReviewModel vrm = new VaultReviewModel();
+            RedirectAttributes mRedirectAttrs = mock(RedirectAttributes.class);
 
-        verify(mRestService).getVaultReview(TEST_VAULT_REVIEW_ID);
-        verify(mRestService).getVault(TEST_VAULT_ID_1);
-        verify(mRestService, times(2)).editDepositReview(any(DepositReview.class));//USE CAPTORS
-        verify(mRestService).editVaultReview(any(VaultReview.class));//USE CAPTORS
-        verify(mRestService, times(2)).getDepositReview(null);//FIX
-        Mockito.verifyNoMoreInteractions(mRestService);
+            when(spyController.validateNextReviewDate(vrm, mRedirectAttrs)).thenReturn(false);
+
+            String result = spyController.processReview(vrm, mRedirectAttrs, "vaultId", "reviewId", ACTION_SUBMIT);
+
+            assertThat(result).isEqualTo("redirect:/admin/vaults/vaultId/reviews");
+            
+            verify(spyController).validateNextReviewDate(vrm, mRedirectAttrs);
+            verifyNoMoreInteractions(mRestService);
+        }
+
+        @Captor
+        ArgumentCaptor<DepositReviewModel> argDRM;
+
+        @Test
+        void processReview_ActionSubmit_ValidNextReviewDate() {
+            VaultReviewModel vrm = new VaultReviewModel();
+            DepositReviewModel drm1 = new DepositReviewModel();
+            DepositReviewModel drm2 = new DepositReviewModel();
+            vrm.setDepositReviewModels(List.of(drm1, drm2));
+            RedirectAttributes mRedirectAttrs = mock(RedirectAttributes.class);
+
+            doReturn(true).when(spyController).validateNextReviewDate(vrm, mRedirectAttrs);
+
+            VaultReview originalVaultReview = new VaultReview();
+            doNothing().when(spyController).updateVaultReviewAndVault(originalVaultReview, vrm, "vaultId", LocalDateTime.now(clock), ACTION_SUBMIT);
+            
+            doNothing().when(spyController).processSingleDepositReview(any(DepositReviewModel.class), eq(LocalDateTime.now(clock)), eq(ACTION_SUBMIT));
+
+            when(mRestService.getVaultReview("reviewId")).thenReturn(originalVaultReview);
+            String result = spyController.processReview(vrm, mRedirectAttrs, "vaultId", "reviewId", ACTION_SUBMIT);
+
+            assertThat(result).isEqualTo("redirect:/admin/reviews");
+            
+            verify(spyController).validateNextReviewDate(vrm, mRedirectAttrs);
+            verify(spyController).updateVaultReviewAndVault(originalVaultReview, vrm, "vaultId", LocalDateTime.now(clock), ACTION_SUBMIT);
+            verify(spyController, times(2)).processSingleDepositReview(argDRM.capture(), eq(LocalDateTime.now(clock)), eq(ACTION_SUBMIT));
+
+            verify(mRestService).getVaultReview("reviewId");
+        
+            assertThat(argDRM.getAllValues()).containsExactlyInAnyOrder(drm1, drm2);
+            
+            verifyNoMoreInteractions(mRestService);
+        }
+        
+        @Nested
+        class ValidateNextReviewDateTests {
+            
+            @Test
+            void testValidate_NullNextReviewDate() {
+                VaultReviewModel vrm = new VaultReviewModel();
+
+                RedirectAttributes mRedirectAttrs = mock(RedirectAttributes.class);
+                boolean result = spyController.validateNextReviewDate(vrm, mRedirectAttrs);
+                assertThat(result).isTrue();
+
+            }
+            
+            @Test
+            void testValidate_NullDepositReviewModels() {
+                VaultReviewModel vrm = new VaultReviewModel();
+                vrm.setNextReviewDate(LocalDate.now().plusYears(1));
+
+                RedirectAttributes mRedirectAttrs = mock(RedirectAttributes.class);
+                boolean result = spyController.validateNextReviewDate(vrm, mRedirectAttrs);
+                assertThat(result).isTrue();
+                verify(mRedirectAttrs, never()).addAttribute("error", "reviewdate");
+            }
+            
+            @Test
+            void testValidate_NullDepositReviewModelsList() {
+                VaultReviewModel vrm = new VaultReviewModel();
+                vrm.setNextReviewDate(null);
+                vrm.setDepositReviewModels(null);
+
+                RedirectAttributes mRedirectAttrs = mock(RedirectAttributes.class);
+                boolean result = spyController.validateNextReviewDate(vrm, mRedirectAttrs);
+                assertThat(result).isTrue();
+                verify(mRedirectAttrs, never()).addAttribute("error", "reviewdate");
+                
+            }
+            
+            @Test
+            void testValidate_DepositReviewModelsWithoutRetain() {
+
+                List<DepositReviewModel> models = Stream.of(
+                        null,
+                        DepositReviewDeleteStatus.NOW,
+                        DepositReviewDeleteStatus.ONREVIEW,
+                        DepositReviewDeleteStatus.ONEXPIRY).map(deleteStatus -> {
+                    DepositReviewModel drm = new DepositReviewModel();
+                    if (deleteStatus != null) {
+                        drm.setDeleteStatus(deleteStatus);
+                        return drm;
+                    } else {
+                        return null;
+                    }
+                }).toList();
+
+                VaultReviewModel vrm = new VaultReviewModel();
+                vrm.setNextReviewDate(null);
+                vrm.setDepositReviewModels(models);
+
+                RedirectAttributes mRedirectAttrs = mock(RedirectAttributes.class);
+                boolean result = spyController.validateNextReviewDate(vrm, mRedirectAttrs);
+                assertThat(result).isTrue();
+                verify(mRedirectAttrs, never()).addAttribute("error", "reviewdate");
+            }
+            
+            @Test
+            void testValidate_DepositReviewModelsWithRetain() {
+
+                List<DepositReviewModel> models = IntStream.of(
+                        DepositReviewDeleteStatus.NOW,
+                        DepositReviewDeleteStatus.ONREVIEW,
+                        DepositReviewDeleteStatus.ONEXPIRY,
+                        DepositReviewDeleteStatus.RETAIN).mapToObj(deleteStatus -> {
+                    DepositReviewModel drm = new DepositReviewModel();
+                    drm.setDeleteStatus(deleteStatus);
+                    return drm;
+                }).toList();
+
+                VaultReviewModel vrm = new VaultReviewModel();
+                vrm.setNextReviewDate(null);
+                vrm.setDepositReviewModels(models);
+
+                RedirectAttributes mRedirectAttrs = mock(RedirectAttributes.class);
+                boolean result = spyController.validateNextReviewDate(vrm, mRedirectAttrs);
+                assertThat(result).isFalse();
+                verify(mRedirectAttrs).addAttribute("error", "reviewdate");
+            }
+        }
+        
+        @Nested
+        class UpdateVaultReviewAndVaultTests {
+            
+            @Test
+            void testNullOriginalVaultReviewModel() {
+             
+                IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
+                    spyController.updateVaultReviewAndVault(null, new VaultReviewModel(), "vaultId", LocalDateTime.now(clock), "action");
+                });
+                assertThat(ex).hasMessage("originalVaultReview cannot be null");
+            }
+            
+            @Test
+            void testNullVaultReviewModel() {
+
+                IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
+                    spyController.updateVaultReviewAndVault(new VaultReview(), null, "vaultId", LocalDateTime.now(clock), "action");
+                });
+                assertThat(ex).hasMessage("vaultReviewModel cannot be null");
+            }
+
+            @ParameterizedTest()
+            @ValueSource(strings = { 
+                    AdminReviewsController.ACTION_CANCEL,
+                    AdminReviewsController.ACTION_SAVE} )
+            void testUpdateVaultReviewAndVault_NonSubmit(String action) {
+                VaultReview originalVaultReview = new VaultReview();
+                VaultReviewModel vrm = new VaultReviewModel();
+                spyController.updateVaultReviewAndVault(originalVaultReview, vrm, "vaultId", LocalDateTime.now(clock), action);
+                
+                verify(mRestService).editVaultReview(originalVaultReview);
+                verifyNoMoreInteractions(mRestService);
+            }
+            
+            @Test
+            void testUpdateVaultReviewAndVault_Submit_WithoutNextReviewDate(){
+                VaultReview originalVaultReview = new VaultReview();
+                
+                VaultReviewModel vrm = new VaultReviewModel();
+                
+                
+                VaultInfo vaultInfo = new VaultInfo();
+                vaultInfo.setReviewDate(LocalDate.now().plusYears(4));
+                
+                when(mRestService.getVault("vaultId")).thenReturn(vaultInfo);
+                spyController.updateVaultReviewAndVault(originalVaultReview, vrm, "vaultId", LocalDateTime.now(clock), ACTION_SUBMIT);
+                
+                assertThat(originalVaultReview.getActionedDate()).isEqualTo(LocalDateTime.now(clock));
+                assertThat(originalVaultReview.getOldReviewDate()).isEqualTo(LocalDate.now().plusYears(4));
+                
+                verify(mRestService).getVault("vaultId");
+                verify(mRestService).editVaultReview(originalVaultReview);
+                verifyNoMoreInteractions(mRestService);
+            }
+            
+            @Test
+            void testUpdateVaultReviewAndVault_Submit_WithNextReviewDate(){
+                VaultReview originalVaultReview = new VaultReview();
+
+                LocalDate nextReviewDate = LocalDate.now(clock).plusYears(3);
+                LocalDate reviewDate = LocalDate.now(clock).plusYears(4);
+                
+                VaultReviewModel vrm = new VaultReviewModel();
+                vrm.setNextReviewDate(nextReviewDate);
+                
+                VaultInfo vaultInfo = new VaultInfo();
+                vaultInfo.setReviewDate(reviewDate);
+
+                when(mRestService.getVault("vaultId")).thenReturn(vaultInfo);
+                when(mRestService.editVaultReview(originalVaultReview)).thenReturn(originalVaultReview);
+                
+                LocalDateTime actionedDateTime = LocalDateTime.now(clock);
+                spyController.updateVaultReviewAndVault(originalVaultReview, vrm, "vaultId", actionedDateTime, ACTION_SUBMIT);
+
+                assertThat(originalVaultReview.getActionedDate()).isEqualTo(actionedDateTime);
+                assertThat(originalVaultReview.getOldReviewDate()).isEqualTo(reviewDate);
+
+                verify(mRestService).getVault("vaultId");
+                verify(mRestService).editVaultReview(originalVaultReview);
+                verify(mRestService).updateReviewDateOfVault("vaultId", nextReviewDate);
+                verifyNoMoreInteractions(mRestService);
+            }
+        }
     }
+    
+    @Nested
+    class ProcessSingleReviewTests {
 
-    @DisplayName("Test processReview() with action Submit with no retained deposits and a review date not null.")
-    @Test
-    @WithMockUser(roles = "ADMIN_VAULTS")
-    void testProcessReview_Submit_WithNoRetainedDeposits_AndReviewDateNotNull() throws Exception {
-        // Arrange
-        mocksForShowAndProcessReviewTests();
+        LocalDateTime timestamp;
 
-        RequestBuilder requestBuilder = MockMvcRequestBuilders.post("/admin/vaults/"+TEST_VAULT_ID_1+"/reviews/" + TEST_VAULT_REVIEW_ID)
-                .queryParam("action", "Submit")
-                .flashAttr("vaultReviewModel", mVaultReviewModel)
-                .contentType(MediaType.APPLICATION_JSON)
-                .with(csrf());
-        // Act
-        MvcResult mvcResult = mockMvc.perform(requestBuilder).andReturn();
-        //Assert
-        assertThat(mvcResult.getModelAndView().getViewName()).isEqualTo("redirect:/admin/reviews");
+        @BeforeEach
+        void setup() {
+            timestamp = LocalDateTime.now(clock);
+        }
 
-        verify(mRestService).getVaultReview(TEST_VAULT_REVIEW_ID);
-        verify(mRestService).getVault(TEST_VAULT_ID_1);
-        verify(mRestService).updateVaultReviewDate(eq(TEST_VAULT_ID_1), any(Date.class)); //could use clock
-        verify(mRestService).editVaultReview(any(VaultReview.class)); //could use captor here
-        verify(mRestService, times(2)).getDepositReview(null);//FIX THIS
-        verify(mRestService, times(2)).editDepositReview(any(DepositReview.class)); //could use captor here
-        Mockito.verifyNoMoreInteractions(mRestService);
+        @Test
+        void testNullVaultReviewModel() {
+            
+            IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
+                spyController.processSingleDepositReview(null, timestamp, "action" );
+            });
+            assertThat(ex).hasMessage("The depositReviewModel cannot be null");
+        }
+        
+        @Captor
+        ArgumentCaptor<DepositReview> argDepositReview;
+        
+        @ParameterizedTest
+        @CsvSource(nullValues = "null", textBlock = """
+               action,  123
+               null,    123
+               Submit,  123
+               """)
+        void testNotSubmitActionWithDeleteStatusNowOrRetain(String action, int deleteStatus) {
+
+            DepositReviewModel drm = new DepositReviewModel();
+            drm.setDepositReviewId("depositReviewId");
+            drm.setComment("comment123");
+            drm.setDepositId("depositId");
+            drm.setDeleteStatus(deleteStatus);
+
+            DepositReview depositReview = new DepositReview();
+            depositReview.setId("depositReviewId");
+            
+            when(mRestService.getDepositReview(anyString())).thenReturn(depositReview);
+            
+            spyController.processSingleDepositReview(drm, timestamp, action);
+            
+            verify(mRestService).getDepositReview("depositReviewId");
+            verify(mRestService).editDepositReview(argDepositReview.capture());
+            verify(mRestService, never()).deleteDeposit(anyString());
+            verifyNoMoreInteractions(mRestService);
+            
+            DepositReview editedDepositReview = argDepositReview.getValue();
+            assertThat(editedDepositReview).isEqualTo(depositReview);
+            
+            assertThat(editedDepositReview.getDeleteStatus()).isEqualTo(deleteStatus);
+            assertThat(editedDepositReview.getComment()).isEqualTo("comment" + deleteStatus);
+            assertThat(editedDepositReview.getActionedDate()).isNull();
+        }
+
+        @Test
+        void testSubmitActionWithDeleteStatusNow() {
+
+            DepositReviewModel drm = new DepositReviewModel();
+            drm.setDepositReviewId("depositReviewId");
+            drm.setComment("comment");
+            drm.setDepositId("depositId");
+            drm.setDeleteStatus(DepositReviewDeleteStatus.NOW);
+
+            DepositReview depositReview = new DepositReview();
+            depositReview.setId("depositReviewId");
+
+            when(mRestService.getDepositReview(anyString())).thenReturn(depositReview);
+
+            spyController.processSingleDepositReview(drm, timestamp, ACTION_SUBMIT);
+
+            verify(mRestService).getDepositReview("depositReviewId");
+            verify(mRestService).editDepositReview(argDepositReview.capture());
+            verify(mRestService).deleteDeposit("depositId");
+            verifyNoMoreInteractions(mRestService);
+
+            DepositReview editedDepositReview = argDepositReview.getValue();
+            assertThat(editedDepositReview).isEqualTo(depositReview);
+            
+
+            assertThat(editedDepositReview.getDeleteStatus()).isEqualTo(DepositReviewDeleteStatus.NOW);
+            assertThat(editedDepositReview.getComment()).isEqualTo("comment");
+            assertThat(editedDepositReview.getActionedDate()).isEqualTo(timestamp);
+            
+            
+        }
+
+        @Test
+        void testSubmitActionWithDeleteStatusRetain() {
+
+            DepositReviewModel drm = new DepositReviewModel();
+            drm.setDepositReviewId("depositReviewId");
+            drm.setComment("comment");
+            drm.setDepositId("depositId");
+            drm.setDeleteStatus(DepositReviewDeleteStatus.RETAIN);
+
+            DepositReview depositReview = new DepositReview();
+            depositReview.setId("depositReviewId");
+
+            when(mRestService.getDepositReview(anyString())).thenReturn(depositReview);
+
+            spyController.processSingleDepositReview(drm, timestamp, ACTION_SUBMIT);
+
+            verify(mRestService).getDepositReview("depositReviewId");
+            verify(mRestService).editDepositReview(argDepositReview.capture());
+            verify(mRestService, never()).deleteDeposit("depositId");
+            verifyNoMoreInteractions(mRestService);
+
+            DepositReview editedDepositReview = argDepositReview.getValue();
+            assertThat(editedDepositReview).isEqualTo(depositReview);
+
+            assertThat(editedDepositReview.getDeleteStatus()).isEqualTo(DepositReviewDeleteStatus.RETAIN);
+            assertThat(editedDepositReview.getComment()).isEqualTo("comment");
+            assertThat(editedDepositReview.getActionedDate()).isEqualTo(timestamp);
+
+
+        }
     }
-
-    @DisplayName("Test processReview() with action Submit with a retained deposit and a review date null.")
-    @Test
-    @WithMockUser(roles = "ADMIN_VAULTS")
-    void testProcessReview_Submit_WithNoReviewDate_AndRetainedDeposits_ThenError() throws Exception {
-        // Arrange
-        mocksForShowAndProcessReviewTests();
-
-        // Override ReviewDate and set RETAIN delete status for one Deposit
-        when(mVaultReviewModel.getNewReviewDate()).thenReturn(null);
-        when(mDepositReviewModel1.getDeleteStatus()).thenReturn(DepositReviewDeleteStatus.RETAIN);
-
-        RequestBuilder requestBuilder = MockMvcRequestBuilders.post("/admin/vaults/"+TEST_VAULT_ID_1+"/reviews/" + TEST_VAULT_REVIEW_ID)
-                .queryParam("action", "Submit")
-                .flashAttr("vaultReviewModel", mVaultReviewModel)
-                .contentType(MediaType.APPLICATION_JSON)
-                .with(csrf());
-        // Act
-        MvcResult mvcResult = mockMvc.perform(requestBuilder).andReturn();
-        // Assert
-        assertThat(mvcResult.getModelAndView().getViewName()).isEqualTo("redirect:/admin/vaults/"+TEST_VAULT_ID_1+"/reviews" );
-
-        ModelMap modelMap = mvcResult.getModelAndView().getModelMap();
-
-        // Error key in modelMap
-        assertThat((String) modelMap.get("error")).isEqualTo("reviewdate");
-        Mockito.verifyNoMoreInteractions(mRestService);
-    }
-
-
-    private void mocksForShowAndProcessReviewTests() {
-        // Arrange
-        when(mRestService.getVault(Mockito.any(String.class))).thenReturn(mVaultInfo1);
-
-        when(mVaultInfo1.getGroupID()).thenReturn(TEST_GROUP_ID);
-
-        when(mRestService.getGroup(TEST_GROUP_ID)).thenReturn(mGroup);
-        when(mRestService.getCurrentReview(TEST_VAULT_ID_1)).thenReturn(mReviewInfo);
-        when(mReviewInfo.getVaultReviewId()).thenReturn(TEST_VAULT_REVIEW_ID);
-        when(mRestService.getVaultReview(TEST_VAULT_REVIEW_ID)).thenReturn(mVaultReview);
-        when(mReviewInfo.getDepositIds()).thenReturn(List.of(TEST_DEPOSIT_ID_1, TEST_DEPOSIT_ID_2));
-        when(mReviewInfo.getDepositReviewIds()).thenReturn(List.of(TEST_DEPOSIT_REVIEW_1_ID, TEST_DEPOSIT_REVIEW_2_ID));
-        when(mRestService.getDepositReview(TEST_DEPOSIT_REVIEW_1_ID)).thenReturn(mDepositReview1);
-        when(mRestService.getDepositReview(TEST_DEPOSIT_REVIEW_2_ID)).thenReturn(mDepositReview2);
-        when(mRestService.getDeposit(TEST_DEPOSIT_ID_1)).thenReturn(mDepositInfo1);
-        when(mRestService.getDeposit(TEST_DEPOSIT_ID_2)).thenReturn(mDepositInfo2);
-
-        when(mDepositReview1.getId()).thenReturn(TEST_DEPOSIT_REVIEW_1_ID);
-        when(mDepositReview1.getComment()).thenReturn(TEST_DEPOSIT_REVIEW_1_COMMENT);
-        when(mDepositReview1.getDeleteStatus()).thenReturn(DepositReviewDeleteStatus.ONREVIEW);
-        when(mDepositInfo1.getID()).thenReturn(TEST_DEPOSIT_ID_1);
-        when(mDepositInfo1.getName()).thenReturn(TEST_DEPOSIT_1_NAME);
-        when(mDepositInfo1.getStatus()).thenReturn(Deposit.Status.IN_PROGRESS);
-        when(mDepositInfo1.getCreationTime()).thenReturn(mDate1);
-
-        when(mDepositReview2.getId()).thenReturn(TEST_DEPOSIT_REVIEW_2_ID);
-        when(mDepositReview2.getComment()).thenReturn(TEST_DEPOSIT_REVIEW_2_COMMENT);
-        when(mDepositReview2.getDeleteStatus()).thenReturn(DepositReviewDeleteStatus.ONEXPIRY);
-        when(mDepositInfo2.getID()).thenReturn(TEST_DEPOSIT_ID_2);
-        when(mDepositInfo2.getName()).thenReturn(TEST_DEPOSIT_2_NAME);
-        when(mDepositInfo2.getStatus()).thenReturn(Deposit.Status.COMPLETE);
-        when(mDepositInfo2.getCreationTime()).thenReturn(mDate2);
-        List<DepositReviewModel> drm = new ArrayList<>();
-        drm.add(mDepositReviewModel1);
-        drm.add(mDepositReviewModel2);
-        when(mRestService.getDepositReview(mDepositReviewModel1.getDepositReviewId())).thenReturn(mOriginalDepositReview1);
-        when(mRestService.getDepositReview(mDepositReviewModel2.getDepositReviewId())).thenReturn(mOriginalDepositReview2);
-        // Default no retained delete status deposits, we override this in some tests
-        when(mDepositReviewModel1.getDeleteStatus()).thenReturn(DepositReviewDeleteStatus.ONEXPIRY);
-        when(mDepositReviewModel2.getDeleteStatus()).thenReturn(DepositReviewDeleteStatus.ONREVIEW);
-        when(mVaultReviewModel.getDepositReviewModels()).thenReturn(drm);
-        // Default ReviewDate set, this overriden in some tests
-        when(mVaultReviewModel.getNewReviewDate()).thenReturn(new Date());
-    }
-
-    @SneakyThrows
-    String toJson(Object value) {
-        return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(value);
-    }
-
 }
+

@@ -13,49 +13,336 @@
         </ol>
     </nav>
 
-    <th:block th:if="${vaults != null}">
+    <th:block th:if="${vaults != null}" th:with="today=${T(java.time.LocalDate).now()}">
 
         <div class="table-responsive" id="vaultsTable">
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 0;">
+                <div style="position: relative; width: 200px; display: flex; align-items: center;">
+                    <input type="text" placeholder="Search by 3 name chars..." aria-label="Search by 3 vault name characters"
+                           style="width: 200px; box-sizing: border-box;">
+                    <span class="error-message"
+                          style="position: absolute; left: calc(100% + 10px); white-space: nowrap; color: red; font-size: 13px; display: none;">
+                      Error message here
+                    </span>
+                </div>
+                <span class="review-due-tip" title="A Vault is Due For Review when the Review Window is open (6 months before Review Date) and the Vault has not been Reviewed since the start of the Review Window." style="font-weight: bold; flex-grow: 1; text-align: center;">Vaults Due For Review</span>
+                <div style="width: 200px;"></div>
+            </div>
             <table class="table table-light table-striped table-hover align-middle">
                 <thead>
-                    <tr class="tr">
-                       <th>Vault Name</th>
-                       <th>Deposits</th>
-                       <th>Vault Size</th>
-                       <th>Owner(UUN)</th>
-                       <th>School</th>
-                       <th>Review Date</th>
-                        <th>Date created</th>
-                        <th>Actions</th>
-                    </tr>
+                <tr class="tr">
+                    <th>Vault Name</th>
+                    <th>Deposits</th>
+                    <th>Vault Size</th>
+                    <th>Owner(UUN)</th>
+                    <th>School</th>
+                    <th>Last Reviewed Date</th>
+                    <th colspan="2">Next Review Date</th>
+                    <th>Vault Created Date</th>
+                    <th>Actions</th>
+                </tr>
                 </thead>
-
                 <tbody>
-                        <tr th:each="vault: ${vaults}" class="tr">
-                            <td>
-                                <a th:href="@{|/vaults/${vault.getID()}/|}">[[${vault.name}]]</a>
-                            </td>
-                            <td>[[${vault.getNumberOfDeposits()}]]</td>
-                            <td>[[${vault.getSizeStr()}]]</td>
-                            <td>
-                                <th:block th:if="${vault.getUserID() != null}">
-                                <a th:href="@{|/vaults/${vault.getID()}/${vault.getUserID()}|}">[[${vault.getUserName()}]] ([[${vault.getUserID()}]])</a>
-                                </th:block>
-                            </td>
-                            
-                            <td>[[${vault.groupID}]]</td>
-                            <td>[[${#dates.format(vault.reviewDate,dateFormatddMMyyyy)}]]<!--/* date */--></td>
-                            <td>[[${#dates.format(vault.getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */--></td>
-                            <td>
-                                <a th:href="@{|/admin/vaults/${vault.getID()}/reviews|}">Review</a>
-                            </td>
-                        </tr>
+                <tr class="no-results" style="display: none;">
+                    <td colspan="10" style="text-align: center; color: #888;">
+                        No matching vaults were found.
+                    </td>
+                </tr>
+                <tr th:each="vault: ${vaults}" class="tr">
+                    <td>
+                        <a th:href="@{|/vaults/${vault.getID()}/|}">[[${vault.name}]]</a>
+                    </td>
+                    <td>[[${vault.getNumberOfDeposits()}]]</td>
+                    <td>[[${vault.getSizeStr()}]]</td>
+                    <td>
+                        <th:block th:if="${vault.getUserID() != null}">
+                            <a th:href="@{|/vaults/${vault.getID()}/${vault.getUserID()}|}">[[${vault.getUserName()}]]
+                                ([[${vault.getUserID()}]])</a>
+                        </th:block>
+                    </td>
+
+                    <td>[[${vault.groupID}]]</td>
+                    <th:block th:if="${vault.vaultReviewStatusInfo.getLatestSubmittedReview != null}">
+                        <td>
+                            [[${#temporals.format(vault.vaultReviewStatusInfo.latestSubmittedReview.actionedDate,dateFormatddMMyyyy)}]]
+                            <!--/* date */--></td>
+                    </th:block>
+                    <th:block th:if="${vault.vaultReviewStatusInfo.getLatestSubmittedReview == null}">
+                        <td>n/a</td>
+                    </th:block>
+                    <td>[[${#temporals.format(vault.reviewDate,dateFormatddMMyyyy)}]]<!--/* date */--></td>
+                    <td th:with="daysDiff=${T(java.time.temporal.ChronoUnit).DAYS.between(today, vault.reviewDate)}">
+                        <!-- Days Until Review Date -->
+                        <span th:if="${daysDiff > 0}" th:text="|In ${daysDiff} days|">In 5 days</span>
+
+                        <span th:if="${daysDiff == 0}">Due Today!</span>
+
+                        <span th:if="${daysDiff < 0}"
+                              th:text="|Overdue by ${T(java.lang.Math).abs(daysDiff)} days|"
+                              style="color: red;">Overdue
+                                </span>
+                    </td>
+                    <td>[[${#temporals.format(vault.getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */--></td>
+                    <td>
+                        <a th:href="@{|/admin/vaults/${vault.getID()}/reviews|}">Review</a>
+                    </td>
+                </tr>
                 </tbody>
             </table>
         </div>
-
     </th:block>
+    <div id="search-container"> 
+        <label for="search-input" style="font-weight: bold;">Search Vaults</label>
 
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 0;">
+            <div style="position: relative; width: 200px; display: flex; align-items: center;">
+                <input type="text" id="search-input" placeholder="Search by 3 name chars..."
+                       style="width: 200px; box-sizing: border-box;">
+
+                <span id="search-error-message"
+                      style="position: absolute; left: calc(100% + 10px); white-space: nowrap; color: red; font-size: 13px; display: none;">
+                      Error message here
+                </span>
+            </div>
+
+            <span style="font-weight: bold; flex-grow: 1; text-align: center;">Vault Search Results</span>
+            <div style="width: 200px;"></div>
+        </div>
+        <table class="table table-light table-striped table-hover align-middle">
+            <thead>
+            <tr class="tr">
+                <th>Vault Name</th>
+                <th>Deposits</th>
+                <th>Vault Size</th>
+                <th>Owner(UUN)</th>
+                <th>School</th>
+                <th>Last Reviewed Date</th>
+                <th>Next Review Date</th>
+                <th>Vault Created Date</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody id="search-results">
+            </tbody>
+        </table>
+        
+    </div>
+    <template id="search-result-template">
+        <tr>
+            <td class="vault-name">!Vault Name</td>
+            <td class="num-deposits">!Deposits</td>
+            <td class="vault-size-str">!Vault Size</td>
+            <td class="owner">!Owner(UUN)</td>
+            <td class="school">!School</td>
+            <td class="last-reviewed-date">!</td>
+            <td class="next-review-date">!Next Review Due Date</td>
+            <td class="vault-created-date">!Vault Created Date</td>
+            <td class="actions">!Actions</td>
+        </tr>
+    </template>
+<script type="text/javascript">
+    function setupTableFilter($container) {
+        const $inputText = $container.find('input[type="text"]').first();
+        const $table = $container.find('table').first();
+        const $rows = $table.find('tbody tr').not('.no-results'); // Don't include the message row in the filter
+        const $noResultsRow = $table.find('.no-results');
+        const $errorSpan = $container.find('.error-message').first();
+        
+        $inputText.on('input', function () {
+            const searchVal = $(this).val().toLowerCase();
+            if (searchVal.length < 3) {
+                $rows.show();
+                $noResultsRow.hide();
+                if (searchVal.length == 0) {
+                    $errorSpan.hide();
+                } else {
+                    $errorSpan.text("Search term must be at least 3 characters long.").show();
+                }
+            } else {
+                $errorSpan.hide();
+                let visibleCount = 0;
+
+                $rows.each(function () {
+                    const $row = $(this);
+                    const isMatch = $row.find("td:eq(0)").text().toLowerCase().includes(searchVal);
+
+                    $row.toggle(isMatch);
+                    if (isMatch) {
+                        visibleCount++;
+                    }
+                });
+
+                // If visibleCount is 0, show the "No results" row
+                $noResultsRow.toggle(visibleCount === 0);
+
+            }
+        });
+
+    }
+    
+    function executeSearch(searchTerm) {
+        return $.ajax({
+            url: '/admin/reviews/vaults/search',
+            method: 'GET',
+            data: {q: searchTerm}, // Spring maps this to @RequestParam("q")
+            success: function (response) {
+                console.log("executeSearch: ", response);
+                // 'response' is the PageDTO<VaultInfo> object
+                renderResults(response);
+                $('#search-error-message').hide();
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                if (textStatus === 'abort') {
+                    return; // Ignore the abort, it was intentional!
+                }
+                if (xhr.status === 422) {
+                    // This catches your ConstraintViolationException message
+                    $('#search-error-message').text(xhr.responseText).show();
+                } else {
+                    console.error("Search failed:", xhr.statusText, errorThrown);
+                }
+            }
+        });
+    }
+
+    const $searchResults = $('#search-results');
+
+    function renderResults(pageDTO) {
+        
+        const vaults = pageDTO.content;
+        const limitedToFirst50 = pageDTO.totalElements > 50;
+        
+        $searchResults.empty();
+
+        const template = document.querySelector('#search-result-template');
+
+        console.log("renderResults: ", vaults);
+        if (vaults.length === 0) {
+            $searchResults.append('<tr class="no-results"><td colspan="9" style="text-align: center; color: #888;">No matching vaults were found.</td></tr>');
+            return;
+        } else if (limitedToFirst50) {
+            const limitedToFirst50Msg = 'Showing the first 50 of ' + pageDTO.totalElements + ' results';
+            $searchResults.append('<tr class="no-results"><td colspan="9" style="text-align: center; color: #888;">'+limitedToFirst50Msg+'.</td></tr>');
+        }
+        vaults.forEach(vault => {
+
+            const row = template.content.cloneNode(true);
+            const vaultName = vault.name;
+            const vaultId = vault.id;
+            const vaultUserId = vault.userID;
+            const vaultUserName = vault.userName;
+            const vaultSizeStr = vault.sizeStr;
+            const vaultNumberOfDeposits = vault.numberOfDeposits;
+            const vaultSchool = vault.groupID;
+            let vaultLastReviewedDate;
+            if (vault.vaultReviewStatusInfo.latestSubmittedReview != null) {
+                vaultLastReviewedDate = vault.vaultReviewStatusInfo.latestSubmittedReview.actionedDate;
+            }
+            const vaultNextReviewDate = vault.reviewDate;
+            const vaultCreatedDate = vault.creationTime;
+
+            //1. Vault Name
+            const $vaultLink = $('<a/>', {
+                text: vaultName,
+                href: '/vaults/' + vaultId
+            });
+            $(row.querySelector('.vault-name')).empty().append($vaultLink);
+
+            //2. Deposits
+            row.querySelector('.num-deposits').textContent = vaultNumberOfDeposits;
+
+            //3. Vault Size
+            row.querySelector('.vault-size-str').textContent = vaultSizeStr;
+
+            //4. Owner(UUN)
+            const owner = row.querySelector('.owner');
+            if (vaultUserId == null) {
+                owner.textContent = 'n/a';
+            } else {
+                const $link = $('<a/>', {
+                    text: vaultUserName + ' (' + vaultUserId + ')',
+                    href: '/vaults/' + vaultId + '/' + vaultUserId,
+                });
+                $(owner).empty().append($link);
+            }
+
+            //5. School
+            row.querySelector('.school').textContent = vaultSchool;
+
+            //6. Last Reviewed Date
+            let lastReviewedDateStr = "n/a";
+
+            if(vaultLastReviewedDate != null){
+                lastReviewedDateStr = dayjs(vaultLastReviewedDate).format('DD/MM/YYYY');
+            }
+            row.querySelector('.last-reviewed-date').textContent = lastReviewedDateStr;
+
+            //7. Next Review Date
+            const nextReviewDateStr = dayjs(vaultNextReviewDate).format('DD/MM/YYYY');
+            row.querySelector('.next-review-date').textContent = nextReviewDateStr;
+
+            //8. Vault Created Date
+            const createdAtStr = dayjs(vaultCreatedDate).format('DD-MMM-YYYY HH:mm:ss');
+            row.querySelector('.vault-created-date').textContent = createdAtStr;
+
+            //9. Actions
+            const $actionsLink = $('<a/>', {
+                text: 'Review',
+                href: '/admin/vaults/' + vaultId + '/reviews'
+            });
+            const $actions = $(row.querySelector('.actions'));
+            $actions.empty().append($actionsLink);
+            
+            $searchResults.append($(row));
+        });
+    }
+
+    $(document).ready(function () {
+        const $vaultsTable = $('#vaultsTable');
+        const $otherVaultsTable = $('#otherVaultsTable');
+        setupTableFilter($vaultsTable)
+        setupTableFilter($otherVaultsTable);
+
+        $('.review-due-tip').tooltip();
+
+        const $searchInput = $('#search-input');
+        const $searchResults = $('#search-results');
+
+        let searchTimeout;
+        let xhr;
+        $searchInput.on('input', function () {
+            let searchTerm = $(this).val().trim();
+
+            console.log("searchTerm: ", searchTerm);
+
+            // Clear the previous timer every time the user types
+            clearTimeout(searchTimeout);
+
+            const $errorMessage = $('#search-error-message');
+            // Don't search if it's too short (Matching your Java @Size(min=3))
+            if (searchTerm.length < 3) {
+                console.log("searchTerm.length:", searchTerm.length);
+                $searchResults.empty();
+                if (searchTerm.length == 0) {
+                    $errorMessage.hide();
+                } else {
+                    $errorMessage.text("Search term must be at least 3 characters long.").show();
+                }
+                return;
+            } else {
+                $errorMessage.hide();
+            }
+            // Wait 300ms after the last keystroke before firing AJAX
+            searchTimeout = setTimeout(function () {
+                if (xhr) {
+                    xhr.abort();
+                }
+                console.log("calling executeSearch: ", searchTerm + "");
+                xhr = executeSearch(searchTerm);
+            }, 300);
+        });
+    });
+</script>
 </div>
 </th:block>
 </html>

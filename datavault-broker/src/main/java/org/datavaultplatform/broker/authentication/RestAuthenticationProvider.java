@@ -18,6 +18,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
@@ -33,6 +34,16 @@ import java.util.Set;
 public class RestAuthenticationProvider implements AuthenticationProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(RestAuthenticationProvider.class);
+
+    public static final Set<Permission> ADMIN_API_PERMISSIONS = EnumSet.of(
+            Permission.CAN_MANAGE_ARCHIVE_STORES,
+            Permission.CAN_MANAGE_DEPOSITS,
+            Permission.CAN_VIEW_RETRIEVES,
+            Permission.CAN_MANAGE_VAULTS,
+            Permission.CAN_MANAGE_PENDING_VAULTS,
+            Permission.CAN_VIEW_EVENTS,
+            Permission.CAN_MANAGE_BILLING_DETAILS
+    );
 
     private UsersService usersService;
     private ClientsService clientsService;
@@ -89,13 +100,9 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
 
             Set<Permission> userPermissions = rolesAndPermissionsService.getUserPermissions(user.getID());
 
-            checkPermissions(Permission.CAN_MANAGE_ARCHIVE_STORES, grantedAuths, userPermissions);
-            checkPermissions(Permission.CAN_MANAGE_DEPOSITS, grantedAuths, userPermissions);
-            checkPermissions(Permission.CAN_VIEW_RETRIEVES, grantedAuths, userPermissions);
-            checkPermissions(Permission.CAN_MANAGE_VAULTS, grantedAuths, userPermissions);
-            checkPermissions(Permission.CAN_MANAGE_PENDING_VAULTS, grantedAuths, userPermissions);
-            checkPermissions(Permission.CAN_VIEW_EVENTS, grantedAuths, userPermissions);
-            checkPermissions(Permission.CAN_MANAGE_BILLING_DETAILS, grantedAuths, userPermissions);
+            for (Permission permission : ADMIN_API_PERMISSIONS) {
+                checkPermissions(permission, grantedAuths, userPermissions);
+            }
         }
 
         RestWebAuthenticationDetails rwad = (RestWebAuthenticationDetails) authentication.getDetails();

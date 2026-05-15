@@ -1,16 +1,21 @@
 package org.datavaultplatform.webapp.services;
 
+import io.micrometer.tracing.Tracer;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.dto.PausedDepositStateDTO;
 import org.datavaultplatform.common.dto.PausedRetrieveStateDTO;
 import org.datavaultplatform.common.response.VaultInfo;
+import org.datavaultplatform.common.util.TraceIdWrapper;
+import org.datavaultplatform.common.util.TraceInfo;
 import org.datavaultplatform.webapp.app.DataVaultWebApp;
 import org.datavaultplatform.webapp.app.services.BaseRestTemplateWithLoggingTest;
 import org.datavaultplatform.webapp.test.ProfileDatabase;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -18,8 +23,6 @@ import org.springframework.test.context.TestPropertySource;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.Date;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -45,7 +48,9 @@ class RestServiceTest extends BaseRestTemplateWithLoggingTest {
         @Test
         @WithMockUser(username = "user1")
         void testTogglePausedState() {
-            restService.toggleDepositPausedState();
+            assertDoesNotThrow(() -> {
+                restService.toggleDepositPausedState();
+            });
         }
 
         @Test
@@ -82,7 +87,9 @@ class RestServiceTest extends BaseRestTemplateWithLoggingTest {
         @Test
         @WithMockUser(username = "user1")
         void testTogglePausedState() {
-            restService.toggleRetrievePausedState();
+            assertDoesNotThrow(() -> {
+                restService.toggleRetrievePausedState();
+            });
         }
 
         @Test
@@ -120,26 +127,14 @@ class RestServiceTest extends BaseRestTemplateWithLoggingTest {
         @WithMockUser(username = "user1")
         void testUpdateReviewDateIsOkay() {
             LocalDate localVaultReviewDate = LocalDate.of(2112, 12, 21);
-            Date vaultReviewDate = convertToDateViaInstant(localVaultReviewDate);
-            VaultInfo vaultInfo = restService.updateVaultReviewDate("vault-abc",vaultReviewDate);
+            VaultInfo vaultInfo = restService.updateReviewDateOfVault("vault-abc",localVaultReviewDate);
 
             assertThat(vaultInfo.getID()).isEqualTo("vault-abc-id");
             assertThat(vaultInfo.getName()).isEqualTo("test-vault-info");
             assertThat(vaultInfo.getNotes()).isEqualTo("test-vault-info-notes");
             assertThat(vaultInfo.getDescription()).isEqualTo("test-vault-info-description");
-            assertThat(convertToLocalDateViaInstant(vaultInfo.getReviewDate())).isEqualTo(localVaultReviewDate);
+            assertThat(vaultInfo.getReviewDate()).isEqualTo(localVaultReviewDate);
         }
-    }
-
-    public LocalDate convertToLocalDateViaInstant(Date dateToConvert) {
-        return dateToConvert.toInstant()
-                .atZone(ZoneOffset.UTC)
-                .toLocalDate();
-    }
-    public Date convertToDateViaInstant(LocalDate dateToConvert) {
-        return java.util.Date.from(dateToConvert.atStartOfDay()
-                .atZone(ZoneOffset.UTC)
-                .toInstant());
     }
     
     @Nested
@@ -152,12 +147,49 @@ class RestServiceTest extends BaseRestTemplateWithLoggingTest {
             assertThat(result).isTrue();
         }
 
+    }
+
+    @SuppressWarnings("GrazieInspectionRunner")
+    @Nested
+    class TraceIdFromBrokerTests {
+
+        @Autowired
+        Tracer tracer;
+
         @Test
-        @WithMockUser(username = "user1")
-        void testRestartRetrieve() {
-            boolean result = restService.restartRetrieve("retrieve456");
-            assertThat(result).isTrue();
+        void testGetTraceFromBrokerWithNoTraceId() {
+            TraceInfo result = restService.getTraceFromBroker("user", "password");
+            assertThat(result.traceId()).isEqualTo("aaaabbbbccccddddaaaabbbbccccdddd");
+        }
+
+        @Test
+        void testGetTraceFromBrokerWithTraceId() {
+
+            String traceId = "aaaabbbbccccddddaaaabbbbccccdddd";
+            TraceIdWrapper wrapper = new TraceIdWrapper(traceId, tracer);
+
+            wrapper.runWithinWrapper(() -> {
+                assertThat(tracer.currentSpan().context().traceId()).isEqualTo(traceId);
+                TraceInfo result = restService.getTraceFromBroker("user", "password");
+                assertThat(result.traceId()).isEqualTo("abcdef11abcdef22abcdef33abcdef44");
+            });
         }
     }
     
+    
+    @Nested
+    class RefreshVaultReviewTests {
+
+        @Test
+        void testVaultId123AndDepositReviewsAdded() {
+            boolean depositReviewsAdded = restService.refreshUnderwayVaultReview("vault-id-123");
+            assertThat(depositReviewsAdded).isTrue();
+        }
+
+        @Test
+        void testVaultId234AndDepositReviewsNotAdded() {
+            boolean depositReviewsAdded = restService.refreshUnderwayVaultReview("vault-id-234");
+            assertThat(depositReviewsAdded).isFalse();
+        }
+    }
 }

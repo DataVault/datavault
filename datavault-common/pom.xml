@@ -12,18 +12,12 @@
 
   <artifactId>datavault-common</artifactId>
   <name>datavault-common</name>
-  <version>0.0.1-SNAPSHOT</version>
 
   <dependencies>
 
     <dependency>
       <groupId>org.springframework.data</groupId>
       <artifactId>spring-data-commons</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>jakarta.xml.bind</groupId>
-      <artifactId>jakarta.xml.bind-api</artifactId>
     </dependency>
 
     <dependency>
@@ -67,8 +61,8 @@
     </dependency>
 
     <dependency>
-      <groupId>org.jsondoc</groupId>
-      <artifactId>jsondoc-core</artifactId>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
     </dependency>
 
     <dependency>
@@ -118,9 +112,8 @@
       <artifactId>oci-java-sdk-addons-resteasy-client-configurator</artifactId>
     </dependency>
     <dependency>
-      <groupId>javax.xml.bind</groupId>
-      <artifactId>jaxb-api</artifactId>
-      <version>2.3.1</version>
+      <groupId>jakarta.xml.bind</groupId>
+      <artifactId>jakarta.xml.bind-api</artifactId>
     </dependency>
 
     <dependency>
@@ -167,8 +160,33 @@
       <groupId>net.i2p.crypto</groupId>
       <artifactId>eddsa</artifactId>
     </dependency> -->
+    <dependency>
+      <groupId>io.micrometer</groupId>
+      <artifactId>micrometer-tracing-bridge-otel</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.micrometer</groupId>
+      <artifactId>micrometer-tracing-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-actuator</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
+    </dependency>
   </dependencies>
-
   <build>
     <plugins>
       <plugin>
@@ -194,6 +212,8 @@
                 <include>**/UsesTestContainers*</include>
                 <include>**/TempFileCleaner*</include>
                 <include>**/TempFileCleanerExtension*</include>
+                <include>**/TraceIdWrapper*</include>
+                <include>**/WithMockActuatorUser*</include>
               </includes>
             </configuration>
           </execution>

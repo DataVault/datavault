@@ -3,6 +3,7 @@ package org.datavaultplatform.webapp.controllers.admin;
 import lombok.SneakyThrows;
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.webapp.services.RestService;
+import org.datavaultplatform.webapp.test.MvcUtils;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +51,7 @@ abstract class BaseAdminUsersControllerTest {
     @SneakyThrows
     @WithMockUser(username = "vanilla-user")
     void testListUsers_VanillaUserCannotListUsers() {
-        mockMvc.perform(get("/admin/users").accept(MediaType.TEXT_HTML)).andDo(print())
+        MvcUtils.performWithForward(mockMvc, get("/admin/users").accept(MediaType.TEXT_HTML)).andDo(print())
                 .andExpect(status().isForbidden())
                 .andReturn();
     }
@@ -60,7 +61,7 @@ abstract class BaseAdminUsersControllerTest {
     @SneakyThrows
     @WithMockUser(username = "super-user", roles = {"IS_ADMIN", "USER"})
     void testListUsers_SuperUserCanListUsers() {
-        mockMvc.perform(get("/admin/users").accept(MediaType.TEXT_HTML)).andDo(print())
+        MvcUtils.performWithForward(mockMvc, get("/admin/users").accept(MediaType.TEXT_HTML)).andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML))
                 .andExpect(content().string(Matchers.containsString("<title>Admin - Users</title>")))
@@ -73,7 +74,7 @@ abstract class BaseAdminUsersControllerTest {
     @SneakyThrows
     @WithMockUser(username = "vanilla-user", roles = {"USER"})
     void testShowAddUserForm_VanillaUserCannotShowCreateUserForm() {
-        mockMvc.perform(get("/admin/users/create")).andDo(print())
+        MvcUtils.performWithForward(mockMvc, get("/admin/users/create")).andDo(print())
                 .andExpect(status().isForbidden())
                 .andReturn();
     }
@@ -85,7 +86,7 @@ abstract class BaseAdminUsersControllerTest {
     @SneakyThrows
     @WithMockUser(username = "vanilla-user", roles = {"USER"})
     void testSubmitAddUserForm_VanillaUserCannotSubmitCreateUserForm() {
-        mockMvc.perform(post("/admin/users/create")
+        MvcUtils.performWithForward(mockMvc, post("/admin/users/create")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .with(csrf())
                         .param("action", "Save")
@@ -104,7 +105,7 @@ abstract class BaseAdminUsersControllerTest {
     @SneakyThrows
     @WithMockUser(username = "vanilla-user", roles = {"USER"})
     void testShowEditUsersForm_UserCannotShowEditUserFormForThemselves() {
-        mockMvc.perform(get("/admin/users/edit/bob")).andDo(print())
+        MvcUtils.performWithForward(mockMvc, get("/admin/users/edit/bob")).andDo(print())
                 .andExpect(status().isForbidden())
                 .andReturn();
 
@@ -155,7 +156,7 @@ abstract class BaseAdminUsersControllerTest {
     @SneakyThrows
     @WithMockUser(username = "vanilla-user", roles = {"USER"})
     void testSubmitEditUsersForm_UserCannotSubmitEditUserFormForOthers() {
-        mockMvc.perform(post("/admin/users/edit/bob")
+        MvcUtils.performWithForward(mockMvc, post("/admin/users/edit/bob")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .with(csrf())
                         .param("action", "Save")

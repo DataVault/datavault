@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import org.datavaultplatform.common.model.PendingVault;
 import org.datavaultplatform.common.response.BillingInformation;
+import org.datavaultplatform.common.response.ResponseType;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.response.VaultsData;
 import org.datavaultplatform.webapp.services.RestService;
@@ -14,13 +15,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.supercsv.io.CsvBeanWriter;
 import org.supercsv.io.ICsvBeanWriter;
 import org.supercsv.prefs.CsvPreference;
@@ -29,7 +27,7 @@ import org.supercsv.prefs.CsvPreference;
 
 @Controller
 @ConditionalOnBean(RestService.class)
-public class AdminBillingController {
+public class AdminBillingController implements AdminBillingControllerApi {
 
 
 	private static final Logger logger = LoggerFactory.getLogger(AdminBillingController.class);
@@ -44,7 +42,8 @@ public class AdminBillingController {
     }
 
 
-    @RequestMapping(value = "/admin/billing", method = RequestMethod.GET)
+    @Override
+    @GetMapping(value = "/admin/billing", produces = MediaType.TEXT_HTML_VALUE)
     public String billingByVaults(ModelMap model,
                                @RequestParam(value = "query", required = false, defaultValue = "") String query,
                                @RequestParam(value = "sort", required = false, defaultValue = "creationTime") String sort,
@@ -83,7 +82,8 @@ public class AdminBillingController {
         return "admin/billing/index";
     }
     
-    @RequestMapping(value = "/admin/billing/csv", method = RequestMethod.GET)
+    @Override
+    @GetMapping(value = "/admin/billing/csv", produces = ResponseType.TEXT_CSV_VALUE)
     public void exportBillingVaults(HttpServletResponse response,
                                @RequestParam(value = "query", required = false, defaultValue = "") String query,
                                @RequestParam(value = "sort", required = false, defaultValue = "creationTime") String sort,
@@ -95,7 +95,7 @@ public class AdminBillingController {
         VaultsData vaultData =  restService.searchVaultsForBilling(query, sort, order, 0, Integer.MAX_VALUE);
         vaults = vaultData.getData();
 
-        response.setContentType("text/csv");
+        response.setContentType(ResponseType.TEXT_CSV_VALUE);
 
         // creates mock data
         String headerKey = "Content-Disposition";
@@ -137,17 +137,19 @@ public class AdminBillingController {
 		return recordsInfo.toString();
 	}
     
-    @RequestMapping(value = "/admin/billing/{vaultId}", method = RequestMethod.GET)
-    public String retrieveBillingInfo(ModelMap model, @PathVariable("vaultId") String vaultId) {
+    @Override
+    @GetMapping(value = "/admin/billing/{vaultId}", produces = MediaType.TEXT_HTML_VALUE)
+    public String retrieveBillingInfo(ModelMap model, @PathVariable String vaultId) {
     	BillingInformation billingDetails = restService.getVaultBillingInfo(vaultId);
         model.addAttribute("billingDetails", billingDetails);
         String billingPage = "admin/billing/billingDetailsNA";
         return this.getBillingInfoPage(billingDetails.getBillingType());
     }
    
-    @RequestMapping(value = "/admin/billing/updateBillingDetails", method = RequestMethod.POST)
-    public String updateBillingDetails(ModelMap model,           
-            @ModelAttribute("billingDetails") BillingInformation billingDetails         
+    @Override
+    @PostMapping(value = "/admin/billing/updateBillingDetails", produces = MediaType.TEXT_HTML_VALUE, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public String updateBillingDetails(ModelMap model,
+            @ModelAttribute("billingDetails") BillingInformation billingDetails
             ) throws Exception {
     	 logger.info("-----------getBudgetCode---------"+billingDetails.getBudgetCode());
     	restService.updateBillingInfo(billingDetails.getVaultID(),billingDetails);

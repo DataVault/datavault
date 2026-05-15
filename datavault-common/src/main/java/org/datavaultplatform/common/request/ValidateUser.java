@@ -2,8 +2,7 @@ package org.datavaultplatform.common.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
-import org.jsondoc.core.annotation.ApiObject;
-import org.jsondoc.core.annotation.ApiObjectField;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * User: Robin Taylor
@@ -12,14 +11,14 @@ import org.jsondoc.core.annotation.ApiObjectField;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiObject(name = "ValidateUser")
+@Schema(name = "ValidateUser")
 @Data
 public class ValidateUser {
 
-    @ApiObjectField(description = "Userid")
+    @Schema(description = "Userid")
     private String userid;
 
-    @ApiObjectField(description = "Password")
+    @Schema(description = "Password")
     private String password;
 
     public ValidateUser() {}

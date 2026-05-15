@@ -1,7 +1,10 @@
 package org.datavaultplatform.common.storage.impl;
 
+import org.assertj.core.api.Assertions;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.util.ProcessHelper;
+import org.datavaultplatform.common.util.ProcessInfo;
+import org.datavaultplatform.common.util.TestUtils;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -38,16 +41,19 @@ class TSMTrackerTest {
         
         doAnswer(invocation -> {
             
-            assertThat(invocation.getArguments()).hasSize(6);
-            assertThat(invocation.getArgument(0,String.class)).isEqualTo("tsmStore");
-            assertThat(invocation.getArgument(1,String.class)).isEqualTo("dsmc");
-            assertThat(invocation.getArgument(2,String.class)).isEqualTo("archive");
-            assertThat(invocation.getArgument(3,String.class)).isEqualTo("/test/absolute/path");
-            assertThat(invocation.getArgument(4,String.class)).isEqualTo("-description=testDescription");
-            assertThat(invocation.getArgument(5,String.class)).isEqualTo("-optfile=testLocation");
+            assertThat(invocation.getArgument(0, String.class)).isEqualTo("tsmStore");
+
+            String[] expectedCommands = TivoliStorageManager.cleanTsmCommand(
+                    "dsmc",
+                    "archive",
+                    "/test/absolute/path",
+                    "-description=testDescription",
+                    "-optfile=testLocation");
             
+            TestUtils.testExpectedCommands(invocation, expectedCommands);
+
             boolean willSucceed = attempts.incrementAndGet() == attemptWhichSucceeds;
-            ProcessHelper.ProcessInfo mProcessInfo = Mockito.mock(ProcessHelper.ProcessInfo.class);
+            ProcessInfo mProcessInfo = Mockito.mock(ProcessInfo.class);
             if(willSucceed){
                 lenient().when(mProcessInfo.wasSuccess()).thenReturn(true);
                 lenient().when(mProcessInfo.wasFailure()).thenReturn(false);
@@ -85,19 +91,21 @@ class TSMTrackerTest {
 
             attempts.incrementAndGet();
             
-            assertThat(invocation.getArguments()).hasSize(6);
-            assertThat(invocation.getArgument(0,String.class)).isEqualTo("tsmStore");
-            assertThat(invocation.getArgument(1,String.class)).isEqualTo("dsmc");
-            assertThat(invocation.getArgument(2,String.class)).isEqualTo("archive");
-            assertThat(invocation.getArgument(3,String.class)).isEqualTo("/test/absolute/path");
-            assertThat(invocation.getArgument(4,String.class)).isEqualTo("-description=testDescription");
-            assertThat(invocation.getArgument(5,String.class)).isEqualTo("-optfile=testLocation");
+            Assertions.assertThat(invocation.getArguments()[0]).isEqualTo("tsmStore");
 
-            ProcessHelper.ProcessInfo mProcessInfo = Mockito.mock(ProcessHelper.ProcessInfo.class);
+            String[] expectedCommands = TivoliStorageManager.cleanTsmCommand(
+                    "dsmc",
+                    "archive",
+                    "/test/absolute/path",
+                    "-description=testDescription",
+                    "-optfile=testLocation");
+
+            TestUtils.testExpectedCommands(invocation, expectedCommands);
+            
+            ProcessInfo mProcessInfo = Mockito.mock(ProcessInfo.class);
                 lenient().when(mProcessInfo.wasSuccess()).thenReturn(false);
                 lenient().when(mProcessInfo.wasFailure()).thenReturn(true);
-                lenient().when(mProcessInfo.getOutputMessages()).thenReturn(Arrays.asList("message1","message2"));
-                lenient().when(mProcessInfo.getErrorMessages()).thenReturn(Arrays.asList("error1","error2"));
+                lenient().when(mProcessInfo.outputMessages()).thenReturn(Arrays.asList("message1","message2"));
             return mProcessInfo;
         }).when(tracker).getProcessInfo(any(String.class), any(String[].class));
 

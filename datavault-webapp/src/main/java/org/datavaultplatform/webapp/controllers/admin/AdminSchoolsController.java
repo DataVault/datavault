@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -24,7 +25,7 @@ import java.util.Optional;
 
 @Controller
 @ConditionalOnBean(RestService.class)
-public class AdminSchoolsController {
+public class AdminSchoolsController implements AdminSchoolsControllerApi {
 
     private static final Logger logger = LoggerFactory.getLogger(AdminSchoolsController.class);
 
@@ -43,6 +44,7 @@ public class AdminSchoolsController {
         this.forceLogoutService = forceLogoutService;
     }
 
+    @Override
     @GetMapping("/admin/schools")
     public ModelAndView getSchoolsListingPage() {
         Group[] manageableSchools = restService.getGroupsByScopedPermissions();
@@ -61,9 +63,10 @@ public class AdminSchoolsController {
         return mav;
     }
 
+    @Override
     @PreAuthorize("hasPermission(#schoolId, 'GROUP', 'CAN_VIEW_SCHOOL_ROLE_ASSIGNMENTS')")
-    @GetMapping("/admin/schools/{school}")
-    public ModelAndView getSchoolRoleAssignmentsPage(@PathVariable("school") String schoolId, Principal principal) {
+    @GetMapping(value = "/admin/schools/{schoolId}", produces = MediaType.TEXT_HTML_VALUE)
+    public ModelAndView getSchoolRoleAssignmentsPage(@PathVariable String schoolId, Principal principal) {
 
         Optional<Group> school = getGroup(schoolId);
         if (school.isEmpty()) {
@@ -88,6 +91,7 @@ public class AdminSchoolsController {
 
             logger.info("XXXX-START");
             logger.info("XXXX-SIZE[{}]", mavRoles.size());
+            //noinspection CodeBlock2Expr
             mavRoles.forEach(role -> {
                 logger.info("XXXX-ROLE-ID[{}] ROLE-NAME[{}]", role.getId(), role.getName());
             });
@@ -98,9 +102,10 @@ public class AdminSchoolsController {
         return mav;
     }
 
+    @Override
     @PreAuthorize("hasPermission(#schoolId, 'GROUP', 'CAN_MANAGE_SCHOOL_ROLE_ASSIGNMENTS')")
-    @PostMapping("/admin/schools/{school}/user")
-    public ResponseEntity<?> addNewRoleAssignment(@PathVariable("school") String schoolId,
+    @PostMapping(value = "/admin/schools/{schoolId}/user", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public ResponseEntity<?> addNewRoleAssignment(@PathVariable String schoolId,
                                                @RequestParam("user") String userId,
                                                @RequestParam("role") Long roleId) {
 
@@ -166,9 +171,10 @@ public class AdminSchoolsController {
         return ResponseEntity.status(422).body(message);
     }
 
+    @Override
     @PreAuthorize("hasPermission(#schoolId, 'GROUP', 'CAN_MANAGE_SCHOOL_ROLE_ASSIGNMENTS')")
-    @PostMapping("/admin/schools/{school}/user/update")
-    public ResponseEntity<?> updateExistingRoleAssignment(@PathVariable("school") String schoolId,
+    @PostMapping(value = "/admin/schools/{schoolId}/user/update", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public ResponseEntity<?> updateExistingRoleAssignment(@PathVariable String schoolId,
                                                @RequestParam("assignment") Long assignmentId,
                                                @RequestParam("role") Long roleId) {
 
@@ -210,9 +216,10 @@ public class AdminSchoolsController {
         return ResponseEntity.ok().build();
     }
 
+    @Override
     @PreAuthorize("hasPermission(#schoolId, 'GROUP', 'CAN_MANAGE_SCHOOL_ROLE_ASSIGNMENTS')")
-    @PostMapping("/admin/schools/{school}/user/delete")
-    public ResponseEntity<?> deleteRoleAssignment(@PathVariable("school") String schoolId,
+    @PostMapping(value = "/admin/schools/{schoolId}/user/delete", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public ResponseEntity<?> deleteRoleAssignment(@PathVariable String schoolId,
                                        @RequestParam("assignment") Long assignmentId) {
 
         if (assignmentId == null) {

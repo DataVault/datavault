@@ -5,6 +5,7 @@ import org.datavaultplatform.webapp.services.RestService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -17,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Controller
 @ConditionalOnBean(RestService.class)
-public class AdminRetentionPoliciesController {
+public class AdminRetentionPoliciesController implements AdminRetentionPoliciesControllerApi {
 
     private final Logger logger = LoggerFactory.getLogger(AdminRetentionPoliciesController.class);
 
@@ -28,16 +29,18 @@ public class AdminRetentionPoliciesController {
         this.restService = restService;
     }
 
-    @RequestMapping(value = "/admin/retentionpolicies", method = RequestMethod.GET)
-    public String getRetentionPoliciesListing(ModelMap model) throws Exception {
+    @Override
+    @GetMapping(value = "/admin/retentionpolicies", produces = MediaType.TEXT_HTML_VALUE)
+    public String getRetentionPoliciesListing(ModelMap model) {
 
         model.addAttribute("policies", restService.getRetentionPolicyListing());
 
         return "admin/retentionpolicies/index";
     }
 
-    @RequestMapping(value = "/admin/retentionpolicies/delete/{id}", method = RequestMethod.DELETE)
-    public ResponseEntity<Void> deleteRetentionPoliciesListing(ModelMap model, @PathVariable("id") String policyId) throws Exception {
+    @Override
+    @DeleteMapping(value = "/admin/retentionpolicies/delete/{policyId}")
+    public ResponseEntity<Void> deleteRetentionPoliciesListing(ModelMap model, @PathVariable String policyId) throws Exception {
 
         // todo : Check if it is being used and if so then error.
 
@@ -46,9 +49,9 @@ public class AdminRetentionPoliciesController {
         return ResponseEntity.ok().build();
     }
 
-    // Return an empty 'add new retention policy' page
-    @RequestMapping(value = "/admin/retentionpolicies/add", method = RequestMethod.GET)
-    public String addRetentionPolicy(ModelMap model) {
+    @Override
+    @GetMapping(value = "/admin/retentionpolicies/add", produces = MediaType.TEXT_HTML_VALUE)
+    public String addRetentionPolicyPage(ModelMap model) {
         // pass the view an empty RetentionPolicy since the form expects it
         model.addAttribute("retentionPolicy", new CreateRetentionPolicy());
 
@@ -56,7 +59,8 @@ public class AdminRetentionPoliciesController {
     }
 
     // Process the completed 'add new retention policy' page
-    @RequestMapping(value = "/admin/retentionpolicies/add", method = RequestMethod.POST)
+    @Override
+    @PostMapping(value = "/admin/retentionpolicies/add", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public String addRetentionPolicy(@ModelAttribute CreateRetentionPolicy createRetentionPolicy, ModelMap model, @RequestParam String action) throws Exception {
         // Was the cancel button pressed?
         if ("cancel".equals(action)) {
@@ -71,8 +75,9 @@ public class AdminRetentionPoliciesController {
     }
 
     // Return an 'edit retention policy' page
-    @GetMapping(value = "/admin/retentionpolicies/edit/{retentionpolicyid}")
-    public String editRetentionPolicy(ModelMap model, @PathVariable("retentionpolicyid") String retentionPolicyId) throws Exception {
+    @Override
+    @GetMapping(value = "/admin/retentionpolicies/edit/{retentionPolicyId}", produces = MediaType.TEXT_HTML_VALUE)
+    public String editRetentionPolicyPage(ModelMap model, @PathVariable String retentionPolicyId) throws Exception {
 
         logger.info("Getting RetentionPolicy with id = " +  retentionPolicyId);
 
@@ -83,8 +88,9 @@ public class AdminRetentionPoliciesController {
     }
 
     // Process the completed 'edit retention policy' page
-    @PostMapping(value = "/admin/retentionpolicies/edit/{retentionpolicyid}")
-    public String editRetentionPolicy(@ModelAttribute CreateRetentionPolicy createRetentionPolicy, ModelMap model, @PathVariable("retentionpolicyid") String retentionPolicyId, @RequestParam String action) throws Exception {
+    @Override
+    @PostMapping(value = "/admin/retentionpolicies/edit/{retentionPolicyId}", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public String editRetentionPolicy(@ModelAttribute CreateRetentionPolicy createRetentionPolicy, ModelMap model, @PathVariable String retentionPolicyId, @RequestParam String action) throws Exception {
         // Was the cancel button pressed?
         if ("cancel".equals(action)) {
             return "redirect:/";

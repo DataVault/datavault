@@ -1,5 +1,6 @@
 package org.datavaultplatform.webapp.config.standalone;
 
+import org.datavaultplatform.webapp.config.OpenApiConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
@@ -9,7 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Profile("standalone")
 @ComponentScan({"org.datavaultplatform.webapp.controllers.standalone"})
-@Import(StandaloneWebSecurityConfig.class)
+@Import({StandaloneWebSecurityConfig.class,OpenApiConfig.class})
 public class StandaloneProfileConfig {
 
   @Bean

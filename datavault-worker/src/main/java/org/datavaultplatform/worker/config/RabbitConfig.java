@@ -1,6 +1,8 @@
 package org.datavaultplatform.worker.config;
 
 import com.rabbitmq.client.ConnectionFactory;
+import io.micrometer.tracing.Tracer;
+import io.micrometer.tracing.propagation.Propagator;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.worker.queue.Receiver;
@@ -79,8 +81,10 @@ public class RabbitConfig {
   @Bean
   public RabbitMessageSelector hiLoRabbitMessageSelector(
           ConnectionFactory connectionFactory,
-          TopLevelRabbitMessageProcessor messageProcessor) {
-    return new RabbitMessageSelector(this.hiPriorityQueueName, this.loPriorityQueueName, connectionFactory, messageProcessor);
+          TopLevelRabbitMessageProcessor messageProcessor,
+          Tracer tracer,
+          Propagator propagator) {
+      return new RabbitMessageSelector(this.hiPriorityQueueName, this.loPriorityQueueName, connectionFactory, messageProcessor, tracer, propagator);
   }
 
   @Bean("monitorLogger")

@@ -39,7 +39,7 @@ public class RestTemplateConfig {
    */
   @Bean
   @SneakyThrows
-  RestTemplate restTemplate(@Value("${broker.timeout.ms:1000}") int brokerTimeoutMs) {
+  RestTemplate restTemplate(@Value("${broker.timeout.ms:1000}") int brokerTimeoutMs, RestTemplateBuilder restTemplateBuilder) {
     log.info("broker.timeout.ms [{}]", brokerTimeoutMs);
 
     Builder builder = SocketConfig.custom();
@@ -66,11 +66,10 @@ public class RestTemplateConfig {
     HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory(
             httpclient);
 
-    RestTemplateBuilder tBuilder = new RestTemplateBuilder();
     if (brokerTimeoutMs > 0) {
-      tBuilder = tBuilder.setConnectTimeout(Duration.ofMillis(brokerTimeoutMs));
+      restTemplateBuilder = restTemplateBuilder.connectTimeout(Duration.ofMillis(brokerTimeoutMs));
     }
-    RestTemplate restTemplate = tBuilder
+    RestTemplate restTemplate = restTemplateBuilder
             .requestFactory(() -> factory)
             //.setBufferRequestBody(true)
             .interceptors(List.of(new LoggingInterceptor()))

@@ -3,6 +3,9 @@ package org.datavaultplatform.webapp.config.standalone;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.webapp.authentication.AuthenticationSuccess;
 import org.datavaultplatform.webapp.config.HttpSecurityUtils;
+import org.datavaultplatform.webapp.config.trace.TraceLoggingFilter;
+import org.datavaultplatform.webapp.config.trace.MdcRequestFilter;
+import org.datavaultplatform.webapp.controllers.auth.DataVaultAccessDeniedHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,6 +27,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 
 @EnableWebSecurity
 @Slf4j
@@ -41,13 +45,21 @@ public class StandaloneWebSecurityConfig {
   AuthenticationSuccess authenticationSuccess;
 
   @Bean
+  DataVaultAccessDeniedHandler accessDeniedHandler() {
+    return new DataVaultAccessDeniedHandler();
+  }
+  
+  @Bean
   @Order(2)
   public SecurityFilterChain filterChain(HttpSecurity http,
-                                         @Qualifier("standaloneAuthenticationProvider") AuthenticationProvider authenticationProvider) throws Exception {
+                                         @Qualifier("standaloneAuthenticationProvider") AuthenticationProvider authenticationProvider,
+                                         AccessDeniedHandler accessDeniedHandler,
+                                         TraceLoggingFilter traceLoggingFilter,
+                                         MdcRequestFilter userMdcFilter) throws Exception {
 
-    HttpSecurityUtils.formLogin(http, authenticationSuccess);
+    HttpSecurityUtils.formLogin(http, authenticationSuccess, null);
 
-    HttpSecurityUtils.authorizeRequests(http, true);
+    HttpSecurityUtils.authorizeRequests(http, true, traceLoggingFilter, userMdcFilter);
 
     HttpSecurityUtils.sessionManagement(http, sessionRegistry);
 

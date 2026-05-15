@@ -14,9 +14,11 @@ import org.datavaultplatform.worker.tasks.Deposit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.stubbing.Answer;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.core.io.ClassPathResource;
@@ -74,7 +76,10 @@ class ReceiverTest {
 
     @Mock
     Map<String, String> mDepositProperties;
-    
+
+    @Mock
+    OperatingSystemChildProcessManager mOperatingSystemChildProcessManager;
+
     String jsonMessageBody;
 
     String testApplicationName = "worker-2";
@@ -123,7 +128,8 @@ class ReceiverTest {
                 recomposeDate,
                 mProcessedJobStore,
                 testApplicationName,
-                mTaskStageEventListener
+                mTaskStageEventListener,
+                mOperatingSystemChildProcessManager
         ));
 
         Mockito.lenient().when(mMessageInfo.message()).thenReturn(mMessage);
@@ -167,10 +173,11 @@ class ReceiverTest {
         verify(mMessage).getMessageProperties();
 
         verify(mTask).getJobID();
+        verify(mTask).getProperties();
         verify(mTask, times(1)).setIsRedeliver(true);
         verify(mTask, never()).performAction(any(Context.class));
-
-        verifyNoMoreInteractions(mMessageInfo, mMessage, mMessageProperties, mTask, mProcessedJobStore);
+        verify(mOperatingSystemChildProcessManager).findAndStopChildProcesses(anyBoolean());
+        verifyNoMoreInteractions(mMessageInfo, mMessage, mMessageProperties, mTask, mProcessedJobStore, mOperatingSystemChildProcessManager);
     }
 
     @Test
@@ -198,22 +205,34 @@ class ReceiverTest {
         verify(mDeposit, atLeast(1)).getLastEvent();
         verify(mDeposit, never()).setIsRedeliver(any(Boolean.class));
         verify(mDeposit).performAction(mContext);
+        verify(mDeposit).getProperties();
 
         verify(mProcessedJobStore).storeProcessedJob(TEST_JOB_ID);
 
-        verifyNoMoreInteractions(mMessageInfo, mMessage, mMessageProperties, mDeposit, mProcessedJobStore);
+        verify(mOperatingSystemChildProcessManager).findAndStopChildProcesses(anyBoolean());
+
+        verifyNoMoreInteractions(mMessageInfo, mMessage, mMessageProperties, mDeposit, mProcessedJobStore, mOperatingSystemChildProcessManager);
     }
 
     @Test
     void testDepositsWithLastEventWhereNonRestartJobIdIsStored() {
-
+        ArgumentCaptor<String> argString = ArgumentCaptor.forClass(String.class);
+        
         doReturn(mLastEvent).when(mDeposit).getLastEvent();
         doReturn(false).when(mMessageProperties).isRedelivered();
         doReturn(mDeposit).when(receiver).getConcreteTask(jsonMessageBody);
         doReturn(mContext).when(receiver).getContext(any(Path.class));
         doReturn(true).when(mProcessedJobStore).isProcessedJob(NON_RESTART_JOB_ID);
-        doReturn(NON_RESTART_JOB_ID).when(mDepositProperties).get(PropNames.NON_RESTART_JOB_ID);
 
+        when(mDepositProperties.get(anyString())).thenAnswer((Answer<String>) invocation -> {
+            String arg = invocation.getArgument(0);
+            if (PropNames.NON_RESTART_JOB_ID.equals(arg)) {
+                return NON_RESTART_JOB_ID;
+            } else {
+                return null;
+            }
+        });
+        
         doNothing().when(mProcessedJobStore).storeProcessedJob(TEST_JOB_ID);
         doNothing().when(mDeposit).performAction(mContext);
 
@@ -232,27 +251,39 @@ class ReceiverTest {
         verify(mDeposit, atLeast(1)).getJobID();
         verify(mDeposit, atLeast(1)).getLastEvent();
         verify(mDeposit, never()).setIsRedeliver(any(Boolean.class));
-        verify(mDeposit).getProperties();
+        verify(mDeposit, times(2)).getProperties();
 
-        verify(mDepositProperties).get(PropNames.NON_RESTART_JOB_ID);
-
+        verify(mDepositProperties, times(6)).get(argString.capture());
+        assertThat(argString.getAllValues()).contains(PropNames.NON_RESTART_JOB_ID);
+        
         verify(mProcessedJobStore).isProcessedJob(NON_RESTART_JOB_ID);
 
         verify(mDeposit).performAction(mContext);
         verify(mProcessedJobStore).storeProcessedJob(TEST_JOB_ID);
+        verify(mOperatingSystemChildProcessManager).findAndStopChildProcesses(anyBoolean());
 
-        verifyNoMoreInteractions(mMessageInfo, mMessage, mMessageProperties, mDeposit, mProcessedJobStore);
+        verifyNoMoreInteractions(mMessageInfo, mMessage, mMessageProperties, mDeposit, mProcessedJobStore, mOperatingSystemChildProcessManager);
     }
 
     @Test
     void testDepositsWithLastEventWhereNonRestartJobIdIsNotStored() {
 
+        ArgumentCaptor<String> argString = ArgumentCaptor.forClass(String.class);
+        
         doReturn(mLastEvent).when(mDeposit).getLastEvent();
         doReturn(false).when(mMessageProperties).isRedelivered();
         doReturn(mDeposit).when(receiver).getConcreteTask(jsonMessageBody);
         doReturn(mContext).when(receiver).getContext(any(Path.class));
         doReturn(false).when(mProcessedJobStore).isProcessedJob(NON_RESTART_JOB_ID);
-        doReturn(NON_RESTART_JOB_ID).when(mDepositProperties).get(PropNames.NON_RESTART_JOB_ID);
+
+        when(mDepositProperties.get(anyString())).thenAnswer((Answer<String>) invocation -> {
+            String arg = invocation.getArgument(0);
+            if (PropNames.NON_RESTART_JOB_ID.equals(arg)) {
+                return NON_RESTART_JOB_ID;
+            } else {
+                return null;
+            }
+        });
 
         receiver.onMessage(mMessageInfo);
 
@@ -269,15 +300,17 @@ class ReceiverTest {
         verify(mDeposit, atLeast(1)).getJobID();
         verify(mDeposit, atLeast(1)).getLastEvent();
         verify(mDeposit, never()).setIsRedeliver(any(Boolean.class));
-        verify(mDeposit).getProperties();
+        verify(mDeposit, times(2)).getProperties();
 
-        verify(mDepositProperties).get(PropNames.NON_RESTART_JOB_ID);
-
+        verify(mDepositProperties, times(6)).get(argString.capture());
+        assertThat(argString.getAllValues()).contains(PropNames.NON_RESTART_JOB_ID);
+        
         verify(mProcessedJobStore).isProcessedJob(NON_RESTART_JOB_ID);
 
         verify(mProcessedJobStore, never()).storeProcessedJob(TEST_JOB_ID);
         verify(mDeposit, never()).performAction(mContext);
 
-        verifyNoMoreInteractions(mMessageInfo, mMessage, mMessageProperties, mDeposit, mProcessedJobStore);
+        verify(mOperatingSystemChildProcessManager).findAndStopChildProcesses(anyBoolean());
+        verifyNoMoreInteractions(mMessageInfo, mMessage, mMessageProperties, mDeposit, mProcessedJobStore, mOperatingSystemChildProcessManager);
     }
 }

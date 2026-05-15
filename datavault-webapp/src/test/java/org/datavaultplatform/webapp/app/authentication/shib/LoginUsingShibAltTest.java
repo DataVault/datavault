@@ -23,10 +23,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, properties = "output.traceid.on.error=false")
 @ProfileShib
 @Slf4j
-public class LoginUsingShibAltTest {
+class LoginUsingShibAltTest {
 
   @Autowired
   TestRestTemplate template;
@@ -39,7 +39,7 @@ public class LoginUsingShibAltTest {
    * If we try and access a page without 'uid' request header, we should get error.
    */
   @Test
-  void testErrorOnMissingReqestHeader() {
+  void testErrorOnMissingRequestHeader() {
     ResponseEntity<String> response = template.getForEntity("/", String.class);
     log.info("status {}", response.getStatusCode());
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
@@ -85,13 +85,13 @@ public class LoginUsingShibAltTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings={"info", "health", "customtime", "mappings"})
+    @ValueSource(strings={"info", "health"})
     void testPublicActuatorEndpoints(String endpoint){
       assertEquals(HttpStatus.OK, actuatorEndpoint(endpoint).getStatusCode());
     }
 
     @ParameterizedTest
-    @ValueSource(strings={"beans", "logging"})
+    @ValueSource(strings={"beans", "logging", "customtime", "mappings"})
     void testNonPublicActuatorEndpoints(String endpoint){
       assertEquals(HttpStatus.UNAUTHORIZED, actuatorEndpoint(endpoint).getStatusCode());
     }

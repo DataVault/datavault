@@ -6,13 +6,14 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.Calendar;
@@ -29,6 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
  * @see GlobalDateTimeFormatInterceptor
  */
 @WebMvcTest
+@AutoConfigureObservability
 @ProfileStandalone
 public class ThymeleafConfigDateFormatTest extends BaseThymeleafTest{
 
@@ -103,7 +105,7 @@ public class ThymeleafConfigDateFormatTest extends BaseThymeleafTest{
             @Autowired
             Date myDateTime;
 
-            @RequestMapping("/test/dates")
+            @GetMapping("/test/dates")
             public ModelAndView renderTestDatePage() {
                 ModelAndView result = new ModelAndView("test/dates");
                 result.addObject("myDateTime", myDateTime);

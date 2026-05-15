@@ -33,7 +33,7 @@ import org.datavaultplatform.broker.actuator.SftpFileStoreEndpoint;
 import org.datavaultplatform.broker.actuator.SftpFileStoreInfo;
 import org.datavaultplatform.broker.app.DataVaultBrokerApp;
 import org.datavaultplatform.broker.services.AdminDepositService;
-import org.datavaultplatform.broker.queue.Sender;
+import org.datavaultplatform.broker.queue.TaskSender;
 import org.datavaultplatform.broker.test.AddTestProperties;
 import org.datavaultplatform.broker.test.BaseDatabaseTest;
 import org.datavaultplatform.common.PropNames;
@@ -104,7 +104,7 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
   @Value("${sftp.passphrase}")
   String passphrase;
   @MockBean
-  Sender sender;
+  TaskSender taskSender;
   @MockBean
   AdminDepositService adminDepositService;
   @Autowired

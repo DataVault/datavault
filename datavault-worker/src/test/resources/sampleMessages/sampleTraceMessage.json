@@ -1,0 +1,22 @@
+{
+  "taskClass": "org.datavaultplatform.worker.tasks.Trace",
+  "jobID": "1234567890",
+  "properties": {
+    "brokerTraceId" : "broker-trace-id"
+  },
+  "fileStorePaths": null,
+  "fileUploadPaths": null,
+  "archiveFileStores": [],
+  "userFileStoreProperties": {},
+  "userFileStoreClasses": {},
+  "chunkFilesDigest": {},
+  "tarIV": "",
+  "chunksIVs": {},
+  "encTarDigest": "",
+  "encChunksDigest": {},
+  "lastEvent": null,
+  "chunksToAudit": null,
+  "archiveIds": null,
+  "restartArchiveIds": {},
+  "redeliver": false
+}

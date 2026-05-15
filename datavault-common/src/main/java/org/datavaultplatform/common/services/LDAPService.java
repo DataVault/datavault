@@ -1,11 +1,6 @@
 package org.datavaultplatform.common.services;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
@@ -311,7 +306,7 @@ public class LDAPService {
         return searchRequest;
     }
 
-    public  HashMap<String, String> getLDAPAttributes(String name) throws LdapException, CursorException {
+    public Map<String, String> getLDAPAttributes(String name) throws LdapException, CursorException {
         LdapNetworkConnection connection = null;
         try {
             connection = getConnection();

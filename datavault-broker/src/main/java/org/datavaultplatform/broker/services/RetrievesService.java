@@ -5,7 +5,8 @@ import org.datavaultplatform.common.model.Retrieve;
 import org.datavaultplatform.common.model.dao.RetrieveDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.util.Date;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,9 +27,9 @@ public class RetrievesService {
     }
     
     public void addRetrieve(Retrieve retrieve, Deposit deposit, String retrievePath) {
-        
-        Date d = new Date();
-        retrieve.setTimestamp(d);
+
+        LocalDateTime now = LocalDateTime.now();
+        retrieve.setTimestamp(now);
         
         retrieve.setDeposit(deposit);
         retrieve.setStatus(Retrieve.Status.NOT_STARTED);

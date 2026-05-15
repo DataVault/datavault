@@ -7,6 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.directory.api.ldap.model.cursor.CursorException;
@@ -170,7 +172,7 @@ public abstract class BaseLDAPServiceIT {
 
   @Test
   void testLDAPAttributesJamesBond() throws CursorException, LdapException {
-    HashMap<String, String> info = ldapService.getLDAPAttributes("jamesbond");
+    Map<String, String> info = ldapService.getLDAPAttributes("jamesbond");
     assertEquals(3, info.size());
     assertEquals("jamesbond", info.get("uid"));
     assertEquals("james.bond@test.com", info.get("mail"));
@@ -179,7 +181,7 @@ public abstract class BaseLDAPServiceIT {
 
   @Test
   void testLDAPAttributesJoeBloggs() throws CursorException, LdapException {
-    HashMap<String, String> info = ldapService.getLDAPAttributes("joebloggs");
+    Map<String, String> info = ldapService.getLDAPAttributes("joebloggs");
     Assertions.assertEquals(3, info.size());
     assertEquals("joebloggs", info.get("uid"));
     assertEquals("joe.bloggs@test.com", info.get("mail"));

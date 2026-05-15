@@ -8,7 +8,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 public class GlobalDateTimeFormatInterceptor implements HandlerInterceptor {
 
