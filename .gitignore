@@ -46,3 +46,4 @@ dv5/local-db/docker/backup.D.SPEED.sql
 # this can set the java version for the Intellij IDE and will set java versions for terminals too if 'sdk config set sdkman_auto_env true'
 .sdkmanrc
 SWAGGER_OPENAPI/*.zip
+**/.attach_pid*
