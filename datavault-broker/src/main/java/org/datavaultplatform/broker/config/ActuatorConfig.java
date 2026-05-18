@@ -4,14 +4,15 @@ import java.time.Clock;
 import java.util.List;
 import java.util.function.Function;
 
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.info.Info;
 import org.datavaultplatform.broker.actuator.CurrentTimeEndpoint;
 import org.datavaultplatform.broker.actuator.LocalFileStoreEndpoint;
 import org.datavaultplatform.broker.actuator.MemoryInfoEndpoint;
 import org.datavaultplatform.broker.actuator.SftpFileStoreEndpoint;
 import org.datavaultplatform.broker.services.ArchiveStoreService;
 import org.datavaultplatform.broker.services.FileStoreService;
+import org.datavaultplatform.common.actuator.ActuatorHealthSecurityAdvice;
+import org.datavaultplatform.common.actuator.ActuatorInfoSecurityAdvice;
+import org.datavaultplatform.common.actuator.ActuatorSecurityAdvice;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +21,21 @@ import org.springframework.boot.actuate.info.InfoContributor;
 import org.springframework.context.annotation.Bean;
 
 public class ActuatorConfig {
+
+  @Bean
+  ActuatorInfoSecurityAdvice actuatorInfoSecurityAdvice() {
+    return new ActuatorInfoSecurityAdvice();
+  }
+
+  @Bean
+  ActuatorHealthSecurityAdvice actuatorHealthSecurityAdvice() {
+    return new ActuatorHealthSecurityAdvice();
+  }
+  
+  @Bean
+  ActuatorSecurityAdvice actuatorSecurityAdvice() {
+    return new ActuatorSecurityAdvice();
+  }
 
   @Bean
   Clock clock() {
@@ -55,12 +71,5 @@ public class ActuatorConfig {
   @Bean
   public LocalFileStoreEndpoint localFileStoreEndpoint(@Autowired ArchiveStoreService archiveStoreService) {
     return new LocalFileStoreEndpoint(archiveStoreService);
-  }
-
-  @Bean
-  public OpenAPI openAPI() {
-    return new OpenAPI().info(new Info().title("DataVault Broker")
-            .description("broker application")
-            .version("v0.0.1"));
   }
 }

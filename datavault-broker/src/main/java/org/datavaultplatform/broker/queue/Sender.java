@@ -1,5 +1,7 @@
 package org.datavaultplatform.broker.queue;
 
+import io.micrometer.tracing.Tracer;
+import io.micrometer.tracing.propagation.Propagator;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.config.BaseQueueConfig;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -14,21 +16,25 @@ public class Sender {
   private final RabbitTemplate template;
   private final String workerQueueName;
   private final String restartExchangeName;
-
+  private final Tracer tracer;
+  private final Propagator propagator;
+  
   @Autowired
   public Sender(@Value(BaseQueueConfig.WORKER_QUEUE_NAME) String workerQueueName,
                 @Value(BaseQueueConfig.RESTART_EXCHANGE_NAME) String restartExchangeName,
-                RabbitTemplate template) {
+                RabbitTemplate template, Tracer tracer, Propagator propagator) {
     this.template = template;
     this.workerQueueName = workerQueueName;
     this.restartExchangeName = restartExchangeName;
+      this.tracer = tracer;
+      this.propagator = propagator;
   }
 
   public String send(String messageText, boolean restart) {
     if (restart) {
-      return RabbitUtils.sendToExchange(template, restartExchangeName, messageText);
+      return RabbitUtils.sendToExchange(template, restartExchangeName, messageText, tracer, propagator);
     } else {
-      return RabbitUtils.sendDirectToQueue(template, workerQueueName, messageText);
+      return RabbitUtils.sendDirectToQueue(template, workerQueueName, messageText, tracer, propagator);
     }
   }
   

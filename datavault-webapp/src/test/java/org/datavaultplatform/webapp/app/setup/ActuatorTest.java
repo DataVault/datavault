@@ -19,6 +19,7 @@ import java.util.Set;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.datavaultplatform.common.actuator.WithMockActuatorUser;
 import org.datavaultplatform.webapp.test.ProfileStandalone;
 import org.datavaultplatform.webapp.test.TestClockConfig;
 import org.datavaultplatform.webapp.test.TestUtils;
@@ -31,6 +32,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -42,10 +44,10 @@ import org.springframework.test.web.servlet.ResultActions;
 @ProfileStandalone
 @Slf4j
 @TestPropertySource(properties = "management.endpoints.web.exposure.include=*")
-public class ActuatorTest {
+class ActuatorTest {
 
-  private static final List<String> PUBLIC_ENDPOINTS = List.of("info","health","customtime", "metrics", "memoryinfo","mappings");
-  private static final List<String> PRIVATE_ENDPOINTS = List.of("env","loggers","beans");
+  private static final List<String> PUBLIC_ENDPOINTS = List.of("info","health");
+  private static final List<String> PRIVATE_ENDPOINTS = List.of("env","loggers","beans","customtime", "metrics", "memoryinfo","mappings");
 
   @Autowired
   ObjectMapper mapper;
@@ -63,19 +65,33 @@ public class ActuatorTest {
   private String actuatorPassword;
 
   @Test
-  void testInfo() throws Exception {
+  @WithMockActuatorUser
+  void testFullInfo() throws Exception {
     mvc.perform(get("/actuator/info"))
-        .andExpect(jsonPath("$.app.name").value(Matchers.is("datavault-webapp")))
-        .andExpect(jsonPath("$.app.description").value(Matchers.is("webapp for datavault")))
-        .andExpect(jsonPath("$.git.commit.time").exists())
-        .andExpect(jsonPath("$.git.commit.time").value(Matchers.is("2022-03-30T10:25:54Z")))
-        .andExpect(jsonPath("$.git.commit.id").value(Matchers.is("a16f01e")))
-        .andExpect(jsonPath("$.build.artifact").value(Matchers.is("datavault-webapp")))
-        .andExpect(jsonPath("$.java.vendor").exists())
-        .andExpect(jsonPath("$.java.runtime.version").exists())
-        .andExpect(jsonPath("$.java.jvm.version").exists());
+            .andExpect(jsonPath("$.app.name").value(Matchers.is("datavault-webapp")))
+            .andExpect(jsonPath("$.app.description").value(Matchers.is("webapp for datavault")))
+            .andExpect(jsonPath("$.git.commit.time").exists())
+            .andExpect(jsonPath("$.git.commit.time").value(Matchers.is("2022-03-30T10:25:54Z")))
+            .andExpect(jsonPath("$.git.commit.id").value(Matchers.is("a16f01e")))
+            .andExpect(jsonPath("$.build.artifact").value(Matchers.is("datavault-webapp")))
+            .andExpect(jsonPath("$.java.vendor").exists())
+            .andExpect(jsonPath("$.java.runtime.version").exists())
+            .andExpect(jsonPath("$.java.jvm.version").exists());
   }
 
+  @Test
+  void testFilteredInfo() throws Exception {
+    mvc.perform(get("/actuator/info"))
+            .andExpect(jsonPath("$.app.name").value(Matchers.is("datavault-webapp")))
+            .andExpect(jsonPath("$.app.description").value(Matchers.is("webapp for datavault")))
+            .andExpect(jsonPath("$.git.commit.time").doesNotExist())
+            .andExpect(jsonPath("$.git.commit.time").doesNotExist())
+            .andExpect(jsonPath("$.git.commit.id").doesNotExist())
+            .andExpect(jsonPath("$.build.artifact").doesNotExist())
+            .andExpect(jsonPath("$.java.vendor").doesNotExist())
+            .andExpect(jsonPath("$.java.runtime.version").doesNotExist())
+            .andExpect(jsonPath("$.java.jvm.version").doesNotExist());
+  }
 
   /* just checking that 'test-classes' come before the other 'classes' directories */
   @Test
@@ -101,6 +117,7 @@ public class ActuatorTest {
 
 
   @Test
+  @WithMockActuatorUser
   void testCurrentTime() throws Exception {
     MvcResult mvcResult = mvc.perform(
             get("/actuator/customtime"))
@@ -119,6 +136,7 @@ public class ActuatorTest {
   }
 
   @Test
+  @WithMockUser(username = "wactor", roles = {"ACTUATOR"})
   void testMemoryInfo() throws Exception {
     MvcResult mvcResult = mvc.perform(
                     get("/actuator/memoryinfo"))
@@ -142,6 +160,7 @@ public class ActuatorTest {
   }
 
   @Test
+  @WithMockActuatorUser
   void testAvailableEndpoints() throws Exception {
 
     assertEquals(Collections.singleton("*"), this.endpoints);

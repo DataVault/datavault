@@ -1,5 +1,6 @@
 package org.datavaultplatform.webapp.app.setup;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.net.URI;
@@ -7,10 +8,12 @@ import java.net.URISyntaxException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.assertj.core.api.Assertions;
 import org.datavaultplatform.webapp.controllers.standalone.api.SimulateErrorController;
 import org.datavaultplatform.webapp.model.test.EmailInfo;
 import org.datavaultplatform.webapp.test.ProfileStandalone;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,7 +27,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.ui.Model;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@TestPropertySource(properties = "datavault.csrf.disabled=true")
+@TestPropertySource(properties = {"datavault.csrf.disabled=true","output.traceid.on.error=false"})
 @Slf4j
 @ProfileStandalone
 public class ErrorHandlingTest {
@@ -33,18 +36,20 @@ public class ErrorHandlingTest {
   TestRestTemplate restTemplate;
 
   /**
-   * @see org.datavaultplatform.webapp.controllers.ErrorController#customError(HttpServletRequest,
-   * HttpServletResponse, Model)
+   * @see org.datavaultplatform.webapp.controllers.auth.ErrorController#customError(HttpServletRequest, HttpServletResponse, Model) (HttpServletRequest,
    */
   @Test
-  public void testErrorPageDirectly() {
+  void testErrorPageDirectly() {
     ResponseEntity<String> respEntity = restTemplate.getForEntity("/error", String.class);
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, respEntity.getStatusCode());
     String body = respEntity.getBody();
     checkNoStackTrace(body);
 
-    Assertions.assertThat(body).contains("An error has occurred!");
-    Assertions.assertThat(body).contains("Error code null returned for Unknown with message:");
+    //create doc with jsoup from body
+    Document doc = Jsoup.parse(body);
+    Element errorMessageSpan = doc.getElementById("error-message");
+    assertThat(errorMessageSpan.tagName()).isEqualTo("span");
+    assertThat(errorMessageSpan.text()).isEqualTo("Error code 500 returned for Unknown with message: Internal Server Error");
   }
 
   /**
@@ -57,8 +62,8 @@ public class ErrorHandlingTest {
     String body = respEntity.getBody();
     checkHasStackTrace(body);
 
-    Assertions.assertThat(respEntity.getBody()).contains("An error has occurred!");
-    Assertions.assertThat(respEntity.getBody()).contains("SimulatedError");
+    assertThat(respEntity.getBody()).contains("An error has occurred!");
+    assertThat(respEntity.getBody()).contains("SimulatedError");
   }
 
   /**
@@ -72,10 +77,10 @@ public class ErrorHandlingTest {
     checkNoStackTrace(body);
 
     //response is from auth/denied template
-    Assertions.assertThat(body).contains("Access denied.");
+    assertThat(body).contains("Access denied.");
 
     //response is NOT from error/error template
-    Assertions.assertThat(body).doesNotContain("An error has occured!");
+    assertThat(body).doesNotContain("An error has occured!");
   }
 
   /**
@@ -89,10 +94,10 @@ public class ErrorHandlingTest {
 
     String body = respEntity.getBody();
     //response is from error/error template
-    Assertions.assertThat(body).contains("An error has occurred!");
+    assertThat(body).contains("An error has occurred!");
 
     //response text is generic 404 / NOT FOUND message
-    Assertions.assertThat(body).contains(
+    assertThat(body).contains(
         "Error code 404 returned for /test/entity-not-found with message:<br/> Not Found");
 
     //error page does not have stack trace
@@ -110,11 +115,11 @@ public class ErrorHandlingTest {
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, respEntity.getStatusCode());
     String body = respEntity.getBody();
 
-    Assertions.assertThat(body)
+    assertThat(body)
         .contains("Error code 500 returned for /test/invalid-uun with message:");
 
     checkHasStackTrace(body);
-    Assertions.assertThat(body).contains(
+    assertThat(body).contains(
         "Caused by: org.datavaultplatform.webapp.exception.InvalidUunException: Invalid UUN: blah");
   }
 
@@ -139,11 +144,11 @@ public class ErrorHandlingTest {
   }
 
   private void checkNoStackTrace(String body) {
-    Assertions.assertThat(body).doesNotContain("Caused by:");
+    assertThat(body).doesNotContain("Caused by:");
   }
 
   private void checkHasStackTrace(String body) {
-    Assertions.assertThat(body).contains("Caused by:");
+    assertThat(body).contains("Caused by:");
   }
 
   private <T> ResponseEntity<T> postEmail(String emailAddress, Class<T> clazz)

@@ -6,16 +6,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.monitor.MemoryStats;
 import org.datavaultplatform.common.services.LDAPService;
-import org.datavaultplatform.webapp.config.ActutatorConfig;
-import org.datavaultplatform.webapp.config.LdapConfig;
-import org.datavaultplatform.webapp.config.MailConfig;
-import org.datavaultplatform.webapp.config.MvcConfig;
-import org.datavaultplatform.webapp.config.PropertiesConfig;
-import org.datavaultplatform.webapp.config.RestTemplateConfig;
-import org.datavaultplatform.webapp.config.SecurityActuatorConfig;
-import org.datavaultplatform.webapp.config.SecurityConfig;
-import org.datavaultplatform.webapp.config.TomcatAjpConfig;
-import org.datavaultplatform.webapp.config.WebConfig;
+import org.datavaultplatform.webapp.config.*;
 import org.datavaultplatform.webapp.config.database.DatabaseProfileConfig;
 import org.datavaultplatform.webapp.config.shib.ShibProfileConfig;
 import org.datavaultplatform.webapp.config.standalone.StandaloneProfileConfig;
@@ -37,7 +28,7 @@ import org.springframework.core.env.Environment;
 @ComponentScan({
     "org.datavaultplatform.webapp.controllers",
     "org.datavaultplatform.webapp.services"})
-@Import({PropertiesConfig.class, WebConfig.class, MvcConfig.class, ActutatorConfig.class,
+@Import({PropertiesConfig.class, ActutatorConfig.class, WebConfig.class, MvcConfig.class,
     SecurityActuatorConfig.class, SecurityConfig.class, MailConfig.class, LdapConfig.class,
         StandaloneProfileConfig.class, DatabaseProfileConfig.class,
     ShibProfileConfig.class, RestTemplateConfig.class, TomcatAjpConfig.class})
@@ -47,6 +38,12 @@ public class DataVaultWebApp implements CommandLineRunner {
   @Value("${spring.application.name}")
   String applicationName;
 
+  @Value("${management.tracing.sampling.probability}")
+  String tracingSamplingProbability;
+
+  @Value("${management.tracing.propagation.type}")
+  String tracingPropagationType;
+  
   @Autowired
   Environment env;
 
@@ -92,6 +89,8 @@ public class DataVaultWebApp implements CommandLineRunner {
     log.info("WebApp [{}] ready [{}]", applicationName, readyEvent);
     LDAPService.testLdapConnection(readyEvent.getApplicationContext());
     log.info("{}", MemoryStats.getCurrent().toPretty());
+    log.info("Tracing Sampling Probability [{}]", tracingSamplingProbability);
+    log.info("Tracing Propagation Type [{}]", tracingPropagationType);
   }
 
 }

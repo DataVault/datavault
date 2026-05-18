@@ -21,7 +21,6 @@ import org.datavaultplatform.worker.utils.DepositEvents;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.amqp.core.AmqpAdmin;
 import org.springframework.amqp.core.Message;
-import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -130,16 +129,6 @@ public abstract class BaseDepositIT extends BaseRabbitIT {
 
         registry.add("tempDir", () -> tempDirValue);
         registry.add("metaDir", () -> metaDirValue);
-    }
-
-    @SuppressWarnings("UnusedReturnValue")
-    final String sendNormalMessage(String msgBody) {
-        MessageProperties props = new MessageProperties();
-        props.setMessageId(UUID.randomUUID().toString());
-        props.setPriority(NORMAL_PRIORITY);
-        Message msg = new Message(msgBody.getBytes(StandardCharsets.UTF_8), props);
-        template.send(workerQueue.getActualName(), msg);
-        return props.getMessageId();
     }
 
     @BeforeEach

@@ -10,9 +10,11 @@ import org.datavaultplatform.common.request.*;
 import org.datavaultplatform.common.response.*;
 import org.datavaultplatform.common.util.Constants;
 import org.datavaultplatform.common.util.DateTimeUtils;
+import org.datavaultplatform.common.util.TraceInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -54,7 +56,16 @@ public class RestService implements NotifyLogoutService, NotifyLoginService, Eva
         return exchangeWithAuth(auth, url, clazz, method, payload);
     }
 
-    private <T> ResponseEntity<T> exchangeWithAuth(Authentication auth, String url, Class<T> clazz, HttpMethod method, Object payload) {
+    private <T> ResponseEntity<T> exchange(String url, ParameterizedTypeReference<T> ptr, HttpMethod method, Object payload) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return exchangeWithAuth(auth, url, ptr, method, payload);
+    }
+
+    private <T> ResponseEntity<T> exchangeWithAuth(Authentication auth, String url, Class<T> ptr, HttpMethod method, Object payload) {
+        return exchangeWithAuth(auth, url, ParameterizedTypeReference.forType(ptr), method, payload);
+    }
+
+    private <T> ResponseEntity<T> exchangeWithAuth(Authentication auth, String url, ParameterizedTypeReference<T> ptr, HttpMethod method, Object payload) {
 
         HttpHeaders headers = new HttpHeaders();
 
@@ -83,8 +94,12 @@ public class RestService implements NotifyLogoutService, NotifyLoginService, Eva
         // todo : check the http status code before returning?
 
         log.info("broker.url [{}]",url);
-        return restTemplate.exchange(url, method, entity, clazz);
+        return restTemplate.exchange(url, method, entity, ptr);
 
+    }
+
+    public <T> ResponseEntity<T> get(String url, ParameterizedTypeReference<T> ptr) {
+        return exchange(url, ptr, HttpMethod.GET, null);
     }
 
     public <T> ResponseEntity<T> get(String url, Class<T> clazz) {
@@ -918,5 +933,21 @@ public class RestService implements NotifyLogoutService, NotifyLoginService, Eva
             log.error(msg);
             throw new RuntimeException(msg);
         }
+    }
+
+    public TraceInfo getTraceFromBroker(String brokerActuatorUserName, String brokerActuatorPassword) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBasicAuth(brokerActuatorUserName, brokerActuatorPassword);
+        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+        ResponseEntity<TraceInfo> response = restTemplate.exchange(brokerURL + "/trace/info", HttpMethod.GET, new HttpEntity<>(headers), TraceInfo.class);
+        return response.getBody();
+    }
+
+    public TraceInfo getTraceFromBrokerAndSendToWorker(String brokerActuatorUserName, String brokerActuatorPassword) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBasicAuth(brokerActuatorUserName, brokerActuatorPassword);
+        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+        ResponseEntity<TraceInfo> response = restTemplate.exchange(brokerURL + "/trace/worker", HttpMethod.GET, new HttpEntity<>(headers), TraceInfo.class);
+        return response.getBody();
     }
 }

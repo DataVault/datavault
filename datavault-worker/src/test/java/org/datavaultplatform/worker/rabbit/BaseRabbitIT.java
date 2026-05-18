@@ -1,6 +1,11 @@
 package org.datavaultplatform.worker.rabbit;
 
 import com.rabbitmq.client.ConnectionFactory;
+import io.micrometer.tracing.Span;
+import io.micrometer.tracing.TraceContext;
+import io.micrometer.tracing.Tracer;
+import io.micrometer.tracing.propagation.Propagator;
+import io.opentelemetry.api.trace.TraceId;
 import org.datavaultplatform.common.docker.DockerImage;
 import org.datavaultplatform.worker.config.RabbitConfig;
 import org.datavaultplatform.worker.utils.SocketUtils;
@@ -8,6 +13,10 @@ import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.AmqpAdmin;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessageProperties;
+import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,10 +29,13 @@ import org.testcontainers.DockerClientFactory;
 import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mockingDetails;
 
 @DirtiesContext
@@ -32,6 +44,8 @@ import static org.mockito.Mockito.mockingDetails;
 @TestPropertySource(properties = "logging.level.com.rabbitmq.client.ConnectionFactory=DEBUG")
 public abstract class BaseRabbitIT {
 
+    @Autowired
+    protected AmqpAdmin rabbitAdmin;
 
     @Value("${spring.rabbitmq.host}")
     String rabbitMQhost;
@@ -45,6 +59,15 @@ public abstract class BaseRabbitIT {
     @Value("${spring.rabbitmq.password}")
     String rabbitMQpassword;
     
+    @Autowired
+    Tracer tracer;
+
+    @Autowired
+    Propagator propagator;
+
+    protected Span testSpan;
+    protected Tracer.SpanInScope testScope;
+
     private static final Logger BASE_LOG = LoggerFactory.getLogger(BaseRabbitIT.class);
 
     public static final int HI_PRIORITY = 2;
@@ -64,6 +87,12 @@ public abstract class BaseRabbitIT {
     @Qualifier("monitorLogger")
     Logger log;
 
+    @Autowired
+    protected RabbitTemplate template;
+    @Autowired
+    @Qualifier("workerQueue") //the name of the bean, not the Q
+    protected Queue workerQueue;
+
     @DynamicPropertySource
     static void registerProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.rabbitmq.host", RABBIT::getHost);
@@ -74,10 +103,10 @@ public abstract class BaseRabbitIT {
         BASE_LOG.info("spring.rabbitmq.port [{}]", RABBIT.getAmqpPort());
     }
     
-    protected static final long classLoadedAt;
+    protected static final long CLASS_LOADED_AT;
     
     static {
-        classLoadedAt = System.currentTimeMillis();
+        CLASS_LOADED_AT = System.currentTimeMillis();
     }
 
     @BeforeEach
@@ -110,7 +139,7 @@ public abstract class BaseRabbitIT {
 
     @BeforeEach
     void checkRabbitConnection() {
-        assertThat(ctx.getStartupDate() > classLoadedAt).isTrue();
+        assertThat(ctx.getStartupDate() > CLASS_LOADED_AT).isTrue();
 
         assertThat(RABBIT.isCreated()).isTrue().withFailMessage(() -> "rabbit is NOT created");
         assertThat(RABBIT.isRunning()).isTrue().withFailMessage(() -> "rabbit is NOT running");
@@ -120,7 +149,7 @@ public abstract class BaseRabbitIT {
         log.info("rabbit host [{}]", RABBIT.getHost());
         log.info("rabbit AMQP port [{}]", RABBIT.getAmqpPort());
 
-        // double check that we can connect via socket to rabbit before proceeding with actual tests
+        // double-check that we can connect via socket to rabbit before proceeding with actual tests
         assertThat(SocketUtils.isServerListening(RABBIT.getHost(), RABBIT.getAmqpPort())).isTrue();
         assertThat(isServerListening2()).isTrue();
     }
@@ -143,7 +172,56 @@ public abstract class BaseRabbitIT {
     }
 
     @AfterAll
-    public static void tearDownContainer(){
+    public static void tearDownContainer() {
         RABBIT.stop();
+    }
+
+    @SuppressWarnings("UnusedReturnValue")
+    protected String sendNormalMessage(String msgBody) {
+        MessageProperties props = new MessageProperties();
+        props.setMessageId(UUID.randomUUID().toString());
+        props.setPriority(NORMAL_PRIORITY);
+
+        Span currentSpan = tracer.currentSpan();
+        if (currentSpan != null) {
+            propagator.inject(currentSpan.context(), props, (carrier, key, value) -> {
+                carrier.setHeader(key, value);
+            });
+        }
+        Message msg = new Message(msgBody.getBytes(StandardCharsets.UTF_8), props);
+        template.send(workerQueue.getActualName(), msg);
+        return props.getMessageId();
+    }
+
+    protected void setupTestTraceId(String testTraceId) {
+        if (testTraceId == null) {
+            return;
+        }
+        String spanId = "00f067aa0ba902b7";
+
+        assertTrue(TraceId.isValid(testTraceId), "The traceId you supplied is not valid. It should be a 32 digit hex string and not all 0s");
+        TraceContext context = tracer.traceContextBuilder()
+                .traceId(testTraceId)
+                .spanId(spanId)
+                .sampled(true)
+                .build();
+        testSpan = tracer.spanBuilder().setParent(context).start();
+        testScope = tracer.withSpan(testSpan);
+    }
+
+    @AfterEach
+    final void tearDownTestSpan() {
+        if (this.testScope != null) {
+            this.testScope.close();
+        }
+        if (this.testSpan != null) {
+            this.testSpan.end();
+        }
+    }
+
+    // This value has to be a 32-digit hex string
+    public String getTestTraceId() {
+        //noinspection GrazieInspectionRunner
+        return "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
     }
 }

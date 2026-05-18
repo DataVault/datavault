@@ -1,16 +1,20 @@
 package org.datavaultplatform.webapp.services;
 
+import io.micrometer.tracing.Tracer;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.dto.PausedDepositStateDTO;
 import org.datavaultplatform.common.dto.PausedRetrieveStateDTO;
 import org.datavaultplatform.common.response.VaultInfo;
+import org.datavaultplatform.common.util.TraceIdWrapper;
+import org.datavaultplatform.common.util.TraceInfo;
 import org.datavaultplatform.webapp.app.DataVaultWebApp;
 import org.datavaultplatform.webapp.app.services.BaseRestTemplateWithLoggingTest;
 import org.datavaultplatform.webapp.test.ProfileDatabase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -45,7 +49,9 @@ class RestServiceTest extends BaseRestTemplateWithLoggingTest {
         @Test
         @WithMockUser(username = "user1")
         void testTogglePausedState() {
-            restService.toggleDepositPausedState();
+            assertDoesNotThrow(() -> {
+                restService.toggleDepositPausedState();
+            });
         }
 
         @Test
@@ -82,7 +88,9 @@ class RestServiceTest extends BaseRestTemplateWithLoggingTest {
         @Test
         @WithMockUser(username = "user1")
         void testTogglePausedState() {
-            restService.toggleRetrievePausedState();
+            assertDoesNotThrow(() -> {
+                restService.toggleRetrievePausedState();
+            });
         }
 
         @Test
@@ -159,5 +167,32 @@ class RestServiceTest extends BaseRestTemplateWithLoggingTest {
             assertThat(result).isTrue();
         }
     }
-    
+
+    @SuppressWarnings("GrazieInspectionRunner")
+    @Nested
+    class TraceIdFromBrokerTests {
+
+        @Autowired
+        Tracer tracer;
+
+        @Test
+        void testGetTraceFromBrokerWithNoTraceId() {
+            TraceInfo result = restService.getTraceFromBroker("user", "password");
+            assertThat(result.traceId()).isEqualTo("aaaabbbbccccddddaaaabbbbccccdddd");
+        }
+
+        @Test
+        void testGetTraceFromBrokerWithTraceId() {
+
+            String traceId = "aaaabbbbccccddddaaaabbbbccccdddd";
+            TraceIdWrapper wrapper = new TraceIdWrapper(traceId, tracer);
+
+            wrapper.runWithinWrapper(() -> {
+                assertThat(tracer.currentSpan().context().traceId()).isEqualTo(traceId);
+                TraceInfo result = restService.getTraceFromBroker("user", "password");
+                assertThat(result.traceId()).isEqualTo("abcdef11abcdef22abcdef33abcdef44");
+            });
+        }
+    }
+
 }

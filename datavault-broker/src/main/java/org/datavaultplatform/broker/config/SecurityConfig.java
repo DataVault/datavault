@@ -1,22 +1,16 @@
 package org.datavaultplatform.broker.config;
 
-import static org.datavaultplatform.common.util.Constants.HEADER_USER_ID;
-
-import java.io.IOException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.datavaultplatform.broker.authentication.RestAuthenticationFailureHandler;
-import org.datavaultplatform.broker.authentication.RestAuthenticationFilter;
-import org.datavaultplatform.broker.authentication.RestAuthenticationProvider;
-import org.datavaultplatform.broker.authentication.RestAuthenticationSuccessHandler;
-import org.datavaultplatform.broker.authentication.RestWebAuthenticationDetailsSource;
+import org.datavaultplatform.broker.authentication.*;
 import org.datavaultplatform.broker.services.AdminService;
 import org.datavaultplatform.broker.services.ClientsService;
 import org.datavaultplatform.broker.services.RolesAndPermissionsService;
 import org.datavaultplatform.broker.services.UsersService;
+import org.datavaultplatform.common.config.SecurityMethod;
 import org.datavaultplatform.common.util.Constants;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,6 +22,7 @@ import org.springframework.security.authentication.AuthenticationEventPublisher;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -45,6 +40,12 @@ import org.springframework.util.Assert;
 import org.springframework.web.filter.CommonsRequestLoggingFilter;
 import org.springframework.web.filter.GenericFilterBean;
 
+import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import static org.datavaultplatform.common.util.Constants.HEADER_USER_ID;
+
 @SuppressWarnings("DefaultAnnotationParam")
 @ConditionalOnExpression("${broker.security.enabled:true}")
 @Configuration
@@ -60,7 +61,6 @@ public class SecurityConfig {
   WebSecurityCustomizer webSecurityCustomizer() {
     return web -> {
       web.debug(securityDebug);
-      web.ignoring().requestMatchers("/retrieve/**");
     };
   }
 
@@ -78,22 +78,64 @@ public class SecurityConfig {
       .addFilterAt(restFilter(authenticationManager), AbstractPreAuthenticatedProcessingFilter.class)
       .sessionManagement(cust -> cust.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
       .exceptionHandling(ex -> ex.authenticationEntryPoint(http403EntryPoint()))
-      .authorizeHttpRequests(authz -> authz
-            .requestMatchers("/admin/users/**").hasAuthority("ROLE_ADMIN")
-            .requestMatchers("/admin/archivestores/**").hasAuthority("ROLE_ADMIN_ARCHIVESTORES")
-            .requestMatchers("/admin/deposits/**").hasAuthority("ROLE_ADMIN_DEPOSITS")
-            .requestMatchers("/admin/retrieves/**").hasAuthority("ROLE_ADMIN_RETRIEVES")
-            .requestMatchers("/admin/vaults/**").hasAuthority("ROLE_ADMIN_VAULTS")
-            .requestMatchers("/admin/pendingVaults/**").hasAuthority("ROLE_ADMIN_PENDING_VAULTS")
-            .requestMatchers("/admin/events/**").hasAuthority("ROLE_ADMIN_EVENTS")
-            .requestMatchers("/admin/billing/**").hasAuthority("ROLE_ADMIN_BILLING")
-            /* TODO : DavidHay : no controller mapped to /admin/reviews ! */
-            .requestMatchers("/admin/reviews/**").hasAuthority("ROLE_ADMIN_REVIEWS")
-            .requestMatchers("/admin/paused/deposit/toggle/**").hasAuthority("ROLE_ADMIN")
-            .requestMatchers("/admin/paused/retrieve/toggle/**").hasAuthority("ROLE_ADMIN")
-            .anyRequest().authenticated());
+      .authorizeHttpRequests(getAuthZCustomizer());
 
     return http.build();
+  }
+
+  public static final Map<String,String> SECURITY_PATH_MAP = new LinkedHashMap<>();
+  
+  static {
+    SECURITY_PATH_MAP.put("/admin/users/**", "hasAuthority('ROLE_ADMIN')");
+    SECURITY_PATH_MAP.put("/admin/archivestores/**", "hasAuthority('ROLE_ADMIN_ARCHIVESTORES')");
+    SECURITY_PATH_MAP.put("/admin/deposits/**", "hasAuthority('ROLE_ADMIN_DEPOSITS')");
+    SECURITY_PATH_MAP.put("/admin/retrieves/**", "hasAuthority('ROLE_ADMIN_RETRIEVES')");
+    SECURITY_PATH_MAP.put("/admin/vaults/**", "hasAuthority('ROLE_ADMIN_VAULTS')");
+    SECURITY_PATH_MAP.put("/admin/pendingVaults/**", "hasAuthority('ROLE_ADMIN_PENDING_VAULTS')");
+    SECURITY_PATH_MAP.put("/admin/events/**", "hasAuthority('ROLE_ADMIN_EVENTS')");
+    SECURITY_PATH_MAP.put("/admin/billing/**", "hasAuthority('ROLE_ADMIN_BILLING')");
+    /* TODO : DavidHay : no controller mapped to /admin/reviews ! */
+    SECURITY_PATH_MAP.put("/admin/reviews/**", "hasAuthority('ROLE_ADMIN_REVIEWS')");
+    SECURITY_PATH_MAP.put("/admin/paused/deposit/toggle/**", "hasAuthority('ROLE_ADMIN')");
+    SECURITY_PATH_MAP.put("/admin/paused/retrieve/toggle/**", "hasAuthority('ROLE_ADMIN')");
+  }
+  
+  public Customizer<org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry> getAuthZCustomizer() {
+    return authz -> {
+
+      for(Map.Entry<String, String> entry : SECURITY_PATH_MAP.entrySet()) {
+        var matchers = authz.requestMatchers(entry.getKey());
+        SecurityMethod sm = SecurityMethod.from(entry.getValue());
+        if (sm.isPermitAll()) {
+          matchers.permitAll();
+
+        } else if (sm.isHasRole()) {
+          matchers.hasRole(sm.arg());
+
+        } else if (sm.isHasAuthority()) {
+          matchers.hasAuthority(sm.arg());
+
+        } else {
+          throw new RuntimeException("Unknown security method: " + sm.method());
+        }
+      }
+      authz.anyRequest().authenticated();
+
+//      authz
+//              .requestMatchers("/admin/users/**").hasAuthority("ROLE_ADMIN")
+//              .requestMatchers("/admin/archivestores/**").hasAuthority("ROLE_ADMIN_ARCHIVESTORES")
+//              .requestMatchers("/admin/deposits/**").hasAuthority("ROLE_ADMIN_DEPOSITS")
+//              .requestMatchers("/admin/retrieves/**").hasAuthority("ROLE_ADMIN_RETRIEVES")
+//              .requestMatchers("/admin/vaults/**").hasAuthority("ROLE_ADMIN_VAULTS")
+//              .requestMatchers("/admin/pendingVaults/**").hasAuthority("ROLE_ADMIN_PENDING_VAULTS")
+//              .requestMatchers("/admin/events/**").hasAuthority("ROLE_ADMIN_EVENTS")
+//              .requestMatchers("/admin/billing/**").hasAuthority("ROLE_ADMIN_BILLING")
+//              /* TODO : DavidHay : no controller mapped to /admin/reviews ! */
+//              .requestMatchers("/admin/reviews/**").hasAuthority("ROLE_ADMIN_REVIEWS")
+//              .requestMatchers("/admin/paused/deposit/toggle/**").hasAuthority("ROLE_ADMIN")
+//              .requestMatchers("/admin/paused/retrieve/toggle/**").hasAuthority("ROLE_ADMIN")
+//              .anyRequest().authenticated();
+    };
   }
 
   /**

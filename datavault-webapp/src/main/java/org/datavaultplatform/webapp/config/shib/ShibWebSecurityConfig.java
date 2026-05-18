@@ -5,6 +5,9 @@ import org.datavaultplatform.webapp.authentication.shib.ShibAuthenticationFilter
 import org.datavaultplatform.webapp.authentication.shib.ShibAuthenticationProvider;
 import org.datavaultplatform.webapp.authentication.shib.ShibWebAuthenticationDetailsSource;
 import org.datavaultplatform.webapp.config.HttpSecurityUtils;
+import org.datavaultplatform.webapp.config.trace.TraceLoggingFilter;
+import org.datavaultplatform.webapp.config.trace.MdcRequestFilter;
+import org.datavaultplatform.webapp.controllers.auth.DataVaultAccessDeniedHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +23,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 
@@ -60,18 +64,25 @@ public class ShibWebSecurityConfig {
     http.exceptionHandling(ex -> ex.authenticationEntryPoint(http403EntryPoint));
   }
    */
+  
+  @Bean
+  AccessDeniedHandler accessDeniedHandler() {
+    return new DataVaultAccessDeniedHandler();
+  }
 
   @Bean
   @Order(2)
   public SecurityFilterChain filterChain(
           HttpSecurity http,
-          AuthenticationManager authManager
-  ) throws Exception {
+          AuthenticationManager authManager,
+          AccessDeniedHandler accessDeniedHandler,
+          TraceLoggingFilter traceLoggingFilter,
+          MdcRequestFilter userMdcFilter) throws Exception {
 
     // no form login for 'shib'
     http.authenticationProvider(shibAuthenticationProvider);
 
-    HttpSecurityUtils.authorizeRequests(http);
+    HttpSecurityUtils.authorizeRequests(http, traceLoggingFilter, userMdcFilter);
 
     HttpSecurityUtils.sessionManagement(http, sessionRegistry);
 
@@ -84,6 +95,7 @@ public class ShibWebSecurityConfig {
     http.addFilterAt(shibFilter, AbstractPreAuthenticatedProcessingFilter.class);
 
     http.exceptionHandling(ex -> ex.authenticationEntryPoint(http403EntryPoint));
+    http.exceptionHandling(exh -> exh.accessDeniedHandler(accessDeniedHandler));
     return http.build();
   }
 

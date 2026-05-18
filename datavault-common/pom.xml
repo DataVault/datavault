@@ -12,7 +12,6 @@
 
   <artifactId>datavault-common</artifactId>
   <name>datavault-common</name>
-  <version>0.0.1-SNAPSHOT</version>
 
   <dependencies>
 
@@ -64,6 +63,11 @@
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-annotations</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
     </dependency>
 
     <dependency>
@@ -167,8 +171,38 @@
       <groupId>net.i2p.crypto</groupId>
       <artifactId>eddsa</artifactId>
     </dependency> -->
+    <dependency>
+      <groupId>io.micrometer</groupId>
+      <artifactId>micrometer-tracing-bridge-otel</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.micrometer</groupId>
+      <artifactId>micrometer-tracing-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-actuator</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-webmvc</artifactId>
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
-
   <build>
     <plugins>
       <plugin>
@@ -192,6 +226,10 @@
                 <include>**/EventTest*</include>
                 <include>**/TestUtils*</include>
                 <include>**/UsesTestContainers*</include>
+                <include>**/TempFileCleaner*</include>
+                <include>**/TempFileCleanerExtension*</include>
+                <include>**/TraceIdWrapper*</include>
+                <include>**/WithMockActuatorUser*</include>
               </includes>
             </configuration>
           </execution>
@@ -200,6 +238,7 @@
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
+        <version>${jacoco.plugin.version}</version>
         <executions>
           <execution>
             <id>prepare-agent-integration</id>
