@@ -10,6 +10,7 @@ import java.util.Map;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.datavaultplatform.common.actuator.WithMockActuatorUser;
 import org.datavaultplatform.common.event.RecordingEventSender;
 import org.datavaultplatform.worker.app.DataVaultWorkerInstanceApp;
 import org.datavaultplatform.worker.rabbit.RabbitMessageSelectorScheduler;
@@ -37,11 +38,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
     "management.endpoints.web.exposure.include=*",
     "worker.security.enabled=true",
     "management.endpoints.web.base-path=/actuator",
-    "management.endpoints.enabled-by-default=true",
+    "management.endpoints.access.default=unrestricted",
     "management.health.rabbit.enabled=false"})
 @AutoConfigureMockMvc
-@Import(TestClockConfig.class)
-public class ActuatorTest {
+@Import(TestClockConfig.class) 
+class ActuatorTest {
 
   @Autowired
   ObjectMapper mapper;
@@ -56,21 +57,21 @@ public class ActuatorTest {
   RabbitMessageSelectorScheduler scheduler;
   
   @ParameterizedTest
-  @ValueSource(strings = {"/actuator/info", "/actuator/health", "/actuator/metrics", "/actuator/memoryinfo", "/actuator/mappings"})
+  @ValueSource(strings = {"/actuator/info", "/actuator/health", "/actuator", "/actuator/" })
   @SneakyThrows
   void testActuatorPublicAccess(String path) {
     checkPublic(path);
   }
 
   @ParameterizedTest
-  @ValueSource(strings={"/actuator", "/actuator/", "/actuator/env", "/actuator/loggers"})
+  @ValueSource(strings={"/actuator/env", "/actuator/loggers", "/actuator/metrics", "/actuator/memoryinfo", "/actuator/mappings"})
   @SneakyThrows
   void testActuatorUnauthorized(String path) {
     checkUnauthorized(path);
   }
 
   @ParameterizedTest
-  @ValueSource(strings={"/actuator", "/actuator/", "/actuator/env"})
+  @ValueSource(strings={"/actuator/env", "/actuator/metrics", "/actuator/memoryinfo", "/actuator/mappings"})
   @SneakyThrows
   void testActuatorAuthorized(String path) {
     checkAuthorized(path, "wactu", "wactupass");
@@ -94,6 +95,7 @@ public class ActuatorTest {
   }
 
   @Test
+  @WithMockActuatorUser
   void testMemoryInfo() throws Exception {
     MvcResult mvcResult = mvc.perform(
                     get("/actuator/memoryinfo"))

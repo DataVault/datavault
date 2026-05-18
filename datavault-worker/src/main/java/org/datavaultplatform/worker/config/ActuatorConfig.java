@@ -2,8 +2,9 @@ package org.datavaultplatform.worker.config;
 
 import java.time.Clock;
 
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.info.Info;
+import org.datavaultplatform.common.actuator.ActuatorHealthSecurityAdvice;
+import org.datavaultplatform.common.actuator.ActuatorInfoSecurityAdvice;
+import org.datavaultplatform.common.actuator.ActuatorSecurityAdvice;
 import org.datavaultplatform.worker.actuator.CurrentTimeEndpoint;
 import org.datavaultplatform.worker.actuator.MemoryInfoEndpoint;
 import org.springframework.boot.SpringBootVersion;
@@ -13,6 +14,21 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class ActuatorConfig {
+
+  @Bean
+  ActuatorInfoSecurityAdvice actuatorInfoSecurityAdvice() {
+    return new ActuatorInfoSecurityAdvice();
+  }
+
+  @Bean
+  ActuatorHealthSecurityAdvice actuatorHealthSecurityAdvice() {
+    return new ActuatorHealthSecurityAdvice();
+  }
+
+  @Bean
+  ActuatorSecurityAdvice actuatorSecurityAdvice() {
+    return new ActuatorSecurityAdvice();
+  }
 
   @Bean
   Clock clock() {
@@ -34,10 +50,4 @@ public class ActuatorConfig {
     return builder -> builder.withDetail("spring-boot.version", SpringBootVersion.getVersion());
   }
 
-  @Bean
-  public OpenAPI openAPI() {
-    return new OpenAPI().info(new Info().title("DataVault Worker")
-            .description("worker application")
-            .version("v0.0.1"));
-  }
 }

@@ -10,6 +10,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -51,21 +52,20 @@ public class SecurityActuatorConfig {
 
   @Bean
   SecurityFilterChain springFilterChain(HttpSecurity http) throws Exception {
-    http.securityMatcher("/actuator/**","/task/interrupt","/task/interrupt/*")
+    http.securityMatcher("/actuator/**","/task/interrupt", "/task/interrupt/*")
             .userDetailsService(userDetailsService())
+            .csrf(AbstractHttpConfigurer::disable)
             .httpBasic(Customizer.withDefaults())
             .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authz -> {
               authz.requestMatchers(
-                "/actuator/customtime",
-                  "/actuator/health",
-                      "/actuator/memoryinfo",
-                      "/actuator/metrics",
-                      "/actuator/mappings",
-                  "/actuator/info").permitAll();
+                      "/actuator",
+                      "/actuator/info",
+                      "/actuator/health"
+              ).permitAll();
+
               authz.anyRequest().authenticated();
             });
-    http.csrf(csrf -> csrf.disable());
     return http.build();
   }
 

@@ -47,7 +47,7 @@ public class ProfileDatabaseTest {
   @Test
   void testServiceBeans(ApplicationContext ctx) {
     Set<String> serviceNames = Set.of(ctx.getBeanNamesForAnnotation(Service.class));
-    assertEquals(Set.of("forceLogoutService", "restService", "permissionsService","userLookupService","validateService"), serviceNames);
+    assertEquals(Set.of("forceLogoutService", "restService", "permissionsService","userLookupService","validateService","traceService"), serviceNames);
   }
 
   @Test
@@ -55,7 +55,7 @@ public class ProfileDatabaseTest {
     Set<String> names = Set.of(ctx.getBeanNamesForAnnotation(Controller.class));
     Set<String> restNames = Set.of(ctx.getBeanNamesForAnnotation(RestController.class));
     assertTrue(names.containsAll(restNames));
-    assertThat(names.size()).isEqualTo(31);
+    assertThat(names).hasSize(30);
   }
 
   @TestConfiguration

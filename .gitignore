@@ -18,7 +18,6 @@ dist/
 nbdist/
 nbactions.xml
 nb-configuration.xml
-META-INF/
 datavault-broker/src/main/webapp/WEB-INF/glassfish-web.xml
 datavault-webapp/src/main/webapp/WEB-INF/glassfish-web.xml
 ## Ignore all *.properties file in root folder, EXCEPT datavault.properties (the default)
@@ -44,3 +43,6 @@ datavault-webapp/pids
 .run/
 TEMPLATES/*
 dv5/local-db/docker/backup.D.SPEED.sql
+# this can set the java version for the Intellij IDE and will set java versions for terminals too if 'sdk config set sdkman_auto_env true'
+.sdkmanrc
+SWAGGER_OPENAPI/*.zip

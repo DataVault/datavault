@@ -112,9 +112,6 @@
     <!-- https://mvnrepository.com/artifact/org.apache.directory.api/api-all -->
     <apache.directory.api.version>2.1.7</apache.directory.api.version>
 
-    <!-- https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-starter-webmvc-ui -->
-    <springdoc.openapi.version>2.8.4</springdoc.openapi.version>
-
     <!-- https://mvnrepository.com/artifact/org.apache.velocity/velocity-engine-core -->
     <velocity.version>2.4.1</velocity.version>
     <!-- above here, updated 03April2025 -->
@@ -173,6 +170,13 @@
 
   <dependencyManagement>
     <dependencies>
+      <!-- Source: https://mvnrepository.com/artifact/io.micrometer/micrometer-tracing-bridge-brave -->
+      <dependency>
+        <groupId>io.micrometer</groupId>
+        <artifactId>micrometer-tracing-bridge-otel</artifactId>
+        <version>1.6.5</version>
+        <scope>compile</scope>
+      </dependency>
       <dependency>
         <groupId>datavault</groupId>
         <artifactId>datavault-common</artifactId>
@@ -489,11 +493,6 @@
       <artifactId>spring-boot-configuration-processor</artifactId>
       <optional>true</optional>
     </dependency>
-    <dependency>
-      <groupId>org.springdoc</groupId>
-      <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-      <version>${springdoc.openapi.version}</version>
-    </dependency>
   </dependencies>
 
 
@@ -551,6 +550,7 @@
           <artifactId>maven-failsafe-plugin</artifactId>
           <version>${failsafe.plugin.version}</version>
           <configuration>
+            <argLine>-Duser.timezone=Europe/London</argLine>
             <skipITs>${skip.integration.tests}</skipITs>
             <systemPropertyVariables>
               <junit.jupiter.execution.timeout.default>300 s</junit.jupiter.execution.timeout.default>
@@ -563,6 +563,7 @@
           <artifactId>maven-surefire-plugin</artifactId>
           <version>${surefire.plugin.version}</version>
           <configuration>
+            <argLine>-Duser.timezone=Europe/London</argLine>
             <skipTests>${skip.unit.tests}</skipTests>
             <excludedGroups>slow,org.datavaultplatform.test.TSMTest</excludedGroups>
             <systemPropertyVariables>

@@ -30,7 +30,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@SpringBootTest
+@SpringBootTest(properties = "management.endpoints.web.exposure.include=*")
 @ProfileStandalone
 @AutoConfigureMockMvc
 @Slf4j
@@ -38,7 +38,7 @@ import org.springframework.web.bind.annotation.RestController;
  * Tests the Roles required to access protected paths.
  * @see org.datavaultplatform.webapp.config.standalone.StandaloneWebSecurityConfig
  */
-public class ProtectedPathsTest {
+class ProtectedPathsTest {
 
   private static final String ROLE_XXX = "XXX";
   private static final AtomicInteger COUNTER = new AtomicInteger();
@@ -93,6 +93,11 @@ public class ProtectedPathsTest {
     }
 
     COUNTER.incrementAndGet();
+  }
+
+  @Test
+  void testPathRequiresRole_AuthDenied() {
+    testPathRequiresRole("/auth/denied", null);
   }
 
   /**

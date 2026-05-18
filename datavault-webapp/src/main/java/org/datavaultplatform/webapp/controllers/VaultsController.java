@@ -76,9 +76,9 @@ public class VaultsController {
     }
 
     @PreAuthorize("hasPermission(#vaultId, 'VAULT', 'CAN_TRANSFER_VAULT_OWNERSHIP') or hasPermission(#vaultId, 'GROUP_VAULT', 'TRANSFER_SCHOOL_VAULT_OWNERSHIP')")
-    @PostMapping(value = "/vaults/{vaultid}/data-owner/update")
+    @PostMapping(value = "/vaults/{vaultId}/data-owner/update", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public ResponseEntity<Object> transferOwnership(
-            @PathVariable("vaultid") String vaultId,
+            @PathVariable String vaultId,
             @Valid VaultTransferRequest request) {
 
         VaultInfo vault = restService.getVault(vaultId);
@@ -287,7 +287,7 @@ public class VaultsController {
         return "vaults/vault";
     }
 
-    private boolean canAccessVault(VaultInfo vault, Principal principal) {
+    protected boolean canAccessVault(VaultInfo vault, Principal principal) {
         return canAccessVault(vault, principal, false);
     }
 
@@ -295,7 +295,7 @@ public class VaultsController {
         return canAccessVault(vault, principal, true);
     }
 
-    private boolean canAccessVault(VaultInfo vault, Principal principal, Boolean pending) {
+    protected boolean canAccessVault(VaultInfo vault, Principal principal, Boolean pending) {
         List<RoleAssignment> roleAssignmentsForUser = restService.getRoleAssignmentsForUser(principal.getName());
         if (pending) {
             return roleAssignmentsForUser.stream().anyMatch(roleAssignment ->
@@ -312,7 +312,10 @@ public class VaultsController {
 
     @PreAuthorize("hasRole('IS_ADMIN') or #userId == authentication.name")
     @GetMapping(value = "/vaults/{vaultId}/{userId}", produces = MediaType.TEXT_HTML_VALUE)
-    public String getVault(ModelMap model, @PathVariable String vaultId, @PathVariable String userId, Principal principal) {
+    public String getUserVaults(ModelMap model,
+                                @PathVariable String vaultId,
+                                @PathVariable String userId,
+                                Principal principal) {
         VaultInfo vault = restService.getVault(vaultId);
         if (vault == null) {
             throw new EntityNotFoundException(Vault.class, vaultId);
@@ -321,6 +324,7 @@ public class VaultsController {
             throw new ForbiddenException();
         }
         model.addAttribute("vaults", restService.getVaultsListingAll(userId));
+    	        
         return "vaults/userVaults";
     }
 
@@ -534,19 +538,19 @@ public class VaultsController {
         return "redirect:" + vaultUrl;
     }
 
-    @PreAuthorize("hasRole('IS_ADMIN')")
-    @RequestMapping(value = "/vaults/autocompleteuun/{term}", method = RequestMethod.GET)
-    @ResponseBody
-    public String autocompleteUUN(@PathVariable("term") String term) {
+    //@PreAuthorize("hasRole('IS_ADMIN')")
+    @GetMapping(value = "/vaults/autocompleteuun/{term}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody //note - this value returns a JSON array - no curly brackets
+    public String autocompleteUUN(@PathVariable String term) {
         List<String> result = userLookupService.getSuggestedUuns(term);
         Gson gson = new Gson();
         return gson.toJson(result);
     }
 
-    @PreAuthorize("hasRole('IS_ADMIN')")
-    @RequestMapping(value = "/vaults/isuun/{uun}", method = RequestMethod.GET)
-    @ResponseBody
-    public String isUUN(@PathVariable("uun") String uun) {
+    //@PreAuthorize("hasRole('IS_ADMIN')")
+    @GetMapping(value = "/vaults/isuun/{uun}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody // note - this function returns simple true/false value as JSON - no curly brackets
+    public String isUUN(@PathVariable String uun) {
         boolean result = userLookupService.isUUN(uun);
         Gson gson = new Gson();
         return gson.toJson(result);

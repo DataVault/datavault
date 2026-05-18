@@ -61,7 +61,7 @@ public class ProfileStandaloneTest {
     Set<String> names = new TreeSet<>(Set.of(ctx.getBeanNamesForAnnotation(Controller.class)));
     Set<String> restNames = Set.of(ctx.getBeanNamesForAnnotation(RestController.class));
     assertTrue(names.containsAll(restNames));
-    assertEquals(new TreeSet<>(Set.of("protectedTimeController", "timeController", "errorPageController", "simulateErrorController", "authController", "errorController", "fileUploadController", "helloController", "faviconController","swaggerConfigResource","swaggerWelcome","openApiResource")), names);
+    assertEquals(new TreeSet<>(Set.of("protectedTimeController", "timeController", "errorPageController", "simulateErrorController", "authController", "errorController", "fileUploadController", "helloController", "faviconController")), names);
   }
 
   @TestConfiguration

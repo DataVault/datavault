@@ -9,7 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Profile("standalone")
 @ComponentScan({"org.datavaultplatform.webapp.controllers.standalone"})
-@Import(StandaloneWebSecurityConfig.class)
+@Import({StandaloneWebSecurityConfig.class})
 public class StandaloneProfileConfig {
 
   @Bean

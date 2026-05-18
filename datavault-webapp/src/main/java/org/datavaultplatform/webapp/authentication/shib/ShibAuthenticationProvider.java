@@ -19,6 +19,7 @@ import org.springframework.security.web.authentication.preauth.PreAuthenticatedA
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * In truth this class does not do any true authentication as the user was pre-authenticated by Shib, it just
@@ -76,7 +77,7 @@ public class ShibAuthenticationProvider implements AuthenticationProvider {
             user.setEmail(swad.getEmail());
 
             if (ldapEnabled) {
-                user.setProperties(getLDAPAttributes(name));
+                user.setProperties(new HashMap<>(getLDAPAttributes(name)));
             }
 
             try{
@@ -103,10 +104,10 @@ public class ShibAuthenticationProvider implements AuthenticationProvider {
         return PreAuthenticatedAuthenticationToken.class.equals(authentication);
     }
 
-    private HashMap<String, String> getLDAPAttributes(String name) {
+    private Map<String, String> getLDAPAttributes(String name) {
         try {
             return ldapService.getLDAPAttributes(name);
-        }catch (Exception e) {
+        } catch (Exception e) {
             throw new AuthenticationServiceException("LDAP Exception", e);
         }
     }

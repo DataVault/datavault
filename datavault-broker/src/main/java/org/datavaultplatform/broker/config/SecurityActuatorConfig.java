@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -18,6 +19,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+
+import static org.springframework.security.config.Customizer.withDefaults;
 
 @ConditionalOnExpression("${broker.security.enabled:true}")
 @Configuration
@@ -46,25 +49,40 @@ public class SecurityActuatorConfig {
   }
 
   @Bean
+  @Order(0)
+  @Profile("database")
+  public SecurityFilterChain traceApiFilterChain(HttpSecurity http, AuthenticationProvider actuatorAuthenticationProvider) throws Exception {
+    return http
+            .securityMatcher("/trace/**")
+            .csrf(AbstractHttpConfigurer::disable)
+            .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+            .authenticationProvider(actuatorAuthenticationProvider)
+            .httpBasic(withDefaults())
+            .build();
+  }
+
+  @Bean
   @Order(1)
   public SecurityFilterChain actuatorSecurityFilterChain(HttpSecurity http,
                                                          @Qualifier("actuatorAuthenticationProvider") AuthenticationProvider authenticationProvider) throws Exception {
-    http.securityMatcher("/actuator/**","/v3/**","/swagger-ui/**")
-            .authenticationProvider( authenticationProvider )
+    http.securityMatcher("/actuator/**")
+            .authenticationProvider(authenticationProvider)
             .csrf(AbstractHttpConfigurer::disable)
             .httpBasic(Customizer.withDefaults())
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests( authz -> {
-                authz.requestMatchers(
-                        "/v3/**",
-                        "/swagger-ui/**",
-                        "/actuator/info",
-                        "/actuator/health",
-                        "/actuator/metrics",
-                        "/actuator/mappings",
-                        "/actuator/memoryinfo").permitAll();
-                authz.anyRequest().fullyAuthenticated();
-            });
+            .authorizeHttpRequests(authz -> authz
+                    // 1. Allow these specific endpoints without login
+                    .requestMatchers(
+                            "/actuator",
+                            "/actuator/info",
+                            "/actuator/health"
+                    ).permitAll()
+
+                    // 2. Require authentication for everything else covered by the securityMatcher
+                    // (This includes Swagger, V3 docs, and the rest of the actuator endpoints)
+                    .anyRequest().authenticated()
+            );
 
     return http.build();
   }

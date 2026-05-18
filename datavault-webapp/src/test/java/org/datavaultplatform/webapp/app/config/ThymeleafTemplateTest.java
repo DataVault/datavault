@@ -57,8 +57,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @TestMethodOrder(MethodOrderer.MethodName.class)
 @AutoConfigureMockMvc
 @TestPropertySource(properties = "logging.level.org.thymeleaf.spring6.expression=TRACE")
-public class ThymeleafTemplateTest extends BaseThymeleafTest {
+class ThymeleafTemplateTest extends BaseThymeleafTest {
 
+    
     private static final ThreadLocal<ModelMap> TL_MODEL_MAP = ThreadLocal.withInitial(ModelMap::new);
 
     @Autowired
@@ -687,7 +688,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         Elements forms = doc.selectXpath("//form[1]");
 
         if(forms.isEmpty()){
-            assertThat(expectedFormId.equals(""));
+            assertThat(expectedFormId).isEmpty();
             return;
         }
         Element form = forms.get(0);
@@ -697,7 +698,7 @@ public class ThymeleafTemplateTest extends BaseThymeleafTest {
         if (expectedFormId != null) {
             assertThat(formId).isEqualTo(expectedFormId);
         } else {
-            System.out.println("WE HAVE A FORM NOT EXPECTED WITT ID [" + formId  + "]");
+            System.out.println("WE HAVE A FORM NOT EXPECTED WITH ID [" + formId  + "]");
         }
         if(StringUtils.isNotBlank(formAction)){
             assertThat(formAction).startsWith("/dv");
