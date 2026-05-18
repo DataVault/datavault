@@ -590,10 +590,10 @@
             <configuration>
               <rules>
                 <requireJavaVersion>
-                  <!-- Allow all Java 17.x versions, but block Java 18+ -->
-                  <!-- Code may run on newer JDKs, but tests depend on Java 17 behaviour -->
-                  <version>17,18)</version>
-                  <message>Invalid Java version! This project requires JDK 17.</message>
+                  <!-- Allow all Java 21.x versions, but block Java 22+ -->
+                  <!-- Code may run on newer JDKs, but tests depend on Java 21 behaviour -->
+                  <version>21,22)</version>
+                  <message>Invalid Java version! This project requires JDK 21.</message>
                 </requireJavaVersion>
               </rules>
             </configuration>
