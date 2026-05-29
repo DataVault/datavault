@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Map;
 import javax.crypto.SecretKey;
@@ -35,7 +36,7 @@ public abstract class BaseSFTPFileSystemPrivatePublicKeyPairIT extends BaseSFTPF
   static KeyPairInfo keyPairInfo;
 
 
-  static GenericContainer<?> initialiseContainer(String tcName) {
+  static GenericContainer<?> initialiseContainer(String tcName, Path tempFilePath) {
 
     try {
       keyStoreTempDir = Files.createTempDirectory("tmpKeyStoreDir").toFile();
@@ -51,7 +52,7 @@ public abstract class BaseSFTPFileSystemPrivatePublicKeyPairIT extends BaseSFTPF
         .withEnv(ENV_PUBLIC_KEY,
             keyPairInfo.getPublicKey()) //this causes the public key to be added to /config/.ssh/authorized_keys
         .withExposedPorts(SFTP_SERVER_PORT)
-        .withCopyFileToContainer(MountableFile.forHostPath(tempLocalPath),"/config")
+        .withCopyFileToContainer(MountableFile.forHostPath(tempFilePath),"/config")
         .waitingFor(Wait.forListeningPort());
   }
 
