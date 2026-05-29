@@ -415,8 +415,8 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 		List<String> result = new ArrayList<>(commands);
 		// these "dsmc" options are best practice when
 		// using 'dsmc' for non-interactive session where simple text output is best
-		result.add("-displaymode=list");
-		result.add("-noprompt");
+		//result.add("-displaymode=list");
+		//result.add("-noprompt");
 		return result;
 	}
 }
