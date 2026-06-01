@@ -604,7 +604,7 @@ class TivoliStorageManagerTest {
         @Test
         void testCommandsWithDsmc() {
             String[] result = TivoliStorageManager.cleanTsmCommand(WITH_DSMC);
-            assertThat(result).containsExactly("script", "-q", "/dev/null", "dsmc", "opt1", "opt2", "-displaymode=list", "-noprompt");
+            assertThat(result).containsExactly("script", "-q", "/dev/null", "dsmc", "opt1", "opt2");
         }
 
         @Test
