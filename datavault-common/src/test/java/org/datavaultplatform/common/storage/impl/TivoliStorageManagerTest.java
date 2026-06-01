@@ -624,7 +624,7 @@ class TivoliStorageManagerTest {
         @Test
         void testCommandsWithDsmc() {
             String[] result = TivoliStorageManager.cleanTsmCommand(WITH_DSMC);
-            assertThat(result).containsExactly("stdbuf", "-oL", "dsmc", "opt1", "opt2", "-displaymode=list", "-noprompt");
+            assertThat(result).containsExactly("stdbuf", "-oL", "dsmc", "opt1", "opt2");
         }
 
         @Test
