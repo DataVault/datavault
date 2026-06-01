@@ -7,8 +7,8 @@ import java.io.File;
 import javax.crypto.SecretKey;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.io.TempDir;
 
 @Slf4j
@@ -48,9 +48,20 @@ public abstract class BaseTempKeyStoreTest {
         keyForSSH);
     Encryption.saveSecretKeyToKeyStore(Encryption.getVaultDataEncryptionKeyName(),
         keyForData);
-    Assertions.assertTrue(new File(keyStorePath).exists());
 
     assertTrue(new File(keyStorePath).exists());
+  }
+  
+  @AfterEach
+  void tearDown() {
+    // JUnit @TempDir takes care of deleting the 'temp' directory
+    // but clearing the Encryption settings is good practice since they seem to be static
+    Encryption enc = new Encryption();
+    enc.setKeystoreEnable(false);
+    enc.setKeystorePath(null);
+    enc.setKeystorePassword(null);
+    enc.setVaultPrivateKeyEncryptionKeyName(null);
+    enc.setVaultDataEncryptionKeyName(null);
   }
 
 }
