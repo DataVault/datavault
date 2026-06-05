@@ -8,6 +8,7 @@ import org.datavaultplatform.common.monitor.MemoryStats;
 import org.datavaultplatform.common.services.LDAPService;
 import org.datavaultplatform.webapp.config.*;
 import org.datavaultplatform.webapp.config.database.DatabaseProfileConfig;
+import org.datavaultplatform.webapp.config.ratelimited.*;
 import org.datavaultplatform.webapp.config.shib.ShibProfileConfig;
 import org.datavaultplatform.webapp.config.standalone.StandaloneProfileConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,15 +20,20 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.ApplicationPidFileWriter;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.event.ApplicationStartingEvent;
+import org.springframework.boot.context.properties.ConfigurationPropertiesBinding;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.event.EventListener;
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.env.Environment;
 
 @SpringBootApplication
 @ComponentScan({
     "org.datavaultplatform.webapp.controllers",
     "org.datavaultplatform.webapp.services"})
+@EnableConfigurationProperties({RateLimitedProperties.class, CacheInfo.class, FilterProperties.class})
 @Import({PropertiesConfig.class, ActutatorConfig.class, WebConfig.class, MvcConfig.class,
     SecurityActuatorConfig.class, SecurityConfig.class, MailConfig.class, LdapConfig.class,
         StandaloneProfileConfig.class, DatabaseProfileConfig.class,
@@ -93,4 +99,9 @@ public class DataVaultWebApp implements CommandLineRunner {
     log.info("Tracing Propagation Type [{}]", tracingPropagationType);
   }
 
+  @Bean
+  @ConfigurationPropertiesBinding
+  Converter<String, DurationInfo> converter() {
+    return new DurationInfoConverter();
+  }
 }
