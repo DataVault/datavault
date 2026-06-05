@@ -31,11 +31,6 @@ public class RateLimitConfig {
     }
 
     @Bean
-    Clock clock() {
-        return Clock.systemDefaultZone();
-    }
-
-    @Bean
     public TimeMeter timeMeter(Clock clock) {
         return new TimeMeter() {
             @Override

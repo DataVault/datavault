@@ -1,4 +1,4 @@
-package org.datavaultplatform.webapp.config.ratelimited;
+package org.datavaultplatform.webapp.ratelimited;
 
 import java.time.Clock;
 import java.time.Duration;

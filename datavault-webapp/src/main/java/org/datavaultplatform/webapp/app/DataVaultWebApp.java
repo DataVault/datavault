@@ -37,7 +37,8 @@ import org.springframework.core.env.Environment;
 @Import({PropertiesConfig.class, ActutatorConfig.class, WebConfig.class, MvcConfig.class,
     SecurityActuatorConfig.class, SecurityConfig.class, MailConfig.class, LdapConfig.class,
         StandaloneProfileConfig.class, DatabaseProfileConfig.class,
-    ShibProfileConfig.class, RestTemplateConfig.class, TomcatAjpConfig.class, OpenApiConfig.class})
+    ShibProfileConfig.class, RestTemplateConfig.class, TomcatAjpConfig.class, 
+        OpenApiConfig.class, RateLimitConfig.class})
 @Slf4j
 public class DataVaultWebApp implements CommandLineRunner {
 
