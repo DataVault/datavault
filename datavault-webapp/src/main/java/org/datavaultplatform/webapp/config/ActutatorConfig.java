@@ -2,13 +2,13 @@ package org.datavaultplatform.webapp.config;
 
 import java.time.Clock;
 
-//import io.swagger.v3.oas.models.OpenAPI;
-//import io.swagger.v3.oas.models.info.Info;
 import org.datavaultplatform.common.actuator.ActuatorHealthSecurityAdvice;
 import org.datavaultplatform.common.actuator.ActuatorInfoSecurityAdvice;
 import org.datavaultplatform.common.actuator.ActuatorSecurityAdvice;
 import org.datavaultplatform.webapp.actuator.CurrentTimeEndpoint;
 import org.datavaultplatform.webapp.actuator.MemoryInfoEndpoint;
+import org.datavaultplatform.webapp.actuator.RateLimitedEndpoint;
+import org.datavaultplatform.webapp.config.ratelimited.RateLimitedProperties;
 import org.springframework.boot.SpringBootVersion;
 import org.springframework.boot.actuate.info.InfoContributor;
 import org.springframework.context.annotation.Bean;
@@ -48,14 +48,13 @@ public class ActutatorConfig {
   }
 
   @Bean
+  RateLimitedEndpoint rateLimited(RateLimitedProperties rateLimitedProperties) {
+    return new RateLimitedEndpoint(rateLimitedProperties);
+  }
+
+  @Bean
   public InfoContributor springBootVersionInfoContributor() {
     return builder -> builder.withDetail("spring-boot.version", SpringBootVersion.getVersion());
   }
 
-//  @Bean
-//  public OpenAPI openAPI() {
-//    return new OpenAPI().info(new Info().title("DataVault WebApp")
-//            .description("webapp application")
-//            .version("v0.0.1"));
-//  }
 }
