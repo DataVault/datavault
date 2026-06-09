@@ -68,8 +68,7 @@ class RateLimitedEndpointMvcTest {
                     "type": "SECONDS"
                   },
                   "refillUnit": 5,
-                  "durationType": "SECONDS",
-                  "refillRate": 0.5
+                  "durationType": "SECONDS"
                 }
               ]
             }

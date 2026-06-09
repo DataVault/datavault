@@ -120,11 +120,11 @@ public class RateLimitedProperties {
             BandwidthInfo window = bandwidths.get(i);
             BandwidthInfo nextWindow = bandwidths.get(i + 1);
 
-            double windowRate = window.getRefillRate();
-            double nextWindowRate = nextWindow.getRefillRate();
+            long windowCapacity = window.capacity();
+            long nextWindowCapacity = nextWindow.capacity();
 
-            if (window.getRefillRate() > nextWindow.getRefillRate()) {
-                String refillMessage = "The refill-rate for [%s] is [%.2f]. This is a higher refill-rate than [%s] which is [%.2f]. This is inconsistent.".formatted(window, windowRate, nextWindow, nextWindowRate);
+            if (windowCapacity > nextWindowCapacity) {
+                String refillMessage = "The refill-capacity for [%s] is [%d]. This is a higher refill-capacity than [%s] which has refill-capacity [%d]. This is inconsistent.".formatted(window, windowCapacity, nextWindow, nextWindowCapacity);
                 throw new IllegalStateException(refillMessage);
             }
         }

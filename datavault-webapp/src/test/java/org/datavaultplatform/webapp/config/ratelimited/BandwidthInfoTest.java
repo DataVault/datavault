@@ -59,6 +59,6 @@ class BandwidthInfoTest {
         assertThat(info.getBandwidth()).isEqualTo(expectedBandwidth);
         
         assertThat(info.getDurationType()).isEqualTo(DurationType.MINUTES);
-        assertThat(info.getRefillRate()).isCloseTo(1.0 / 60.0, within(1e-12));
+        assertThat(info.capacity()).isEqualTo(10);
     }
 }

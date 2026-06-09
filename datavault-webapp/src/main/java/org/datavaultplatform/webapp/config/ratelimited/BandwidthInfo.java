@@ -35,7 +35,4 @@ public record BandwidthInfo(BandwidthType type, long capacity, DurationInfo refi
         return refillPeriod.type();
     }
 
-    public double getRefillRate() {
-        return refillUnit / (double) refillPeriod.duration().toSeconds();
-    }
 }

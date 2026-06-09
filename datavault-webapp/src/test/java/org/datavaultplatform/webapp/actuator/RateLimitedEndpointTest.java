@@ -35,7 +35,6 @@ class RateLimitedEndpointTest {
                     "type" : "DAYS"
                   },
                   "refillUnit" : 1000,
-                  "refillRate" : 3.8580246913580245E-4,
                   "durationType" : "DAYS"
                 }, {
                   "type" : "INTERVAL",
@@ -45,7 +44,6 @@ class RateLimitedEndpointTest {
                     "type" : "MINUTES"
                   },
                   "refillUnit" : 100,
-                  "refillRate" : 1.6666666666666667,
                   "durationType" : "MINUTES"
                 } ]
               }

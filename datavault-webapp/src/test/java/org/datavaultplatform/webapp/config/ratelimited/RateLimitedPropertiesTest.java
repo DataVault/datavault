@@ -177,8 +177,8 @@ class RateLimitedPropertiesTest {
         RateLimitedProperties properties = new RateLimitedProperties();
         properties.setEnabled(true);
 
-        BandwidthInfo interval1 = new BandwidthInfo(BandwidthType.INTERVAL, 140, new DurationInfo(Duration.ofSeconds(120), DurationType.SECONDS), 140);
-        BandwidthInfo interval2 = new BandwidthInfo(BandwidthType.INTERVAL, 10, new DurationInfo(Duration.ofMinutes(1), DurationType.MINUTES), 10);
+        BandwidthInfo interval1 = new BandwidthInfo(BandwidthType.INTERVAL, 70, new DurationInfo(Duration.ofSeconds(60), DurationType.SECONDS), 70);
+        BandwidthInfo interval2 = new BandwidthInfo(BandwidthType.INTERVAL, 60, new DurationInfo(Duration.ofMinutes(1), DurationType.MINUTES), 60);
 
         properties.setBandwidths(List.of(interval1, interval2));
 
@@ -188,7 +188,7 @@ class RateLimitedPropertiesTest {
             spy.validate();
         });
         
-        assertThat(ex).hasMessage("The refill-rate for [BandwidthInfo[type=INTERVAL, capacity=140, refillPeriod=DurationInfo[duration=PT2M, type=SECONDS], refillUnit=140]] is [1.17]. This is a higher refill-rate than [BandwidthInfo[type=INTERVAL, capacity=10, refillPeriod=DurationInfo[duration=PT1M, type=MINUTES], refillUnit=10]] which is [0.17]. This is inconsistent.");
+        assertThat(ex).hasMessage("The refill-capacity for [BandwidthInfo[type=INTERVAL, capacity=70, refillPeriod=DurationInfo[duration=PT1M, type=SECONDS], refillUnit=70]] is [70]. This is a higher refill-capacity than [BandwidthInfo[type=INTERVAL, capacity=60, refillPeriod=DurationInfo[duration=PT1M, type=MINUTES], refillUnit=60]] which has refill-capacity [60]. This is inconsistent.");
     }
     
     
