@@ -10,11 +10,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.webapp.config.ratelimited.ClockUtils;
 import org.datavaultplatform.webapp.config.ratelimited.RateLimitedProperties;
 import org.datavaultplatform.webapp.filters.RateLimitingFilter;
+import org.datavaultplatform.webapp.config.ratelimited.RateLimitExceededEvent;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.event.EventListener;
 
 import java.time.Clock;
 
@@ -22,10 +25,16 @@ import java.time.Clock;
 @Slf4j
 public class RateLimitConfig {
 
+    
     private final RateLimitedProperties rateLimitedProperties;
+    private final Clock clock;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public RateLimitConfig(RateLimitedProperties rateLimitedProperties) {
+    public RateLimitConfig(RateLimitedProperties rateLimitedProperties, Clock clock, ApplicationEventPublisher eventPublisher) {
         this.rateLimitedProperties = rateLimitedProperties;
+        this.clock = clock;
+        this.eventPublisher = eventPublisher;
+        
         log.info("rateLimitedProperties {}", rateLimitedProperties);
         log.info("fin.");
     }
@@ -74,7 +83,7 @@ public class RateLimitConfig {
         FilterRegistrationBean<RateLimitingFilter> registrationBean = new FilterRegistrationBean<>();
 
         // Pass the proxy manager and configuration directly to the filter
-        registrationBean.setFilter(new RateLimitingFilter(proxyManager, rateLimitBlueprint, rateLimitedProperties));
+        registrationBean.setFilter(new RateLimitingFilter(proxyManager, rateLimitBlueprint, rateLimitedProperties, clock, eventPublisher ));
 
         // the filter decides what to filter based on the FilterTargetConfiguration
         registrationBean.addUrlPatterns("/*");
@@ -83,5 +92,10 @@ public class RateLimitConfig {
         registrationBean.setOrder(SecurityProperties.BASIC_AUTH_ORDER + 1);
 
         return registrationBean;
+    }
+
+    @EventListener
+    public void onRateLimitedApplicationEvent(RateLimitExceededEvent event) {
+        log.info("RateLimited(429) : [{}:{}]", event.getUsername(), event.getRequestUri());
     }
 }

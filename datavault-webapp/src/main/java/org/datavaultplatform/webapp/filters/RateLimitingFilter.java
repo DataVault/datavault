@@ -9,6 +9,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.webapp.config.ratelimited.RateLimitedProperties;
+import org.datavaultplatform.webapp.config.ratelimited.RateLimitExceededEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -20,9 +22,9 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Rate Limiting Filter - runs after spring security.
@@ -32,9 +34,6 @@ import java.util.concurrent.atomic.AtomicLong;
 @Slf4j
 public class RateLimitingFilter extends OncePerRequestFilter {
 
-    //TODO : this counter is only for testing - we can remove for production
-    public static final AtomicLong counter  = new AtomicLong(0);
-    
     public static final String X_FORWARDED_FOR = "X-Forwarded-For";
     private static final String TOO_MANY_REQUESTS_MESSAGE = "Too Many Requests - Rate limit exceeded.";
     private static final String PATH_PATTERN = "PATH_PATTERN";
@@ -44,12 +43,24 @@ public class RateLimitingFilter extends OncePerRequestFilter {
     private final BucketConfiguration bucketConfiguration;
     private final List<String> pathPatterns;
     private final AntPathMatcher matcher = new AntPathMatcher();
+    private final Clock clock;
+    private final ApplicationEventPublisher eventPublisher;
 
-     public RateLimitingFilter(ProxyManager<Object> proxyManager, BucketConfiguration bucketConfiguration, RateLimitedProperties rateLimitedProperties) {
-         this.proxyManager = proxyManager;
-         this.bucketConfiguration = bucketConfiguration;
-         this.pathPatterns = rateLimitedProperties.getFilter().pathPatterns();
-     }
+    public RateLimitingFilter(ProxyManager<Object> proxyManager, BucketConfiguration bucketConfiguration, RateLimitedProperties rateLimitedProperties, Clock clock, ApplicationEventPublisher eventPublisher) {
+        this.proxyManager = proxyManager;
+        this.bucketConfiguration = bucketConfiguration;
+        this.pathPatterns = rateLimitedProperties.getFilter().pathPatterns();
+        this.clock = clock;
+        this.eventPublisher = eventPublisher;
+    }
+
+    public static String getCacheKey(String username, String uriPattern) {
+        Assert.hasText(username, "The username cannot be empty");
+        Assert.hasText(uriPattern, "The uriPattern cannot be empty");
+        Assert.isTrue(!uriPattern.startsWith("http"), "The uriPattern should NOT start with 'http'");
+        String cacheKey = "%s:%s".formatted(username, uriPattern);
+        return cacheKey;
+    }
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
@@ -66,8 +77,8 @@ public class RateLimitingFilter extends OncePerRequestFilter {
         }).orElse(false);
     }
 
-    private Optional<String> getMatchingPattern(HttpServletRequest request){
-         return pathPatterns.stream().filter(pathPattern -> matcher.match(pathPattern, request.getRequestURI())).findFirst();
+    private Optional<String> getMatchingPattern(HttpServletRequest request) {
+        return pathPatterns.stream().filter(pathPattern -> matcher.match(pathPattern, request.getRequestURI())).findFirst();
     }
 
     @Override
@@ -82,20 +93,18 @@ public class RateLimitingFilter extends OncePerRequestFilter {
         // based on the provided configuration.
         Bucket bucket = proxyManager.getProxy(cacheKey, () -> bucketConfiguration);
 
-        long count = counter.incrementAndGet();
-
-        log.info("count[{}] Available tokens: {}",count, bucket.getAvailableTokens());
+        log.info("Available tokens: {}", bucket.getAvailableTokens());
 
         // 3. Try to consume 1 token for this request
         boolean allowed = bucket.tryConsume(1);
 
-        log.info("count[{}] Remaining tokens: {}", count, bucket.getAvailableTokens());
-        log.info("count[{}] Allowed: {}", count, allowed);
-        log.info("count[{}] Cache Key: {}", count, cacheKey);
+        log.info("Remaining tokens: {}", bucket.getAvailableTokens());
+        log.info("Allowed: {}", allowed);
+        log.info("Cache Key: {}", cacheKey);
 
         String uri = request.getRequestURI();
         String query = request.getQueryString();
-        
+
         String full = (query == null) ? uri : uri + "?" + query;
         log.debug("RequestURI: {} - Allowed: {}", full, allowed);
 
@@ -103,18 +112,11 @@ public class RateLimitingFilter extends OncePerRequestFilter {
         if (allowed) {
             filterChain.doFilter(request, response);
         } else {
+            publishRateLimitedEvent(cacheKey);
             response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
             response.setContentType(MediaType.TEXT_PLAIN_VALUE);
             response.getWriter().write(TOO_MANY_REQUESTS_MESSAGE);
         }
-    }
-
-    public static String getCacheKey(String username, String uriPattern) {
-        Assert.hasText(username, "The username cannot be empty");
-        Assert.hasText(uriPattern, "The uriPattern cannot be empty");
-        Assert.isTrue(!uriPattern.startsWith("http"), "The uriPattern should NOT start with 'http'");
-        String cacheKey = "%s:%s".formatted(username, uriPattern);
-        return cacheKey;
     }
 
     private String resolveCacheKey(HttpServletRequest request) {
@@ -131,7 +133,7 @@ public class RateLimitingFilter extends OncePerRequestFilter {
             return pathPattern;
         }
     }
-    
+
     private String resolveUserName(HttpServletRequest request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = null;
@@ -157,5 +159,17 @@ public class RateLimitingFilter extends OncePerRequestFilter {
         } else {
             return request.getRemoteAddr();
         }
+    }
+
+    private void publishRateLimitedEvent(String cacheKey) {
+        String[] parts = cacheKey.split(":");
+        String username = parts[0];
+        String requestURI = parts[1];
+        RateLimitExceededEvent event = createRateLimitedEvent(username, requestURI);
+        eventPublisher.publishEvent(event);
+    }
+
+    private RateLimitExceededEvent createRateLimitedEvent(String username, String requestUri) {
+        return new RateLimitExceededEvent(this, clock, username, requestUri);
     }
 }
