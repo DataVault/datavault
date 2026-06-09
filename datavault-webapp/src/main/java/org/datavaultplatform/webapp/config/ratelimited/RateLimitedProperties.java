@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.util.Assert;
 
+import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -59,6 +60,18 @@ public class RateLimitedProperties {
                 new TreeMap<>(bandwidths.stream().collect(groupingBy(BandwidthInfo::type)));
 
         bandwidthTypeMap.forEach(this::validateBandwidthsWithSameBandwidthType);
+        
+        validateCacheExpirationAgainstBandwidths();
+    }
+    
+    protected void validateCacheExpirationAgainstBandwidths() {
+        Duration cacheDuration = this.cache.expiration();
+
+        for (BandwidthInfo bandwidth : this.bandwidths) {
+            if (bandwidth.refillPeriod().duration().toSeconds() >= cacheDuration.toSeconds()) {
+                throw new IllegalStateException("The bandwidth [%s] has a duration which is not less than the cache duration [%s]. This is not allowed.".formatted(bandwidth, cacheDuration));
+            }
+        }
     }
     
     // Validates that all bandwidths in the list have the same bandwidth type and that there are no duplicate duration types

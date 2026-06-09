@@ -21,6 +21,8 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class RateLimitedPropertiesTest {
+    
+    public static final CacheInfo TEST_CACHE_INFO = new CacheInfo(Duration.ofDays(31), 10_000);
 
     RateLimitedProperties spy;
 
@@ -75,6 +77,7 @@ class RateLimitedPropertiesTest {
 
         RateLimitedProperties properties = new RateLimitedProperties();
         properties.setEnabled(true);
+        properties.setCache(TEST_CACHE_INFO);
         
         BandwidthInfo interval1 = new BandwidthInfo(BandwidthType.INTERVAL, 10, new DurationInfo(Duration.ofSeconds(10), DurationType.SECONDS), 10);
         BandwidthInfo greedy1 = new BandwidthInfo(BandwidthType.GREEDY, 10, new DurationInfo(Duration.ofSeconds(10), DurationType.SECONDS), 10);
@@ -103,6 +106,7 @@ class RateLimitedPropertiesTest {
     void testSingleBandwidthOfEachType() {
         RateLimitedProperties properties = new RateLimitedProperties();
         properties.setEnabled(true);
+        properties.setCache(TEST_CACHE_INFO);
 
         BandwidthInfo interval1 = new BandwidthInfo(BandwidthType.INTERVAL, 10, new DurationInfo(Duration.ofSeconds(10), DurationType.SECONDS), 10);
         BandwidthInfo greedy1 = new BandwidthInfo(BandwidthType.GREEDY, 10, new DurationInfo(Duration.ofSeconds(10), DurationType.SECONDS), 10);
@@ -156,6 +160,7 @@ class RateLimitedPropertiesTest {
     void testConsistentRatesOfBandwidthsForDurationType() {
         RateLimitedProperties properties = new RateLimitedProperties();
         properties.setEnabled(true);
+        properties.setCache(TEST_CACHE_INFO);
 
         BandwidthInfo interval1 = new BandwidthInfo(BandwidthType.INTERVAL, 10, new DurationInfo(Duration.ofSeconds(120), DurationType.SECONDS), 10);
         BandwidthInfo interval2 = new BandwidthInfo(BandwidthType.INTERVAL, 10, new DurationInfo(Duration.ofMinutes(1), DurationType.MINUTES), 10);
@@ -184,5 +189,25 @@ class RateLimitedPropertiesTest {
         });
         
         assertThat(ex).hasMessage("The refill-rate for [BandwidthInfo[type=INTERVAL, capacity=140, refillPeriod=DurationInfo[duration=PT2M, type=SECONDS], refillUnit=140]] is [1.17]. This is a higher refill-rate than [BandwidthInfo[type=INTERVAL, capacity=10, refillPeriod=DurationInfo[duration=PT1M, type=MINUTES], refillUnit=10]] which is [0.17]. This is inconsistent.");
+    }
+    
+    
+    @Test
+    void testBandwidthDurationIsLargerThanCacheDuration(){
+        RateLimitedProperties properties = new RateLimitedProperties();
+        properties.setEnabled(true);
+        properties.setCache(new CacheInfo(Duration.ofHours(12), 10_000));
+
+        BandwidthInfo interval1 = new BandwidthInfo(BandwidthType.INTERVAL, 140, new DurationInfo(Duration.ofHours(13), DurationType.HOURS), 140);
+
+        properties.setBandwidths(List.of(interval1));
+
+        setupSpy(properties);
+
+        IllegalStateException ex = assertThrows(IllegalStateException.class, () -> {
+            spy.validate();
+        });
+
+        assertThat(ex).hasMessage("The bandwidth [BandwidthInfo[type=INTERVAL, capacity=140, refillPeriod=DurationInfo[duration=PT13H, type=HOURS], refillUnit=140]] has a duration which is not less than the cache duration [PT12H]. This is not allowed.");
     }
 }
