@@ -1,9 +1,11 @@
-package org.datavaultplatform.webapp.ratelimited;
+package org.datavaultplatform.webapp.ratelimited.api.testclock;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.webapp.app.DataVaultWebApp;
 import org.datavaultplatform.webapp.config.ratelimited.ClockUtils;
+import org.datavaultplatform.webapp.ratelimited.BaseGreedyApiEndpointTests;
+import org.datavaultplatform.webapp.ratelimited.MutableTestClock;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -19,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes =
         {DataVaultWebApp.class, GreedyApiEndpointTestClockTests.TestClockConfig.class})
-class GreedyApiEndpointTestClockTests extends BaseGreedyApiEndpointTests {
+public class GreedyApiEndpointTestClockTests extends BaseGreedyApiEndpointTests {
     
     @Override
     @SneakyThrows

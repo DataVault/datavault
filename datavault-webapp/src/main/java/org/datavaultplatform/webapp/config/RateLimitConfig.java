@@ -39,6 +39,12 @@ public class RateLimitConfig {
         log.info("fin.");
     }
 
+    /**
+     * Bucket4j uses a TimeMeter to get the current time - so we make sure the time is derived from Clock which can be
+     * system time Clock or Mock Clock for testing.
+     * @param clock
+     * @return
+     */
     @Bean
     public TimeMeter timeMeter(Clock clock) {
         return new TimeMeter() {
@@ -54,6 +60,10 @@ public class RateLimitConfig {
         };
     }
 
+    /*
+    The ProxyManager is the bridge between Bucket4j’s rate‑limiting logic and whatever storage backend you use (JCache, Hazelcast, Redis, JDBC, Infinispan, etc.).
+    In this case - the storage backend we are using is Caffeine in-memory cache.
+     */
     @Bean
     public ProxyManager<Object> proxyManager(TimeMeter timeMeter, RateLimitedProperties properties) {
         // Configure the underlying cache without an expiration policy
@@ -67,12 +77,22 @@ public class RateLimitConfig {
                 .build();
     }
 
-    // This is the default blueprint used by the filter.
+    /* 
+     The BucketConfiguration is a bucket4j class that holds the bucket4j configuration via a list of Bucket4j Bandwith objects.
+     We derive the list of bucket4j bandwidth objects from the RateLimitiedProperties object.
+     */
     @Bean
     public BucketConfiguration rateLimitBucketConfiguration() {
         return new BucketConfiguration(rateLimitedProperties.getBucket4jBandwidths());
     }
-
+    
+    /*
+    The FilterRegistrationBean is used to create an instance of RateLimitingFilter web-filter to perform the actual rate-limiting.
+    Spring will send all requests to the RateLimitingFilter - but the web filter decided which of those
+    requests to rate-limit via the rateLimitedProperties.
+    Note: the order of the RateLimitingFilter is important - it has to be done AFTER SpringSecurit filters have run because
+    RateLimitingFilter requires access to currently Authenticated user.
+     */
     @Bean
     @ConditionalOnBooleanProperty(name = "ratelimited.enabled")
     public FilterRegistrationBean<RateLimitingFilter> rateLimitingFilterRegistration(
@@ -94,6 +114,9 @@ public class RateLimitConfig {
         return registrationBean;
     }
 
+    /*
+    This is not 100% required, but it makes is straightforward to list for RateLimitExceeded Events.
+     */
     @EventListener
     public void onRateLimitedApplicationEvent(RateLimitExceededEvent event) {
         log.info("RateLimited(429) : [{}:{}]", event.getUsername(), event.getRequestUri());
