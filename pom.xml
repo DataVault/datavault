@@ -171,6 +171,8 @@
     
     <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-enforcer-plugin -->
     <maven.enforcer.plugin.version>3.6.2</maven.enforcer.plugin.version>
+    
+    <bucket4j-caffeine.version>8.14.0</bucket4j-caffeine.version>
   </properties>
   
 
@@ -402,6 +404,25 @@
         <version>${arch.unit.version}</version>
         <scope>test</scope>
       </dependency>
+
+      <dependency>
+        <groupId>com.bucket4j</groupId>
+        <artifactId>bucket4j_jdk17-core</artifactId>
+        <version>${bucket4j-caffeine.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.bucket4j</groupId>
+        <artifactId>bucket4j_jdk17-caffeine</artifactId>
+        <version>${bucket4j-caffeine.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.github.ben-manes.caffeine</groupId>
+        <artifactId>caffeine</artifactId>
+        <version>${caffeine.version}</version>
+      </dependency>
+
     </dependencies>
   </dependencyManagement>
 
