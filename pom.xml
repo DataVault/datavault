@@ -31,7 +31,7 @@
   <properties>
     <!-- general -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <java.version>21</java.version>
+    <java.version>25</java.version>
     <skip.git.commit>false</skip.git.commit>
     <skip.unit.tests>false</skip.unit.tests>
     <skip.integration.tests>false</skip.integration.tests>
@@ -611,10 +611,10 @@
             <configuration>
               <rules>
                 <requireJavaVersion>
-                  <!-- Allow all Java 21.x versions, but block Java 22+ -->
-                  <!-- Code may run on newer JDKs, but tests depend on Java 21 behaviour -->
-                  <version>21,22)</version>
-                  <message>Invalid Java version! This project requires JDK 21.</message>
+                  <!-- Allow all Java 25.x versions, but block Java 26+ -->
+                  <!-- Code may run on newer JDKs, but tests depend on Java 25 behaviour -->
+                  <version>25,26)</version>
+                  <message>Invalid Java version! This project requires JDK 25.</message>
                 </requireJavaVersion>
               </rules>
             </configuration>
@@ -699,6 +699,21 @@
               <testExcludes>
                 <testExclude>**/*FT.java</testExclude>
               </testExcludes>
+              <annotationProcessorPaths>
+                <path>
+                  <groupId>org.projectlombok</groupId>
+                  <artifactId>lombok</artifactId>
+                  <version>${lombok.version}</version>
+                </path>
+                <path>
+                  <groupId>org.hibernate.orm</groupId>
+                  <artifactId>hibernate-jpamodelgen</artifactId>
+                  <version>${hibernate.version}</version>
+                </path>
+              </annotationProcessorPaths>
+              <compilerArgs>
+                <arg>-parameters</arg>
+              </compilerArgs>
             </configuration>
           </plugin>
         </plugins>

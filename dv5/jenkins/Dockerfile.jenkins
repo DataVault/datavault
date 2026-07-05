@@ -1,7 +1,7 @@
-# Created by David Hay 31Oct2022 / Updated 29Apr2026
+# Created by David Hay 31Oct2022 / Updated 05Jul2026
 # Used to create custom docker image for Jenkins docker builds
 #
-# used 'eclipse-temurin:21.0.10_7-jdk' as base java21 image because it has addgroup/adduser/gpasswd
+# used 'eclipse-temurin:25.0.3_9-jdk' as base java25 image because it has addgroup/adduser/gpasswd
 #
 # added User[jenkins] and Groups[jenkins,docker]
 # added User[jenkins] to Group[docker]
@@ -10,9 +10,9 @@
 #
 # added tools jq, curl and ping to help with testing and diagnostics
 #
-# THIS SPECIFIC VERSION OF eclipse-temurin:21 works - dated 2026-04-29 (had problems with some other versions)
-#https://hub.docker.com/layers/library/eclipse-temurin/21.0.10_7-jdk/images/sha256-53e0a987e4ee9832c7e668929fc2c0cfdbb874b3ed2b1ed2ed333b688cc6bc1d
-FROM eclipse-temurin@sha256:e58e492628c1428ceb838afc1a1b8762673d5eaa09296f560c363daea0fdcf3b
+# THIS SPECIFIC VERSION OF eclipse-temurin:25 works - dated 2026-07-02 (had problems with some other versions)
+#https://hub.docker.com/layers/library/eclipse-temurin/25.0.3_9-jdk/images/sha256-b83ec3a4a3a0f545f31c9aa96aeddf89dbc520a5601236d1e17079b5d1657d9d
+FROM eclipse-temurin@sha256:68868d04fa9cfd5f5c6abec0b5cef86d8de2bf9c62c37c7d3e4f0f80f5cfd7ff
 ARG JENKINS_UID
 ARG JENKINS_GID
 ARG DOCKER_GID
