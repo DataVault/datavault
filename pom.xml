@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion><!-- see https://maven.apache.org/pom.html -->
   <packaging>pom</packaging>
   <modules>
@@ -14,7 +14,7 @@
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
     <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot -->
-    <version>3.5.14</version>
+    <version>3.5.16</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
 
@@ -37,13 +37,12 @@
     <skip.integration.tests>false</skip.integration.tests>
 
     <!-- https://mvnrepository.com/artifact/org.jacoco/jacoco-maven-plugin -->
-    <jacoco.plugin.version>0.8.14</jacoco.plugin.version>
+    <jacoco.plugin.version>0.8.15</jacoco.plugin.version>
 
     <!-- I've changed as I was able to test on my local deploy.  I could see the uploaded file in the
     Oracle gui -->
-    <!-- DON'T CHANGE! - had problems with this - we have no integration test for Oracle Device/Archive -->
     <!-- https://mvnrepository.com/artifact/com.oracle.oci.sdk/oci-java-sdk-bom -->
-    <oci.java.sdk.bom.version>3.86.2</oci.java.sdk.bom.version>
+    <oci.java.sdk.bom.version>3.90.1</oci.java.sdk.bom.version>
 
     <!-- https://mvnrepository.com/artifact/net.i2p.crypto/eddsa -->
     <!-- <eddsa.version>0.3.0</eddsa.version> -->
@@ -51,25 +50,25 @@
     <!-- https://mvnrepository.com/artifact/org.apache.tika/tika-core -->
     <!-- DON'T CHANGE not sure why this was marked don't change all tests pass and nothing bad seen
     (so far) when I deploy locally -->
-    <tika.version>3.3.0</tika.version>
+    <tika.version>3.3.1</tika.version>
 
     <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-surefire-plugin -->
-    <surefire.plugin.version>3.5.5</surefire.plugin.version>
+    <surefire.plugin.version>3.5.6</surefire.plugin.version>
 
     <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-failsafe-plugin -->
-    <failsafe.plugin.version>3.5.5</failsafe.plugin.version>
+    <failsafe.plugin.version>3.5.6</failsafe.plugin.version>
 
     <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-bom -->
     <aws.java.sdk.bom.version>1.12.797</aws.java.sdk.bom.version>
 
     <!-- https://mvnrepository.com/artifact/org.springframework.retry/spring-retry -->
-    <spring.retry.version>2.0.12</spring.retry.version>
+    <spring.retry.version>2.0.13</spring.retry.version>
 
     <!-- https://mvnrepository.com/artifact/org.owasp/dependency-check-maven -->
     <owasp.dependency.check.version>12.2.2</owasp.dependency.check.version>
 
     <!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-contract-stub-runner -->
-    <spring.cloud.version>4.3.3</spring.cloud.version>
+    <spring.cloud.version>4.3.4</spring.cloud.version>
 
     <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-collections4 -->
     <commons.collections4.version>4.5.0</commons.collections4.version>
@@ -78,7 +77,7 @@
     <commons.compress.version>1.28.0</commons.compress.version>
 
     <!-- https://mvnrepository.com/artifact/org.apache.sshd/sshd-sftp -->
-    <sshd.sftp.version>2.17.1</sshd.sftp.version>
+    <sshd.sftp.version>2.18.0</sshd.sftp.version>
 
     <!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
     <jsoup.version>1.22.2</jsoup.version>
@@ -105,7 +104,7 @@
     <thymeleaf.layout.version>4.0.1</thymeleaf.layout.version>
 
     <!-- https://mvnrepository.com/artifact/org.apache.directory.api/api-all -->
-    <apache.directory.api.version>2.1.7</apache.directory.api.version>
+    <apache.directory.api.version>2.1.8</apache.directory.api.version>
 
     <!-- https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-starter-webmvc-ui -->
     <springdoc.openapi.version>2.8.17</springdoc.openapi.version>
@@ -113,7 +112,7 @@
     <!-- https://mvnrepository.com/artifact/org.apache.velocity/velocity-engine-core -->
     <velocity.version>2.4.1</velocity.version>
     <!-- above here, updated 03April2025 -->
-    
+
     <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
     <guava.version>33.6.0-jre</guava.version>
 
@@ -156,25 +155,26 @@
 
     <!-- https://mvnrepository.com/artifact/oro/oro -->
     <!-- <oro.version>2.0.8</oro.version> -->
-    
+
     <!-- https://mvnrepository.com/artifact/com.tngtech.archunit/archunit-junit5 -->
     <arch.unit.version>1.4.2</arch.unit.version>
 
     <!-- Source: https://mvnrepository.com/artifact/jakarta.xml.bind/jakarta.xml.bind-api -->
-    <jakarta-xml-bind-api.version>4.0.5</jakarta-xml-bind-api.version>
+    <jakarta-xml-bind-api.version>4.1.0-M1</jakarta-xml-bind-api.version>
 
     <!-- Source: https://mvnrepository.com/artifact/io.micrometer/micrometer-tracing-bridge-brave -->
-    <micrometer.io.version>1.6.5</micrometer.io.version>
+    <micrometer.io.version>1.7.0</micrometer.io.version>
 
     <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-site-plugin -->
     <maven.site.plugin.version>3.21.0</maven.site.plugin.version>
-    
+
     <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-enforcer-plugin -->
-    <maven.enforcer.plugin.version>3.6.2</maven.enforcer.plugin.version>
-    
-    <bucket4j-caffeine.version>8.14.0</bucket4j-caffeine.version>
+    <maven.enforcer.plugin.version>3.6.3</maven.enforcer.plugin.version>
+
+    <!-- https://mvnrepository.com/artifact/com.bucket4j/bucket4j_jdk17-core -->
+    <bucket4j.version>8.19.0</bucket4j.version>
   </properties>
-  
+
 
   <dependencyManagement>
     <dependencies>
@@ -274,13 +274,13 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
-        <dependency>
-          <groupId>com.oracle.oci.sdk</groupId>
-          <artifactId>oci-java-sdk-common-httpclient-jersey</artifactId>
-          <version>${oci.java.sdk.bom.version}</version>
-          <type>pom</type>
-          <scope>import</scope>
-        </dependency>
+      <dependency>
+        <groupId>com.oracle.oci.sdk</groupId>
+        <artifactId>oci-java-sdk-common-httpclient-jersey</artifactId>
+        <version>${oci.java.sdk.bom.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
       <dependency>
         <groupId>org.jsoup</groupId>
         <artifactId>jsoup</artifactId>
@@ -350,7 +350,7 @@
         <scope>test</scope>
       </dependency>
 
-     <dependency>
+      <dependency>
         <groupId>org.apache.velocity</groupId>
         <artifactId>velocity-engine-core</artifactId>
         <version>${velocity.version}</version>
@@ -408,13 +408,13 @@
       <dependency>
         <groupId>com.bucket4j</groupId>
         <artifactId>bucket4j_jdk17-core</artifactId>
-        <version>${bucket4j-caffeine.version}</version>
+        <version>${bucket4j.version}</version>
       </dependency>
 
       <dependency>
         <groupId>com.bucket4j</groupId>
         <artifactId>bucket4j_jdk17-caffeine</artifactId>
-        <version>${bucket4j-caffeine.version}</version>
+        <version>${bucket4j.version}</version>
       </dependency>
 
       <dependency>
@@ -466,10 +466,10 @@
           <groupId>org.mockito</groupId>
           <artifactId>mockito-junit-jupiter</artifactId>
         </exclusion>
-          <exclusion>
-            <groupId>org.junit.vintage</groupId>
-            <artifactId>junit-vintage-engine</artifactId>
-          </exclusion>
+        <exclusion>
+          <groupId>org.junit.vintage</groupId>
+          <artifactId>junit-vintage-engine</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
