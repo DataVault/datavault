@@ -1,9 +1,11 @@
 package org.datavaultplatform.webapp.controllers;
 
+import ch.qos.logback.classic.spi.ILoggingEvent;
 import lombok.SneakyThrows;
 import org.datavaultplatform.common.model.RoleAssignment;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.util.RoleUtils;
+import org.datavaultplatform.common.util.TestUtils;
 import org.datavaultplatform.webapp.app.DataVaultWebApp;
 import org.datavaultplatform.webapp.services.RestService;
 import org.datavaultplatform.webapp.services.UserLookupService;
@@ -22,14 +24,18 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.web.csrf.CsrfFilter;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -246,6 +252,19 @@ class VaultsControllerMvcTest {
 
         verify(userLookupService).getSuggestedUuns("blah");
         verifyNoMoreInteractions(restService, userLookupService);
+    }
+    
+    @Test
+    @SneakyThrows
+    @WithMockUser(username = "super-user", roles = {"USER","IS_ADMIN"})
+    void testStepCreateWithNoCsrfToken() {
+        List<ILoggingEvent> logEvents = TestUtils.captureLogging(CsrfFilter.class, () -> {
+            MvcResult result = mockMvc.perform(post("/vaults/stepCreate")).andReturn();
+        assertThat(result.getResponse().getStatus()).isEqualTo(403);  
+        assertThat(result.getResponse().getContentAsString()).isEqualTo("Forbidden: Could not verify the provided CSRF token because no token was found to compare.");
+        });
+        assertThat(logEvents).hasSize(1);
+        assertThat(logEvents.get(0).getFormattedMessage()).isEqualTo("Invalid CSRF token found for http://localhost/vaults/stepCreate");
     }
 
 }
