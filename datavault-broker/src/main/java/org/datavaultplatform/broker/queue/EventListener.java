@@ -428,14 +428,17 @@ public class EventListener implements MessageListener {
     String userSubject = getUserSubject(type);
     String adminSubject = getAdminSubject(type);
 
+    List<User> owners = group.getOwners();
     // Send email to group owners
-    for (User groupAdmin : group.getOwners()) {
-      String adminEmail = groupAdmin.getEmail();
-      log.info("GroupAdmin email is {}", adminEmail);
-      sendTemplateEmail(adminEmail,
-          adminSubject,
-          adminTemplate,
-          model);
+    if (owners != null) {
+      for (User groupAdmin : owners) {
+        String adminEmail = groupAdmin.getEmail();
+        log.info("GroupAdmin email is {}", adminEmail);
+        sendTemplateEmail(adminEmail,
+                adminSubject,
+                adminTemplate,
+                model);
+      }
     }
 
     // Send email to the deposit user

@@ -104,7 +104,7 @@ public class AdminReviewsController implements AdminReviewsControllerApi {
 
         CreateRetentionPolicy retentionPolicy = restService.getRetentionPolicy(vault.getPolicyID());
         model.addAttribute("createRetentionPolicy", retentionPolicy);
-        model.addAttribute(restService.getGroup(vault.getGroupID()));
+        model.addAttribute("group", restService.getGroup(vault.getGroupID()));
 
         // for existing 'underway' VaultReview - makes sure it has a DepositReview for each of the Vault's Deposits
         boolean depositReviewsAdded = restService.refreshUnderwayVaultReview(vaultId);

@@ -23,7 +23,7 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.methods;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 
 @AnalyzeClasses(packages = "org.datavaultplatform.webapp.controllers")
-public class ApiConsistencyTest {
+public class ApiConsistencyArchUnitTest {
 
     // New Rule 1: Controllers should reside in specific packages
     @ArchTest

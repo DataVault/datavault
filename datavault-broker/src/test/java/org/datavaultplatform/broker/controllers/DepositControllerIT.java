@@ -105,14 +105,28 @@ class DepositControllerIT extends BaseDatabaseTest {
     @MockBean
     RolesAndPermissionsService rolesAndPermissionsService;
     
+    @Autowired
+    RetentionPoliciesService retentionPoliciesService;
+    
+    RetentionPolicy retentionPolicy;
+    
     @BeforeEach
     void setup() {
-        
+        retentionPolicy = new RetentionPolicy();
+        retentionPolicy.setEngine("engine!");
+        retentionPolicy.setName("RETENTION POLICY 111");
+        retentionPolicy.setDescription("RETENTION POLICY 111 DEC");
+        retentionPolicy.setMinRetentionPeriod(1);
+        retentionPolicy.setExtendUponRetrieval(false);
+        retentionPoliciesService.addRetentionPolicy(retentionPolicy);
+
+
         vault = new Vault();
         vault.setDescription("test-vault");
         vault.setContact("test-contact");
         vault.setName("test-vault-name");
         vault.setReviewDate(LocalDate.now());
+        vault.setRetentionPolicy(retentionPolicy);
         vaultDAO.save(vault);
         vaultDAO.flush();
         

@@ -41,6 +41,7 @@ import org.datavaultplatform.common.event.deposit.UploadComplete;
 import org.datavaultplatform.common.event.deposit.ValidationComplete;
 import org.datavaultplatform.common.event.retrieve.*;
 import org.datavaultplatform.common.model.*;
+import org.datavaultplatform.common.model.dao.RetentionPolicyDAO;
 import org.datavaultplatform.common.storage.Verify;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -67,6 +68,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @TestMethodOrder(MethodOrderer.MethodName.class)
 class EventListenerIT extends BaseDatabaseTest {
+  @Autowired
+  private RetentionPolicyDAO retentionPolicyDAO;
 
   private static final String TEST_ARCHIVE_ID = "TEST-ARCHIVE_ID";
   
@@ -137,8 +140,19 @@ class EventListenerIT extends BaseDatabaseTest {
 
   Group group;
 
+  RetentionPolicy retentionPolicy;
+  
   @BeforeEach
-  void setup(){
+  void setup() {
+    
+    retentionPolicy = new RetentionPolicy();
+    retentionPolicy.setEngine("engine!");
+    retentionPolicy.setName("RETENTION POLICY 111");
+    retentionPolicy.setDescription("RETENTION POLICY 111 DEC");
+    retentionPolicy.setMinRetentionPeriod(1);
+    retentionPolicy.setExtendUponRetrieval(false);
+    retentionPolicyDAO.save(retentionPolicy);
+    
     user = new User();
     user.setFirstname("first");
     user.setLastname("last");
@@ -157,6 +171,7 @@ class EventListenerIT extends BaseDatabaseTest {
     vault.setGroup(group);
     LocalDate nowPlus1Year = LocalDate.now().plusYears(1);
     vault.setReviewDate(nowPlus1Year);
+    vault.setRetentionPolicy(this.retentionPolicy);
     vaultsService.addVault(vault);
     this.vaultId = vault.getID();
 

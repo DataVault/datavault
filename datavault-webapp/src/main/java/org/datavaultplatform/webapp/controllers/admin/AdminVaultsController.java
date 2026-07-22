@@ -153,8 +153,8 @@ public class AdminVaultsController implements AdminVaultsControllerApi {
 
         model.addAttribute("vault", vault);
        
-        model.addAttribute(restService.getRetentionPolicy(vault.getPolicyID()));
-        model.addAttribute(restService.getGroup(vault.getGroupID()));
+        model.addAttribute("retentionPolicy", restService.getRetentionPolicy(vault.getPolicyID()));
+        model.addAttribute("group", restService.getGroup(vault.getGroupID()));
         model.addAttribute("deposits", restService.getDepositsListing(vaultId));
         
 

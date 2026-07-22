@@ -18,7 +18,7 @@ import java.util.List;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.methods;
 
 @AnalyzeClasses(packages = "org.datavaultplatform.webapp.controllers")
-public class FormApiConsistencyTest {
+public class FormApiConsistencyArchUnitTest {
 
     @ArchTest
     static final ArchRule post_methods_with_model_attribute_should_consume_form_data =

@@ -21,6 +21,8 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import org.datavaultplatform.common.util.DateTimeUtils;
 import org.datavaultplatform.common.util.Utils;
 import org.hibernate.Hibernate;
@@ -524,5 +526,19 @@ public class Vault implements Identified {
      */
     public boolean isVaultReviewUnderway() {
         return findLatestVaultReviewIfStillUnderway().isPresent();
+    }
+    
+    @PrePersist
+    private void verifyRetentionPolicyIsPresentForInsert() {
+        if (this.retentionPolicy == null) {
+            throw new IllegalStateException("RetentionPolicy must not be null when saving VaultName[%s]".formatted(this.name));
+        }
+    }
+
+    @PreUpdate
+    private void verifyRetentionPolicyIsPresentForUpdate() {
+        if (this.retentionPolicy == null) {
+            throw new IllegalStateException("RetentionPolicy must not be null when updating VaultId[%s]VaultName[%s]".formatted(this.id, this.name));
+        }
     }
 }
