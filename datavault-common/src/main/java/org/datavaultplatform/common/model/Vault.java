@@ -30,6 +30,7 @@ import org.datavaultplatform.common.response.BillingInformation;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.retentionpolicy.RetentionPolicyStatus;
 import org.hibernate.annotations.UuidGenerator;
+import org.springframework.util.Assert;
 
 /**
  * User: Tom Higgins
@@ -423,6 +424,8 @@ public class Vault implements Identified {
     }
 
     public VaultInfo convertToResponse() {
+        Assert.notNull(retentionPolicy, "The retention policy cannot null");
+        Assert.notNull(retentionPolicy.getID(), "The retention policy id cannot null");
         return new VaultInfo(
                 id,
                 user == null ? null : user.getID(),

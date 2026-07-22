@@ -64,5 +64,9 @@ public class UsersService {
         // Passwords match so its tickety boo!
         return password.equals(user.getPassword());
     }
+
+    public List<User> findUsersWithInvalidEmail() {
+        return userDAO.findUsersWithInvalidEmail();
+    }
 }
 

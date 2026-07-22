@@ -20,6 +20,7 @@ import org.apache.directory.ldap.client.api.LdapNetworkConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
 
@@ -246,7 +247,8 @@ public class LDAPService {
         }
     }
 
-    public  HashMap<String, String> getLdapUserInfo(String uid) throws LdapException, CursorException {
+    @Cacheable(value = "ldap-users", key = "#uid")
+    public HashMap<String, String> getLdapUserInfo(String uid) throws LdapException, CursorException {
         logger.info("Search info for UUN: [{}]", uid);
 
         LdapNetworkConnection connection = getConnection();
