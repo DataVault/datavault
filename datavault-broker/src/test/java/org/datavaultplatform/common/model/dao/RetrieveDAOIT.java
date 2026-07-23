@@ -12,12 +12,8 @@ import org.datavaultplatform.broker.app.DataVaultBrokerApp;
 import org.datavaultplatform.broker.test.AddTestProperties;
 import org.datavaultplatform.broker.test.BaseReuseDatabaseTest;
 import org.datavaultplatform.broker.test.TestUtils;
-import org.datavaultplatform.common.model.Deposit;
-import org.datavaultplatform.common.model.Group;
-import org.datavaultplatform.common.model.Permission;
-import org.datavaultplatform.common.model.Retrieve;
+import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.model.Retrieve.Status;
-import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.util.DateTimeUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,6 +44,9 @@ public class RetrieveDAOIT extends BaseReuseDatabaseTest {
 
   @Autowired
   VaultDAO vaultDAO;
+  
+  @Autowired
+  RetentionPolicyDAO retentionPolicyDAO;
 
   @Test
   void testWriteThenRead() {
@@ -143,6 +142,7 @@ public class RetrieveDAOIT extends BaseReuseDatabaseTest {
     template.execute("delete from `Deposits`");
     template.execute("delete from `Vaults`");
     template.execute("delete from `Groups`");
+    template.execute("delete from `RetentionPolicies`");
     assertEquals(0, count());
   }
 
@@ -194,6 +194,14 @@ public class RetrieveDAOIT extends BaseReuseDatabaseTest {
     createTestUser("denied", schoolId);
     createTestUser("allowed", schoolId, Permission.CAN_VIEW_RETRIEVES);
 
+    RetentionPolicy retentionPolicy = new RetentionPolicy();
+    retentionPolicy.setEngine("engine!");
+    retentionPolicy.setName("RETENTION POLICY 111");
+    retentionPolicy.setDescription("RETENTION POLICY 111 DEC");
+    retentionPolicy.setMinRetentionPeriod(1);
+    retentionPolicy.setExtendUponRetrieval(false);
+    retentionPolicyDAO.save(retentionPolicy);
+
     Group group = new Group();
     group.setID(schoolId);
     group.setName("LFCS");
@@ -205,6 +213,7 @@ public class RetrieveDAOIT extends BaseReuseDatabaseTest {
     vault.setGroup(group);
     vault.setContact("James Bond");
     vault.setReviewDate(DateTimeUtils.toLocalDate(TestUtils.NOW));
+    vault.setRetentionPolicy(retentionPolicy);
     vaultDAO.save(vault);
 
     Deposit deposit = new Deposit();
@@ -232,6 +241,14 @@ public class RetrieveDAOIT extends BaseReuseDatabaseTest {
   @Test
   void testListByUser() {
 
+    RetentionPolicy retentionPolicy = new RetentionPolicy();
+    retentionPolicy.setEngine("engine!");
+    retentionPolicy.setName("RETENTION POLICY 111");
+    retentionPolicy.setDescription("RETENTION POLICY 111 DEC");
+    retentionPolicy.setMinRetentionPeriod(1);
+    retentionPolicy.setExtendUponRetrieval(false);
+    retentionPolicyDAO.save(retentionPolicy);
+
     String schoolId = "lfcs-id";
 
     createTestUser("denied", schoolId);
@@ -248,6 +265,7 @@ public class RetrieveDAOIT extends BaseReuseDatabaseTest {
     vault.setGroup(group);
     vault.setContact("James Bond");
     vault.setReviewDate(DateTimeUtils.toLocalDate(TestUtils.NOW));
+    vault.setRetentionPolicy(retentionPolicy);
     vaultDAO.save(vault);
 
     Deposit deposit = new Deposit();
@@ -282,6 +300,14 @@ public class RetrieveDAOIT extends BaseReuseDatabaseTest {
 
   @Test
   void testInProgressCountByUser(){
+    RetentionPolicy retentionPolicy = new RetentionPolicy();
+    retentionPolicy.setEngine("engine!");
+    retentionPolicy.setName("RETENTION POLICY 111");
+    retentionPolicy.setDescription("RETENTION POLICY 111 DEC");
+    retentionPolicy.setMinRetentionPeriod(1);
+    retentionPolicy.setExtendUponRetrieval(false);
+    retentionPolicyDAO.save(retentionPolicy);
+
     String schoolId = "lfcs-id";
 
     createTestUser("denied", schoolId);
@@ -298,6 +324,7 @@ public class RetrieveDAOIT extends BaseReuseDatabaseTest {
     vault.setGroup(group);
     vault.setContact("James Bond");
     vault.setReviewDate(DateTimeUtils.toLocalDate(TestUtils.NOW));
+    vault.setRetentionPolicy(retentionPolicy);
     vaultDAO.save(vault);
 
     Deposit deposit = new Deposit();
@@ -332,6 +359,14 @@ public class RetrieveDAOIT extends BaseReuseDatabaseTest {
   }
   @Test
   void testQueueCount(){
+    RetentionPolicy retentionPolicy = new RetentionPolicy();
+    retentionPolicy.setEngine("engine!");
+    retentionPolicy.setName("RETENTION POLICY 111");
+    retentionPolicy.setDescription("RETENTION POLICY 111 DEC");
+    retentionPolicy.setMinRetentionPeriod(1);
+    retentionPolicy.setExtendUponRetrieval(false);
+    retentionPolicyDAO.save(retentionPolicy);
+
     String schoolId = "lfcs-id";
 
     createTestUser("denied", schoolId);
@@ -348,6 +383,7 @@ public class RetrieveDAOIT extends BaseReuseDatabaseTest {
     vault.setGroup(group);
     vault.setContact("James Bond");
     vault.setReviewDate(DateTimeUtils.toLocalDate(TestUtils.NOW));
+    vault.setRetentionPolicy(retentionPolicy);
     vaultDAO.save(vault);
 
     Deposit deposit = new Deposit();
@@ -388,6 +424,14 @@ public class RetrieveDAOIT extends BaseReuseDatabaseTest {
 
   @Test
   void testInProgressCount() {
+    RetentionPolicy retentionPolicy = new RetentionPolicy();
+    retentionPolicy.setEngine("engine!");
+    retentionPolicy.setName("RETENTION POLICY 111");
+    retentionPolicy.setDescription("RETENTION POLICY 111 DEC");
+    retentionPolicy.setMinRetentionPeriod(1);
+    retentionPolicy.setExtendUponRetrieval(false);
+    retentionPolicyDAO.save(retentionPolicy);
+
     String schoolId = "lfcs-id";
 
     createTestUser("denied", schoolId);
@@ -404,6 +448,7 @@ public class RetrieveDAOIT extends BaseReuseDatabaseTest {
     vault.setGroup(group);
     vault.setContact("James Bond");
     vault.setReviewDate(DateTimeUtils.toLocalDate(TestUtils.NOW));
+    vault.setRetentionPolicy(retentionPolicy);
     vaultDAO.save(vault);
 
     Deposit deposit = new Deposit();

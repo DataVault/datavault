@@ -57,18 +57,26 @@ public class UserLookupService {
 
     public User ensureUserExists(String uun) throws InvalidUunException {
         User user = restService.getUser(uun);
-        if (user == null) {
-            // Validate UUN
-            HashMap<String, String> attributes;
-            try {
-                attributes = ldapService.getLdapUserInfo(uun);
-            } catch (LdapException | CursorException e) {
-                throw new InvalidUunException(uun, e);
-            }
-            if (attributes.isEmpty()){
-                throw new InvalidUunException(uun);
-            }
 
+        // Validate UUN
+        HashMap<String, String> attributes;
+        try {
+            attributes = ldapService.getLdapUserInfo(uun);
+        } catch (LdapException | CursorException ex) {
+            if (user == null) {
+                // we can't cope with Exception if we have a new user
+                throw new InvalidUunException(uun, ex);
+            }
+            attributes = new HashMap<>();
+        }
+        if (attributes.isEmpty() && user == null) {
+            // we can't cope without LDAP attributes if we have a new user
+            throw new InvalidUunException(uun);
+        }
+        String latestLdapEmail = attributes.get("mail");
+        attributes.remove("mail");
+        if (user == null) {
+            // we have LDAP attributes for new users
             String[] names = attributes.get("cn").split(" "); attributes.remove("cn");
 
             logger.info("Adding user {} - {} {}", uun, names[0], names[1]);
@@ -76,7 +84,7 @@ public class UserLookupService {
             newUser.setFirstname(names[0]);
             newUser.setLastname(names[1]);
             newUser.setID(attributes.get("uid")); attributes.remove("uid");
-            newUser.setEmail(attributes.get("mail")); attributes.remove("mail");
+            newUser.setEmail(latestLdapEmail);
             newUser.setProperties(attributes);
 
             // Generate random password to make sure account is not easily accessible
@@ -84,9 +92,17 @@ public class UserLookupService {
             newUser.setPassword(password);
 
             restService.addUser(newUser);
+            if (!newUser.isValidEmail()) {
+                log.error("New User Does Not Have Valid Email Address From Ldap UserId[{}]Email[{}]", newUser.getID(), newUser.getEmail());
+            }
             return newUser;
 
         } else {
+            if (User.isValidEmail(latestLdapEmail) && !latestLdapEmail.equals(user.getEmail())) {
+                user.setEmail(latestLdapEmail);
+                log.info("updating email address of [{}] to [{}]", user.getID(), user.getEmail());
+                restService.editUser(user);
+            }
             logger.info("User {} already exists!", uun);
             return user;
         }
@@ -112,9 +128,12 @@ public class UserLookupService {
     	return exists;
     }
 
-    private String checkUserList(List<String> list, String errorUrl) {
+    protected String checkUserList(List<String> list, String errorUrl) {
         String retVal = "";
 
+        if (list == null) {
+            return retVal;
+        }
         for (String li : list) {
             String result = this.checkUser(li, errorUrl);
             if (result != null && ! result.isEmpty()) {
@@ -126,7 +145,7 @@ public class UserLookupService {
 
     }
 
-    private String checkUser(String user, String errorUrl) {
+    protected String checkUser(String user, String errorUrl) {
         String retVal = "";
         // exclude the empty dummy user
         if (user != null && !user.isEmpty()) {

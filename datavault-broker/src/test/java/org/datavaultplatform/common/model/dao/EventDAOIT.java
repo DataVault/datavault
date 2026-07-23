@@ -24,10 +24,7 @@ import org.datavaultplatform.common.event.delete.DeletedChunk;
 import org.datavaultplatform.common.event.deposit.*;
 import org.datavaultplatform.common.event.Error;
 import org.datavaultplatform.common.event.retrieve.*;
-import org.datavaultplatform.common.model.Agent;
-import org.datavaultplatform.common.model.Deposit;
-import org.datavaultplatform.common.model.Job;
-import org.datavaultplatform.common.model.Vault;
+import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.storage.impl.LocalFileSystem;
 import org.datavaultplatform.common.util.RetrievedChunks;
 import org.datavaultplatform.common.util.StoredChunks;
@@ -65,6 +62,9 @@ public class EventDAOIT extends BaseDatabaseTest {
   JobDAO jobDAO;
   
   @Autowired
+  RetentionPolicyDAO retentionPolicyDAO;
+  
+  @Autowired
   JdbcTemplate template;
 
   @PersistenceContext
@@ -72,6 +72,19 @@ public class EventDAOIT extends BaseDatabaseTest {
 
   @Autowired
   private EventService eventService;
+
+  RetentionPolicy retentionPolicy;
+
+  @BeforeEach
+  void setup() {
+    retentionPolicy = new RetentionPolicy();
+    retentionPolicy.setEngine("engine!");
+    retentionPolicy.setName("RETENTION POLICY 111");
+    retentionPolicy.setDescription("RETENTION POLICY 111 DEC");
+    retentionPolicy.setMinRetentionPeriod(1);
+    retentionPolicy.setExtendUponRetrieval(false);
+    retentionPolicyDAO.save(retentionPolicy);
+  }
 
   @Nested
   class BlobTests {
@@ -171,7 +184,7 @@ public class EventDAOIT extends BaseDatabaseTest {
   @Test
   void testVaultEvents() {
 
-    Vault vault = VaultDAOIT.getVault1();
+    Vault vault = VaultDAOIT.getVault1(retentionPolicy);
     vaultDAO.save(vault);
 
     Event event1 = getEvent1_ComputedChunkEvent();

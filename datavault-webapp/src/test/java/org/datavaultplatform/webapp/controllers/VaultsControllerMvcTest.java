@@ -1,9 +1,11 @@
 package org.datavaultplatform.webapp.controllers;
 
+import ch.qos.logback.classic.spi.ILoggingEvent;
 import lombok.SneakyThrows;
 import org.datavaultplatform.common.model.RoleAssignment;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.util.RoleUtils;
+import org.datavaultplatform.common.util.TestUtils;
 import org.datavaultplatform.webapp.app.DataVaultWebApp;
 import org.datavaultplatform.webapp.services.RestService;
 import org.datavaultplatform.webapp.services.UserLookupService;
@@ -21,15 +23,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.web.csrf.CsrfFilter;
+import org.springframework.security.web.csrf.CsrfToken;
+import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -41,6 +51,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class VaultsControllerMvcTest {
 
+//    private static final String SESSION_ATTR_CSRF_TOKEN = HttpSessionCsrfTokenRepository.class.getName()
+//        .concat(".CSRF_TOKEN");
     @Autowired
     MockMvc mockMvc;
     @Captor
@@ -246,6 +258,43 @@ class VaultsControllerMvcTest {
 
         verify(userLookupService).getSuggestedUuns("blah");
         verifyNoMoreInteractions(restService, userLookupService);
+    }
+    
+    @Test
+    @SneakyThrows
+    @WithMockUser(username = "super-user", roles = {"USER","IS_ADMIN"})
+    void testStepCreateWithNoCsrfToken() {
+        List<ILoggingEvent> logEvents = TestUtils.captureLogging(CsrfFilter.class, () -> {
+            MvcResult result = mockMvc.perform(post("/vaults/stepCreate")).andReturn();
+        assertThat(result.getResponse().getStatus()).isEqualTo(403);  
+        assertThat(result.getResponse().getContentAsString()).isEqualTo("Your session has expired due to inactivity. Please refresh the page and try again.");
+        });
+        assertThat(logEvents).hasSize(1);
+        assertThat(logEvents.get(0).getFormattedMessage()).isEqualTo("Invalid CSRF token found for http://localhost/vaults/stepCreate");
+    }
+
+    @Test
+    @SneakyThrows
+    @WithMockUser(username = "super-user", roles = {"USER", "IS_ADMIN"})
+    void testStepCreateWithInvalidCsrfToken() {
+
+        //This will create a session and add a CSRF token to it.
+        MvcResult mvcResult = mockMvc.perform(get("/test/hello")).andReturn();
+        MockHttpSession session = (MockHttpSession) mvcResult.getRequest().getSession();
+
+        List<ILoggingEvent> logEvents = TestUtils.captureLogging(CsrfFilter.class, () -> {
+            MvcResult result = mockMvc.perform(
+                    post("/vaults/stepCreate")
+                        .session(session)
+                        .with(csrf().useInvalidToken()))
+                .andReturn();
+            assertThat(result.getResponse().getStatus()).isEqualTo(403);
+            assertThat(result.getResponse().getContentAsString()).isEqualTo(
+                "Invalid security token. Please refresh the page and try again.");
+        });
+        assertThat(logEvents).hasSize(1);
+        assertThat(logEvents.get(0).getFormattedMessage()).isEqualTo(
+            "Invalid CSRF token found for http://localhost/vaults/stepCreate");
     }
 
 }

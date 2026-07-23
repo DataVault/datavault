@@ -21,6 +21,8 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import org.datavaultplatform.common.util.DateTimeUtils;
 import org.datavaultplatform.common.util.Utils;
 import org.hibernate.Hibernate;
@@ -28,6 +30,7 @@ import org.datavaultplatform.common.response.BillingInformation;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.retentionpolicy.RetentionPolicyStatus;
 import org.hibernate.annotations.UuidGenerator;
+import org.springframework.util.Assert;
 
 /**
  * User: Tom Higgins
@@ -421,6 +424,8 @@ public class Vault implements Identified {
     }
 
     public VaultInfo convertToResponse() {
+        Assert.notNull(retentionPolicy, "The retention policy cannot null");
+        Assert.notNull(retentionPolicy.getID(), "The retention policy id cannot null");
         return new VaultInfo(
                 id,
                 user == null ? null : user.getID(),
@@ -524,5 +529,19 @@ public class Vault implements Identified {
      */
     public boolean isVaultReviewUnderway() {
         return findLatestVaultReviewIfStillUnderway().isPresent();
+    }
+    
+    @PrePersist
+    private void verifyRetentionPolicyIsPresentForInsert() {
+        if (this.retentionPolicy == null) {
+            throw new IllegalStateException("RetentionPolicy must not be null when saving VaultName[%s]".formatted(this.name));
+        }
+    }
+
+    @PreUpdate
+    private void verifyRetentionPolicyIsPresentForUpdate() {
+        if (this.retentionPolicy == null) {
+            throw new IllegalStateException("RetentionPolicy must not be null when updating VaultId[%s]VaultName[%s]".formatted(this.id, this.name));
+        }
     }
 }

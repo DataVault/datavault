@@ -210,8 +210,8 @@ public class VaultsController implements VaultsControllerApi {
         model.addAttribute("vault", vault);
         model.addAttribute("roles", validRoles);
         model.addAttribute("roleAssignments", vaultUsers);
-        model.addAttribute(restService.getRetentionPolicy(vault.getPolicyID()));
-        model.addAttribute(restService.getGroup(vault.getGroupID()));
+        model.addAttribute("retentionPolicy", restService.getRetentionPolicy(vault.getPolicyID()));
+        model.addAttribute("group", restService.getGroup(vault.getGroupID()));
         
         DepositInfo[] deposits = restService.getDepositsListing(vaultId);
         model.addAttribute("deposits", deposits);

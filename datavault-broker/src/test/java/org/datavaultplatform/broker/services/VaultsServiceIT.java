@@ -11,8 +11,10 @@ import org.datavaultplatform.broker.app.DataVaultBrokerApp;
 import org.datavaultplatform.broker.config.MockRabbitConfig;
 import org.datavaultplatform.broker.test.AddTestProperties;
 import org.datavaultplatform.broker.test.BaseReuseDatabaseTest;
+import org.datavaultplatform.common.model.RetentionPolicy;
 import org.datavaultplatform.common.model.RoleAssignment;
 import org.datavaultplatform.common.model.Vault;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -39,7 +41,23 @@ public class VaultsServiceIT extends BaseReuseDatabaseTest {
     AdminDepositService adminDepositService;
     
     @Autowired
+    RetentionPoliciesService retentionPoliciesService;
+    
+    RetentionPolicy retentionPolicy;
+    
+    @Autowired
     Clock clock;
+
+    @BeforeEach
+    void setup() {
+        retentionPolicy = new RetentionPolicy();
+        retentionPolicy.setEngine("engine!");
+        retentionPolicy.setName("RETENTION POLICY 111");
+        retentionPolicy.setDescription("RETENTION POLICY 111 DEC");
+        retentionPolicy.setMinRetentionPeriod(1);
+        retentionPolicy.setExtendUponRetrieval(false);
+        retentionPoliciesService.addRetentionPolicy(retentionPolicy);
+    }
 
     @Test
     public void checkVaultCount() {
@@ -56,6 +74,7 @@ public class VaultsServiceIT extends BaseReuseDatabaseTest {
         vault.setGrantEndDate(LocalDate.now());
         vault.setReviewDate(LocalDate.now(clock));
         vault.setSnapshot("This is a dummy snapshot");
+        vault.setRetentionPolicy(retentionPolicy);
         vaultsService.addVault(vault);
         
         int newVaultCount = prevVaultCount + 1;

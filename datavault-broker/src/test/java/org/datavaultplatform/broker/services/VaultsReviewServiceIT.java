@@ -7,10 +7,7 @@ import org.datavaultplatform.broker.app.DataVaultBrokerApp;
 import org.datavaultplatform.broker.config.MockRabbitConfig;
 import org.datavaultplatform.broker.test.AddTestProperties;
 import org.datavaultplatform.broker.test.BaseDatabaseTest;
-import org.datavaultplatform.common.model.Deposit;
-import org.datavaultplatform.common.model.DepositReview;
-import org.datavaultplatform.common.model.Vault;
-import org.datavaultplatform.common.model.VaultReview;
+import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.model.dao.DepositDAO;
 import org.datavaultplatform.common.model.dao.DepositReviewDAO;
 import org.datavaultplatform.common.model.dao.VaultDAO;
@@ -75,6 +72,9 @@ class VaultsReviewServiceIT extends BaseDatabaseTest {
     @Autowired
     private VaultsService vaultsService;
 
+    @Autowired
+    private RetentionPoliciesService retentionPoliciesService;
+    
     @MockBean
     AdminDepositService adminDepositService;
 
@@ -91,7 +91,20 @@ class VaultsReviewServiceIT extends BaseDatabaseTest {
     
     @Autowired
     private DepositsService depositsService;
+
+    private RetentionPolicy retentionPolicy;
     
+    @BeforeEach
+    void setup(){
+        retentionPolicy = new RetentionPolicy();
+        retentionPolicy.setEngine("engine!");
+        retentionPolicy.setName("RETENTION POLICY 111");
+        retentionPolicy.setDescription("RETENTION POLICY 111 DEC");
+        retentionPolicy.setMinRetentionPeriod(1);
+        retentionPolicy.setExtendUponRetrieval(false);
+        retentionPoliciesService.addRetentionPolicy(retentionPolicy);
+
+    }
     DepositReview addDepositReview(VaultReview vaultReview, Deposit deposit, String comment) {
         DepositReview depositReview = new DepositReview();
         depositReview.setDeposit(deposit);
@@ -127,6 +140,7 @@ class VaultsReviewServiceIT extends BaseDatabaseTest {
             vault.setReviewDate(today.plusYears(1));
             vault.setContact("test-contact");
             vault.setDescription("test-description");
+            vault.setRetentionPolicy(retentionPolicy);
 
             VaultReview vaultReview = vaultsReviewService.createVaultReview(vault);
 

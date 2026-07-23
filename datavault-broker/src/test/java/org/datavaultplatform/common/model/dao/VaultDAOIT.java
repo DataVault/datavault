@@ -16,11 +16,7 @@ import org.datavaultplatform.broker.app.DataVaultBrokerApp;
 import org.datavaultplatform.broker.test.AddTestProperties;
 import org.datavaultplatform.broker.test.BaseReuseDatabaseTest;
 import org.datavaultplatform.broker.test.TestUtils;
-import org.datavaultplatform.common.model.Dataset;
-import org.datavaultplatform.common.model.Group;
-import org.datavaultplatform.common.model.Permission;
-import org.datavaultplatform.common.model.Vault;
-import org.datavaultplatform.common.model.User;
+import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.util.DateTimeUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,12 +45,31 @@ public class VaultDAOIT extends BaseReuseDatabaseTest {
 
   @Autowired
   DatasetDAO datasetDAO;
+  
+  @Autowired
+  RetentionPolicyDAO retentionPolicyDAO;
+
+  RetentionPolicy retentionPolicy;
+  
+  @BeforeEach
+  void setup() {
+    assertEquals(0, count());
+
+    retentionPolicy = new RetentionPolicy();
+    retentionPolicy.setEngine("engine!");
+    retentionPolicy.setName("RETENTION POLICY 111");
+    retentionPolicy.setDescription("RETENTION POLICY 111 DEC");
+    retentionPolicy.setMinRetentionPeriod(1);
+    retentionPolicy.setExtendUponRetrieval(false);
+    retentionPolicyDAO.save(retentionPolicy);
+  }
+
 
   @Test
   void testWriteThenRead() {
-    Vault vault1 = getVault1();
+    Vault vault1 = getVault1(retentionPolicy);
 
-    Vault vault2 = getVault2();
+    Vault vault2 = getVault2(retentionPolicy);
 
     dao.save(vault1);
     assertNotNull(vault1.getID());
@@ -74,11 +89,11 @@ public class VaultDAOIT extends BaseReuseDatabaseTest {
 
   @Test
   void testListIsSortedByCreationTimeAscending() {
-    Vault vault1 = getVault1();
+    Vault vault1 = getVault1(retentionPolicy);
 
-    Vault vault2 = getVault2();
+    Vault vault2 = getVault2(retentionPolicy);
 
-    Vault vault3 = getVault3();
+    Vault vault3 = getVault3(retentionPolicy);
 
     dao.save(vault1);
     assertEquals(1, count());
@@ -107,7 +122,7 @@ public class VaultDAOIT extends BaseReuseDatabaseTest {
 
   @Test
   void testUpdate() {
-    Vault vault = getVault1();
+    Vault vault = getVault1(retentionPolicy);
 
     dao.saveOrUpdateVault(vault);
 
@@ -122,17 +137,12 @@ public class VaultDAOIT extends BaseReuseDatabaseTest {
   @Test
   void testVaultSnapshotBLOB(){
 
-    Vault vault = getVaultWithSnapshot();
+    Vault vault = getVaultWithSnapshot(retentionPolicy);
     dao.save(vault);
 
     Vault found = dao.findById(vault.getID()).get();
 
     assertEquals(vault.getSnapshot(), found.getSnapshot());
-  }
-
-  @BeforeEach
-  void setup() {
-    assertEquals(0, count());
   }
 
   @AfterEach
@@ -144,9 +154,9 @@ public class VaultDAOIT extends BaseReuseDatabaseTest {
   @Test
   void testGetTotalNumberOfVaultsForUser() {
 
-    Vault v1 = getVault1();
-    Vault v2 = getVault2();
-    Vault v3 = getVault3();
+    Vault v1 = getVault1(retentionPolicy);
+    Vault v2 = getVault2(retentionPolicy);
+    Vault v3 = getVault3(retentionPolicy);
 
     String schoolId = "lfcs-id";
 
@@ -178,9 +188,9 @@ public class VaultDAOIT extends BaseReuseDatabaseTest {
   @Test
   void testGetTotalNumberOfVaultsWithQueryForUser() {
 
-    Vault v1 = getVault1();
-    Vault v2 = getVault2();
-    Vault v3 = getVault3();
+    Vault v1 = getVault1(retentionPolicy);
+    Vault v2 = getVault2(retentionPolicy);
+    Vault v3 = getVault3(retentionPolicy);
 
     String schoolId = "lfcs-id";
 
@@ -253,11 +263,11 @@ public class VaultDAOIT extends BaseReuseDatabaseTest {
     datasetDAO.save(ds1);
     datasetDAO.save(ds2);
 
-    Vault v1 = getVault1();
+    Vault v1 = getVault1(retentionPolicy);
     v1.setDataset(ds1);
-    Vault v2 = getVault2();
+    Vault v2 = getVault2(retentionPolicy);
     v2.setDataset(ds2);
-    Vault v3 = getVault3();
+    Vault v3 = getVault3(retentionPolicy);
     v3.setDataset(ds1);
 
     String schoolId = "lfcs-id";
@@ -396,11 +406,11 @@ public class VaultDAOIT extends BaseReuseDatabaseTest {
     datasetDAO.save(ds1);
     datasetDAO.save(ds2);
 
-    Vault v1 = getVault1();
+    Vault v1 = getVault1(retentionPolicy);
     v1.setDataset(ds1);
-    Vault v2 = getVault2();
+    Vault v2 = getVault2(retentionPolicy);
     v2.setDataset(ds2);
-    Vault v3 = getVault3();
+    Vault v3 = getVault3(retentionPolicy);
     v3.setDataset(ds1);
 
     String schoolId = "lfcs-id";
@@ -540,15 +550,15 @@ public class VaultDAOIT extends BaseReuseDatabaseTest {
     assertThat(user1.getID()).isEqualTo("user-id-1");
     assertThat(user2.getID()).isEqualTo("user-id-2");
     
-    Vault v1 = getVault1();
+    Vault v1 = getVault1(retentionPolicy);
     v1.setUser(user1);
     v1.setDataset(ds1);
     
-    Vault v2 = getVault2();
+    Vault v2 = getVault2(retentionPolicy);
     v2.setUser(user2);
     v2.setDataset(ds2);
     
-    Vault v3 = getVault3();
+    Vault v3 = getVault3(retentionPolicy);
     v3.setUser(user1);
     v3.setDataset(ds1);
     
@@ -575,6 +585,8 @@ public class VaultDAOIT extends BaseReuseDatabaseTest {
     dao.save(v1);
     dao.save(v2);
     dao.save(v3);
+    
+    
 
     createTestUser("allowed", schoolId, Permission.CAN_MANAGE_VAULTS);
     List<Vault> vaultsByNameAsc = dao.search("allowed", null, "name", "asc", null,null);
@@ -613,9 +625,9 @@ public class VaultDAOIT extends BaseReuseDatabaseTest {
     count does not include 'DISTINCT_ROOT_ENTITY' - we should check this in the test
      */
 
-    Vault v1 = getVault1();
-    Vault v2 = getVault2();
-    Vault v3 = getVault3();
+    Vault v1 = getVault1(retentionPolicy);
+    Vault v2 = getVault2(retentionPolicy);
+    Vault v3 = getVault3(retentionPolicy);
 
     String schoolId = "lfcs-id";
 
@@ -647,9 +659,9 @@ public class VaultDAOIT extends BaseReuseDatabaseTest {
   @Test
   void getGetRetentionPolicyCountFor() {
 
-    Vault v1 = getVault1();
-    Vault v2 = getVault2();
-    Vault v3 = getVault3();
+    Vault v1 = getVault1(retentionPolicy);
+    Vault v2 = getVault2(retentionPolicy);
+    Vault v3 = getVault3(retentionPolicy);
 
     v1.setRetentionPolicyStatus(222);
     v2.setRetentionPolicyStatus(111);
@@ -671,9 +683,9 @@ public class VaultDAOIT extends BaseReuseDatabaseTest {
   @Test
   void testGetAllProjectSize() {
 
-    Vault v1 = getVault1();
-    Vault v2 = getVault2();
-    Vault v3 = getVault3();
+    Vault v1 = getVault1(retentionPolicy);
+    Vault v2 = getVault2(retentionPolicy);
+    Vault v3 = getVault3(retentionPolicy);
 
     v1.setProjectId("222");
     v1.setSize(1000L);
@@ -703,8 +715,9 @@ public class VaultDAOIT extends BaseReuseDatabaseTest {
 
   }
 
-  static  Vault getVault1() {
+  static  Vault getVault1(RetentionPolicy retentionPolicy) {
     Vault result = new Vault();
+    result.setRetentionPolicy(retentionPolicy);
     result.setContact("contact-1");
     result.setName("vault-1");
     result.setReviewDate(DateTimeUtils.toLocalDate(NOW));
@@ -712,8 +725,9 @@ public class VaultDAOIT extends BaseReuseDatabaseTest {
     return result;
   }
 
-  static Vault getVault2() {
+  static Vault getVault2(RetentionPolicy retentionPolicy) {
     Vault result = new Vault();
+    result.setRetentionPolicy(retentionPolicy);
     result.setContact("contact-2");
     result.setName("vault-2");
     result.setReviewDate(DateTimeUtils.toLocalDate(NOW));
@@ -721,19 +735,21 @@ public class VaultDAOIT extends BaseReuseDatabaseTest {
     return result;
   }
 
-  static Vault getVault3() {
+  static Vault getVault3(RetentionPolicy retentionPolicy) {
     Vault result = new Vault();
-    result.setContact("contact-2");
-    result.setName("vault-2");
+    result.setRetentionPolicy(retentionPolicy);
+    result.setContact("contact-3");
+    result.setName("vault-3");
     result.setReviewDate(DateTimeUtils.toLocalDate(NOW));
     result.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(TWO_WEEKS_AGO));
     return result;
   }
 
-  static Vault getVaultWithSnapshot() {
+  static Vault getVaultWithSnapshot(RetentionPolicy retentionPolicy) {
     Vault result = new Vault();
-    result.setContact("contact-3");
-    result.setName("vault-3");
+    result.setRetentionPolicy(retentionPolicy);
+    result.setContact("contact-ss");
+    result.setName("vault-ss");
     result.setReviewDate(DateTimeUtils.toLocalDate(NOW));
     result.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(NOW));
     result.setSnapshot(String.join(",", TestUtils.getRandomList()));

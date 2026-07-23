@@ -15,14 +15,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.app.DataVaultBrokerApp;
+import org.datavaultplatform.broker.services.RetentionPoliciesService;
 import org.datavaultplatform.broker.test.AddTestProperties;
 import org.datavaultplatform.broker.test.BaseReuseDatabaseTest;
-import org.datavaultplatform.common.model.Deposit;
+import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.model.Deposit.Status;
-import org.datavaultplatform.common.model.Group;
-import org.datavaultplatform.common.model.Permission;
-import org.datavaultplatform.common.model.Vault;
-import org.datavaultplatform.common.model.MariaDBConstants;
 import org.datavaultplatform.common.util.DateTimeUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,7 +37,7 @@ import org.springframework.test.context.TestPropertySource;
     "broker.rabbit.enabled=false",
     "broker.scheduled.enabled=false"
 })
-public class DepositDAOIT extends BaseReuseDatabaseTest {
+class DepositDAOIT extends BaseReuseDatabaseTest {
 
   @Autowired
   DepositDAO dao;
@@ -52,8 +49,10 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
   @Autowired
   GroupDAO groupDAO;
 
-  //@Autowired
-  //DepositChunkDAO depositChunkDAO;
+  @Autowired
+  RetentionPoliciesService retentionPoliciesService;
+  
+  RetentionPolicy retentionPolicy;
 
   @Test
   void testWriteThenRead() {
@@ -168,6 +167,7 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
     vault1.setGroup(group1);
     vault1.setName("vault-one");
     vault1.setReviewDate(DateTimeUtils.toLocalDate(NOW));
+    vault1.setRetentionPolicy(retentionPolicy);
     vaultDAO.save(vault1);
 
     Vault vault2 = new Vault();
@@ -175,6 +175,7 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
     vault2.setGroup(group2);
     vault2.setName("vault-two");
     vault2.setReviewDate(DateTimeUtils.toLocalDate(NOW));
+    vault2.setRetentionPolicy(retentionPolicy);
     vaultDAO.save(vault2);
 
     Deposit depositReview1 = getDeposit1();
@@ -243,6 +244,7 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
     vault1.setGroup(group1);
     vault1.setName("vault-one");
     vault1.setReviewDate(DateTimeUtils.toLocalDate(NOW));
+    vault1.setRetentionPolicy(retentionPolicy);
     vaultDAO.save(vault1);
 
     Vault vault2 = new Vault();
@@ -250,6 +252,7 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
     vault2.setGroup(group2);
     vault2.setName("vault-two");
     vault2.setReviewDate(DateTimeUtils.toLocalDate(NOW));
+    vault2.setRetentionPolicy(retentionPolicy);
     vaultDAO.save(vault2);
 
     Deposit depositReview1 = getDeposit1();
@@ -357,6 +360,7 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
     vault1.setGroup(group1);
     vault1.setName("vault-1");
     vault1.setReviewDate(DateTimeUtils.toLocalDate(NOW));
+    vault1.setRetentionPolicy(retentionPolicy);
     vaultDAO.save(vault1);
 
     Vault vault2 = new Vault();
@@ -364,6 +368,7 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
     vault2.setGroup(group1);
     vault2.setName("vault-2");
     vault2.setReviewDate(DateTimeUtils.toLocalDate(NOW));
+    vault2.setRetentionPolicy(retentionPolicy);
     vaultDAO.save(vault2);
     
     Vault vault3 = new Vault();
@@ -371,6 +376,7 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
     vault3.setGroup(group1);
     vault3.setName("vault-3");
     vault3.setReviewDate(DateTimeUtils.toLocalDate(NOW));
+    vault3.setRetentionPolicy(retentionPolicy);
     vaultDAO.save(vault3);
 
     Vault vault4 = new Vault();
@@ -378,6 +384,7 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
     vault4.setGroup(group1);
     vault4.setName("vault-4");
     vault4.setReviewDate(DateTimeUtils.toLocalDate(NOW));
+    vault4.setRetentionPolicy(retentionPolicy);
     vaultDAO.save(vault4);
 
     Vault vault5 = new Vault();
@@ -385,6 +392,7 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
     vault5.setGroup(group1);
     vault5.setName("vault-5");
     vault5.setReviewDate(DateTimeUtils.toLocalDate(NOW));
+    vault5.setRetentionPolicy(retentionPolicy);
     vaultDAO.save(vault5);
 
     Deposit depositReview1 = getDeposit1();
@@ -547,6 +555,7 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
     vault1.setGroup(group1);
     vault1.setName("vault-one");
     vault1.setReviewDate(DateTimeUtils.toLocalDate(NOW));
+    vault1.setRetentionPolicy(retentionPolicy);
     vaultDAO.save(vault1);
 
     Vault vault2 = new Vault();
@@ -554,6 +563,7 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
     vault2.setGroup(group2);
     vault2.setName("vault-two");
     vault2.setReviewDate(DateTimeUtils.toLocalDate(NOW));
+    vault2.setRetentionPolicy(retentionPolicy);
     vaultDAO.save(vault2);
 
     Deposit depositReview1 = getDeposit1();
@@ -625,6 +635,7 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
     vault1.setGroup(group1);
     vault1.setName("vault-one");
     vault1.setReviewDate(DateTimeUtils.toLocalDate(NOW));
+    vault1.setRetentionPolicy(retentionPolicy);
     vaultDAO.save(vault1);
 
     Vault vault2 = new Vault();
@@ -632,6 +643,7 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
     vault2.setGroup(group2);
     vault2.setName("vault-two");
     vault2.setReviewDate(DateTimeUtils.toLocalDate(NOW));
+    vault2.setRetentionPolicy(retentionPolicy);
     vaultDAO.save(vault2);
 
     Deposit depositReview1 = getDeposit1();
@@ -708,6 +720,7 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
     vault1.setGroup(group1);
     vault1.setName("vault-one");
     vault1.setReviewDate(DateTimeUtils.toLocalDate(NOW));
+    vault1.setRetentionPolicy(retentionPolicy);
     vaultDAO.save(vault1);
 
     Vault vault2 = new Vault();
@@ -715,6 +728,7 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
     vault2.setGroup(group2);
     vault2.setName("vault-two");
     vault2.setReviewDate(DateTimeUtils.toLocalDate(NOW));
+    vault2.setRetentionPolicy(retentionPolicy);
     vaultDAO.save(vault2);
 
     Deposit depositReview1 = getDeposit1();
@@ -782,6 +796,13 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
   @BeforeEach
   void setup() {
     assertEquals(0, dao.count());
+    retentionPolicy = new RetentionPolicy();
+    retentionPolicy.setEngine("engine!");
+    retentionPolicy.setName("RETENTION POLICY 111");
+    retentionPolicy.setDescription("RETENTION POLICY 111 DEC");
+    retentionPolicy.setMinRetentionPeriod(1);
+    retentionPolicy.setExtendUponRetrieval(false);
+    retentionPoliciesService.addRetentionPolicy(retentionPolicy);
   }
 
   @AfterEach
@@ -913,6 +934,7 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
     vault1.setGroup(group1);
     vault1.setName("vault-one");
     vault1.setReviewDate(DateTimeUtils.toLocalDate(NOW));
+    vault1.setRetentionPolicy(retentionPolicy);
     vaultDAO.save(vault1);
 
     Vault vault2 = new Vault();
@@ -920,6 +942,7 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
     vault2.setGroup(group2);
     vault2.setName("vault-two");
     vault2.setReviewDate(DateTimeUtils.toLocalDate(NOW));
+    vault2.setRetentionPolicy(retentionPolicy);
     vaultDAO.save(vault2);
 
     Deposit depositReview1 = getDeposit1();

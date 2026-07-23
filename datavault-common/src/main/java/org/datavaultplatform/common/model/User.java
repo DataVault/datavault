@@ -129,4 +129,13 @@ public class User implements Identified {
     public int hashCode() {
         return getClass().hashCode();
     }
+
+    @JsonIgnore
+    public boolean isValidEmail() {
+        return User.isValidEmail(this.email);
+    }
+    
+    public static boolean isValidEmail(String email) {
+        return email != null && email.contains("@");
+    }
 }

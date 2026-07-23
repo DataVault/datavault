@@ -237,7 +237,7 @@ class VaultsControllerTest {
             }
             assertThat(modelMap).containsEntry("vault", vaultInfo);
             assertThat(modelMap).containsEntry("roles", validRoles);
-            assertThat(modelMap).containsEntry("createRetentionPolicy", createRetentionPolicy);
+            assertThat(modelMap).containsEntry("retentionPolicy", createRetentionPolicy);
             assertThat(modelMap).containsEntry("group", group);
             assertThat(modelMap).containsEntry("deposits", depositInfos);
             Map<String, Retrieve[]> retrievals = (Map<String, Retrieve[]>)modelMap.get("retrievals");

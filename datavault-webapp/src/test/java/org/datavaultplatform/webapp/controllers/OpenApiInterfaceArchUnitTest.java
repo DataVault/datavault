@@ -15,7 +15,7 @@ import java.util.Optional;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 
 @AnalyzeClasses(packages = "org.datavaultplatform.webapp")
-public class OpenApiInterfaceTest {
+public class OpenApiInterfaceArchUnitTest {
 
     private static final DescribedPredicate<JavaClass> NOT_A_TEST_CLASS =
             new DescribedPredicate<>("is not a test class or inner class of a test class") {

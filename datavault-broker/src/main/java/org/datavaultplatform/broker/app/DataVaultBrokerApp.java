@@ -15,7 +15,9 @@ import org.datavaultplatform.broker.actuator.LocalFileStoreInfo;
 import org.datavaultplatform.broker.actuator.SftpFileStoreEndpoint;
 import org.datavaultplatform.broker.actuator.SftpFileStoreInfo;
 import org.datavaultplatform.broker.config.*;
+import org.datavaultplatform.broker.services.UsersService;
 import org.datavaultplatform.common.crypto.EncryptionValidator;
+import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.monitor.MemoryStats;
 import org.datavaultplatform.common.services.LDAPService;
 import org.springframework.amqp.rabbit.listener.RabbitListenerEndpointRegistry;
@@ -71,6 +73,12 @@ public class DataVaultBrokerApp implements CommandLineRunner {
 
   @Autowired
   LocalFileStoreEndpoint localFileStoreEndpoint;
+  
+  @Autowired
+  UsersService usersService;
+
+  @Value("${broker.show.users.with.invalid.email.on.startup:false}")
+  boolean brokerShowUsersWithInvalidEmailOnStartup;
 
   @SneakyThrows
   public static void main(String[] args) {
@@ -133,6 +141,7 @@ public class DataVaultBrokerApp implements CommandLineRunner {
     showLocalFileStoreInfo();
     LDAPService.testLdapConnection(readyEvent.getApplicationContext());
     log.info("{}", MemoryStats.getCurrent().toPretty());
+    showUsersWithInvalidEmails();
   }
 
   private void showLocalFileStoreInfo() {
@@ -179,5 +188,20 @@ public class DataVaultBrokerApp implements CommandLineRunner {
       String runnableDescription = ctd.getRunnable().getTarget();
       log.info("CRON[{}][{}][{}]", runnableDescription, cronExpr, description);
     });
+  }
+
+  protected void showUsersWithInvalidEmails() {
+    log.info("broker.show.users.with.invalid.email.on.startup [{}]", brokerShowUsersWithInvalidEmailOnStartup);
+    if (brokerShowUsersWithInvalidEmailOnStartup) {
+      log.info("START - users with invalid email");
+      List<User> usersWithInvalidEmail = usersService.findUsersWithInvalidEmail();
+      int total = usersWithInvalidEmail.size();
+      for (int i = 0; i < usersWithInvalidEmail.size(); i++) {
+        User user = usersWithInvalidEmail.get(i);
+        String msg = String.format("[%d/%d] userId[%s] : Invalid Email[%s]", i + 1, total, user.getID(), user.getEmail());
+        log.info(msg);
+      }
+      log.info("END   - users with invalid email");
+    }
   }
 }
