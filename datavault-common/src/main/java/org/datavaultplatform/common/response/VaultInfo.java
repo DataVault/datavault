@@ -2,170 +2,172 @@ package org.datavaultplatform.common.response;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
-import java.util.Calendar;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
 import org.datavaultplatform.common.model.PendingVault;
 import org.datavaultplatform.common.request.CreateVault;
 import org.datavaultplatform.common.retentionpolicy.RetentionPolicyStatus;
 import org.datavaultplatform.common.util.DateTimeUtils;
-import org.jsondoc.core.annotation.ApiObject;
-import org.jsondoc.core.annotation.ApiObjectField;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiObject(name = "VaultInfo")
+@Schema(name = "VaultInfo", description = "Information about a DataVault Vault")
+@Data
 public class VaultInfo {
     
-    @ApiObjectField(description = "The unique identifier for this vault")
+    @Schema(description = "The unique identifier for this vault")
     private String id;
     
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern=DateTimeUtils.ISO_DATE_TIME_FORMAT)
-    @ApiObjectField(description = "The date and time when this vault was created")
-    private Date creationTime;
+    @Schema(description = "The date and time when this vault was created")
+    private LocalDateTime creationTime;
 
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern=DateTimeUtils.ISO_DATE_TIME_FORMAT)
-    @ApiObjectField(description = "The date and time when the policy will expire")
-    private Date policyExpiry;
+    @Schema(description = "The date and time when the policy will expire")
+    private LocalDateTime policyExpiry;
 
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern=DateTimeUtils.ISO_DATE_TIME_FORMAT)
-    @ApiObjectField(description = "The date and time when the policy check was last carried out")
-    private Date policyLastChecked;
+    @Schema(description = "The date and time when the policy check was last carried out")
+    private LocalDateTime policyLastChecked;
 
-    @ApiObjectField(description = "The name of this vault")
+    @Schema(description = "The name of this vault")
     private String name;
     
-    @ApiObjectField(description = "The date and time when this vault was created")
+    @Schema(description = "The description of this vault")
     private String description;
 
-    @ApiObjectField(description = "Estimate of vault size")
+    @Schema(description = "Estimate of vault size")
     private PendingVault.Estimate estimate;
 
-    @ApiObjectField(description = "How we are billing")
+    @Schema(description = "How we are billing")
     private PendingVault.Billing_Type billingType;
 
-    @ApiObjectField(description = "Notes regarding data retention")
+    @Schema(description = "Notes regarding data retention")
     private String notes;
     
-    @ApiObjectField(description = "The policy that applies to this vault")
+    @Schema(description = "The policy that applies to this vault")
     private String policyID;
 
-    @ApiObjectField(description = "The length of the policy that applies to this vault")
+    @Schema(description = "The length of the policy that applies to this vault")
     private String policyLength;
     
-    @ApiObjectField(description = "The group which is related to this vault")
+    @Schema(description = "The group which is related to this vault")
     private String groupID;
     
-    @ApiObjectField(description = "The user UUN who owns this vault")
+    @Schema(description = "The user UUN who owns this vault")
     private String userID;
     
-    @ApiObjectField(description = "The user name who owns this vault")
+    @Schema(description = "The user name who owns this vault")
     private String userName;
 
-    @ApiObjectField(description = "A reference to an external metadata record that describes this vault")
+    @Schema(description = "A reference to an external metadata record that describes this vault")
     private String datasetID;
 
-    @ApiObjectField(description = "Another reference to an external metadata record that describes this vault")
+    @Schema(description = "Another reference to an external metadata record that describes this vault")
     private String crisID;
 
-    @ApiObjectField(description = "The name of the external metadata record that describes this vault")
+    @Schema(description = "The name of the external metadata record that describes this vault")
     private String datasetName;
 
-    @ApiObjectField(description = "The size of this vault in bytes")
+    @Schema(description = "The size of this vault in bytes")
     private long vaultSize;
     
-    @ApiObjectField(description = "The status of the vault policy")
+    @Schema(description = "The status of the vault policy")
     private int policyStatus;
 
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern= DateTimeUtils.ISO_DATE_FORMAT)
-    @ApiObjectField(description = "Define the minimum of time the archive will be kept")
-    private Date grantEndDate;
+    @Schema(description = "Define the minimum of time the archive will be kept")
+    private LocalDate grantEndDate;
 
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern= DateTimeUtils.ISO_DATE_FORMAT)
-    @ApiObjectField(description = "The date by which the vault should be reviewed for decision as to whether it should be deleted or whether there are funds available to support continued storage")
-    private Date reviewDate;
+    @Schema(description = "The date by which the vault should be reviewed for decision as to whether it should be deleted or whether there are funds available to support continued storage")
+    private LocalDate reviewDate;
     
-    @ApiObjectField(description = "Number of Deposits in a vault")
+    @Schema(description = "Number of Deposits in a vault")
     private long numberOfDeposits;
     
-    @ApiObjectField(description = "Project Id from Pure")
+    @Schema(description = "Project Id from Pure")
     private String projectId;
 
-    @ApiObjectField(description = "Slice ID from erm somewhere")
+    @Schema(description = "Slice ID from erm somewhere")
     private String sliceID;
 
-    @ApiObjectField(description = "Authoriser of the billing")
+    @Schema(description = "Authoriser of the billing")
     private String authoriser;
 
-    @ApiObjectField(description = "School / Unit to be billed")
+    @Schema(description = "School / Unit to be billed")
     private String schoolOrUnit;
 
-    @ApiObjectField(description = "Subunit to be billed")
+    @Schema(description = "Subunit to be billed")
     private String subunit;
 
-    @ApiObjectField(description = "Project Title (from Grant billing fieldset)")
+    @Schema(description = "Project Title (from Grant billing fieldset)")
     private String projectTitle;
     
-    @ApiObjectField(description = "Amount to be Billed")
+    @Schema(description = "Amount to be Billed")
     private BigDecimal amountToBeBilled;
     
-    @ApiObjectField(description = "Amount Billed")
+    @Schema(description = "Amount Billed")
     private BigDecimal amountBilled;
     
-    @ApiObjectField(description = "Sum of vaults size for a projectId")
+    @Schema(description = "Sum of vaults size for a projectId")
     private long projectSize;
 
-    @ApiObjectField(description = "Did the user accept the various rules on the create vault intro page")
+    @Schema(description = "Did the user accept the various rules on the create vault intro page")
     private Boolean affirmed = false;
 
-    @ApiObjectField(description = "Did the user accept the Pure Link rule on the summary page")
+    @Schema(description = "Did the user accept the Pure Link rule on the summary page")
     private Boolean pureLink = false;
 
-    @ApiObjectField(description = "Did the user confirm the pending vault yet")
+    @Schema(description = "Did the user confirm the pending vault yet")
     private Boolean confirmed = false;
 
-    @ApiObjectField(description = "Pure Contact")
+    @Schema(description = "Pure Contact")
     private String contact;
 
-    @ApiObjectField(description = "Pending / Vault Owner ID")
+    @Schema(description = "Pending / Vault Owner ID")
     private String ownerId;
 
-    @ApiObjectField(description = "Vault Owner Name")
+    @Schema(description = "Vault Owner Name")
     private String ownerName;
 
-    @ApiObjectField(description = "Pending Vault Creator ID")
+    @Schema(description = "Pending Vault Creator ID")
     private String vaultCreatorId;
     
-    @ApiObjectField(description = "Data Creators")
+    @Schema(description = "Data Creators")
     private List<String> creators;
 
-    @ApiObjectField(description = "Nominated Data Managers")
+    @Schema(description = "Nominated Data Managers")
     private List<String> nominatedDataManagerIds;
 
-    @ApiObjectField(description = "Depositors")
+    @Schema(description = "Depositors")
     private List<String> depositorIds;
 
-    @ApiObjectField(description = "The Billing page sliceQueryChoice radio button value")
+    @Schema(description = "The Billing page sliceQueryChoice radio button value")
 	private PendingVault.Slice_Query_Choice sliceQueryChoice;
 
-	@ApiObjectField(description = "The Billing page fundingQueryChoice radio button value")
+	@Schema(description = "The Billing page fundingQueryChoice radio button value")
 	private PendingVault.Funding_Query_Choice fundingQueryChoice;
 
-	@ApiObjectField(description = "The Billing page feewaiverQueryChoice radio button value")
+	@Schema(description = "The Billing page feewaiverQueryChoice radio button value")
 	private PendingVault.Feewaiver_Query_Choice feewaiverQueryChoice;
 
-    @ApiObjectField(description = "The Billing payment details.")
+    @Schema(description = "The Billing payment details.")
 	private String paymentDetails;
+    
+    private VaultReviewStatusInfo vaultReviewStatusInfo;
 
     public VaultInfo() { }
 
     public VaultInfo(String id, String userID, String userName, String datasetID, String crisID, String datasetName,
-                     Date creationTime, String name, String description, String policyID, String policyLength, String groupID,
-                     long vaultSize, int policyStatus, Date policyExpiry, Date policyLastChecked, Date grantEndDate,
-                     Date reviewDate, long numberOfDeposits, String projectId) {
+                     LocalDateTime creationTime, String name, String description, String policyID, String policyLength, String groupID,
+                     long vaultSize, int policyStatus, LocalDateTime policyExpiry, LocalDateTime policyLastChecked, LocalDate grantEndDate,
+                     LocalDate reviewDate, long numberOfDeposits, String projectId) {
         this.id = id;
         this.userID = userID;
         this.userName = userName;
@@ -188,8 +190,8 @@ public class VaultInfo {
         this.crisID = crisID;
     }
 
-     public VaultInfo(String id,String userName, Date creationTime, String name,
-    		long vaultSize, Date reviewDate, Date grantEndDate, BigDecimal amountToBeBilled,BigDecimal amountBilled, String projectId,
+     public VaultInfo(String id,String userName, LocalDateTime creationTime, String name,
+    		long vaultSize, LocalDate reviewDate, LocalDate grantEndDate, BigDecimal amountToBeBilled,BigDecimal amountBilled, String projectId,
             String paymentDetails) {
         this.id = id;
         this.userName = userName;
@@ -204,8 +206,8 @@ public class VaultInfo {
         this.paymentDetails = paymentDetails;
     }
 
-    public VaultInfo(String id,String userName, Date creationTime, String name,
-    		long vaultSize, Date reviewDate,BigDecimal amountToBeBilled,BigDecimal amountBilled, String projectId,
+    public VaultInfo(String id,String userName, LocalDateTime creationTime, String name,
+    		long vaultSize, LocalDate reviewDate,BigDecimal amountToBeBilled,BigDecimal amountBilled, String projectId,
             String paymentDetails) {
         this.id = id;        
         this.userName = userName;    
@@ -227,125 +229,6 @@ public class VaultInfo {
         this.id = id;
     }
 
-    public String getUserID() {
-        return userID;
-    }
-
-    public void setUserID(String userID) {
-        this.userID = userID;
-    }
-    
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
-    public String getDatasetID() {
-        return datasetID;
-    }
-
-    public void setDatasetID(String datasetID) {
-        this.datasetID = datasetID;
-    }
-
-    public String getCrisID() {
-        return crisID;
-    }
-
-    public void setCrisID(String crisID) {
-        this.crisID = crisID;
-    }
-
-    public String getDatasetName() {
-        return datasetName;
-    }
-
-    public void setDatasetName(String datasetName) {
-        this.datasetName = datasetName;
-    }
-
-    public Date getCreationTime() {
-        return creationTime;
-    }
-
-    public void setCreationTime(Date creationTime) {
-        this.creationTime = creationTime;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getNotes() {
-        return this.notes;
-    }
-
-    public void setNotes(String notes) {
-        this.notes = notes;
-    }
-
-    public PendingVault.Estimate getEstimate() {
-        return this.estimate;
-    }
-
-    public void setEstimate(PendingVault.Estimate estimate) {
-        this.estimate = estimate;
-    }
-
-    public PendingVault.Billing_Type getBillingType() {
-        return this.billingType;
-    }
-
-    public void setBillingType(PendingVault.Billing_Type billingType) {
-        this.billingType = billingType;
-    }
-
-    public String getPolicyID() {
-        return policyID;
-    }
-
-    public void setPolicyID(String policyID) {
-        this.policyID = policyID;
-    }
-
-    public String getPolicyLength() {
-        return policyLength;
-    }
-
-    public void setPolicyLength(String policyLength) {
-        this.policyLength = policyLength;
-    }
-
-    public String getGroupID() {
-        return groupID;
-    }
-
-    public void setGroupID(String groupID) {
-        this.groupID = groupID;
-    }
-
-    public long getVaultSize() {
-        return vaultSize;
-    }
-
-    public void setVaultSize(long vaultSize) {
-        this.vaultSize = vaultSize;
-    }
 
     public String getSizeStr() {
         if ( vaultSize == 0 ){
@@ -361,30 +244,6 @@ public class VaultInfo {
         return dx + " GB";
     }
 
-    public int getPolicyStatus() {
-        return policyStatus;
-    }
-
-    public void setPolicyStatus(int policyStatus) {
-        this.policyStatus = policyStatus;
-    }
-
-    public Date getPolicyLastChecked() {
-        return policyLastChecked;
-    }
-
-    public void setPolicyLastChecked(Date policyLastChecked) {
-        this.policyLastChecked = policyLastChecked;
-    }
-
-    public Date getPolicyExpiry() {
-        return policyExpiry;
-    }
-
-    public void setPolicyExpiry(Date policyExpiry) {
-        this.policyExpiry = policyExpiry;
-    }
-
     public String getPolicyStatusStr() {
         if (policyStatus == RetentionPolicyStatus.UNCHECKED) return "Un-checked";
         else if (policyStatus == RetentionPolicyStatus.OK) return "OK";
@@ -392,64 +251,6 @@ public class VaultInfo {
         else return ("Unknown");
     }
     
-    public Date getGrantEndDate() {
-        return grantEndDate;
-    }
-
-    public void setGrantEndDate(Date grantEndDate) {
-        this.grantEndDate = grantEndDate;
-    }
-
-    public Date getReviewDate() {
-        return reviewDate;
-    }
-
-    public void setReviewDate(Date reviewDate) {
-        this.reviewDate = reviewDate;
-    }
-
-	public long getNumberOfDeposits() {
-		return numberOfDeposits;
-	}
-
-	public void setNumberOfDeposits(long numberOfDeposits) {
-		this.numberOfDeposits = numberOfDeposits;
-	}
-
-	public String getProjectId() {
-		return projectId;
-	}
-
-	public void setProjectId(String projectId) {
-		this.projectId = projectId;
-	}
-
-    public String getProjectTitle() {
-        return projectTitle;
-    }
-
-    public void setProjectTitle(String projectTitle) {
-        this.projectTitle = projectTitle;
-    }
-
-    public String getSliceID() {
-        return this.sliceID;
-    }
-
-    public void setSliceID(String sliceID) {
-        this.sliceID = sliceID;
-    }
-
-	public long getProjectSize() {
-		return projectSize;
-	}
-
-
-
-	public void setProjectSize(long projectSize) {
-		this.projectSize = projectSize;
-	}
-	
 	public String getProjectSizeStr() {
         if ( projectSize == 0 ){
             return "0";
@@ -462,160 +263,6 @@ public class VaultInfo {
             return "< 1 GB";
         }
         return dx + " GB";
-    }
-
-
-	public BigDecimal getAmountToBeBilled() {
-		return amountToBeBilled;
-	}
-
-	public void setAmountToBeBilled(BigDecimal amountToBeBilled) {
-		this.amountToBeBilled = amountToBeBilled;
-	}
-
-	public BigDecimal getAmountBilled() {
-		return amountBilled;
-	}
-
-	public void setAmountBilled(BigDecimal amountBilled) {
-		this.amountBilled = amountBilled;
-	}
-
-    public Boolean getAffirmed() {
-        return affirmed;
-    }
-
-    public void setAffirmed(Boolean affirmed) {
-        this.affirmed = affirmed;
-    }
-
-    public String getAuthoriser() {
-        return this.authoriser;
-    }
-
-    public void setAuthoriser(String authoriser) {
-        this.authoriser = authoriser;
-    }
-
-    public String getSchoolOrUnit() {
-        return this.schoolOrUnit;
-    }
-
-    public void setSchoolOrUnit(String schoolOrUnit) {
-        this.schoolOrUnit = schoolOrUnit;
-    }
-
-    public String getSubunit() {
-        return this.subunit;
-    }
-
-    public void setSubunit(String subunit) {
-        this.subunit = subunit;
-    }
-
-    public String getContact() {
-        return this.contact;
-    }
-
-    public void setContact(String contact) {
-        this.contact = contact;
-    }
-
-    public String getOwnerId() {
-        return this.ownerId;
-    }
-
-    public void setOwnerId(String ownerId) {
-        this.ownerId = ownerId;
-    }
-
-    public String getOwnerName() {
-        return this.ownerName;
-    }
-
-    public void setOwnerName(String ownerName) {
-        this.ownerName = ownerName;
-    }
-
-    public void setDataCreators(List<String> creators) {
-        this.creators = creators;
-    }
-
-    public List<String> getDataCreators() {
-        return this.creators;
-    }
-
-    public List<String> getNominatedDataManagerIds() {
-        return nominatedDataManagerIds;
-    }
-
-    public void setNominatedDataManagerIds(List<String> nominatedDataManagerIds) {
-        this.nominatedDataManagerIds = nominatedDataManagerIds;
-    }
-
-    public List<String> getDepositorIds() {
-        return depositorIds;
-    }
-
-    public void setDepositorIds(List<String> depositorIds) {
-        this.depositorIds = depositorIds;
-    }
-
-    public Boolean getPureLink() {
-        return pureLink;
-    }
-
-    public void setPureLink(Boolean pureLink) {
-        this.pureLink = pureLink;
-    }
-
-    public Boolean getConfirmed() {
-        return confirmed;
-    }
-
-    public void setConfirmed(Boolean confirmed) {
-        this.confirmed = confirmed;
-    }
-    
-
-    public String getVaultCreatorId() {
-		return vaultCreatorId;
-	}
-
-	public void setVaultCreatorId(String vaultCreatorId) {
-		this.vaultCreatorId = vaultCreatorId;
-	}
-
-    public PendingVault.Slice_Query_Choice getSliceQueryChoice() {
-		return sliceQueryChoice;
-	}
-
-	public void setSliceQueryChoice(PendingVault.Slice_Query_Choice sliceQueryChoice) {
-		this.sliceQueryChoice = sliceQueryChoice;
-	}
-
-	public PendingVault.Funding_Query_Choice getFundingQueryChoice() {
-		return fundingQueryChoice;
-	}
-
-	public void setFundingQueryChoice(PendingVault.Funding_Query_Choice fundingQueryChoice) {
-		this.fundingQueryChoice = fundingQueryChoice;
-	}
-
-	public PendingVault.Feewaiver_Query_Choice getFeewaiverQueryChoice() {
-		return feewaiverQueryChoice;
-	}
-
-	public void setFeewaiverQueryChoice(PendingVault.Feewaiver_Query_Choice feewaiverQueryChoice) {
-		this.feewaiverQueryChoice = feewaiverQueryChoice;
-	}
-
-    public String getPaymentDetails() {
-        return this.paymentDetails;
-    }
-
-    public void setPaymentDetails(String paymentDetails) {
-        this.paymentDetails = paymentDetails;
     }
 
 	public CreateVault convertToCreate() {
@@ -720,24 +367,20 @@ public class VaultInfo {
 
         return cv;
     }
-
-    private Date plusOneDay(Date date) {
-        Date retVal = null;
-        if (date != null) {
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(date);
-            cal.add(Calendar.DATE, 1);
-            retVal =  cal.getTime();
-        }
-
-        return retVal;
-
-    }
-
+    
     /**
      * see 'templates/vaults/security.html'
      */
     public static VaultInfo create(){
         return new VaultInfo();
     }
+
+    public void setDataCreators(List<String> creators) {
+        this.creators = creators;
+    }
+
+    public List<String> getDataCreators() {
+        return this.creators;
+    }
+
 }

@@ -5,6 +5,8 @@ import java.util.Optional;
 import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.model.Vault_;
 import org.datavaultplatform.common.model.dao.custom.VaultCustomDAO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -36,4 +38,7 @@ public interface VaultDAO extends BaseDAO<Vault>, VaultCustomDAO {
   @Override
   @EntityGraph(Vault.EG_VAULT)
   Optional<Vault> findById(String id);
+
+  @EntityGraph(Vault.EG_VAULT)
+  Page<Vault> findByNameContainingIgnoreCaseOrderByNameAsc(String partialName, Pageable pageable);
 }

@@ -3,10 +3,10 @@ package org.datavaultplatform.common.model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.*;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -20,15 +20,17 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.persistence.Version;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import org.datavaultplatform.common.util.DateTimeUtils;
+import org.datavaultplatform.common.util.Utils;
 import org.hibernate.Hibernate;
 import org.datavaultplatform.common.response.BillingInformation;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.retentionpolicy.RetentionPolicyStatus;
 import org.hibernate.annotations.UuidGenerator;
+import org.springframework.util.Assert;
 
 /**
  * User: Tom Higgins
@@ -47,7 +49,7 @@ import org.hibernate.annotations.UuidGenerator;
         @NamedAttributeNode(Vault_.DEPOSITS),
 })
 public class Vault implements Identified {
-
+    
     public static final String EG_VAULT = "eg.Vault.1";
     private static final long ZERO = 0L;
     // Vault Identifier
@@ -62,22 +64,20 @@ public class Vault implements Identified {
 
     // Serialise date in ISO 8601 format
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateTimeUtils.ISO_DATE_TIME_FORMAT)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date creationTime;
+    @Column(name = "creationTime", nullable = false, columnDefinition = "TIMESTAMP")
+    private LocalDateTime creationTime;
 
     // NOTE: This field is optional. Always remember to check for null when handling
     // it!
     // Serialise date in ISO 8601 format
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateTimeUtils.ISO_DATE_FORMAT)
-    @Temporal(TemporalType.DATE)
-    @Column(name = "grantEndDate", nullable = true)
-    private Date grantEndDate;
+    @Column(name = "grantEndDate", nullable = true, columnDefinition = "DATE")
+    private LocalDate grantEndDate;
 
     // Serialise date in ISO 8601 format
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateTimeUtils.ISO_DATE_FORMAT)
-    @Temporal(TemporalType.DATE)
-    @Column(name = "reviewDate", nullable = false)
-    private Date reviewDate;
+    @Column(name = "reviewDate", nullable = false, columnDefinition = "DATE")
+    private LocalDate reviewDate;
 
     // Name of the vault
     @Column(name = "name", nullable = false, columnDefinition = "TEXT", length = 400)
@@ -120,13 +120,13 @@ public class Vault implements Identified {
 
     // Date retention policy will expire
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateTimeUtils.ISO_DATE_TIME_FORMAT)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date retentionPolicyExpiry;
+    @Column(name = "retentionPolicyExpiry", nullable = true, columnDefinition = "TIMESTAMP")
+    private LocalDateTime retentionPolicyExpiry;
 
     // Date retention policy was last checked
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateTimeUtils.ISO_DATE_TIME_FORMAT)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date retentionPolicyLastChecked;
+    @Column(name = "retentionPolicyLastChecked", nullable = true, columnDefinition = "TIMESTAMP")
+    private LocalDateTime retentionPolicyLastChecked;
 
     @JsonIgnore
     @ManyToOne
@@ -170,9 +170,9 @@ public class Vault implements Identified {
     public Vault() {
     }
 
-    public Vault(String name) {
+    public Vault(String name, Clock clock) {
         this.name = name;
-        this.creationTime = new Date();
+        this.creationTime = LocalDateTime.now(clock);
         retentionPolicyStatus = RetentionPolicyStatus.UNCHECKED;
     }
 
@@ -184,27 +184,27 @@ public class Vault implements Identified {
         return version;
     }
 
-    public void setCreationTime(Date creationTime) {
+    public void setCreationTime(LocalDateTime creationTime) {
         this.creationTime = creationTime;
     }
 
-    public Date getCreationTime() {
+    public LocalDateTime getCreationTime() {
         return creationTime;
     }
 
-    public void setGrantEndDate(Date grantEndDate) {
+    public void setGrantEndDate(LocalDate grantEndDate) {
         this.grantEndDate = grantEndDate;
     }
 
-    public Date getGrantEndDate() {
+    public LocalDate getGrantEndDate() {
         return grantEndDate;
     }
 
-    public void setReviewDate(Date reviewDate) {
+    public void setReviewDate(LocalDate reviewDate) {
         this.reviewDate = reviewDate;
     }
 
-    public Date getReviewDate() {
+    public LocalDate getReviewDate() {
         return reviewDate;
     }
 
@@ -233,8 +233,9 @@ public class Vault implements Identified {
     }
 
     public List<Deposit> getDeposits() {
-        if (deposits == null)
+        if (deposits == null) {
             return new ArrayList<>();
+        }
         return deposits;
     }
 
@@ -243,23 +244,34 @@ public class Vault implements Identified {
     }
 
     public List<VaultReview> getVaultReviews() {
-        if (vaultReviews == null)
+        if (vaultReviews == null) {
             return new ArrayList<>();
+        }
         return vaultReviews;
     }
 
     public void addDeposit(Deposit deposit) {
+        if (deposits == null) {
+            deposits = new ArrayList<>();
+        }
         this.deposits.add(deposit);
     }
 
     public List<DataManager> getDataManagers() {
-        if (dataManagers == null)
+        if (dataManagers == null) {
             return new ArrayList<>();
+        }
         return dataManagers;
     }
 
     public DataManager getDataManager(String uun) {
+        if (dataManagers == null) {
+            return null;
+        }
         for (DataManager dataManager : dataManagers) {
+            if (dataManager == null) {
+                continue;
+            }
             if (dataManager.getUUN().equals(uun)) {
                 return dataManager;
             }
@@ -268,6 +280,9 @@ public class Vault implements Identified {
     }
 
     public void addDataManager(DataManager dataManager) {
+        if (dataManagers == null) {
+            dataManagers = new ArrayList<>();
+        }
         this.dataManagers.add(dataManager);
     }
 
@@ -283,19 +298,19 @@ public class Vault implements Identified {
         return retentionPolicyStatus;
     }
 
-    public void setRetentionPolicyExpiry(Date retentionPolicyExpiry) {
+    public void setRetentionPolicyExpiry(LocalDateTime retentionPolicyExpiry) {
         this.retentionPolicyExpiry = retentionPolicyExpiry;
     }
 
-    public Date getRetentionPolicyExpiry() {
+    public LocalDateTime getRetentionPolicyExpiry() {
         return retentionPolicyExpiry;
     }
 
-    public void setRetentionPolicyLastChecked(Date retentionPolicyLastChecked) {
+    public void setRetentionPolicyLastChecked(LocalDateTime retentionPolicyLastChecked) {
         this.retentionPolicyLastChecked = retentionPolicyLastChecked;
     }
 
-    public Date getRetentionPolicyLastChecked() {
+    public LocalDateTime getRetentionPolicyLastChecked() {
         return retentionPolicyLastChecked;
     }
 
@@ -409,6 +424,8 @@ public class Vault implements Identified {
     }
 
     public VaultInfo convertToResponse() {
+        Assert.notNull(retentionPolicy, "The retention policy cannot null");
+        Assert.notNull(retentionPolicy.getID(), "The retention policy id cannot null");
         return new VaultInfo(
                 id,
                 user == null ? null : user.getID(),
@@ -486,5 +503,45 @@ public class Vault implements Identified {
     @Override
     public int hashCode() {
         return getClass().hashCode();
+    }
+
+    /**
+     * Get the most recent vault review.
+     * @return will return 'Optional.empty' if no VaultReviews
+     */
+    public Optional<VaultReview> getMostRecentVaultReview() {
+        return Utils.getSafeStream(vaultReviews)
+                .max(VaultReview.BY_CREATION_TIME);
+    }
+
+    /**
+     * Gets the most recent vault review where that most recent vault review also has NO actioned data.
+     * @return will return 'Optional.empty' if no VaultReviews OR most recent VaultReview has non-null actionedDate.
+     */
+    public Optional<VaultReview> findLatestVaultReviewIfStillUnderway() {
+        return getMostRecentVaultReview()
+                .filter(VaultReview::isReviewUnderway);
+    }
+
+    /**
+     * A VaultReview is underway if it has a null actionedDate
+     * @return true if the most recent vault review has no actionedDate.
+     */
+    public boolean isVaultReviewUnderway() {
+        return findLatestVaultReviewIfStillUnderway().isPresent();
+    }
+    
+    @PrePersist
+    private void verifyRetentionPolicyIsPresentForInsert() {
+        if (this.retentionPolicy == null) {
+            throw new IllegalStateException("RetentionPolicy must not be null when saving VaultName[%s]".formatted(this.name));
+        }
+    }
+
+    @PreUpdate
+    private void verifyRetentionPolicyIsPresentForUpdate() {
+        if (this.retentionPolicy == null) {
+            throw new IllegalStateException("RetentionPolicy must not be null when updating VaultId[%s]VaultName[%s]".formatted(this.id, this.name));
+        }
     }
 }

@@ -1,8 +1,6 @@
 package org.datavaultplatform.webapp.controllers;
 
-import com.google.common.base.Strings;
 import com.google.gson.Gson;
-import jakarta.validation.constraints.NotEmpty;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.request.CreateVault;
@@ -15,9 +13,7 @@ import org.datavaultplatform.common.util.RoleUtils;
 import org.datavaultplatform.webapp.exception.EntityNotFoundException;
 import org.datavaultplatform.webapp.exception.ForbiddenException;
 import org.datavaultplatform.webapp.exception.InvalidUunException;
-import org.datavaultplatform.webapp.model.DepositReviewModel;
-import org.datavaultplatform.webapp.model.VaultReviewHistoryModel;
-import org.datavaultplatform.webapp.model.VaultReviewModel;
+import org.datavaultplatform.webapp.model.*;
 import org.datavaultplatform.webapp.services.ForceLogoutService;
 import org.datavaultplatform.webapp.services.RestService;
 import org.datavaultplatform.webapp.services.UserLookupService;
@@ -37,14 +33,14 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.AssertTrue;
 import java.security.Principal;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Controller
 @ConditionalOnBean(RestService.class)
-public class VaultsController {
+public class VaultsController implements VaultsControllerApi {
 
     private static final Logger logger = LoggerFactory.getLogger(VaultsController.class);
     public static final String SYSTEM = "system";
@@ -75,10 +71,11 @@ public class VaultsController {
         this.welcome = welcome;
     }
 
+    @Override
     @PreAuthorize("hasPermission(#vaultId, 'VAULT', 'CAN_TRANSFER_VAULT_OWNERSHIP') or hasPermission(#vaultId, 'GROUP_VAULT', 'TRANSFER_SCHOOL_VAULT_OWNERSHIP')")
-    @PostMapping(value = "/vaults/{vaultid}/data-owner/update")
+    @PostMapping(value = "/vaults/{vaultId}/data-owner/update", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public ResponseEntity<Object> transferOwnership(
-            @PathVariable("vaultid") String vaultId,
+            @PathVariable String vaultId,
             @Valid VaultTransferRequest request) {
 
         VaultInfo vault = restService.getVault(vaultId);
@@ -89,32 +86,32 @@ public class VaultsController {
         String vaultOwner = vault.getUserID();
 
         if (!request.isOrphaning()) {
-            User newOwner = restService.getUser(request.user);
+            User newOwner = restService.getUser(request.getUser());
             if (newOwner == null) {
-                return ResponseEntity.status(422).body("Could not find user with ID=" + request.user);
+                return ResponseEntity.status(422).body("Could not find user with ID=" + request.getUser());
             }
 
-            boolean hasVaultRole = restService.getRoleAssignmentsForUser(request.user)
+            boolean hasVaultRole = restService.getRoleAssignmentsForUser(request.getUser())
                     .stream()
                     .anyMatch(role -> role.getVaultId() != null && role.getVaultId().equals(vaultId));
 
             String userId = vault.getUserID();
             // DAS 20210409 If the we are changing owner to a new user who isn't the same owner
             // and he has an existing role remove it
-            if (hasVaultRole && (userId == null || ! userId.equals(request.user))) {
+            if (hasVaultRole && (userId == null || ! userId.equals(request.getUser()))) {
                 // delete the users existing vault role
-                restService.getRoleAssignmentsForUser(request.user).stream()
+                restService.getRoleAssignmentsForUser(request.getUser()).stream()
                         .filter(roleAssignment -> vault.getID().equals(roleAssignment.getVaultId()))
                         .findFirst()
                         .ifPresent(roleAssignment -> restService.deleteRoleAssignment(roleAssignment.getId()));
             }
 
-            if (userId != null && userId.equals(request.user)) {
+            if (userId != null && userId.equals(request.getUser())) {
                 return ResponseEntity.status(422).body("Cannot transfer ownership to the current owner");
             }
 
             // if currently orphaned can't give new role
-            if (vaultOwner == null && request.assigningRole) {
+            if (vaultOwner == null && request.isAssigningRole()) {
                 return ResponseEntity.status(422).body("Cannot assign role to the previous owner");
             }
 
@@ -128,10 +125,10 @@ public class VaultsController {
             }
         }
         TransferVault transfer = new TransferVault();
-        transfer.setUserId(request.user);
-        transfer.setRoleId(request.role);
-        transfer.setChangingRoles(request.assigningRole);
-        transfer.setOrphaning(request.orphaning);
+        transfer.setUserId(request.getUser());
+        transfer.setRoleId(request.getRole());
+        transfer.setChangingRoles(request.isAssigningRole());
+        transfer.setOrphaning(request.isOrphaning());
 
         restService.transferVault(vaultId, transfer);
 
@@ -139,15 +136,16 @@ public class VaultsController {
             logoutService.logoutUser(vaultOwner);
         }
 
-        if (request.assigningRole) {
-            logoutService.logoutUser(request.user);
+        if (request.isAssigningRole()) {
+            logoutService.logoutUser(request.getUser());
         }
 
         return ResponseEntity.ok().build();
     }
 
 
-    @RequestMapping(value = "/vaults", method = RequestMethod.GET)
+    @Override
+    @GetMapping(value = "/vaults", produces = MediaType.TEXT_HTML_VALUE)
     public String getVaultsListing(ModelMap model, Principal principal) {
         logger.debug("Getting the current vaults");
         VaultInfo[] currentVaults = restService.getVaultsListing();
@@ -156,7 +154,8 @@ public class VaultsController {
         // go to vault list or vault create if no current / pending vaults
         if ((currentVaults != null && currentVaults.length > 0)
                 || (pendingVaults != null && pendingVaults.length > 0)) {
-            logger.debug("Current vaults: " + currentVaults.length);
+            int currentVaultsLength = currentVaults == null ? 0 : currentVaults.length;
+            logger.debug("Current vaults: {}", currentVaultsLength);
             model.addAttribute("vaults", currentVaults);
             model.addAttribute("pendingVaults", pendingVaults);
 
@@ -184,17 +183,18 @@ public class VaultsController {
         return this.buildVault(model, principal);
     }
 
-    @RequestMapping(value = "/vaults/{vaultid}", method = RequestMethod.GET)
-    public String getVault(ModelMap model, @PathVariable("vaultid") String vaultID, Principal principal) {
-        VaultInfo vault = restService.getVault(vaultID);
-        logger.info("getVault: " + vault);
+    @Override
+    @GetMapping(value = "/vaults/{vaultId}", produces = MediaType.TEXT_HTML_VALUE)
+    public String getVaultByVaultId(ModelMap model, @PathVariable String vaultId, Principal principal) {
+        VaultInfo vault = restService.getVault(vaultId);
+        logger.info("getVault: {}", vault);
 
         if (!canAccessVault(vault, principal)) {
             logger.info("getVault no permission.");
             throw new ForbiddenException();
         }
 
-        List<RoleAssignment> roleAssignmentsForVault = restService.getRoleAssignmentsForVault(vaultID);
+        List<RoleAssignment> roleAssignmentsForVault = restService.getRoleAssignmentsForVault(vaultId);
         List<RoleAssignment> vaultUsers = roleAssignmentsForVault.stream()
                 .filter(roleAssignment -> !RoleUtils.isDataOwner(roleAssignment))
                 .collect(Collectors.toList());
@@ -210,10 +210,10 @@ public class VaultsController {
         model.addAttribute("vault", vault);
         model.addAttribute("roles", validRoles);
         model.addAttribute("roleAssignments", vaultUsers);
-        model.addAttribute(restService.getRetentionPolicy(vault.getPolicyID()));
-        model.addAttribute(restService.getGroup(vault.getGroupID()));
+        model.addAttribute("retentionPolicy", restService.getRetentionPolicy(vault.getPolicyID()));
+        model.addAttribute("group", restService.getGroup(vault.getGroupID()));
         
-        DepositInfo[] deposits = restService.getDepositsListing(vaultID);
+        DepositInfo[] deposits = restService.getDepositsListing(vaultId);
         model.addAttribute("deposits", deposits);
 
         Map<String, Retrieve[]> depositRetrievals = new HashMap<>();
@@ -223,7 +223,7 @@ public class VaultsController {
         }
         model.addAttribute("retrievals", depositRetrievals);
         
-        DataManager[] dataManagers = restService.getDataManagers(vaultID);
+        DataManager[] dataManagers = restService.getDataManagers(vaultId);
         List<User> dataManagerUsers = new ArrayList<>();
         for(DataManager dm : dataManagers){
             User u = restService.getUser(dm.getUUN());
@@ -241,53 +241,53 @@ public class VaultsController {
         }
         model.addAttribute("dataManagers", dataManagerUsers);
 
-        EventInfo[] roleEvents = restService.getVaultsRoleEvents(vaultID);
+        EventInfo[] roleEvents = restService.getVaultsRoleEvents(vaultId);
         model.addAttribute("roleEvents", roleEvents);
 
         // todo: Get all the review history
 
-        ReviewInfo[] reviewInfos = restService.getReviewsListing(vaultID);
-        List<VaultReviewModel> vaultReviewModels = new ArrayList<>();
+        ReviewInfo[] reviewInfos = restService.getReviewsListing(vaultId);
+        List<VaultReviewViewModel> vaultReviewViewModels = new ArrayList<>();
 
         for (ReviewInfo reviewInfo : reviewInfos) {
 
-            VaultReview currentReview = restService.getVaultReview(reviewInfo.getVaultReviewId());
-            VaultReviewModel vaultReviewModel = new VaultReviewModel(currentReview);
-            List<DepositReviewModel> depositReviewModels = new ArrayList<>();
+            VaultReview vaultReview = restService.getVaultReview(reviewInfo.getVaultReviewId());
+            List<DepositReviewViewModel> depositReviewViewModels = new ArrayList<>();
             for (int i = 0; i < reviewInfo.getDepositIds().size(); i++) {
                 DepositInfo depositInfo = restService.getDeposit(reviewInfo.getDepositIds().get(i));
                 DepositReview depositReview = restService.getDepositReview(reviewInfo.getDepositReviewIds().get(i));
-                DepositReviewModel drm = new DepositReviewModel();
 
-                // Set DepositReview stuff
-                drm.setDepositReviewId(depositReview.getId());
-                drm.setDeleteStatus(depositReview.getDeleteStatus());
-                drm.setComment(depositReview.getComment());
-
-                // Set Deposit stuff
-                drm.setDepositId(depositInfo.getID());
-                drm.setName(depositInfo.getName());
-                drm.setStatusName(depositInfo.getStatus().name());
-                drm.setCreationTime(depositInfo.getCreationTime());
-
-                depositReviewModels.add(drm);
+                DepositReviewViewModel depositReviewViewModel = new DepositReviewViewModel(depositReview, depositInfo);
+                depositReviewViewModels.add(depositReviewViewModel);
             }
+            depositReviewViewModels.sort(DepositReviewViewModel.BY_DEPOSIT_CREATION_TIME);
 
-            depositReviewModels.sort(Comparator.comparing(DepositReviewModel::getCreationTime));
-            vaultReviewModel.setDepositReviewModels(depositReviewModels);
+            // the oldest DRVM first, most recent DRVM last
 
-            vaultReviewModels.add(vaultReviewModel);
+            VaultReviewViewModel vaultReviewViewModel = new VaultReviewViewModel();
+
+            vaultReviewViewModel.setVaultReviewId(vaultReview.getId());
+            vaultReviewViewModel.setComment(vaultReview.getComment());
+            vaultReviewViewModel.setActionedDate(vaultReview.getActionedDate());
+            vaultReviewViewModel.setCreationTime(vaultReview.getCreationTime());
+            vaultReviewViewModel.setOldReviewDate(vaultReview.getOldReviewDate()); //only show this with there is an actioned date
+            vaultReviewViewModel.setCurrentVaultReviewDate(vault.getReviewDate()); //only show this when there is no actioned date
+
+            vaultReviewViewModel.setDepositReviewViewModels(depositReviewViewModels);
+
+            vaultReviewViewModels.add(vaultReviewViewModel);
         }
+        vaultReviewViewModels.sort(VaultReviewViewModel.BY_CREATION_TIME);
 
         VaultReviewHistoryModel vrhm = new VaultReviewHistoryModel();
-        vrhm.setVaultReviewModels(vaultReviewModels);
+        vrhm.setVaultReviewViewModels(vaultReviewViewModels);
 
         model.addAttribute("vrhm", vrhm);
 
         return "vaults/vault";
     }
 
-    private boolean canAccessVault(VaultInfo vault, Principal principal) {
+    protected boolean canAccessVault(VaultInfo vault, Principal principal) {
         return canAccessVault(vault, principal, false);
     }
 
@@ -295,7 +295,7 @@ public class VaultsController {
         return canAccessVault(vault, principal, true);
     }
 
-    private boolean canAccessVault(VaultInfo vault, Principal principal, Boolean pending) {
+    protected boolean canAccessVault(VaultInfo vault, Principal principal, Boolean pending) {
         List<RoleAssignment> roleAssignmentsForUser = restService.getRoleAssignmentsForUser(principal.getName());
         if (pending) {
             return roleAssignmentsForUser.stream().anyMatch(roleAssignment ->
@@ -309,10 +309,13 @@ public class VaultsController {
                             || (RoleUtils.isRoleInSchool(roleAssignment, vault.getGroupID()) && RoleUtils.hasPermission(roleAssignment, Permission.CAN_MANAGE_VAULTS)));
         }
     }
-
+    @Override
     @PreAuthorize("hasRole('IS_ADMIN') or #userId == authentication.name")
     @GetMapping(value = "/vaults/{vaultId}/{userId}", produces = MediaType.TEXT_HTML_VALUE)
-    public String getVault(ModelMap model, @PathVariable String vaultId, @PathVariable String userId, Principal principal) {
+    public String getUserVaults(ModelMap model,
+                                @PathVariable String vaultId,
+                                @PathVariable String userId,
+                                Principal principal) {
         VaultInfo vault = restService.getVault(vaultId);
         if (vault == null) {
             throw new EntityNotFoundException(Vault.class, vaultId);
@@ -321,13 +324,17 @@ public class VaultsController {
             throw new ForbiddenException();
         }
         model.addAttribute("vaults", restService.getVaultsListingAll(userId));
+    	        
         return "vaults/userVaults";
     }
 
-    @RequestMapping(value = "/pendingVaults/{vaultid}", method = RequestMethod.GET)
-    public String getPendingVault(ModelMap model, @PathVariable("vaultid") String vaultID, Principal principal) {
-        VaultInfo vault = restService.getPendingVault(vaultID);
-        logger.info("Passed in id: '" + vaultID);
+    @Override
+    @GetMapping(value = "/pendingVaults/{vaultId}", produces = MediaType.TEXT_HTML_VALUE)
+    public String getPendingVault(ModelMap model,
+                                  @PathVariable String vaultId,
+                                  Principal principal) {
+        VaultInfo vault = restService.getPendingVault(vaultId);
+        logger.info("Passed in vaultId: {}", vaultId);
 
         if (!canAccessPendingVault(vault, principal)) {
             throw new ForbiddenException();
@@ -346,7 +353,8 @@ public class VaultsController {
         return "vaults/newCreatePrototype";
     }
 
-    @RequestMapping(value = "/vaults/buildsteps", method = RequestMethod.GET)
+    @Override
+    @GetMapping(value = "/vaults/buildsteps", produces = MediaType.TEXT_HTML_VALUE)
     public String buildVault(ModelMap model, Principal principal) {
 
         // pass the view an empty Vault since the form expects it if nothing has been saved so far
@@ -355,7 +363,7 @@ public class VaultsController {
         vault.setIsOwner(true);
         vault.setLoggedInAs(principal.getName());
         model.addAttribute("vault", vault);
-        Date defaultReviewDate = validateService.getDefaultReviewDate();
+        LocalDate defaultReviewDate = validateService.getDefaultReviewDate();
         vault.setReviewDate(defaultReviewDate);
 
         RetentionPolicy[] policies = restService.getRetentionPolicyListing();
@@ -376,13 +384,16 @@ public class VaultsController {
         String vaultUrl = "/vaults/" + newVault.getID() + "/";
         return "redirect:" + vaultUrl;
     }*/
-   @RequestMapping(value = "/vaults/confirmed", method = RequestMethod.GET)
-    public String confirmPendingVault() {
+
+   @Override
+   @GetMapping(value = "/vaults/confirmed", produces = MediaType.TEXT_HTML_VALUE)
+   public String confirmPendingVault() {
        return "vaults/confirmed";
 
     }
     // Process the completed 'create new vault' page
-    @RequestMapping(value = "/vaults/stepCreate", method = RequestMethod.POST)
+    @Override
+    @PostMapping(value = "/vaults/stepCreate", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public String addVault(@ModelAttribute CreateVault vault, ModelMap model, @RequestParam String action, Principal principal) {
 
 
@@ -455,7 +466,7 @@ public class VaultsController {
             // remove all the pending stuff for the vault;
             //String vaultUrl = "/pendingVaults/" + newVault.getID() + "/";
             //VaultInfo newVault = restService.addVault(vault);
-            return "";
+            return "vaults/index";
         } else {
             logger.info("Invalid button clicked");
             return "redirect:" + buildUrl;
@@ -463,16 +474,17 @@ public class VaultsController {
 
     }
     
-    @RequestMapping(value = "/vaults/{vaultid}/addDataManager", method = RequestMethod.POST)
+    @Override
+    @PostMapping(value = "/vaults/{vaultId}/addDataManager", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public RedirectView addDataManager(ModelMap model,
-                                       @PathVariable("vaultid") String vaultID,
+                                       @PathVariable String vaultId,
                                        @RequestParam("uun") String uun,
                                        final RedirectAttributes redirectAttrs) {
         logger.debug("Adding "+uun+" as DM");
 
-        String vaultUrl = "/vaults/" + vaultID + "/";
+        String vaultUrl = "/vaults/" + vaultId + "/";
 
-        DataManager[] dataManagers = restService.getDataManagers(vaultID);
+        DataManager[] dataManagers = restService.getDataManagers(vaultId);
         logger.debug("Check if already DM");
         for( DataManager dm : dataManagers ){
             logger.debug("DM: "+dm.getUUN());
@@ -490,7 +502,7 @@ public class VaultsController {
             return new RedirectView(vaultUrl, true);
         }
 
-        restService.addDataManager(vaultID, uun);
+        restService.addDataManager(vaultId, uun);
 
         redirectAttrs.addFlashAttribute("success",
                 "<strong>'"+uun+"'</strong> added as Data Manager of this Vault!");
@@ -498,55 +510,59 @@ public class VaultsController {
     }
     
     
-    @RequestMapping(value = "/vaults/{vaultid}/deleteDataManager", method = RequestMethod.POST)
+    @Override
+    @PostMapping(value = "/vaults/{vaultId}/deleteDataManager")
     public RedirectView deleteDataManager(ModelMap model,
-                                          @PathVariable("vaultid") String vaultID,
+                                          @PathVariable String vaultId,
                                           @RequestParam("uun") String uun,
                                           final RedirectAttributes redirectAttrs) {
         logger.info("Get Data Manager with id: "+uun);
-        DataManager dataManager = restService.getDataManager(vaultID, uun);
+        DataManager dataManager = restService.getDataManager(vaultId, uun);
 
         logger.info("Deleting Data Manager...");
-        restService.deleteDataManager(vaultID, dataManager.getID());
+        restService.deleteDataManager(vaultId, dataManager.getID());
 
-        String vaultUrl = "/vaults/" + vaultID + "/";
+        String vaultUrl = "/vaults/" + vaultId + "/";
         redirectAttrs.addFlashAttribute("success",
                 "<strong>'"+uun+"'</strong> is no longer a Data Manager of this Vault!");
         return new RedirectView(vaultUrl, true);
     }
 
-
-    @RequestMapping(value = "/vaults/{vaultid}/updateVaultDescription", method = RequestMethod.POST)
+    @Override
+    @PostMapping(value = "/vaults/{vaultId}/updateVaultDescription")
     public String updateVaultDescription(ModelMap model,
-                                         @PathVariable("vaultid") String vaultID,
+                                         @PathVariable String vaultId,
                                          @RequestParam("description") String description) {
-        VaultInfo vault = restService.updateVaultDescription(vaultID, description);
+        VaultInfo vault = restService.updateVaultDescription(vaultId, description);
         String vaultUrl = "/vaults/" + vault.getID() + "/";
         return "redirect:" + vaultUrl;
     }
 
-    @RequestMapping(value = "/vaults/{vaultid}/updateVaultName", method = RequestMethod.POST)
+    @Override
+    @PostMapping(value = "/vaults/{vaultId}/updateVaultName")
     public String updateVaultName(ModelMap model,
-                                         @PathVariable("vaultid") String vaultID,
-                                         @RequestParam("name") String name) {
-        VaultInfo vault = restService.updateVaultName(vaultID, name);
+                                  @PathVariable String vaultId,
+                                  @RequestParam("name") String name) {
+        VaultInfo vault = restService.updateVaultName(vaultId, name);
         String vaultUrl = "/vaults/" + vault.getID() + "/";
         return "redirect:" + vaultUrl;
     }
 
+    @Override
     //@PreAuthorize("hasRole('IS_ADMIN')")
-    @RequestMapping(value = "/vaults/autocompleteuun/{term}", method = RequestMethod.GET)
-    @ResponseBody
-    public String autocompleteUUN(@PathVariable("term") String term) {
+    @GetMapping(value = "/vaults/autocompleteuun/{term}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody //note - this value returns a JSON array - no curly brackets
+    public String autocompleteUUN(@PathVariable String term) {
         List<String> result = userLookupService.getSuggestedUuns(term);
         Gson gson = new Gson();
         return gson.toJson(result);
     }
 
+    @Override
     //@PreAuthorize("hasRole('IS_ADMIN')")
-    @RequestMapping(value = "/vaults/isuun/{uun}", method = RequestMethod.GET)
-    @ResponseBody
-    public String isUUN(@PathVariable("uun") String uun) {
+    @GetMapping(value = "/vaults/isuun/{uun}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody // note - this function returns simple true/false value as JSON - no curly brackets
+    public String isUUN(@PathVariable String uun) {
         boolean result = userLookupService.isUUN(uun);
         Gson gson = new Gson();
         return gson.toJson(result);
@@ -627,65 +643,6 @@ public class VaultsController {
 //        return retVal;
 //    }
 
-    private static class VaultTransferRequest {
-        private Long role;
-        private String user;
-        private boolean assigningRole;
-        private boolean orphaning;
-        private String reason;
-
-        public void setOrphaning(boolean orphaning) {
-            this.orphaning = orphaning;
-        }
-
-        public boolean isOrphaning() {
-            return orphaning;
-        }
-
-        public void setAssigningRole(boolean assigningRole) {
-            this.assigningRole = assigningRole;
-        }
-
-        public void setRole(Long role) {
-            this.role = role;
-        }
-
-        public void setUser(String user) {
-            this.user = user;
-        }
-
-        public Long getRole() {
-            return role;
-        }
-
-        public String getUser() {
-            return user;
-        }
-
-        @NotEmpty(message = "Please specify a transfer reason")
-        public String getReason() {
-            return reason;
-        }
-
-        public void setReason(String reason) {
-            this.reason = reason;
-        }
-
-        public boolean isAssigningRole() {
-            return assigningRole;
-        }
-
-        @AssertTrue(message = "Please specify a user")
-        public boolean isUserSelectionValid() {
-            return orphaning || !Strings.isNullOrEmpty(user);
-        }
-
-        @AssertTrue(message = "Please specify a role")
-        public boolean isRoleSelectionValid() {
-            return !assigningRole || role != null;
-        }
-
-    }
 }
 
 

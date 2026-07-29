@@ -21,7 +21,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 
 public class GroupsControllerAuthTest extends BaseControllerAuthTest {
 
@@ -177,7 +176,7 @@ public class GroupsControllerAuthTest extends BaseControllerAuthTest {
   @Test
   void testPostUpdateGroup() throws Exception {
     when(controller.updateGroup(argUserId.capture(), argGroup.capture())).thenReturn(
-        ResponseEntity.ok(GROUP_1));
+        GROUP_1);
 
     checkWorksWhenAuthenticatedFailsOtherwise(
         post("/groups/update")

@@ -18,13 +18,10 @@ import org.datavaultplatform.common.event.EventSender;
 import org.datavaultplatform.common.event.RecordingEventSender;
 import org.datavaultplatform.common.io.DataVaultFileUtils;
 import org.datavaultplatform.common.model.Job;
-import org.datavaultplatform.common.task.Context;
+import org.datavaultplatform.common.task.*;
 import org.datavaultplatform.common.task.Context.AESMode;
-import org.datavaultplatform.common.task.ContextVaultInfo;
-import org.datavaultplatform.common.task.Task;
-import org.datavaultplatform.common.task.TaskStageEventListener;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
-import org.datavaultplatform.worker.WorkerInstance;
+
 import org.datavaultplatform.worker.rabbit.RabbitMessageInfo;
 import org.datavaultplatform.worker.rabbit.RabbitMessageProcessor;
 import org.datavaultplatform.worker.tasks.Deposit;
@@ -63,6 +60,8 @@ public class Receiver implements RabbitMessageProcessor{
     
     private final TaskStageEventListener taskStageEventListener;
     
+    private final OperatingSystemChildProcessManager operatingSystemChildProcessManager;
+    
     public Receiver(
             String tempDir,
             String metaDir,
@@ -80,7 +79,8 @@ public class Receiver implements RabbitMessageProcessor{
             StorageClassNameResolver storageClassNameResolver,
             boolean oldRecompose, String recomposeDate,
             ProcessedJobStore processedJobStore,
-            String applicationName, TaskStageEventListener taskStageEventListener) {
+            String applicationName, TaskStageEventListener taskStageEventListener, 
+            OperatingSystemChildProcessManager operatingSystemChildProcessManager) {
         this.tempDir = tempDir;
         this.metaDir = metaDir;
         this.chunkingEnabled = chunkingEnabled;
@@ -98,6 +98,7 @@ public class Receiver implements RabbitMessageProcessor{
         this.processedJobStore = processedJobStore;
         this.applicationName = applicationName;
         this.taskStageEventListener = taskStageEventListener;
+        this.operatingSystemChildProcessManager = operatingSystemChildProcessManager;
     }
 
     @Override
@@ -142,11 +143,13 @@ public class Receiver implements RabbitMessageProcessor{
             String message = messageInfo.getMessageBody();
             MessageProperties props = messageInfo.message().getMessageProperties();
             // Decode and begin the job ...
+            TaskConfigTL.reset();
             try {
                 logMessageAsFormattedJson(props.getMessageId(), message);
- 
-                Task concreteTask = getConcreteTask(message);
 
+                Task concreteTask = getConcreteTask(message);
+                TaskConfigTL.get().populate(concreteTask.getProperties());
+    
                 // Is the message a redelivery ?
                 if (props.isRedelivered()) {
                     concreteTask.setIsRedeliver(true);
@@ -170,6 +173,9 @@ public class Receiver implements RabbitMessageProcessor{
                 long diff = System.currentTimeMillis() - start;
                 log.info("Finished Processing message[{}]. Took [{}]secs",
                     messageInfo, TimeUnit.MILLISECONDS.toSeconds(diff));
+
+               boolean stopChildProcesses = TaskConfigTL.get().isExecutorProperShutdownEnabled();
+               operatingSystemChildProcessManager.findAndStopChildProcesses(stopChildProcesses);
             }
      }
     

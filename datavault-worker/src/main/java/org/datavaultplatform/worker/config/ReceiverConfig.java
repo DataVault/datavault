@@ -14,6 +14,8 @@ import org.datavaultplatform.common.task.Context.AESMode;
 import org.datavaultplatform.common.task.TaskStageEventListener;
 import org.datavaultplatform.common.task.TaskType;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
+import org.datavaultplatform.worker.queue.OperatingSystemChildProcessManager;
+import org.datavaultplatform.worker.queue.OperatingSystemChildProcessManagerImpl;
 import org.datavaultplatform.worker.queue.ProcessedJobStore;
 import org.datavaultplatform.worker.queue.Receiver;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,7 +87,9 @@ public class ReceiverConfig {
 
    */
   @Bean
-  public Receiver receiver(StorageClassNameResolver resolver, ProcessedJobStore processedJobStore, TaskStageEventListener taskStageEventListener) {
+  public Receiver receiver(StorageClassNameResolver resolver, ProcessedJobStore processedJobStore,
+                           TaskStageEventListener taskStageEventListener,
+                           OperatingSystemChildProcessManager operatingSystemChildProcessManager) {
     Receiver result = new Receiver(
         this.tempDir,
         this.metaDir,
@@ -101,12 +105,18 @@ public class ReceiverConfig {
         this.recomposeDate,
         processedJobStore,
         applicationName,
-        taskStageEventListener
+        taskStageEventListener,
+        operatingSystemChildProcessManager
     );
     if(result.isEncryptionEnabled() && result.getEncryptionMode() == AESMode.GCM ) {
       Security.addProvider(new BouncyCastleProvider());
     }
     return result;
+  }
+  
+  @Bean
+  OperatingSystemChildProcessManager operatingSystemChildProcessManager(){
+    return new OperatingSystemChildProcessManagerImpl();
   }
   
   @Bean

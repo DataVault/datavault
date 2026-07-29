@@ -7,9 +7,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.datavaultplatform.broker.queue.Sender;
 import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.event.Event;
@@ -17,13 +21,6 @@ import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.response.*;
 
-import org.datavaultplatform.common.task.Task;
-import org.jsondoc.core.annotation.Api;
-import org.jsondoc.core.annotation.ApiHeader;
-import org.jsondoc.core.annotation.ApiHeaders;
-import org.jsondoc.core.annotation.ApiMethod;
-import org.jsondoc.core.annotation.ApiQueryParam;
-import org.jsondoc.core.pojo.ApiVerb;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,8 +30,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
@@ -43,8 +38,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 
 @RestController
-//@CrossOrigin
-@Api(name="Admin", description = "Administrator functions")
+@Tag(name="admin-controller", description = "Administrator functions")
 @Slf4j
 public class AdminController {
 
@@ -60,7 +54,7 @@ public class AdminController {
     private final ExternalMetadataService externalMetadataService;
     private final AuditsService auditsService;
     private final RolesAndPermissionsService permissionsService;
-    private final Sender sender;
+    private final AdminDepositService adminDepositService;
     private final String optionsDir;
     private final String tempDir;
     private final String bucketName;
@@ -73,7 +67,7 @@ public class AdminController {
         DepositsService depositsService, RetrievesService retrievesService,
         EventService eventService, ArchiveStoreService archiveStoreService, JobsService jobsService,
         ExternalMetadataService externalMetadataService, AuditsService auditsService,
-        RolesAndPermissionsService permissionsService, Sender sender,
+        RolesAndPermissionsService permissionsService, AdminDepositService adminDepositService,
         @Value("${optionsDir:#{null}}") String optionsDir,
         @Value("${tempDir:#{null}}") String tempDir,
         @Value("${s3.bucketName:#{null}}") String bucketName,
@@ -90,7 +84,7 @@ public class AdminController {
         this.externalMetadataService = externalMetadataService;
         this.auditsService = auditsService;
         this.permissionsService = permissionsService;
-        this.sender = sender;
+        this.adminDepositService = adminDepositService;
         this.optionsDir = optionsDir;
         this.tempDir = tempDir;
         this.bucketName = bucketName;
@@ -100,56 +94,59 @@ public class AdminController {
     }
 
 
-    @GetMapping(value = "/admin/deposits/count")
-    public Integer getDepositsCount(@RequestHeader(HEADER_USER_ID) String userID,
-                                  @RequestParam(value = "query", required = false)
-                                  @ApiQueryParam(name = "query",
-                                          description = "Deposit query field",
-                                          required = false) String query) {
-        return depositsService.getTotalDepositsCount(userID, query);
+    @Operation(
+            summary = "Get the total count of Deposits",
+            description = "Retrieves the total number of Deposits in the system, with an optional query filter.",
+            parameters = {
+                    @Parameter(in = ParameterIn.HEADER, name = HEADER_USER_ID, required = true, description = "DataVault Broker User ID", schema = @Schema(type = "string")),
+                    @Parameter(in = ParameterIn.QUERY, name = "query", description = "Deposit query field", schema = @Schema(type = "string"))
+            }
+    )
+    @GetMapping(value = "/admin/deposits/count", produces = MediaType.APPLICATION_JSON_VALUE)
+    public int getDepositsCount(@RequestHeader(HEADER_USER_ID) String userId,
+                                @RequestParam(value = "query", required = false) String query) {
+        return depositsService.getTotalDepositsCount(userId, query);
     }
 
-    @GetMapping(value = "/admin/retrieves/count")
-    public Integer getRetrievesCount(@RequestHeader(HEADER_USER_ID) String userID,
-                                    @RequestParam(value = "query", required = false)
-                                    @ApiQueryParam(name = "query",
-                                            description = "Retrieve query field",
-                                            required = false) String query) {
-        return retrievesService.getTotalRetrievesCount(userID, query);
+    @Operation(
+            summary = "Get the total count of Retrieves",
+            description = "Retrieves the total number of Retrieves in the system, with an optional query filter.",
+            parameters = {
+                    @Parameter(in = ParameterIn.HEADER, name = HEADER_USER_ID, required = true, description = "DataVault Broker User ID", schema = @Schema(type = "string")),
+                    @Parameter(in = ParameterIn.QUERY, name = "query", required = false, description = "Retrieve query field", schema = @Schema(type = "string"))
+            }
+    )
+    @GetMapping(value = "/admin/retrieves/count", produces = MediaType.APPLICATION_JSON_VALUE)
+    public int getRetrievesCount(@RequestHeader(HEADER_USER_ID) String userId,
+                                 @RequestParam(value = "query", required = false) String query) {
+        return retrievesService.getTotalRetrievesCount(userId, query);
     }
-  
+
     public ExternalMetadataService getExternalMetadataService() {
         return externalMetadataService;
     }
 
-    @GetMapping("/admin/deposits")
-    public List<DepositInfo> getDepositsAll(@RequestHeader(HEADER_USER_ID) String userID,
-                                            @RequestParam(value = "query", required = false)
-                                            @ApiQueryParam(name = "query",
-                                                    description = "Deposit query field",
-                                                    required = false) String query,
-                                            @RequestParam(value = "sort", required = false)
-                                            @ApiQueryParam(name = "sort",
-                                                    description = "Deposit sort field",
-                                                    allowedvalues = {"name", "depositSize", "creationTime", "status",
-                                                            "depositor", "vaultName", "pureId", "school", "id",
-                                                            "vaultId", "owner", "reviewDate"},
-                                                    defaultvalue = "creationTime", required = false) String sort,
-                                            @RequestParam(value = "order", required = false)
-                                            @ApiQueryParam(name = "order",
-                                                    description = "Deposit sort order",
-                                                    allowedvalues = {"asc", "desc"},
-                                                    defaultvalue = "desc", required = false) String order,
-                                            @RequestParam(value = "offset", required = false)
-                                            @ApiQueryParam(name = "offset",
-                                                    description = "Deposit row id",
-                                                    defaultvalue = "0", required = false) int offset,
-                                            @RequestParam(value = "maxResult", required = false)
-                                            @ApiQueryParam(name = "maxResult",
-                                                    description = "Number of records",
-                                                    required = false) int maxResult) {
+    @Operation(
+            summary = "Get a list of all Deposits",
+            description = "Retrieves a list of all Deposits in the system, with optional sorting and filtering.",
+            parameters = {
+                    @Parameter(in = ParameterIn.HEADER, name = HEADER_USER_ID, required = true, description = "DataVault Broker User ID", schema = @Schema(type = "string")),
+                    @Parameter(in = ParameterIn.QUERY, name = "query", required = false, description = "Deposit query field", schema = @Schema(type = "string")),
+                    @Parameter(in = ParameterIn.QUERY, name = "sort", required = false, description = "Deposit sort field", schema = @Schema(type = "string", allowableValues = {"name", "depositSize", "creationTime", "status", "depositor", "vaultName", "pureId", "school", "id", "vaultId", "owner", "reviewDate"}, defaultValue = "creationTime")),
+                    @Parameter(in = ParameterIn.QUERY, name = "order", required = false, description = "Deposit sort order", schema = @Schema(type = "string", allowableValues = {"asc", "desc"}, defaultValue = "desc")),
+                    @Parameter(in = ParameterIn.QUERY, name = "offset", required = false, description = "Deposit row id", schema = @Schema(type = "integer", format = "int32", defaultValue = "0")),
+                    @Parameter(in = ParameterIn.QUERY, name = "maxResult", required = false, description = "Number of records", schema = @Schema(type = "integer", format = "int32"))
+            }
+    )
+    @GetMapping(value = "/admin/deposits", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<DepositInfo> getDepositsAll(@RequestHeader(HEADER_USER_ID) String userId,
+                                            @RequestParam(value = "query", required = false) String query,
+                                            @RequestParam(value = "sort", required = false) String sort,
+                                            @RequestParam(value = "order", required = false) String order,
+                                            @RequestParam(value = "offset", required = false) int offset,
+                                            @RequestParam(value = "maxResult", required = false) int maxResult) {
         List<DepositInfo> depositResponses = new ArrayList<>();
-        List<Deposit> deposits = depositsService.getDeposits(query, userID, sort, order, offset, maxResult);
+        List<Deposit> deposits = depositsService.getDeposits(query, userId, sort, order, offset, maxResult);
         for (Deposit deposit : deposits) {
             DepositInfo depositInfo = deposit.convertToResponse();
             User depositor = usersService.getUser(depositInfo.getUserID());
@@ -175,26 +172,23 @@ public class AdminController {
         return depositResponses;
     }
 
-    @ApiMethod(
-            path = "/admin/deposits/data",
-            verb = ApiVerb.GET,
-            description = "Gets a list of all Vaults",
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
+    @Operation(
+            summary = "Gets a list of all Vaults",
+            description = "Retrieves a list of all Vaults in the system, with optional sorting.",
+            parameters = {
+                    @Parameter(in = ParameterIn.HEADER, name = HEADER_USER_ID, required = true, description = "DataVault Broker User ID", schema = @Schema(type = "string")),
+                    @Parameter(in = ParameterIn.QUERY, name = "sort", description = "Vault sort field", schema = @Schema(type = "string"))
+            }
     )
-    @ApiHeaders(headers={
-            @ApiHeader(name=HEADER_USER_ID, description="DataVault Broker User ID")
-    })
-    @GetMapping("/admin/deposits/data")
-    public DepositsData getDepositsAllData(@RequestHeader(HEADER_USER_ID) String userID,
-                                           @RequestParam(value = "sort", required = false)
-                                           @ApiQueryParam(name = "sort", description = "Vault sort field") String sort
+    @GetMapping(value = "/admin/deposits/data", produces = MediaType.APPLICATION_JSON_VALUE)
+    public DepositsData getDepositsAllData(@RequestHeader(HEADER_USER_ID) String userId,
+                                           @RequestParam(value = "sort", required = false) String sort
     ) {
 
         if (sort == null) sort = "";
         long recordsTotal = 0L;
         List<DepositInfo> depositResponses = new ArrayList<>();
-        List<Deposit> deposits = depositsService.getDeposits("", userID, sort, null, 0, 10);
+        List<Deposit> deposits = depositsService.getDeposits("", userId, sort, null, 0, 10);
         if(CollectionUtils.isNotEmpty(deposits)) {
             for (Deposit deposit : deposits) {
                 DepositInfo depositInfo = deposit.convertToResponse();
@@ -221,70 +215,60 @@ public class AdminController {
         return data;
     }
 
-    @GetMapping("/admin/retrieves")
-    public List<Retrieve> getRetrievesAll(@RequestHeader(HEADER_USER_ID) String userID,
-                                            @RequestParam(value = "query", required = false)
-                                            @ApiQueryParam(name = "query",
-                                                    description = "Retrieve query field",
-                                                    required = false) String query,
-                                            @RequestParam(value = "sort", required = false)
-                                            @ApiQueryParam(name = "sort",
-                                                    description = "Retrieve sort field",
-                                                    allowedvalues = {"timestamp"},
-                                                    defaultvalue = "timestamp", required = false) String sort,
-                                            @RequestParam(value = "order", required = false)
-                                            @ApiQueryParam(name = "order",
-                                                    description = "Retrieve sort order",
-                                                    allowedvalues = {"asc", "desc"},
-                                                    defaultvalue = "desc", required = false) String order,
-                                            @RequestParam(value = "offset", required = false)
-                                            @ApiQueryParam(name = "offset",
-                                                    description = "Retrieve row id",
-                                                    defaultvalue = "0", required = false) int offset,
-                                            @RequestParam(value = "maxResult", required = false)
-                                            @ApiQueryParam(name = "maxResult",
-                                                    description = "Number of records",
-                                                    required = false) int maxResult) {
-        List<Retrieve> retrieves = retrievesService.getRetrieves(query, userID, sort, order, offset, maxResult);
+    @Operation(
+            summary = "Get a list of all Retrieves",
+            description = "Retrieves a list of all Retrieves in the system, with optional sorting and filtering.",
+            parameters = {
+                    @Parameter(in = ParameterIn.HEADER, name = HEADER_USER_ID, required = true, description = "DataVault Broker User ID", schema = @Schema(type = "string")),
+                    @Parameter(in = ParameterIn.QUERY, name = "query", description = "Retrieve query field", schema = @Schema(type = "string")),
+                    @Parameter(in = ParameterIn.QUERY, name = "sort", description = "Retrieve sort field", schema = @Schema(type = "string", allowableValues = {"timestamp"}, defaultValue = "timestamp")),
+                    @Parameter(in = ParameterIn.QUERY, name = "order", description = "Retrieve sort order", schema = @Schema(type = "string", allowableValues = {"asc", "desc"}, defaultValue = "desc")),
+                    @Parameter(in = ParameterIn.QUERY, name = "offset", description = "Retrieve row id", schema = @Schema(type = "integer", format = "int32", defaultValue = "0")),
+                    @Parameter(in = ParameterIn.QUERY, name = "maxResult", description = "Number of records", schema = @Schema(type = "integer", format = "int32"))
+            }
+    )
+    @GetMapping(value = "/admin/retrieves", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<Retrieve> getRetrievesAll(@RequestHeader(HEADER_USER_ID) String userId,
+                                          @RequestParam(value = "query", required = false) String query,
+                                          @RequestParam(value = "sort", required = false) String sort,
+                                          @RequestParam(value = "order", required = false) String order,
+                                          @RequestParam(value = "offset", required = false) int offset,
+                                          @RequestParam(value = "maxResult", required = false) int maxResult) {
+        List<Retrieve> retrieves = retrievesService.getRetrieves(query, userId, sort, order, offset, maxResult);
 
         return retrieves;
     }
 
 
-    @ApiMethod(
-            path = "/admin/vaults",
-            verb = ApiVerb.GET,
-            description = "Gets a list of all Vaults",
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
+    @Operation(
+            summary = "Gets a list of all Vaults",
+            description = "Retrieves a list of all Vaults in the system, with optional sorting and filtering.",
+            parameters = {
+                    @Parameter(in = ParameterIn.HEADER, name = HEADER_USER_ID, required = true, description = "DataVault Broker User ID", schema = @Schema(type = "string")),
+                    @Parameter(in = ParameterIn.QUERY, name = "sort", description = "Vault sort field", schema = @Schema(type = "string", allowableValues = {"id", "name", "description", "vaultSize", "user", "policy", "creationTime", "groupID", "reviewDate"}, defaultValue = "creationTime")),
+                    @Parameter(in = ParameterIn.QUERY, name = "order", description = "Vault sort order", schema = @Schema(type = "string", allowableValues = {"asc", "desc"}, defaultValue = "desc")),
+                    @Parameter(in = ParameterIn.QUERY, name = "offset", description = "Vault row id", schema = @Schema(type = "string", defaultValue = "0")),
+                    @Parameter(in = ParameterIn.QUERY, name = "maxResult", description = "Number of records", schema = @Schema(type = "string"))
+            }
     )
-    @ApiHeaders(headers={
-            @ApiHeader(name=HEADER_USER_ID, description="DataVault Broker User ID")
-    })
-    @GetMapping(value = "/admin/vaults")
-    public VaultsData getVaultsAll(@RequestHeader(HEADER_USER_ID) String userID,
-                                   @RequestParam(value = "sort", required = false)
-                                   @ApiQueryParam(name = "sort", description = "Vault sort field", allowedvalues = {"id", "name", "description", "vaultSize", "user", "policy", "creationTime", "groupID", "reviewDate"}, defaultvalue = "creationTime", required = false) String sort,
-                                   @RequestParam(value = "order", required = false)
-                                   @ApiQueryParam(name = "order", description = "Vault sort order", allowedvalues = {"asc", "desc"}, defaultvalue = "desc", required = false) String order,
-                                   @RequestParam(value = "offset", required = false)
-                                   @ApiQueryParam(name = "offset", description = "Vault row id ", defaultvalue = "0", required = false) String offset,
-                                   @RequestParam(value = "maxResult", required = false)
-                                   @ApiQueryParam(name = "maxResult", description = "Number of records", required = false) String maxResult) {
+    @GetMapping(value = "/admin/vaults", produces = MediaType.APPLICATION_JSON_VALUE)
+    public VaultsData getVaultsAll(@Parameter(hidden = true) @RequestHeader(HEADER_USER_ID) String userId,
+                                   @Parameter(hidden = true) @RequestParam(value = "sort", required = false) String sort,
+                                   @Parameter(hidden = true) @RequestParam(value = "order", required = false) String order,
+                                   @Parameter(hidden = true) @RequestParam(value = "offset", required = false) String offset,
+                                   @Parameter(hidden = true) @RequestParam(value = "maxResult", required = false) String maxResult) {
 
         if (sort == null) sort = "";
         if (order == null) order = "asc";
         int recordsTotal = 0;
         List<VaultInfo> vaultResponses = new ArrayList<>();
-        List<Vault> vaults = vaultsService.getVaults(userID, sort, order,offset, maxResult);
+        List<Vault> vaults = vaultsService.getVaults(userId, sort, order,offset, maxResult);
         if(CollectionUtils.isNotEmpty(vaults)) {
             for (Vault vault : vaults) {
                 vaultResponses.add(vault.convertToResponse());
             }
-            recordsTotal = vaultsService.getTotalNumberOfVaults(userID);
-            //Map of project with its size
+            recordsTotal = vaultsService.getTotalNumberOfVaults(userId);
             Map<String, Long> projectSizeMap = vaultsService.getAllProjectsSize();
-            //update project Size in the response
             for(VaultInfo vault: vaultResponses) {
                 if(vault.getProjectId() != null) {
                     vault.setProjectSize(projectSizeMap.get(vault.getProjectId()));
@@ -297,8 +281,16 @@ public class AdminController {
         return data;
     }
 
-    @GetMapping(value = "/admin/events")
-    public List<EventInfo> getEventsAll(@RequestHeader(HEADER_USER_ID) String userID,
+    @Operation(
+            summary = "Get a list of all Events",
+            description = "Retrieves a list of all Events in the system, with optional sorting.",
+            parameters = {
+                    @Parameter(in = ParameterIn.HEADER, name = HEADER_USER_ID, required = true, description = "DataVault Broker User ID", schema = @Schema(type = "string")),
+                    @Parameter(in = ParameterIn.QUERY, name = "sort", description = "Event sort field", schema = @Schema(type = "string"))
+            }
+    )
+    @GetMapping(value = "/admin/events", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<EventInfo> getEventsAll(@RequestHeader(HEADER_USER_ID) String userId,
                                         @RequestParam(value = "sort", required = false) String sort) {
 
         List<EventInfo> events = new ArrayList<>();
@@ -308,9 +300,16 @@ public class AdminController {
         return events;
     }
 
-    @GetMapping("/admin/audits")
-    public List<AuditInfo> getAuditsAll(@RequestHeader(HEADER_USER_ID) String userID) {
-	    List<AuditInfo> audits = new ArrayList<>();
+    @Operation(
+            summary = "Get a list of all Audits",
+            description = "Retrieves a list of all Audits in the system.",
+            parameters = {
+                    @Parameter(in = ParameterIn.HEADER, name = HEADER_USER_ID, required = true, description = "DataVault Broker User ID", schema = @Schema(type = "string"))
+            }
+    )
+    @GetMapping(value = "/admin/audits", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<AuditInfo> getAuditsAll(@RequestHeader(HEADER_USER_ID) String userId) {
+        List<AuditInfo> audits = new ArrayList<>();
 
 	    for (Audit audit : auditsService.getAudits()){
             AuditInfo auditInfo = audit.convertToResponse();
@@ -328,89 +327,49 @@ public class AdminController {
 	    return audits;
     }
 
-    //TODO - looks like this method could do with TLC
-    @GetMapping("/admin/deposits/audit")
-    public String runDepositAudit(@RequestHeader(HEADER_USER_ID) String userID,
-                                HttpServletRequest request) {
-        // Make sure it's admin or localhost
+    @Operation(
+            summary = "Run a Deposit audit",
+            description = "Triggers a Deposit audit process.",
+            parameters = {
+                    @Parameter(in = ParameterIn.HEADER, name = HEADER_USER_ID, required = false, description = "DataVault Broker User ID", schema = @Schema(type = "string"))
+            }
+    )
+    @GetMapping(value = "/admin/deposits/audit", produces = MediaType.TEXT_PLAIN_VALUE)
+    public String runDepositAudit(@RequestHeader(value = HEADER_USER_ID, required = false) String userId,
+                                  HttpServletRequest request) {
         String remoteAddr = request.getRemoteAddr();
         log.info("remoteAddr: {}", remoteAddr);
 
-        // Get oldest Audit
         String query = "";
         String sort = "";
         List<DepositChunk> chunks = depositsService.getChunksForAudit();
-        //TODO - doesn't seem right - ignores 'chunks'
         return "Success";
     }
     
-    @DeleteMapping("/admin/deposits/{depositID}")
-    public ResponseEntity<Object> deleteDeposit(@RequestHeader(HEADER_USER_ID) String userID,
-                                                @PathVariable("depositID") String depositID) throws Exception {
+    @Operation(
+            summary = "Delete a Deposit",
+            description = "Deletes a Deposit from the system.",
+            parameters = {
+                    @Parameter(in = ParameterIn.HEADER, name = HEADER_USER_ID, required = true, description = "DataVault Broker User ID", schema = @Schema(type = "string")),
+                    @Parameter(in = ParameterIn.PATH, name = "depositID", required = true, description = "The ID of the Deposit to delete", schema = @Schema(type = "string"))
+            }
+    )
+    @DeleteMapping("/admin/deposits/{depositId}")
+    public ResponseEntity<Void> deleteDeposit(@RequestHeader(HEADER_USER_ID) String userId,
+                                                @PathVariable String depositId) throws Exception {
 
-        LOGGER.info("Delete deposit with ID : {}", depositID);
+        LOGGER.info("Delete deposit with ID : {}", depositId);
 
-        User user = usersService.getUser(userID);
-        Deposit deposit = depositsService.getUserDeposit(user, depositID);
+        User user = usersService.getUser(userId);
+        Deposit deposit = depositsService.getUserDeposit(user, depositId);
 
         if (user == null) {
-            throw new Exception("User '" + userID + "' does not exist");
+            throw new Exception("User '" + userId + "' does not exist");
         }
-
-        List<Job> jobs = deposit.getJobs();
-        for (Job job : jobs) {
-            if (job.isError() == false && job.getState() != job.getStates().size() - 1) {
-                // There's an in-progress job for this deposit
-                throw new IllegalArgumentException("Job in-progress for this Deposit");
-            }
-        }
-
-        List<ArchiveStore> archiveStores = archiveStoreService.getArchiveStores();
-        if (archiveStores.isEmpty()) {
-            throw new Exception("No configured archive storage");
-        }
-        LOGGER.info("Delete deposit archiveStores : {}", archiveStores);
-        archiveStores = this.addArchiveSpecificOptions(archiveStores);
-
-        // Create a job to track this delete
-        Job job = new Job("org.datavaultplatform.worker.tasks.Delete");
-        jobsService.addJob(deposit, job);
-
-        // Ask the worker to process the data delete
-        try {
-            HashMap<String, String> deleteProperties = new HashMap<>();
-            deleteProperties.put(PropNames.DEPOSIT_ID, deposit.getID());
-            deleteProperties.put(PropNames.BAG_ID, deposit.getBagId());
-            deleteProperties.put(PropNames.ARCHIVE_SIZE, Long.toString(deposit.getArchiveSize()));
-            deleteProperties.put(PropNames.USER_ID, user.getID());
-            deleteProperties.put(PropNames.NUM_OF_CHUNKS, Integer.toString(deposit.getNumOfChunks()));
-            for (Archive archive : deposit.getArchives()) {
-                deleteProperties.put(archive.getArchiveStore().getID(), archive.getArchiveId());
-            }
-
-            // Add a single entry for the user file storage
-            Map<String, String> userFileStoreClasses = new HashMap<>();
-            Map<String, Map<String, String>> userFileStoreProperties = new HashMap<>();
-            //userFileStoreClasses.put(storageID, userStore.getStorageClass());
-            //userFileStoreProperties.put(storageID, userStore.getProperties());
-
-
-            Task deleteTask = new Task(
-                    job, deleteProperties, archiveStores,
-                    userFileStoreProperties, userFileStoreClasses,
-                    null, null,
-                    null,
-                    null, null,
-                    null, null, null);
-            ObjectMapper mapper = new ObjectMapper();
-            String jsonDelete = mapper.writeValueAsString(deleteTask);
-            sender.send(jsonDelete);
-        } catch (Exception e) {
-            LOGGER.error("Exception while deleting a deposit", e);
-        }
+        adminDepositService.deleteDeposit(deposit, user);
         return new ResponseEntity<>(HttpStatus.OK);
-
     }
+    
     private List<ArchiveStore> addArchiveSpecificOptions(List<ArchiveStore> archiveStores) {
         if (archiveStores != null && ! archiveStores.isEmpty()) {
             for (ArchiveStore archiveStore : archiveStores) {

@@ -4,11 +4,10 @@ import org.datavaultplatform.webapp.services.RestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.servlet.view.RedirectView;
 
 /**
  * User: Robin Taylor
@@ -17,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
  */
 @Controller
 @ConditionalOnBean(RestService.class)
-public class WelcomeController {
+public class WelcomeController implements WelcomeControllerApi {
 
     private final RestService restService;
 
@@ -33,9 +32,10 @@ public class WelcomeController {
         this.link = link;
     }
 
-    @RequestMapping(value = "/", method = RequestMethod.GET)
-    public String getVaultsListing(ModelMap model) {
-        return "redirect:/vaults";
+    @Override
+    @GetMapping("/")
+    public RedirectView getVaultsListing() {
+        return new RedirectView("/vaults");
     }
     
 //    @RequestMapping(value = "/", method = RequestMethod.GET)
@@ -64,8 +64,9 @@ public class WelcomeController {
 //
 //    }
 
-        @GetMapping("/welcome")
-        public String welcome(){
-            return "welcome";
-        }
+    @Override
+    @GetMapping(value = "/welcome", produces = MediaType.TEXT_HTML_VALUE)
+    public String welcome() {
+        return "welcome";
+    }
 }

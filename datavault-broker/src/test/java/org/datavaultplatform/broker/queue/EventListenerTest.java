@@ -2170,7 +2170,7 @@ public class EventListenerTest {
         }
       };
       assertEquals(0, deposit.getNumOfChunks());
-      assertNull(deposit.getDepositChunks());
+      assertThat(deposit.getDepositChunks().isEmpty());
 
       doNothing().when(depositsService).updateDeposit(deposit);
       sut.updateDepositWithChunks(deposit, event);

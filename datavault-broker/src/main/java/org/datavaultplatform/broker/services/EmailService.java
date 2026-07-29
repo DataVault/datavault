@@ -50,7 +50,10 @@ public class EmailService {
 
     // Send a plain-text email
     public void sendPlaintextMail(final String to, final String subject, final String message) {
-        
+        if (!User.isValidEmail(to)) {
+            log.error("Invalid Email [{}]", to);
+            return;
+        }
         SimpleMailMessage msg = new SimpleMailMessage();
         msg.setTo(to);
         msg.setFrom(mailAdministrator);
@@ -70,26 +73,29 @@ public class EmailService {
     }
 
     public void sendTemplateMailToUser(User user, final String subject, final String template, final Map<String,Object> model) {
-        if (user.getEmail() != null) {
+        if (user.isValidEmail()) {
             sendTemplateMail(user.getEmail(),
                     subject,
                     template,
                     model);
         } else {
             // TODO: email admin "User missing email"
-            log.info("Email missing for {}.  Can't send role assignment email", user.getID());
+            log.error("Email Invalid for UserId[{}]Email[{}].  Can't send email", user.getID(), user.getEmail());
         }
     }
 
     // Send an HTML email based on a Velocity template using data from the provided model
     public void sendTemplateMail(final String to, final String subject, final String template, final Map<String,Object> model) {
-
+        if (!User.isValidEmail(to)) {
+            log.error("Invalid Email [{}]", to);
+            return;
+        }
+        String text = emailBodyGenerator.generate(template, model);
         MimeMessagePreparator preparator = mimeMessage -> {
             MimeMessageHelper message = new MimeMessageHelper(mimeMessage);
             message.setTo(to);
             message.setFrom(mailAdministrator);
             message.setSubject(subject);
-            String text = emailBodyGenerator.generate(template, model);
             message.setText(text, true);
         };
         

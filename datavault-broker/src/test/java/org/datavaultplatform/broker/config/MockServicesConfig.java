@@ -98,4 +98,6 @@ public class MockServicesConfig {
   @MockBean
   VaultsService mVaultsService;
 
+  @MockBean
+  AdminDepositService mAdminDepositService;
 }

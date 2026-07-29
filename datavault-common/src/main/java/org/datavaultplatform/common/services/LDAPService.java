@@ -1,11 +1,6 @@
 package org.datavaultplatform.common.services;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
@@ -25,6 +20,7 @@ import org.apache.directory.ldap.client.api.LdapNetworkConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
 
@@ -251,7 +247,8 @@ public class LDAPService {
         }
     }
 
-    public  HashMap<String, String> getLdapUserInfo(String uid) throws LdapException, CursorException {
+    @Cacheable(value = "ldap-users", key = "#uid")
+    public HashMap<String, String> getLdapUserInfo(String uid) throws LdapException, CursorException {
         logger.info("Search info for UUN: [{}]", uid);
 
         LdapNetworkConnection connection = getConnection();
@@ -311,7 +308,7 @@ public class LDAPService {
         return searchRequest;
     }
 
-    public  HashMap<String, String> getLDAPAttributes(String name) throws LdapException, CursorException {
+    public Map<String, String> getLDAPAttributes(String name) throws LdapException, CursorException {
         LdapNetworkConnection connection = null;
         try {
             connection = getConnection();

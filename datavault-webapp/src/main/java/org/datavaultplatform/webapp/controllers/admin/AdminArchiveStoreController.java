@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
@@ -23,7 +24,7 @@ import java.util.List;
  */
 @Controller
 @ConditionalOnBean(RestService.class)
-public class AdminArchiveStoreController {
+public class AdminArchiveStoreController implements AdminArchiveStoreControllerApi {
 
     private static final Logger logger = LoggerFactory.getLogger(AdminArchiveStoreController.class);
 
@@ -38,8 +39,9 @@ public class AdminArchiveStoreController {
     }
 
     // Return the 'Archive Stores' page
-    @RequestMapping(value = "/admin/archivestores", method = RequestMethod.GET)
-    public String listArchivestores(ModelMap model) throws Exception {
+    @Override
+    @GetMapping(value = "/admin/archivestores", produces = MediaType.TEXT_HTML_VALUE)
+    public String listArchivestores(ModelMap model) {
         model.addAttribute("archiveDir", archiveDir);
 
         ArchiveStore[] archiveStores = restService.getArchiveStores();
@@ -58,12 +60,13 @@ public class AdminArchiveStoreController {
     }
 
     // Process the 'add local ArchiveStore' Ajax request
-    @RequestMapping(value = "/admin/archivestores/local", method = RequestMethod.POST)
+    @Override
+    @PostMapping(value = "/admin/archivestores/local", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     @ResponseBody
-    public void addLocalArchivestore(@RequestParam(value="properties",required=false) String properties,
-                                     @RequestParam(value="label") String label,
-                                     @RequestParam(value="type") String type,
-                                     @RequestParam(value="retrieve",required=false) String retrieve) throws Exception {
+    public void addLocalArchiveStore(@RequestParam(value = "properties", required = false) String properties,
+                                     @RequestParam(value = "label") String label,
+                                     @RequestParam(value = "type") String type,
+                                     @RequestParam(value = "retrieve", required = false) String retrieve) throws Exception {
 
         String storageClass = StorageConstants.getStorageClass(type).orElseThrow (
             () -> new IllegalArgumentException(String.format("The type[%s] is not valid", type))
@@ -78,37 +81,41 @@ public class AdminArchiveStoreController {
     }
 
     // Process the 'delete archivestore' Ajax request
-    @RequestMapping(value = "/admin/archivestores/{archivestoreId}", method = RequestMethod.DELETE)
+    @Override
+    @DeleteMapping(value = "/admin/archivestores/{archiveStoreId}")
     @ResponseBody
-    public void deleteArchiveStore(ModelMap model, @PathVariable("archivestoreId") String archivestoreId) throws Exception {
-        restService.deleteArchiveStore(archivestoreId);
+    public void deleteArchiveStore(ModelMap model, @PathVariable String archiveStoreId) {
+        restService.deleteArchiveStore(archiveStoreId);
     }
 
     // Mark this archive store as being the preferred one for retrieval
-    @RequestMapping(value = "/admin/archivestores/{archivestoreId}/enable", method = RequestMethod.POST)
+    @Override
+    @PostMapping(value = "/admin/archivestores/{archiveStoreId}/enable")
     @ResponseBody
-    public void enableRetrieve(ModelMap model, @PathVariable("archivestoreId") String archivestoreId) throws Exception {
-        ArchiveStore archiveStore = restService.getArchiveStore(archivestoreId);
+    public void enableRetrieve(ModelMap model, @PathVariable String archiveStoreId) {
+        ArchiveStore archiveStore = restService.getArchiveStore(archiveStoreId);
         archiveStore.setRetrieveEnabled(true);
         restService.editArchiveStore(archiveStore);
     }
 
     // Mark this archivestore as no longer being preferred for retrieval
-    @RequestMapping(value = "/admin/archivestores/{archivestoreId}/disable", method = RequestMethod.POST)
+    @Override
+    @PostMapping(value = "/admin/archivestores/{archiveStoreId}/disable")
     @ResponseBody
-    public void disableRetrieve(ModelMap model, @PathVariable("archivestoreId") String archivestoreId) throws Exception {
-        ArchiveStore archiveStore = restService.getArchiveStore(archivestoreId);
+    public void disableRetrieve(ModelMap model, @PathVariable String archiveStoreId) {
+        ArchiveStore archiveStore = restService.getArchiveStore(archiveStoreId);
         archiveStore.setRetrieveEnabled(false);
         restService.editArchiveStore(archiveStore);
     }
 
     // Process the 'update properties archivestore' Ajax request
-    @RequestMapping(value = "/admin/archivestores/{archivestoreId}/update/properties", method = RequestMethod.POST)
+    @Override
+    @PostMapping(value = "/admin/archivestores/{archiveStoreId}/update/properties", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     @ResponseBody
     public void updateArchiveStore(ModelMap model,
-                                   @PathVariable("archivestoreId") String archivestoreId,
+                                   @PathVariable String archiveStoreId,
                                    @RequestParam("properties") String properties) throws Exception {
-        ArchiveStore archiveStore = restService.getArchiveStore(archivestoreId);
+        ArchiveStore archiveStore = restService.getArchiveStore(archiveStoreId);
         HashMap<String,String> storeProperties = buildStoreProperties(properties);
         archiveStore.setProperties(storeProperties);
         restService.editArchiveStore(archiveStore);

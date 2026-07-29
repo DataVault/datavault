@@ -1,14 +1,16 @@
 package org.datavaultplatform.broker.controllers;
 
-import static org.datavaultplatform.common.util.Constants.HEADER_CLIENT_KEY;
 import static org.datavaultplatform.common.util.Constants.HEADER_USER_ID;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.datavaultplatform.broker.services.AdminService;
 import org.datavaultplatform.broker.services.UsersService;
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.request.ValidateUser;
-import org.jsondoc.core.annotation.*;
-import org.jsondoc.core.pojo.ApiVerb;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +19,7 @@ import java.util.List;
 
 @RestController
 //@CrossOrigin
-@Api(name="Users", description = "Interact with DataVault Users")
+@Tag(name="users-controller", description = "Interact with DataVault Users")
 public class UsersController {
 
     private final AdminService adminService;
@@ -30,65 +32,67 @@ public class UsersController {
         this.usersService = usersService;
     }
 
-    @ApiMethod(
-            path = "/users",
-            verb = ApiVerb.GET,
-            description = "Gets a list of all Users",
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
+    @Operation(
+            summary = "Gets a list of all Users",
+            description = "Retrieves a list of all users in the DataVault system."
     )
-    @ApiHeaders(headers={
-            @ApiHeader(name=HEADER_USER_ID, description="DataVault Broker User ID")
-    })
-    @GetMapping( "/users")
-    public List<User> getUsers(@RequestHeader(HEADER_USER_ID) String userID) {
+    @GetMapping(value = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<User> getUsers( @RequestHeader(HEADER_USER_ID) String userId) {
         return usersService.getUsers();
     }
 
-    @ApiMethod(
-            path = "/users}",
-            verb = ApiVerb.POST,
-            description = "Create a new DataVault User",
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
+    @Operation(
+            summary = "Create a new DataVault User",
+            description = "Creates a new user in the DataVault system."
     )
-    @ApiHeaders(headers={
-            @ApiHeader(name=HEADER_USER_ID, description="DataVault Broker User ID"),
-            @ApiHeader(name=HEADER_CLIENT_KEY, description="DataVault API Client Key")
-    })
-    @PostMapping("/users")
+    @PostMapping(value = "/users", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public User addUser(@RequestBody User user) {
         usersService.addUser(user);
         return user;
     }
 
-    @ApiMethod(
-            path = "/users/{userid}",
-            verb = ApiVerb.GET,
-            description = "Get a specific DataVault User",
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
+    @Operation(
+            summary = "Get a specific DataVault User",
+            description = "Retrieves details for a specific user by their ID."
     )
-    @ApiHeaders(headers={
-            @ApiHeader(name=HEADER_USER_ID, description="DataVault Broker User ID"),
-            @ApiHeader(name=HEADER_CLIENT_KEY, description="DataVault API Client Key")
-    })
-    @GetMapping("/users/{userid}")
-    public User getUser(@PathVariable("userid") @ApiPathParam(name = "User ID", description = "The User ID to retrieve") String queryUserID) {
-        return usersService.getUser(queryUserID);
+    @GetMapping(value = "/users/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public User getUser(@PathVariable String userId) {
+        return usersService.getUser(userId);
     }
 
-    @PostMapping("/auth/users/exists")
+    @Operation(
+            summary = "Check if a user exists",
+            description = "Checks if a user exists in the DataVault system."
+    )
+    @PostMapping(value = "/auth/users/exists", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Boolean exists(@RequestBody ValidateUser validateUser) {
         return usersService.getUser(validateUser.getUserid()) != null;
     }
 
-    @PostMapping("/auth/users/isvalid")
+    @Operation(
+            summary = "Validate a user's credentials",
+            description = "Validates a user's credentials in the DataVault system."
+    )
+    @PostMapping(value = "/auth/users/isvalid", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Boolean validateUser(@RequestBody ValidateUser validateUser) {
         return usersService.validateUser(validateUser.getUserid(), validateUser.getPassword());
     }
 
-    @PostMapping("/auth/users/isadmin")
+    @Operation(
+            summary = "Check if a user is an admin",
+            description = "Checks if a user is an administrator in the DataVault system.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Returns true if the user is an admin",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(type = "boolean", examples = "true")
+                            )
+                    )
+            }
+    )
+    @PostMapping(value = "/auth/users/isadmin", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Boolean isAdmin(@RequestBody ValidateUser validateUser) {
         return adminService.isAdminUser(validateUser.getUserid());
     }

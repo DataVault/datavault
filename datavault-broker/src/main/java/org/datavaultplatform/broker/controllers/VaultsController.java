@@ -3,6 +3,12 @@ package org.datavaultplatform.broker.controllers;
 import static org.datavaultplatform.common.util.Constants.HEADER_CLIENT_KEY;
 import static org.datavaultplatform.common.util.Constants.HEADER_USER_ID;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.collections4.CollectionUtils;
 import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.common.email.EmailTemplate;
@@ -18,8 +24,6 @@ import org.datavaultplatform.common.request.TransferVault;
 import org.datavaultplatform.common.response.*;
 import org.datavaultplatform.common.util.DateTimeUtils;
 import org.datavaultplatform.common.util.RoleUtils;
-import org.jsondoc.core.annotation.*;
-import org.jsondoc.core.pojo.ApiVerb;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +37,7 @@ import java.util.stream.Collectors;
 
 
 @RestController
-@Api(name="Vaults", description = "Interact with DataVault Vaults")
+@Tag(name="vaults-controller", description = "Interact with DataVault Vaults")
 public class VaultsController {
 
     private static final Logger logger = LoggerFactory.getLogger(VaultsController.class);
@@ -74,16 +78,16 @@ public class VaultsController {
 
     @Autowired
     public VaultsController(EmailService emailService, VaultsService vaultsService,
-        PendingVaultsService pendingVaultsService,
-        PendingDataCreatorsService pendingDataCreatorsService, DepositsService depositsService,
-        ExternalMetadataService externalMetadataService,
-        RetentionPoliciesService retentionPoliciesService, GroupsService groupsService,
-        UsersService usersService, EventService eventService, ClientsService clientsService,
-        DataManagersService dataManagersService, RolesAndPermissionsService permissionsService,
-        @Value("${activeDir}") String activeDir,
-        @Value("${archiveDir}") String archiveDir,
-        @Value("${home.page}") String homePage,
-        @Value("${help.page}") String helpPage) {
+                            PendingVaultsService pendingVaultsService,
+                            PendingDataCreatorsService pendingDataCreatorsService, DepositsService depositsService,
+                            ExternalMetadataService externalMetadataService,
+                            RetentionPoliciesService retentionPoliciesService, GroupsService groupsService,
+                            UsersService usersService, EventService eventService, ClientsService clientsService,
+                            DataManagersService dataManagersService, RolesAndPermissionsService permissionsService,
+                            @Value("${activeDir}") String activeDir,
+                            @Value("${archiveDir}") String archiveDir,
+                            @Value("${home.page}") String homePage,
+                            @Value("${help.page}") String helpPage) {
         this.emailService = emailService;
         this.vaultsService = vaultsService;
         this.pendingVaultsService = pendingVaultsService;
@@ -104,20 +108,14 @@ public class VaultsController {
     }
 
 
-    @ApiMethod(
-            path = "/vaults",
-            verb = ApiVerb.GET,
-            description = "Gets a list of all Vaults for the specified User",
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
+    @Operation(
+            summary = "Gets a list of all Vaults for the specified User",
+            description = "Retrieves a list of all Vaults that the specified user has a role assignment for."
     )
-    @ApiHeaders(headers={
-            @ApiHeader(name=HEADER_USER_ID, description="DataVault Broker User ID")
-    })
-    @GetMapping("/vaults")
-    public List<VaultInfo> getVaults(@RequestHeader(HEADER_USER_ID) String userID) {
+    @GetMapping(value = "/vaults", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<VaultInfo> getVaults( @RequestHeader(HEADER_USER_ID) String userId) {
 
-        List<VaultInfo> vaultResponses = permissionsService.getRoleAssignmentsForUser(userID).stream()
+        List<VaultInfo> vaultResponses = permissionsService.getRoleAssignmentsForUser(userId).stream()
                 .filter(roleAssignment -> (RoleType.VAULT == roleAssignment.getRole().getType() ||
                         RoleUtils.isDataOwner(roleAssignment))  && (roleAssignment.getVaultId() != null))
                 .map(roleAssignment -> vaultsService.getVault(roleAssignment.getVaultId()).convertToResponse())
@@ -135,20 +133,14 @@ public class VaultsController {
         return vaultResponses;
     }
 
-    @ApiMethod(
-            path = "/pendingVaults",
-            verb = ApiVerb.GET,
-            description = "Gets a list of all Pending Vaults for the specified User",
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
+    @Operation(
+            summary = "Gets a list of all Pending Vaults for the specified User",
+            description = "Retrieves a list of all Pending Vaults that the specified user has a role assignment for."    
     )
-    @ApiHeaders(headers={
-            @ApiHeader(name=HEADER_USER_ID, description="DataVault Broker User ID")
-    })
-    @GetMapping("/pendingVaults")
-    public List<VaultInfo> getPendingVaults(@RequestHeader(HEADER_USER_ID) String userID) {
+    @GetMapping(value = "/pendingVaults", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<VaultInfo> getPendingVaults( @RequestHeader(HEADER_USER_ID) String userId) {
 
-        List<VaultInfo> vaultResponses = permissionsService.getRoleAssignmentsForUser(userID).stream()
+        List<VaultInfo> vaultResponses = permissionsService.getRoleAssignmentsForUser(userId).stream()
                 .filter(roleAssignment -> (RoleUtils.isVaultCreator(roleAssignment)) && (roleAssignment.getPendingVaultId() != null))
                 .map(roleAssignment -> pendingVaultsService.getPendingVault(roleAssignment.getPendingVaultId()).convertToResponse())
                 .sorted(Comparator.comparing(VaultInfo::getCreationTime))
@@ -168,11 +160,14 @@ public class VaultsController {
             }
         }
         return vaultResponses;
-        //return null;
     }
 
-    @GetMapping("/vaults/user")
-    public List<VaultInfo> getVaultsForUser(@RequestParam(value = "userID", required = true)String userID) {
+    @Operation(
+            summary = "Get Vaults for a specific user",
+            description = "Retrieves a list of all Vaults associated with a specific user."
+    )
+    @GetMapping(value = "/vaults/user", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<VaultInfo> getVaultsForUser(@RequestParam(value = "userID") String userID) {
 
         List<VaultInfo> vaultResponses = new ArrayList<>();
         User user = usersService.getUser(userID);
@@ -185,11 +180,15 @@ public class VaultsController {
     }
 
 
-    @PostMapping("/vaults/{vaultId}/transfer")
-    public ResponseEntity<Void> transferVault(@RequestHeader(HEADER_USER_ID) String userID,
-                                        @RequestHeader(HEADER_CLIENT_KEY) String clientKey,
-                                        @PathVariable("vaultId") String vaultId,
-                                        @RequestBody TransferVault transfer) {
+    @Operation(
+            summary = "Transfer a Vault's ownership",
+            description = "Transfers ownership of a Vault to another user or orphans it."
+    )
+    @PostMapping(value = "/vaults/{vaultId}/transfer", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Void> transferVault(@RequestHeader(HEADER_USER_ID) String userId,
+                                              @RequestHeader(HEADER_CLIENT_KEY) String clientKey,
+                                              @PathVariable String vaultId,
+                                              @RequestBody TransferVault transfer) {
 
         Vault vault = vaultsService.getVault(vaultId);
 
@@ -208,9 +207,9 @@ public class VaultsController {
         if (transfer.isOrphaning()) {
             vaultsService.orphanVault(vault);
 
-            OrphanVault orphanVaultEvent = new OrphanVault(vault, userID);
+            OrphanVault orphanVaultEvent = new OrphanVault(vault, userId);
             orphanVaultEvent.setVault(vault);
-            orphanVaultEvent.setUser(usersService.getUser(userID));
+            orphanVaultEvent.setUser(usersService.getUser(userId));
             orphanVaultEvent.setAgentType(Agent.AgentType.BROKER);
             orphanVaultEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
 
@@ -224,11 +223,11 @@ public class VaultsController {
             vaultsService.transferVault(vault, usersService.getUser(transfer.getUserId()), transfer.getReason());
 
             logger.debug("send email for transfer ownership from: "+previousUserID+" to "+transfer.getUserId());
-            sendEmails(EmailTemplate.TRANSFER_VAULT_OWNERSHIP, vault, userID, previousUserID, transfer.getUserId());
+            sendEmails(EmailTemplate.TRANSFER_VAULT_OWNERSHIP, vault, userId, previousUserID, transfer.getUserId());
 
-            TransferVaultOwnership transferEvent = new TransferVaultOwnership(transfer, vault, userID);
+            TransferVaultOwnership transferEvent = new TransferVaultOwnership(transfer, vault, userId);
             transferEvent.setVault(vault);
-            transferEvent.setUser(usersService.getUser(userID));
+            transferEvent.setUser(usersService.getUser(userId));
             transferEvent.setAgentType(Agent.AgentType.BROKER);
             transferEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
             transferEvent.setAssignee(usersService.getUser(transfer.getUserId()));
@@ -250,9 +249,9 @@ public class VaultsController {
             // Jira RSS212-099 - 'Don't email the old owners under any circumstances', so commenting out this email.
             //sendEmails(EmailTemplate.TRANSFER_VAULT_OWNERSHIP, vault, userID, transfer.getUserId());
 
-            CreateRoleAssignment roleAssignmentEvent = new CreateRoleAssignment(assignment, userID);
+            CreateRoleAssignment roleAssignmentEvent = new CreateRoleAssignment(assignment, userId);
             roleAssignmentEvent.setVault(vaultsService.getVault(assignment.getVaultId()));
-            roleAssignmentEvent.setUser(usersService.getUser(userID));
+            roleAssignmentEvent.setUser(usersService.getUser(userId));
             roleAssignmentEvent.setAgentType(Agent.AgentType.BROKER);
             roleAssignmentEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
             roleAssignmentEvent.setAssignee(usersService.getUser(assignment.getUserId()));
@@ -263,21 +262,22 @@ public class VaultsController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/vaults/search")
-    public VaultsData searchAllVaults(@RequestHeader(HEADER_USER_ID) String userID,
+    @Operation(
+            summary = "Search all Vaults",
+            description = "Searches for Vaults based on a query string and other parameters."
+    )
+    @GetMapping(value = "/vaults/search", produces = MediaType.APPLICATION_JSON_VALUE)
+    public VaultsData searchAllVaults( @RequestHeader(HEADER_USER_ID) String userId,
                                       @RequestParam String query,
                                       @RequestParam(value = "sort", required = false) String sort,
-                                      @RequestParam(value = "order", required = false)
-                                      @ApiQueryParam(name = "order", description = "Vault sort order", allowedvalues = {"asc", "desc"}, defaultvalue = "asc", required = false) String order,
-                                      @RequestParam(value = "offset", required = false)
-                                      @ApiQueryParam(name = "offset", description = "Vault row id ", defaultvalue = "0", required = false) String offset,
-                                      @RequestParam(value = "maxResult", required = false)
-                                      @ApiQueryParam(name = "maxResult", description = "Number of records", required = false) String maxResult) {
+                                      @RequestParam(value = "order", required = false) String order,
+                                      @RequestParam(value = "offset", required = false) String offset,
+                                      @RequestParam(value = "maxResult", required = false) String maxResult) {
 
         List<VaultInfo> vaultResponses = new ArrayList<>();
         int recordsTotal = 0;
         int recordsFiltered = 0;
-        List<Vault> vaults = vaultsService.search(userID, query, sort, order, offset, maxResult);
+        List<Vault> vaults = vaultsService.search(userId, query, sort, order, offset, maxResult);
         if(CollectionUtils.isNotEmpty(vaults)) {
             for (Vault vault : vaults) {
                 vaultResponses.add(vault.convertToResponse());
@@ -296,8 +296,8 @@ public class VaultsController {
                     vault.setProjectSize(projectSizeMap.get(vault.getProjectId()));
                 }
             }
-            recordsTotal = vaultsService.getTotalNumberOfVaults(userID);
-            recordsFiltered = vaultsService.getTotalNumberOfVaults(userID, query);
+            recordsTotal = vaultsService.getTotalNumberOfVaults(userId);
+            recordsFiltered = vaultsService.getTotalNumberOfVaults(userId, query);
         }
 
         VaultsData data = new VaultsData();
@@ -307,23 +307,23 @@ public class VaultsController {
         return data;
     }
 
-    @GetMapping("/pendingVaults/search")
-    public VaultsData searchAllPendingVaults(@RequestHeader(HEADER_USER_ID) String userID,
-                                      @RequestParam String query,
-                                      @RequestParam(value = "sort", required = false) String sort,
-                                      @RequestParam(value = "order", required = false)
-                                      @ApiQueryParam(name = "order", description = "Vault sort order", allowedvalues = {"asc", "desc"}, defaultvalue = "asc", required = false) String order,
-                                      @RequestParam(value = "offset", required = false)
-                                      @ApiQueryParam(name = "offset", description = "Vault row id ", defaultvalue = "0", required = false) String offset,
-                                      @RequestParam(value = "confirmed", required = false)
-                                      @ApiQueryParam(name = "confirmed", description = "True = confirmed records only, false saved ones and null all", required = false) String confirmed,
-                                      @RequestParam(value = "maxResult", required = false)
-                                      @ApiQueryParam(name = "maxResult", description = "Number of records", required = false) String maxResult) {
+    @Operation(
+            summary = "Search all Pending Vaults",
+            description = "Searches for Pending Vaults based on a query string and other parameters."
+    )
+    @GetMapping(value = "/pendingVaults/search", produces = MediaType.APPLICATION_JSON_VALUE)
+    public VaultsData searchAllPendingVaults(@RequestHeader(HEADER_USER_ID) String userId,
+                                             @RequestParam String query,
+                                             @RequestParam(value = "sort", required = false) String sort,
+                                             @RequestParam(value = "order", required = false) String order,
+                                             @RequestParam(value = "offset", required = false) String offset,
+                                             @RequestParam(value = "confirmed", required = false) String confirmed,
+                                             @RequestParam(value = "maxResult", required = false) String maxResult) {
 
         List<VaultInfo> vaultResponses = new ArrayList<>();
         int recordsTotal = 0;
         int recordsFiltered = 0;
-        List<PendingVault> vaults = pendingVaultsService.search(userID, query, sort, order, offset, maxResult, confirmed);
+        List<PendingVault> vaults = pendingVaultsService.search(userId, query, sort, order, offset, maxResult, confirmed);
         if(CollectionUtils.isNotEmpty(vaults)) {
             for (PendingVault vault : vaults) {
             	User owner = permissionsService.getPendingVaultOwner(vault.getId());
@@ -340,8 +340,8 @@ public class VaultsController {
                 vaultResponses.add(vaultInfo);
             }
 
-            recordsTotal = pendingVaultsService.getTotalNumberOfPendingVaults(userID, confirmed);
-            recordsFiltered = pendingVaultsService.getTotalNumberOfPendingVaults(userID, query, confirmed);
+            recordsTotal = pendingVaultsService.getTotalNumberOfPendingVaults(userId, confirmed);
+            recordsFiltered = pendingVaultsService.getTotalNumberOfPendingVaults(userId, query, confirmed);
         }
 
         VaultsData data = new VaultsData();
@@ -351,14 +351,18 @@ public class VaultsController {
         return data;
     }
 
-    @GetMapping(value = "/vaults/deposits/search")
-    public List<DepositInfo> searchAllDeposits(@RequestHeader(HEADER_USER_ID) String userID,
+    @Operation(
+            summary = "Search all Deposits",
+            description = "Searches for Deposits based on a query string and other parameters."
+    )
+    @GetMapping(value = "/vaults/deposits/search", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<DepositInfo> searchAllDeposits( @RequestHeader(HEADER_USER_ID) String userId,
                                                @RequestParam(value = "query", required = false, defaultValue = "") String query,
                                                @RequestParam(value = "sort", required = false, defaultValue = "creationTime") String sort,
                                                @RequestParam(value = "order", required = false, defaultValue = "desc") String order) {
 
         List<DepositInfo> depositResponses = new ArrayList<>();
-        for (Deposit deposit : depositsService.search(query, sort, order, userID)) {
+        for (Deposit deposit : depositsService.search(query, sort, order, userId)) {
             //deposit.convertToResponse();
             DepositInfo depositInfo = deposit.convertToResponse();
             User depositor = usersService.getUser(depositInfo.getUserID());
@@ -382,8 +386,12 @@ public class VaultsController {
     }
 
 
-    @GetMapping("/vaults/deposits/data/search")
-    public DepositsData searchAllDepositsData(@RequestHeader(HEADER_USER_ID) String userID,
+    @Operation(
+            summary = "Search all Deposits with data",
+            description = "Searches for Deposits with data based on a query string and other parameters."
+    )
+    @GetMapping(value = "/vaults/deposits/data/search", produces = MediaType.APPLICATION_JSON_VALUE)
+    public DepositsData searchAllDepositsData( @RequestHeader(HEADER_USER_ID) String userId,
                                               @RequestParam(value = "query", required = false, defaultValue = "") String query,
                                               @RequestParam(value = "sort", required = false, defaultValue = "creationTime") String sort,
                                               @RequestParam(value = "order", required = false, defaultValue = "desc") String order) {
@@ -391,7 +399,7 @@ public class VaultsController {
 
         List<DepositInfo> depositResponses = new ArrayList<>();
 
-        List<Deposit> deposits = depositsService.search(query, sort, order, userID);
+        List<Deposit> deposits = depositsService.search(query, sort, order, userId);
         if(CollectionUtils.isNotEmpty(deposits)) {
             for (Deposit deposit : deposits) {
                 DepositInfo depositInfo = deposit.convertToResponse();
@@ -426,8 +434,12 @@ public class VaultsController {
 
     }
 
-    @GetMapping("/vaults/deposits/data/limited/search")
-    public DepositsData limitedSearchDepositsData(@RequestHeader(HEADER_USER_ID) String userID,
+    @Operation(
+            summary = "Limited search for Deposits with data",
+            description = "Searches for Deposits with data based on a query string and other parameters, with a limit on the number of results."
+    )
+    @GetMapping(value = "/vaults/deposits/data/limited/search", produces = MediaType.APPLICATION_JSON_VALUE)
+    public DepositsData limitedSearchDepositsData( @RequestHeader(HEADER_USER_ID) String userId,
                                                      @RequestParam(value = "query", required = false, defaultValue = "") String query,
                                                      @RequestParam(value = "sort", required = false, defaultValue = "creationTime") String sort,
                                                      @RequestParam(value = "order", required = false, defaultValue = "desc") String order,
@@ -437,7 +449,7 @@ public class VaultsController {
 
         List<DepositInfo> depositResponses = new ArrayList<>();
 
-        List<Deposit> deposits = depositsService.getDeposits( query, userID, sort, order, offset, maxResult);
+        List<Deposit> deposits = depositsService.getDeposits( query, userId, sort, order, offset, maxResult);
         
         if(CollectionUtils.isNotEmpty(deposits)) {
             for (Deposit deposit : deposits) {
@@ -473,12 +485,16 @@ public class VaultsController {
 
     }
 
-    @PostMapping("/pendingVaults/update")
-    public VaultInfo updatePendingVault(@RequestHeader(HEADER_USER_ID) String userID,
+    @Operation(
+            summary = "Update a Pending Vault",
+            description = "Updates an existing Pending Vault."
+    )
+    @PostMapping(value = "/pendingVaults/update", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public VaultInfo updatePendingVault(@RequestHeader(HEADER_USER_ID) String userId,
                                         @RequestHeader(HEADER_CLIENT_KEY) String clientKey,
                                         @RequestBody CreateVault createVault) throws Exception {
         PendingVault vault = pendingVaultsService.getPendingVault(createVault.getPendingID());
-        vault = pendingVaultsService.processVaultParams(vault, createVault, userID);
+        vault = pendingVaultsService.processVaultParams(vault, createVault, userId);
 
         pendingVaultsService.addOrUpdatePendingVault(vault);
 
@@ -500,13 +516,13 @@ public class VaultsController {
         pendingVaultsService.addDepositorRoles(createVault, vault.getId());
 
         // This should be present
-        pendingVaultsService.addOwnerRole(createVault, vault.getId(), userID);
+        pendingVaultsService.addOwnerRole(createVault, vault.getId(), userId);
 
         vault = pendingVaultsService.processDataCreatorParams(createVault, vault);
 
         pendingVaultsService.addNDMRoles(createVault, vault.getId());
 
-        pendingVaultsService.addCreator(createVault, userID, vault.getId());
+        pendingVaultsService.addCreator(createVault, userId, vault.getId());
 
         //Create vaultEvent = new Create(vault.getId());
         //vaultEvent.setVault(vault);
@@ -535,10 +551,14 @@ public class VaultsController {
         return vault.convertToResponse();
     }
 
-    @PostMapping("/admin/pendingVaults/edit")
-    public VaultInfo editPendingVault(@RequestHeader(HEADER_USER_ID) String userID,
-                                        @RequestHeader(HEADER_CLIENT_KEY) String clientKey,
-                                        @RequestBody CreateVault createVault) throws Exception {
+    @Operation(
+            summary = "Edit a Pending Vault (Admin)",
+            description = "Updates an existing Pending Vault as an administrator."
+    )
+    @PostMapping(value = "/admin/pendingVaults/edit", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public VaultInfo editPendingVault(@RequestHeader(HEADER_USER_ID) String userId,
+                                      @RequestHeader(HEADER_CLIENT_KEY) String clientKey,
+                                      @RequestBody CreateVault createVault) throws Exception {
         PendingVault vault = pendingVaultsService.getPendingVault(createVault.getPendingID());
         
         // Note whilst Data Owner may change, 
@@ -555,7 +575,7 @@ public class VaultsController {
         //Set pureLink = true as it is not set in Admin Edit UI
         createVault.setPureLink(true);
         
-        vault = pendingVaultsService.processVaultParams(vault, createVault, userID);
+        vault = pendingVaultsService.processVaultParams(vault, createVault, userId);
         
         // Update all the data except Role Assignments and Data creators
         pendingVaultsService.addOrUpdatePendingVault(vault);
@@ -623,24 +643,28 @@ public class VaultsController {
         return vault.convertToResponse();
     }
 
-    @PostMapping(value = "/pendingVaults")
-    public VaultInfo addPendingVault(@RequestHeader(HEADER_USER_ID) String userID,
-                              @RequestHeader(HEADER_CLIENT_KEY) String clientKey,
-                              @RequestBody CreateVault createVault) throws Exception {
+    @Operation(
+            summary = "Add a new Pending Vault",
+            description = "Adds a new Pending Vault to the system."
+    )
+    @PostMapping(value = "/pendingVaults", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public VaultInfo addPendingVault(@RequestHeader(HEADER_USER_ID) String userId,
+                                     @RequestHeader(HEADER_CLIENT_KEY) String clientKey,
+                                     @RequestBody CreateVault createVault) throws Exception {
         PendingVault vault = new PendingVault();
-        vault = pendingVaultsService.processVaultParams(vault, createVault, userID);
+        vault = pendingVaultsService.processVaultParams(vault, createVault, userId);
 
         pendingVaultsService.addOrUpdatePendingVault(vault);
 
         pendingVaultsService.addDepositorRoles(createVault, vault.getId());
 
-        pendingVaultsService.addOwnerRole(createVault, vault.getId(), userID);
+        pendingVaultsService.addOwnerRole(createVault, vault.getId(), userId);
 
         vault = pendingVaultsService.processDataCreatorParams(createVault, vault);
 
         pendingVaultsService.addNDMRoles(createVault, vault.getId());
 
-        pendingVaultsService.addCreator(createVault, userID, vault.getId());
+        pendingVaultsService.addCreator(createVault, userId, vault.getId());
 
         logger.info("createVault.getConfirmed(): " + createVault.getConfirmed());
         // Send email if createVault confirmed
@@ -653,8 +677,12 @@ public class VaultsController {
         return vault.convertToResponse();
     }
 
-    @PostMapping("/vaults")
-    public VaultInfo addVault(@RequestHeader(HEADER_USER_ID) String userID,
+    @Operation(
+            summary = "Add a new Vault",
+            description = "Adds a new Vault to the system."
+    )
+    @PostMapping(value = "/vaults", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public VaultInfo addVault(@RequestHeader(HEADER_USER_ID) String userId,
                               @RequestHeader(HEADER_CLIENT_KEY) String clientKey,
                               @RequestBody CreateVault createVault) throws Exception {
 
@@ -684,10 +712,10 @@ public class VaultsController {
         }
         vault.setGroup(group);
 
-        User user = usersService.getUser(userID);
+        User user = usersService.getUser(userId);
         if (user == null) {
-            logger.error("User '" + userID + "' does not exist");
-            throw new Exception("User '" + userID + "' does not exist");
+            logger.error("User '" + userId + "' does not exist");
+            throw new Exception("User '" + userId + "' does not exist");
         }
         vault.setUser(user);
 
@@ -714,7 +742,7 @@ public class VaultsController {
         //pendingEvent.setUser(usersService.getUser(createVault.get);
         //pendingEvent.setAgentType(Agent.AgentType.BROKER);
         //pendingEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
-        vaultsService.addVaultEvent(vault, clientKey, userID);
+        vaultsService.addVaultEvent(vault, clientKey, userId);
         vaultsService.addOwnerRole(createVault, vault, clientKey);
         // send mail to owner
         vaultsService.sendVaultOwnerEmail(vault, homePage, helpPage, user);
@@ -727,7 +755,7 @@ public class VaultsController {
 
         // Check the retention policy of the newly created vault
         try {
-            vaultsService.checkRetentionPolicy(vault.getID());
+            vaultsService.checkRetentionPolicy(vault.getID(), RetentionPoliciesService.RetentionPolicyUpdateReason.ADDED_VAULT);
         } catch (Exception e) {
             logger.error("Fail to check retention policy: ",e);
             throw e;
@@ -737,12 +765,16 @@ public class VaultsController {
         return vault.convertToResponse();
     }
 
-    @GetMapping("/vaults/{vaultid}")
-    public VaultInfo getVault(@RequestHeader(HEADER_USER_ID) String userID,
-                              @PathVariable("vaultid") String vaultID) throws Exception {
+    @Operation(
+            summary = "Get a specific Vault",
+            description = "Retrieves details for a specific Vault by its ID."
+    )
+    @GetMapping(value = "/vaults/{vaultId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public VaultInfo getVault( @RequestHeader(HEADER_USER_ID) String userId,
+                              @PathVariable String vaultId) throws Exception {
 
-        User user = usersService.getUser(userID);
-        Vault vault = vaultsService.getUserVault(user, vaultID);
+        User user = usersService.getUser(userId);
+        Vault vault = vaultsService.getUserVault(user, vaultId);
         if (vault != null) {
             logger.debug("getVault: " + vault);
             return vault.convertToResponse();
@@ -751,16 +783,20 @@ public class VaultsController {
         }
     }
 
-    @GetMapping("/pendingVaults/{vaultid}")
-    public VaultInfo getPendingVault(@RequestHeader(HEADER_USER_ID) String userID,
-                              @PathVariable("vaultid") String vaultID) throws Exception {
+    @Operation(
+            summary = "Get a specific Pending Vault",
+            description = "Retrieves details for a specific Pending Vault by its ID."
+    )
+    @GetMapping(value = "/pendingVaults/{vaultId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public VaultInfo getPendingVault( @RequestHeader(HEADER_USER_ID) String userId,
+                                     @PathVariable String vaultId) throws Exception {
 
-        User user = usersService.getUser(userID);
-        PendingVault vault = pendingVaultsService.getUserPendingVault(user, vaultID);
-        User owner = permissionsService.getPendingVaultOwner(vaultID);
-        List<User> ndms = permissionsService.getPendingVaultNDMs(vaultID);
-        List<User> deps = permissionsService.getPendingVaultDepositors(vaultID);
-        User creator = permissionsService.getPendingVaultCreator(vaultID);
+        User user = usersService.getUser(userId);
+        PendingVault vault = pendingVaultsService.getUserPendingVault(user, vaultId);
+        User owner = permissionsService.getPendingVaultOwner(vaultId);
+        List<User> ndms = permissionsService.getPendingVaultNDMs(vaultId);
+        List<User> deps = permissionsService.getPendingVaultDepositors(vaultId);
+        User creator = permissionsService.getPendingVaultCreator(vaultId);
         
         vault.setOwner(owner);
         vault.setNominatedDataManagers(ndms);
@@ -782,33 +818,53 @@ public class VaultsController {
     }
     
 
-    @GetMapping("/vaults/{vaultid}/checkretentionpolicy")
-    public Vault checkVaultRetentionPolicy(@RequestHeader(HEADER_USER_ID) String userID,
-                                           @PathVariable("vaultid") String vaultID) {
+    @Operation(
+            summary = "Check a Vault's retention policy",
+            description = "Checks the retention policy of a specific Vault.",
+            parameters = {
+                    @Parameter(in = ParameterIn.HEADER, name = HEADER_USER_ID, required = true, description = "DataVault Broker User ID", schema = @Schema(type = "string")),
+                    @Parameter(in = ParameterIn.PATH, name = "vaultId", required = true, description = "The ID of the Vault to check", schema = @Schema(type = "string"))
+            }
+    )
+    @GetMapping(value = "/vaults/{vaultId}/checkretentionpolicy", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Vault checkVaultRetentionPolicy( @RequestHeader(HEADER_USER_ID) String userId,
+                                           @PathVariable String vaultId) {
 
-        return vaultsService.checkRetentionPolicy(vaultID);
+        return vaultsService.checkRetentionPolicy(vaultId, RetentionPoliciesService.RetentionPolicyUpdateReason.MANUAL_UPDATE);
     }
 
-    @GetMapping("/vaults/{vaultid}/record")
-    public Vault getVaultRecord(@RequestHeader(HEADER_USER_ID) String userID,
-                                @PathVariable("vaultid") String vaultID) {
+    @Operation(
+            summary = "Get a Vault's record",
+            description = "Retrieves the full record for a specific Vault."
+    )
+    @GetMapping(value = "/vaults/{vaultId}/record", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Vault getVaultRecord( @RequestHeader(HEADER_USER_ID) String userId,
+                                @PathVariable String vaultId) {
 
-        return vaultsService.getVault(vaultID);
+        return vaultsService.getVault(vaultId);
     }
     
-    @GetMapping("/pendingVaults/{vaultid}/record")
-    public PendingVault getPendingVaultRecord(@RequestHeader(HEADER_USER_ID) String userID,
-                                @PathVariable("vaultid") String vaultID) {
+    @Operation(
+            summary = "Get a Pending Vault's record",
+            description = "Retrieves the full record for a specific Pending Vault."
+    )
+    @GetMapping(value = "/pendingVaults/{vaultId}/record", produces = MediaType.APPLICATION_JSON_VALUE)
+    public PendingVault getPendingVaultRecord(@RequestHeader(HEADER_USER_ID) String userId,
+                                @PathVariable String vaultId) {
 
-        return pendingVaultsService.getPendingVault(vaultID);
+        return pendingVaultsService.getPendingVault(vaultId);
     }
 
-    @GetMapping("/vaults/{vaultid}/deposits")
+    @Operation(
+            summary = "Get a Vault's Deposits",
+            description = "Retrieves a list of all Deposits for a specific Vault."
+    )
+    @GetMapping("/vaults/{vaultId}/deposits")
     public List<DepositInfo> getDeposits(@RequestHeader(HEADER_USER_ID) String userID,
-                                         @PathVariable("vaultid") String vaultID) throws Exception {
+                                         @PathVariable String vaultId) throws Exception {
 
         User user = usersService.getUser(userID);
-        Vault vault = vaultsService.getUserVault(user, vaultID);
+        Vault vault = vaultsService.getUserVault(user, vaultId);
 
         List<DepositInfo> depositResponses = new ArrayList<>();
         for (Deposit deposit : vault.getDeposits()) {
@@ -817,12 +873,16 @@ public class VaultsController {
         return depositResponses;
     }
 
-    @GetMapping("/vaults/{vaultid}/roleEvents")
-    public List<EventInfo> getRoleEvents(@RequestHeader(HEADER_USER_ID) String userID,
-                                         @PathVariable("vaultid") String vaultID) throws Exception {
+    @Operation(
+            summary = "Get a Vault's Role Events",
+            description = "Retrieves a list of all Role Events for a specific Vault."
+    )
+    @GetMapping(value = "/vaults/{vaultId}/roleEvents", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<EventInfo> getRoleEvents( @RequestHeader(HEADER_USER_ID) String userId,
+                                         @PathVariable String vaultId) throws Exception {
 
-        User user = usersService.getUser(userID);
-        Vault vault = vaultsService.getUserVault(user, vaultID);
+        User user = usersService.getUser(userId);
+        Vault vault = vaultsService.getUserVault(user, vaultId);
 
         List<EventInfo> events = new ArrayList<>();
         for (Event event : eventService.findVaultEvents(vault)) {
@@ -832,12 +892,24 @@ public class VaultsController {
         return events;
     }
 
-    @PostMapping("/vaults/{vaultid}/addDataManager")
-    public VaultInfo addDataManager(@RequestHeader(HEADER_USER_ID) String userID,
-                                    @PathVariable("vaultid") String vaultID,
+    @Operation(
+            summary = "Add a Data Manager to a Vault",
+            description = "Adds a Data Manager to a specific Vault.",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "The user uun",
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.TEXT_PLAIN_VALUE,
+                            schema = @Schema(type = "string", description = "the user uun")
+                    )
+            )
+    )
+    @PostMapping(value = "/vaults/{vaultId}/addDataManager", consumes = MediaType.TEXT_PLAIN_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public VaultInfo addDataManager(@RequestHeader(HEADER_USER_ID) String userId,
+                                    @PathVariable String vaultId,
                                     @RequestBody String unn) throws Exception {
-        User user = usersService.getUser(userID);
-        Vault vault = vaultsService.getUserVault(user, vaultID);
+        User user = usersService.getUser(userId);
+        Vault vault = vaultsService.getUserVault(user, vaultId);
 
         DataManager dataManager = new DataManager(unn);
         dataManager.setVault(vault);
@@ -846,51 +918,75 @@ public class VaultsController {
         return vault.convertToResponse();
     }
 
-    @GetMapping("/vaults/{vaultid}/dataManagers")
-    public List<DataManager> getDataManagers(@RequestHeader(HEADER_USER_ID) String userID,
-                                             @PathVariable("vaultid") String vaultID) throws Exception {
-        User user = usersService.getUser(userID);
-        Vault vault = vaultsService.getUserVault(user, vaultID);
+    @Operation(
+            summary = "Get a Vault's Data Managers",
+            description = "Retrieves a list of all Data Managers for a specific Vault."
+    )
+    @GetMapping(value = "/vaults/{vaultId}/dataManagers", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<DataManager> getDataManagers( @RequestHeader(HEADER_USER_ID) String userId,
+                                             @PathVariable String vaultId) throws Exception {
+        User user = usersService.getUser(userId);
+        Vault vault = vaultsService.getUserVault(user, vaultId);
         List<DataManager> dataManagersList = dataManagersService.findByVaultId(vault.getID());
         return dataManagersList;
     }
 
-    @GetMapping("/vaults/{vaultid}/dataManager/{uun}")
-    public DataManager getDataManager(@RequestHeader(HEADER_USER_ID) String userID,
-                                      @PathVariable("vaultid") String vaultID,
-                                      @PathVariable("uun") String uun) throws Exception {
-        User user = usersService.getUser(userID);
-        Vault vault = vaultsService.getUserVault(user, vaultID);
+    @Operation(
+            summary = "Get a specific Data Manager",
+            description = "Retrieves a specific Data Manager by their UUN."
+    )
+    @GetMapping(value = "/vaults/{vaultId}/dataManager/{uun}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public DataManager getDataManager( @RequestHeader(HEADER_USER_ID) String userId,
+                                      @PathVariable String vaultId,
+                                      @PathVariable String uun) throws Exception {
+        User user = usersService.getUser(userId);
+        Vault vault = vaultsService.getUserVault(user, vaultId);
 
         return vault.getDataManager(uun);
     }
 
-    @DeleteMapping( "/vaults/{vaultid}/deleteDataManager/{dataManagerID}")
-    public VaultInfo deleteDataManager(@RequestHeader(HEADER_USER_ID) String userID,
-                                       @PathVariable("vaultid") String vaultID,
-                                       @PathVariable("dataManagerID") String dataManagerID) throws Exception {
-        User user = usersService.getUser(userID);
-        Vault vault = vaultsService.getUserVault(user, vaultID);
+    @Operation(
+            summary = "Delete a Data Manager",
+            description = "Deletes a Data Manager from a Vault."
+    )
+    @DeleteMapping(value = "/vaults/{vaultId}/deleteDataManager/{dataManagerID}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public VaultInfo deleteDataManager( @RequestHeader(HEADER_USER_ID) String userId,
+                                       @PathVariable String vaultId,
+                                       @PathVariable String dataManagerID) throws Exception {
+        User user = usersService.getUser(userId);
+        Vault vault = vaultsService.getUserVault(user, vaultId);
 
         dataManagersService.deleteDataManager(dataManagerID);
 
         return vault.convertToResponse();
     }
 
-    @PostMapping("/vaults/{vaultid}/updateVaultDescription")
-    public VaultInfo updateVaultDescription(@RequestHeader(HEADER_USER_ID) String userID,
+    @Operation(
+            summary = "Update a Vault's description",
+            description = "Updates the description of a specific Vault.",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "The new vault description",
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.TEXT_PLAIN_VALUE,
+                            schema = @Schema(type = "string", description = "the new vault description")
+                    )
+            )
+    )
+    @PostMapping(value = "/vaults/{vaultId}/updateVaultDescription", consumes = MediaType.TEXT_PLAIN_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public VaultInfo updateVaultDescription(@RequestHeader(HEADER_USER_ID) String userId,
                                             @RequestHeader(HEADER_CLIENT_KEY) String clientKey,
-                                            @PathVariable("vaultid") String vaultID,
-                                            @RequestBody() String description) throws Exception {
-        User user = usersService.getUser(userID);
-        Vault vault = vaultsService.getUserVault(user, vaultID);
+                                            @PathVariable String vaultId,
+                                            @RequestBody String description) throws Exception {
+        User user = usersService.getUser(userId);
+        Vault vault = vaultsService.getUserVault(user, vaultId);
         String oldDesc = vault.getDescription();
         vault.setDescription(description);
         vaultsService.updateVault(vault);
 
         UpdatedDescription descEvent = new UpdatedDescription(oldDesc, description);
         descEvent.setVault(vault);
-        descEvent.setUser(usersService.getUser(userID));
+        descEvent.setUser(usersService.getUser(userId));
         descEvent.setAgentType(Agent.AgentType.BROKER);
         descEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
 
@@ -899,20 +995,34 @@ public class VaultsController {
         return vault.convertToResponse();
     }
 
-    @PostMapping(value = "/vaults/{vaultid}/updateVaultName")
-    public VaultInfo updateVaultName(@RequestHeader(HEADER_USER_ID) String userID,
+    @Operation(
+            summary = "Update a Vault's name",
+            description = "Updates the name of a specific Vault.",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "The new vault name",
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.TEXT_PLAIN_VALUE,
+                            schema = @Schema(type = "string", description = "the new vault name")
+                    )
+            )
+    )
+    @PostMapping(value = "/vaults/{vaultId}/updateVaultName",
+            consumes = MediaType.TEXT_PLAIN_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public VaultInfo updateVaultName(@RequestHeader(HEADER_USER_ID) String userId,
                                      @RequestHeader(HEADER_CLIENT_KEY) String clientKey,
-                                     @PathVariable("vaultid") String vaultID,
+                                     @PathVariable String vaultId,
                                      @RequestBody String name) throws Exception {
-        User user = usersService.getUser(userID);
-        Vault vault = vaultsService.getUserVault(user, vaultID);
+        User user = usersService.getUser(userId);
+        Vault vault = vaultsService.getUserVault(user, vaultId);
         String oldName = vault.getName();
         vault.setName(name);
         vaultsService.updateVault(vault);
 
         UpdatedName nameEvent = new UpdatedName(oldName, name);
         nameEvent.setVault(vault);
-        nameEvent.setUser(usersService.getUser(userID));
+        nameEvent.setUser(usersService.getUser(userId));
         nameEvent.setAgentType(Agent.AgentType.BROKER);
         nameEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
 
@@ -921,16 +1031,32 @@ public class VaultsController {
         return vault.convertToResponse();
     }
 
-    @PostMapping("/vaults/{vaultid}/updatereviewdate")
-    public VaultInfo updateVaultReviewDate(@RequestHeader(HEADER_USER_ID) String userID,
-                                            @PathVariable("vaultid") String vaultID,
-                                            @RequestBody String reviewDate) throws Exception {
-        User user = usersService.getUser(userID);
-        Vault vault = vaultsService.getUserVault(user, vaultID);
+    @Operation(
+            summary = "Update a Vault's review date",
+            description = "Updates the review date of a specific Vault.",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Review date in ISO 8601 format",
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.TEXT_PLAIN_VALUE,
+                            schema = @Schema(
+                                    type = "string",
+                                    format = "date",
+                                    examples = "2026-12-31"
+                            )
+                    )
+            )
+    )
+    @PostMapping(value = "/vaults/{vaultId}/updatereviewdate", consumes = MediaType.TEXT_PLAIN_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public VaultInfo updateVaultReviewDate(@RequestHeader(HEADER_USER_ID) String userId,
+                                           @PathVariable String vaultId,
+                                           @RequestBody String reviewDate) throws Exception {
+        User user = usersService.getUser(userId);
+        Vault vault = vaultsService.getUserVault(user, vaultId);
 
-        vault.setReviewDate(DateTimeUtils.parseDate(reviewDate));
+        vault.setReviewDate(DateTimeUtils.parseLocalDate(reviewDate));
 
-        logger.info("Updating Review Date for Vault Id " + vaultID);
+        logger.info("Updating Review Date for Vault Id {}", vaultId);
         vaultsService.updateVault(vault);
 
         return vault.convertToResponse();

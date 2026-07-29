@@ -4,18 +4,17 @@ import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.datavaultplatform.common.util.DateTimeUtils;
-import org.jsondoc.core.annotation.ApiObject;
-import org.jsondoc.core.annotation.ApiObjectField;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiObject(name = "EventInfo")
+@Schema(name = "EventInfo")
 public class EventInfo {
     
-    @ApiObjectField(description = "The unique identifier for this event")
+    @Schema(description = "The unique identifier for this event")
     private String id;
     
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern= DateTimeUtils.ISO_DATE_TIME_FORMAT)
-    @ApiObjectField(description = "The date and time when this event occured")
+    @Schema(description = "The date and time when this event occured")
     private Date timestamp;
     
     private String message;

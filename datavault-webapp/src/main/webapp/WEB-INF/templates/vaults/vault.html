@@ -1,7 +1,11 @@
 <!DOCTYPE html><!--vaults/vault.html-->
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/defaultlayout(nav='home')}">
-<head><title>Vaults - Vault</title></head>
+<head><title>Vaults - Vault</title>
+    <style>
+        .zebra-highlight { background-color: #FAFAD2; }
+    </style>
+</head>
 <th:block layout:fragment="content">
 <div class="container">
 
@@ -173,7 +177,7 @@
                             </a>
                         </td>
                         <td>[[${deposit.getUserID()}]]</td>
-                        <td>[[${#dates.format(deposit.getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */--></td>
+                        <td>[[${#temporals.format(deposit.getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */--></td>
                         <td>
                             <th:block th:if="${deposit?.status?.name() != 'NOT_STARTED'}">
                             [[${deposit.getSizeStr()}]]
@@ -281,7 +285,7 @@
                                 <th scope="col">Grant End Date</th>
                                 <td>
                                     <th:block th:if="${vault.grantEndDate != null}">
-                                        [[${#dates.format(vault.getGrantEndDate(),dateFormatISO)}]]<!--/* date */-->
+                                        [[${#temporals.format(vault.getGrantEndDate(),dateFormatISO)}]]<!--/* date */-->
                                     </th:block>
                                     <th:block th:if="${vault.grantEndDate == null}">
                                         No end date
@@ -295,7 +299,7 @@
                             </tr>
                             <tr>
                                 <th scope="col">Review Date</th>
-                                <td>[[${#dates.format(vault.getReviewDate(),dateFormatISO)}]]<!--/* date */--></td>
+                                <td>[[${#temporals.format(vault.getReviewDate(),dateFormatISO)}]]<!--/* date */--></td>
                                 <td>
                                     <button type="button" class="btn btn-default pull-right" disabled>
                                         Edit review date
@@ -351,7 +355,7 @@
                                     <td>[[${depositName}]]</td>
                                     <td>[[${retrieve?.user?.getID()}]]</td>
                                     <td>[[${#bools.isTrue(retrieve?.hasExternalRecipients) ? 'Yes' : 'No'}]]</td>
-                                    <td>[[${#dates.format(retrieve.timestamp,globalDateTimeFormat)}]]<!--/* datetime */--></td>
+                                    <td>[[${#temporals.format(retrieve.timestamp,globalDateTimeFormat)}]]<!--/* datetime */--></td>
                                     <td>
                                         <div th:switch="${retrieve?.status?.name()}" class="job-status">
                                         <th:block th:case="COMPLETE">
@@ -406,46 +410,81 @@
                         </table>
                     </div>
 
-                    <h4><strong>Reviews</strong></h4>
+                    <th:block th:with="reviewCount=${vrhm.vaultReviewViewModels?.size() ?: 0}">
+                        <h4>
+                            <strong>
+                                [[${reviewCount}]] Review[[${reviewCount == 1 ? '' : 's'}]]
+                            </strong>
+                        </h4>
+                    </th:block>                    
                     <div class="scrollable">
                         <table class="table table-bordered ">
-                             <th:block th:each="vrm: ${vrhm.vaultReviewModels}">
-
+                            <th:block th:each="vrvm, iterStat : ${vrhm.vaultReviewViewModels}"
+                                      th:with="rowClass=${iterStat.odd ? 'zebra-highlight' : ''}">
                                  <thead>
-                                 <tr>
-                                     <th>Date Reviewed</th>
-                                     <th>New Review Date</th>
-                                     <th>Comment</th>
+                                 <tr th:class="${rowClass}">
+                                     <th>#</th>
+                                     <th>Date Review Submitted</th>
+                                     <th:block th:if="${vrvm.actionedDate != null}">
+                                         <!--/* if there's an actionedDate - the (old) Vault ReviewDate at time of submission will be used */-->
+                                         <th>Review Date (when submitted)</th>
+                                     </th:block>
+                                     <th:block th:if="${vrvm.actionedDate == null}">
+                                         <!--/* if there's no actionedDate - we display the current Vault Review date */-->
+                                         <th>Review Date (current)</th>
+                                     </th:block>
+
+                                     <th colspan="2">Comment</th>
                                  </tr>
                                  </thead>
 
                                  <tbody>
-                                 <tr>
-                                     <th:block th:if="${vrm.actionedDate != null}">
-                                        <td>[[${#dates.format(vrm.actionedDate,dateFormatISO)}]]<!--/* date */--></td>
+                                 <tr th:class="${rowClass}">
+                                     <td>[[${iterStat.count}]]</td>
+                                     <th:block th:if="${vrvm.actionedDate != null}">
+                                        <td>[[${#temporals.format(vrvm.actionedDate,dateFormatISO)}]]<!--/* date */--></td>
                                      </th:block>
-                                     <th:block th:if="${vrm.actionedDate == null}">
+                                     <th:block th:if="${vrvm.actionedDate == null}">
                                         <td>Review still in progress</td>
                                      </th:block>
-                                     <td>[[${vrm.newReviewDate}]]</td>
-                                     <td>[[${vrm.comment ?: ''}]]</td>
+                                     <th:block th:if="${vrvm.actionedDate != null}">
+                                         <!--/* if there's an actionedDate - the oldReviewDate will be set */-->
+                                         <td>[[${#temporals.format(vrvm.oldReviewDate,dateFormatISO)}]]<!--/* date */--></td>
+                                     </th:block>
+                                     <th:block th:if="${vrvm.actionedDate == null}">
+                                         <!--/* if there's no actionedDate - we display the current Vault Review Date */-->
+                                         <td>[[${#temporals.format(vrvm.currentVaultReviewDate,dateFormatISO)}]]<!--/* date */--></td>
+                                     </th:block>
+                                     <td colspan="2">[[${vrvm.comment ?: ''}]]</td>
                                  </tr>
                                  </tbody>
 
                                  <thead>
-                                 <tr>
-                                     <th>Deposit</th>
-                                     <th>Marked for deletion</th>
+                                 <tr th:class="${rowClass}">
+                                     <th>[[${iterStat.count}]]</th>
+                                     <th>Deposit Name</th>
+                                     <th>Marked For Deletion ?</th>
+                                     <th>Deposit Deletion Requested Date</th>
                                      <th>Comment</th>
                                  </tr>
                                  </thead>
 
                                  <tbody>
 
-                                    <tr th:each="drm: ${vrm.depositReviewModels}">
-                                        <td>[[${drm.name}]]</td>
-                                        <td>[[${drm.deleteStatus == 0 ? 'No' : 'Yes'}]]</td>
-                                        <td>[[${drm.comment ?: ""}]]</td>
+                                    <tr th:class="${rowClass}" th:each="drvm: ${vrvm.depositReviewViewModels}">
+                                        <td>[[${iterStat.count}]]</td>
+                                        <td>[[${drvm.depositName}]]</td>
+                                        <td>[[${drvm.deleteStatus == 0 ? 'No' : 'Yes'}]]</td>
+                                        <th:block th:if="${drvm.deleteStatus == 0}">
+                                            <td>Not marked for Delete</td>
+                                        </th:block>
+                                        <th:block th:if="${drvm.deleteStatus != 0 && drvm.actionedDate != null}">
+                                            <td>[[${#temporals.format(drvm.actionedDate,dateFormatISO)}]]<!--/* date */--></td>
+                                        </th:block>
+                                        <th:block th:if="${drvm.deleteStatus != 0 && drvm.actionedDate == null}">
+                                            <td>Deletion Not Yet Requested</td>
+                                        </th:block>
+                                        <td>[[${drvm.comment ?: ""}]]</td>
                                     </tr>
 
                                  </tbody>

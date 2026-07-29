@@ -144,6 +144,7 @@ public abstract class BasePerformDepositThenRetrieveThenRestartIT extends BaseDe
             .anyMatch(e -> e.getClass().equals(eventClass));
   }
 
+  @Override
   boolean foundComplete() {
     return foundEvent(Complete.class);
   }
@@ -175,7 +176,7 @@ public abstract class BasePerformDepositThenRetrieveThenRestartIT extends BaseDe
       log.info("ITERATION[{}][{}]-------------------------------------------", ++count, interruptAtEventClass.getSimpleName());
       log.info("CALCULATED TAR FILE [{}]calculated-exists[{}]", tarFilePath, Files.exists(tarFilePath));
       log.info("-----------------------------------------------------");
-      scheduler.setChecker(new TaskInterrupter.Checker(event -> interruptAtEventClass.getName().equals(event.getClass().getName()), interruptAtEventClass.getSimpleName()));
+      scheduler.setChecker(new TaskInterrupter.Checker(interruptAtEventClass::isInstance, interruptAtEventClass.getSimpleName()));
       Event lastEvent = nextLastEvent;
       retrieveMessage = mapper.writeValueAsString(retrieve);
       log.info("retrieveMessage {}", retrieveMessage);

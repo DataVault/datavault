@@ -3,8 +3,14 @@ package org.datavaultplatform.broker.controllers;
 import static org.datavaultplatform.common.util.Constants.HEADER_USER_ID;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.lang3.StringUtils;
-import org.datavaultplatform.broker.queue.Sender;
+import org.datavaultplatform.broker.queue.TaskSender;
 import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.event.Event;
@@ -17,12 +23,12 @@ import org.datavaultplatform.common.task.Task;
 import org.datavaultplatform.common.util.DateTimeUtils;
 import org.datavaultplatform.common.util.RetrievedChunks;
 import org.datavaultplatform.common.util.StoredChunks;
-import org.jsondoc.core.annotation.Api;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
@@ -32,7 +38,7 @@ import java.util.*;
 
 @RestController
 //@CrossOrigin
-@Api(name="Deposits", description = "Interact with DataVault Deposits")
+@Tag(name="deposits-controller", description = "Interact with DataVault Deposits")
 public class DepositsController {
 
     private final VaultsService vaultsService;
@@ -45,7 +51,7 @@ public class DepositsController {
     private final ArchiveStoreService archiveStoreService;
     private final JobsService jobsService;
     private final AdminService adminService;
-    private final Sender sender;
+    private final TaskSender taskSender;
     private final String optionsDir;
     private final String tempDir;
     private final String bucketName;
@@ -73,7 +79,7 @@ public class DepositsController {
         RetrievesService retrievesService, MetadataService metadataService,
         ExternalMetadataService externalMetadataService, FilesService filesService,
         UsersService usersService, ArchiveStoreService archiveStoreService, JobsService jobsService,
-        AdminService adminService, Sender sender,
+        AdminService adminService, TaskSender taskSender,
         @Value("${optionsDir:#{null}}") String optionsDir,
         @Value("${tempDir:#{null}}") String tempDir,
         @Value("${s3.bucketName:#{null}}") String bucketName,
@@ -101,7 +107,7 @@ public class DepositsController {
         this.archiveStoreService = archiveStoreService;
         this.jobsService = jobsService;
         this.adminService = adminService;
-        this.sender = sender;
+        this.taskSender = taskSender;
         this.optionsDir = optionsDir;
         this.tempDir = tempDir;
         this.bucketName = bucketName;
@@ -122,20 +128,27 @@ public class DepositsController {
     }
 
 
+    @Operation(
+            summary = "Get a specific Deposit",
+            description = "Retrieves details for a specific Deposit by its ID."
+    )
+    @GetMapping(value = "/deposits/{depositId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public DepositInfo getDeposit( @RequestHeader(HEADER_USER_ID) String userId,
+                                   @PathVariable String depositId) throws Exception {
 
-    @GetMapping("/deposits/{depositid}")
-    public DepositInfo getDeposit(@RequestHeader(HEADER_USER_ID) String userID,
-                                  @PathVariable("depositid") String depositID) throws Exception {
-
-        User user = getUser(userID);
-        return getUserDeposit(user, depositID).convertToResponse();
+        User user = getUser(userId);
+        return getUserDeposit(user, depositId).convertToResponse();
     }
 
-    @PostMapping("/deposits")
-    public ResponseEntity<DepositInfo> addDeposit(@RequestHeader(HEADER_USER_ID) String userID,
-                                             @RequestBody CreateDeposit createDeposit) throws Exception {
+    @Operation(
+            summary = "Add a new Deposit",
+            description = "Adds a new Deposit to the system."
+    )
+    @PostMapping(value = "/deposits", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<DepositInfo> addDeposit(@RequestHeader(HEADER_USER_ID) String userId,
+                                                  @RequestBody CreateDeposit createDeposit) throws Exception {
 
-        User user = getUser(userID);
+        User user = getUser(userId);
 
         Deposit deposit = new Deposit();
 
@@ -171,17 +184,21 @@ public class DepositsController {
         this.runDeposit(archiveStores, deposit, createDeposit.getDepositPaths(), null);
 
         // Check the retention policy of the newly created vault
-        vaultsService.checkRetentionPolicy(vault.getID());
+        vaultsService.checkRetentionPolicy(vault.getID(), RetentionPoliciesService.RetentionPolicyUpdateReason.ADDED_DEPOSIT);
 
         return new ResponseEntity<>(deposit.convertToResponse(), HttpStatus.OK);
     }
     
-    @GetMapping("/deposits/{depositid}/manifest")
-    public List<FileFixity> getDepositManifest(@RequestHeader(HEADER_USER_ID) String userID,
-                                               @PathVariable("depositid") String depositID) throws Exception {
+    @Operation(
+            summary = "Get a Deposit's manifest",
+            description = "Retrieves the manifest for a specific Deposit."
+    )
+    @GetMapping(value = "/deposits/{depositId}/manifest", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<FileFixity> getDepositManifest(@RequestHeader(HEADER_USER_ID) String userId,
+                                               @PathVariable String depositId) throws Exception {
 
-        User user = getUser(userID);
-        Deposit deposit = getUserDeposit(user, depositID);
+        User user = getUser(userId);
+        Deposit deposit = getUserDeposit(user, depositId);
 
         List<FileFixity> manifest = new ArrayList<>();
         
@@ -192,12 +209,16 @@ public class DepositsController {
         return manifest;
     }
 
-    @GetMapping("/deposits/{depositid}/events")
-    public List<EventInfo> getDepositEvents(@RequestHeader(HEADER_USER_ID) String userID,
-                                            @PathVariable("depositid") String depositID) throws Exception {
+    @Operation(
+            summary = "Get a Deposit's events",
+            description = "Retrieves a list of all Events for a specific Deposit."
+    )
+    @GetMapping(value = "/deposits/{depositId}/events", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<EventInfo> getDepositEvents(@RequestHeader(HEADER_USER_ID) String userId,
+                                            @PathVariable String depositId) throws Exception {
 
-        User user = getUser(userID);
-        Deposit deposit = getUserDeposit(user, depositID);
+        User user = getUser(userId);
+        Deposit deposit = getUserDeposit(user, depositId);
 
         List<EventInfo> events = new ArrayList<>();
         
@@ -208,51 +229,92 @@ public class DepositsController {
         return events;
     }
 
-    @GetMapping("/deposits/{depositid}/retrieves")
-    public List<Retrieve> getDepositRetrieves(@RequestHeader(HEADER_USER_ID) String userID,
-                                            @PathVariable("depositid") String depositID) throws Exception {
+    @Operation(
+            summary = "Get a Deposit's retrieves",
+            description = "Retrieves a list of all Retrieves for a specific Deposit."
+    )
+    @GetMapping(value = "/deposits/{depositId}/retrieves", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<Retrieve> getDepositRetrieves(@RequestHeader(HEADER_USER_ID) String userId,
+                                              @PathVariable String depositId) throws Exception {
 
-        User user = getUser(userID);
-        Deposit deposit = getUserDeposit(user, depositID);
+        User user = getUser(userId);
+        Deposit deposit = getUserDeposit(user, depositId);
 
         return deposit.getRetrieves();
     }
 
-    @GetMapping("/deposits/{depositid}/jobs")
-    public List<Job> getDepositJobs(@RequestHeader(HEADER_USER_ID) String userID,
-                                    @PathVariable("depositid") String depositID) throws Exception {
+    @Operation(
+            summary = "Get a Deposit's jobs",
+            description = "Retrieves a list of all Jobs for a specific Deposit."
+    )
+    @GetMapping(value = "/deposits/{depositId}/jobs", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<Job> getDepositJobs( @RequestHeader(HEADER_USER_ID) String userId,
+                                     @PathVariable String depositId) throws Exception {
 
-        User user = getUser(userID);
-        Deposit deposit = getUserDeposit(user, depositID);
+        User user = getUser(userId);
+        Deposit deposit = getUserDeposit(user, depositId);
 
         return deposit.getJobs();
     }
 
-    @PostMapping( "/deposits/{depositid}/retrieve")
-    public Boolean retrieveDeposit(@RequestHeader(HEADER_USER_ID) String userID,
-                                  @PathVariable("depositid") String depositID,
-                                  @RequestBody Retrieve retrieve) throws Exception {
-        User user = getUser(userID);
-        Deposit deposit = getUserDeposit(user, depositID);
+    @Operation(
+            summary = "Retrieve a Deposit",
+            description = "Initiates a retrieve process for a specific Deposit.",
+            responses = {
+                    @ApiResponse(
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(type = "boolean"),
+                                    examples = @ExampleObject(value = "true"))
+                    )
+            }
+    )
+    @PostMapping(value = "/deposits/{depositId}/retrieve", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Boolean retrieveDeposit(@RequestHeader(HEADER_USER_ID) String userId,
+                                   @PathVariable String depositId,
+                                   @RequestBody Retrieve retrieve) throws Exception {
+        User user = getUser(userId);
+        Deposit deposit = getUserDeposit(user, depositId);
         return runRetrieveDeposit(user, deposit, retrieve, null);
     }
 
-    /*
-    Added this method to easier testing of retrieve restarts with just a retrieve id
-     */
-    @PostMapping( "/retrieve/{retrieveId}/restart")
-    public boolean retrieveRestart(@PathVariable("retrieveId") String retrieveId) throws Exception {
+    @Operation(
+            hidden = true,
+            summary = "Restart a retrieve process",
+            description = "Restarts a retrieve process by its ID.",
+            responses = {
+                    @ApiResponse(
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(type = "boolean"),
+                                    examples = @ExampleObject(value = "true"))
+                    )
+            }
+    )
+    @PostMapping(value = "/retrieve/{retrieveId}/restart", produces = MediaType.APPLICATION_JSON_VALUE)
+    public boolean retrieveRestart(@PathVariable String retrieveId) throws Exception {
         Retrieve retrieve = getRetrieve(retrieveId);
         Deposit deposit = retrieve.getDeposit();
         User user = retrieve.getUser();
         return retrieveDepositRestart(user.getID(), deposit.getID(), retrieveId );
     }
 
-    @PostMapping( "/deposits/{depositId}/retrieve/{retrieveId}/restart")
-    public boolean retrieveDepositRestart(@RequestHeader(HEADER_USER_ID) String userID,
-                                   @PathVariable("depositId") String depositId,
-                                   @PathVariable("retrieveId") String retrieveId) throws Exception {
-        User user = adminService.ensureAdminUser(userID);
+    @Operation(
+            summary = "Restart a retrieve process for a specific Deposit",
+            description = "Restarts a retrieve process for a specific Deposit by its ID.",
+            responses = {
+                    @ApiResponse(
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(type = "boolean"),
+                                    examples = @ExampleObject(value = "true"))
+                    )
+            }
+    )
+    @PostMapping(value = "/deposits/{depositId}/retrieve/{retrieveId}/restart", produces = MediaType.APPLICATION_JSON_VALUE)
+    public boolean retrieveDepositRestart(@RequestHeader(HEADER_USER_ID) String userId,
+                                          @PathVariable String depositId,
+                                          @PathVariable String retrieveId) throws Exception {
+        User user = adminService.ensureAdminUser(userId);
         Deposit deposit = getUserDeposit(user, depositId);
         Assert.isTrue(deposit.getNonRestartJobId() != null, "The non restart job id should not be null");
         Retrieve retrieve = getRetrieve(retrieveId);
@@ -345,15 +407,14 @@ public class DepositsController {
                     chunksDigest,
                     tarIVs, chunksIVs,
                     encTarDigest, encChunksDigests, lastEvent);
-            String jsonRetrieve = mapper.writeValueAsString(retrieveTask);
 
-            sender.send(jsonRetrieve, isRestart);
+            taskSender.send(retrieveTask, isRestart);
         } catch (Exception e) {
             logger.error("unexpected exception", e);
         }
 
         // Check the retention policy of the newly created vault
-        vaultsService.checkRetentionPolicy(deposit.getVault().getID());
+        vaultsService.checkRetentionPolicy(deposit.getVault().getID(), RetentionPoliciesService.RetentionPolicyUpdateReason.RETRIEVE_DEPOSIT);
 
         return true;
     }
@@ -400,7 +461,7 @@ public class DepositsController {
     private HashMap<String,String> getRetrieveProperties(User user, Deposit deposit, Retrieve retrieve, String retrievePath, String archiveID) {
         var result = new HashMap<String,String>();
         result.put(PropNames.DEPOSIT_ID, deposit.getID());
-        result.put(PropNames.DEPOSIT_CREATION_DATE, DateTimeUtils.formatDateBasicISO(deposit.getCreationTime()));
+        result.put(PropNames.DEPOSIT_CREATION_DATE, DateTimeUtils.formatLocalDateTimeBasicISO(deposit.getCreationTime()));
         result.put(PropNames.RETRIEVE_ID, retrieve.getID());
         result.put(PropNames.BAG_ID, deposit.getBagId());
         result.put(PropNames.RETRIEVE_PATH, retrievePath); // No longer the absolute path
@@ -491,12 +552,16 @@ public class DepositsController {
         }
     }
 
-    @PostMapping("/deposits/{depositid}/restart")
-    public Deposit restartDeposit(@RequestHeader(HEADER_USER_ID) String userID,
-                                   @PathVariable("depositid") String depositID) throws Exception{
+    @Operation(
+            summary = "Restart a Deposit",
+            description = "Restarts a failed Deposit process."
+    )
+    @PostMapping(value = "/deposits/{depositId}/restart", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Deposit restartDeposit(@RequestHeader(HEADER_USER_ID) String userId,
+                                  @PathVariable String depositId) throws Exception {
 
-        User user = adminService.ensureAdminUser(userID);
-        Deposit deposit = getUserDeposit(user, depositID);
+        User user = adminService.ensureAdminUser(userId);
+        Deposit deposit = getUserDeposit(user, depositId);
 
         List<FileStore> userStores = user.getFileStores();
         logger.info("There is {}user stores.", userStores.size());
@@ -678,15 +743,14 @@ public class DepositsController {
         if (archiveIDs != null) {
             depositTask.setRestartArchiveIds(archiveIDs);
         }
-        String jsonDeposit = this.mapper.writeValueAsString(depositTask);
-        sender.send(jsonDeposit, isRestart);
+        taskSender.send(depositTask, isRestart);
 
         return job;
     }
-    private User getUser(String userID) throws Exception {
-        User user = usersService.getUser(userID);
+    private User getUser(String userId) throws Exception {
+        User user = usersService.getUser(userId);
         if (user == null) {
-            throw new Exception("User '" + userID + "' does not exist");
+            throw new Exception("User '" + userId + "' does not exist");
         }
         return user;
     }

@@ -9,7 +9,7 @@ import org.datavaultplatform.common.model.Permission;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
-public class AdminPendingVaultsControllerAuthTest extends BaseControllerAuthTest {
+class AdminPendingVaultsControllerAuthTest extends BaseControllerAuthTest {
 
   @MockBean
   AdminPendingVaultsController controller;
@@ -19,7 +19,7 @@ public class AdminPendingVaultsControllerAuthTest extends BaseControllerAuthTest
     doNothing().when(controller).delete(USER_ID_1, "vault-id-123");
 
     checkWorksWhenAuthenticatedFailsOtherwise(
-        delete("/admin/pendingVaults/{id}", "vault-id-123"),
+        delete("/admin/pendingVaults/{vaultId}", "vault-id-123"),
         null,
         Permission.CAN_MANAGE_PENDING_VAULTS);
 

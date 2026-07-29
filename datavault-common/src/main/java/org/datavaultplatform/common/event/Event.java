@@ -5,8 +5,6 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
 import org.datavaultplatform.common.event.audit.*;
 import org.datavaultplatform.common.event.client.*;
 import org.datavaultplatform.common.event.delete.*;
@@ -33,6 +31,7 @@ import org.datavaultplatform.common.response.EventInfo;
 
         @JsonSubTypes.Type(value = DeleteStart.class, name = "org.datavaultplatform.common.event.delete.DeleteStart"),
         @JsonSubTypes.Type(value = DeleteComplete.class, name = "org.datavaultplatform.common.event.delete.DeleteComplete"),
+        @JsonSubTypes.Type(value = DeletedChunk.class, name = "org.datavaultplatform.common.event.delete.DeletedChunk"),
 
         @JsonSubTypes.Type(value = ValidationComplete.class, name = "org.datavaultplatform.common.event.deposit.ValidationComplete"),
         @JsonSubTypes.Type(value = ComputedSize.class,       name = "org.datavaultplatform.common.event.deposit.ComputedSize"),
@@ -81,7 +80,7 @@ import org.datavaultplatform.common.response.EventInfo;
         @JsonSubTypes.Type(value = Event.class,            name = "org.datavaultplatform.common.event.Event"),
         @JsonSubTypes.Type(value = Error.class,            name = "org.datavaultplatform.common.event.Error"),
         @JsonSubTypes.Type(value = InitStates.class,       name = "org.datavaultplatform.common.event.InitStates"),
-        @JsonSubTypes.Type(value = UpdateProgress.class,   name = "org.datavaultplatform.common.event.UpdateProgress")
+        @JsonSubTypes.Type(value = UpdateProgress.class,   name = "org.datavaultplatform.common.event.UpdateProgress"),
 })
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
@@ -237,13 +236,9 @@ public class Event {
     @Transient
     protected String roleId;
 
-    @Getter
-    @Setter
     @Column(name = "chunkNumber", columnDefinition = "INT DEFAULT NULL")
     private Integer chunkNumber;
 
-    @Getter
-    @Setter
     @Column(name = "archive_store_id", columnDefinition = "VARCHAR(256) DEFAULT NULL")
     private String archiveStoreId;
     
@@ -287,6 +282,11 @@ public class Event {
         return eventClass;
     }
 
+    /**
+     * This is the name of a class.
+     * We can't use Class.forName to check if it's valid because it might be the name of a class in another module.
+     * @param eventClass the name of java Event class.
+     */
     public void setEventClass(String eventClass) {
         this.eventClass = eventClass;
     }

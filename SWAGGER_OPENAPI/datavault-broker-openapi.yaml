@@ -1,0 +1,5461 @@
+openapi: 3.1.0
+info:
+  title: DataVault Broker API
+  description: |-
+    API documentation for the DataVault Broker module.
+    All endpoints require authentication via the X-UserID and X-Client-Key headers.
+  version: 0.0.0 (1e9556f)
+  x-generated-at: 2026-04-20T10:14:34.243262
+servers:
+- url: http://localhost
+  description: Generated server url
+security:
+- X-UserID-Header: []
+- X-Client-Key-Header: []
+tags:
+- name: admin-controller
+  description: Administrator functions
+- name: deposits-controller
+  description: Interact with DataVault Deposits
+- name: notify-controller
+  description: Inform the broker about an event
+- name: vaults-controller
+  description: Interact with DataVault Vaults
+- name: users-controller
+  description: Interact with DataVault Users
+- name: reviews-controller
+  description: Review functions
+- name: admin-reviews-controller
+  description: Administrator Review functions
+- name: admin-users-controller
+  description: Administrator User functions
+- name: admin-retention-policies-controller
+  description: Administrator RetentionPolicies functions
+- name: groups-controller
+  description: Interact with DataVault Groups
+- name: billing-controller
+  description: Administrator Billing functions
+- name: roles-and-permissions-controller
+  description: Interact with DataVault Roles and Permissions
+- name: statistics-controller
+  description: System statistics
+- name: admin-pending-vaults-controller
+  description: Administrator pending vault functions.
+paths:
+  /permissions/role:
+    put:
+      tags:
+      - roles-and-permissions-controller
+      summary: Update an existing role
+      description: Updates an existing role
+      operationId: updateRole
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RoleModel"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RoleModel"
+    post:
+      tags:
+      - roles-and-permissions-controller
+      summary: Create a new DataVault Role
+      description: Create a new DataVault Role
+      operationId: createRole
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RoleModel"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RoleModel"
+  /permissions/roleAssignment:
+    put:
+      tags:
+      - roles-and-permissions-controller
+      summary: Update an existing DataVault Role Assignment
+      description: Update an existing DataVault Role Assignment
+      operationId: updateRoleAssignment
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: X-Client-Key
+        in: header
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RoleAssignment"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RoleAssignment"
+    post:
+      tags:
+      - roles-and-permissions-controller
+      summary: Create a new DataVault Role Assignment
+      description: Create a new DataVault Role Assignment
+      operationId: createRoleAssignment
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: X-Client-Key
+        in: header
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RoleAssignment"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RoleAssignment"
+  /notify/logout:
+    put:
+      tags:
+      - notify-controller
+      summary: Register a logout event
+      description: Registers a user logout event with the DataVault broker.
+      operationId: logout
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: X-Client-Key
+        in: header
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateClientEvent"
+        required: true
+      responses:
+        "200":
+          description: Logout event registered successfully
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: Always an empty string
+  /notify/login:
+    put:
+      tags:
+      - notify-controller
+      summary: Register a login event
+      description: Registers a user login event with the DataVault broker.
+      operationId: login
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: X-Client-Key
+        in: header
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateClientEvent"
+        required: true
+      responses:
+        "200":
+          description: Logout event registered successfully
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: Always an empty string
+  /groups/{groupId}/users/{ownerUserId}:
+    put:
+      tags:
+      - groups-controller
+      summary: Add a Group Owner
+      description: Adds a user as an owner to a specific Group.
+      operationId: addGroupOwner
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: ownerUserId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    delete:
+      tags:
+      - groups-controller
+      summary: Remove a Group Owner
+      description: Removes a user as an owner from a specific Group.
+      operationId: removeGroupOwner
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: ownerUserId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+  /groups/{groupId}/enable:
+    put:
+      tags:
+      - groups-controller
+      summary: Enable a Group
+      description: Enables a specific Group by its ID.
+      operationId: enableGroup
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+  /groups/{groupId}/disable:
+    put:
+      tags:
+      - groups-controller
+      summary: Disable a Group
+      description: Disables a specific Group by its ID.
+      operationId: disableGroup
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+  /admin/vaults/vaultreviews:
+    put:
+      tags:
+      - admin-reviews-controller
+      summary: Edit a Vault Review
+      description: |-
+        Updates an existing Vault Review.
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_VAULTS')`
+      operationId: editVaultReview
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: X-Client-Key
+        in: header
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VaultReview"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VaultReview"
+  /admin/vaultreviews/depositreviews:
+    put:
+      tags:
+      - admin-reviews-controller
+      operationId: editDepositReview
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DepositReview"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DepositReview"
+  /admin/users:
+    put:
+      tags:
+      - admin-users-controller
+      summary: Edit a DataVault User
+      description: |-
+        Updates an existing user in the DataVault system.
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN')`
+      operationId: editUser
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+    post:
+      tags:
+      - admin-users-controller
+      summary: Create a new DataVault User
+      description: |-
+        Creates a new user in the DataVault system.
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN')`
+      operationId: addUser
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+  /admin/retentionpolicies:
+    put:
+      tags:
+      - admin-retention-policies-controller
+      summary: Edit a Retention Policy
+      description: Updates an existing Retention Policy.
+      operationId: editRetentionPolicy
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: X-Client-Key
+        in: header
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateRetentionPolicy"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateRetentionPolicy"
+    post:
+      tags:
+      - admin-retention-policies-controller
+      summary: Create a new Retention Policy
+      description: Creates a new Retention Policy in the DataVault system.
+      operationId: addRetentionPolicy
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: X-Client-Key
+        in: header
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateRetentionPolicy"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateRetentionPolicy"
+  /admin/archivestores:
+    get:
+      tags:
+      - admin-archive-store-controller
+      description: |2-
+
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_ARCHIVESTORES')`
+      operationId: getArchiveStores
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ArchiveStore"
+    put:
+      tags:
+      - admin-archive-store-controller
+      description: |2-
+
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_ARCHIVESTORES')`
+      operationId: editArchiveStore
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ArchiveStore"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArchiveStore"
+    post:
+      tags:
+      - admin-archive-store-controller
+      description: |2-
+
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_ARCHIVESTORES')`
+      operationId: addArchiveStore
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ArchiveStore"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArchiveStore"
+  /vaults:
+    get:
+      tags:
+      - vaults-controller
+      summary: Gets a list of all Vaults for the specified User
+      description: Retrieves a list of all Vaults that the specified user has a role
+        assignment for.
+      operationId: getVaults
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/VaultInfo"
+    post:
+      tags:
+      - vaults-controller
+      summary: Add a new Vault
+      description: Adds a new Vault to the system.
+      operationId: addVault
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: X-Client-Key
+        in: header
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateVault"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VaultInfo"
+  /vaults/{vaultId}/updatereviewdate:
+    post:
+      tags:
+      - vaults-controller
+      summary: Update a Vault's review date
+      description: Updates the review date of a specific Vault.
+      operationId: updateVaultReviewDate
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: vaultId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Review date in ISO 8601 format
+        content:
+          text/plain:
+            schema:
+              type: string
+              format: date
+              examples:
+              - 2026-12-31
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VaultInfo"
+  /vaults/{vaultId}/updateVaultName:
+    post:
+      tags:
+      - vaults-controller
+      summary: Update a Vault's name
+      description: Updates the name of a specific Vault.
+      operationId: updateVaultName
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: X-Client-Key
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: vaultId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: The new vault name
+        content:
+          text/plain:
+            schema:
+              type: string
+              description: the new vault name
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VaultInfo"
+  /vaults/{vaultId}/updateVaultDescription:
+    post:
+      tags:
+      - vaults-controller
+      summary: Update a Vault's description
+      description: Updates the description of a specific Vault.
+      operationId: updateVaultDescription
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: X-Client-Key
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: vaultId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: The new vault description
+        content:
+          text/plain:
+            schema:
+              type: string
+              description: the new vault description
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VaultInfo"
+  /vaults/{vaultId}/transfer:
+    post:
+      tags:
+      - vaults-controller
+      summary: Transfer a Vault's ownership
+      description: Transfers ownership of a Vault to another user or orphans it.
+      operationId: transferVault
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: X-Client-Key
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: vaultId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransferVault"
+        required: true
+      responses:
+        "200":
+          description: OK
+  /vaults/{vaultId}/addDataManager:
+    post:
+      tags:
+      - vaults-controller
+      summary: Add a Data Manager to a Vault
+      description: Adds a Data Manager to a specific Vault.
+      operationId: addDataManager
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: vaultId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: The user uun
+        content:
+          text/plain:
+            schema:
+              type: string
+              description: the user uun
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VaultInfo"
+  /users:
+    get:
+      tags:
+      - users-controller
+      summary: Gets a list of all Users
+      description: Retrieves a list of all users in the DataVault system.
+      operationId: getUsers
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+    post:
+      tags:
+      - users-controller
+      summary: Create a new DataVault User
+      description: Creates a new user in the DataVault system.
+      operationId: addUser_1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+  /upload/{fileUploadHandle}/{filename}:
+    post:
+      tags:
+      - files-controller
+      operationId: postFileChunk
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: fileUploadHandle
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: filename
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: relativePathBase64
+        in: query
+        description: Base64 encoded relative path
+        required: true
+        schema:
+          type: string
+      - name: chunkNumber
+        in: query
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: chunkSize
+        in: query
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: byte
+              description: bytes of file chunk
+        required: true
+      responses:
+        "200":
+          description: post a file chunk
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: Always an empty string
+                enum:
+                - ""
+  /pendingVaults:
+    get:
+      tags:
+      - vaults-controller
+      summary: Gets a list of all Pending Vaults for the specified User
+      description: Retrieves a list of all Pending Vaults that the specified user
+        has a role assignment for.
+      operationId: getPendingVaults
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/VaultInfo"
+    post:
+      tags:
+      - vaults-controller
+      summary: Add a new Pending Vault
+      description: Adds a new Pending Vault to the system.
+      operationId: addPendingVault
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: X-Client-Key
+        in: header
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateVault"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VaultInfo"
+  /pendingVaults/update:
+    post:
+      tags:
+      - vaults-controller
+      summary: Update a Pending Vault
+      description: Updates an existing Pending Vault.
+      operationId: updatePendingVault
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: X-Client-Key
+        in: header
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateVault"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VaultInfo"
+  /groups:
+    get:
+      tags:
+      - groups-controller
+      summary: Get a list of all Groups
+      description: Gets a list of all Groups in the DataVault system.
+      operationId: getGroups
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Group"
+    post:
+      tags:
+      - groups-controller
+      summary: Add a new Group
+      description: Adds a new Group to the DataVault system.
+      operationId: addGroup
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Group"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Group"
+  /groups/update:
+    post:
+      tags:
+      - groups-controller
+      summary: Update an existing Group
+      description: Updates an existing Group in the DataVault system.
+      operationId: updateGroup
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Group"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Group"
+  /filestores:
+    get:
+      tags:
+      - file-store-controller
+      operationId: getFileStores
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FileStore"
+    post:
+      tags:
+      - file-store-controller
+      operationId: addFileStore
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FileStore"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FileStore"
+  /filestores/sftp:
+    get:
+      tags:
+      - file-store-controller
+      operationId: getFileStoresSFTP
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FileStore"
+    post:
+      tags:
+      - file-store-controller
+      operationId: addFileStoreSFTP
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FileStore"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FileStore"
+  /deposits:
+    post:
+      tags:
+      - deposits-controller
+      summary: Add a new Deposit
+      description: Adds a new Deposit to the system.
+      operationId: addDeposit
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateDeposit"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Deposit"
+  /deposits/{depositId}/retrieve:
+    post:
+      tags:
+      - deposits-controller
+      summary: Retrieve a Deposit
+      description: Initiates a retrieve process for a specific Deposit.
+      operationId: retrieveDeposit
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: depositId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Retrieve"
+        required: true
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                type: boolean
+              example: true
+  /deposits/{depositId}/retrieve/{retrieveId}/restart:
+    post:
+      tags:
+      - deposits-controller
+      summary: Restart a retrieve process for a specific Deposit
+      description: Restarts a retrieve process for a specific Deposit by its ID.
+      operationId: retrieveDepositRestart
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: depositId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: retrieveId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                type: boolean
+              example: true
+  /deposits/{depositId}/restart:
+    post:
+      tags:
+      - deposits-controller
+      summary: Restart a Deposit
+      description: Restarts a failed Deposit process.
+      operationId: restartDeposit
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: depositId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Deposit"
+  /auth/users/isvalid:
+    post:
+      tags:
+      - users-controller
+      summary: Validate a user's credentials
+      description: Validates a user's credentials in the DataVault system.
+      operationId: validateUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ValidateUser"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: boolean
+  /auth/users/isadmin:
+    post:
+      tags:
+      - users-controller
+      summary: Check if a user is an admin
+      description: Checks if a user is an administrator in the DataVault system.
+      operationId: isAdmin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ValidateUser"
+        required: true
+      responses:
+        "200":
+          description: Returns true if the user is an admin
+          content:
+            application/json:
+              schema:
+                type: boolean
+                examples:
+                - "true"
+  /auth/users/exists:
+    post:
+      tags:
+      - users-controller
+      summary: Check if a user exists
+      description: Checks if a user exists in the DataVault system.
+      operationId: exists
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ValidateUser"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: boolean
+  /admin/vaults/vaultreviews/{vaultId}/refresh:
+    post:
+      tags:
+      - admin-reviews-controller
+      summary: refreshes the underway VaultReview associated with the specified vault
+      description: |-
+        refreshes the underway VaultReview associated with the specified vault by ensuring there is a DepositReview for each of the Vault's Deposits
+
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_VAULTS')`
+      operationId: refreshDepositsOnUnderwayVaultReview
+      parameters:
+      - name: vaultId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: boolean
+  /admin/vaults/vaultreviews/current:
+    post:
+      tags:
+      - admin-reviews-controller
+      summary: Creates the current review for a Vault
+      description: |-
+        Initiates a new review process for a specified Vault.
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_VAULTS')`
+      operationId: createCurrentReview
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: The unique ID of the Vault
+        content:
+          text/plain:
+            schema:
+              type: string
+              description: Vault Identifier
+              examples:
+              - v-123-abc
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReviewInfo"
+  /admin/pendingVaults/edit:
+    post:
+      tags:
+      - vaults-controller
+      summary: Edit a Pending Vault (Admin)
+      description: |-
+        Updates an existing Pending Vault as an administrator.
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_PENDING_VAULTS')`
+      operationId: editPendingVault
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: X-Client-Key
+        in: header
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateVault"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VaultInfo"
+  /admin/paused/retrieve/toggle:
+    post:
+      tags:
+      - paused-retrieve-state-controller
+      description: |2-
+
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN')`
+      operationId: togglePaused
+      responses:
+        "200":
+          description: OK
+  /admin/paused/deposit/toggle:
+    post:
+      tags:
+      - paused-deposit-state-controller
+      description: |2-
+
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN')`
+      operationId: togglePaused_1
+      responses:
+        "200":
+          description: OK
+  /admin/billing/{vaultId}/updateBilling:
+    post:
+      tags:
+      - billing-controller
+      summary: Update a Vault's billing details
+      description: |-
+        Updates the billing details for a specific Vault.
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_BILLING')`
+      operationId: updateBillingDetails
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: vaultId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BillingInfo"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BillingInfo"
+  /vaults/{vaultId}:
+    get:
+      tags:
+      - vaults-controller
+      summary: Get a specific Vault
+      description: Retrieves details for a specific Vault by its ID.
+      operationId: getVault
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: vaultId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VaultInfo"
+  /vaults/{vaultId}/vaultreviews:
+    get:
+      tags:
+      - reviews-controller
+      summary: Gets a list of Reviews for a Vault
+      description: Retrieves a list of all Reviews for a specific Vault.
+      operationId: getVaultReviews
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: vaultId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ReviewInfo"
+  /vaults/{vaultId}/roleEvents:
+    get:
+      tags:
+      - vaults-controller
+      summary: Get a Vault's Role Events
+      description: Retrieves a list of all Role Events for a specific Vault.
+      operationId: getRoleEvents
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: vaultId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/EventInfo"
+  /vaults/{vaultId}/record:
+    get:
+      tags:
+      - vaults-controller
+      summary: Get a Vault's record
+      description: Retrieves the full record for a specific Vault.
+      operationId: getVaultRecord
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: vaultId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vault"
+  /vaults/{vaultId}/deposits:
+    get:
+      tags:
+      - vaults-controller
+      summary: Get a Vault's Deposits
+      description: Retrieves a list of all Deposits for a specific Vault.
+      operationId: getDeposits
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: vaultId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Deposit"
+  /vaults/{vaultId}/dataManagers:
+    get:
+      tags:
+      - vaults-controller
+      summary: Get a Vault's Data Managers
+      description: Retrieves a list of all Data Managers for a specific Vault.
+      operationId: getDataManagers
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: vaultId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DataManager"
+  /vaults/{vaultId}/dataManager/{uun}:
+    get:
+      tags:
+      - vaults-controller
+      summary: Get a specific Data Manager
+      description: Retrieves a specific Data Manager by their UUN.
+      operationId: getDataManager
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: vaultId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: uun
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DataManager"
+  /vaults/{vaultId}/checkretentionpolicy:
+    get:
+      tags:
+      - vaults-controller
+      summary: Check a Vault's retention policy
+      description: Checks the retention policy of a specific Vault.
+      operationId: checkVaultRetentionPolicy
+      parameters:
+      - name: X-UserID
+        in: header
+        description: DataVault Broker User ID
+        required: true
+        schema:
+          type: string
+      - name: vaultId
+        in: path
+        description: The ID of the Vault to check
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vault"
+  /vaults/vaultreviews/{vaultReviewId}:
+    get:
+      tags:
+      - reviews-controller
+      summary: Get a Vault Review
+      description: Retrieves a specific Vault Review by its ID.
+      operationId: getVaultReview
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: vaultReviewId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VaultReview"
+  /vaults/user:
+    get:
+      tags:
+      - vaults-controller
+      summary: Get Vaults for a specific user
+      description: Retrieves a list of all Vaults associated with a specific user.
+      operationId: getVaultsForUser
+      parameters:
+      - name: userID
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/VaultInfo"
+  /vaults/search:
+    get:
+      tags:
+      - vaults-controller
+      summary: Search all Vaults
+      description: Searches for Vaults based on a query string and other parameters.
+      operationId: searchAllVaults
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: query
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: sort
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: order
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: maxResult
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VaultsData"
+  /vaults/retrievequeuecount:
+    get:
+      tags:
+      - statistics-controller
+      summary: Get the count of Retrieves in queue
+      description: Retrieves the number of Retrieves currently in the queue.
+      operationId: getRetrievesQueuedCount
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int32
+  /vaults/retrieveinprogress:
+    get:
+      tags:
+      - statistics-controller
+      summary: Get Retrieves in progress
+      description: Retrieves a list of Retrieves currently in progress.
+      operationId: getRetrievesInProgress
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Retrieve"
+  /vaults/retentionpolicycount/{status}:
+    get:
+      tags:
+      - statistics-controller
+      summary: Get count of Vaults by Retention Policy Status
+      description: Retrieves the number of Vaults matching a specific Retention Policy
+        status.
+      operationId: getPolicyStatusCount
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: status
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int32
+  /vaults/deposits/search:
+    get:
+      tags:
+      - vaults-controller
+      summary: Search all Deposits
+      description: Searches for Deposits based on a query string and other parameters.
+      operationId: searchAllDeposits
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: query
+        in: query
+        required: false
+        schema:
+          type: string
+          default: ""
+      - name: sort
+        in: query
+        required: false
+        schema:
+          type: string
+          default: creationTime
+      - name: order
+        in: query
+        required: false
+        schema:
+          type: string
+          default: desc
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Deposit"
+  /vaults/deposits/data/search:
+    get:
+      tags:
+      - vaults-controller
+      summary: Search all Deposits with data
+      description: Searches for Deposits with data based on a query string and other
+        parameters.
+      operationId: searchAllDepositsData
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: query
+        in: query
+        required: false
+        schema:
+          type: string
+          default: ""
+      - name: sort
+        in: query
+        required: false
+        schema:
+          type: string
+          default: creationTime
+      - name: order
+        in: query
+        required: false
+        schema:
+          type: string
+          default: desc
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DepositsData"
+  /vaults/deposits/data/limited/search:
+    get:
+      tags:
+      - vaults-controller
+      summary: Limited search for Deposits with data
+      description: "Searches for Deposits with data based on a query string and other\
+        \ parameters, with a limit on the number of results."
+      operationId: limitedSearchDepositsData
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: query
+        in: query
+        required: false
+        schema:
+          type: string
+          default: ""
+      - name: sort
+        in: query
+        required: false
+        schema:
+          type: string
+          default: creationTime
+      - name: order
+        in: query
+        required: false
+        schema:
+          type: string
+          default: desc
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - name: maxResult
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 300
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DepositsData"
+  /vaults/depositqueuecount:
+    get:
+      tags:
+      - statistics-controller
+      summary: Get the count of Deposits in queue
+      description: Retrieves the number of Deposits currently in the queue.
+      operationId: getDepositsQueueCount
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int32
+  /vaults/depositinprogress:
+    get:
+      tags:
+      - statistics-controller
+      summary: Get Deposits in progress
+      description: Retrieves a list of Deposits currently in progress.
+      operationId: getDepositsInProgress
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Deposit"
+  /vaultreviews/{vaultReviewId}/depositreviews:
+    get:
+      tags:
+      - reviews-controller
+      summary: Gets a list of Deposit Reviews for a Vault Review
+      description: Retrieves a list of all Deposit Reviews for a specific Vault Review.
+      operationId: getDepositReviews
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: vaultReviewId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DepositReview"
+  /vaultreviews/depositreviews/{depositReviewId}:
+    get:
+      tags:
+      - reviews-controller
+      summary: Gets a particular Deposit Review
+      description: Retrieves a specific Deposit Review by its ID.
+      operationId: getDepositReview
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: depositReviewId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DepositReview"
+  /users/{userId}:
+    get:
+      tags:
+      - users-controller
+      summary: Get a specific DataVault User
+      description: Retrieves details for a specific user by their ID.
+      operationId: getUser
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+  /statistics/size:
+    get:
+      tags:
+      - statistics-controller
+      summary: Get the total size of Vaults
+      description: Retrieves the combined size of all Vaults in the system.
+      operationId: getVaultsSize
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int64
+  /statistics/retrieveinprogresscount:
+    get:
+      tags:
+      - statistics-controller
+      summary: Get the count of Retrieves in progress
+      description: Retrieves the number of Retrieves currently in progress.
+      operationId: getRetrievesInProgressCount
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int32
+  /statistics/retrievecount:
+    get:
+      tags:
+      - statistics-controller
+      summary: Get the total count of Retrieves
+      description: Retrieves the total number of Retrieves in the system.
+      operationId: getRetrievesCount
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int32
+  /statistics/pendingVaultsTotal:
+    get:
+      tags:
+      - statistics-controller
+      summary: Get the total count of Pending Vaults
+      description: Retrieves the total number of Pending Vaults in the system.
+      operationId: getTotalNumberOfPendingVaults
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int32
+  /statistics/eventcount:
+    get:
+      tags:
+      - statistics-controller
+      summary: Get the total count of Events
+      description: Retrieves the total number of Events in the system.
+      operationId: getEventCount
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int64
+  /statistics/depositinprogresscount:
+    get:
+      tags:
+      - statistics-controller
+      summary: Get the count of Deposits in progress
+      description: Retrieves the number of Deposits currently in progress.
+      operationId: getDepositsInProgressCount
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int32
+  /statistics/depositcount:
+    get:
+      tags:
+      - statistics-controller
+      summary: Get the total count of Deposits
+      description: Retrieves the total number of Deposits in the system.
+      operationId: getDepositsCount
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int32
+  /statistics/count:
+    get:
+      tags:
+      - statistics-controller
+      summary: Get the total count of Vaults
+      description: Retrieves the total number of Vaults in the system.
+      operationId: getVaultsCount
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int32
+  /sizeofselectedfiles:
+    get:
+      tags:
+      - files-controller
+      operationId: sizeOfSelectedFiles
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: filepath
+        in: query
+        required: true
+        schema:
+          type: array
+          items:
+            type: string
+      responses:
+        "200":
+          description: gets combined filesize of selected files
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: english description of size
+                examples:
+                - 5 GB
+                - File information not available.
+  /retentionpolicies:
+    get:
+      tags:
+      - retention-policies-controller
+      operationId: getPolicies
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: X-Client-Key
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RetentionPolicy"
+  /permissions/vault:
+    get:
+      tags:
+      - roles-and-permissions-controller
+      summary: Get all vault permissions
+      description: Gets all vault permissions
+      operationId: getVaultPermissions
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PermissionModel"
+  /permissions/school:
+    get:
+      tags:
+      - roles-and-permissions-controller
+      summary: Get all school permissions
+      description: Gets all school permissions
+      operationId: getSchoolPermissions
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PermissionModel"
+  /permissions/roles:
+    get:
+      tags:
+      - roles-and-permissions-controller
+      summary: Get all editable roles
+      description: Gets all roles which can be edited
+      operationId: getEditableRoles
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RoleModel"
+  /permissions/roles/vault:
+    get:
+      tags:
+      - roles-and-permissions-controller
+      summary: Get all vault roles
+      description: Gets all vault roles
+      operationId: getAllVaultRoles
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RoleModel"
+  /permissions/roles/school:
+    get:
+      tags:
+      - roles-and-permissions-controller
+      summary: Get all school roles
+      description: Gets all school roles
+      operationId: getAllSchoolRoles
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RoleModel"
+  /permissions/roles/readOnly:
+    get:
+      tags:
+      - roles-and-permissions-controller
+      summary: Get all viewable (read-only) roles
+      description: Gets all roles which can be viewed but not edited
+      operationId: getViewableRoles
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RoleModel"
+  /permissions/roleAssignments/vault/{vaultId}:
+    get:
+      tags:
+      - roles-and-permissions-controller
+      summary: Get all role assignments for a given vault
+      description: Gets all role assignments for a given vault
+      operationId: getRoleAssignmentsForVault
+      parameters:
+      - name: vaultId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RoleAssignment"
+  /permissions/roleAssignments/user/{userId}:
+    get:
+      tags:
+      - roles-and-permissions-controller
+      summary: Get all role assignments for a given user
+      description: Gets all role assignments for a given user
+      operationId: getRoleAssignmentsForUser
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RoleAssignment"
+  /permissions/roleAssignments/school/{schoolId}:
+    get:
+      tags:
+      - roles-and-permissions-controller
+      summary: Get all role assignments for a given school
+      description: Gets all role assignments for a given school
+      operationId: getRoleAssignmentsForSchool
+      parameters:
+      - name: schoolId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RoleAssignment"
+  /permissions/roleAssignments/role/{roleId}:
+    get:
+      tags:
+      - roles-and-permissions-controller
+      summary: Get all role assignments for a given role
+      description: Gets all role assignments for a given role
+      operationId: getRoleAssignmentsForRole
+      parameters:
+      - name: roleId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RoleAssignment"
+  /permissions/roleAssignment/{assignmentId}:
+    get:
+      tags:
+      - roles-and-permissions-controller
+      summary: Get a specified role assignment by ID
+      description: Gets a specified role assignment by its ID
+      operationId: getRoleAssignment
+      parameters:
+      - name: assignmentId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RoleAssignment"
+  /permissions/role/{roleId}:
+    get:
+      tags:
+      - roles-and-permissions-controller
+      summary: Get a specific role by ID
+      description: Gets a specific role by its ID
+      operationId: getRole
+      parameters:
+      - name: roleId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RoleModel"
+    delete:
+      tags:
+      - roles-and-permissions-controller
+      summary: Delete a role by ID
+      description: Deletes a role by its ID
+      operationId: deleteRole
+      parameters:
+      - name: roleId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+  /permissions/role/isAdmin:
+    get:
+      tags:
+      - roles-and-permissions-controller
+      summary: Get the 'I.S. Admin' Role
+      description: Gets the 'I.S. Admin' Role
+      operationId: getIsAdmin
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RoleModel"
+  /pendingVaults/{vaultId}:
+    get:
+      tags:
+      - vaults-controller
+      summary: Get a specific Pending Vault
+      description: Retrieves details for a specific Pending Vault by its ID.
+      operationId: getPendingVault
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: vaultId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VaultInfo"
+  /pendingVaults/{vaultId}/record:
+    get:
+      tags:
+      - vaults-controller
+      summary: Get a Pending Vault's record
+      description: Retrieves the full record for a specific Pending Vault.
+      operationId: getPendingVaultRecord
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: vaultId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PendingVault"
+  /pendingVaults/search:
+    get:
+      tags:
+      - vaults-controller
+      summary: Search all Pending Vaults
+      description: Searches for Pending Vaults based on a query string and other parameters.
+      operationId: searchAllPendingVaults
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: query
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: sort
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: order
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: confirmed
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: maxResult
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VaultsData"
+  /metadata/datasets:
+    get:
+      tags:
+      - metadata-controller
+      operationId: getDatasets
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Dataset"
+  /metadata/datasets/{datasetId}:
+    get:
+      tags:
+      - metadata-controller
+      operationId: getDataset
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: datasetId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Dataset"
+  /groups/{groupId}:
+    get:
+      tags:
+      - groups-controller
+      summary: Get a specific DataVault Group
+      description: Gets details for a specific DataVault Group by its ID.
+      operationId: getGroup
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Group"
+    delete:
+      tags:
+      - groups-controller
+      summary: Delete a Group
+      description: Deletes a Group from the DataVault system. Only possible if the
+        group is not attached to any vaults or has no owners.
+      operationId: deleteGroup
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: boolean
+  /groups/{groupId}/vaults:
+    get:
+      tags:
+      - groups-controller
+      summary: Get a list of all Vaults owned by a given Group
+      description: Gets a list of all Vaults associated with a specific Group.
+      operationId: getGroupVaults
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/VaultInfo"
+  /groups/{groupId}/count:
+    get:
+      tags:
+      - groups-controller
+      summary: Get the number of Vaults owned by a Group
+      description: Gets the total number of Vaults associated with a specific Group.
+      operationId: getGroupVaultCount
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int32
+  /groups/count:
+    get:
+      tags:
+      - groups-controller
+      summary: Get the number of Groups
+      description: Gets the total number of Groups in the DataVault system.
+      operationId: getGroupsCount
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int32
+  /groups/byScopedPermissions:
+    get:
+      tags:
+      - groups-controller
+      summary: Get a list of Groups by Scoped Permissions
+      description: Gets a list of Groups based on the user's scoped permissions.
+      operationId: getGroupsByScopedPermissions
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Group"
+  /filestores/{fileStoreId}:
+    get:
+      tags:
+      - file-store-controller
+      operationId: getFileStore
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: fileStoreId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FileStore"
+  /filestores/sftp/{filestoreid}:
+    get:
+      tags:
+      - file-store-controller
+      operationId: getFilestoreSFTP
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: filestoreid
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FileStore"
+  /filestores/local:
+    get:
+      tags:
+      - file-store-controller
+      operationId: getFileStoresLocal
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FileStore"
+  /filesize/{storageId}/{filePath}:
+    get:
+      tags:
+      - files-controller
+      summary: Get file size
+      description: Gets filesize of storageId/<filepath>
+      operationId: getFilesize
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: storageId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: filePath
+        in: path
+        description: The relative path to the file (captured greedily)
+        required: true
+        schema:
+          type: string
+        example: backups/2023/data.zip
+      responses:
+        "200":
+          description: gets filesize of storageId/<filepath>
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: english description of size
+                examples:
+                - 5 GB
+                - File information not available.
+  /files:
+    get:
+      tags:
+      - files-controller
+      operationId: getStorageListing
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FileInfo"
+  /files/{storageId}/{filePath}:
+    get:
+      tags:
+      - files-controller
+      operationId: getFilesListing
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: storageId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: filePath
+        in: path
+        description: The relative path to the file (captured greedily)
+        required: true
+        schema:
+          type: string
+        example: backups/2023/data.zip
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FileInfo"
+  /deposits/{depositId}:
+    get:
+      tags:
+      - deposits-controller
+      summary: Get a specific Deposit
+      description: Retrieves details for a specific Deposit by its ID.
+      operationId: getDeposit
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: depositId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Deposit"
+  /deposits/{depositId}/retrieves:
+    get:
+      tags:
+      - deposits-controller
+      summary: Get a Deposit's retrieves
+      description: Retrieves a list of all Retrieves for a specific Deposit.
+      operationId: getDepositRetrieves
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: depositId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Retrieve"
+  /deposits/{depositId}/manifest:
+    get:
+      tags:
+      - deposits-controller
+      summary: Get a Deposit's manifest
+      description: Retrieves the manifest for a specific Deposit.
+      operationId: getDepositManifest
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: depositId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FileFixity"
+  /deposits/{depositId}/jobs:
+    get:
+      tags:
+      - deposits-controller
+      summary: Get a Deposit's jobs
+      description: Retrieves a list of all Jobs for a specific Deposit.
+      operationId: getDepositJobs
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: depositId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Job"
+  /deposits/{depositId}/events:
+    get:
+      tags:
+      - deposits-controller
+      summary: Get a Deposit's events
+      description: Retrieves a list of all Events for a specific Deposit.
+      operationId: getDepositEvents
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: depositId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/EventInfo"
+  /checkdepositsize:
+    get:
+      tags:
+      - files-controller
+      operationId: checkDepositSize
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DepositSize"
+  /admin/vaults:
+    get:
+      tags:
+      - admin-controller
+      summary: Gets a list of all Vaults
+      description: |-
+        Retrieves a list of all Vaults in the system, with optional sorting and filtering.
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_VAULTS')`
+      operationId: getVaultsAll
+      parameters:
+      - name: X-UserID
+        in: header
+        description: DataVault Broker User ID
+        required: true
+        schema:
+          type: string
+      - name: sort
+        in: query
+        description: Vault sort field
+        schema:
+          type: string
+          default: creationTime
+          enum:
+          - id
+          - name
+          - description
+          - vaultSize
+          - user
+          - policy
+          - creationTime
+          - groupID
+          - reviewDate
+      - name: order
+        in: query
+        description: Vault sort order
+        schema:
+          type: string
+          default: desc
+          enum:
+          - asc
+          - desc
+      - name: offset
+        in: query
+        description: Vault row id
+        schema:
+          type: string
+          default: "0"
+      - name: maxResult
+        in: query
+        description: Number of records
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VaultsData"
+  /admin/vaultsForReview:
+    get:
+      tags:
+      - admin-reviews-controller
+      summary: Gets a list of Vaults for Review
+      description: Retrieves a list of all Vaults that are due for review.
+      operationId: getVaultsForReview
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VaultsData"
+  /admin/vaultsForReview/search:
+    get:
+      tags:
+      - admin-reviews-controller
+      summary: searches vaults by partial vault name (returns 1st 50 only)
+      description: searches vaults by partial vault name (returns 1st 50 only)
+      operationId: getVaultsByPartialName
+      parameters:
+      - name: q
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PageDTOVaultInfo"
+  /admin/vaultsForReview/all:
+    get:
+      tags:
+      - admin-reviews-controller
+      summary: Gets all Vaults - supports Admin Reviews page
+      description: Gets all Vaults
+      operationId: getAllVaults
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VaultsData"
+  /admin/vaults/{vaultId}/reviewstatus:
+    get:
+      tags:
+      - admin-reviews-controller
+      summary: Gets the Review Status of a specific vault
+      description: |-
+        Gets the Review Status of a specific vault
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_VAULTS')`
+      operationId: getVaultReviewStatusInfo
+      parameters:
+      - name: vaultId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VaultReviewStatusInfo"
+  /admin/vaults/{vaultID}/vaultreviews/current:
+    get:
+      tags:
+      - admin-reviews-controller
+      summary: Gets the current review for a Vault
+      description: |-
+        Retrieves the most recent review details for a specific Vault.
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_VAULTS')`
+      operationId: getCurrentReview
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: vaultID
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReviewInfo"
+  /admin/users/search:
+    get:
+      tags:
+      - admin-users-controller
+      summary: Search Users
+      description: |-
+        Searches for users based on a query string.
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN')`
+      operationId: getUsers_1
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: query
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+  /admin/users/count:
+    get:
+      tags:
+      - admin-users-controller
+      summary: Get the number of Users
+      description: |-
+        Gets the total number of Users in the DataVault system.
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN')`
+      operationId: getUsersCount
+      parameters:
+      - name: X-UserID
+        in: header
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int64
+  /admin/retrieves:
+    get:
+      tags:
+      - admin-controller
+      summary: Get a list of all Retrieves
+      description: |-
+        Retrieves a list of all Retrieves in the system, with optional sorting and filtering.
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_RETRIEVES')`
+      operationId: getRetrievesAll
+      parameters:
+      - name: X-UserID
+        in: header
+        description: DataVault Broker User ID
+        required: true
+        schema:
+          type: string
+      - name: query
+        in: query
+        description: Retrieve query field
+        required: false
+        schema:
+          type: string
+      - name: sort
+        in: query
+        description: Retrieve sort field
+        required: false
+        schema:
+          type: string
+          default: timestamp
+          enum:
+          - timestamp
+      - name: order
+        in: query
+        description: Retrieve sort order
+        required: false
+        schema:
+          type: string
+          default: desc
+          enum:
+          - asc
+          - desc
+      - name: offset
+        in: query
+        description: Retrieve row id
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - name: maxResult
+        in: query
+        description: Number of records
+        required: false
+        schema:
+          type: integer
+          format: int32
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Retrieve"
+  /admin/retrieves/count:
+    get:
+      tags:
+      - admin-controller
+      summary: Get the total count of Retrieves
+      description: |-
+        Retrieves the total number of Retrieves in the system, with an optional query filter.
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_RETRIEVES')`
+      operationId: getRetrievesCount_1
+      parameters:
+      - name: X-UserID
+        in: header
+        description: DataVault Broker User ID
+        required: true
+        schema:
+          type: string
+      - name: query
+        in: query
+        description: Retrieve query field
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int32
+  /admin/retentionpolicies/{policyId}:
+    get:
+      tags:
+      - admin-retention-policies-controller
+      summary: Get a Retention Policy
+      description: Retrieves a specific Retention Policy by its ID.
+      operationId: getRetentionPolicy
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: X-Client-Key
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: policyId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateRetentionPolicy"
+  /admin/paused/retrieve/state:
+    get:
+      tags:
+      - paused-retrieve-state-controller
+      operationId: isPaused
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PausedRetrieveStateDTO"
+  /admin/paused/retrieve/history/{limit}:
+    get:
+      tags:
+      - paused-retrieve-state-controller
+      operationId: showPauseHistory
+      parameters:
+      - name: limit
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PausedRetrieveStateDTO"
+  /admin/paused/retrieve/history:
+    get:
+      tags:
+      - paused-retrieve-state-controller
+      operationId: showPauseHistory_1
+      parameters: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PausedRetrieveStateDTO"
+  /admin/paused/deposit/state:
+    get:
+      tags:
+      - paused-deposit-state-controller
+      operationId: isPaused_1
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PausedDepositStateDTO"
+  /admin/paused/deposit/history:
+    get:
+      tags:
+      - paused-deposit-state-controller
+      operationId: showPauseHistory_2
+      parameters: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PausedDepositStateDTO"
+  /admin/paused/deposit/history/{limit}:
+    get:
+      tags:
+      - paused-deposit-state-controller
+      operationId: showPauseHistory_3
+      parameters:
+      - name: limit
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PausedDepositStateDTO"
+  /admin/events:
+    get:
+      tags:
+      - admin-controller
+      summary: Get a list of all Events
+      description: |-
+        Retrieves a list of all Events in the system, with optional sorting.
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_EVENTS')`
+      operationId: getEventsAll
+      parameters:
+      - name: X-UserID
+        in: header
+        description: DataVault Broker User ID
+        required: true
+        schema:
+          type: string
+      - name: sort
+        in: query
+        description: Event sort field
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/EventInfo"
+  /admin/deposits:
+    get:
+      tags:
+      - admin-controller
+      summary: Get a list of all Deposits
+      description: |-
+        Retrieves a list of all Deposits in the system, with optional sorting and filtering.
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_DEPOSITS')`
+      operationId: getDepositsAll
+      parameters:
+      - name: X-UserID
+        in: header
+        description: DataVault Broker User ID
+        required: true
+        schema:
+          type: string
+      - name: query
+        in: query
+        description: Deposit query field
+        required: false
+        schema:
+          type: string
+      - name: sort
+        in: query
+        description: Deposit sort field
+        required: false
+        schema:
+          type: string
+          default: creationTime
+          enum:
+          - name
+          - depositSize
+          - creationTime
+          - status
+          - depositor
+          - vaultName
+          - pureId
+          - school
+          - id
+          - vaultId
+          - owner
+          - reviewDate
+      - name: order
+        in: query
+        description: Deposit sort order
+        required: false
+        schema:
+          type: string
+          default: desc
+          enum:
+          - asc
+          - desc
+      - name: offset
+        in: query
+        description: Deposit row id
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - name: maxResult
+        in: query
+        description: Number of records
+        required: false
+        schema:
+          type: integer
+          format: int32
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Deposit"
+  /admin/deposits/data:
+    get:
+      tags:
+      - admin-controller
+      summary: Gets a list of all Vaults
+      description: |-
+        Retrieves a list of all Vaults in the system, with optional sorting.
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_DEPOSITS')`
+      operationId: getDepositsAllData
+      parameters:
+      - name: X-UserID
+        in: header
+        description: DataVault Broker User ID
+        required: true
+        schema:
+          type: string
+      - name: sort
+        in: query
+        description: Vault sort field
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DepositsData"
+  /admin/deposits/count:
+    get:
+      tags:
+      - admin-controller
+      summary: Get the total count of Deposits
+      description: |-
+        Retrieves the total number of Deposits in the system, with an optional query filter.
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_DEPOSITS')`
+      operationId: getDepositsCount_1
+      parameters:
+      - name: X-UserID
+        in: header
+        description: DataVault Broker User ID
+        required: true
+        schema:
+          type: string
+      - name: query
+        in: query
+        description: Deposit query field
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int32
+  /admin/deposits/audit:
+    get:
+      tags:
+      - admin-controller
+      summary: Run a Deposit audit
+      description: |-
+        Triggers a Deposit audit process.
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_DEPOSITS')`
+      operationId: runDepositAudit
+      parameters:
+      - name: X-UserID
+        in: header
+        description: DataVault Broker User ID
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+  /admin/billing/{vaultId}:
+    get:
+      tags:
+      - billing-controller
+      summary: Get a Vault's billing information
+      description: |-
+        Retrieves the billing information for a specific Vault.
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_BILLING')`
+      operationId: getVaultBillingInfo
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: vaultId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BillingInfo"
+  /admin/billing/search:
+    get:
+      tags:
+      - billing-controller
+      summary: Search all Billing Vaults
+      description: |-
+        Searches for Vaults with billing information based on a query string and other parameters.
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_BILLING')`
+      operationId: searchAllBillingVaults
+      parameters:
+      - name: X-UserID
+        in: header
+        description: DataVault Broker User ID
+        required: true
+        schema:
+          type: string
+      - name: query
+        in: query
+        description: Search query string
+        required: true
+        schema:
+          type: string
+      - name: sort
+        in: query
+        description: Sort field
+        required: false
+        schema:
+          type: string
+      - name: order
+        in: query
+        description: Sort order
+        required: false
+        schema:
+          type: string
+          default: asc
+          enum:
+          - asc
+          - desc
+      - name: offset
+        in: query
+        description: Row offset
+        required: false
+        schema:
+          type: string
+          default: "0"
+      - name: maxResult
+        in: query
+        description: Maximum number of results
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VaultsData"
+  /admin/audits:
+    get:
+      tags:
+      - admin-controller
+      summary: Get a list of all Audits
+      description: Retrieves a list of all Audits in the system.
+      operationId: getAuditsAll
+      parameters:
+      - name: X-UserID
+        in: header
+        description: DataVault Broker User ID
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Audit"
+  /admin/archivestores/{archiveStoreId}:
+    get:
+      tags:
+      - admin-archive-store-controller
+      description: |2-
+
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_ARCHIVESTORES')`
+      operationId: getArchiveStore
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: archiveStoreId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArchiveStore"
+    delete:
+      tags:
+      - admin-archive-store-controller
+      description: |2-
+
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_ARCHIVESTORES')`
+      operationId: deleteArchiveStore
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: archiveStoreId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+  /vaults/{vaultId}/deleteDataManager/{dataManagerID}:
+    delete:
+      tags:
+      - vaults-controller
+      summary: Delete a Data Manager
+      description: Deletes a Data Manager from a Vault.
+      operationId: deleteDataManager
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: vaultId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: dataManagerID
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VaultInfo"
+  /permissions/roleAssignment/{roleAssignmentId}:
+    delete:
+      tags:
+      - roles-and-permissions-controller
+      summary: Delete a DataVault Role Assignment
+      description: Delete a DataVault Role Assignment
+      operationId: deleteRoleAssignment
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: X-Client-Key
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: roleAssignmentId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+  /filestores/{filestoreid}:
+    delete:
+      tags:
+      - file-store-controller
+      operationId: deleteFileStore
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: filestoreid
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+  /admin/retentionpolicies/delete/{policyId}:
+    delete:
+      tags:
+      - admin-retention-policies-controller
+      summary: Delete a Retention Policy
+      description: Deletes a Retention Policy by its ID.
+      operationId: deleteRetentionPolicy
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: policyId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+  /admin/pendingVaults/{vaultId}:
+    delete:
+      tags:
+      - admin-pending-vaults-controller
+      summary: Delete a Pending Vault
+      description: |-
+        Deletes a Pending Vault from the system.
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_PENDING_VAULTS')`
+      operationId: delete
+      parameters:
+      - name: X-UserID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: vaultId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+  /admin/deposits/{depositId}:
+    delete:
+      tags:
+      - admin-controller
+      summary: Delete a Deposit
+      description: |-
+        Deletes a Deposit from the system.
+
+        **HttpSecurity Rule:** `hasAuthority('ROLE_ADMIN_DEPOSITS')`
+      operationId: deleteDeposit
+      parameters:
+      - name: X-UserID
+        in: header
+        description: DataVault Broker User ID
+        required: true
+        schema:
+          type: string
+      - name: depositId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+components:
+  schemas:
+    PermissionModel:
+      type: object
+      properties:
+        adminPermission:
+          type: boolean
+        id:
+          type: string
+        label:
+          type: string
+        permission:
+          type: string
+          enum:
+          - VIEW_DEPOSITS_AND_RETRIEVES
+          - VIEW_VAULT_METADATA
+          - VIEW_VAULT_ROLES
+          - ASSIGN_VAULT_ROLES
+          - VIEW_VAULT_HISTORY
+          - CAN_TRANSFER_VAULT_OWNERSHIP
+          - CAN_VIEW_VAULTS_SIZE
+          - CAN_VIEW_IN_PROGRESS
+          - CAN_VIEW_QUEUES
+          - CAN_MANAGE_VAULTS
+          - CAN_MANAGE_DEPOSITS
+          - CAN_VIEW_RETRIEVES
+          - CAN_VIEW_SCHOOL_ROLE_ASSIGNMENTS
+          - CAN_ORPHAN_SCHOOL_VAULTS
+          - MANAGE_SCHOOL_VAULT_DEPOSITS
+          - VIEW_SCHOOL_VAULT_METADATA
+          - VIEW_SCHOOL_VAULT_ROLES
+          - ASSIGN_SCHOOL_VAULT_ROLES
+          - VIEW_SCHOOL_VAULT_HISTORY
+          - TRANSFER_SCHOOL_VAULT_OWNERSHIP
+          - EDIT_SCHOOL_VAULT_METADATA
+          - DELETE_SCHOOL_VAULT_DEPOSITS
+          - CAN_RETRIEVE_DATA
+          - CAN_MANAGE_BILLING_DETAILS
+          - CAN_MANAGE_ROLES
+          - CAN_MANAGE_PENDING_VAULTS
+          - CAN_VIEW_EVENTS
+          - CAN_MANAGE_RETENTION_POLICIES
+          - CAN_MANAGE_ARCHIVE_STORES
+          - CAN_MANAGE_SCHOOL_ROLE_ASSIGNMENTS
+          - CAN_MANAGE_REVIEWS
+        schoolPermission:
+          type: boolean
+        type:
+          type: string
+          enum:
+          - SCHOOL
+          - VAULT
+          - ADMIN
+        vaultPermission:
+          type: boolean
+    RoleModel:
+      type: object
+      properties:
+        assignedUserCount:
+          type: integer
+          format: int32
+        description:
+          type: string
+        id:
+          type: integer
+          format: int64
+        idAsString:
+          type: string
+        name:
+          type: string
+        permissions:
+          type: array
+          items:
+            $ref: "#/components/schemas/PermissionModel"
+        status:
+          type: string
+        type:
+          type: string
+          enum:
+          - SCHOOL
+          - VAULT
+          - ADMIN
+    RoleAssignment:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        pendingVaultId:
+          type: string
+        role:
+          $ref: "#/components/schemas/RoleModel"
+        schoolId:
+          type: string
+        userId:
+          type: string
+        vaultId:
+          type: string
+    CreateClientEvent:
+      type: object
+      properties:
+        remoteAddress:
+          type: string
+          description: The remote IP address which triggered this event
+        userAgent:
+          type: string
+          description: The browser user agent (if applicable)
+    VaultReview:
+      type: object
+      properties:
+        actionedDate:
+          type: string
+          format: date-time
+        comment:
+          type: string
+        creationTime:
+          type: string
+          format: date-time
+        id:
+          type: string
+        newReviewDate:
+          type: string
+          format: date
+          deprecated: true
+          writeOnly: true
+        oldReviewDate:
+          type: string
+          format: date
+    DataCreator:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        version:
+          type: integer
+          format: int64
+    Dataset:
+      type: object
+      properties:
+        crisId:
+          type: string
+        id:
+          type: string
+        name:
+          type: string
+        visible:
+          type: boolean
+    Deposit:
+      type: object
+      properties:
+        archiveDigest:
+          type: string
+        archiveDigestAlgorithm:
+          type: string
+        archiveSize:
+          type: integer
+          format: int64
+        bagId:
+          type: string
+          description: ID of the bag associated with this Deposit
+        creationTime:
+          type: string
+          format: date-time
+          description: Date that the vault was created
+        depositChunks:
+          type: array
+          items:
+            $ref: "#/components/schemas/DepositChunk"
+        depositPaths:
+          type: array
+          items:
+            $ref: "#/components/schemas/DepositPath"
+        description:
+          type: string
+          description: Deposit description to provide more information about the Deposit
+        encArchiveDigest:
+          type: string
+        encIV:
+          type: string
+          format: byte
+        fileOrigin:
+          type: string
+          description: Origin of the deposited filepath
+        filePath:
+          type: string
+          description: Filepath of the origin deposit
+        hasPersonalData:
+          type: boolean
+          description: Whether the deposit contains personal data or not
+        id:
+          type: string
+          description: Universally Unique Identifier for the Deposit
+        name:
+          type: string
+          description: Deposit name to briefly describe the Deposit
+        nonRestartJobId:
+          type: string
+        numOfChunks:
+          type: integer
+          format: int32
+        personalDataStatement:
+          type: string
+          description: Description of the nature of the personal data
+        shortFilePath:
+          type: string
+          description: Short version of the origin of the deposited filepath
+        size:
+          type: integer
+          format: int64
+        status:
+          type: string
+          description: Status of the Deposit
+          enum:
+          - NOT_STARTED
+          - IN_PROGRESS
+          - COMPLETE
+          - FAILED
+          - DELETE_IN_PROGRESS
+          - DELETED
+          - DELETE_FAILED
+        user:
+          $ref: "#/components/schemas/User"
+        vault:
+          $ref: "#/components/schemas/Vault"
+        version:
+          type: integer
+          format: int64
+    DepositChunk:
+      type: object
+      properties:
+        archiveDigest:
+          type: string
+        archiveDigestAlgorithm:
+          type: string
+        chunkNum:
+          type: integer
+          format: int32
+          description: Filepath of the origin deposit
+        ecnArchiveDigest:
+          type: string
+        encIV:
+          type: string
+          format: byte
+        id:
+          type: string
+          description: Universally Unique Identifier for the Deposit Path
+    DepositPath:
+      type: object
+      properties:
+        filePath:
+          type: string
+          description: Filepath of the origin deposit
+        id:
+          type: string
+          description: Universally Unique Identifier for the Deposit Path
+        pathType:
+          type: string
+          enum:
+          - FILESTORE
+          - USER_UPLOAD
+    DepositReview:
+      type: object
+      properties:
+        actionedDate:
+          type: string
+          format: date-time
+        comment:
+          type: string
+        creationTime:
+          type: string
+          format: date-time
+        deleteStatus:
+          type: integer
+          format: int32
+        deposit:
+          $ref: "#/components/schemas/Deposit"
+        id:
+          type: string
+        toBeDeleted:
+          type: boolean
+          deprecated: true
+        vaultReview:
+          $ref: "#/components/schemas/VaultReview"
+    RetentionPolicy:
+      type: object
+      properties:
+        dataGuidanceReviewed:
+          type: string
+          format: date
+        description:
+          type: string
+        endDate:
+          type: string
+          format: date
+        engine:
+          type: string
+          deprecated: true
+        extendUponRetrieval:
+          type: boolean
+        id:
+          type: integer
+          format: int32
+        inEffectDate:
+          type: string
+          format: date
+        minDataRetentionPeriod:
+          type: string
+          deprecated: true
+        minRetentionPeriod:
+          type: integer
+          format: int32
+        name:
+          type: string
+        policyInfo:
+          type: string
+        sort:
+          type: integer
+          format: int32
+          deprecated: true
+        url:
+          type: string
+    User:
+      type: object
+      properties:
+        email:
+          type: string
+        firstname:
+          type: string
+        id:
+          type: string
+        lastname:
+          type: string
+        password:
+          type: string
+        properties:
+          type: object
+          additionalProperties:
+            type: string
+    Vault:
+      type: object
+      properties:
+        affirmed:
+          type: boolean
+        contact:
+          type: string
+        creationTime:
+          type: string
+          format: date-time
+        dataCreator:
+          type: array
+          items:
+            $ref: "#/components/schemas/DataCreator"
+          writeOnly: true
+        dataset:
+          $ref: "#/components/schemas/Dataset"
+        description:
+          type: string
+        estimate:
+          type: string
+          enum:
+          - UNDER_100GB
+          - UNDER_10TB
+          - OVER_10TB
+          - UNKNOWN
+        grantEndDate:
+          type: string
+          format: date
+        id:
+          type: string
+        mostRecentVaultReview:
+          $ref: "#/components/schemas/VaultReview"
+        name:
+          type: string
+        notes:
+          type: string
+        projectId:
+          type: string
+        pureLink:
+          type: boolean
+        retentionPolicy:
+          $ref: "#/components/schemas/RetentionPolicy"
+        retentionPolicyExpiry:
+          type: string
+          format: date-time
+        retentionPolicyLastChecked:
+          type: string
+          format: date-time
+        retentionPolicyStatus:
+          type: integer
+          format: int32
+        reviewDate:
+          type: string
+          format: date
+        size:
+          type: integer
+          format: int64
+        snapshot:
+          type: string
+        user:
+          $ref: "#/components/schemas/User"
+          deprecated: true
+        vaultReviewUnderway:
+          type: boolean
+        version:
+          type: integer
+          format: int64
+    CreateRetentionPolicy:
+      type: object
+      properties:
+        dataGuidanceReviewed:
+          type: string
+          format: date
+          description: Date Guidance Reviewed
+        description:
+          type: string
+          description: A description of Retention Policy
+        endDate:
+          type: string
+          format: date
+          description: End Date
+        engine:
+          type: string
+          description: Engine for Retention Policy (deprecated
+        extendUponRetrieval:
+          type: boolean
+          description: Extend the expiry date of a vault if a deposit is retrieved
+        id:
+          type: integer
+          format: int32
+          description: Uh... the id
+        inEffectDate:
+          type: string
+          format: date
+          description: In Effect Date
+        minDataRetentionPeriod:
+          type: string
+          description: Minimum Date Retention Period (deprecated)
+        minRetentionPeriod:
+          type: integer
+          format: int32
+          description: Minimum retention period in years
+        name:
+          type: string
+          description: A name for the new Retention Policy
+        policyInfo:
+          type: string
+        sort:
+          type: string
+          description: Sorting order for Retention Policy (deprecated)
+        url:
+          type: string
+          description: URL for Retention Policy
+    ArchiveStore:
+      type: object
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+        properties:
+          type: object
+          additionalProperties:
+            type: string
+        retrieveEnabled:
+          type: boolean
+        storageClass:
+          type: string
+    CreateVault:
+      type: object
+      properties:
+        affirmed:
+          type: boolean
+          description: Did the user accept the various rules on the create vault intro
+            page
+        billingGrantEndDate:
+          type: string
+          format: date
+          description: Define the minimum of time the archive will be kept
+        billingType:
+          type: string
+          description: How we are billing
+        budgetAuthoriser:
+          type: string
+          description: If the billng type is grant or budget we will store an identifier
+            for authoriser
+        budgetSchoolOrUnit:
+          type: string
+          description: If the billng type is grant or budget we will store an identifier
+            for school / unit
+        budgetSubunit:
+          type: string
+          description: If the billng type is grant or budget we will store an identifier
+            for subunit
+        confirmed:
+          type: boolean
+          description: Has the pending vault been confirmed
+        contactPerson:
+          type: string
+          description: contact person for Pure
+        dataCreators:
+          type: array
+          description: List of creators of the dataset
+          items:
+            type: string
+        dataCreatorsAsString:
+          type: string
+        datasetID:
+          type: string
+          description: A reference to an external metadata record that describes this
+            vault
+        depositors:
+          type: array
+          description: List of pending depositors
+          items:
+            type: string
+        depositorsAsString:
+          type: string
+        description:
+          type: string
+          description: A description of the vault
+        estimate:
+          type: string
+          description: Estimate of vault size
+        feewaiverQueryChoice:
+          type: string
+          description: The Billing page feewaiverQueryChoice radio button value
+        fundingQueryChoice:
+          type: string
+          description: The Billing page fundingQueryChoice radio button value
+        grantAuthoriser:
+          type: string
+          description: If the billng type is grant or budget we will store an identifier
+            for authoriser
+        grantEndDate:
+          type: string
+          format: date
+          description: Define the minimum of time the archive will be kept
+        grantSchoolOrUnit:
+          type: string
+          description: If the billng type is grant or budget we will store an identifier
+            for school / unit
+        grantSubunit:
+          type: string
+          description: If the billng type is grant or budget we will store an identifier
+            for subunit
+        groupID:
+          type: string
+          description: The group which is related to this vault
+        isOwner:
+          type: boolean
+          description: Is the logged in user the vault owner
+        loggedInAs:
+          type: string
+          description: The logged in user's UUN (used to pass to JS validation)
+        name:
+          type: string
+          description: A name for the new vault
+        ndmsAsString:
+          type: string
+        nominatedDataManagers:
+          type: array
+          description: List of pending Nominated Data Managers
+          items:
+            type: string
+        notes:
+          type: string
+          description: Notes regarding data retention
+        paymentDetails:
+          type: string
+          description: The Billing payment details.
+        pendingID:
+          type: string
+          description: An ID for the partially completed pending vault
+        policyInfo:
+          type: string
+          description: The policy that will be applied to this vault the format of
+            the string is policyID-lengthofPolicy
+        projectTitle:
+          type: string
+          description: If the billng type is grant we will store an identifier for
+            project title
+        pureLink:
+          type: boolean
+          description: Agree to Pure Link
+        reviewDate:
+          type: string
+          format: date
+          description: The date by which the vault should be reviewed for decision
+            as to whether it should be deleted or whether there are funds available
+            to support continued storage
+        sliceID:
+          type: string
+          description: If the billng type is slice we will store an identifier for
+            the slice
+        sliceQueryChoice:
+          type: string
+          description: The Billing page sliceQueryChoice radio button value
+        vaultCreator:
+          type: string
+          description: Creator of the pending vault (who can be different from who
+            owns the pending vault)
+        vaultOwner:
+          type: string
+          description: Prospective Owner of the vault (who can be different from who
+            is creating the pending vault)
+    VaultInfo:
+      type: object
+      description: Information about a DataVault Vault
+      properties:
+        affirmed:
+          type: boolean
+          description: Did the user accept the various rules on the create vault intro
+            page
+        amountBilled:
+          type: number
+          description: Amount Billed
+        amountToBeBilled:
+          type: number
+          description: Amount to be Billed
+        authoriser:
+          type: string
+          description: Authoriser of the billing
+        billingType:
+          type: string
+          description: How we are billing
+          enum:
+          - NA
+          - GRANT_FUNDING
+          - BUDGET_CODE
+          - SLICE
+          - ORIG
+          - FEEWAIVER
+          - WILL_PAY
+          - BUY_NEW_SLICE
+          - FUNDING_NO_OR_DO_NOT_KNOW
+        confirmed:
+          type: boolean
+          description: Did the user confirm the pending vault yet
+        contact:
+          type: string
+          description: Pure Contact
+        creationTime:
+          type: string
+          format: date-time
+          description: The date and time when this vault was created
+        creators:
+          type: array
+          description: Data Creators
+          items:
+            type: string
+        crisID:
+          type: string
+          description: Another reference to an external metadata record that describes
+            this vault
+        dataCreators:
+          type: array
+          items:
+            type: string
+        datasetID:
+          type: string
+          description: A reference to an external metadata record that describes this
+            vault
+        datasetName:
+          type: string
+          description: The name of the external metadata record that describes this
+            vault
+        depositorIds:
+          type: array
+          description: Depositors
+          items:
+            type: string
+        description:
+          type: string
+          description: The description of this vault
+        estimate:
+          type: string
+          description: Estimate of vault size
+          enum:
+          - UNDER_100GB
+          - UNDER_10TB
+          - OVER_10TB
+          - UNKNOWN
+        feewaiverQueryChoice:
+          type: string
+          description: The Billing page feewaiverQueryChoice radio button value
+          enum:
+          - "YES"
+          - NO_OR_DO_NOT_KNOW
+        fundingQueryChoice:
+          type: string
+          description: The Billing page fundingQueryChoice radio button value
+          enum:
+          - "YES"
+          - FUNDING_NO_OR_DO_NOT_KNOW
+        grantEndDate:
+          type: string
+          format: date
+          description: Define the minimum of time the archive will be kept
+        groupID:
+          type: string
+          description: The group which is related to this vault
+        id:
+          type: string
+          description: The unique identifier for this vault
+        name:
+          type: string
+          description: The name of this vault
+        nominatedDataManagerIds:
+          type: array
+          description: Nominated Data Managers
+          items:
+            type: string
+        notes:
+          type: string
+          description: Notes regarding data retention
+        numberOfDeposits:
+          type: integer
+          format: int64
+          description: Number of Deposits in a vault
+        ownerId:
+          type: string
+          description: Pending / Vault Owner ID
+        ownerName:
+          type: string
+          description: Vault Owner Name
+        paymentDetails:
+          type: string
+          description: The Billing payment details.
+        policyExpiry:
+          type: string
+          format: date-time
+          description: The date and time when the policy will expire
+        policyID:
+          type: string
+          description: The policy that applies to this vault
+        policyLastChecked:
+          type: string
+          format: date-time
+          description: The date and time when the policy check was last carried out
+        policyLength:
+          type: string
+          description: The length of the policy that applies to this vault
+        policyStatus:
+          type: integer
+          format: int32
+          description: The status of the vault policy
+        policyStatusStr:
+          type: string
+        projectId:
+          type: string
+          description: Project Id from Pure
+        projectSize:
+          type: integer
+          format: int64
+          description: Sum of vaults size for a projectId
+        projectSizeStr:
+          type: string
+        projectTitle:
+          type: string
+          description: Project Title (from Grant billing fieldset)
+        pureLink:
+          type: boolean
+          description: Did the user accept the Pure Link rule on the summary page
+        reviewDate:
+          type: string
+          format: date
+          description: The date by which the vault should be reviewed for decision
+            as to whether it should be deleted or whether there are funds available
+            to support continued storage
+        schoolOrUnit:
+          type: string
+          description: School / Unit to be billed
+        sizeStr:
+          type: string
+        sliceID:
+          type: string
+          description: Slice ID from erm somewhere
+        sliceQueryChoice:
+          type: string
+          description: The Billing page sliceQueryChoice radio button value
+          enum:
+          - "YES"
+          - NO_OR_DO_NOT_KNOW
+          - BUY_NEW_SLICE
+        subunit:
+          type: string
+          description: Subunit to be billed
+        userID:
+          type: string
+          description: The user UUN who owns this vault
+        userName:
+          type: string
+          description: The user name who owns this vault
+        vaultCreatorId:
+          type: string
+          description: Pending Vault Creator ID
+        vaultReviewStatusInfo:
+          $ref: "#/components/schemas/VaultReviewStatusInfo"
+        vaultSize:
+          type: integer
+          format: int64
+          description: The size of this vault in bytes
+    VaultReviewStatusInfo:
+      type: object
+      properties:
+        latestSubmittedReview:
+          $ref: "#/components/schemas/VaultReview"
+        underwayReview:
+          $ref: "#/components/schemas/VaultReview"
+    TransferVault:
+      type: object
+      properties:
+        changingRoles:
+          type: boolean
+          description: If the previous data owner is changing to a new role as part
+            of this transfer
+        orphaning:
+          type: boolean
+          description: If the vault is being orphaned. Only possible to do so if the
+            user is an administrator. Mutually exclusive with `changingRolse`
+        reason:
+          type: string
+          description: The reason for the vault transfer
+        roleId:
+          type: integer
+          format: int64
+          description: The ID of the role to associate with the previous vault owner
+        userId:
+          type: string
+          description: The ID of the user to transfer the vault to
+      required:
+      - reason
+      - userId
+    Group:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+        id:
+          type: string
+          pattern: "[a-zA-Z0-9-_/ ]+"
+        name:
+          type: string
+        owners:
+          type: array
+          items:
+            $ref: "#/components/schemas/User"
+    FileStore:
+      type: object
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+        properties:
+          type: object
+          additionalProperties:
+            type: string
+        storageClass:
+          type: string
+    CreateDeposit:
+      type: object
+      properties:
+        depositPaths:
+          type: array
+          description: File paths of the data to deposit (including device ID)
+          items:
+            type: string
+        description:
+          type: string
+          description: Detailed description of the purpose or contents of this deposit
+        fileUploadHandle:
+          type: string
+          description: The temporary upload location for files
+        hasPersonalData:
+          type: string
+          description: Whether the deposit contains personal data or not
+        name:
+          type: string
+          description: Name to briefly describe the purpose or contents of this deposit
+        personalDataStatement:
+          type: string
+          description: Description of the nature of the personal data
+        vaultID:
+          type: string
+          description: The vault which this deposit will be added to
+    Retrieve:
+      type: object
+      properties:
+        deposit:
+          $ref: "#/components/schemas/Deposit"
+        hasExternalRecipients:
+          type: boolean
+        id:
+          type: string
+        note:
+          type: string
+        retrievePath:
+          type: string
+        status:
+          type: string
+          enum:
+          - NOT_STARTED
+          - IN_PROGRESS
+          - COMPLETE
+          - FAILED
+        timestamp:
+          type: string
+          format: date-time
+        user:
+          $ref: "#/components/schemas/User"
+    ValidateUser:
+      type: object
+      properties:
+        password:
+          type: string
+          description: Password
+        userid:
+          type: string
+          description: Userid
+    ReviewInfo:
+      type: object
+      properties:
+        depositIds:
+          type: array
+          description: List of all deposits associated with a VaultReview
+          items:
+            type: string
+        depositReviewIds:
+          type: array
+          description: List of all depositReviews associated with a VaultReview
+          items:
+            type: string
+        vaultReviewId:
+          type: string
+          description: Universally Unique Identifier for the VaultReview
+    BillingInfo:
+      type: object
+      properties:
+        amountBilled:
+          type: number
+          description: The value calculated for all deposits in the vault entered
+            by Admin
+        amountToBeBilled:
+          type: number
+          description: The value calculated for all deposits in the vault entered
+            by Admin
+        billingType:
+          type: string
+          description: The Billing type
+          enum:
+          - NA
+          - GRANT_FUNDING
+          - BUDGET_CODE
+          - SLICE
+          - ORIG
+          - FEEWAIVER
+          - WILL_PAY
+          - BUY_NEW_SLICE
+          - FUNDING_NO_OR_DO_NOT_KNOW
+        budgetCode:
+          type: boolean
+          description: To know if the user uses BudgetCode
+        budgetCodeStr:
+          type: string
+        contactName:
+          type: string
+          description: Billing Details Contact Name
+        creationTime:
+          type: string
+          format: date-time
+          description: The creation Date of the vault
+        grantEndDate:
+          type: string
+          format: date
+          description: The grant end Date of the vault
+        id:
+          type: string
+          description: The unique identifier for this vault
+        paymentDetails:
+          type: string
+          description: The Billing payment details.
+        projectId:
+          type: string
+          description: Project ID
+        projectSize:
+          type: integer
+          format: int64
+          description: Sum of vaults size for a projectId
+        projectSizeStr:
+          type: string
+        projectTitle:
+          type: string
+          description: The Billing Project title
+        reviewDate:
+          type: string
+          format: date-time
+          description: The Date the vault was last reviewed
+        school:
+          type: string
+          description: Internal Customer Name
+        sliceID:
+          type: string
+          description: The Billing SliceID
+        specialComments:
+          type: string
+          description: The comments entered by Admin
+        subUnit:
+          type: string
+          description: The Billing Subunit
+        userName:
+          type: string
+          description: Owner Name
+        vaultID:
+          type: string
+          description: The vault ID
+        vaultName:
+          type: string
+          description: Name of the vault
+        vaultSize:
+          type: integer
+          format: int64
+          description: Sum of vaults size for a projectId
+    EventInfo:
+      type: object
+      properties:
+        agent:
+          type: string
+        agentType:
+          type: string
+        depositID:
+          type: string
+        eventClass:
+          type: string
+        id:
+          type: string
+          description: The unique identifier for this event
+        message:
+          type: string
+        remoteAddress:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+          description: The date and time when this event occured
+        userAgent:
+          type: string
+        userID:
+          type: string
+        vaultID:
+          type: string
+    DataManager:
+      type: object
+      properties:
+        id:
+          type: string
+        uun:
+          type: string
+          description: Data Manager UUN
+        vault:
+          $ref: "#/components/schemas/Vault"
+    VaultsData:
+      type: object
+      properties:
+        data:
+          type: array
+          description: The Vaults information to be displayed in the table
+          items:
+            $ref: "#/components/schemas/VaultInfo"
+        recordsFiltered:
+          type: integer
+          format: int32
+          description: "Total records, after filtering"
+        recordsTotal:
+          type: integer
+          format: int32
+          description: "Total records, before filtering"
+    DepositsData:
+      type: object
+      properties:
+        data:
+          type: array
+          description: The Vaults information to be displayed in the table
+          items:
+            $ref: "#/components/schemas/Deposit"
+        recordsFiltered:
+          type: integer
+          format: int64
+          description: "Total records, after filtering"
+        recordsTotal:
+          type: integer
+          format: int64
+          description: "Total records, before filtering"
+    PendingDataCreator:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        version:
+          type: integer
+          format: int64
+    PendingVault:
+      type: object
+      properties:
+        affirmed:
+          type: boolean
+        authoriser:
+          type: string
+        billingType:
+          type: string
+          enum:
+          - NA
+          - GRANT_FUNDING
+          - BUDGET_CODE
+          - SLICE
+          - ORIG
+          - FEEWAIVER
+          - WILL_PAY
+          - BUY_NEW_SLICE
+          - FUNDING_NO_OR_DO_NOT_KNOW
+        confirmed:
+          type: boolean
+        contact:
+          type: string
+        creationTime:
+          type: string
+          format: date-time
+        creator:
+          $ref: "#/components/schemas/User"
+        dataCreator:
+          type: array
+          items:
+            $ref: "#/components/schemas/PendingDataCreator"
+          writeOnly: true
+        depositors:
+          type: array
+          items:
+            $ref: "#/components/schemas/User"
+        description:
+          type: string
+        estimate:
+          type: string
+          enum:
+          - UNDER_100GB
+          - UNDER_10TB
+          - OVER_10TB
+          - UNKNOWN
+        feewaiverQueryChoice:
+          type: string
+          enum:
+          - "YES"
+          - NO_OR_DO_NOT_KNOW
+        fundingQueryChoice:
+          type: string
+          enum:
+          - "YES"
+          - FUNDING_NO_OR_DO_NOT_KNOW
+        grantEndDate:
+          type: string
+          format: date
+        id:
+          type: string
+        name:
+          type: string
+        nominatedDataManagers:
+          type: array
+          items:
+            $ref: "#/components/schemas/User"
+        notes:
+          type: string
+        owner:
+          $ref: "#/components/schemas/User"
+        paymentDetails:
+          type: string
+        projectTitle:
+          type: string
+        pureLink:
+          type: boolean
+        retentionPolicy:
+          $ref: "#/components/schemas/RetentionPolicy"
+        reviewDate:
+          type: string
+          format: date
+        schoolOrUnit:
+          type: string
+        sliceID:
+          type: string
+        sliceQueryChoice:
+          type: string
+          enum:
+          - "YES"
+          - NO_OR_DO_NOT_KNOW
+          - BUY_NEW_SLICE
+        subunit:
+          type: string
+        user:
+          $ref: "#/components/schemas/User"
+        version:
+          type: integer
+          format: int64
+    FileInfo:
+      type: object
+      properties:
+        absolutePath:
+          type: string
+        isDirectory:
+          type: boolean
+        key:
+          type: string
+        name:
+          type: string
+    FileFixity:
+      type: object
+      properties:
+        algorithm:
+          type: string
+        file:
+          type: string
+        fileType:
+          type: string
+        fixity:
+          type: string
+    Job:
+      type: object
+      properties:
+        depositJob:
+          type: boolean
+        error:
+          type: boolean
+        errorMessage:
+          type: string
+        id:
+          type: string
+        progress:
+          type: integer
+          format: int64
+        progressMax:
+          type: integer
+          format: int64
+        progressMessage:
+          type: string
+        retrieveJob:
+          type: boolean
+        state:
+          type: integer
+          format: int32
+        states:
+          type: array
+          items:
+            type: string
+        taskClass:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        version:
+          type: integer
+          format: int64
+    DepositSize:
+      type: object
+      properties:
+        max:
+          type: integer
+          format: int64
+          description: The max deposit size allowed
+        result:
+          type: boolean
+          description: Whether the potential deposit is under the limit
+        sizeWithUnits:
+          type: string
+          description: The size of deposit as string with units.
+    PageDTOVaultInfo:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/VaultInfo"
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+    PausedRetrieveStateDTO:
+      type: object
+      properties:
+        created:
+          type: string
+          format: date-time
+        isPaused:
+          type: boolean
+    PausedDepositStateDTO:
+      type: object
+      properties:
+        created:
+          type: string
+          format: date-time
+        isPaused:
+          type: boolean
+    Audit:
+      type: object
+      properties:
+        auditChunks:
+          type: array
+          description: Deposit chunks
+          items:
+            $ref: "#/components/schemas/AuditChunkStatus"
+        creationTime:
+          type: string
+          format: date-time
+          description: Date that the audit started
+        id:
+          type: string
+          description: Universally Unique Identifier for the Audit
+        status:
+          type: string
+          description: Status of the Audit
+          enum:
+          - FAILED
+          - IN_PROGRESS
+          - COMPLETE
+    AuditChunkStatus:
+      type: object
+      properties:
+        archiveId:
+          type: string
+          description: The archive ID
+        completedTime:
+          type: string
+          format: date-time
+          description: Date that the audit finished
+        creationTime:
+          type: string
+          format: date-time
+          description: Date that the audit started
+        deposit:
+          $ref: "#/components/schemas/Deposit"
+          description: The chunk deposit
+        depositChunk:
+          $ref: "#/components/schemas/DepositChunk"
+          description: Deposit chunks
+        id:
+          type: string
+          description: Universally Unique Identifier for the Audit
+        note:
+          type: string
+          description: The error note if any
+        status:
+          type: string
+          description: Status of the Audit
+          enum:
+          - QUEUING
+          - IN_PROGRESS
+          - COMPLETE
+          - FIXED
+          - ERROR
+  securitySchemes:
+    X-UserID-Header:
+      type: apiKey
+      description: "User ID header, corresponds to `org.datavaultplatform.common.util.Constants.HEADER_USER_ID`."
+      name: X-UserID
+      in: header
+    X-Client-Key-Header:
+      type: apiKey
+      description: "Client Key header, corresponds to `org.datavaultplatform.common.util.Constants.HEADER_CLIENT_KEY`."
+      name: X-Client-Key
+      in: header

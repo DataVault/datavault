@@ -3,33 +3,32 @@ package org.datavaultplatform.common.request;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
-import org.jsondoc.core.annotation.ApiObject;
-import org.jsondoc.core.annotation.ApiObjectField;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiObject(name = "CreateDeposit")
+@Schema(name = "CreateDeposit")
 @Data
 public class CreateDeposit {
     
-    @ApiObjectField(description = "Name to briefly describe the purpose or contents of this deposit")
+    @Schema(description = "Name to briefly describe the purpose or contents of this deposit")
     private String name;
     
-    @ApiObjectField(description = "Detailed description of the purpose or contents of this deposit")
+    @Schema(description = "Detailed description of the purpose or contents of this deposit")
     private String description;
     
-    @ApiObjectField(description = "Whether the deposit contains personal data or not")
+    @Schema(description = "Whether the deposit contains personal data or not")
     private String hasPersonalData;
     
-    @ApiObjectField(description = "Description of the nature of the personal data")
+    @Schema(description = "Description of the nature of the personal data")
     private String personalDataStatement;
     
-    @ApiObjectField(description = "The vault which this deposit will be added to")
+    @Schema(description = "The vault which this deposit will be added to")
     private String vaultID;
     
-    @ApiObjectField(description = "File paths of the data to deposit (including device ID)")
+    @Schema(description = "File paths of the data to deposit (including device ID)")
     private List<String> depositPaths;
     
-    @ApiObjectField(description = "The temporary upload location for files")
+    @Schema(description = "The temporary upload location for files")
     private String fileUploadHandle;
     
     public CreateDeposit() { }

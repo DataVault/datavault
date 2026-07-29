@@ -14,11 +14,10 @@ import jakarta.persistence.ManyToOne;
 
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.UuidGenerator;
-import org.jsondoc.core.annotation.ApiObject;
-import org.jsondoc.core.annotation.ApiObjectField;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiObject(name = "DataManager")
+@Schema(name = "DataManager")
 @Entity
 @Table(name="DataManagers")
 @NamedEntityGraph(
@@ -42,7 +41,7 @@ public class DataManager {
     @Column(name = "id", unique = true, length = 36)
     private String id;
     
-    @ApiObjectField(description = "Data Manager UUN")
+    @Schema(description = "Data Manager UUN")
     @Column(name = "uun", columnDefinition = "TEXT", length = 36)
     private String uun;
     

@@ -31,9 +31,9 @@
             <b>Retention Policy:</b> [[${retentionPolicy.name}]]<br/>
             <b>Dataset name:</b> [[${vault.datasetName}]]<br/>
             <b>Group:</b> [[${group.name}]]<br/>
-            <b>Created:</b> [[${#dates.format(vault.creationTime,globalDateTimeFormat)}]]<!--/* datetime */--><br/>
-            <b>Review date:</b> [[${#dates.format(vault.policyExpiry,globalDateTimeFormat)}]]<!--/* datetime */--> (Status: [[${vault.policyStatusStr}]])<br/>
-            <b>Last checked:</b> [[${#dates.format(vault.policyLastChecked,globalDateTimeFormat)}]]<!--/* datetime */--><button type="submit" class="btn btn-default btn-sm"><i class="bi bi-arrow-repeat spin" aria-hidden="true"></i> Update</button><br/>
+            <b>Created:</b> [[${#temporals.format(vault.creationTime,globalDateTimeFormat)}]]<!--/* datetime */--><br/>
+            <b>Review date:</b> [[${#temporals.format(vault.policyExpiry,globalDateTimeFormat)}]]<!--/* datetime */--> (Status: [[${vault.policyStatusStr}]])<br/>
+            <b>Last checked:</b> [[${#temporals.format(vault.policyLastChecked,globalDateTimeFormat)}]]<!--/* datetime */--><button type="submit" class="btn btn-default btn-sm"><i class="bi bi-arrow-repeat spin" aria-hidden="true"></i> Update</button><br/>
             <b>Size:</b> [[${vault.getSizeStr()}]]
         </p>
 
@@ -81,7 +81,7 @@
                                     </div>
                                 </td>
                                 <td>[[${deposit.getSizeStr()}]]</td>
-                                <td>[[${#dates.format(deposit.getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */--></td>
+                                <td>[[${#temporals.format(deposit.getCreationTime(),globalDateTimeFormat)}]]<!--/* datetime */--></td>
                             </tr>
                     </tbody>
                 </table>

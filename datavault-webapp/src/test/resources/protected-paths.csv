@@ -15,7 +15,6 @@ PATH, ROLE
 /resources/favicon.ico,
 /actuator/info,
 /actuator/health,
-/actuator/customtime,
 /auth/login,
 /auth/confirmation,
 /auth/denied,

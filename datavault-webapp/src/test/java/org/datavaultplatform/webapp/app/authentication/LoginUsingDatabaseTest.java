@@ -18,6 +18,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.http.client.ClientHttpRequestFactorySettings;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -32,7 +33,7 @@ import org.springframework.security.core.session.SessionRegistry;
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 @ProfileDatabase
-public class LoginUsingDatabaseTest {
+class LoginUsingDatabaseTest {
 
   @LocalServerPort
   int localServerPort;
@@ -57,6 +58,7 @@ public class LoginUsingDatabaseTest {
 
   @BeforeEach
   void setup() {
+    template = template.withRedirects(ClientHttpRequestFactorySettings.Redirects.DONT_FOLLOW);
     TestUtils.cleanRegistry(registry);
   }
 

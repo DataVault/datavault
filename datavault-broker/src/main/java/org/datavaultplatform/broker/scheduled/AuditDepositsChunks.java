@@ -1,12 +1,11 @@
 package org.datavaultplatform.broker.scheduled;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.datavaultplatform.broker.queue.Sender;
+import org.datavaultplatform.broker.queue.TaskSender;
 import org.datavaultplatform.broker.services.ArchiveStoreService;
 import org.datavaultplatform.broker.services.AuditsService;
 import org.datavaultplatform.broker.services.DepositsService;
@@ -34,7 +33,7 @@ public class AuditDepositsChunks implements ScheduledTask {
     private final EmailService emailService;
     private final JobsService jobsService;
     private final AuditsService auditsService;
-    private final Sender sender;
+    private final TaskSender taskSender;
 
     private final String optionsDir;
     private final String tempDir;
@@ -67,7 +66,7 @@ public class AuditDepositsChunks implements ScheduledTask {
     @Autowired
     public AuditDepositsChunks(ArchiveStoreService archiveStoreService,
         DepositsService depositsService, EmailService emailService, JobsService jobsService,
-        AuditsService auditsService, Sender sender,
+        AuditsService auditsService, TaskSender taskSender,
         @Value("${optionsDir:#{null}}") String optionsDir,
         @Value("${tempDir:#{null}}") String tempDir,
         @Value("${s3.bucketName:#{null}}") String bucketName,
@@ -86,7 +85,7 @@ public class AuditDepositsChunks implements ScheduledTask {
         this.emailService = emailService;
         this.jobsService = jobsService;
         this.auditsService = auditsService;
-        this.sender = sender;
+        this.taskSender = taskSender;
         this.optionsDir = optionsDir;
         this.tempDir = tempDir;
         this.bucketName = bucketName;
@@ -187,9 +186,7 @@ public class AuditDepositsChunks implements ScheduledTask {
                 auditTask.setChunksToAudit(chunksInfo);
                 auditTask.setArchiveIds(archiveIds);
 
-                ObjectMapper mapper = new ObjectMapper();
-                String jsonAudit = mapper.writeValueAsString(auditTask);
-                sender.send(jsonAudit);
+                taskSender.send(auditTask);
             } catch (Exception e) {
                 log.error("unexpected exception", e);
             }

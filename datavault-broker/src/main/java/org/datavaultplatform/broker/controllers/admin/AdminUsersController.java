@@ -1,15 +1,11 @@
 package org.datavaultplatform.broker.controllers.admin;
 
-import static org.datavaultplatform.common.util.Constants.HEADER_CLIENT_KEY;
 import static org.datavaultplatform.common.util.Constants.HEADER_USER_ID;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.datavaultplatform.broker.services.UsersService;
 import org.datavaultplatform.common.model.User;
-import org.jsondoc.core.annotation.Api;
-import org.jsondoc.core.annotation.ApiHeader;
-import org.jsondoc.core.annotation.ApiHeaders;
-import org.jsondoc.core.annotation.ApiMethod;
-import org.jsondoc.core.pojo.ApiVerb;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,7 +19,7 @@ import java.util.List;
 
 @RestController
 //@CrossOrigin
-@Api(name="AdminUsers", description = "Administrator User functions")
+@Tag(name="admin-users-controller", description = "Administrator User functions")
 public class AdminUsersController {
 
     private final UsersService usersService;
@@ -32,50 +28,31 @@ public class AdminUsersController {
         this.usersService = usersService;
     }
 
-    @ApiMethod(
-            path = "/admin/users/search",
-            verb = ApiVerb.GET,
-            description = "Search Users",
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
+    @Operation(
+            summary = "Search Users",
+            description = "Searches for users based on a query string."
     )
-    @ApiHeaders(headers={
-            @ApiHeader(name=HEADER_USER_ID, description="DataVault Broker User ID")
-    })
-    @GetMapping("/admin/users/search")
-    public List<User> getUsers(@RequestHeader(HEADER_USER_ID) String userID,
+    @GetMapping(value = "/admin/users/search", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<User> getUsers(@RequestHeader(HEADER_USER_ID) String userId,
                                @RequestParam String query) {
         return usersService.search(query);
     }
 
-    @ApiMethod(
-            path = "/admin/users/count",
-            verb = ApiVerb.GET,
-            description = "Gets the number of Users in the DataVault",
-            produces = { MediaType.TEXT_PLAIN_VALUE },
-            responsestatuscode = "200 - OK"
+    @Operation(
+            summary = "Get the number of Users",
+            description = "Gets the total number of Users in the DataVault system."
     )
-    @ApiHeaders(headers={
-            @ApiHeader(name=HEADER_USER_ID, description="DataVault Broker User ID")
-    })
-    @GetMapping("/admin/users/count")
-    public long getUsersCount(@RequestHeader(HEADER_USER_ID) String userID) {
+    @GetMapping(value = "/admin/users/count", produces = MediaType.APPLICATION_JSON_VALUE)
+    public long getUsersCount( @RequestHeader(value = HEADER_USER_ID, required = false) String userID) {
         return usersService.count();
     }
 
-    @ApiMethod(
-            path = "/admin/users}",
-            verb = ApiVerb.POST,
-            description = "Create a new DataVault User",
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
+    @Operation(
+            summary = "Create a new DataVault User",
+            description = "Creates a new user in the DataVault system."
     )
-    @ApiHeaders(headers={
-            @ApiHeader(name=HEADER_USER_ID, description="DataVault Broker User ID"),
-            @ApiHeader(name=HEADER_CLIENT_KEY, description="DataVault API Client Key")
-    })
-    @PostMapping("/admin/users")
-    public User addUser(@RequestHeader(HEADER_USER_ID) String userID,
+    @PostMapping(value = "/admin/users", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public User addUser(@RequestHeader(HEADER_USER_ID) String userId,
                         @RequestBody User user) {
         usersService.addUser(user);
 
@@ -84,19 +61,12 @@ public class AdminUsersController {
         return user;
     }
 
-    @ApiMethod(
-            path = "/admin/users}",
-            verb = ApiVerb.PUT,
-            description = "Edit a DataVault User",
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
+    @Operation(
+            summary = "Edit a DataVault User",
+            description = "Updates an existing user in the DataVault system."
     )
-    @ApiHeaders(headers={
-            @ApiHeader(name=HEADER_USER_ID, description="DataVault Broker User ID"),
-            @ApiHeader(name=HEADER_CLIENT_KEY, description="DataVault API Client Key")
-    })
-    @PutMapping("/admin/users")
-    public User editUser(@RequestHeader(HEADER_USER_ID) String userID,
+    @PutMapping(value = "/admin/users", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public User editUser(@RequestHeader(HEADER_USER_ID) String userId,
                          @RequestBody User user) {
 
         usersService.updateUser(user);

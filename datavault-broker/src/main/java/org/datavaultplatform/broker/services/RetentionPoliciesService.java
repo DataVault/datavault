@@ -7,22 +7,24 @@ import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.model.dao.RetentionPolicyDAO;
 import org.datavaultplatform.common.request.CreateRetentionPolicy;
 import org.datavaultplatform.common.retentionpolicy.RetentionPolicyStatus;
+import org.datavaultplatform.common.util.DateTimeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
+
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Service
 @Transactional
 public class RetentionPoliciesService {
 
-    private final Logger logger = LoggerFactory.getLogger(RetentionPoliciesService.class);
+    private static final Logger logger = LoggerFactory.getLogger(RetentionPoliciesService.class);
 
     private final RetentionPolicyDAO retentionPolicyDAO;
 
@@ -101,123 +103,102 @@ public class RetentionPoliciesService {
 
     }
 
+    public enum RetentionPolicyUpdateReason {
+        ADDED_VAULT,
+        ADDED_DEPOSIT,
+        RETRIEVE_DEPOSIT,
+        MANUAL_UPDATE,
+        TASK_UPDATE,
+        TEST
+    }
     /**
-    public int run(Vault v) {
-        RetentionPolicy rp = v.getRetentionPolicy();
+     * Called from VaultsService. 
+     */
+    public static void updateRetentionPolicyExpiryDate(Vault vault, Clock clock, RetentionPolicyUpdateReason reason) {
+        Assert.notNull(vault, "The vault cannot be null");
+        logger.info("Updating RetentionPolicyExpiryDate for Vault[{}]reason[{}]", vault.getID(), reason);        
 
-        if (rp.getMinRetentionPeriod() > 0) {
-            Date now = new Date();
-            Date check = getReviewDate(v);
-
-            // Is it time for review?
-            if (check.before(now)) {
-                v.setRetentionPolicyStatus(RetentionPolicyStatus.REVIEW);
-                return RetentionPolicyStatus.REVIEW;
-            }
+        final LocalDateTime retentionPolicyExpiryLocalDateTime;
+        
+        RetentionPolicy retentionPolicy = vault.getRetentionPolicy();
+        if (vault.getGrantEndDate() == null) {
+            retentionPolicyExpiryLocalDateTime = vault.getCreationTime();
+        } else {
+            LocalDate baseRetentionPolicyExpiryLocalDate = getBaseRetentionPolicyExpiryDate(vault, retentionPolicy);
+            int retentionPolicyMinPeriod = retentionPolicy.getMinRetentionPeriod();
+            // Add on the minimum retention period (a number of years)
+            LocalDate retentionPolicyExpiryLocalDate = DateTimeUtils.getLocalDateAdjustedByYears(baseRetentionPolicyExpiryLocalDate, retentionPolicyMinPeriod);
+            retentionPolicyExpiryLocalDateTime = DateTimeUtils.toLocalDateTimeAtMidnight(retentionPolicyExpiryLocalDate);
         }
 
-        v.setRetentionPolicyStatus(RetentionPolicyStatus.OK);
-        return RetentionPolicyStatus.OK;
+        vault.setRetentionPolicyExpiry(retentionPolicyExpiryLocalDateTime);
 
+        int retentionPolicyStatus = getRetentionPolicyStatus(clock, retentionPolicyExpiryLocalDateTime);
+        vault.setRetentionPolicyStatus(retentionPolicyStatus);
+        
+        vault.setRetentionPolicyLastChecked(LocalDateTime.now(clock));
+    }
+    
+    private static int getRetentionPolicyStatus(Clock clock, LocalDateTime retentionPolicyExpiryDate) {
+        // Is it time for review? - to 'date arithmetic' using LocalDate - not Date.
+        LocalDate today = LocalDate.now(clock);
+        if (DateTimeUtils.toLocalDate(retentionPolicyExpiryDate).isBefore(today)) {
+            return RetentionPolicyStatus.REVIEW;
+        } else {
+            return RetentionPolicyStatus.OK;
+        }
     }
 
-    public Date getReviewDate(Vault v) {
+    private static LocalDate getBaseRetentionPolicyExpiryDate(Vault vault, RetentionPolicy retentionPolicy) {
+        Assert.notNull(vault, "The vault cannot be null");
+        Assert.notNull(retentionPolicy, "The retention policy cannot be null");
 
-        logger.info("Calculating Expiry Date for vault " + v.getName());
+        LocalDate grantEndDate = vault.getGrantEndDate();
 
-        if (v.getGrantEndDate() == null) {
-            logger.info("No grant date entered for vault " + v.getName());
-            return v.getCreationTime();
-        }
-
-        Date check = v.getGrantEndDate();
-
-        logger.info("Start date is " + check);
-
-        RetentionPolicy rp = v.getRetentionPolicy();
-
-        if (rp.isExtendUponRetrieval()) {
+        final LocalDate result;
+        if (retentionPolicy.getMinRetentionPeriod() > 0 && retentionPolicy.isExtendUponRetrieval()) {
             // At the time of writing this means its EPSRC
 
             // Get all the retrieve events
-            ArrayList<Retrieve> retrieves = new ArrayList<Retrieve>();
-            for (Deposit d : v.getDeposits()) {
-                retrieves.addAll(d.getRetrieves());
-            }
+            // find the latest Timestamp and use that for the base
+            List<Retrieve> allRetrieves = getAllDepositRetrieveEvents(vault);
 
-            // Have their been any retrieves?
-            if (!retrieves.isEmpty()) {
-                check = retrieves.get(0).getTimestamp();
-                for (Retrieve r : retrieves) {
-                    if (r.getTimestamp().after(check)) {
-                        check = r.getTimestamp();
-                    }
-                }
+            if (allRetrieves.isEmpty()) {
+                result = grantEndDate;
+            } else {
+                // we know that allRetrieves has min length 1
+                // Have there been any retrieves?
+                // if so - set the retentionPeriodExpiryDate to be the max timestamp
+                // NOTE: We do not consider the status of these retrieves
+                LocalDateTime maxTimestamp = getMaxTimestamp(allRetrieves).orElseThrow();
+                result = maxTimestamp.toLocalDate();
             }
+        } else {
+            result = grantEndDate;
         }
-
-        Calendar c = Calendar.getInstance();
-        c.setTime(check);
-        c.add(Calendar.YEAR, rp.getMinRetentionPeriod());
-        check = c.getTime();
-
-        logger.info("Expiry date is " + check);
-
-        return check;
+        return result;
     }
-     **/
 
-    public static void setRetention(Vault v) {
+    private static Optional<LocalDateTime> getMaxTimestamp(List<Retrieve> retrieves) {
+        Assert.isTrue(!retrieves.isEmpty(), "the retrieves cannot be empty");
+        return retrieves
+                .stream()
+                .map(Retrieve::getTimestamp)
+                .filter(Objects::nonNull)
+                .max(LocalDateTime::compareTo);
+    }
 
-        RetentionPolicy rp = v.getRetentionPolicy();
-
-        Date check;
-        if (v.getGrantEndDate() == null) {
-            check = v.getCreationTime();
-        } else {
-            check = v.getGrantEndDate();
-
-            if (rp.getMinRetentionPeriod() > 0 && rp.isExtendUponRetrieval()) {
-                // At the time of writing this means its EPSRC
-
-                // Get all the retrieve events
-                ArrayList<Retrieve> retrieves = new ArrayList<>();
-                for (Deposit d : v.getDeposits()) {
-                    retrieves.addAll(d.getRetrieves());
-                }
-
-                // Have their been any retrieves?
-                if (!retrieves.isEmpty()) {
-                    check = retrieves.get(0).getTimestamp();
-                    for (Retrieve r : retrieves) {
-                        if (r.getTimestamp().after(check)) {
-                            check = r.getTimestamp();
-                        }
-                    }
-                }
-            }
-
-            // Add on the minimum retention period (a number of years)
-            Calendar c = Calendar.getInstance();
-            c.setTime(check);
-            c.add(Calendar.YEAR, rp.getMinRetentionPeriod());
-            check = c.getTime();
-
+    private static List<Retrieve> getAllDepositRetrieveEvents(Vault vault) {
+        List<Deposit> deposits = vault.getDeposits();
+        if (deposits == null) {
+            return List.of();
         }
-
-        v.setRetentionPolicyExpiry(check);
-
-        // Is it time for review?
-        Date now = new Date();
-        if (check.before(now)) {
-            v.setRetentionPolicyStatus(RetentionPolicyStatus.REVIEW);
-        } else {
-            v.setRetentionPolicyStatus(RetentionPolicyStatus.OK);
-        }
-
-        // Record when we checked it
-        v.setRetentionPolicyLastChecked(new Date());
-
+        return deposits.stream()
+                .filter(Objects::nonNull)   // Ignore null Deposits
+                .map(Deposit::getRetrieves) // we now have a stream of List<Retrieve>
+                .filter(Objects::nonNull)   // filter out null List<Retrieve>
+                .flatMap(List::stream)      // Flatten Stream<List<Retrieve>> into Stream<Retrieve>
+                .filter(Objects::nonNull)   // Filter out null Retrieve elements from the stream
+                .toList();
     }
 }
-

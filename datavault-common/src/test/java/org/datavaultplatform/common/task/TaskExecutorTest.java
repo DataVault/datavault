@@ -4,14 +4,15 @@ package org.datavaultplatform.common.task;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class TaskExecutorTest {
+class TaskExecutorTest {
 
   @Test
   void testSingleExecution() throws Exception {
@@ -57,6 +58,28 @@ public class TaskExecutorTest {
   }
 
   @Test
+  void testTasksSubmittedBeforeErrorTaskCanRunToCompletion() {
+    List<String> finishedOkay = new CopyOnWriteArrayList<>();
+    TaskExecutor<String> executor = new TaskExecutor<>(1, "Error");
+    for (int taskNum = 1; taskNum <= 3; taskNum++) {
+      final String taskNumString = String.valueOf(taskNum);
+      executor.add(() -> {
+        String msg = "finishedOkay-" + taskNumString;
+        finishedOkay.add(msg);
+        return msg;
+      });
+    }
+    executor.add(() -> {
+      throw new IOException("oops!");
+    });
+    IOException ex = assertThrows(IOException.class, () -> {
+      executor.execute(System.out::println);
+    });
+    assertThat(ex).hasMessage("oops!");
+    assertThat(finishedOkay).isEqualTo(List.of("finishedOkay-1","finishedOkay-2","finishedOkay-3"));
+  }
+
+  @Test
   void testNullTasksRejected() {
     TaskExecutor<String> executor = new TaskExecutor<>(1, "Error");
     IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
@@ -92,10 +115,32 @@ public class TaskExecutorTest {
   }
 
   private <T> Callable<T> getDelayedTask(int delaySecs, T result) {
+    return getDelayedTask(delaySecs, () -> result);
+  }
+
+  private <T> Callable<T> getDelayedTask(int delaySecs, Callable<T> result) {
     return () -> {
       TimeUnit.SECONDS.sleep(delaySecs);
-      return result;
+      return result.call();
     };
   }
 
+  @Test
+  void testTaskExecutorTimeout() {
+    TaskConfigTL.get().setExecutorProperShutdownEnabled(true);
+    TimeoutException te = assertThrows(TimeoutException.class, () -> {
+
+      TaskExecutor<String> executor = new TaskExecutor<>(1, "executorTimeoutTest");
+      for (int i = 0; i < 10; i++) {
+        String label = "" + i;
+        executor.add(() -> {
+          Thread.sleep(20_000);
+          return label;
+        });
+      }
+      executor.execute(null, Duration.ofSeconds(3));
+    });
+    assertThat(te.getMessage()).isEqualTo("The executor [executorTimeoutTest] has timed out after [PT3S]");
+    assertThat(te).hasCauseInstanceOf(CancellationException.class);
+  }
 }

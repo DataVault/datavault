@@ -14,24 +14,10 @@ import org.datavaultplatform.broker.actuator.LocalFileStoreEndpoint;
 import org.datavaultplatform.broker.actuator.LocalFileStoreInfo;
 import org.datavaultplatform.broker.actuator.SftpFileStoreEndpoint;
 import org.datavaultplatform.broker.actuator.SftpFileStoreInfo;
-import org.datavaultplatform.broker.config.ActuatorConfig;
-import org.datavaultplatform.broker.config.ControllerConfig;
-import org.datavaultplatform.broker.config.DatabaseConfig;
-import org.datavaultplatform.broker.config.EmailConfig;
-import org.datavaultplatform.broker.config.EmailLocalConfig;
-import org.datavaultplatform.broker.config.EncryptionConfig;
-import org.datavaultplatform.broker.config.InitialiseConfig;
-import org.datavaultplatform.broker.config.JacksonConfig;
-import org.datavaultplatform.broker.config.LdapConfig;
-import org.datavaultplatform.broker.config.PropertiesConfig;
-import org.datavaultplatform.broker.config.RabbitConfig;
-import org.datavaultplatform.broker.config.ScheduleConfig;
-import org.datavaultplatform.broker.config.SecurityActuatorConfig;
-import org.datavaultplatform.broker.config.SecurityConfig;
-import org.datavaultplatform.broker.config.ServiceConfig;
-import org.datavaultplatform.broker.config.StorageClassNameResolverConfig;
-import org.datavaultplatform.broker.config.WebConfig;
+import org.datavaultplatform.broker.config.*;
+import org.datavaultplatform.broker.services.UsersService;
 import org.datavaultplatform.common.crypto.EncryptionValidator;
+import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.monitor.MemoryStats;
 import org.datavaultplatform.common.services.LDAPService;
 import org.springframework.amqp.rabbit.listener.RabbitListenerEndpointRegistry;
@@ -55,12 +41,11 @@ import org.springframework.core.env.Environment;
     JacksonConfig.class, PropertiesConfig.class, EncryptionConfig.class, ActuatorConfig.class,
     ScheduleConfig.class, InitialiseConfig.class,
     SecurityActuatorConfig.class, SecurityConfig.class, ControllerConfig.class,
-    ServiceConfig.class,  DatabaseConfig.class,
+    DatabaseConfig.class,
     LdapConfig.class, EmailConfig.class, EmailLocalConfig.class, RabbitConfig.class,
-    StorageClassNameResolverConfig.class, WebConfig.class
+    StorageClassNameResolverConfig.class, WebConfig.class, ServiceConfig.class, OpenApiConfig.class
 })
 @Slf4j
-//@EnableJSONDoc
 public class DataVaultBrokerApp implements CommandLineRunner {
 
   @Value("${validate.encryption.config:false}")
@@ -88,6 +73,12 @@ public class DataVaultBrokerApp implements CommandLineRunner {
 
   @Autowired
   LocalFileStoreEndpoint localFileStoreEndpoint;
+  
+  @Autowired
+  UsersService usersService;
+
+  @Value("${broker.show.users.with.invalid.email.on.startup:false}")
+  boolean brokerShowUsersWithInvalidEmailOnStartup;
 
   @SneakyThrows
   public static void main(String[] args) {
@@ -150,6 +141,7 @@ public class DataVaultBrokerApp implements CommandLineRunner {
     showLocalFileStoreInfo();
     LDAPService.testLdapConnection(readyEvent.getApplicationContext());
     log.info("{}", MemoryStats.getCurrent().toPretty());
+    showUsersWithInvalidEmails();
   }
 
   private void showLocalFileStoreInfo() {
@@ -196,5 +188,20 @@ public class DataVaultBrokerApp implements CommandLineRunner {
       String runnableDescription = ctd.getRunnable().getTarget();
       log.info("CRON[{}][{}][{}]", runnableDescription, cronExpr, description);
     });
+  }
+
+  protected void showUsersWithInvalidEmails() {
+    log.info("broker.show.users.with.invalid.email.on.startup [{}]", brokerShowUsersWithInvalidEmailOnStartup);
+    if (brokerShowUsersWithInvalidEmailOnStartup) {
+      log.info("START - users with invalid email");
+      List<User> usersWithInvalidEmail = usersService.findUsersWithInvalidEmail();
+      int total = usersWithInvalidEmail.size();
+      for (int i = 0; i < usersWithInvalidEmail.size(); i++) {
+        User user = usersWithInvalidEmail.get(i);
+        String msg = String.format("[%d/%d] userId[%s] : Invalid Email[%s]", i + 1, total, user.getID(), user.getEmail());
+        log.info(msg);
+      }
+      log.info("END   - users with invalid email");
+    }
   }
 }

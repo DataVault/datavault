@@ -21,13 +21,14 @@ public class MetadataController {
     }
 
     @GetMapping(value = "/metadata/datasets")
-    public List<Dataset> getDatasets(@RequestHeader(HEADER_USER_ID) String userID) {
-        return externalMetadataService.getDatasets(userID);
+    public List<Dataset> getDatasets( @RequestHeader(HEADER_USER_ID) String userId) {
+        return externalMetadataService.getDatasets(userId);
     }
     
-    @GetMapping("/metadata/datasets/{datasetid}")
-    public Dataset getDataset(@RequestHeader(HEADER_USER_ID) String userID,
-                              @PathVariable("datasetid") String datasetID) {
-        return externalMetadataService.getDataset(datasetID);
+    @GetMapping("/metadata/datasets/{datasetId}")
+    public Dataset getDataset(
+            @RequestHeader(HEADER_USER_ID) String userId,
+            @PathVariable String datasetId) {
+        return externalMetadataService.getDataset(datasetId);
     }
 }

@@ -10,22 +10,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import java.security.SecureRandom;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Set;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.app.DataVaultBrokerApp;
+import org.datavaultplatform.broker.services.RetentionPoliciesService;
 import org.datavaultplatform.broker.test.AddTestProperties;
 import org.datavaultplatform.broker.test.BaseReuseDatabaseTest;
-import org.datavaultplatform.common.model.Deposit;
+import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.model.Deposit.Status;
-import org.datavaultplatform.common.model.Group;
-import org.datavaultplatform.common.model.Permission;
-import org.datavaultplatform.common.model.Vault;
-import org.datavaultplatform.common.model.MariaDBConstants;
+import org.datavaultplatform.common.util.DateTimeUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,7 +37,7 @@ import org.springframework.test.context.TestPropertySource;
     "broker.rabbit.enabled=false",
     "broker.scheduled.enabled=false"
 })
-public class DepositDAOIT extends BaseReuseDatabaseTest {
+class DepositDAOIT extends BaseReuseDatabaseTest {
 
   @Autowired
   DepositDAO dao;
@@ -54,8 +49,10 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
   @Autowired
   GroupDAO groupDAO;
 
-  //@Autowired
-  //DepositChunkDAO depositChunkDAO;
+  @Autowired
+  RetentionPoliciesService retentionPoliciesService;
+  
+  RetentionPolicy retentionPolicy;
 
   @Test
   void testWriteThenRead() {
@@ -97,12 +94,12 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
     Deposit deposit1 = new Deposit();
     deposit1.setName("dep1-name");
     deposit1.setHasPersonalData(false);
-    deposit1.setCreationTime(NOW);
+    deposit1.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(NOW));
 
     Deposit deposit2 = new Deposit();
     deposit2.setHasPersonalData(true);
     deposit2.setName("dep2-name");
-    deposit2.setCreationTime(NOW);
+    deposit2.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(NOW));
 
     dao.save(deposit1);
     assertNotNull(deposit1.getID());
@@ -169,14 +166,16 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
     vault1.setContact("James Bond");
     vault1.setGroup(group1);
     vault1.setName("vault-one");
-    vault1.setReviewDate(NOW);
+    vault1.setReviewDate(DateTimeUtils.toLocalDate(NOW));
+    vault1.setRetentionPolicy(retentionPolicy);
     vaultDAO.save(vault1);
 
     Vault vault2 = new Vault();
     vault2.setContact("James Bond");
     vault2.setGroup(group2);
     vault2.setName("vault-two");
-    vault2.setReviewDate(NOW);
+    vault2.setReviewDate(DateTimeUtils.toLocalDate(NOW));
+    vault2.setRetentionPolicy(retentionPolicy);
     vaultDAO.save(vault2);
 
     Deposit depositReview1 = getDeposit1();
@@ -244,14 +243,16 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
     vault1.setContact("James Bond");
     vault1.setGroup(group1);
     vault1.setName("vault-one");
-    vault1.setReviewDate(NOW);
+    vault1.setReviewDate(DateTimeUtils.toLocalDate(NOW));
+    vault1.setRetentionPolicy(retentionPolicy);
     vaultDAO.save(vault1);
 
     Vault vault2 = new Vault();
     vault2.setContact("James Bond");
     vault2.setGroup(group2);
     vault2.setName("vault-two");
-    vault2.setReviewDate(NOW);
+    vault2.setReviewDate(DateTimeUtils.toLocalDate(NOW));
+    vault2.setRetentionPolicy(retentionPolicy);
     vaultDAO.save(vault2);
 
     Deposit depositReview1 = getDeposit1();
@@ -358,35 +359,40 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
     vault1.setContact("James Bond1");
     vault1.setGroup(group1);
     vault1.setName("vault-1");
-    vault1.setReviewDate(NOW);
+    vault1.setReviewDate(DateTimeUtils.toLocalDate(NOW));
+    vault1.setRetentionPolicy(retentionPolicy);
     vaultDAO.save(vault1);
 
     Vault vault2 = new Vault();
     vault2.setContact("Brooke Bond");
     vault2.setGroup(group1);
     vault2.setName("vault-2");
-    vault2.setReviewDate(NOW);
+    vault2.setReviewDate(DateTimeUtils.toLocalDate(NOW));
+    vault2.setRetentionPolicy(retentionPolicy);
     vaultDAO.save(vault2);
     
     Vault vault3 = new Vault();
     vault3.setContact("Jane Bond");
     vault3.setGroup(group1);
     vault3.setName("vault-3");
-    vault3.setReviewDate(NOW);
+    vault3.setReviewDate(DateTimeUtils.toLocalDate(NOW));
+    vault3.setRetentionPolicy(retentionPolicy);
     vaultDAO.save(vault3);
 
     Vault vault4 = new Vault();
     vault4.setContact("Chemical Bond");
     vault4.setGroup(group1);
     vault4.setName("vault-4");
-    vault4.setReviewDate(NOW);
+    vault4.setReviewDate(DateTimeUtils.toLocalDate(NOW));
+    vault4.setRetentionPolicy(retentionPolicy);
     vaultDAO.save(vault4);
 
     Vault vault5 = new Vault();
     vault5.setContact("Premium Bond");
     vault5.setGroup(group1);
     vault5.setName("vault-5");
-    vault5.setReviewDate(NOW);
+    vault5.setReviewDate(DateTimeUtils.toLocalDate(NOW));
+    vault5.setRetentionPolicy(retentionPolicy);
     vaultDAO.save(vault5);
 
     Deposit depositReview1 = getDeposit1();
@@ -548,14 +554,16 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
     vault1.setContact("James Bond");
     vault1.setGroup(group1);
     vault1.setName("vault-one");
-    vault1.setReviewDate(NOW);
+    vault1.setReviewDate(DateTimeUtils.toLocalDate(NOW));
+    vault1.setRetentionPolicy(retentionPolicy);
     vaultDAO.save(vault1);
 
     Vault vault2 = new Vault();
     vault2.setContact("James Bond");
     vault2.setGroup(group2);
     vault2.setName("vault-two");
-    vault2.setReviewDate(NOW);
+    vault2.setReviewDate(DateTimeUtils.toLocalDate(NOW));
+    vault2.setRetentionPolicy(retentionPolicy);
     vaultDAO.save(vault2);
 
     Deposit depositReview1 = getDeposit1();
@@ -626,14 +634,16 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
     vault1.setContact("James Bond");
     vault1.setGroup(group1);
     vault1.setName("vault-one");
-    vault1.setReviewDate(NOW);
+    vault1.setReviewDate(DateTimeUtils.toLocalDate(NOW));
+    vault1.setRetentionPolicy(retentionPolicy);
     vaultDAO.save(vault1);
 
     Vault vault2 = new Vault();
     vault2.setContact("James Bond");
     vault2.setGroup(group2);
     vault2.setName("vault-two");
-    vault2.setReviewDate(NOW);
+    vault2.setReviewDate(DateTimeUtils.toLocalDate(NOW));
+    vault2.setRetentionPolicy(retentionPolicy);
     vaultDAO.save(vault2);
 
     Deposit depositReview1 = getDeposit1();
@@ -709,14 +719,16 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
     vault1.setContact("James Bond");
     vault1.setGroup(group1);
     vault1.setName("vault-one");
-    vault1.setReviewDate(NOW);
+    vault1.setReviewDate(DateTimeUtils.toLocalDate(NOW));
+    vault1.setRetentionPolicy(retentionPolicy);
     vaultDAO.save(vault1);
 
     Vault vault2 = new Vault();
     vault2.setContact("James Bond");
     vault2.setGroup(group2);
     vault2.setName("vault-two");
-    vault2.setReviewDate(NOW);
+    vault2.setReviewDate(DateTimeUtils.toLocalDate(NOW));
+    vault2.setRetentionPolicy(retentionPolicy);
     vaultDAO.save(vault2);
 
     Deposit depositReview1 = getDeposit1();
@@ -784,6 +796,13 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
   @BeforeEach
   void setup() {
     assertEquals(0, dao.count());
+    retentionPolicy = new RetentionPolicy();
+    retentionPolicy.setEngine("engine!");
+    retentionPolicy.setName("RETENTION POLICY 111");
+    retentionPolicy.setDescription("RETENTION POLICY 111 DEC");
+    retentionPolicy.setMinRetentionPeriod(1);
+    retentionPolicy.setExtendUponRetrieval(false);
+    retentionPoliciesService.addRetentionPolicy(retentionPolicy);
   }
 
   @AfterEach
@@ -796,7 +815,7 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
   Deposit getDeposit1() {
     Deposit result = new Deposit();
     result.setName("dep1-name");
-    result.setCreationTime(NOW);
+    result.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(NOW));
     result.setHasPersonalData(false);
     result.setStatus(Status.COMPLETE);
     return result;
@@ -814,7 +833,7 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
   Deposit getDeposit2(){
     Deposit result = new Deposit();
     result.setName("dep2-name");
-    result.setCreationTime(NOW);
+    result.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(NOW));
     result.setHasPersonalData(true);
     result.setStatus(Status.IN_PROGRESS);
     return result;
@@ -823,7 +842,7 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
   Deposit getDeposit3(){
     Deposit result = new Deposit();
     result.setName("dep3-name");
-    result.setCreationTime(NOW);
+    result.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(NOW));
     result.setHasPersonalData(true);
     result.setStatus(Status.COMPLETE);
     return result;
@@ -832,7 +851,7 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
   Deposit getDeposit4() {
     Deposit result = new Deposit();
     result.setName("dep4-name");
-    result.setCreationTime(NOW);
+    result.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(NOW));
     result.setHasPersonalData(true);
     result.setStatus(Status.DELETE_FAILED);
     return result;
@@ -841,7 +860,7 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
   Deposit getDeposit5() {
     Deposit result = new Deposit();
     result.setName("dep5-name");
-    result.setCreationTime(NOW);
+    result.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(NOW));
     result.setHasPersonalData(true);
     result.setStatus(Status.FAILED);
     return result;
@@ -850,7 +869,7 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
   Deposit getDeposit6() {
     Deposit result = new Deposit();
     result.setName("dep6-name");
-    result.setCreationTime(NOW);
+    result.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(NOW));
     result.setHasPersonalData(true);
     result.setStatus(Status.IN_PROGRESS);
     return result;
@@ -859,7 +878,7 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
   Deposit getDeposit7AwaitAuditNOW() {
     Deposit result = new Deposit();
     result.setName("dep7-name");
-    result.setCreationTime(NOW);
+    result.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(NOW));
     result.setHasPersonalData(true);
     result.setStatus(Status.COMPLETE);
     return result;
@@ -868,7 +887,7 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
   Deposit getDeposit8AwaitAudit1YearAgo() {
     Deposit result = new Deposit();
     result.setName("dep8-name");
-    result.setCreationTime(ONE_YEAR_AGO);
+    result.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(ONE_YEAR_AGO));
     result.setHasPersonalData(true);
     result.setStatus(Status.COMPLETE);
     return result;
@@ -877,7 +896,7 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
   Deposit getDeposit9AwaitAudit2YearsAgo() {
     Deposit result = new Deposit();
     result.setName("dep9-name");
-    result.setCreationTime(TWO_YEARS_AGO);
+    result.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(TWO_YEARS_AGO));
     result.setHasPersonalData(true);
     result.setStatus(Status.NOT_STARTED);
     return result;
@@ -886,7 +905,7 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
   Deposit getDeposit10AwaitAudit3YearsAgo() {
     Deposit result = new Deposit();
     result.setName("dep10-name");
-    result.setCreationTime(THREE_YEARS_AGO);
+    result.setCreationTime(DateTimeUtils.toLocalDateTimeAtMidnight(THREE_YEARS_AGO));
     result.setHasPersonalData(true);
     result.setStatus(Status.IN_PROGRESS);
     return result;
@@ -914,14 +933,16 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
     vault1.setContact("James Bond");
     vault1.setGroup(group1);
     vault1.setName("vault-one");
-    vault1.setReviewDate(NOW);
+    vault1.setReviewDate(DateTimeUtils.toLocalDate(NOW));
+    vault1.setRetentionPolicy(retentionPolicy);
     vaultDAO.save(vault1);
 
     Vault vault2 = new Vault();
     vault2.setContact("James Bond");
     vault2.setGroup(group2);
     vault2.setName("vault-two");
-    vault2.setReviewDate(NOW);
+    vault2.setReviewDate(DateTimeUtils.toLocalDate(NOW));
+    vault2.setRetentionPolicy(retentionPolicy);
     vaultDAO.save(vault2);
 
     Deposit depositReview1 = getDeposit1();

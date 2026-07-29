@@ -89,7 +89,7 @@
                     </tr>
                     <tr>
                         <th scope="col">Time and Date of Deposit</th>
-                        <td>[[${#dates.format(deposit.creationTime,globalDateTimeFormat)}]]<!--/* datetime */--></td>
+                        <td>[[${#temporals.format(deposit.creationTime,globalDateTimeFormat)}]]<!--/* datetime */--></td>
                     </tr>
                     <tr>
                     <th scope="col">Contains Personal Data</th>
@@ -206,7 +206,7 @@
                                     <tr th:each="retrieve: ${retrieves}" class="tr">
                                         <td>[[${retrieve?.user?.getID()}]]</td>
                                         <td th:text="${retrieve.hasExternalRecipients} ? 'Yes' : 'No'">dummy</td>
-                                        <td>[[${#dates.format(retrieve.timestamp,globalDateTimeFormat)}]]<!--/* datetime */--></td>
+                                        <td>[[${#temporals.format(retrieve.timestamp,globalDateTimeFormat)}]]<!--/* datetime */--></td>
                                         <td>
                                             <div th:switch="${retrieve.status.name()}" class="job-status" >
                                                 <div th:case="COMPLETE" class="text-success">

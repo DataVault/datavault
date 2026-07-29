@@ -57,4 +57,11 @@ public interface PropNames {
   String USER_FS_RETRY_DELAY_MS_1 = "userFsRetryDelayMs1";
   String USER_FS_RETRY_DELAY_MS_2 = "userFsRetryDelayMs2";
   String NON_RESTART_JOB_ID = "nonRestartJobId";
+  String WORKERS_SEND_DELETED_CHUNK_EVENTS = "workersSendDeletedChunkEvents";
+
+  String EXECUTOR_PROPER_SHUTDOWN_ENABLED = "executorProperShutdownEnabled";
+  String EXECUTOR_PRE_SHUTDOWN_NOW_DURATION = "executorPreShutdownNowDuration";
+  String PROCESS_MAX_DURATION = "processMaxDuration";
+  String PROCESS_SIGTERM_TIMEOUT_DURATION = "processSigTermTimeoutDuration";
+  String PROCESS_POST_SIGKILL_TIMEOUT_DURATION = "processPostSigKillTimeoutDuration";
 }

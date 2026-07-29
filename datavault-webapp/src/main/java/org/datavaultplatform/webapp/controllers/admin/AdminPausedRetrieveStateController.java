@@ -4,6 +4,7 @@ import org.datavaultplatform.common.dto.PausedRetrieveStateDTO;
 import org.datavaultplatform.common.model.RoleName;
 import org.datavaultplatform.webapp.services.RestService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -19,7 +20,7 @@ import java.util.List;
 @Controller
 @ConditionalOnBean(RestService.class)
 @RequestMapping("/admin/paused/retrieve")
-public class AdminPausedRetrieveStateController {
+public class AdminPausedRetrieveStateController implements AdminPausedRetrieveStateControllerApi {
 
     private final RestService service;
 
@@ -27,9 +28,10 @@ public class AdminPausedRetrieveStateController {
         this.service = service;
     }
 
-    @GetMapping("/history")
+    @Override
+    @GetMapping(value = "/history", produces = MediaType.TEXT_HTML_VALUE)
     @PreAuthorize("hasRole('USER')")
-    public ModelAndView showPauseHistory(Authentication auth) {
+    public ModelAndView showPausedRetrieveHistory(Authentication auth) {
         boolean hasIsAdminRole = auth.getAuthorities().stream().map(GrantedAuthority::getAuthority).anyMatch(name -> name.equals(RoleName.ROLE_USER));
         Assert.isTrue(hasIsAdminRole, "USER DOES NOT HAVE 'USER' role");
         ModelAndView mav = new ModelAndView();
@@ -40,9 +42,10 @@ public class AdminPausedRetrieveStateController {
     }
 
     @SuppressWarnings("SameReturnValue")
+    @Override
     @PreAuthorize("hasRole('IS_ADMIN')")
     @PostMapping("/toggle")
-    public String togglePause(Authentication auth) {
+    public String toggleRetrievePause(Authentication auth) {
         boolean hasIsAdminRole = auth.getAuthorities().stream().map(GrantedAuthority::getAuthority).anyMatch(name -> name.equals(RoleName.ROLE_IS_ADMIN));
         Assert.isTrue(hasIsAdminRole, "USER DOES NOT HAVE 'IS_ADMIN' role");
         service.toggleRetrievePausedState();

@@ -10,7 +10,7 @@ PROJECT_ROOT=$(cd $SCRIPT_DIR/../../..;pwd)
 
 cd $PROJECT_ROOT
  SERVER_PORT=8080 \
- SPRING_PROFILES_ACTIVE=local \
+ SPRING_PROFILES_ACTIVE=local,database \
  SPRING_SECURITY_DEBUG=true \
  DATAVAULT_HOME="$PROJECT_ROOT/dv5/local-byodb/props/broker" \
  SPRING_JPA_HIBERNATE_DDL_AUTO=validate \
@@ -28,6 +28,7 @@ cd $PROJECT_ROOT
  RABBITMQ_DEFINE_QUEUE_WORKER=true \
  RABBITMQ_DEFINE_QUEUE_BROKER=true \
  LDAP_CONNECTION_TEST_SEARCH_TERM=Bond \
+ LOGGING_PATTERN_CONSOLE='%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %clr([trace=%X{traceId:-} span=%X{spanId:-} user=%X{user:-}]){yellow} %m%n${LOG_EXCEPTION_CONVERSION_WORD:%rEx}' \
  ./mvnw spring-boot:run  \
  -Dspring-boot.run.jvmArguments="-Xdebug \
  -Xms1024M -Xmx2024M \

@@ -5,6 +5,7 @@ import java.util.List;
 
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.datavaultplatform.common.response.ResponseType;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.response.VaultsData;
 import org.datavaultplatform.webapp.services.RestService;
@@ -12,12 +13,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.supercsv.io.CsvBeanWriter;
 import org.supercsv.io.ICsvBeanWriter;
 import org.supercsv.prefs.CsvPreference;
@@ -29,7 +28,7 @@ import org.supercsv.prefs.CsvPreference;
 
 @ConditionalOnBean(RestService.class)
 @Controller
-public class AdminVaultsController {
+public class AdminVaultsController implements AdminVaultsControllerApi {
 
 	private static final Logger logger = LoggerFactory.getLogger(AdminVaultsController.class);
 	
@@ -44,7 +43,8 @@ public class AdminVaultsController {
     }
 
 
-    @RequestMapping(value = "/admin/vaults", method = RequestMethod.GET)
+    @Override
+    @GetMapping(value = "/admin/vaults", produces = MediaType.TEXT_HTML_VALUE)
     public String searchVaults(ModelMap model,
                                @RequestParam(value = "query", defaultValue = "") String query,
                                @RequestParam(value = "sort", defaultValue = "creationTime") String sort,
@@ -102,7 +102,8 @@ public class AdminVaultsController {
 		return recordsInfo.toString();
 	}
 
-    @RequestMapping(value = "/admin/vaults/csv", method = RequestMethod.GET)
+    @Override
+    @GetMapping(value = "/admin/vaults/csv", produces = ResponseType.TEXT_CSV_VALUE)
     public void exportVaults(HttpServletResponse response,
                                @RequestParam(value = "query", required = false) String query,
                                @RequestParam(value = "sort", required = false) String sort,
@@ -117,7 +118,7 @@ public class AdminVaultsController {
         VaultsData vaultData =  restService.searchVaults(query, theSort, theOrder, 0, Integer.MAX_VALUE);
         vaults = vaultData.getData();
 
-        response.setContentType("text/csv");
+        response.setContentType(ResponseType.TEXT_CSV_VALUE);
 
         // creates mock data
         String headerKey = "Content-Disposition";
@@ -145,25 +146,27 @@ public class AdminVaultsController {
         }
     }
 
-    @RequestMapping(value = "/admin/vaults/{vaultid}", method = RequestMethod.GET)
-    public String showVault(ModelMap model, @PathVariable("vaultid") String vaultID) throws Exception {
-        VaultInfo vault = restService.getVault(vaultID);
+    @Override
+    @GetMapping(value = "/admin/vaults/{vaultId}", produces = MediaType.TEXT_HTML_VALUE)
+    public String showVault(ModelMap model, @PathVariable String vaultId) throws Exception {
+        VaultInfo vault = restService.getVault(vaultId);
 
         model.addAttribute("vault", vault);
        
-        model.addAttribute(restService.getRetentionPolicy(vault.getPolicyID()));
-        model.addAttribute(restService.getGroup(vault.getGroupID()));
-        model.addAttribute("deposits", restService.getDepositsListing(vaultID));
+        model.addAttribute("retentionPolicy", restService.getRetentionPolicy(vault.getPolicyID()));
+        model.addAttribute("group", restService.getGroup(vault.getGroupID()));
+        model.addAttribute("deposits", restService.getDepositsListing(vaultId));
         
 
         return "admin/vaults/vault";
     }
 
-    @RequestMapping(value = "/admin/vaults/{vaultid}/checkretentionpolicy", method = RequestMethod.POST)
-    public String checkPolicy(ModelMap model, @PathVariable("vaultid") String vaultID) throws Exception {
-        restService.checkVaultRetentionPolicy(vaultID);
+    @Override
+    @PostMapping(value = "/admin/vaults/{vaultId}/checkretentionpolicy")
+    public String checkPolicy(ModelMap model, @PathVariable String vaultId) throws Exception {
+        restService.checkVaultRetentionPolicy(vaultId);
 
-        return "redirect:/admin/vaults/" + vaultID;
+        return "redirect:/admin/vaults/" + vaultId;
     }
 }
 

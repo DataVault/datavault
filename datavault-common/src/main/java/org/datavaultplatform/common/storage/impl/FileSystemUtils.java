@@ -17,6 +17,9 @@ public class FileSystemUtils {
 
     private static final String EMPTY_STRING = "";
 
+    private FileSystemUtils() {
+    }
+
     public static Path getAbsolutePath(String filePath, String location) {
 
         // Join the requested path to the root of the filesystem.
@@ -73,7 +76,16 @@ public class FileSystemUtils {
 
     public static void delete(String path, String location) throws Exception {
         Path absolutePath = getAbsolutePath(path, location);
-        Files.deleteIfExists(absolutePath);
+        log.info("Starting to Delete [{}] ", absolutePath);
+        boolean deleted = false;
+        try {
+            deleted = Files.deleteIfExists(absolutePath);
+        } catch(Exception ex) {
+            log.info("Attempt to Delete [{}] failed ", absolutePath, ex);
+            throw ex;
+        } finally {
+            log.info("Attempt to Delete [{}] success ? {}", absolutePath, deleted);
+        }
     }
 
     public static String store(String path, File working, Progress progress, String location) throws  Exception{

@@ -35,6 +35,7 @@ import org.datavaultplatform.common.event.audit.ChunkAuditComplete;
 import org.datavaultplatform.common.event.audit.ChunkAuditStarted;
 import org.datavaultplatform.common.event.delete.DeleteComplete;
 import org.datavaultplatform.common.event.delete.DeleteStart;
+import org.datavaultplatform.common.event.delete.DeletedChunk;
 import org.datavaultplatform.common.event.deposit.ChunksDigestEvent;
 import org.datavaultplatform.common.event.deposit.Complete;
 import org.datavaultplatform.common.event.deposit.CompleteCopyUpload;
@@ -59,6 +60,7 @@ import org.datavaultplatform.common.model.Job;
 import org.datavaultplatform.common.model.Retrieve;
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.model.Vault;
+import org.datavaultplatform.common.model.Archive;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageListener;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -364,6 +366,8 @@ public class EventListener implements MessageListener {
       process28UploadedToUserStore(uploadedToUserStore);
     } else if (event instanceof UserStoreSpaceAvailableChecked userStoreSpaceAvailableChecked ){
       process29UserStoreSpaceAvailableChecked(userStoreSpaceAvailableChecked);
+    } else if (event instanceof DeletedChunk deletedChunk ){
+      process30DeletedChunk(deletedChunk);
     } else {
       throw new Exception(
           String.format("Failed to process unknown Event class[%s]message[%s]", event.getClass(),
@@ -424,14 +428,17 @@ public class EventListener implements MessageListener {
     String userSubject = getUserSubject(type);
     String adminSubject = getAdminSubject(type);
 
+    List<User> owners = group.getOwners();
     // Send email to group owners
-    for (User groupAdmin : group.getOwners()) {
-      String adminEmail = groupAdmin.getEmail();
-      log.info("GroupAdmin email is {}", adminEmail);
-      sendTemplateEmail(adminEmail,
-          adminSubject,
-          adminTemplate,
-          model);
+    if (owners != null) {
+      for (User groupAdmin : owners) {
+        String adminEmail = groupAdmin.getEmail();
+        log.info("GroupAdmin email is {}", adminEmail);
+        sendTemplateEmail(adminEmail,
+                adminSubject,
+                adminTemplate,
+                model);
+      }
     }
 
     // Send email to the deposit user
@@ -879,6 +886,18 @@ public class EventListener implements MessageListener {
   }
   protected void process29UserStoreSpaceAvailableChecked(UserStoreSpaceAvailableChecked event) {
     ignore(event);
+  }
+
+  protected void process30DeletedChunk(DeletedChunk deletedChunk) {
+    processDeposit(deletedChunk.getDeposit(), $deposit -> {
+      String archiveId = deletedChunk.getArchiveId();
+      if (archiveId != null) {
+        Archive archive = archivesService.getArchiveByArchiveId(archiveId);
+        if (archive != null) {
+          deletedChunk.setArchive(archive);
+        }
+      }
+    });
   }
 
   String getUserSubject(String type) {

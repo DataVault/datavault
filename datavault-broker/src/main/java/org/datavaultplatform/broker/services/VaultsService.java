@@ -1,5 +1,7 @@
 package org.datavaultplatform.broker.services;
 
+import java.time.Clock;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import org.datavaultplatform.common.event.roles.CreateRoleAssignment;
@@ -12,8 +14,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.datavaultplatform.common.email.EmailTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 @Service
 @Transactional
@@ -41,12 +47,13 @@ public class VaultsService {
     private final EventService eventService;
     private final ClientsService clientsService;
     private final EmailService emailService;
+    private final Clock clock;
 
     @Autowired
     public VaultsService(VaultDAO vaultDAO, RolesAndPermissionsService rolesAndPermissionsService,
             RetentionPoliciesService retentionPoliciesService, DataCreatorsService dataCreatorsService,
             BillingService billingService, UsersService usersService, EventService eventService,
-            ClientsService clientsService, EmailService emailService) {
+            ClientsService clientsService, EmailService emailService, Clock clock) {
         this.vaultDAO = vaultDAO;
         this.rolesAndPermissionsService = rolesAndPermissionsService;
         this.retentionPoliciesService = retentionPoliciesService;
@@ -56,6 +63,7 @@ public class VaultsService {
         this.eventService = eventService;
         this.clientsService = clientsService;
         this.emailService = emailService;
+        this.clock = clock;
     }
 
     public RetentionPoliciesService getRetentionPoliciesService() {
@@ -63,8 +71,7 @@ public class VaultsService {
     }
 
     public List<Vault> getVaults() {
-        List<Vault> vaults = vaultDAO.list();
-        return vaults;
+        return vaultDAO.list();
     }
 
     public List<Vault> getVaults(String userId, String sort, String order, String offset, String maxResult) {
@@ -72,26 +79,33 @@ public class VaultsService {
     }
 
     public void addVault(Vault vault) {
-        Date d = new Date();
-        vault.setCreationTime(d);
+        Assert.notNull(vault, "The vault cannot be null");
+        LocalDateTime creationTime = LocalDateTime.now(clock);
+        vault.setCreationTime(creationTime);
         vaultDAO.save(vault);
     }
 
     public void addVaultEvent(Vault vault, String clientKey, String userID) {
+        Assert.notNull(vault, "The vault cannot be null");
         Create vaultEvent = new Create(vault.getID());
         vaultEvent.setVault(vault);
         vaultEvent.setUser(usersService.getUser(userID));
         vaultEvent.setAgentType(Agent.AgentType.BROKER);
-        vaultEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
+        Client client = clientsService.getClientByApiKey(clientKey);
+        String clientName = client == null ? "" : client.getName();
+        vaultEvent.setAgent(clientName);
         eventService.addEvent(vaultEvent);
     }
 
-    private void addRoleEvent(RoleAssignment ra, String assigneeId, String creatorId, String clientKey) {
+    protected void addRoleEvent(RoleAssignment ra, String assigneeId, String creatorId, String clientKey) {
+        Assert.notNull(ra, "The role assignment cannot be null");
         CreateRoleAssignment roleAssignmentEvent = new CreateRoleAssignment(ra, creatorId);
         roleAssignmentEvent.setVault(this.getVault(ra.getVaultId()));
         roleAssignmentEvent.setUser(usersService.getUser(creatorId));
         roleAssignmentEvent.setAgentType(Agent.AgentType.BROKER);
-        roleAssignmentEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
+        Client client = clientsService.getClientByApiKey(clientKey);
+        String clientName = client == null ? "" : client.getName();
+        roleAssignmentEvent.setAgent(clientName);
         roleAssignmentEvent.setAssignee(usersService.getUser(assigneeId));
         roleAssignmentEvent.setRole(ra.getRole());
 
@@ -99,26 +113,31 @@ public class VaultsService {
     }
 
     public void sendVaultOwnerEmail(Vault vault, String homePage, String helpPage, User user) {
+        Assert.notNull(user, "The user cannot be null");
         // send mail to owner
         this.sendEmail(vault, user.getEmail(), "A new vault you own has been created", "Owner",
                 EmailTemplate.USER_VAULT_CREATE, homePage, helpPage);
     }
 
     public void sendVaultDepositorsEmail(Vault vault, String homePage, String helpPage, User user) {
+        Assert.notNull(user, "The user cannot be null");
         // send mail to depositor
         this.sendEmail(vault, user.getEmail(), "A new vault you have a role on has been created", "Depositor",
                 EmailTemplate.USER_VAULT_CREATE, homePage, helpPage);
     }
 
     public void sendVaultNDMsEmail(Vault vault, String homePage, String helpPage, User user) {
+        Assert.notNull(user, "The user cannot be null");
         // send mail to ndm
         this.sendEmail(vault, user.getEmail(), "A new vault you have a role on has been created",
                 "Nominated Data Manager",
                 EmailTemplate.USER_VAULT_CREATE, homePage, helpPage);
     }
 
-    private void sendEmail(Vault vault, String email, String subject, String role, String template, String homePage,
+    protected void sendEmail(Vault vault, String email, String subject, String role, String template, String homePage,
             String helpPage) {
+        Assert.notNull(vault, "The vault cannot be null");
+        Assert.notNull(vault.getGroup(), "The vault group cannot be null");
         HashMap<String, Object> model = new HashMap<>();
         model.put(EMAIL_HOME_PAGE, homePage);
         model.put(EMAIL_HELP_PAGE, helpPage);
@@ -131,6 +150,7 @@ public class VaultsService {
     }
 
     public void orphanVault(Vault vault) {
+        Assert.notNull(vault, "The vault cannot be null");
         vault.setUser(null);
         vaultDAO.update(vault);
 
@@ -165,20 +185,15 @@ public class VaultsService {
         return vaultDAO.getRetentionPolicyCount(status);
     }
 
-    public Vault checkRetentionPolicy(String vaultID) {
+    public Vault checkRetentionPolicy(String vaultID, RetentionPoliciesService.RetentionPolicyUpdateReason reason) {
         // Get the vault
-        Vault vault = vaultDAO.findById(vaultID).orElse(null);
-
-        RetentionPoliciesService.setRetention(vault);
-
-        // Check the policy
-        // retentionPoliciesService.run(vault);
-
-        // Set the expiry date
-        // vault.setRetentionPolicyExpiry(retentionPoliciesService.getReviewDate(vault));
-
-        // Record when we checked it
-        // vault.setRetentionPolicyLastChecked(new Date());
+        Vault vault = getVault(vaultID);
+        if (vault == null) {
+            logger.info("The vault with id {} does not exist", vaultID);
+            return null;
+        }
+        
+        RetentionPoliciesService.updateRetentionPolicyExpiryDate(vault, clock, reason);
 
         // Update and return the policy
         vaultDAO.update(vault);
@@ -212,15 +227,22 @@ public class VaultsService {
     public Map<String, Long> getAllProjectsSize() {
         Map<String, Long> projectSizeMap = new HashMap<>();
         List<Object[]> allProjectsSize = vaultDAO.getAllProjectsSize();
-        if (allProjectsSize != null) {
-            for (Object[] projectsizeArray : allProjectsSize) {
-                projectSizeMap.put((String) projectsizeArray[0], (Long) projectsizeArray[1]);
+        if (allProjectsSize == null) {
+            return projectSizeMap;
+        }
+        for (Object[] projectSizeArray : allProjectsSize) {
+            if (projectSizeArray == null || projectSizeArray.length < 2) {
+                continue;
             }
+            projectSizeMap.put((String) projectSizeArray[0], (Long) projectSizeArray[1]);
         }
         return projectSizeMap;
     }
 
     public void transferVault(Vault vault, User newOwner, String reason) {
+        Assert.notNull(vault, "The vault cannot be null");
+        Assert.notNull(newOwner, "The newOwner cannot be null");
+
         vault.setUser(newOwner);
         vaultDAO.update(vault);
 
@@ -240,25 +262,30 @@ public class VaultsService {
     public void addDepositorRoles(CreateVault createVault, Vault vault, String clientKey, String homePage,
             String helpPage) {
 
-        // if vault already has depositors delete them and readd
+        Assert.notNull(createVault, "The create vault cannot be null");
+
+        RoleModel depositorRole = rolesAndPermissionsService.getDepositor();
+        
+        // if vault already has depositors delete them and read
         List<String> depositors = createVault.getDepositors();
         if (depositors != null) {
-            for (String dep : depositors) {
-                if (dep != null && !dep.isEmpty()) {
+            for (String depositor : depositors) {
+                if (depositor != null && !depositor.isEmpty()) {
                     RoleAssignment ra = new RoleAssignment();
                     ra.setVaultId(vault.getID());
-                    ra.setRole(rolesAndPermissionsService.getDepositor());
-                    ra.setUserId(dep);
+                    ra.setRole(depositorRole);
+                    ra.setUserId(depositor);
                     rolesAndPermissionsService.createRoleAssignment(ra);
 
                     this.addRoleEvent(ra, createVault.getVaultOwner(), createVault.getVaultCreator(), clientKey);
-                    this.sendVaultDepositorsEmail(vault, homePage, helpPage, usersService.getUser(dep));
+                    this.sendVaultDepositorsEmail(vault, homePage, helpPage, usersService.getUser(depositor));
                 }
             }
         }
     }
 
     public void addOwnerRole(CreateVault createVault, Vault vault, String clientKey) {
+        Assert.notNull(createVault, "The create vault cannot be null");
         String ownerId = createVault.getVaultOwner();
         String creatorId = createVault.getVaultCreator();
 
@@ -276,6 +303,7 @@ public class VaultsService {
     }
 
     public Vault processDataCreatorParams(CreateVault createVault, Vault vault) {
+        Assert.notNull(createVault, "The create vault cannot be null");
         List<String> dcs = createVault.getDataCreators();
         if (dcs != null) {
             logger.debug("Data creator list is :'" + dcs + "'");
@@ -302,13 +330,17 @@ public class VaultsService {
     }
 
     public void addNDMRoles(CreateVault createVault, Vault vault, String clientKey, String homePage, String helpPage) {
+        Assert.notNull(createVault, "The create vault cannot be null");
+
+        RoleModel ndmRole = rolesAndPermissionsService.getNominatedDataManager();
+
         List<String> ndms = createVault.getNominatedDataManagers();
         if (ndms != null) {
             for (String ndm : ndms) {
                 if (ndm != null && !ndm.isEmpty()) {
                     RoleAssignment ra = new RoleAssignment();
                     ra.setVaultId(vault.getID());
-                    ra.setRole(rolesAndPermissionsService.getNominatedDataManager());
+                    ra.setRole(ndmRole);
                     ra.setUserId(ndm);
                     rolesAndPermissionsService.createRoleAssignment(ra);
                     this.addRoleEvent(ra, createVault.getVaultOwner(), createVault.getVaultCreator(), clientKey);
@@ -319,6 +351,7 @@ public class VaultsService {
     }
 
     public void addBillingInfo(CreateVault createVault, Vault vault) {
+        Assert.notNull(createVault, "The create vault cannot be null");
         String billingType = createVault.getBillingType();
         
         BillingInfo billinginfo = new BillingInfo();
@@ -355,4 +388,14 @@ public class VaultsService {
         billingService.saveOrUpdateVault(billinginfo);
     }
 
+    public Page<Vault> getFirstFiftyVaultsWithNameContaining(String partialName) {
+        Assert.hasText(partialName, "The partial name cannot be null or empty");
+
+        String trimmedName = partialName.trim();
+
+        Assert.isTrue(trimmedName.length() >= 3, "The partial name must be at least 3 characters long");
+
+        Pageable pageable = PageRequest.of(0, 50);
+        return vaultDAO.findByNameContainingIgnoreCaseOrderByNameAsc(trimmedName, pageable);
+    }
 }

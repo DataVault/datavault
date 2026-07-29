@@ -1,6 +1,7 @@
 package org.datavaultplatform.webapp.services;
 
 import java.time.Clock;
+import java.time.LocalDate;
 import java.util.*;
 
 import lombok.extern.slf4j.Slf4j;
@@ -148,7 +149,7 @@ public class ValidateService {
       retVal.add("Project Title missing");
     }
     // Grant end date
-    Date grantEndDate = vault.getReviewDate();
+    LocalDate grantEndDate = vault.getReviewDate();
     if (grantEndDate == null) {
       retVal.add("Review Date missing");
     }
@@ -179,17 +180,17 @@ public class ValidateService {
       retVal.add("School missing");
     }
     // Review Date
-    Date reviewDate = vault.getReviewDate();
+    LocalDate reviewDate = vault.getReviewDate();
     if (reviewDate == null) {
       retVal.add("Review Date missing");
     } else {
       // if review date is less than 3 years from today
       int yearsToAdd = 3;
-      if (DateTimeUtils.isBefore(reviewDate,this.getDefaultReviewDate(yearsToAdd))) {
+      if (DateTimeUtils.isBefore(reviewDate, this.getDefaultReviewDate(yearsToAdd))) {
         retVal.add("Review Date for selected policy is required to be at least " + yearsToAdd + " years");
       }
 
-      if (DateTimeUtils.isAfter(reviewDate,this.getMaxReviewDate())) {
+      if (DateTimeUtils.isAfter(reviewDate, this.getMaxReviewDate())) {
         retVal.add("Review Date for selected policy is required to be less than 30 years in the future");
       }
     }
@@ -257,20 +258,17 @@ public class ValidateService {
     return retVal;
   }
 
-  public Date getDefaultReviewDate(int addedYears) {
-    Calendar cal = Calendar.getInstance();
-    cal.setTimeInMillis(clock.millis());
-    cal.setTimeZone(TimeZone.getTimeZone("Europe/London"));
-    cal.add(Calendar.YEAR, addedYears);
-    Date todayPlusXYears = cal.getTime();
+  public LocalDate getDefaultReviewDate(int addedYears) {
+    LocalDate today = LocalDate.now(clock);
+    LocalDate todayPlusXYears = today.plusYears(addedYears);
     return todayPlusXYears;
   }
 
-  public Date getDefaultReviewDate() {
+  public LocalDate getDefaultReviewDate() {
     return this.getDefaultReviewDate(3);
   }
 
-  public Date getMaxReviewDate() {
+  public LocalDate getMaxReviewDate() {
     return this.getDefaultReviewDate(30);
   }
 }

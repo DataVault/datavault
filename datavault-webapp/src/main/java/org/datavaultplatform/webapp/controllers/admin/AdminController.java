@@ -6,6 +6,7 @@ import org.datavaultplatform.webapp.model.AdminDashboardPermissionsModel;
 import org.datavaultplatform.webapp.services.PermissionsService;
 import org.datavaultplatform.webapp.services.RestService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +15,7 @@ import java.security.Principal;
 
 @Controller
 @ConditionalOnBean(RestService.class)
-public class AdminController {
+public class AdminController implements AdminControllerApi {
 
     private final RestService restService;
 
@@ -26,7 +27,8 @@ public class AdminController {
         this.permissionsService = permissionsService;
     }
 
-    @RequestMapping(value = "/admin", method = RequestMethod.GET)
+    @Override
+    @GetMapping(value = "/admin", produces = MediaType.TEXT_HTML_VALUE)
     public String adminIndex(ModelMap modelMap, Principal principal) {
         AdminDashboardPermissionsModel permissionsModel = permissionsService.getDashboardPermissions(principal);
 

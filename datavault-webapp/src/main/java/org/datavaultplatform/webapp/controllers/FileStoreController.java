@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +23,7 @@ import java.util.HashMap;
  */
 @Controller
 @ConditionalOnBean(RestService.class)
-public class FileStoreController {
+public class FileStoreController implements FileStoreControllerApi {
 
     private static final Logger logger = LoggerFactory.getLogger(FileStoreController.class);
 
@@ -46,8 +47,9 @@ public class FileStoreController {
     }
 
     // Return the 'Storage Options' page
-    @RequestMapping(value = "/filestores", method = RequestMethod.GET)
-    public String listFilestores(ModelMap model) throws Exception {
+    @Override
+    @GetMapping(value = "/filestores", produces = MediaType.TEXT_HTML_VALUE)
+    public String listFilestores(ModelMap model) throws Exception{
         model.addAttribute("activeDir", activeDir);
         model.addAttribute("sftpHost", sftpHost);
         model.addAttribute("sftpPort", sftpPort);
@@ -59,7 +61,8 @@ public class FileStoreController {
     }
 
     // Process the 'add local FileStore' Ajax request
-    @RequestMapping(value = "/filestores/local", method = RequestMethod.POST)
+    @Override
+    @PostMapping(value = "/filestores/local", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     @ResponseBody
     public void addLocalFilestore(@RequestParam("path") String path) throws Exception {
         HashMap<String,String> storeProperties = new HashMap<>();
@@ -72,7 +75,8 @@ public class FileStoreController {
     }
 
     // Process the 'add SFTP FileStore' Ajax request
-    @RequestMapping(value = "/filestores/sftp", method = RequestMethod.POST)
+    @Override
+    @PostMapping(value = "/filestores/sftp", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     @ResponseBody
     public void addSFTPFilestore(@RequestParam("hostname") String hostname, @RequestParam("port") String port, @RequestParam("path") String path, ModelMap model) throws Exception {
         //todo : replace the separate parms above with one Filestore model attribute?
@@ -88,11 +92,11 @@ public class FileStoreController {
     }
 
 
-    // Process the 'delete filestore' Ajax request
-    @RequestMapping(value = "/filestores/{filestoreId}", method = RequestMethod.DELETE)
+    @Override
+    @DeleteMapping(value = "/filestores/{fileStoreId}")
     @ResponseBody
-    public void deleteFileStore(ModelMap model, @PathVariable("filestoreId") String filestoreId) throws Exception {
-        restService.deleteFileStore(filestoreId);
+    public void deleteFileStore(ModelMap model, @PathVariable String fileStoreId) {
+        restService.deleteFileStore(fileStoreId);
     }
 
 

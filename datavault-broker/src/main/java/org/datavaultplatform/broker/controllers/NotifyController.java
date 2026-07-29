@@ -3,12 +3,15 @@ package org.datavaultplatform.broker.controllers;
 import static org.datavaultplatform.common.util.Constants.HEADER_CLIENT_KEY;
 import static org.datavaultplatform.common.util.Constants.HEADER_USER_ID;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.services.EventService;
 import org.datavaultplatform.broker.services.ClientsService;
 import org.datavaultplatform.broker.services.UsersService;
-import org.jsondoc.core.annotation.*;
-import org.jsondoc.core.pojo.ApiVerb;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +21,7 @@ import org.datavaultplatform.common.model.Agent;
 
 @RestController
 //@CrossOrigin
-@Api(name="Notify", description = "Inform the broker about an event")
+@Tag(name = "notify-controller", description = "Inform the broker about an event")
 @Slf4j
 public class NotifyController {
     
@@ -34,50 +37,66 @@ public class NotifyController {
         this.usersService = usersService;
     }
 
-    @ApiMethod(
-            path = "/notify/login}",
-            verb = ApiVerb.PUT,
-            description = "Notify the broker about a client login event",
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
+    @Operation(
+            summary = "Register a login event",
+            description = "Registers a user login event with the DataVault broker.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Logout event registered successfully",
+                            content = @Content(
+                                    mediaType = MediaType.TEXT_PLAIN_VALUE,
+                                    schema = @Schema(
+                                            type = "string",
+                                            description = "Always an empty string",
+                                            example = ""
+                                    )
+                            )
+                    )
+            }
     )
-    @ApiHeaders(headers={
-            @ApiHeader(name=HEADER_USER_ID, description="DataVault Broker User ID")
-    })
-    @PutMapping("/notify/login")
-    public String login(@RequestHeader(HEADER_USER_ID) String userID,
+    @PutMapping(value = "/notify/login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.TEXT_PLAIN_VALUE)
+    public String login(@RequestHeader(HEADER_USER_ID) String userId,
                         @RequestHeader(HEADER_CLIENT_KEY) String clientKey,
                         @RequestBody CreateClientEvent clientEvent) {
-        
-        log.info("USER [{}] logged IN from Client [{}]", userID, clientKey);
+
+        log.info("USER [{}] logged IN from Client [{}]", userId, clientKey);
         Login loginEvent = new Login(clientEvent.getRemoteAddress(), clientEvent.getUserAgent());
-        loginEvent.setUser(usersService.getUser(userID));
+        loginEvent.setUser(usersService.getUser(userId));
         loginEvent.setAgentType(Agent.AgentType.WEB);
         loginEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
         eventService.addEvent(loginEvent);
         
         return "";
     }
-    
-    @ApiMethod(
-            path = "/notify/logout}",
-            verb = ApiVerb.PUT,
-            description = "Notify the broker about a client logout event",
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
+
+    @Operation(
+            summary = "Register a logout event",
+            description = "Registers a user logout event with the DataVault broker.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Logout event registered successfully",
+                            content = @Content(
+                                    mediaType = MediaType.TEXT_PLAIN_VALUE,
+                                    schema = @Schema(
+                                            type = "string",
+                                            description = "Always an empty string",
+                                            example = ""
+                                    )
+                            )
+                    )
+            }
     )
-    @ApiHeaders(headers={
-            @ApiHeader(name=HEADER_USER_ID, description="DataVault Broker User ID")
-    })
-    @PutMapping("/notify/logout")
-    public String logout(@RequestHeader(HEADER_USER_ID) String userID,
+    @PutMapping(value = "/notify/logout", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.TEXT_PLAIN_VALUE)
+    public String logout(@RequestHeader(HEADER_USER_ID) String userId,
                          @RequestHeader(HEADER_CLIENT_KEY) String clientKey,
                          @RequestBody CreateClientEvent clientEvent) {
 
-        log.info("USER [{}] logged OUT from Client [{}]", userID, clientKey);
+        log.info("USER [{}] logged OUT from Client [{}]", userId, clientKey);
 
         Logout logoutEvent = new Logout(clientEvent.getRemoteAddress());
-        logoutEvent.setUser(usersService.getUser(userID));
+        logoutEvent.setUser(usersService.getUser(userId));
         logoutEvent.setAgentType(Agent.AgentType.WEB);
         logoutEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
         eventService.addEvent(logoutEvent);

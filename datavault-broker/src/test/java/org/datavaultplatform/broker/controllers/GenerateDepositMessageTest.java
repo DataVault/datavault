@@ -25,12 +25,14 @@ import org.datavaultplatform.common.request.CreateDeposit;
 import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.storage.impl.LocalFileSystem;
+import org.datavaultplatform.common.task.Task;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.skyscreamer.jsonassert.JSONAssert;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -45,9 +47,9 @@ public class GenerateDepositMessageTest extends BaseGenerateMessageTest {
   private static final String FILE_STORE_SRC_LABEL = "FILE_STORE-SRC-LABEL";
 
   final File srcDir = new File(baseDir, "src");
-
+  
   @Captor
-  ArgumentCaptor<String> argMessage;
+  ArgumentCaptor<Task> argTask;
   private DepositsController dc;
 
   @BeforeEach
@@ -82,7 +84,7 @@ public class GenerateDepositMessageTest extends BaseGenerateMessageTest {
 
     User mockUser = mock(User.class);
     when(mockUser.getID()).thenReturn("used-id-one");
-    when(sender.send(argMessage.capture(), any(Boolean.class))).thenReturn("MESSAGE_ID");
+    when(taskSender.send(argTask.capture(), any(Boolean.class))).thenReturn("MESSAGE_ID");
 
     Vault mockVault = mock(Vault.class);
     VaultInfo mockVaultInfo = mock(VaultInfo.class);
@@ -120,7 +122,8 @@ public class GenerateDepositMessageTest extends BaseGenerateMessageTest {
 
     dc.addDeposit("user123", cd);
 
-    String sentMessage = argMessage.getValue();
+    Task sentTask = argTask.getValue();
+    String sentMessage = mapper.writeValueAsString(sentTask);
     log.info("START SENT MESSAGE");
     mapper.enable(SerializationFeature.INDENT_OUTPUT);
 
@@ -148,7 +151,9 @@ public class GenerateDepositMessageTest extends BaseGenerateMessageTest {
     assertEquals(destPath, actualDestPath);
 
     JsonNode expected = mapper.readTree(getExpectedJson(bagId, srcPath, destPath));
-    assertEquals(expected, convert(generated));
+    JsonNode actual = convert(generated);
+    JSONAssert.assertEquals(expected.toPrettyString(), actual.toPrettyString(), true);
+    assertEquals(expected, actual);
     log.info("Generated Message {}", expected.toPrettyString());
     log.info("END SENT MESSAGE");
   }
@@ -192,11 +197,11 @@ public class GenerateDepositMessageTest extends BaseGenerateMessageTest {
         + "  \"userFileStoreClasses\" : {"
         + "    \"FILE-STORE-SRC-ID\" : \"org.datavaultplatform.common.storage.impl.LocalFileSystem\""
         + "  },"
-        + "  \"chunkFilesDigest\" : null,"
+        + "  \"chunkFilesDigest\" : {},"
         + "  \"tarIV\" : null,"
-        + "  \"chunksIVs\" : null,"
+        + "  \"chunksIVs\" : {},"
         + "  \"encTarDigest\" : null,"
-        + "  \"encChunksDigest\" : null,"
+        + "  \"encChunksDigest\" : {},"
         + "  \"lastEvent\" : null,"
         + "  \"chunksToAudit\" : null,"
         + "  \"archiveIds\" : null,"

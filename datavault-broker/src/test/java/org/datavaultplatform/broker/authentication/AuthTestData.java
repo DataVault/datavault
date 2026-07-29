@@ -1,6 +1,7 @@
 package org.datavaultplatform.broker.authentication;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Date;
 import org.datavaultplatform.common.model.ArchiveStore;
@@ -323,9 +324,9 @@ public class AuthTestData {
     CREATE_RETENTION_POLICY.setEngine("V8");
     CREATE_RETENTION_POLICY.setSort("bubble");
     CREATE_RETENTION_POLICY.setExtendUponRetrieval(true);
-    CREATE_RETENTION_POLICY.setDataGuidanceReviewed(new Date());
-    CREATE_RETENTION_POLICY.setEndDate(new Date());
-    CREATE_RETENTION_POLICY.setInEffectDate(new Date());
+    CREATE_RETENTION_POLICY.setDataGuidanceReviewed(LocalDate.now());
+    CREATE_RETENTION_POLICY.setEndDate(LocalDate.now());
+    CREATE_RETENTION_POLICY.setInEffectDate(LocalDate.now());
 
   }
 }

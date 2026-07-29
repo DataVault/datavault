@@ -5,7 +5,24 @@ java -version
 SCRIPT_DIR="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 PROJECT_ROOT=$(cd $SCRIPT_DIR/../../..;pwd)
 
+mkdir -p /tmp/datavault/{temp,meta}
+
 cd $PROJECT_ROOT
+
+# Interactive prompt
+SCRIPT_NAME=$(basename "$0")
+ALT_SCRIPT_NAME="runLocalWebApp.sh"
+echo "WARNING: You are running $SCRIPT_NAME"
+echo "Did you mean to run $ALT_SCRIPT_NAME instead ?"
+read -p "ARE YOU SURE YOU WANT TO RUN ${SCRIPT_NAME}? (y/N): " confirm
+
+# Check if input is y or Y
+if [[ ! "$confirm" =~ ^[yY]$ ]]; then
+    echo "Exiting. Please run $ALT_SCRIPT_NAME instead."
+    exit 1
+fi
+
+echo "Proceeding to run $SCRIPT_NAME"
  SERVER_PORT=9090 \
  SPRING_APPLICATION_NAME=datavault-worker-1 \
  SPRING_SECURITY_DEBUG=true \

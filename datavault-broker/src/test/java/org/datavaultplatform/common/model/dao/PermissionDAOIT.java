@@ -50,6 +50,11 @@ public class PermissionDAOIT extends BaseDatabaseTest {
   JdbcTemplate template;
 
   @Test
+  void testNumberofPermissions() {
+    assertEquals(Permission.values().length, 31);
+  }
+  
+  @Test
   void testWriteThenRead() {
     PermissionModel permissionModel1 = getPermissionModel1();
 

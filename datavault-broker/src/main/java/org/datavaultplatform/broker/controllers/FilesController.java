@@ -2,6 +2,13 @@ package org.datavaultplatform.broker.controllers;
 
 import static org.datavaultplatform.common.util.Constants.HEADER_USER_ID;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Base64;
 import org.datavaultplatform.broker.services.AdminService;
@@ -13,12 +20,10 @@ import org.datavaultplatform.common.model.FileStore;
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.response.DepositSize;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.HandlerMapping;
 
-import jakarta.servlet.http.HttpServletRequest;
 import java.io.File;
-import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -36,10 +41,10 @@ import java.util.Set;
 
 
 @RestController
-//@CrossOrigin
 @Slf4j
 public class FilesController {
-    
+
+    public static final String FILE_INFORMATION_NOT_AVAILABLE = "File information not available.";
     private final FilesService filesService;
     private final UsersService usersService;
     private final AdminService adminService;
@@ -48,10 +53,10 @@ public class FilesController {
     private final Long maxAdminDepositByteSize;
 
     public FilesController(FilesService filesService, UsersService usersService,
-        AdminService adminService,
-        @Value("${tempDir}") String tempDir,
-        @Value("${max.deposit.size}") String maxDepositByteSize,
-        @Value("${max.admin.deposit.size}") String maxAdminDepositByteSize) {
+                           AdminService adminService,
+                           @Value("${tempDir}") String tempDir,
+                           @Value("${max.deposit.size}") String maxDepositByteSize,
+                           @Value("${max.admin.deposit.size}") String maxAdminDepositByteSize) {
         this.filesService = filesService;
         this.usersService = usersService;
         this.adminService = adminService;
@@ -60,11 +65,10 @@ public class FilesController {
         this.maxAdminDepositByteSize = DataVaultFileUtils.parseFormattedSizeToBytes(maxAdminDepositByteSize);
     }
 
-    @GetMapping("/files")
-    public List<FileInfo> getStorageListing(@RequestHeader(HEADER_USER_ID) String userID,
-                                            HttpServletRequest request) {
+    @GetMapping(value = "/files", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<FileInfo> getStorageListing(@RequestHeader(HEADER_USER_ID) String userId) {
         
-        User user = usersService.getUser(userID);
+        User user = usersService.getUser(userId);
         
         ArrayList<FileInfo> files = new ArrayList<>();
         List<FileStore> userStores = user.getFileStores();
@@ -79,32 +83,29 @@ public class FilesController {
         // "GET /files/" will display a list of configured user storage systems.
         return files;
     }
-    
-    @GetMapping("/files/{storageid}/**")
-    public List<FileInfo> getFilesListing(@RequestHeader(HEADER_USER_ID) String userID,
-                                          HttpServletRequest request,
-                                          @PathVariable("storageid") String storageID) throws Exception {
-        
-        User user = usersService.getUser(userID);
+
+    @GetMapping(value = "/files/{storageId}/{*filePath}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<FileInfo> getFilesListing(@RequestHeader(HEADER_USER_ID) String userId,
+                                          @PathVariable String storageId,
+                                          @Parameter(description = "The relative path to the file (captured greedily)", example = "backups/2023/data.zip")
+                                          @PathVariable String filePath) throws Exception {
+
+        User user = usersService.getUser(userId);
         
         FileStore store = null;
         List<FileStore> userStores = user.getFileStores();
         for (FileStore userStore : userStores) {
-            if (userStore.getID().equals(storageID)) {
+            if (userStore.getID().equals(storageId)) {
                 store = userStore;
             }
         }
         
         if (store == null) {
-            throw new Exception("Storage device '" + storageID + "' not found!");
+            throw new Exception("Storage device '" + storageId + "' not found!");
         }
         
         // "GET /files/storageid" will display files from the base directory.
         // "GET /files/storageid/abc" will display files from the "abc" directory under the base.
-        
-        // TODO: is there a cleaner way to extract the request path?
-        String requestPath = (String)request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
-        String filePath = requestPath.replaceFirst("^/files/" + storageID, "");
         
         List<FileInfo> files = filesService.getFilesListing(filePath, store);
         
@@ -116,52 +117,80 @@ public class FilesController {
                 fullKey = "/" + fullKey;
             }
             
-            fullKey = storageID + fullKey;
+            fullKey = storageId + fullKey;
             file.setKey(fullKey);
         }
         
         return files;
     }
-    
-    @GetMapping("/filesize/{storageid}/**")
-    public String getFilesize(@RequestHeader(HEADER_USER_ID) String userID,
-                                      HttpServletRequest request,
-                                      @PathVariable("storageid") String storageID) throws Exception {
+
+    @Operation(summary = "Get file size", description = "Gets filesize of storageId/<filepath>")
+    //"5 GB"
+    @ApiResponse(
+            responseCode = "200",
+            description = "gets filesize of storageId/<filepath>",
+            content = @Content(
+                    mediaType = MediaType.TEXT_PLAIN_VALUE,
+                    schema = @Schema(
+                            type = "string",
+                            description = "english description of size",
+                            examples = {"5 GB", FILE_INFORMATION_NOT_AVAILABLE}
+                    )
+            )
+    )
+    @GetMapping(value = "/filesize/{storageId}/{*filePath}", produces = MediaType.TEXT_PLAIN_VALUE)
+    public String getFilesize(
+            @RequestHeader(HEADER_USER_ID) String userId,
+            @PathVariable String storageId,
+            @Parameter(description = "The relative path to the file (captured greedily)", example = "backups/2023/data.zip")
+            @PathVariable String filePath
+    ) throws Exception {
         
-        User user = usersService.getUser(userID);
+        User user = usersService.getUser(userId);
         
         FileStore store = null;
         List<FileStore> userStores = user.getFileStores();
         for (FileStore userStore : userStores) {
-            if (userStore.getID().equals(storageID)) {
+            if (userStore.getID().equals(storageId)) {
                 store = userStore;
             }
         }
         
         if (store == null) {
-            throw new Exception("Storage device '" + storageID + "' not found!");
+            throw new Exception("Storage device '" + storageId + "' not found!");
         }
-        
-        // TODO: is there a cleaner way to extract the request path?
-        String requestPath = (String)request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
-        String filePath = requestPath.replaceFirst("^/filesize/" + storageID, "");
         
         Long size = filesService.getFilesize(filePath, store);
         
         if (size == null) {
-            return "File information not available";
+            return FILE_INFORMATION_NOT_AVAILABLE;
         } else {
             return DataVaultFileUtils.getGibibyteSizeStr(size);
         }
     }
 
-    @GetMapping("/sizeofselectedfiles")
-    public String sizeOfSelectedFiles(@RequestHeader(HEADER_USER_ID) String userID,
-                                       HttpServletRequest request) throws Exception {
+    //"5 GB"
+    @ApiResponse(
+            responseCode = "200",
+            description = "gets combined filesize of selected files",
+            content = @Content(
+                    mediaType = MediaType.TEXT_PLAIN_VALUE,
+                    schema = @Schema(
+                            type = "string",
+                            description = "english description of size",
+                            examples = {"5 GB", FILE_INFORMATION_NOT_AVAILABLE}
+                    )
+            )
+    )
+    @GetMapping(value = "/sizeofselectedfiles", produces = MediaType.TEXT_PLAIN_VALUE)
+    public String sizeOfSelectedFiles(
+            @RequestHeader(HEADER_USER_ID) String userId,
+            @RequestParam(value = "filepath") List<String> filePaths
+    ) {
         log.info("Start of sizeOfSelectedFiles");
-        String[] filePaths = request.getParameterValues("filepath");
+
         // Get storage id from the file path of first
-        if (filePaths.length > 0) {
+        if (filePaths.size() > 0) {
             // Start timing
             long start = System.nanoTime();
 
@@ -171,10 +200,10 @@ public class FilesController {
                 storageIDSet.add(fileStorageID);
             }
 
-            Long size = 0L;
+            long size = 0L;
             for (String storageID: storageIDSet) {
                 log.info("storageID: " + storageID);
-                User user = usersService.getUser(userID);
+                User user = usersService.getUser(userId);
                 FileStore store = null;
                 List<FileStore> userStores = user.getFileStores();
                 
@@ -186,7 +215,7 @@ public class FilesController {
         
                 if (store == null) {
                     // throw new Exception("Storage device '" + storageID + "' not found!");
-                    return "File information not available. Storage device '" + storageID + "' not found!.";
+                    return FILE_INFORMATION_NOT_AVAILABLE + " Storage device '" + storageID + "' not found!.";
                 }
             
                 for (String filePath : filePaths) {
@@ -209,22 +238,20 @@ public class FilesController {
                 log.info("sizeOfSelectedFiles(): timeElapsed for calculating size: " + timeElapsed + " seconds");
             }  
             if (size == 0L) {
-                return "File information not available.";
+                return FILE_INFORMATION_NOT_AVAILABLE;
             } else {
                 return DataVaultFileUtils.getGibibyteSizeStr(size);
             }
         } else {
-            return "File information not available.";
+            return FILE_INFORMATION_NOT_AVAILABLE;
         }
-
-        
     }
 
-    @GetMapping("/checkdepositsize")
-    public DepositSize checkDepositSize(@RequestHeader(HEADER_USER_ID) String userID,
+    @GetMapping(value = "/checkdepositsize", produces = MediaType.APPLICATION_JSON_VALUE)
+    public DepositSize checkDepositSize(@RequestHeader(HEADER_USER_ID) String userId,
                               HttpServletRequest request) throws Exception {
 
-        User user = usersService.getUser(userID);
+        User user = usersService.getUser(userId);
         String[] filePaths = request.getParameterValues("filepath");
 
         // Start timing
@@ -283,22 +310,52 @@ public class FilesController {
         log.info("retVal: " + retVal);
         return retVal;
     }
-    
-    @PostMapping(value="/upload/{fileUploadHandle}/{filename:.+}")
-    public String postFileChunk(@RequestHeader(HEADER_USER_ID) String userID,
-                                HttpServletRequest request,
-                                @PathVariable("fileUploadHandle") String fileUploadHandle,
-                                @PathVariable("filename") String filename) throws Exception {
-        
-        User user = usersService.getUser(userID);
-        
+
+    @Operation(
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "post a file chunk",
+                            content = @Content(
+                                    mediaType = MediaType.TEXT_PLAIN_VALUE,
+                                    schema = @Schema(
+                                            type = "string",
+                                            description = "Always an empty string",
+                                            allowableValues = {""}
+                                    )
+                            )
+                    ) // This was the missing closing brace for @ApiResponse
+            }
+    )
+    @PostMapping(value = "/upload/{fileUploadHandle}/{filename:.+}",
+            consumes = MediaType.APPLICATION_OCTET_STREAM_VALUE,
+            produces = MediaType.TEXT_PLAIN_VALUE)
+    public String postFileChunk(
+            @RequestHeader(HEADER_USER_ID) String userId,
+            @PathVariable String fileUploadHandle,
+            @PathVariable String filename,
+            @Parameter(
+                    description = "Base64 encoded relative path",
+                    schema = @Schema(type = "string"),
+                    examples = {@ExampleObject("L3Vzci9sb2NhbC90ZW1w")}
+            )
+            @RequestParam String relativePathBase64, // Decoded in logic
+            @RequestParam long chunkNumber,
+            @RequestParam long chunkSize,
+            @Parameter(description = "bytes of file chunk")
+            @RequestBody byte[] chunkBytes
+    ) throws Exception {
+
+        // Spring automatically parses the Longs for you!
+ 
+        User user = usersService.getUser(userId);
+
         log.info("Broker postFileChunk for " + user.getID() + " - " + filename);
-        
-        String relativePath = new String(Base64.decodeBase64(request.getParameter("relativePath").getBytes()));
-        long chunkNumber = Long.parseLong(request.getParameter("chunkNumber"));
-        Long totalChunks = Long.parseLong(request.getParameter("totalChunks"));
-        long chunkSize = Long.parseLong(request.getParameter("chunkSize"));
-        Long totalSize = Long.parseLong(request.getParameter("totalSize"));
+
+        String relativePath = new String(Base64.decodeBase64(relativePathBase64.getBytes()));
+
+        //Long totalChunks = Long.parseLong(request.getParameter("totalChunks"));
+        //Long totalSize = Long.parseLong(request.getParameter("totalSize"));
         
         log.info("fileUploadHandle =" + fileUploadHandle);
         
@@ -325,7 +382,7 @@ public class FilesController {
         }
         
         // Create the directory for this user
-        Path userUploadDirPath = uploadDirPath.resolve(userID);
+        Path userUploadDirPath = uploadDirPath.resolve(userId);
         File userUploadDir = userUploadDirPath.toFile();
         if (!userUploadDir.exists()) {
             log.info("Creating userUploadDir: " + userUploadDir.getPath());
@@ -359,26 +416,14 @@ public class FilesController {
         // Create subdirectories (if needed)
         f.getParentFile().mkdirs();
         
-        RandomAccessFile raf = new RandomAccessFile(f, "rw");
-        
-        //Seek through the file to the start of this chunk
-        raf.seek((chunkNumber - 1) * chunkSize);
-        
         // Write chunk bytes to file
-        InputStream is = request.getInputStream();
-        long count = 0;
-        long length = request.getContentLength();
-        byte[] buf = new byte[1024 * 1024];
-        while(count < length) {
-            int r = is.read(buf);
-            if (r < 0)  {
-                break;
-            }
-            raf.write(buf, 0, r);
-            count += r;
-        }
-        raf.close();
-        
+        try (RandomAccessFile raf = new RandomAccessFile(f, "rw")) {
+            // Seek to the correct offset
+            raf.seek((chunkNumber - 1) * chunkSize);
+
+            // Write the byte array directly
+            raf.write(chunkBytes);
+        } // raf.close() is called automatically here, even if an error occurs
         return "";
     }
 }

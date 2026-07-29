@@ -35,7 +35,6 @@ public abstract class BaseSFTPFileSystemPrivatePublicKeyPairIT extends BaseSFTPF
   static File keyStoreTempDir;
   static KeyPairInfo keyPairInfo;
 
-
   static GenericContainer<?> initialiseContainer(String tcName, Path tempFilePath) {
 
     try {

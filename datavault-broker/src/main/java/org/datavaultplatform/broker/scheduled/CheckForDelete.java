@@ -1,21 +1,24 @@
 package org.datavaultplatform.broker.scheduled;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.datavaultplatform.broker.queue.Sender;
-import org.datavaultplatform.broker.services.*;
-import org.datavaultplatform.common.PropNames;
+import org.datavaultplatform.broker.services.AdminDepositService;
+import org.datavaultplatform.broker.services.DepositsReviewService;
+import org.datavaultplatform.broker.services.VaultsService;
 import org.datavaultplatform.common.model.*;
-import org.datavaultplatform.common.task.Task;
+import org.datavaultplatform.common.util.DateTimeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.annotation.Scheduled;
-
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
+
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 /**
  * As part of the Review process, deposits can be flagged for deletion at a later date. Check the deposits
@@ -25,30 +28,21 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 public class CheckForDelete implements ScheduledTask {
 
-    private static final Logger log = LoggerFactory.getLogger(CheckForDelete.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CheckForDelete.class);
 
-    private final VaultsService vaultsService;
-    private final VaultsReviewService vaultsReviewService;
     private final DepositsReviewService depositsReviewService;
-    private final ArchiveStoreService archiveStoreService;
-    private final RolesAndPermissionsService rolesAndPermissionsService;
-    private final UsersService usersService;
-    private final JobsService jobsService;
-    private final Sender sender;
+    private final AdminDepositService adminDepositService;
+    private final VaultsService vaultsService;
+    private final Clock clock;
 
     @Autowired
-    public CheckForDelete(VaultsService vaultsService, VaultsReviewService vaultsReviewService,
-        DepositsReviewService depositsReviewService, ArchiveStoreService archiveStoreService,
-        RolesAndPermissionsService rolesAndPermissionsService, UsersService usersService,
-        JobsService jobsService, Sender sender) {
+    public CheckForDelete(VaultsService vaultsService,
+                           DepositsReviewService depositsReviewService,
+                           AdminDepositService adminDepositService, Clock clock) {
         this.vaultsService = vaultsService;
-        this.vaultsReviewService = vaultsReviewService;
         this.depositsReviewService = depositsReviewService;
-        this.archiveStoreService = archiveStoreService;
-        this.rolesAndPermissionsService = rolesAndPermissionsService;
-        this.usersService = usersService;
-        this.jobsService = jobsService;
-        this.sender = sender;
+        this.adminDepositService = adminDepositService;
+        this.clock = clock;
     }
 
     @Override
@@ -56,115 +50,132 @@ public class CheckForDelete implements ScheduledTask {
     @Transactional
     public void execute() throws Exception {
 
-        Date today = new Date();
-        log.info("Initiating check of Vaults with deposits to delete at " + today);
+        long start = clock.millis();
+        LocalDate today = LocalDate.now(clock);
 
-        List<Vault> vaults = vaultsService.getVaults();
+        LOG.info("Initiating check of Vaults with deposits to delete");
 
-        for (Vault vault : vaults) {
+        checkVaultsForDelete(today);
 
-            List<VaultReview> vaultReviews = vault.getVaultReviews();
-
-            if (!vaultReviews.isEmpty()) {
-
-                log.info("Does Vault " + vault.getName() + " have deposits to delete?");
-
-                // Get the most recent VaultReview
-                vaultReviews.sort(Comparator.comparing(VaultReview::getCreationTime));
-                VaultReview vaultReview = vaultReviews.get(0);
-
-                log.info("Does VaultReview with id " + vaultReview.getId() + " have deposits to delete?") ;
-
-                if (vaultReview.getActionedDate() != null ) {
-                    log.info("Vault " + vault.getName() + " has a completed review");
-
-                    for (DepositReview dr : vaultReview.getDepositReviews()) {
-                        if (dr.getActionedDate() == null) {
-                            log.info("Vault " + vault.getName() + " has an uncompleted depositReview");
-
-                            switch (dr.getDeleteStatus()) {
-                                case (DepositReviewDeleteStatus.ONREVIEW):
-                                    if (today.after(vaultReview.getOldReviewDate())) {
-                                        log.info("deleting deposit " + dr.getDeposit().getID());
-                                        deleteDeposit(dr.getDeposit());
-                                        dr.setActionedDate(today);
-                                        depositsReviewService.updateDepositReview(dr);
-                                    }
-                                    break;
-
-                                case (DepositReviewDeleteStatus.ONEXPIRY):
-                                    if (today.after(vault.getRetentionPolicyExpiry())) {
-                                        log.info("deleting deposit " + dr.getDeposit().getID());
-                                        deleteDeposit(dr.getDeposit());
-                                        dr.setActionedDate(today);
-                                        depositsReviewService.updateDepositReview(dr);
-                                    }
-                                    break;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        Date end = new Date();
-        log.info("Finished check of Vaults with deposits to delete at " + today);
-        log.info("Check took " + TimeUnit.MILLISECONDS.toSeconds(end.getTime() - today.getTime()) + " seconds");
+        long end = clock.millis();
+        long seconds = TimeUnit.MILLISECONDS.toSeconds(end - start);
+        LOG.info("Finished check of Vaults with deposits to delete. Took [{}] seconds", seconds);
     }
 
-    // todo : move this method to a service class
-    private void deleteDeposit(Deposit deposit) throws Exception {
-        log.info("Delete deposit with name " + deposit.getName());
+    private void checkVaultsForDelete(LocalDate today) throws Exception {
+        List<Vault> vaults = vaultsService.getVaults();
 
-        List<Job> jobs = deposit.getJobs();
-        for (Job job : jobs) {
-            if (job.isError() == false && job.getState() != job.getStates().size() - 1) {
-                // There's an in-progress job for this deposit
-                throw new IllegalArgumentException("Job in-progress for this Deposit");
+        if (vaults == null) {
+            return;
+        }
+        for (Vault vault : vaults) {
+            if (vault != null) {
+                checkVaultForDelete(vault, today);
             }
         }
+    }
 
-        List<ArchiveStore> archiveStores = archiveStoreService.getArchiveStores();
-        if (archiveStores.isEmpty()) {
-            throw new Exception("No configured archive storage");
+    protected void checkVaultForDelete(Vault vault, LocalDate today) throws Exception {
+        Assert.notNull(vault, "The vault cannot be null");
+
+        List<VaultReview> vaultReviews = vault.getVaultReviews();
+
+        if (vaultReviews == null || vaultReviews.isEmpty()) {
+            return;
         }
 
-        log.info("Delete deposit archiveStores : {}", archiveStores);
-        archiveStores = archiveStoreService.addArchiveSpecificOptions(archiveStores);
+        LOG.info("Checking if Vault {}/{} has deposits to delete?", vault.getID(), vault.getName());
 
-        // Create a job to track this delete
-        Job job = new Job("org.datavaultplatform.worker.tasks.Delete");
-        jobsService.addJob(deposit, job);
-
-        // Ask the worker to process the data delete
-
-        HashMap<String, String> deleteProperties = new HashMap<>();
-        deleteProperties.put(PropNames.DEPOSIT_ID, deposit.getID());
-        deleteProperties.put(PropNames.BAG_ID, deposit.getBagId());
-        deleteProperties.put(PropNames.ARCHIVE_SIZE, Long.toString(deposit.getArchiveSize()));
-        // We have no record of who requested the delete, is that acceptable?
-        deleteProperties.put(PropNames.USER_ID, null);
-        deleteProperties.put(PropNames.NUM_OF_CHUNKS, Integer.toString(deposit.getNumOfChunks()));
-        for (Archive archive : deposit.getArchives()) {
-            deleteProperties.put(archive.getArchiveStore().getID(), archive.getArchiveId());
+        // Get the most recent VaultReview - all VaultReviews are for the vault - DepositReviews are associated with Deposit.
+        Optional<VaultReview> optMostRecentVaultReview = vault.getMostRecentVaultReview();
+        if (optMostRecentVaultReview.isEmpty()) {
+            return;
         }
+        VaultReview mostRecentVaultReview = optMostRecentVaultReview.get();
 
-        // Add a single entry for the user file storage
-        Map<String, String> userFileStoreClasses = new HashMap<>();
-        Map<String, Map<String, String>> userFileStoreProperties = new HashMap<>();
-        //userFileStoreClasses.put(storageID, userStore.getStorageClass());
-        //userFileStoreProperties.put(storageID, userStore.getProperties());
+        LOG.info("Processing most recent VaultReview with id {} for Vault {}/{}",
+                mostRecentVaultReview.getId(), vault.getID(), vault.getName());
 
-        Task deleteTask = new Task(
-                job, deleteProperties, archiveStores,
-                userFileStoreProperties, userFileStoreClasses,
-                null, null,
-                null,
-                null, null,
-                null, null, null);
-        ObjectMapper mapper = new ObjectMapper();
-        String jsonDelete = mapper.writeValueAsString(deleteTask);
-        sender.send(jsonDelete);
+        // We only process VaultReviews that have been actioned (submitted).
+        // If a VaultReview is not actioned, it means it's still in progress and its associated DepositReviews
+        // should not be considered for deletion by this scheduled task yet.
+        if (mostRecentVaultReview.isReviewSubmitted()) {
+            LOG.info("Vault {} has a completed review", vault.getName());
 
+            List<DepositReview> depositReviews = mostRecentVaultReview.getDepositReviews();
+            if (depositReviews == null) {
+                return;
+            }
+            // Iterate through DepositReviews associated with the most recent, completed VaultReview
+            for (DepositReview dr : depositReviews) {
+                if (dr == null) {
+                    continue;
+                }
+                checkActionedDepositReview(vault, mostRecentVaultReview, dr, today);
+            }
+        }
+    }
+
+    protected void checkActionedDepositReview(Vault vault, VaultReview vaultReview, DepositReview dr, LocalDate today) throws Exception {
+        Assert.notNull(vault, "The vault cannot be null");
+        Assert.notNull(vaultReview, "The vaultReview cannot be null");
+        Assert.notNull(dr, "The depositReview cannot be null");
+        Assert.notNull(dr.getDeposit(), "The depositReview.deposit cannot be null");
+        Assert.notNull(today, "The Date 'today' cannot be null");
+
+        // we are only interested in DepositReviews that have not been actioned
+        // when we save a depositReview with RETAIN - we set the actionedDate.
+        // when we save a depositReivew with NOW - we set the actionedDate (and delete the deposit) 
+        if (dr.isReviewActioned()) {
+            return;
+        }
+        String depositId = dr.getDeposit().getID();
+        LOG.debug("Vault {} has an uncompleted depositReview for Deposit {}", vault.getName(), depositId);
+
+        var deleteStatus = dr.getDeleteStatus();
+        switch (deleteStatus) {
+            case DepositReviewDeleteStatus.ONREVIEW:
+                LocalDate oldReviewDate = vaultReview.getOldReviewDate();
+                if (oldReviewDate != null && today.isAfter(oldReviewDate)) {
+                    LOG.info("Deleting Deposit [{}] because today is after OLD Review Date [{}]" , depositId, oldReviewDate);
+                    depositReviewDeleteDeposit(dr);
+                }
+                break;
+
+            case DepositReviewDeleteStatus.ONEXPIRY:
+                LocalDate retentionPolicyExpiryDate = DateTimeUtils.toLocalDate(vault.getRetentionPolicyExpiry());
+                if (retentionPolicyExpiryDate != null && today.isAfter(retentionPolicyExpiryDate)) {
+                    LOG.info("Deleting Deposit [{}] because today is after Retention Policy Expiry Date[{}]", depositId, retentionPolicyExpiryDate);
+                    depositReviewDeleteDeposit(dr);
+                }
+                break;
+
+            case DepositReviewDeleteStatus.NOW, DepositReviewDeleteStatus.RETAIN:
+                // CONSISTENCY CHECK
+                // at this point, DepositReviews with RETAIN or NOW deleteStatus should have a non-null actionedDate
+                
+                if (dr.getActionedDate() == null) {
+                    String deleteStatusDesc = DepositReviewDeleteStatus.getDescription(dr.getDeleteStatus());
+                    LOG.warn("The DepositReview with Id[{}] and deleteStatus[{}] is unexpectedly an unexpected null actionedDate", dr.getId(), deleteStatusDesc);
+                }
+                break;
+
+            default:
+                // CONSISTENCY CHECK
+                // if we get here, we have an unexpected deleteStatus
+                String deleteStatusDesc = DepositReviewDeleteStatus.getDescription(dr.getDeleteStatus());
+                LOG.warn("The DepositReview with Id[{}] has unexpected deleteStatus[{}]", dr.getId(), deleteStatusDesc);
+        }
+    }
+
+    private void depositReviewDeleteDeposit(DepositReview dr) throws Exception {
+        Assert.notNull(dr, "The depositReview cannot be null");
+        Assert.notNull(dr.getDeposit(), "The depositReview.deposit cannot be null");
+
+        Deposit deposit = dr.getDeposit();
+        LOG.info("deleting deposit {}/{}", deposit.getID(), deposit.getName());
+        adminDepositService.deleteDeposit(deposit, null);
+        dr.setActionedDate(LocalDateTime.now(clock));
+        depositsReviewService.updateDepositReview(dr);
     }
 }

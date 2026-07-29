@@ -40,7 +40,7 @@ public sealed abstract class HashMapConverter<K, V>
           encoded = baos.toByteArray();
         }
       }
-      log.info("encoded [{}] to [{}]bytes", props, encoded.length);
+      log.trace("encoded [{}] to [{}]bytes", props, encoded.length);
       return encoded;
     } catch (Exception ex) {
       log.error("problem trying to encode properties", ex);
@@ -54,7 +54,7 @@ public sealed abstract class HashMapConverter<K, V>
     try {
       if (encoded == null || encoded.length == 0) {
         properties = new HashMap<>();
-        log.info("decoded [{}]bytes to [{}]", 0, properties);
+        log.trace("decoded [{}]bytes to [{}]", 0, properties);
       } else {
         try (ObjectInputStream ois = new ObjectInputStream(
                 new ByteArrayInputStream(encoded))) {
@@ -64,7 +64,7 @@ public sealed abstract class HashMapConverter<K, V>
           }
           properties = (HashMap<K, V>) obj;
         }
-        log.info("decoded [{}]bytes to [{}]", encoded.length, properties);
+        log.trace("decoded [{}]bytes to [{}]", encoded.length, properties);
       }
       return properties;
     } catch (Exception ex) {

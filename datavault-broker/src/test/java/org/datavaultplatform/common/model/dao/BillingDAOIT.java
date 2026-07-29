@@ -12,6 +12,7 @@ import org.datavaultplatform.broker.test.AddTestProperties;
 import org.datavaultplatform.broker.test.BaseReuseDatabaseTest;
 import org.datavaultplatform.common.model.BillingInfo;
 import org.datavaultplatform.common.model.PendingVault.Billing_Type;
+import org.datavaultplatform.common.model.RetentionPolicy;
 import org.datavaultplatform.common.model.Vault;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,10 +38,15 @@ public class BillingDAOIT extends BaseReuseDatabaseTest {
   @Autowired
   VaultDAO vaultDAO;
 
+  @Autowired
+  RetentionPolicyDAO retentionPolicyDAO;
+  
   Vault v1;
   Vault v2;
 
   Vault v3;
+  
+  RetentionPolicy retentionPolicy;
 
   @Test
   void testWriteThenRead() {
@@ -104,9 +110,17 @@ public class BillingDAOIT extends BaseReuseDatabaseTest {
   @BeforeEach
   void setup() {
     assertEquals(0, count());
-    v1 = vaultDAO.save(VaultDAOIT.getVault1());
-    v2 = vaultDAO.save(VaultDAOIT.getVault2());
-    v3 = vaultDAO.save(VaultDAOIT.getVault3());
+    retentionPolicy = new RetentionPolicy();
+    retentionPolicy.setEngine("engine!");
+    retentionPolicy.setName("RETENTION POLICY 111");
+    retentionPolicy.setDescription("RETENTION POLICY 111 DEC");
+    retentionPolicy.setMinRetentionPeriod(1);
+    retentionPolicy.setExtendUponRetrieval(false);
+    retentionPolicyDAO.save(retentionPolicy);
+
+    v1 = vaultDAO.save(VaultDAOIT.getVault1(retentionPolicy));
+    v2 = vaultDAO.save(VaultDAOIT.getVault2(retentionPolicy));
+    v3 = vaultDAO.save(VaultDAOIT.getVault3(retentionPolicy));
   }
 
   @AfterEach
