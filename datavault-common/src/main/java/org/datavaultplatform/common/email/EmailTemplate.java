@@ -6,6 +6,7 @@ package org.datavaultplatform.common.email;
 public abstract class EmailTemplate {
 
   public static final String AUDIT_CHUNK_ERROR = "audit-chunk-error.vm";
+  public static final String DELETE_ROLE_ASSIGNMENT = "delete-role-assignment.vm";
   public static final String GROUP_ADMIN_DEPOSIT_COMPLETE = "group-admin-deposit-complete.vm";
   public static final String GROUP_ADMIN_DEPOSIT_ERROR = "group-admin-deposit-error.vm";
   public static final String GROUP_ADMIN_DEPOSIT_START = "group-admin-deposit-start.vm";

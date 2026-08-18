@@ -295,7 +295,7 @@ public class RolesAndPermissionsController {
 
         RoleAssignment assignment = rolesAndPermissionsService.getRoleAssignment(roleAssignmentId);
 
-        sendEmails("delete-role-assignment.vm", assignment, userId);
+        sendEmails(EmailTemplate.DELETE_ROLE_ASSIGNMENT, assignment, userId);
 
         DeleteRoleAssignment roleAssignmentEvent = new DeleteRoleAssignment(assignment, userId);
 
