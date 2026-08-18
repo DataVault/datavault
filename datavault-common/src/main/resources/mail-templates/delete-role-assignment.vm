@@ -1,0 +1,16 @@
+<html>
+<body>
+
+<p>Your ${role} role has been deleted by ${assignee}:</p>
+<ul>
+    #if( ${target} == 'vault')
+        <li>Vault Title: ${vault}</li>
+        <li>Vault Owner: ${owner}</li>
+    #elseif( $target == 'school' )
+        <li>School: ${school}</li>
+    #end
+</ul>
+<p>You can login to the DataVault <a href=${homepage}>here</a></p>
+<p>You can find out more about DataVault roles <a href=${helppage}>here</a></p>
+</body>
+</html>
