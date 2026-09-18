@@ -1,60 +1,60 @@
 #!/usr/bin/env bash
 
-chunk_to_be_repaired=$1
-tmp_chunk_location=$2
-chunk_description=$3
+deposit_id=$1
+chunk_num=$2
+bag_id=$3
 location_of_good_chunk=$4
 location_of_bad_chunk=$5
 
-
-# ./fixAuditChunk.sh /datavault/temp/018218c1-0830-4eca-a868-9408ae8d5175.1/407d6229-37df-4587-bd6b-7f0109f172a3.tar.1 /datavault/temp/dv_20260309005150/407d6229-37df-4587-bd6b-7f0109f172a3.tar.1 018218c1-0830-4eca-a868-9408ae8d5175.1 /home/lacdv/.TSM/opt/dsm1.opt /home/lacdv/.TSM/opt/dsm2.opt
-
-if [ -z "$chunk_to_be_repaired" ]; then
-  echo "chunk_to_be_repaired is required"
-  echo "Usage: $0 <chunk_to_be_repaired> <tmp_chunk_location> <chunk_description> <location_of_good_chunk> <location_of_bad_chunk>"
+if [ -z "$deposit_id" ]; then
+  echo "deposit_id is required"
+  echo "Usage: $0 <deposit_id> <chunk_num> <bag_id> <location_of_good_chunk> <location_of_bad_chunk>"
   exit 1
 fi
 
-if [ -z "$tmp_chunk_location" ]; then
-  echo "tmp_chunk_location is required"
-  echo "Usage: $0 <chunk_to_be_repaired> <tmp_chunk_location> <chunk_description> <location_of_good_chunk> <location_of_bad_chunk>"
+if [ -z "$chunk_num" ]; then
+  echo "chunk_num is required"
+  echo "Usage: $0 <deposit_id> <chunk_num> <bag_id> <location_of_good_chunk> <location_of_bad_chunk>"
   exit 1
 fi
 
-if [ -z "$chunk_description" ]; then
-  echo "chunk_description is required"
-  echo "Usage: $0 <chunk_to_be_repaired> <tmp_chunk_location> <chunk_description> <location_of_good_chunk> <location_of_bad_chunk>"
+if [ -z "$bag_id" ]; then
+  echo "bag_id is required"
+  "Usage: $0 <deposit_id> <chunk_num> <bag_id> <location_of_good_chunk> <location_of_bad_chunk>"
   exit 1
 fi
 
 if [ -z "$location_of_good_chunk" ]; then
   echo "location_of_good_chunk is required"
-  echo "Usage: $0 <chunk_to_be_repaired> <tmp_chunk_location> <chunk_description> <location_of_good_chunk> <location_of_bad_chunk>"
+  "Usage: $0 <deposit_id> <chunk_num> <bag_id> <location_of_good_chunk> <location_of_bad_chunk>"
   exit 1
 fi
 
 if [ -z "$location_of_bad_chunk" ]; then
   echo "location_of_bad_chunk is required"
-  echo "Usage: $0 <chunk_to_be_repaired> <tmp_chunk_location> <chunk_description> <location_of_good_chunk> <location_of_bad_chunk>"
+  "Usage: $0 <deposit_id> <chunk_num> <bag_id> <location_of_good_chunk> <location_of_bad_chunk>"
   exit 1
 fi
 
-/usr/bin/dsmc retrieve "$chunk_to_be_repaired" "$tmp_chunk_location" -description="$chunk_description" -optfile="$location_of_good_chunk" -replace=true
+/usr/bin/dsmc retrieve /datavault/temp/"$deposit_id"."$chunk_num"/"$bag_id".tar."$chunk_num" /datavault/temp/"$deposit_id"."$chunk_num"/"$bag_id".tar."$chunk_num" -description="$deposit_id"."$chunk_num" -optfile=/home/lacdv/.TSM/opt/dsm"$location_of_good_chunk".opt -replace=true
 retrieve_rc=$?
 if [ $retrieve_rc -ne 0 ]; then
-  echo "Failed to retrieve chunk [$chunk_to_be_repaired] to [$tmp_chunk_location] using optfile [$location_of_good_chunk]. dsmc returned [$retrieve_rc]"
+  echo "Failed to retrieve chunk [/datavault/temp/$deposit_id.$chunk_num/$bag_id.tar.$chunk_num] to [/datavault/temp/$deposit_id.$chunk_num/$bag_id.tar.$chunk_num] using optfile [/home/lacdv/.TSM/opt/dsm$location_of_good_chunk.opt]. dsmc returned [$retrieve_rc]"
   exit $retrieve_rc
 fi
 
-/usr/bin/dsmc delete archive "$chunk_to_be_repaired" -description="$chunk_description" -optfile="$location_of_bad_chunk" -noprompt
+#what about the move stuff? Is that needed?  Also sort the timestamp stuff so it is taken from the OS but passed in.
+#sort the location params too make one param either true (1 )or false (0) for 1 bad 2 good or some way to ensure if param is 1 or 2 the other is non used value
+
+/usr/bin/dsmc delete archive /datavault/temp/"$deposit_id"."$chunk_num"/"$bag_id".tar."$chunk_num" -description="$deposit_id"."$chunk_num" -optfile=/home/lacdv/.TSM/opt/dsm"$location_of_bad_chunk".opt -noprompt
 delete_rc=$?
 if [ $delete_rc -ne 0 ]; then
-  echo "Failed to delete archived chunk [$chunk_to_be_repaired] using optfile [$location_of_bad_chunk]. dsmc returned [$delete_rc]. Continuing."
+  echo "Failed to delete archived chunk [/datavault/temp/$deposit_id.$chunk_num/$bag_id.tar.$chunk_num] using optfile [/home/lacdv/.TSM/opt/dsm$location_of_bad_chunk.opt]. dsmc returned [$delete_rc]. Continuing."
 fi
 
-/usr/bin/dsmc archive "$chunk_to_be_repaired" "$tmp_chunk_location" -description="$chunk_description" -optfile="$location_of_bad_chunk"
+/usr/bin/dsmc archive /datavault/temp/"$deposit_id"."$chunk_num"/"$bag_id".tar."$chunk_num" /datavault/temp/"$deposit_id"."$chunk_num"/"$bag_id".tar."$chunk_num" -description="$deposit_id"."$chunk_num" -optfile=/home/lacdv/.TSM/opt/dsm"$location_of_bad_chunk".opt
 archive_rc=$?
 if [ $archive_rc -ne 0 ]; then
-  echo "Failed to archive chunk [$chunk_to_be_repaired] from [$tmp_chunk_location] using optfile [$location_of_bad_chunk]. dsmc returned [$archive_rc]"
+  echo "Failed to archive chunk [/datavault/temp/$deposit_id.$chunk_num/$bag_id.tar.$chunk_num] from [/datavault/temp/$deposit_id.$chunk_num/$bag_id.tar.$chunk_num] using optfile [/home/lacdv/.TSM/opt/dsm$location_of_bad_chunk.opt]. dsmc returned [$archive_rc]"
   exit $archive_rc
 fi
