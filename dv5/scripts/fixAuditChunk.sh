@@ -3,38 +3,45 @@
 deposit_id=$1
 chunk_num=$2
 bag_id=$3
-location_of_good_chunk=$4
-location_of_bad_chunk=$5
+location_of_bad_chunk=$4
+
+usage() {
+  echo "Usage: $0 <deposit_id> <chunk_num> <bag_id> <location_of_bad_chunk>"
+}
 
 if [ -z "$deposit_id" ]; then
   echo "deposit_id is required"
-  echo "Usage: $0 <deposit_id> <chunk_num> <bag_id> <location_of_good_chunk> <location_of_bad_chunk>"
+  usage
   exit 1
 fi
 
 if [ -z "$chunk_num" ]; then
   echo "chunk_num is required"
-  echo "Usage: $0 <deposit_id> <chunk_num> <bag_id> <location_of_good_chunk> <location_of_bad_chunk>"
+  usage
   exit 1
 fi
 
 if [ -z "$bag_id" ]; then
   echo "bag_id is required"
-  "Usage: $0 <deposit_id> <chunk_num> <bag_id> <location_of_good_chunk> <location_of_bad_chunk>"
-  exit 1
-fi
-
-if [ -z "$location_of_good_chunk" ]; then
-  echo "location_of_good_chunk is required"
-  "Usage: $0 <deposit_id> <chunk_num> <bag_id> <location_of_good_chunk> <location_of_bad_chunk>"
+  usage
   exit 1
 fi
 
 if [ -z "$location_of_bad_chunk" ]; then
   echo "location_of_bad_chunk is required"
-  "Usage: $0 <deposit_id> <chunk_num> <bag_id> <location_of_good_chunk> <location_of_bad_chunk>"
+  usage
   exit 1
 fi
+
+case "$location_of_bad_chunk" in
+  1) location_of_good_chunk=2 ;;
+  2) location_of_good_chunk=1 ;;
+  *)
+    echo "location_of_bad_chunk must be 1 or 2"
+    usage
+    exit 1
+    ;;
+esac
 
 /usr/bin/dsmc retrieve /datavault/temp/"$deposit_id"."$chunk_num"/"$bag_id".tar."$chunk_num" /datavault/temp/"$deposit_id"."$chunk_num"/"$bag_id".tar."$chunk_num" -description="$deposit_id"."$chunk_num" -optfile=/home/lacdv/.TSM/opt/dsm"$location_of_good_chunk".opt -replace=true
 retrieve_rc=$?
