@@ -112,12 +112,13 @@ public interface VaultsControllerApi {
     class VaultTransferRequest {
         @Getter @Setter
         private Long role;
-        @Getter
+        @Getter @Setter
         private String user;
         @Getter @Setter
         private boolean assigningRole;
         @Getter @Setter
         private boolean orphaning;
+        @Getter @Setter
         private String reason;
         
         @NotEmpty(message = "Please specify a transfer reason")
